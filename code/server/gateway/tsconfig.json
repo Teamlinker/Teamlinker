@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "commonjs",
+    "target": "ES2017",
+    "sourceMap": true,
+    "resolveJsonModule":true,
+    "moduleResolution":"node",
+    "noImplicitUseStrict":true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": "./",
+    "plugins": [
+      { "transform": "../../common/transform/transformer.js" }
+    ]
+  },
+  "include": [
+    "./**/*"
+, "../common/rpc/api", "../common/rpc/rpc.ts"  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

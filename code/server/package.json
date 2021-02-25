@@ -7,5 +7,29 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^9.1.0",
+    "got": "^11.8.1",
+    "ioredis": "^4.22.0",
+    "koa": "^2.7.0",
+    "koa-better-body": "^3.0.4",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "koa-send": "^5.0.0",
+    "koa-session2": "^2.2.10",
+    "koa-static": "^5.0.0",
+    "koa-static-server": "^1.4.0",
+    "koa2-formidable": "^1.0.2",
+    "nacos": "^2.0.1",
+    "socket.io": "^3.1.1",
+    "socket.io-client": "^3.1.1",
+    "yargs": "^16.2.0"
+  },
+  "devDependencies": {
+    "@types/ioredis": "^4.19.4",
+    "@types/koa": "^2.11.8",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-router": "^7.4.1"
+  }
 }

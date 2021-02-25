@@ -1,0 +1,76 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "gateway",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "cwd": "${workspaceRoot}/code/server/gateway",
+            //"program": "${workspaceFolder}/code/server/gateway/index.ts",
+            "args": [
+                "index.ts" // 入口文件
+            ],
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+              ],
+            "env": {
+                "TS_NODE_COMPILER":"ttypescript",
+                "nacosPort":"8848",
+                "nacosUrl":"127.0.0.1",
+                "nacosName":"gateway",
+                "nacosId":"config"
+            },
+            //"sourceMaps": true,
+            "console":"internalConsole",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            //"preLaunchTask": "gateway-clean"
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "user",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "cwd": "${workspaceRoot}/code/server/user",
+            //"program": "${workspaceFolder}/code/server/gateway/index.ts",
+            "args": [
+                "index.ts" // 入口文件
+            ],
+            "outFiles": [
+                "${workspaceFolder}/**/*.js"
+            ],
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+              ],
+            "env": {
+                "TS_NODE_COMPILER":"ttypescript",
+                "nacosPort":"8848",
+                "nacosUrl":"127.0.0.1",
+                "nacosName":"user",
+                "nacosId":"config"
+            },
+            //"sourceMaps": true,
+            "console":"internalConsole",
+            "resolveSourceMapLocations": [
+                "${workspaceFolder}/**",
+                "!**/node_modules/**"
+            ],
+            //"preLaunchTask": "gateway-clean"
+        }
+    ]
+}
