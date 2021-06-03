@@ -9,8 +9,7 @@ export async function init() {
     let nacos=new Nacos<IServer_GateWay_Config>(process.env.nacosUrl,Number(process.env.nacosPort),process.env.nacosName,process.env.nacosId)
     await nacos.init()
     single.config=nacos.configInfo
-    single.redis=new Redis(nacos.redisInfo);
-    (<any>global).redis=single.redis
+    new Redis(nacos.redisInfo);
     let cacheService=new CacheService(nacos)
     cacheService.start()
 }

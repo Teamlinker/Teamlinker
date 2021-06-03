@@ -1,5 +1,6 @@
 import { IServer_Common_Config_Redis } from './../types/config';
 import * as IORedis from "ioredis"
+export var g_redis:Redis
 export class Redis {
     private redis:InstanceType<typeof IORedis>
     constructor(info:IServer_Common_Config_Redis){
@@ -9,6 +10,7 @@ export class Redis {
             password:info.password,
             db:info.db
         })
+        g_redis=this;
     }
     async get<T>(key:string,type:T):Promise<T> {
         let ret=await this.redis.get(key)

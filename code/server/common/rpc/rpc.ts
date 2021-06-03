@@ -42,7 +42,7 @@ export class Rpc{
     {
         let objRedis=REDIS_GATEWAY.instance(name)
         let ret=await objRedis.get()
-        return ret[0]
+        return ret?ret[0]:null
     }
 }
 
@@ -54,6 +54,11 @@ export function RPCSend(rpcName:EServer_Common_Config_Services){
                 if(!g_Socket[rpcName] || !g_Socket[rpcName].connected)
                 {
                     let instance=await Rpc.validInstance(rpcName)
+                    if(!instance)
+                    {
+                        resolve(null)
+                        return
+                    }
                     let socket=ioClient.io(`ws://${instance.ip}:${instance.port}`)
                     g_Socket[rpcName]=socket
                     socket.on("connect",()=>{

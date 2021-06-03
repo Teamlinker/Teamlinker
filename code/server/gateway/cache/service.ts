@@ -1,7 +1,8 @@
 import { Redis } from '../../common/cache/redis';
-import single from '../util/single';
+
 import Nacos from '../../common/nacos/nacos';
 import {REDIS_GATEWAY} from "../../common/cache/keys/gateway"
+import { getRedisInstance } from '../../common/util/global';
 export class CacheService {
     private redis:InstanceType<typeof Redis>
     private timer:NodeJS.Timeout
@@ -10,7 +11,7 @@ export class CacheService {
     private nacos:InstanceType<typeof Nacos>
     constructor(nacos:InstanceType<typeof Nacos>){
         this.nacos=nacos
-        this.redis=single.redis
+        this.redis=getRedisInstance()
     }
     start(){
         this.handle()

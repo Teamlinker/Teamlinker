@@ -21,12 +21,16 @@
     "koa-static": "^5.0.0",
     "koa-static-server": "^1.4.0",
     "koa2-formidable": "^1.0.2",
+    "mongodb": "^3.6.4",
+    "mysql2": "^2.2.5",
     "nacos": "^2.0.1",
     "socket.io": "^3.1.1",
     "socket.io-client": "^3.1.1",
+    "typeorm": "^0.2.31",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.7",
     "@types/ioredis": "^4.19.4",
     "@types/koa": "^2.11.8",
     "@types/koa-bodyparser": "^4.3.0",

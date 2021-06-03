@@ -1,7 +1,7 @@
 import { Redis } from "../redis";
-
+import {getRedisInstance} from "../../util/global"
 class RedisBaseKey<T> {
-    protected redis:InstanceType<typeof Redis>=(<any>global).redis
+    protected redis:InstanceType<typeof Redis>=getRedisInstance()
     protected type:T
     protected name:string
     constructor(name:string,type:T){
