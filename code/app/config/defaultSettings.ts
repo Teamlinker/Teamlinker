@@ -5,6 +5,7 @@ const Settings: LayoutSettings & {
   logo?: string;
 } = {
   navTheme: 'light',
+  headerTheme: 'light',
   // TeamLinker 主题
   primaryColor: '#0052CC',
   layout: 'mix',
@@ -12,10 +13,10 @@ const Settings: LayoutSettings & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'Teamlinker',
+  title: false,
   pwa: false,
-  logo: '/logo.png',
   iconfontUrl: '',
+  splitMenus: true,
 };
 
 export default Settings;
