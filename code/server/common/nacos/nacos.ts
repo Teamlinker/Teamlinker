@@ -1,10 +1,14 @@
+import { IServer_Common_Config_Mysql } from './../types/config';
 import { IServer_Common_Nacos_Instance_List } from './../types/nacos';
 import {IServer_Common_Config,IServer_Common_Config_Redis,IServer_Common_Config_Base} from "../types/config"
 import * as nacos from "nacos"
 import got from "got"
 const NacosConfigClient=nacos.NacosConfigClient
 const NacosNamingClient=(<any>nacos).NacosNamingClient
-
+var g_nacos:InstanceType<typeof Nacos>;
+export function getNacosInstance() {
+    return g_nacos;
+}
 export default class Nacos<T extends IServer_Common_Config_Base> {
     private client:any
     private config:InstanceType<typeof NacosConfigClient>
@@ -28,6 +32,7 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
         this.config=new NacosConfigClient({
             serverAddr:`${url}:${port}`
         })
+        g_nacos=this;
     }
     async init(){
         const content= await this.config.getConfig(this.configName, 'DEFAULT_GROUP');
@@ -45,6 +50,9 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
     }
     get redisInfo():IServer_Common_Config_Redis {
         return this.objConfig.redis
+    }
+    get mysqlInfo():IServer_Common_Config_Mysql {
+        return this.objConfig.mysql
     }
     async getInstances():Promise<IServer_Common_Nacos_Instance_List> {
         let services=this.objConfig.services
@@ -78,3 +86,4 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
         }
     }
 }
+

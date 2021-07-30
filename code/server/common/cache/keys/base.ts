@@ -1,5 +1,4 @@
-import { Redis } from "../redis";
-import {getRedisInstance} from "../../util/global"
+import { getRedisInstance, Redis } from "../redis";
 class RedisBaseKey<T> {
     protected redis:InstanceType<typeof Redis>=getRedisInstance()
     protected type:T

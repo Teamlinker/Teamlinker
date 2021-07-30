@@ -1,6 +1,9 @@
 import { IServer_Common_Config_Redis } from './../types/config';
 import * as IORedis from "ioredis"
-export var g_redis:Redis
+var g_redis:InstanceType<typeof Redis>;
+export function getRedisInstance(){
+    return g_redis
+}
 export class Redis {
     private redis:InstanceType<typeof IORedis>
     constructor(info:IServer_Common_Config_Redis){

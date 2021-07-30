@@ -9,6 +9,7 @@
     "noImplicitUseStrict":true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "noImplicitOverride": true,
     "baseUrl": "./",
     "plugins": [
       { "transform": "../../common/transform/transformer.js" }
