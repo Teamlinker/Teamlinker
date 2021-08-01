@@ -26,9 +26,10 @@
             "env": {
                 "TS_NODE_COMPILER":"ttypescript",
                 "nacosPort":"8848",
-                "nacosUrl":"127.0.0.1",
+                "nacosUrl":"175.27.166.37",
                 "nacosName":"gateway",
-                "nacosId":"config"
+                "nacosId":"config",
+                "nacosNamespace":"sunxin"
             },
             //"sourceMaps": true,
             "console":"internalConsole",
@@ -60,9 +61,10 @@
             "env": {
                 "TS_NODE_COMPILER":"ttypescript",
                 "nacosPort":"8848",
-                "nacosUrl":"127.0.0.1",
+                "nacosUrl":"175.27.166.37",
                 "nacosName":"user",
-                "nacosId":"config"
+                "nacosId":"config",
+                "nacosNamespace":"sunxin"
             },
             //"sourceMaps": true,
             "console":"internalConsole",

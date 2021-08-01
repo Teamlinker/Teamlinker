@@ -21,6 +21,7 @@
     "koa-static": "^5.0.0",
     "koa-static-server": "^1.4.0",
     "koa2-formidable": "^1.0.2",
+    "log4js": "^6.3.0",
     "mongodb": "^3.6.4",
     "mysql2": "^2.2.5",
     "nacos": "^2.0.1",
