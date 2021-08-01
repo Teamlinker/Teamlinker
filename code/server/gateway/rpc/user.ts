@@ -4,6 +4,9 @@ import {RPCSend} from "../../common/rpc/rpc"
 export default class RpcUserApi implements IServer_Common_RPC_User {
     @RPCSend(EServer_Common_Config_Services.User)
     async a(obj:IAAA):Promise<IAAA> {
-        return null
+        return {
+            name:"sd",
+            age:33
+        }
     }
 }

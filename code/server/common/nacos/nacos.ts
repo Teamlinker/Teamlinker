@@ -18,19 +18,22 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
     private objConfig:IServer_Common_Config
     private nacosUrl:string
     private nacosPort:number
-    constructor(url:string,port:number,name:string,configName:string,logger=console)
+    private nacosNamespace:string
+    constructor(url:string,port:number,name:string,configName:string,namesapce:string="public",logger=console)
     {
         this.nacosUrl=url;
         this.nacosPort=port
         this.name=name
         this.configName=configName
+        this.nacosNamespace=namesapce
         this.client=new NacosNamingClient({
             logger,
             serverList:`${url}:${port}`,
-            namespace:"public"
+            namespace:namesapce
         })
         this.config=new NacosConfigClient({
-            serverAddr:`${url}:${port}`
+            serverAddr:`${url}:${port}`,
+            namespace:namesapce
         })
         g_nacos=this;
     }
@@ -58,7 +61,7 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
         let services=this.objConfig.services
         let arrPromise=[]
         for(let key in services){
-            arrPromise.push(got(`http://${this.nacosUrl}:${this.nacosPort}/nacos/v1/ns/instance/list?serviceName=${key}&healthyOnly=true`))
+            arrPromise.push(got(`http://${this.nacosUrl}:${this.nacosPort}/nacos/v1/ns/instance/list?serviceName=${key}&healthyOnly=true&namespaceId=${this.nacosNamespace}`))
         }
         try {
             let arrRes=await Promise.all(arrPromise)

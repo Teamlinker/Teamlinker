@@ -37,8 +37,6 @@ export default class GateWay extends Application {
                     age:23
                 })
                 console.log(ret)
-                let results=await getIssueTypeListMapper()
-                console.log(results[0])
             }, 2000);
         })
     }

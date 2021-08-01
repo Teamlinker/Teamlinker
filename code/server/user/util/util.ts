@@ -7,7 +7,7 @@ import {IServer_User_Config} from "../types/config"
 import {Rpc} from "../../common/rpc/rpc"
 import "../rpc/user"
 export async function init() {
-    let nacos=new Nacos<IServer_User_Config>(process.env.nacosUrl,Number(process.env.nacosPort),process.env.nacosName,process.env.nacosId)
+    let nacos=new Nacos<IServer_User_Config>(process.env.nacosUrl,Number(process.env.nacosPort),process.env.nacosName,process.env.nacosId,process.env.nacosNamespace)
     await nacos.init()
     single.config=nacos.configInfo
     new Redis(nacos.redisInfo);
