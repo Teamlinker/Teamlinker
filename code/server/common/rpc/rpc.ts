@@ -1,3 +1,4 @@
+import { IServer_Common_Http_Proxy } from './../types/http';
 import { IServer_Common_Nacos_Instance } from './../types/nacos';
 import { EServer_Common_Config_Services } from './../types/config';
 import { Redis } from '../cache/redis';
@@ -5,9 +6,15 @@ import * as sio from "socket.io"
 import * as ioClient from "socket.io-client"
 import { REDIS_GATEWAY } from '../cache/keys/gateway';
 import * as http from 'http';
+import { getHttpRoutes, handleHttpCall } from '../http/http';
 interface ISocketStruct {
     name:string,
     args:any[]
+}
+interface ISocketRPCResponseStruct {
+    code:number,
+    msg?:string,
+    data?:any
 }
 var g_RevieveFunc={
     
@@ -28,13 +35,37 @@ export class Rpc{
             transports: ['websocket', 'polling']
         })
         Rpc.io.on("connection",(socket)=>{
-            socket.on("data",async (arg:ISocketStruct,callback)=>{
+            socket.on("rpc-call",async (arg:ISocketStruct,callback)=>{
                 let funcName=arg.name
                 if(g_RevieveFunc[funcName] && g_RevieveInstance[funcName])
                 {
-                    let ret=await g_RevieveFunc[funcName].apply(g_RevieveInstance[funcName],arg.args)
-                    callback(ret)
+                    let objRes=<ISocketRPCResponseStruct>{}
+                    try {
+                        let ret=await g_RevieveFunc[funcName].apply(g_RevieveInstance[funcName],arg.args)
+                        objRes.code=0
+                        objRes.data=ret
+                        callback(objRes)
+                    } catch (err) {
+                        objRes.code=err.code
+                        objRes.msg=err.msg;
+                        callback(objRes)
+                    }
+                    
                 }
+            })
+            socket.on("http-call",async (arg:IServer_Common_Http_Proxy,callback)=>{
+                let key=arg.method+ " " +arg.path
+                let objRoute=getHttpRoutes()
+                for(let keyRoute in objRoute) {
+                    if(key==keyRoute){
+                        let ret=await handleHttpCall(objRoute[keyRoute],arg)
+                        callback(ret)
+                        return
+                    }
+                }
+                let obj:IServer_Common_Http_Proxy=<IServer_Common_Http_Proxy>{}
+                obj.status=404
+                callback(obj)
             })
         })
     }
@@ -46,13 +77,46 @@ export class Rpc{
     }
 }
 
-export function RPCSend(rpcName:EServer_Common_Config_Services){
+export async function proxyRequest(objProxy:IServer_Common_Http_Proxy,targetServer:EServer_Common_Config_Services):Promise<IServer_Common_Http_Proxy> {
+    return new Promise(async function(resolve,reject){
+        if(!g_Socket[targetServer] || !g_Socket[targetServer].connected)
+        {
+            if(g_Socket[targetServer] && !g_Socket[targetServer].connected) {
+                g_Socket[targetServer].close()
+            }
+            let instance=await Rpc.validInstance(targetServer)
+            if(!instance)
+            {
+                resolve(null)
+                return
+            }
+            let socket=ioClient.io(`ws://${instance.ip}:${instance.port}`)
+            g_Socket[targetServer]=socket
+            socket.on("connect",()=>{
+                socket.emit("http-call",objProxy,(res:IServer_Common_Http_Proxy)=>{
+                    resolve(res)
+                })
+            })
+        }
+        else
+        {
+            g_Socket[targetServer].emit("http-call",objProxy,(res:IServer_Common_Http_Proxy)=>{
+                resolve(res)
+            })
+        }
+    })
+}
+
+export function DRPCSend(rpcName:EServer_Common_Config_Services){
     return function (target: Object, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
         descriptor.value = function () {
             let args=Array.from(arguments)
-            return new Promise(async function(resolve){
+            return new Promise(async function(resolve,reject){
                 if(!g_Socket[rpcName] || !g_Socket[rpcName].connected)
                 {
+                    if(g_Socket[rpcName] && !g_Socket[rpcName].connected) {
+                        g_Socket[rpcName].close()
+                    }
                     let instance=await Rpc.validInstance(rpcName)
                     if(!instance)
                     {
@@ -62,21 +126,39 @@ export function RPCSend(rpcName:EServer_Common_Config_Services){
                     let socket=ioClient.io(`ws://${instance.ip}:${instance.port}`)
                     g_Socket[rpcName]=socket
                     socket.on("connect",()=>{
-                        socket.emit("data",<ISocketStruct>{
+                        socket.emit("rpc-call",<ISocketStruct>{
                             name:propertyName,
                             args:args
-                        },(res)=>{
-                            resolve(res)
+                        },(res:ISocketRPCResponseStruct)=>{
+                            if(res.code==0)
+                            {
+                                resolve(res.data)
+                            } else {
+                                reject({
+                                    code:res.code,
+                                    msg:res.msg
+                                })
+                            }
+                            
                         })
                     })
                 }
                 else
                 {
-                    g_Socket[rpcName].emit("data",<ISocketStruct>{
+                    g_Socket[rpcName].emit("rpc-call",<ISocketStruct>{
                         name:propertyName,
                         args:args
-                    },(res)=>{
-                        resolve(res)
+                    },(res:ISocketRPCResponseStruct)=>{
+                        if(res.code==0)
+                        {
+                            resolve(res.data)
+                        } else {
+                            reject({
+                                code:res.code,
+                                msg:res.msg
+                            })
+                        }
+                        
                     })
                 }
             })
@@ -84,7 +166,7 @@ export function RPCSend(rpcName:EServer_Common_Config_Services){
     }
 }
 
-export function RPCRecieve(target: Object, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
+export function DRPCRecieve(target: Object, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
     if(!g_RevieveFunc[propertyName])
     {
         g_RevieveFunc[propertyName]=descriptor.value;

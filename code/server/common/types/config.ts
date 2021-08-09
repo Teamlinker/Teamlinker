@@ -1,6 +1,5 @@
 export interface IServer_Common_Config_Base {
-    port:number,
-    ip?:string
+    
 }
 
 export interface IServer_Common_Config_Redis {

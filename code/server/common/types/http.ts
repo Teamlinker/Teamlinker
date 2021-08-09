@@ -1,7 +1,10 @@
 export enum EServer_Common_Http_Structure_HandleParam_Category {
+    Content,
+    File,
     Param,
     Header,
-    Cookie
+    Cookie,
+    Context
 }
 export interface IServer_Common_Http_Structure_HandleParam {
     name:string,
@@ -14,8 +17,31 @@ export interface IServer_Common_Http_Structure_HandleParam {
 export interface IServer_Common_Http_Structure {
     method:string,
     path:string,
-    user?:boolean,
-    admin?:boolean,
+    ignoreValidate?:boolean,
     handle:(...args: any[]) => any,
     handleParam:IServer_Common_Http_Structure_HandleParam[]
+}
+
+export enum EServer_Common_Http_Body_Type {
+    NONE,
+    URIENCODED,
+    JSON,
+    FORMDATA,
+    BINARY
+}
+
+export interface IServer_Common_Http_Proxy {
+    status:number,
+    path:string,
+    method:string,
+    headers:{
+        [param:string]:string
+    },
+    data:any,
+    bodyType:EServer_Common_Http_Body_Type
+}
+
+export interface IServer_Common_Http_Req_File {
+    fileName:string,
+    data:string
 }
