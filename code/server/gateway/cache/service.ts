@@ -9,6 +9,9 @@ export class CacheService {
     private timerCount:number=5000
     private instanceTTL:number=10*1000
     private nacos:InstanceType<typeof Nacos>
+    private instanceMap:{
+        [param:string]:string
+    }={}
     constructor(){
         this.nacos=getNacosInstance();
         this.redis=getRedisInstance()
@@ -18,12 +21,17 @@ export class CacheService {
     }
     private async handle(){
         let ret=await this.nacos.getInstances()
+        this.instanceMap={}
         for(let key in ret) {
             let obj=ret[key]
+            this.instanceMap[key]=obj[0].ip
             let objRedis=REDIS_GATEWAY.instance(key)
             await objRedis.set(obj,this.instanceTTL)
         }
         this.timer=setTimeout(this.handle.bind(this),this.timerCount)
+    }
+    private getInstanceMap() {
+        return this.instanceMap
     }
     stop(){
         if(this.timer)

@@ -19,6 +19,7 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
     private nacosUrl:string
     private nacosPort:number
     private nacosNamespace:string
+    private objConfigCurrentService:any
     constructor(url:string,port:number,name:string,configName:string,namesapce:string="public",logger=console)
     {
         this.nacosUrl=url;
@@ -41,12 +42,19 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
         const content= await this.config.getConfig(this.configName, 'DEFAULT_GROUP');
         const obj=JSON.parse(content)
         this.objConfig=obj
-        this.objConfigCurrent=this.objConfig.services[this.name]
+        this.objConfigCurrentService=this.objConfig.services[this.name]
+        this.objConfigCurrent=this.objConfig.services[this.name].config
         await this.client.ready()
         await this.client.registerInstance(this.name, {
-            ip: this.objConfigCurrent.ip || '127.0.0.1',
-            port: this.objConfigCurrent.port,
+            ip: this.objConfigCurrentService.ip || '127.0.0.1',
+            port: this.objConfigCurrentService.port,
         });
+    }
+    get serverPort():number {
+        return this.objConfigCurrentService.port
+    }
+    get rpcServer():boolean {
+        return this.objConfigCurrentService.rpcServer
     }
     get configInfo():T {
         return this.objConfigCurrent

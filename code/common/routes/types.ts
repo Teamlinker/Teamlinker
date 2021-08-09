@@ -4,14 +4,18 @@ export enum ECommon_HttpApi_Method {
     DELETE="DELETE",
     PUT="PUT"
 }
+
+export interface ICommon_Http_Route {
+    method:ECommon_HttpApi_Method,
+    path:string,
+    req:any,
+    res:any,
+    ignoreValidate?:boolean
+}
+
 export interface ICommon_HttpApi {
     baseUrl:string,
     routes:{
-        [param:string]:{
-            method:ECommon_HttpApi_Method,
-            path:string,
-            req:any,
-            res:any
-        }
+        [param:string]:ICommon_Http_Route
     }
 }
