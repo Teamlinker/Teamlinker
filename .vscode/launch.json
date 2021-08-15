@@ -29,7 +29,9 @@
                 "nacosUrl":"175.27.166.37",
                 "nacosName":"gateway",
                 "nacosId":"config",
-                "nacosNamespace":"sunxin"
+                "nacosNamespace":"sunxin",
+                "nacosUsername":"nacos",
+                "nacosPassword":"sxsxsxSX1"
             },
             //"sourceMaps": true,
             "console":"internalConsole",
@@ -64,7 +66,9 @@
                 "nacosUrl":"175.27.166.37",
                 "nacosName":"user",
                 "nacosId":"config",
-                "nacosNamespace":"sunxin"
+                "nacosNamespace":"sunxin",
+                "nacosUsername":"nacos",
+                "nacosPassword":"sxsxsxSX1"
             },
             //"sourceMaps": true,
             "console":"internalConsole",
