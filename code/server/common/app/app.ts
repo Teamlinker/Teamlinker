@@ -24,6 +24,12 @@ export default abstract class Application{
         if(argv["nacosNamespace"]) {
             process.env.nacosNamespace=argv["nacosNamespace"]
         }
+        if(argv["nacosUsername"]) {
+            process.env.nacosUsername=argv["nacosUsername"]
+        }
+        if(argv["nacosPassword"]) {
+            process.env.nacosPassword=argv["nacosPassword"]
+        }
         await init()
         if(getNacosInstance().rpcServer) {
             await Rpc.start(getNacosInstance().serverPort)
