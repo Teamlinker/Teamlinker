@@ -20,7 +20,7 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
     private nacosPort:number
     private nacosNamespace:string
     private objConfigCurrentService:any
-    constructor(url:string,port:number,name:string,configName:string,namesapce:string="public",logger=console)
+    constructor(url:string,port:number,name:string,configName:string,username:string,password:string,namesapce:string="public",logger=console)
     {
         this.nacosUrl=url;
         this.nacosPort=port
@@ -30,11 +30,16 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
         this.client=new NacosNamingClient({
             logger,
             serverList:`${url}:${port}`,
-            namespace:namesapce
+            namespace:namesapce,
+            username:username,
+            password:password
         })
         this.config=new NacosConfigClient({
             serverAddr:`${url}:${port}`,
-            namespace:namesapce
+            namespace:namesapce,
+            // @ts-ignore
+            username:username,
+            password:password
         })
         g_nacos=this;
     }
