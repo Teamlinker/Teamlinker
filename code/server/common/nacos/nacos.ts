@@ -1,6 +1,6 @@
 import { IServer_Common_Config_Mysql } from './../types/config';
 import { IServer_Common_Nacos_Instance_List } from './../types/nacos';
-import {IServer_Common_Config,IServer_Common_Config_Redis,IServer_Common_Config_Base} from "../types/config"
+import {IServer_Common_Config,IServer_Common_Config_Redis,IServer_Common_Config_Base,IServer_Common_Global_Config} from "../types/config"
 import * as nacos from "nacos"
 import got from "got"
 const NacosConfigClient=nacos.NacosConfigClient
@@ -64,6 +64,9 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
     }
     get rpcServer():boolean {
         return this.objConfigCurrentService.rpcServer
+    }
+    get globalConfig():IServer_Common_Global_Config {
+        return this.objConfigCurrentService.global
     }
     get configInfo():T {
         return this.objConfigCurrent
