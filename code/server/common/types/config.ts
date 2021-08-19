@@ -29,3 +29,6 @@ export interface IServer_Common_Config {
     redis:IServer_Common_Config_Redis
     mysql:IServer_Common_Config_Mysql
 }
+export interface IServer_Common_Global_Config {
+    
+}
