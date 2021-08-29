@@ -17,11 +17,6 @@ export interface IServer_Common_Config_Mysql {
     password:string
 }
 
-export enum EServer_Common_Config_Services {
-    GateWay="gateway",
-    User="user"
-}
-
 export interface IServer_Common_Config {
     services:{
         [name:string]:any

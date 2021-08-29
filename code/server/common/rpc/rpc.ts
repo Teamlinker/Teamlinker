@@ -1,6 +1,6 @@
 import { IServer_Common_Http_Proxy } from './../types/http';
 import { IServer_Common_Nacos_Instance } from './../types/nacos';
-import { EServer_Common_Config_Services } from './../types/config';
+import { ECommon_Services } from '../../../common/types';
 import { Redis } from '../cache/redis';
 import * as sio from "socket.io"
 import * as ioClient from "socket.io-client"
@@ -77,7 +77,7 @@ export class Rpc{
     }
 }
 
-export async function proxyRequest(objProxy:IServer_Common_Http_Proxy,targetServer:EServer_Common_Config_Services):Promise<IServer_Common_Http_Proxy> {
+export async function proxyRequest(objProxy:IServer_Common_Http_Proxy,targetServer:ECommon_Services):Promise<IServer_Common_Http_Proxy> {
     return new Promise(async function(resolve,reject){
         if(!g_Socket[targetServer] || !g_Socket[targetServer].connected)
         {
@@ -107,7 +107,7 @@ export async function proxyRequest(objProxy:IServer_Common_Http_Proxy,targetServ
     })
 }
 
-export function DRPCSend(rpcName:EServer_Common_Config_Services){
+export function DRPCSend(rpcName:ECommon_Services){
     return function (target: Object, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
         descriptor.value = function () {
             let args=Array.from(arguments)
