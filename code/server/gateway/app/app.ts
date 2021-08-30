@@ -7,13 +7,12 @@ import { getNacosInstance } from "../../common/nacos/nacos";
 import { CacheService } from './../cache/service';
 import {generateHttpErrorResponse} from "../../common/util/http"
 import ERROR from "../../../common/status/error"
-import OK from "../../../common/status/ok"
 import * as userApi from "../../../common/routes/user"
 import { ICommon_HttpApi } from "../../../common/routes/types";
-import { proxyRequest } from "../../common/rpc/rpc";
-import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
+import {  EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
 import { parseFormData } from "../util/util";
 import { PassThrough } from "stream";
+import { proxyRequest } from "../../common/rpc/rpc";
 var apis:ICommon_HttpApi[]=[userApi];
 var app = new Koa();
 var pipe=function (from,to) :Promise<string>{
@@ -50,7 +49,7 @@ export default class GateWay extends Application {
             }
             for(let key in obj.routes) {
                 let objApi=obj.routes[key];
-                apiMap[baseUrl][objApi.method+" "+objApi.path]=baseUrl;
+                apiMap[baseUrl][objApi.method+" "+objApi.path]=obj.service;
             }
         }
         app.use(async (ctx, next) => {
@@ -84,42 +83,51 @@ export default class GateWay extends Application {
         })
         app.use(body());
         app.use(async (ctx, next) => {
+            ctx.state.apiMap=apiMap;
+            await next()
+        })
+        app.use(async function (ctx, next) {
             let path = ctx.path
-            let method = ctx.req.method;
-            let baseUrl = path.substring(1, path.indexOf("/", 1))
-            let apiPath = path.substr(1 + baseUrl.length)
-            if (apiMap[baseUrl] && apiMap[baseUrl][method + " " + apiPath]) {
-                let microServer = apiMap[baseUrl][method + " " + apiPath]
-                let obj = <IServer_Common_Http_Proxy>{}
-                if (ctx.req.method == "POST" || ctx.req.method == "PUT" || ctx.req.method == "PATCH") {
-                    if (!ctx.state.p) {
-                        ctx.state.p = ctx.request.body;
-                    }
-                }
-                else {
-                    ctx.state.p = ctx.request.query;
-                }
-                obj.method=ctx.req.method
-                obj.headers=<any>ctx.req.headers
-                obj.data=ctx.state.formData??ctx.state.p
-                obj.path=apiPath
-                if(ctx.state.formData) {
-                    obj.bodyType=EServer_Common_Http_Body_Type.FORMDATA
-                }
-                let ret=await proxyRequest(obj,microServer)
-                ctx.response.status=ret.status;
-                for(let key in ret.headers){
-                    if(key=="set-cookie"){
-                        let obj=JSON.parse(ret.headers[key])
-                        for(let o of obj) {
-                            ctx.set("set-cookie",o)
+            if(path.startsWith("/api/")) {
+                path = path.substr("/api".length)
+                let method = ctx.req.method;
+                let baseUrl = path.substring(1, path.indexOf("/", 1))
+                let apiPath = path.substr(1 + baseUrl.length)
+                if (ctx.state.apiMap[baseUrl] && ctx.state.apiMap[baseUrl][method + " " + apiPath]) {
+                    let microServer = ctx.state.apiMap[baseUrl][method + " " + apiPath]
+                    let obj = <IServer_Common_Http_Proxy>{}
+                    if (ctx.req.method == "POST" || ctx.req.method == "PUT" || ctx.req.method == "PATCH") {
+                        if (!ctx.state.p) {
+                            ctx.state.p = ctx.request.body;
                         }
-                    } else {
-                        ctx.set(key,ret.headers[key]);
                     }
+                    else {
+                        ctx.state.p = ctx.request.query;
+                    }
+                    obj.method = ctx.req.method
+                    obj.headers = <any>ctx.req.headers
+                    obj.data = ctx.state.formData ?? ctx.state.p
+                    obj.path = apiPath
+                    if (ctx.state.formData) {
+                        obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
+                    }
+                    let ret = await proxyRequest(obj, microServer)
+                    ctx.response.status = ret.status;
+                    for (let key in ret.headers) {
+                        if (key == "set-cookie") {
+                            let obj = JSON.parse(ret.headers[key])
+                            for (let o of obj) {
+                                ctx.set("set-cookie", o)
+                            }
+                        } else {
+                            ctx.set(key, ret.headers[key]);
+                        }
+                    }
+                    ctx.body = ret.data;
+                    await next()
+                } else {
+                    await next()
                 }
-                ctx.body=ret.data;
-                await next()
             } else {
                 await next()
             }

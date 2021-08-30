@@ -15,6 +15,7 @@ export interface ICommon_Http_Route {
 
 export interface ICommon_HttpApi {
     baseUrl:string,
+    service:string,
     routes:{
         [param:string]:ICommon_Http_Route
     }
