@@ -1,8 +1,10 @@
+
 import { IServer_Common_Config_Mysql } from './../types/config';
 
 import "reflect-metadata"
 import * as mysql from "mysql2"
 import {Pool as PromisePool} from "mysql2/promise"
+import { Err } from '../../../common/status/error';
 var g_mysqlConnection:InstanceType<typeof Mysql>
 export function getMysqlInstance(){
     return g_mysqlConnection;
@@ -38,7 +40,8 @@ export default class Mysql {
             }
 
         } catch(err){
-            return null
+            console.error("mysql error:",err,sqlText)
+            throw new Err.Common.MysqlError
         }
     }
 }

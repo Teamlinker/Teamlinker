@@ -1,19 +1,73 @@
+import { ICommon_Model_Admin } from './../model/admin';
+import { ICommon_Model_User } from './../model/user';
 import { ECommon_Services } from './../types';
-import { ICommon_Http_User_Test_Res } from "./userRes";
 import {ECommon_HttpApi_Method, ICommon_HttpApi} from "./types"
 const api={
     baseUrl:"/user",
     service:ECommon_Services.User,
     routes:{
-        test:{
+        login:{
             method:ECommon_HttpApi_Method.POST,
-            path:"/test",
+            path:"/login",
             req:<{
-                name:string,
-                age:number                 
+                username:string,
+                password:string                 
             }>{},
-            res:<ICommon_Http_User_Test_Res>{},
+            res:<Omit<ICommon_Model_User,"password">>{},
+            ignoreValidate:true
+        },
+        checkUser:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/check_user",
+            req:<{
+                name:string           
+            }>{},
+            res:{},
+            ignoreValidate:true
+        },
+        logout:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/logout",
+            req:{},
+            res:{},
+        },
+        loginAdmin:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/admin_login",
+            req:<{
+                username:string,
+                password:string
+            }>{},
+            res:<Omit<ICommon_Model_Admin,"password">>{},
+        },
+        refresh:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/refresh",
+            req:{},
+            res:<Omit<ICommon_Model_User,"password"> | Omit<ICommon_Model_Admin,"password">>{},
+        },
+        update:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/item",
+            req:<Partial<Omit<ICommon_Model_User,"id" | "password" | "created_time" | "modified_time">>>{},
+            res:<Omit<ICommon_Model_User,"password">>{},
+        },
+        create:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/item",
+            req:<Partial<Omit<ICommon_Model_User,"id"  | "created_time" | "modified_time">> & {
+                username:string,
+                password:string
+            }>{},
+            res:<Omit<ICommon_Model_User,"password">>{},
+        },
+        remove:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/item",
+            req:{},
+            res:{},
         }
     }
 }
+
 export=api

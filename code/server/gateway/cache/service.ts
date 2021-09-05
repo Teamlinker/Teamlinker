@@ -25,7 +25,7 @@ export class CacheService {
         for(let key in ret) {
             let obj=ret[key]
             this.instanceMap[key]=obj[0].ip
-            let objRedis=REDIS_GATEWAY.instance(key)
+            let objRedis=REDIS_GATEWAY.instances(key)
             await objRedis.set(obj,this.instanceTTL)
         }
         this.timer=setTimeout(this.handle.bind(this),this.timerCount)

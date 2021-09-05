@@ -17,7 +17,7 @@
     },
     "include": [
       "./**/*"
-    ],
+, "../gateway/mapper/gateway.ts"    ],
     "exclude": [
       "node_modules"
     ]

@@ -25,5 +25,5 @@ export interface IServer_Common_Config {
     mysql:IServer_Common_Config_Mysql
 }
 export interface IServer_Common_Global_Config {
-    
+    jwt:string
 }
