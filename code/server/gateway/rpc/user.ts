@@ -1,9 +1,10 @@
 import { ECommon_Services } from '../../../common/types';
-import IServer_Common_RPC_User, { IAAA } from "../../common/rpc/api/user";
+import IServer_Common_RPC_User, { IServer_Common_RPC_User_CheckSession } from "../../common/rpc/api/user";
 import {DRPCSend} from "../../common/rpc/rpc"
-export default class RpcUserApi implements IServer_Common_RPC_User {
+class RpcUserApi implements IServer_Common_RPC_User {
     @DRPCSend(ECommon_Services.User)
-    async a(obj:IAAA):Promise<IAAA> {
+    async checkSession(token:string):Promise<IServer_Common_RPC_User_CheckSession> {
         return null
     }
 }
+export default new RpcUserApi

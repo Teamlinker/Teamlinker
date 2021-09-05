@@ -1,18 +1,19 @@
 import * as Koa from "koa"
 import * as body from 'koa-bodyparser';
 import * as http from "http"
-import userCall from "../rpc/user"
+import userRpcApi from '../rpc/user';
 import Application from "../../common/app/app"
 import { getNacosInstance } from "../../common/nacos/nacos";
 import { CacheService } from './../cache/service';
 import {generateHttpErrorResponse} from "../../common/util/http"
-import ERROR from "../../../common/status/error"
 import * as userApi from "../../../common/routes/user"
 import { ICommon_HttpApi } from "../../../common/routes/types";
 import {  EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
 import { parseFormData } from "../util/util";
 import { PassThrough } from "stream";
 import { proxyRequest } from "../../common/rpc/rpc";
+import { Err } from "../../../common/status/error";
+import { ECommon_Services } from "../../../common/types";
 var apis:ICommon_HttpApi[]=[userApi];
 var app = new Koa();
 var pipe=function (from,to) :Promise<string>{
@@ -40,7 +41,14 @@ export default class GateWay extends Application {
         await this.initKoa();
     }
     async initKoa() {
-        let apiMap={}
+        let apiMap=<{
+            [param:string]:{
+                [parem:string]:{
+                    service:string,
+                    ignoreValidate:boolean
+                }
+            }
+        }>{}
         for(let obj of apis){
             let baseUrl=obj.baseUrl.substr(1)
             if(!apiMap[baseUrl])
@@ -49,14 +57,17 @@ export default class GateWay extends Application {
             }
             for(let key in obj.routes) {
                 let objApi=obj.routes[key];
-                apiMap[baseUrl][objApi.method+" "+objApi.path]=obj.service;
+                apiMap[baseUrl][objApi.method+" "+objApi.path]={
+                    service:obj.service,
+                    ignoreValidate:!!objApi.ignoreValidate
+                };
             }
         }
         app.use(async (ctx, next) => {
             if (ctx.headers['content-type'] && ctx.headers['content-type'].split(';')[0] === 'multipart/form-data') {
                 const maxLength = 1024 * 1024 * 5;
                 if (ctx.headers && ctx.headers['content-length'] && Number(ctx.headers['content-length']) > maxLength) {
-                    ctx.body = generateHttpErrorResponse(ERROR.overUploadFileSize)
+                    ctx.body = generateHttpErrorResponse(new Err.Http.OverFileSize)
                     return;
                 }
                 let stream=new PassThrough()
@@ -83,8 +94,11 @@ export default class GateWay extends Application {
         })
         app.use(body());
         app.use(async (ctx, next) => {
-            ctx.state.apiMap=apiMap;
-            await next()
+            try {
+                await next()
+            } catch (err) {
+                ctx.body = generateHttpErrorResponse(err.data??err)
+            }
         })
         app.use(async function (ctx, next) {
             let path = ctx.path
@@ -93,8 +107,19 @@ export default class GateWay extends Application {
                 let method = ctx.req.method;
                 let baseUrl = path.substring(1, path.indexOf("/", 1))
                 let apiPath = path.substr(1 + baseUrl.length)
-                if (ctx.state.apiMap[baseUrl] && ctx.state.apiMap[baseUrl][method + " " + apiPath]) {
-                    let microServer = ctx.state.apiMap[baseUrl][method + " " + apiPath]
+                if (apiMap[baseUrl] && apiMap[baseUrl][method + " " + apiPath]) {
+                    let microServer = apiMap[baseUrl][method + " " + apiPath].service
+                    let ignoreValidate = apiMap[baseUrl][method + " " + apiPath].ignoreValidate
+                    if(!ignoreValidate) {
+                        let authorization = ctx.get("Authorization")
+                        if(!authorization) {
+                            throw new Err.User.NotAuth
+                        }
+                        let ret= await userRpcApi.checkSession(authorization.substr(7))
+                        if(!ret) {
+                            throw new Err.User.NotAuth
+                        }
+                    }
                     let obj = <IServer_Common_Http_Proxy>{}
                     if (ctx.req.method == "POST" || ctx.req.method == "PUT" || ctx.req.method == "PATCH") {
                         if (!ctx.state.p) {
@@ -111,7 +136,7 @@ export default class GateWay extends Application {
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }
-                    let ret = await proxyRequest(obj, microServer)
+                    let ret = await proxyRequest(obj, microServer as ECommon_Services)
                     ctx.response.status = ret.status;
                     for (let key in ret.headers) {
                         if (key == "set-cookie") {
@@ -134,14 +159,6 @@ export default class GateWay extends Application {
         })
         http.createServer(app.callback()).listen(getNacosInstance().serverPort,function(){
             console.log(`start`);
-            setTimeout(async () => {
-                var obj=new userCall()
-                let ret=await obj.a({
-                    name:"dd",
-                    age:23
-                })
-                console.log(ret)
-            }, 2000);
         })
     }
 }

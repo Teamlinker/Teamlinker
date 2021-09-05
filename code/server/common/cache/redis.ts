@@ -6,6 +6,40 @@ export function getRedisInstance(){
 }
 export class Redis {
     private redis:InstanceType<typeof IORedis>
+    private parseType(value:any,type:any){
+        let t=typeof type;
+        if(value==null)
+        {
+            return null
+        }
+        if(t=="boolean")
+        {
+            if(value=="true")
+            {
+                return true;
+            }
+            else
+            {
+                return false
+            }
+        }
+        else if(t=="number")
+        {
+            return Number(value)
+        }
+        else if(t=="object")
+        {
+            try{
+                return JSON.parse(value)
+            }catch(err){
+                return null
+            }
+        }
+        else
+        {
+            return value
+        }
+    }
     constructor(info:IServer_Common_Config_Redis){
         this.redis=new IORedis({
             port:info.port,
@@ -17,39 +51,7 @@ export class Redis {
     }
     async get<T>(key:string,type:T):Promise<T> {
         let ret=await this.redis.get(key)
-        let value:any=null;
-        let t=typeof type;
-        if(ret==null)
-        {
-            value=null
-        }
-        if(t=="boolean")
-        {
-            if(ret=="true")
-            {
-                value=true;
-            }
-            else
-            {
-                value=false
-            }
-        }
-        else if(t=="number")
-        {
-            value=Number(ret)
-        }
-        else if(t=="object")
-        {
-            try{
-                value=JSON.parse(ret)
-            }catch(err){
-                value=null
-            }
-        }
-        else
-        {
-            value=ret
-        }
+        let value=this.parseType(ret,type);
         return value
     }
     async set(key:string,value:any,ttl?:number)
@@ -66,5 +68,23 @@ export class Redis {
         {
             await this.redis.set(key,String(value),"EX",ttl)
         }
+    }
+    async scan<T>(key:string,type:T):Promise<T[]> {
+        let index=0,values=<T[]><unknown>[]
+        do {
+            let ret=await this.redis.scan(index,"match",key);
+            index=Number(ret[0])
+            values=values.concat(ret[1].map(item=>{
+                return this.parseType(item,type)
+            }));
+        } while(index!=0)
+        return values;
+    }
+    async getTTL(key:string):Promise<number> {
+        let ret=await this.redis.ttl(key);
+        return ret;
+    }
+    async setTTL(key:string,seconds:number):Promise<void> {
+        await this.redis.expire(key,seconds);
     }
 }

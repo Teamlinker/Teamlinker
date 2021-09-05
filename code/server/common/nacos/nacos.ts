@@ -59,6 +59,9 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
             port: this.objConfigCurrentService.port,
         });
     }
+    get serviceName():string {
+        return this.name;
+    }
     get serverPort():number {
         return this.objConfigCurrentService.port
     }
@@ -96,6 +99,7 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
                         if(element.valid)
                         {
                             ele.push({
+                                name:element.serviceName,
                                 ip:element.ip,
                                 port:element.port
                             })

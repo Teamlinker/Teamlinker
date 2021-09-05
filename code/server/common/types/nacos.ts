@@ -1,5 +1,6 @@
 
 export interface IServer_Common_Nacos_Instance {
+    name:string,
     ip:string,
     port:number
 }

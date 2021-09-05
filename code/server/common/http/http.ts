@@ -97,7 +97,7 @@ export function DHttpContext(target: Object, propertyKey: string, parameterIndex
             name:null,
             index:parameterIndex,
             type:type,
-            category:EServer_Common_Http_Structure_HandleParam_Category.Content
+            category:EServer_Common_Http_Structure_HandleParam_Category.Context
         }
         if(!g_objParam[key]){
             g_objParam[key]=[]
