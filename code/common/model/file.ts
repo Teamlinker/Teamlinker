@@ -1,8 +1,8 @@
 export interface ICommon_Model_File {
-    id :bigint,
-    user_id :bigint,
-    project_id :bigint ,
-    size: bigint ,
+    id :string,
+    user_id :string,
+    project_id :string ,
+    size: string ,
     filename :string,
     type :string,
     created_time :Date,

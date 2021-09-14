@@ -59,7 +59,7 @@ const api={
                 username:string,
                 password:string
             }>{},
-            res:<Omit<ICommon_Model_User,"password">>{},
+            res:<Omit<ICommon_Model_User,"password">>{}
         },
         remove:{
             method:ECommon_HttpApi_Method.DELETE,

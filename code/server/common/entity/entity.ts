@@ -1,6 +1,6 @@
 export abstract class Entity<T> {
     protected item:T;
-    getId():bigint{
+    getId():string{
         if(this.item) {
             return (<any>this.item).id
         } else {

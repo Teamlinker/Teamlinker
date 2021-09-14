@@ -1,15 +1,15 @@
 export interface ICommon_Model_Project_Issue {
     unique_id :number,
-  id :bigint ,
+  id :string ,
   created_time :Date,
   modified_time :Date,
-  created_by :bigint ,
-  modified_by :bigint ,
-  project_id :bigint ,
-  issue_type_id :bigint ,
+  created_by :string ,
+  modified_by :string ,
+  project_id :string ,
+  issue_type_id :string ,
   name :string,
   priority :number,
-  assigner_id :bigint ,
-  reporter_id :bigint ,
+  assigner_id :string ,
+  reporter_id :string ,
 }
 export const Table_Project_Issue="project_issue"

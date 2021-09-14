@@ -1,8 +1,8 @@
 export interface ICommon_Model_Comment {
-    id:bigint,
+    id:string,
     type:number,
-    type_id:bigint,
-    user_id:bigint,
+    type_id:string,
+    user_id:string,
     content:string,
     created_time:Date,
     modified_time:Date

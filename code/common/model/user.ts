@@ -1,5 +1,5 @@
 export interface ICommon_Model_User {
-    id :bigint,
+    id :string,
   username :string,
   email :string,
   phone :string,

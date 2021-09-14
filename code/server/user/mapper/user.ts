@@ -13,23 +13,20 @@ export namespace userMapper {
         }>(generateQuerySql(Table_User,["username"],{
             username:username
         }),true)
-        if(ret instanceof Err.Common.MysqlError) {
-            throw new Err.Common.MysqlError;
-        }
         return !!ret
     }
     
     export async function createUser(info:ICommon_Model_User):Promise<void> {
         if(!info || !info.username || !info.password ||!info.id){
-            throw new Err.Common.ParamError
+            throw  Err.Common.paramError
         }
         var mysql=getMysqlInstance() 
         await mysql.execute<Extract<typeof createUser,ICommon_Model_User>>(generateCreateSql(Table_User,info))
     }
 
-    export async function getUserById(id:bigint):Promise<ICommon_Model_User> {
+    export async function getUserById(id:string):Promise<ICommon_Model_User> {
         if(!id) {
-            throw new Err.User.UserIdNotExists
+            throw  Err.User.userIdNotExists
         }
         var mysql=getMysqlInstance();
         let ret=await mysql.execute<ICommon_Model_User>(generateQuerySql(Table_User,[],{id}),true)
@@ -38,7 +35,7 @@ export namespace userMapper {
 
     export async function getUserByName(name:string):Promise<ICommon_Model_User> {
         if(!name) {
-            throw new Err.User.UserNameNotExists
+            throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
         let ret=await mysql.execute<ICommon_Model_User>(generateQuerySql(Table_User,[],{username:name}),true)
@@ -47,7 +44,7 @@ export namespace userMapper {
 
     export async function updateUser(info:ICommon_Model_User):Promise<void> {
         if(!info.id) {
-            throw new Err.User.UserIdNotExists
+            throw  Err.User.userIdNotExists
         }
         var mysql=getMysqlInstance();
         let id=info.id;
@@ -57,7 +54,7 @@ export namespace userMapper {
 
     export async function deleteUser(id):Promise<void> {
         if(!id) {
-            throw new Err.User.UserIdNotExists
+            throw  Err.User.userIdNotExists
         }
         var mysql=getMysqlInstance();
         await mysql.execute(generateDeleteSql(Table_User,{id}))

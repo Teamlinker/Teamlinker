@@ -14,6 +14,7 @@ import { PassThrough } from "stream";
 import { proxyRequest } from "../../common/rpc/rpc";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
+import { initSystem } from "../util/util";
 var apis:ICommon_HttpApi[]=[userApi];
 var app = new Koa();
 var pipe=function (from,to) :Promise<string>{
@@ -38,6 +39,7 @@ export default class GateWay extends Application {
     override async config() {
         let cacheService=new CacheService()
         cacheService.start()
+        await initSystem()
         await this.initKoa();
     }
     async initKoa() {
@@ -67,7 +69,7 @@ export default class GateWay extends Application {
             if (ctx.headers['content-type'] && ctx.headers['content-type'].split(';')[0] === 'multipart/form-data') {
                 const maxLength = 1024 * 1024 * 5;
                 if (ctx.headers && ctx.headers['content-length'] && Number(ctx.headers['content-length']) > maxLength) {
-                    ctx.body = generateHttpErrorResponse(new Err.Http.OverFileSize)
+                    ctx.body = generateHttpErrorResponse(Err.Http.overFileSize)
                     return;
                 }
                 let stream=new PassThrough()
@@ -113,12 +115,13 @@ export default class GateWay extends Application {
                     if(!ignoreValidate) {
                         let authorization = ctx.get("Authorization")
                         if(!authorization) {
-                            throw new Err.User.NotAuth
+                            throw Err.User.notAuth
                         }
                         let ret= await userRpcApi.checkSession(authorization.substr(7))
                         if(!ret) {
-                            throw new Err.User.NotAuth
+                            throw Err.User.notAuth
                         }
+                        ctx.state.user=ret;
                     }
                     let obj = <IServer_Common_Http_Proxy>{}
                     if (ctx.req.method == "POST" || ctx.req.method == "PUT" || ctx.req.method == "PATCH") {
@@ -133,6 +136,7 @@ export default class GateWay extends Application {
                     obj.headers = <any>ctx.req.headers
                     obj.data = ctx.state.formData ?? ctx.state.p
                     obj.path = apiPath
+                    obj.user = ctx.state.user
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }

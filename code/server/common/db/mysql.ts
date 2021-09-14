@@ -21,7 +21,9 @@ export default class Mysql {
             database:info.database,
             waitForConnections: true,
             connectionLimit: 10,
-            queueLimit: 0
+            queueLimit: 0,
+            supportBigNumbers:true,
+            bigNumberStrings:true
         })
         this.sql=con.promise();
         g_mysqlConnection=this;
@@ -41,7 +43,7 @@ export default class Mysql {
 
         } catch(err){
             console.error("mysql error:",err,sqlText)
-            throw new Err.Common.MysqlError
+            throw Err.Common.mysqlError
         }
     }
 }

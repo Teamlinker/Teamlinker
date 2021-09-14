@@ -70,6 +70,22 @@ export function DHttpReqParam(name:string,defalutValue?:any){
     }
 }
 
+export function DHttpUser(target: Object, propertyKey: string, parameterIndex: number){
+    let types=Reflect.getMetadata("design:paramtypes",target,propertyKey);
+        let type=types[parameterIndex].name
+        let key=target.constructor.name+"::"+propertyKey
+        let obj:IServer_Common_Http_Structure_HandleParam={
+            name:null,
+            index:parameterIndex,
+            type:type,
+            category:EServer_Common_Http_Structure_HandleParam_Category.User
+        }
+        if(!g_objParam[key]){
+            g_objParam[key]=[]
+        }
+        g_objParam[key].unshift(obj)
+}
+
 export function DHttpReqParamRequired(name:string){
     return function(target: Object, propertyKey: string, parameterIndex: number){
         let types=Reflect.getMetadata("design:paramtypes",target,propertyKey);
@@ -163,13 +179,21 @@ export async function handleHttpCall(obj:IServer_Common_Http_Structure,ctx:IServ
             }
             else if(obj.type=="Object")
             {
-                value=JSON.parse(value)
+                try {
+                    value=JSON.parse(value)
+                } catch {
+                    value={}
+                }
             }
             arr.push(value)
         }
         else if(obj.category==EServer_Common_Http_Structure_HandleParam_Category.Context)
         {
             arr.push(objContext)
+        }
+        else if(obj.category==EServer_Common_Http_Structure_HandleParam_Category.User)
+        {
+            arr.push(ctx.user)
         }
         else if(obj.category==EServer_Common_Http_Structure_HandleParam_Category.File)
         {

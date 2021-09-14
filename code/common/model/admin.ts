@@ -1,5 +1,5 @@
 export interface ICommon_Model_Admin {
-    id:bigint,
+    id:string,
     name:string,
     password:string,
     description:string,

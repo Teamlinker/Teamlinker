@@ -1,10 +1,13 @@
+import { IServer_Common_RPC_User_CheckSession } from "../rpc/api/user";
+
 export enum EServer_Common_Http_Structure_HandleParam_Category {
     Content,
     File,
     Param,
     Header,
     Cookie,
-    Context
+    Context,
+    User
 }
 export interface IServer_Common_Http_Structure_HandleParam {
     name:string,
@@ -38,7 +41,8 @@ export interface IServer_Common_Http_Proxy {
         [param:string]:string
     },
     data:any,
-    bodyType:EServer_Common_Http_Body_Type
+    bodyType:EServer_Common_Http_Body_Type,
+    user?:IServer_Common_RPC_User_CheckSession
 }
 
 export interface IServer_Common_Http_Req_File {

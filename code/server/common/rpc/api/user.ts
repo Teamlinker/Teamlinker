@@ -7,3 +7,5 @@ export interface IServer_Common_RPC_User_CheckSession {
 export default interface IServer_Common_RPC_User {
     checkSession?(token:string):Promise<IServer_Common_RPC_User_CheckSession>
 }
+
+export type IUserSession=IServer_Common_RPC_User_CheckSession

@@ -1,19 +1,19 @@
 import{ UniqueID } from 'nodejs-snowflake';
 
 const uid = new UniqueID({
-    returnNumber: true
+    returnNumber: false
 }); 
 
 type EXPR={
-    [key:string]:string|number|boolean|bigint|{
-        value?:string|number|boolean|string[]|[number,number]|bigint,
+    [key:string]:string|number|boolean|string|{
+        value?:string|number|boolean|string[]|[number,number]|string,
         exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"
     }
 }
 
 export async function generateSnowId() {
     let id =await uid.asyncGetUniqueID()
-    return id as bigint
+    return id as string
 }
 
 function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{

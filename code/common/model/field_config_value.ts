@@ -1,6 +1,6 @@
 export interface ICommon_Model_Field_Config_Value {
-    id: bigint,
-  field_id :bigint,
+    id: string,
+  field_id :string,
   value :string,
   sort :number,
   label :string,
