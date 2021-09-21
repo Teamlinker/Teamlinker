@@ -45,10 +45,20 @@ export namespace Err {
             msg:"over file size"
         }
     }
-    
-
-    
-
+    export let Project = {
+        userIdNotExists:{
+            code:3000,
+            msg:"project id not exists"
+        },
+        projectNotFound:{
+            code:3001,
+            msg:"project not found"
+        },
+        projectExists:{
+            code:3002,
+            msg:"project exists"
+        },
+    }
 
 }
 

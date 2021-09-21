@@ -8,6 +8,7 @@ import { getNacosInstance } from "../../common/nacos/nacos";
 import { CacheService } from './../cache/service';
 import {generateHttpErrorResponse} from "../../common/util/http"
 import * as userApi from "../../../common/routes/user"
+import * as projectApi from "../../../common/routes/project"
 import { ICommon_HttpApi } from "../../../common/routes/types";
 import {  EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
 import { parseFormData } from "../util/util";
@@ -20,7 +21,7 @@ import {getComponent} from "../../common/decorate/component"
 import { Permission_Base } from '../../../common/permission/permission';
 import { processPermission } from '../../common/permission/base';
 import { EServer_Common_User_Type } from '../../common/types/user';
-var apis:ICommon_HttpApi[]=[userApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi];
 var app = new Koa();
 var pipe=function (from,to) :Promise<string>{
     return new Promise(function (resolve) {
@@ -44,7 +45,7 @@ export default class GateWay extends Application {
     override async config() {
         let cacheService=new CacheService()
         cacheService.start()
-        await initSystem()
+        //await initSystem()
         await this.initKoa();
     }
     async initKoa() {
@@ -160,9 +161,15 @@ export default class GateWay extends Application {
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }
-                    if(permission && permission.length>0 && (ctx.state.user && ctx.state.user.type==EServer_Common_User_Type.USER)) {
-                        let isCheck = processPermission(permission,Object.assign({},obj.data,{userId:ctx.state.user?ctx.state.user.userId:undefined}))
-                        if(!isCheck) {
+                    if(permission && permission.length>0) {
+                        if(ctx.state.user) {
+                            if(ctx.state.user.type==EServer_Common_User_Type.USER) {
+                                let isCheck =await processPermission(permission,Object.assign({},obj.data,{userId:ctx.state.user?ctx.state.user.userId:undefined}))
+                                if(!isCheck) {
+                                    throw Err.User.accessDenied
+                                }
+                            }
+                        } else {
                             throw Err.User.accessDenied
                         }
                     }

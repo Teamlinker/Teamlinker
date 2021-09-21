@@ -17,7 +17,6 @@ export default class User extends Entity<ICommon_Model_User> {
         } else if(this.item.id) {
             throw  Err.User.userExists;
         }
-        this.item.id=await generateSnowId()
         await userMapper.createUser(this.item)
         await this.loadItem();
         return this.item;

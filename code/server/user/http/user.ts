@@ -7,7 +7,6 @@ import { Err } from "../../../common/status/error"
 class UserController {
     @DHttpApi(userApi.routes.create)
     async create(@DHttpContent content:typeof userApi.routes.create.req,@DHttpUser userInfo:IUserSession):Promise<typeof userApi.routes.create.res>{
-        console.log(userInfo)
         let user=new UserService()
         user.assignItem(content);
         let obj=await user.create()

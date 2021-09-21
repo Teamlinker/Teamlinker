@@ -1,7 +1,7 @@
 import { Table_User, ICommon_Model_User, UserModel } from './../../../common/model/user';
 import { getMysqlInstance } from "../../common/db/mysql"
 import {Err} from "../../../common/status/error"
-import {generateCreateSql, generateDeleteSql, generateQuerySql, generateUpdateSql} from "../../common/util/sql"
+import {generateCreateSql, generateDeleteSql, generateQuerySql, generateSnowId, generateUpdateSql} from "../../common/util/sql"
 export namespace userMapper {
     export async function checkUserValid(username:string):Promise<boolean> {
         if(!username){
@@ -17,9 +17,10 @@ export namespace userMapper {
     }
     
     export async function createUser(info:ICommon_Model_User):Promise<void> {
-        if(!info || !info.username || !info.password ||!info.id){
+        if(!info || !info.username || !info.password ||info.id){
             throw  Err.Common.paramError
         }
+        info.id=await generateSnowId()
         var mysql=getMysqlInstance() 
         await mysql.execute(generateCreateSql(new UserModel,info))
     }

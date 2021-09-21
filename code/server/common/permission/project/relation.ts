@@ -31,7 +31,7 @@ export class PermissionProjectRead extends PermissionBase<IPermission_Project_Ca
         let arr:string[]=[]
         for(let obj of arrRolePermission) {
             let objPermission = await mysql.executeOne(generateQuerySql(new PermissionModel,[],{
-                id:obj.role_id
+                id:obj.permission_id
             }))
             if(objPermission) {
                 arr.push(objPermission.value)
@@ -40,7 +40,7 @@ export class PermissionProjectRead extends PermissionBase<IPermission_Project_Ca
         return arr;
     }
     check(obj:IPermission_Project_CacheValue):boolean {
-        return obj.includes[Permission_Types.Project.READ.value];
+        return obj.includes(Permission_Types.Project.READ.value);
     }
     getKey({userId,projectId}) {
         if(StringUtil.isEmpty(userId) || StringUtil.isEmpty(projectId)) {

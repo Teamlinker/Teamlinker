@@ -1,3 +1,5 @@
+import { Table_Project_User } from './../../../common/model/project_user';
+import { Table_User } from './../../../common/model/user';
 import { Table_Role_Permission } from './../../../common/model/role_permission';
 import { Table_Project_Role } from './../../../common/model/project_role';
 import { Table_Permission } from './../../../common/model/permission';
@@ -8,6 +10,7 @@ import { Permission_Base, Permission_Types } from '../../../common/permission/pe
 import { generateSnowId } from '../../common/util/sql';
 import { OBTPConfig } from './obtp';
 import { getNacosInstance } from '../../common/nacos/nacos';
+import { Table_Project } from '../../../common/model/project';
 export interface IServer_GateWay_FormData {
     isFile:boolean,
     name:string,
@@ -53,6 +56,9 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_Permission}`) 
     await mysql.execute(`delete from ${Table_Project_Role}`) 
     await mysql.execute(`delete from ${Table_Role_Permission}`) 
+    await mysql.execute(`delete from ${Table_User}`) 
+    await mysql.execute(`delete from ${Table_Project}`) 
+    await mysql.execute(`delete from ${Table_Project_User}`) 
 }
 
 export async function initSystem() {
@@ -64,7 +70,11 @@ export async function initSystem() {
             [param:number]:string
         }>{}
         let adminId=await generateSnowId()
+        let userId=await generateSnowId()
+        let projectId=await generateSnowId()
         await mysql.execute(`insert into ${Table_Admin} (id,name,password) values ('${adminId}','teamlinker','teamlinker')`)
+        await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${userId}','sx','sx')`)
+        await mysql.execute(`insert into ${Table_Project} (id,name,keyword,created_by) values ('${projectId}','test','test','${userId}')`)
         for(let key in Permission_Types) {
             let value=Permission_Types[key]
             let type=key
@@ -80,10 +90,13 @@ export async function initSystem() {
                 }
             }
         }
-        let objProjectRole=OBTPConfig.Role.Project_Role
+        let objProjectRole=OBTPConfig.Role.Project_Role,projectRoleUserId;
         for(let key in objProjectRole) {
             let obj=objProjectRole[key]
             let projectRoleId=await generateSnowId()
+            if(obj.name=="user") {
+                projectRoleUserId=projectRoleId
+            }
             let name=obj.name
             let description=obj.description
             await mysql.execute(`insert into ${Table_Project_Role} (id,name,description) values ('${projectRoleId}','${name}','${description}')`)
@@ -92,6 +105,7 @@ export async function initSystem() {
                 await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${projectRoleId}','${objPermission[o.value]}')`)
             }
         }
+        await mysql.execute(`insert into ${Table_Project_User} (id,role,project_id,user_id) values ('${await generateSnowId()}','${projectRoleUserId}','${projectId}','${userId}')`)
         await mysql.execute(`insert into ${Table_Version} (version) values ('${getNacosInstance().version}')`)
     }
     console.log("init finish")

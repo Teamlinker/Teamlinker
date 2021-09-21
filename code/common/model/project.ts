@@ -1,6 +1,8 @@
+import { BaseModel } from "./base"
+
 export interface ICommon_Model_Project {
     id :string,
-  key :string,
+  keyword :string,
   name :string,
   created_time :Date,
   modified_time :Date,
@@ -9,3 +11,8 @@ export interface ICommon_Model_Project {
   description :string,
 }
 export const Table_Project="project"
+
+export class ProjectModel extends BaseModel {
+  table=Table_Project
+  model=<ICommon_Model_Project>{}
+}

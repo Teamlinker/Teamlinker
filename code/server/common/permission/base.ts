@@ -30,10 +30,12 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
                     if (!isExists) {
                         value = await objPermission.create(objContent)
                         if (value !== null) {
-                            await getRedisInstance().set(key, value)
+                            await getRedisInstance().set(key, value,3600*6)
                         } else {
                             return false
                         }
+                    } else {
+                        value =await getRedisInstance().get(key,{})
                     }
                     keyMap[key] = value;
                 }
@@ -50,6 +52,7 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
         }
         return true
     } catch (err) {
+        console.error(err)
         return false
     }
     

@@ -13,8 +13,7 @@ const api={
                 projectId:string                
             }>{},
             res:<ICommon_Model_Project>{},
-            permission:[Permission_Types.Project.READ],
-            ignoreValidate:true
+            permission:[Permission_Types.Project.READ]
         },
     }
 }
