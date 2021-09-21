@@ -1,4 +1,4 @@
-import { Table_User, ICommon_Model_User } from './../../../common/model/user';
+import { Table_User, ICommon_Model_User, UserModel } from './../../../common/model/user';
 import { getMysqlInstance } from "../../common/db/mysql"
 import {Err} from "../../../common/status/error"
 import {generateCreateSql, generateDeleteSql, generateQuerySql, generateUpdateSql} from "../../common/util/sql"
@@ -8,11 +8,11 @@ export namespace userMapper {
             return false
         }
         var mysql=getMysqlInstance()
-        let ret=await mysql.execute<{
+        let ret=await mysql.executeOne<{
             username:string
-        }>(generateQuerySql(Table_User,["username"],{
+        }>(generateQuerySql(new UserModel,["username"],{
             username:username
-        }),true)
+        }))
         return !!ret
     }
     
@@ -21,15 +21,15 @@ export namespace userMapper {
             throw  Err.Common.paramError
         }
         var mysql=getMysqlInstance() 
-        await mysql.execute<Extract<typeof createUser,ICommon_Model_User>>(generateCreateSql(Table_User,info))
+        await mysql.execute(generateCreateSql(new UserModel,info))
     }
-
+ 
     export async function getUserById(id:string):Promise<ICommon_Model_User> {
         if(!id) {
             throw  Err.User.userIdNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.execute<ICommon_Model_User>(generateQuerySql(Table_User,[],{id}),true)
+        let ret=await mysql.executeOne<ICommon_Model_User>(generateQuerySql(new UserModel,[],{id}))
         return ret
     }
 
@@ -38,7 +38,7 @@ export namespace userMapper {
             throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.execute<ICommon_Model_User>(generateQuerySql(Table_User,[],{username:name}),true)
+        let ret=await mysql.executeOne<ICommon_Model_User>(generateQuerySql(new UserModel,[],{username:name}))
         return ret
     }
 
@@ -49,7 +49,7 @@ export namespace userMapper {
         var mysql=getMysqlInstance();
         let id=info.id;
         delete info.id,info.created_time,info.modified_time
-        await mysql.execute(generateUpdateSql(Table_User,info,{id}))
+        await mysql.execute(generateUpdateSql(new UserModel,info,{id}))
     }
 
     export async function deleteUser(id):Promise<void> {
@@ -57,6 +57,6 @@ export namespace userMapper {
             throw  Err.User.userIdNotExists
         }
         var mysql=getMysqlInstance();
-        await mysql.execute(generateDeleteSql(Table_User,{id}))
+        await mysql.execute(generateDeleteSql(new UserModel,{id}))
     }
 }

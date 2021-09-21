@@ -33,6 +33,10 @@ export namespace Err {
         notAuth:{
             code:1005,
             msg:"user not auth"
+        },
+        accessDenied:{
+            code:1006,
+            msg:"access denied"
         }
     }
     export let Http = {

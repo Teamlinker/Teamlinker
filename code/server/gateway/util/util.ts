@@ -6,8 +6,8 @@ import { Table_Version } from './../../../common/model/version';
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Permission_Base, Permission_Types } from '../../../common/permission/permission';
 import { generateSnowId } from '../../common/util/sql';
-import {version} from "../../package.json"
 import { OBTPConfig } from './obtp';
+import { getNacosInstance } from '../../common/nacos/nacos';
 export interface IServer_GateWay_FormData {
     isFile:boolean,
     name:string,
@@ -51,6 +51,8 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_Version}`) 
     await mysql.execute(`delete from ${Table_Admin}`) 
     await mysql.execute(`delete from ${Table_Permission}`) 
+    await mysql.execute(`delete from ${Table_Project_Role}`) 
+    await mysql.execute(`delete from ${Table_Role_Permission}`) 
 }
 
 export async function initSystem() {
@@ -90,7 +92,7 @@ export async function initSystem() {
                 await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${projectRoleId}','${objPermission[o.value]}')`)
             }
         }
-        await mysql.execute(`insert into ${Table_Version} (version) values ('${version}')`)
+        await mysql.execute(`insert into ${Table_Version} (version) values ('${getNacosInstance().version}')`)
     }
     console.log("init finish")
 }

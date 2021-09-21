@@ -1,5 +1,5 @@
-import  { Table_Issue_Type ,ICommon_Model_Issue_Type} from '../../../common/model/issue_type';
-import { getMysqlInstance } from "../../common/db/mysql";
+import  { Table_Issue_Type ,ICommon_Model_Issue_Type} from '../../../../common/model/issue_type';
+import { getMysqlInstance } from "../mysql";
 
 export async function getIssueTypeListMapper() {
     var mysql=getMysqlInstance()

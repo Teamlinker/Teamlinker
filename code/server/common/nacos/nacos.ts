@@ -59,6 +59,9 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
             port: this.objConfigCurrentService.port,
         });
     }
+    get version():string {
+        return this.objConfig.version;
+    }
     get serviceName():string {
         return this.name;
     }

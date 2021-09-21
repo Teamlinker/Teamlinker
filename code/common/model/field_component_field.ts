@@ -1,3 +1,5 @@
+import { BaseModel } from "./base"
+
 export interface ICommon_Model_Field_Component_Field {
     id:string,
     type_id:string,
@@ -10,3 +12,8 @@ export interface ICommon_Model_Field_Component_Field {
     name:string
 }
 export const Table_Field_Component_Field="field_component_field"
+
+export class FieldComponentFieldModel extends BaseModel {
+    table=Table_Field_Component_Field
+    model=<ICommon_Model_Field_Component_Field>{}
+}

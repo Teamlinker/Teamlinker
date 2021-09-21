@@ -1,3 +1,4 @@
+import { PermissionProjectRead } from '../../common/permission/project/relation';
 import * as Koa from "koa"
 import * as body from 'koa-bodyparser';
 import * as http from "http"
@@ -15,6 +16,10 @@ import { proxyRequest } from "../../common/rpc/rpc";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
 import { initSystem } from "../util/util";
+import {getComponent} from "../../common/decorate/component"
+import { Permission_Base } from '../../../common/permission/permission';
+import { processPermission } from '../../common/permission/base';
+import { EServer_Common_User_Type } from '../../common/types/user';
 var apis:ICommon_HttpApi[]=[userApi];
 var app = new Koa();
 var pipe=function (from,to) :Promise<string>{
@@ -47,7 +52,8 @@ export default class GateWay extends Application {
             [param:string]:{
                 [parem:string]:{
                     service:string,
-                    ignoreValidate:boolean
+                    ignoreValidate:boolean,
+                    permission:Permission_Base[]
                 }
             }
         }>{}
@@ -61,10 +67,23 @@ export default class GateWay extends Application {
                 let objApi=obj.routes[key];
                 apiMap[baseUrl][objApi.method+" "+objApi.path]={
                     service:obj.service,
-                    ignoreValidate:!!objApi.ignoreValidate
+                    ignoreValidate:!!objApi.ignoreValidate,
+                    permission:objApi.permission??[]
                 };
             }
         }
+        app.use(async (ctx, next) => {
+            let req=ctx.req
+            ctx.set("Access-Control-Allow-Origin", req.headers.origin);
+            ctx.set("Access-Control-Allow-Headers", "X-Requested-With");
+            ctx.set("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE");
+            ctx.set("Access-Control-Allow-Credentials", "true");
+            if (ctx.get["access-control-request-headers"]) {
+                ctx.set("Access-Control-Allow-Headers", ctx.get["access-control-request-headers"])
+            }
+            ctx.set("Access-Control-Expose-Headers", "connection,content-length,date,x-powered-by,content-encoding,server,etag,accept-ranges,allow,content-language,set-cookie,doclever-request");
+            await next();
+        })
         app.use(async (ctx, next) => {
             if (ctx.headers['content-type'] && ctx.headers['content-type'].split(';')[0] === 'multipart/form-data') {
                 const maxLength = 1024 * 1024 * 5;
@@ -112,6 +131,7 @@ export default class GateWay extends Application {
                 if (apiMap[baseUrl] && apiMap[baseUrl][method + " " + apiPath]) {
                     let microServer = apiMap[baseUrl][method + " " + apiPath].service
                     let ignoreValidate = apiMap[baseUrl][method + " " + apiPath].ignoreValidate
+                    let permission=apiMap[baseUrl][method + " " + apiPath].permission
                     if(!ignoreValidate) {
                         let authorization = ctx.get("Authorization")
                         if(!authorization) {
@@ -140,6 +160,12 @@ export default class GateWay extends Application {
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }
+                    if(permission && permission.length>0 && (ctx.state.user && ctx.state.user.type==EServer_Common_User_Type.USER)) {
+                        let isCheck = processPermission(permission,Object.assign({},obj.data,{userId:ctx.state.user?ctx.state.user.userId:undefined}))
+                        if(!isCheck) {
+                            throw Err.User.accessDenied
+                        }
+                    }
                     let ret = await proxyRequest(obj, microServer as ECommon_Services)
                     ctx.response.status = ret.status;
                     for (let key in ret.headers) {
@@ -163,6 +189,8 @@ export default class GateWay extends Application {
         })
         http.createServer(app.callback()).listen(getNacosInstance().serverPort,function(){
             console.log(`start`);
+            let obj=getComponent<InstanceType<typeof PermissionProjectRead>>(PermissionProjectRead.name)
+            console.log(obj)
         })
     }
 }
