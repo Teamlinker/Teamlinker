@@ -1,9 +1,9 @@
 export interface ICommon_Model_Permission_Target {
-    id :bigint,
-  permission_id: bigint,
-  target_id :bigint,
+    id :string,
+  permission_id: string,
+  target_id :string,
   target_type :number,
-  item_id :bigint,
+  item_id :string,
   item_type :number,
 }
 export const Table_Permission_Target="permission_target"

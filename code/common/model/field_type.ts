@@ -1,7 +1,7 @@
 export interface ICommon_Model_Field_Type {
-    id :bigint,
+    id :string,
   name :string,
-  icon :bigint,
+  icon :string,
   description :string,
   multi :number,
 }

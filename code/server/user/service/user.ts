@@ -13,18 +13,17 @@ export default class User extends Entity<ICommon_Model_User> {
     
     async create():Promise<ICommon_Model_User>{
         if(!this.item) {
-            throw new Err.User.UserNotFound;
+            throw  Err.User.userNotFound;
         } else if(this.item.id) {
-            throw new Err.User.UserExists;
+            throw  Err.User.userExists;
         }
-        this.item.id=await generateSnowId()
         await userMapper.createUser(this.item)
         await this.loadItem();
         return this.item;
     }
     async update():Promise<ICommon_Model_User>{
         if(!this.item || !this.item.id) {
-            throw new Err.User.UserNotFound;
+            throw  Err.User.userNotFound;
         }
         await userMapper.updateUser(this.item)
         return this.item;
@@ -35,13 +34,13 @@ export default class User extends Entity<ICommon_Model_User> {
     }
     async loadItem():Promise<ICommon_Model_User> {
         if(!this.item || !this.item.id) {
-            throw new Err.User.UserNotFound;
+            throw  Err.User.userNotFound;
         }
         let obj = await userMapper.getUserById(this.item.id);
         this.item=obj;
         return this.item;
     }
-    static async getItemById(id:bigint):Promise<InstanceType<typeof User>>{
+    static async getItemById(id:string):Promise<InstanceType<typeof User>>{
         let obj = await userMapper.getUserById(id);
         if(obj) {
             let user = new User;
@@ -66,7 +65,7 @@ export default class User extends Entity<ICommon_Model_User> {
     async startSession():Promise<string>{
         let secret=getNacosInstance().globalConfig.jwt;
         if(!this.item || !this.item.id) {
-            throw new Err.User.UserNotFound
+            throw Err.User.userNotFound
         }
         return new Promise(async (resolve,reject)=>{
             jwt.sign({

@@ -1,8 +1,8 @@
 export interface ICommon_Model_Field_Solution_Workflow_Action {
-    id :bigint,
-  field_solution :bigint ,
-  workflow_action_id :bigint ,
-  field :bigint,
+    id :string,
+  field_solution :string ,
+  workflow_action_id :string ,
+  field :string,
   optional :number,
   default_value :string,
   multi :number,

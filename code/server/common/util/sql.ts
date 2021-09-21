@@ -1,19 +1,21 @@
 import{ UniqueID } from 'nodejs-snowflake';
+import { BaseModel } from '../../../common/model/base';
 
 const uid = new UniqueID({
-    returnNumber: true
+    returnNumber: false
 }); 
 
 type EXPR={
-    [key:string]:string|number|boolean|bigint|{
-        value?:string|number|boolean|string[]|[number,number]|bigint,
-        exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"
-    }
+    [key:string]:EXPRVALUE
+}
+type EXPRVALUE=string|number|boolean|string|Date|{
+    value?:string|number|boolean|string[]|[number,number]|string|Date,
+    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"
 }
 
 export async function generateSnowId() {
     let id =await uid.asyncGetUniqueID()
-    return id as bigint
+    return id as string
 }
 
 function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{
@@ -24,6 +26,8 @@ function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{
             if(typeof(value)!="object") {
                 let val=typeof(value)=="number"?value:typeof(value)=="boolean"?(value?1:0):("'"+value+"'")
                 arrExpr.push(`${key}=${val}`)
+            } else if (typeof(value)=="object" && (value instanceof Date)){
+                arrExpr.push(`${key}=${value.getTime()}`)
             } else {
                 if (value.exp == "=" || value.exp=="<=" || value.exp==">" || value.exp=="<" || value.exp=="<>" || !value.exp) {
                     if(!value.exp) {
@@ -55,7 +59,12 @@ function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{
     }
     return expr;
 }
-export function generateCreateSql(table:string,obj:any):string {
+export function generateCreateSql<T extends BaseModel>(model:T,obj:{
+    [param in keyof T["model"]]?:EXPRVALUE
+}):{
+    value:string,
+    type:T["model"]
+} {
     let keys="",values=""
     for(let key in obj) {
         let value=obj[key]
@@ -68,10 +77,18 @@ export function generateCreateSql(table:string,obj:any):string {
     if(values[values.length-1]==","){
         values=values.substring(0,values.length-1);
     }
-    return `insert into ${table} (${keys}) values (${values})`
+    return {
+        value:`insert into ${model.table} (${keys}) values (${values})`,
+        type:model.model
+    }
 }
 
-export function generateQuerySql(table:string,columns:string[],objExpr?:EXPR,exprMode?:"and"|"or"):string {
+export function generateQuerySql<T extends BaseModel>(model:T,columns:string[],objExpr?:{
+    [param in keyof T["model"]]?:EXPRVALUE
+},exprMode?:"and"|"or"):{
+    value:string,
+    type:T["model"]
+} {
     let column=""
     if(Array.isArray(columns) && columns.length>0) {
         column=columns.join(",")
@@ -79,10 +96,20 @@ export function generateQuerySql(table:string,columns:string[],objExpr?:EXPR,exp
         column="*"
     }
     let expr=generateExp(objExpr,exprMode);
-    return `select ${column} from ${table}${expr?(" where "+expr):""}`
+    return {
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}`,
+        type:model.model
+    }
 }
 
-export function generateUpdateSql(table:string,obj:any,objExpr?:EXPR,exprMode?:"and"|"or"):string {
+export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
+    [param in keyof T["model"]]?:string|number|Date
+},objExpr?:{
+    [param in keyof T["model"]]?:EXPRVALUE
+},exprMode?:"and"|"or"):{
+    value:string,
+    type:T["model"]
+} {
     let arrVal=[];
     for(let key in obj) {
         let value=obj[key]
@@ -101,10 +128,21 @@ export function generateUpdateSql(table:string,obj:any,objExpr?:EXPR,exprMode?:"
         arrVal.push(`key=${val}`)
     }
     let expr=generateExp(objExpr,exprMode);
-    return `update ${table} set ${arrVal.join(",")}${expr?(" where "+expr):""}`
+    return {
+        value:`update ${model.table} set ${arrVal.join(",")}${expr?(" where "+expr):""}`,
+        type:model.model
+    }
 }
 
-export function generateDeleteSql(table:string,objExpr?:EXPR,exprMode?:"and"|"or"):string {
+export function generateDeleteSql<T extends BaseModel>(model:T,objExpr?:{
+    [param in keyof T["model"]]?:EXPRVALUE
+},exprMode?:"and"|"or"):{
+    value:string,
+    type:T["model"]
+} {
     let expr=generateExp(objExpr,exprMode);
-    return `delete from ${table}${expr?(" where "+expr):""}`
+    return {
+        value:`delete from ${model.table}${expr?(" where "+expr):""}`,
+        type:model.model
+    }
 }

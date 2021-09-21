@@ -21,27 +21,41 @@ export default class Mysql {
             database:info.database,
             waitForConnections: true,
             connectionLimit: 10,
-            queueLimit: 0
+            queueLimit: 0,
+            supportBigNumbers:true,
+            bigNumberStrings:true
         })
         this.sql=con.promise();
         g_mysqlConnection=this;
     }
-    async execute<T>(sqlText:string,returnOne:boolean=false):Promise<T> {
+    async executeOne<T>(sqlText:string|{
+        value:string,
+        type:T
+    }):Promise<T> {
         try{
-            let [rows]=await this.sql.query(sqlText);
-            if(returnOne){
-                if((rows as any[]).length>0){
-                    return rows[0]
-                } else {
-                    return null;
-                }
+            let [rows]=await this.sql.query(typeof(sqlText)=="string"?sqlText:sqlText.value);
+            if((rows as any[]).length>0){
+                return rows[0]
             } else {
-                return <T><unknown>rows
+                return null;
             }
 
         } catch(err){
             console.error("mysql error:",err,sqlText)
-            throw new Err.Common.MysqlError
+            throw Err.Common.mysqlError
+        }
+    }
+    async execute<T>(sqlText:string|{
+        value:string,
+        type:T
+    }):Promise<T[]> {
+        try{
+            let [rows]=await this.sql.query(typeof(sqlText)=="string"?sqlText:sqlText.value);
+            return <T[]><unknown>rows
+
+        } catch(err){
+            console.error("mysql error:",err,sqlText)
+            throw Err.Common.mysqlError
         }
     }
 }

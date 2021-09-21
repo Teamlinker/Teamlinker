@@ -1,3 +1,5 @@
+import { Permission_Base } from "../permission/permission";
+
 export enum ECommon_HttpApi_Method {
     GET="GET",
     POST="POST",
@@ -10,7 +12,8 @@ export interface ICommon_Http_Route {
     path:string,
     req:any,
     res:any,
-    ignoreValidate?:boolean
+    ignoreValidate?:boolean,
+    permission?:Permission_Base[]
 }
 
 export interface ICommon_HttpApi {

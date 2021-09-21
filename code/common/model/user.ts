@@ -1,5 +1,7 @@
+import { BaseModel } from "./base"
+
 export interface ICommon_Model_User {
-    id :bigint,
+    id :string,
   username :string,
   email :string,
   phone :string,
@@ -11,3 +13,8 @@ export interface ICommon_Model_User {
   title :string,
 }
 export const Table_User="user"
+
+export class UserModel extends BaseModel {
+  table=Table_User
+  model=<ICommon_Model_User>{}
+}

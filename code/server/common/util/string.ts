@@ -6,4 +6,10 @@ export default class StringUtil {
         }
         return a
     }
+    static isEmpty(str:string) {
+        if(str===null || str===undefined || str==="") {
+            return true
+        }
+        return false
+    }
 }

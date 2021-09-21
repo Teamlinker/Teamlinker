@@ -1,9 +1,9 @@
 export interface ICommon_Model_Workflow_Solution {
-    id :bigint ,
+    id :string ,
   created_time :Date,
   modified_time :Date,
-  created_by :bigint ,
-  modified_by :bigint,
+  created_by :string ,
+  modified_by :string,
   system :number,
   name :string,
   description :string,

@@ -87,4 +87,11 @@ export class Redis {
     async setTTL(key:string,seconds:number):Promise<void> {
         await this.redis.expire(key,seconds);
     }
+    async del(key:string) {
+        await this.redis.del(key);
+    }
+    async exists(key:string) {
+        let ret=await this.redis.exists(key)
+        return !!ret
+    }
 }

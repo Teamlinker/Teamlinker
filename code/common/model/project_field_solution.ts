@@ -1,6 +1,6 @@
 export interface ICommon_Model_Project_Field_Solution {
-    id: bigint,
-  project_id :bigint ,
-  field_solution_id :bigint ,
+    id: string,
+  project_id :string ,
+  field_solution_id :string ,
 }
 export const Table_Project_Field_Solution="project_field_solution"

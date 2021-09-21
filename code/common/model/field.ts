@@ -1,12 +1,12 @@
 export interface ICommon_Model_Field {
-    id:bigint,
-    type_id:bigint,
+    id:string,
+    type_id:string,
     system:number,
     description:string,
     created_time:Date,
     modified_time:Date,
-    created_by:bigint,
-    modified_by:bigint,
+    created_by:string,
+    modified_by:string,
     name:string
 }
 export const Table_Field="field"
