@@ -22,7 +22,7 @@ const api={
             req:<{
                 name:string           
             }>{},
-            res:{},
+            res:<boolean>{},
             ignoreValidate:true
         },
         logout:{
@@ -44,7 +44,7 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/refresh",
             req:{},
-            res:<Omit<ICommon_Model_User,"password"> | Omit<ICommon_Model_Admin,"password">>{},
+            res:<Omit<ICommon_Model_User,"password">>{},
         },
         update:{
             method:ECommon_HttpApi_Method.PUT,

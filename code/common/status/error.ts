@@ -1,11 +1,11 @@
 export namespace Err {
     export let Common = {
         paramError:{
-            code:0,
+            code:1,
             msg:"param error"
         },
         mysqlError:{
-            code:1,
+            code:2,
             msg:"mysql error"
         }
     }
@@ -43,6 +43,10 @@ export namespace Err {
         overFileSize:{
             code:2000,
             msg:"over file size"
+        },
+        requireParam:{
+            code:2001,
+            msg:"require param"
         }
     }
     export let Project = {

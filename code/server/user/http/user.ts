@@ -30,5 +30,55 @@ class UserController {
             throw  Err.User.userPasswordWrong
         }
     }
+
+    @DHttpApi(userApi.routes.checkUser)
+    async checkUser(@DHttpReqParamRequired("name") name:string):Promise<typeof userApi.routes.checkUser.res> {
+        let user=await UserService.getItemByName(name)
+        if(!user) {
+            return false
+        }
+        return true
+    }
+
+    @DHttpApi(userApi.routes.logout)
+    async logout(@DHttpUser userInfo:IUserSession) {
+        let user=await UserService.getItemById(userInfo.userId)
+        if(!user) {
+            throw Err.User.userNotFound
+        }
+        await user.stopSession()
+    }
+
+    @DHttpApi(userApi.routes.refresh)
+    async refresh(@DHttpUser userInfo:IUserSession):Promise<typeof userApi.routes.refresh.res> {
+        let user=await UserService.getItemById(userInfo.userId)
+        if(!user) {
+            throw Err.User.userNotFound
+        }
+        let item=user.getItem()
+        delete item.password
+        return item
+    }
+
+    @DHttpApi(userApi.routes.update)
+    async update(@DHttpUser userInfo:IUserSession,@DHttpContent content:typeof userApi.routes.update.req):Promise<typeof userApi.routes.update.res> {
+        let user=await UserService.getItemById(userInfo.userId)
+        if(!user) {
+            throw Err.User.userNotFound
+        }
+        user.assignItem(content)
+        let obj=await user.update();
+        delete obj.password
+        return obj
+    }
+
+    @DHttpApi(userApi.routes.remove)
+    async remove(@DHttpUser userInfo:IUserSession) {
+        let user=await UserService.getItemById(userInfo.userId)
+        if(!user) {
+            throw Err.User.userNotFound
+        }
+        await user.delete()
+    }
 }
 export default new UserController

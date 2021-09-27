@@ -6,7 +6,7 @@ import userRpcApi from '../rpc/user';
 import Application from "../../common/app/app"
 import { getNacosInstance } from "../../common/nacos/nacos";
 import { CacheService } from './../cache/service';
-import {generateHttpErrorResponse} from "../../common/util/http"
+import {generateHttpErrorResponse, generateHttpOkResponse} from "../../common/util/http"
 import * as userApi from "../../../common/routes/user"
 import * as projectApi from "../../../common/routes/project"
 import { ICommon_HttpApi } from "../../../common/routes/types";
@@ -185,7 +185,12 @@ export default class GateWay extends Application {
                             ctx.set(key, ret.headers[key]);
                         }
                     }
-                    ctx.body = ret.data;
+                    if(typeof(ret.data)=="string" || typeof(ret.data)=="number" || typeof(ret.data)=="boolean" || typeof(ret.data)=="object")
+                    {
+                        ctx.body = generateHttpOkResponse(ret.data);
+                    } else {
+                        ctx.body = ret.data;
+                    }
                     await next()
                 } else {
                     await next()

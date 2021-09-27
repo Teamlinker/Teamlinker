@@ -12,7 +12,9 @@ export abstract class Entity<T> {
     }
     assignItem(item:any) {
         if(typeof(item)=="object") {
-            this.item=<T>{}
+            if(!this.item) {
+                this.item=<T>{}
+            }
             for(let key in item) {
                 this.item[key]=item[key]
             }

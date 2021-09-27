@@ -2,6 +2,7 @@ import { ICommon_Http_Route } from './../../../common/routes/types';
 import { EServer_Common_Http_Structure_HandleParam_Category, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File, IServer_Common_Http_Structure, IServer_Common_Http_Structure_HandleParam } from "../types/http";
 import "reflect-metadata"
 import HttpContext from "./context"
+import { Err } from '../../../common/status/error';
 var g_objRoute:{
     [param:string]:IServer_Common_Http_Structure
 }={}
@@ -153,10 +154,7 @@ export async function handleHttpCall(obj:IServer_Common_Http_Structure,ctx:IServ
             {
                 if(obj.required)
                 {
-                    throw {
-                        code:1,
-                        msg:"qq"
-                    }
+                    throw Err.Http.requireParam
                 }
                 value=obj.defaultValue
                 arr.push(value)
