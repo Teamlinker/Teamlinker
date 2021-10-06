@@ -3,6 +3,7 @@ import { BaseModel } from "./base"
 export interface ICommon_Model_User {
     id :string,
   username :string,
+  photo:string,
   email :string,
   phone :string,
   created_time :Date,
