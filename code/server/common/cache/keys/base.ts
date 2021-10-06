@@ -4,9 +4,11 @@ class RedisBaseKey<T> {
     protected redis:InstanceType<typeof Redis>=getRedisInstance()
     protected type:T
     protected name:string
-    constructor(name:string,type:T){
-        this.name=name,
+    protected ttl:number
+    constructor(name:string,type:T,ttl?:number){
+        this.name=name
         this.type=type
+        this.ttl=ttl
     }
     async getTTL():Promise<number> {
         let ret=await this.redis.getTTL(this.name)
@@ -15,18 +17,21 @@ class RedisBaseKey<T> {
     async setTTL(seconds:number):Promise<void> {
         await this.redis.setTTL(this.name,seconds)
     }
+    async del() {
+        await this.redis.del(this.name);
+    }
 }
 
 export class RedisStringKey<T> extends RedisBaseKey<T> {
-    constructor(name:string,type:T){
-        super(name,type)
+    constructor(name:string,type:T,ttl?:number){
+        super(name,type,ttl)
     }
     async get():Promise<T>{
         let ret=await this.redis.get(this.name,this.type)
         return ret
     }
     async set(value:T,ttl?:number){
-        await this.redis.set(this.name,value,ttl);
+        await this.redis.set(this.name,value,ttl??this.ttl);
     }
     async scan():Promise<T[]>{
         let ret=await this.redis.scan<T>(this.name,this.type);

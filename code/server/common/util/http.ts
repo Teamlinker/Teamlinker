@@ -8,10 +8,9 @@ export function generateHttpErrorResponse(obj:{
     }
 }
 
-export function generateHttpOkResponse(msg:string,data) {
+export function generateHttpOkResponse(data) {
     return {
         code:0,
-        msg:msg,
         data:data
     }
 }

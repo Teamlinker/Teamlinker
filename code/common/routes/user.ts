@@ -22,7 +22,7 @@ const api={
             req:<{
                 name:string           
             }>{},
-            res:{},
+            res:<boolean>{},
             ignoreValidate:true
         },
         logout:{
@@ -40,11 +40,17 @@ const api={
             }>{},
             res:<Omit<ICommon_Model_Admin,"password">>{},
         },
+        logoutAdmin:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/admin_logout",
+            req:{},
+            res:{},
+        },
         refresh:{
             method:ECommon_HttpApi_Method.GET,
             path:"/refresh",
             req:{},
-            res:<Omit<ICommon_Model_User,"password"> | Omit<ICommon_Model_Admin,"password">>{},
+            res:<Omit<ICommon_Model_User,"password">>{},
         },
         update:{
             method:ECommon_HttpApi_Method.PUT,
@@ -65,6 +71,14 @@ const api={
             method:ECommon_HttpApi_Method.DELETE,
             path:"/item",
             req:{},
+            res:{},
+        },
+        active:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/active",
+            req:<{
+                active:number
+            }>{},
             res:{},
         }
     }

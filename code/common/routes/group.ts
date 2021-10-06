@@ -1,0 +1,95 @@
+import { ICommon_Model_Group_Role } from './../model/group_role';
+import { ICommon_Model_Group } from './../model/group';
+import { Permission_Types } from '../permission/permission';
+import { ICommon_Model_Project } from './../model/project';
+import { ECommon_Services } from './../types';
+import {ECommon_HttpApi_Method, ICommon_HttpApi} from "./types"
+const api={
+    baseUrl:"/group",
+    service:ECommon_Services.User,
+    routes:{
+        create:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/item",
+            req:<{
+                name:string                
+            }>{},
+            res:<ICommon_Model_Group>{}
+        },
+        info:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/item",
+            req:<{
+                groupId:string                
+            }>{},
+            res:<ICommon_Model_Group>{}
+        },
+        update:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/item",
+            req:<{
+                groupId:string,
+                name:string                
+            }>{},
+            res:<ICommon_Model_Group>{}
+        },
+        remove:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/item",
+            req:<{
+                groupId:string                
+            }>{},
+            res:{}
+        },
+        members:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/members",
+            req:<{
+                groupId:string             
+            }>{},
+            res:<{
+                id:string,
+                name:string,
+                photo:string,
+                role:ICommon_Model_Group_Role
+            }[]>{}
+        },
+        addMember:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/add_member",
+            req:<{
+                groupId:string,
+                userId:string                
+            }>{},
+            res:{}
+        },
+        removeMember:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/remove_member",
+            req:<{
+                groupId:string,
+                userId:string                
+            }>{},
+            res:{}
+        },
+        changeRole:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/role",
+            req:<{
+                groupId:string,
+                userId:string,
+                role:string             
+            }>{},
+            res:{}
+        },
+        roles:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/roles",
+            req:<{
+                groupId:string           
+            }>{},
+            res:<ICommon_Model_Group_Role[]>{}
+        }
+    }
+}
+export=api

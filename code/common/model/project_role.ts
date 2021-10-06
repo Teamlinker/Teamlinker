@@ -1,3 +1,5 @@
+import { BaseModel } from "./base"
+
 export interface ICommon_Model_Project_Role {
     id :string,
   name :string,
@@ -7,3 +9,8 @@ export interface ICommon_Model_Project_Role {
   project_id:string
 }
 export const Table_Project_Role="project_role"
+
+export class ProjectRoleModel extends BaseModel {
+  table=Table_Project_Role
+  model=<ICommon_Model_Project_Role>{}
+}

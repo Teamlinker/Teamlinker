@@ -26,10 +26,12 @@ export default class User extends Entity<ICommon_Model_User> {
             throw  Err.User.userNotFound;
         }
         await userMapper.updateUser(this.item)
+        await this.loadItem();
         return this.item;
     }
     async delete(){
         await userMapper.deleteUser(this.item.id);
+        await this.clearCache()
         emitServiceEvent(EServer_Common_Event_Types.User.DELETE,this.item.id);
     }
     async loadItem():Promise<ICommon_Model_User> {
@@ -38,17 +40,23 @@ export default class User extends Entity<ICommon_Model_User> {
         }
         let obj = await userMapper.getUserById(this.item.id);
         this.item=obj;
+        let session=REDIS_USER.info(this.item.id);
+        await session.set(obj)
         return this.item;
     }
-    static async getItemById(id:string):Promise<InstanceType<typeof User>>{
-        let obj = await userMapper.getUserById(id);
-        if(obj) {
-            let user = new User;
-            user.setItem(obj);
-            return user;
-        } else {
-            return null;
-        }
+    static async getItemById(id:string,reload:boolean=false):Promise<InstanceType<typeof User>>{
+        let session=REDIS_USER.info(id);
+        let obj=await session.get();
+        if(!obj || reload) {
+            obj = await userMapper.getUserById(id);
+            if(!obj) {
+                return null
+            }
+            await session.set(obj)
+        } 
+        let user = new User;
+        user.setItem(obj);
+        return user;
     }
 
     static async getItemByName(name:string):Promise<InstanceType<typeof User>>{
@@ -77,10 +85,33 @@ export default class User extends Entity<ICommon_Model_User> {
                     return
                 } else {
                     let session=REDIS_USER.token(this.item.id)
-                    await session.set(token,3600);
+                    await session.set(token);
+                    let sessionInfo=REDIS_USER.info(this.item.id)
+                    await sessionInfo.set(this.item);
                     resolve(token)
                 }
             })
         })
+    }
+
+    async stopSession() {
+        if(!this.item || !this.item.id) {
+            throw Err.User.userNotFound
+        }
+        let session=REDIS_USER.token(this.item.id)
+        await session.del()
+    }
+
+    async active(active:number) {
+        if(!this.item || !this.item.id) {
+            throw Err.User.userNotFound
+        }
+        await userMapper.active(this.item.id,active);
+        await this.loadItem();
+    }
+
+    async clearCache(){
+        await REDIS_USER.token(this.item.id).del()
+        await REDIS_USER.info(this.item.id).del()
     }
 }
