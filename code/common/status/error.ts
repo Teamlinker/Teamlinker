@@ -63,6 +63,15 @@ export namespace Err {
             msg:"project exists"
         },
     }
-
+    export let Group = {
+        groupNotFound:{
+            code:4000,
+            msg:"group not found"
+        },
+        groupExists:{
+            code:4001,
+            msg:"group exists"
+        },
+    }
 }
 

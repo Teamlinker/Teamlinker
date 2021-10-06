@@ -49,7 +49,7 @@ export namespace userMapper {
         }
         var mysql=getMysqlInstance();
         let id=info.id;
-        delete info.id,info.created_time,info.modified_time
+        delete info.id,info.created_time,info.modified_time,info.active
         await mysql.execute(generateUpdateSql(new UserModel,info,{id}))
     }
 
@@ -59,5 +59,13 @@ export namespace userMapper {
         }
         var mysql=getMysqlInstance();
         await mysql.execute(generateDeleteSql(new UserModel,{id}))
+    }
+
+    export async function active(id:string,active:number) {
+        if(!id) {
+            throw  Err.User.userIdNotExists
+        }
+        var mysql=getMysqlInstance();
+        await mysql.execute(generateUpdateSql(new UserModel,{active},{id}))
     }
 }

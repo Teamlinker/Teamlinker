@@ -10,7 +10,7 @@ export abstract class Entity<T> {
     setItem(item:T) {
         this.item=item
     }
-    assignItem(item:any) {
+    assignItem(item:Partial<T>) {
         if(typeof(item)=="object") {
             if(!this.item) {
                 this.item=<T>{}

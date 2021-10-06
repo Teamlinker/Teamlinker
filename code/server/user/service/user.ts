@@ -26,10 +26,12 @@ export default class User extends Entity<ICommon_Model_User> {
             throw  Err.User.userNotFound;
         }
         await userMapper.updateUser(this.item)
+        await this.loadItem();
         return this.item;
     }
     async delete(){
         await userMapper.deleteUser(this.item.id);
+        await this.clearCache()
         emitServiceEvent(EServer_Common_Event_Types.User.DELETE,this.item.id);
     }
     async loadItem():Promise<ICommon_Model_User> {
@@ -98,5 +100,18 @@ export default class User extends Entity<ICommon_Model_User> {
         }
         let session=REDIS_USER.token(this.item.id)
         await session.del()
+    }
+
+    async active(active:number) {
+        if(!this.item || !this.item.id) {
+            throw Err.User.userNotFound
+        }
+        await userMapper.active(this.item.id,active);
+        await this.loadItem();
+    }
+
+    async clearCache(){
+        await REDIS_USER.token(this.item.id).del()
+        await REDIS_USER.info(this.item.id).del()
     }
 }

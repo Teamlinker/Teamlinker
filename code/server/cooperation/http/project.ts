@@ -6,7 +6,7 @@ import HttpContext from "../../common/http/context"
 import { Err } from "../../../common/status/error"
 import { IUserSession } from "../../common/rpc/api/user"
 import Project from "../service/project"
-class UserController {
+class ProjectController {
     @DHttpApi(projectApi.routes.basic)
     async projectBasicInfo(@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof projectApi.routes.basic.res>{
         let obj=await Project.getItemById(projectId);
@@ -14,4 +14,4 @@ class UserController {
     }
 
 }
-export default new UserController
+export default new ProjectController

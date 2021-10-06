@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "common":"tsc -p ./common",
+    "common": "tsc -p ./common",
     "gateway": "tsc -p ./gateway",
     "user": "tsc -p ./user",
     "cooperation": "tsc -p ./cooperation"
   },
-  "reset":true,
+  "reset": true,
   "author": "",
   "license": "ISC",
   "dependencies": {

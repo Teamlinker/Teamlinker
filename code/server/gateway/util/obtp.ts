@@ -30,5 +30,23 @@ export namespace OBTPConfig {
                 permission:[Permission_Types.Project.READ]
             }
         }
+        export const Group_Role=<{
+            [param:string]:{
+                name:string,
+                description:"",
+                permission:Permission_Types.Group[]
+            }
+        }>{
+            admin:{
+                name:"admin",
+                description:"",
+                permission:getAllPermissions(Permission_Types.Group)
+            },
+            user:{
+                name:"user",
+                description:"",
+                permission:[Permission_Types.Group.READ]
+            }
+        }
     }
 }
