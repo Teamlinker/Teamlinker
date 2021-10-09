@@ -83,3 +83,5 @@ dist/
 package-lock.json
 .idea/
 .vscode/
+
+code/client/web_admin/vue-element-admin/node_modules/
