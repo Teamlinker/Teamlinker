@@ -9,7 +9,9 @@ export interface ICommon_Model_Field_Config_Value {
 }
 export const Table_Field_Config_Value="field_config_value"
 
-export class FieldConfigValueModel extends BaseModel {
+class FieldConfigValueModel extends BaseModel {
   table=Table_Field_Config_Value
   model=<ICommon_Model_Field_Config_Value>{}
 }
+
+export let fieldConfigValueModel=new FieldConfigValueModel

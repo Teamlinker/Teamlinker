@@ -1,8 +1,7 @@
-import { IServer_GateWay_Config } from './../types/config';
+import { REDIS_GATEWAY } from "../../common/cache/keys/gateway";
 import { getRedisInstance, Redis } from '../../common/cache/redis';
-
 import Nacos, { getNacosInstance } from '../../common/nacos/nacos';
-import {REDIS_GATEWAY} from "../../common/cache/keys/gateway"
+
 export class CacheService {
     private redis:InstanceType<typeof Redis>
     private timer:NodeJS.Timeout

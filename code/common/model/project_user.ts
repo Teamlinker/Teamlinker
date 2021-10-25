@@ -10,7 +10,9 @@ export interface ICommon_Model_Project_User {
 export const Table_Project_User="project_user"
 
 
-export class ProjectUserModel extends BaseModel {
+class ProjectUserModel extends BaseModel {
   table=Table_Project_User
   model=<ICommon_Model_Project_User>{}
 }
+
+export let projectUserModel=new ProjectUserModel

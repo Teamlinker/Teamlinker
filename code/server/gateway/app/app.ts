@@ -1,27 +1,27 @@
-import { PermissionProjectRead } from '../../common/permission/project/relation';
-import * as Koa from "koa"
+import * as http from "http";
+import * as Koa from "koa";
 import * as body from 'koa-bodyparser';
-import * as http from "http"
-import userRpcApi from '../rpc/user';
-import Application from "../../common/app/app"
-import { getNacosInstance } from "../../common/nacos/nacos";
-import { CacheService } from './../cache/service';
-import {generateHttpErrorResponse, generateHttpOkResponse} from "../../common/util/http"
-import * as userApi from "../../../common/routes/user"
-import * as projectApi from "../../../common/routes/project"
-import { ICommon_HttpApi } from "../../../common/routes/types";
-import {  EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
-import { parseFormData } from "../util/util";
 import { PassThrough } from "stream";
-import { proxyRequest } from "../../common/rpc/rpc";
+import { Permission_Base } from '../../../common/permission/permission';
+import * as projectApi from "../../../common/routes/project";
+import * as teamApi from "../../../common/routes/team";
+import { ICommon_HttpApi } from "../../../common/routes/types";
+import * as userApi from "../../../common/routes/user";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
-import { initSystem } from "../util/util";
-import {getComponent} from "../../common/decorate/component"
-import { Permission_Base } from '../../../common/permission/permission';
+import Application from "../../common/app/app";
+import { getComponent } from "../../common/decorate/component";
+import { getNacosInstance } from "../../common/nacos/nacos";
 import { processPermission } from '../../common/permission/base';
+import { PermissionProjectRead } from '../../common/permission/project/relation';
+import { proxyRequest } from "../../common/rpc/rpc";
+import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
 import { EServer_Common_User_Type } from '../../common/types/user';
-var apis:ICommon_HttpApi[]=[userApi,projectApi];
+import { generateHttpErrorResponse, generateHttpOkResponse } from "../../common/util/http";
+import userRpcApi from '../rpc/user';
+import { parseFormData } from "../util/util";
+import { CacheService } from './../cache/service';
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi];
 var app = new Koa();
 var pipe=function (from,to) :Promise<string>{
     return new Promise(function (resolve) {

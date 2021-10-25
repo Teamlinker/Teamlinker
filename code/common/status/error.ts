@@ -63,12 +63,12 @@ export namespace Err {
             msg:"project exists"
         },
     }
-    export let Group = {
-        groupNotFound:{
+    export let Team = {
+        teamNotFound:{
             code:4000,
             msg:"group not found"
         },
-        groupExists:{
+        teamExists:{
             code:4001,
             msg:"group exists"
         },

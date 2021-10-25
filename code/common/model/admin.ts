@@ -10,7 +10,9 @@ export interface ICommon_Model_Admin {
 }
 export const Table_Admin="admin"
 
-export class AdminModel extends BaseModel {
+class AdminModel extends BaseModel {
     table=Table_Admin
     model=<ICommon_Model_Admin>{}
 }
+
+export let adminModel=new AdminModel

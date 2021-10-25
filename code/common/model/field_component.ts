@@ -11,7 +11,9 @@ export interface ICommon_Model_Field_Component {
 }
 export const Table_Field_Component="field_component"
 
-export class FieldComponentModel extends BaseModel {
+class FieldComponentModel extends BaseModel {
     table=Table_Field_Component
     model=<ICommon_Model_Field_Component>{}
 }
+
+export let fieldComponentModel=new FieldComponentModel

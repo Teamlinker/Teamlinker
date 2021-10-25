@@ -10,7 +10,9 @@ export interface ICommon_Model_Permission {
 }
 export const Table_Permission="permission"
 
-export class PermissionModel extends BaseModel {
+class PermissionModel extends BaseModel {
   table=Table_Permission
   model=<ICommon_Model_Permission>{}
 }
+
+export let permissionModel=new PermissionModel

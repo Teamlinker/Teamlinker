@@ -1,12 +1,11 @@
+import * as jwt from "jsonwebtoken";
+import { Err } from '../../../common/status/error';
+import { REDIS_USER } from "../../common/cache/keys/user";
+import { Entity } from "../../common/entity/entity";
+import { getNacosInstance } from '../../common/nacos/nacos';
+import { adminMapper } from '../mapper/admin';
 import { ICommon_Model_Admin } from './../../../common/model/admin';
 import { EServer_Common_User_Type } from './../../common/types/user';
-import {Entity} from "../../common/entity/entity"
-import { adminMapper } from '../mapper/admin';
-import { Err } from '../../../common/status/error';
-import * as jwt from "jsonwebtoken"
-import { getNacosInstance } from '../../common/nacos/nacos';
-import {REDIS_USER} from "../../common/cache/keys/user"
-import admin from 'http/admin';
 export default class Admin extends Entity<ICommon_Model_Admin> {
     
     async create():Promise<ICommon_Model_Admin>{

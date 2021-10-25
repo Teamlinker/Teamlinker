@@ -1,7 +1,7 @@
-import { Table_Admin, ICommon_Model_Admin, AdminModel } from './../../../common/model/admin';
-import { getMysqlInstance } from "../../common/db/mysql"
-import {Err} from "../../../common/status/error"
-import {generateCreateSql, generateDeleteSql, generateQuerySql, generateSnowId, generateUpdateSql} from "../../common/util/sql"
+import { Err } from "../../../common/status/error";
+import { getMysqlInstance } from "../../common/db/mysql";
+import { generateCreateSql, generateDeleteSql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
+import { adminModel, ICommon_Model_Admin } from './../../../common/model/admin';
 export namespace adminMapper {
     
     export async function createUser(info:ICommon_Model_Admin):Promise<void> {
@@ -10,7 +10,7 @@ export namespace adminMapper {
         }
         info.id=await generateSnowId()
         var mysql=getMysqlInstance() 
-        await mysql.execute(generateCreateSql(new AdminModel,info))
+        await mysql.execute(generateCreateSql(adminModel,info))
     }
  
     export async function getUserById(id:string):Promise<ICommon_Model_Admin> {
@@ -18,7 +18,7 @@ export namespace adminMapper {
             throw  Err.User.userIdNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne<ICommon_Model_Admin>(generateQuerySql(new AdminModel,[],{id}))
+        let ret=await mysql.executeOne(generateQuerySql(adminModel,[],{id}))
         return ret
     }
 
@@ -29,7 +29,7 @@ export namespace adminMapper {
         var mysql=getMysqlInstance();
         let id=info.id;
         delete info.id,info.created_time,info.modified_time
-        await mysql.execute(generateUpdateSql(new AdminModel,info,{id}))
+        await mysql.execute(generateUpdateSql(adminModel,info,{id}))
     }
 
     export async function deleteUser(id):Promise<void> {
@@ -37,7 +37,7 @@ export namespace adminMapper {
             throw  Err.User.userIdNotExists
         }
         var mysql=getMysqlInstance();
-        await mysql.execute(generateDeleteSql(new AdminModel,{id}))
+        await mysql.execute(generateDeleteSql(adminModel,{id}))
     }
 
     export async function getUserByName(name:string):Promise<ICommon_Model_Admin> {
@@ -45,7 +45,7 @@ export namespace adminMapper {
             throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne<ICommon_Model_Admin>(generateQuerySql(new AdminModel,[],{name:name}))
+        let ret=await mysql.executeOne(generateQuerySql(adminModel,[],{name:name}))
         return ret
     }
 }

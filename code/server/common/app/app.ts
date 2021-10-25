@@ -1,8 +1,8 @@
-import { Rpc } from './../rpc/rpc';
-import { IServer_Common_Config_Base } from "../types/config";
-import { init } from "../util/init";
+import * as yargs from "yargs";
+import { initComponent } from "../decorate/component";
 import { getNacosInstance } from '../nacos/nacos';
-import * as yargs from "yargs"
+import { init } from "../util/init";
+import { Rpc } from './../rpc/rpc';
 export default abstract class Application{
     Application(){
 
@@ -30,6 +30,7 @@ export default abstract class Application{
         if(argv["nacosPassword"]) {
             process.env.nacosPassword=argv["nacosPassword"]
         }
+        initComponent()
         await init()
         if(getNacosInstance().rpcServer) {
             await Rpc.start(getNacosInstance().serverPort)
