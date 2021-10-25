@@ -1,11 +1,9 @@
-import { ICommon_Model_Group_Role } from './../model/group_role';
-import { ICommon_Model_Group } from './../model/group';
-import { Permission_Types } from '../permission/permission';
-import { ICommon_Model_Project } from './../model/project';
-import { ECommon_Services } from './../types';
-import {ECommon_HttpApi_Method, ICommon_HttpApi} from "./types"
+import { ICommon_Model_Team } from '../model/team';
+import { ICommon_Model_Team_Role } from '../model/team_role';
+import { ECommon_Services } from '../types';
+import { ECommon_HttpApi_Method } from "./types";
 const api={
-    baseUrl:"/group",
+    baseUrl:"/team",
     service:ECommon_Services.User,
     routes:{
         create:{
@@ -14,30 +12,30 @@ const api={
             req:<{
                 name:string                
             }>{},
-            res:<ICommon_Model_Group>{}
+            res:<ICommon_Model_Team>{}
         },
         info:{
             method:ECommon_HttpApi_Method.GET,
             path:"/item",
             req:<{
-                groupId:string                
+                teamId:string                
             }>{},
-            res:<ICommon_Model_Group>{}
+            res:<ICommon_Model_Team>{}
         },
         update:{
             method:ECommon_HttpApi_Method.PUT,
             path:"/item",
             req:<{
-                groupId:string,
+                teamId:string,
                 name:string                
             }>{},
-            res:<ICommon_Model_Group>{}
+            res:<ICommon_Model_Team>{}
         },
         remove:{
             method:ECommon_HttpApi_Method.DELETE,
             path:"/item",
             req:<{
-                groupId:string                
+                teamId:string                
             }>{},
             res:{}
         },
@@ -45,20 +43,20 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/members",
             req:<{
-                groupId:string             
+                teamId:string             
             }>{},
             res:<{
                 id:string,
                 name:string,
                 photo:string,
-                role:ICommon_Model_Group_Role
+                role:Omit<ICommon_Model_Team_Role,"group_id">
             }[]>{}
         },
         addMember:{
             method:ECommon_HttpApi_Method.POST,
             path:"/add_member",
             req:<{
-                groupId:string,
+                teamId:string,
                 userId:string                
             }>{},
             res:{}
@@ -67,7 +65,7 @@ const api={
             method:ECommon_HttpApi_Method.DELETE,
             path:"/remove_member",
             req:<{
-                groupId:string,
+                teamId:string,
                 userId:string                
             }>{},
             res:{}
@@ -76,7 +74,7 @@ const api={
             method:ECommon_HttpApi_Method.PUT,
             path:"/role",
             req:<{
-                groupId:string,
+                teamId:string,
                 userId:string,
                 role:string             
             }>{},
@@ -86,9 +84,9 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/roles",
             req:<{
-                groupId:string           
+                teamId:string           
             }>{},
-            res:<ICommon_Model_Group_Role[]>{}
+            res:<ICommon_Model_Team_Role[]>{}
         }
     }
 }

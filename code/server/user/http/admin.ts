@@ -1,9 +1,11 @@
+import * as userApi from "../../../common/routes/user";
+import { Err } from "../../../common/status/error";
+import { DComponent } from "../../common/decorate/component";
+import HttpContext from "../../common/http/context";
+import { DHttpApi, DHttpContext, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import AdminService from "../service/admin";
 import { IUserSession } from './../../common/rpc/api/user';
-import { DHttpApi, DHttpContext, DHttpReqParam, DHttpReqParamFile,DHttpContent, DHttpReqParamRequired, DHttpUser } from "../../common/http/http"
-import * as userApi from "../../../common/routes/user"
-import HttpContext from "../../common/http/context"
-import AdminService from "../service/admin"
-import { Err } from "../../../common/status/error"
+@DComponent
 class AdminController {
     @DHttpApi(userApi.routes.loginAdmin)
     async login(@DHttpReqParamRequired("name") username:string,@DHttpReqParamRequired("password") password:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.loginAdmin.res>{
@@ -31,4 +33,3 @@ class AdminController {
         await user.stopSession()
     }
 }
-export default new AdminController

@@ -12,7 +12,9 @@ export interface ICommon_Model_Project {
 }
 export const Table_Project="project"
 
-export class ProjectModel extends BaseModel {
+class ProjectModel extends BaseModel {
   table=Table_Project
   model=<ICommon_Model_Project>{}
 }
+
+export let projectModel=new ProjectModel

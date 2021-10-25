@@ -4,6 +4,8 @@ import * as userApi from "../../../common/routes/user"
 import HttpContext from "../../common/http/context"
 import UserService from "../service/user"
 import { Err } from "../../../common/status/error"
+import { DComponent } from '../../common/decorate/component';
+@DComponent
 class UserController {
     @DHttpApi(userApi.routes.create)
     async create(@DHttpContent content:typeof userApi.routes.create.req,@DHttpUser userInfo:IUserSession):Promise<typeof userApi.routes.create.res>{
@@ -81,4 +83,3 @@ class UserController {
         await user.delete()
     }
 }
-export default new UserController

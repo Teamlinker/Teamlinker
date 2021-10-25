@@ -16,7 +16,9 @@ export interface ICommon_Model_User {
 }
 export const Table_User="user"
 
-export class UserModel extends BaseModel {
+class UserModel extends BaseModel {
   table=Table_User
   model=<ICommon_Model_User>{}
 }
+
+export  let userModel=new UserModel

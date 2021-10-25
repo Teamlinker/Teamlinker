@@ -1,7 +1,7 @@
 import { ICommon_Model_Admin } from './../model/admin';
 import { ICommon_Model_User } from './../model/user';
 import { ECommon_Services } from './../types';
-import {ECommon_HttpApi_Method, ICommon_HttpApi} from "./types"
+import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/user",
     service:ECommon_Services.User,

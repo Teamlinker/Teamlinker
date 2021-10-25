@@ -1,6 +1,6 @@
-import { Table_Group_User } from './../../../common/model/group_user';
-import { Table_Group_Role } from './../../../common/model/group_role';
-import { Table_Group } from './../../../common/model/group';
+import { Table_Team_User } from './../../../common/model/team_user';
+import { Table_Team_Role } from './../../../common/model/team_role';
+import { Table_Team } from './../../../common/model/team';
 import { Table_Project_User } from './../../../common/model/project_user';
 import { Table_User } from './../../../common/model/user';
 import { Table_Role_Permission } from './../../../common/model/role_permission';
@@ -62,9 +62,9 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_User}`) 
     await mysql.execute(`delete from ${Table_Project}`) 
     await mysql.execute(`delete from ${Table_Project_User}`) 
-    await mysql.execute(`delete from ${Table_Group_Role}`)
-    await mysql.execute(`delete from ${Table_Group}`)  
-    await mysql.execute(`delete from ${Table_Group_User}`)
+    await mysql.execute(`delete from ${Table_Team_Role}`)
+    await mysql.execute(`delete from ${Table_Team}`)  
+    await mysql.execute(`delete from ${Table_Team_User}`)
 }
 
 export async function initSystem() {
@@ -82,7 +82,7 @@ export async function initSystem() {
         await mysql.execute(`insert into ${Table_Admin} (id,name,password) values ('${adminId}','teamlinker','teamlinker')`)
         await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${userId}','sx','sx')`)
         await mysql.execute(`insert into ${Table_Project} (id,name,keyword,created_by) values ('${projectId}','test','test','${userId}')`)
-        await mysql.execute(`insert into ${Table_Group} (id,name,created_by) values ('${groupId}','test_group','${userId}')`)
+        await mysql.execute(`insert into ${Table_Team} (id,name,created_by) values ('${groupId}','test_group','${userId}')`)
         for(let key in Permission_Types) {
             let value=Permission_Types[key]
             let type=key
@@ -124,13 +124,13 @@ export async function initSystem() {
             }
             let name=obj.name
             let description=obj.description
-            await mysql.execute(`insert into ${Table_Group_Role} (id,name,description) values ('${groupRoleId}','${name}','${description}')`)
+            await mysql.execute(`insert into ${Table_Team_Role} (id,name,description) values ('${groupRoleId}','${name}','${description}')`)
             for(let o of obj.permission) {
                 let id=await generateSnowId()
                 await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${groupRoleId}','${objPermission[o.value]}')`)
             }
         }
-        await mysql.execute(`insert into ${Table_Group_User} (id,role,group_id,user_id) values ('${await generateSnowId()}','${groupRoleUserId}','${groupId}','${userId}')`)
+        await mysql.execute(`insert into ${Table_Team_User} (id,role,group_id,user_id) values ('${await generateSnowId()}','${groupRoleUserId}','${groupId}','${userId}')`)
     }
     console.log("init finish")
 }

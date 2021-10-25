@@ -1,7 +1,6 @@
 import * as log from "log4js"
-import * as path from "path"
 import * as os from "os"
-import * as fs from "fs"
+import * as path from "path"
 export class Log {
     constructor() {
         let filePath=path.resolve(os.homedir(),`teamlinker-log/${process.env.nacosNamespace}`,`teamlinker-${process.env.nacosName}.log`)

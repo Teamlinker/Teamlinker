@@ -1,10 +1,10 @@
 
+import * as mysql from "mysql2";
+import { Pool as PromisePool } from "mysql2/promise";
+import "reflect-metadata";
+import { Err } from '../../../common/status/error';
 import { IServer_Common_Config_Mysql } from './../types/config';
 
-import "reflect-metadata"
-import * as mysql from "mysql2"
-import {Pool as PromisePool} from "mysql2/promise"
-import { Err } from '../../../common/status/error';
 var g_mysqlConnection:InstanceType<typeof Mysql>
 export function getMysqlInstance(){
     return g_mysqlConnection;
@@ -30,12 +30,40 @@ export default class Mysql {
     }
     async executeOne<T>(sqlText:string|{
         value:string,
-        type:T
+        type:T,
+        aggregation?:{
+            [key:string]:string
+        }
     }):Promise<T> {
         try{
             let [rows]=await this.sql.query(typeof(sqlText)=="string"?sqlText:sqlText.value);
             if((rows as any[]).length>0){
-                return rows[0]
+                if(typeof(sqlText)=="string" || !sqlText.aggregation)
+                {
+                    return rows[0]
+                } else {
+                    let aggregation=sqlText.aggregation
+                    let item=rows[0]
+                    let ret={}
+                    for(let key in item) {
+                        if(key.startsWith("_")) {
+                            let table=key.substring(1,key.indexOf("__"))
+                            if(table in aggregation) {
+                                if(aggregation[table]) {
+                                    if(!(aggregation[table] in ret)){
+                                        ret[aggregation[table]]={}
+                                    }
+                                    ret[aggregation[table]][key.substr(table.length+3)]=item[key]
+                                } else {
+                                    ret[key.substr(table.length+3)]=item[key]
+                                }
+                            }
+                        } else {
+                            ret[key]=item[key]
+                        }
+                    }
+                    return ret as any;
+                }
             } else {
                 return null;
             }
@@ -47,12 +75,41 @@ export default class Mysql {
     }
     async execute<T>(sqlText:string|{
         value:string,
-        type:T
+        type:T,
+        aggregation?:{
+            [key:string]:string
+        }
     }):Promise<T[]> {
         try{
             let [rows]=await this.sql.query(typeof(sqlText)=="string"?sqlText:sqlText.value);
-            return <T[]><unknown>rows
-
+            if(typeof(sqlText)=="string" || !sqlText.aggregation)
+            {
+                return <T[]><unknown>rows
+            } else {
+                let aggregation=sqlText.aggregation
+                rows=(<T[]><unknown>rows).map(item=>{
+                    let ret={}
+                    for(let key in item) {
+                        if(key.startsWith("_")) {
+                            let table=key.substring(1,key.indexOf("__"))
+                            if(table in aggregation) {
+                                if(aggregation[table]) {
+                                    if(!(aggregation[table] in ret)){
+                                        ret[aggregation[table]]={}
+                                    }
+                                    ret[aggregation[table]][key.substr(table.length+3)]=item[key]
+                                } else {
+                                    ret[key.substr(table.length+3)]=item[key]
+                                }
+                            }
+                        } else {
+                            ret[key as any]=item[key]
+                        }
+                    }
+                    return ret as any;
+                })
+                return <T[]><unknown>rows
+            }
         } catch(err){
             console.error("mysql error:",err,sqlText)
             throw Err.Common.mysqlError

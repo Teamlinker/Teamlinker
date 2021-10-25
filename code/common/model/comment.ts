@@ -11,7 +11,9 @@ export interface ICommon_Model_Comment {
 }
 export const Table_Comment="comment"
 
-export class CommentModel extends BaseModel {
+class CommentModel extends BaseModel {
     table=Table_Comment
     model=<ICommon_Model_Comment>{}
 }
+
+export let commentModel=new CommentModel

@@ -20,3 +20,11 @@ export function getComponent<T> (name:string):T {
         return null
     }
 }
+
+export function initComponent(){
+    for(let name in g_Component) {
+        if(!g_ComponentInstance[name]) {
+            g_ComponentInstance[name]=new g_Component[name]()
+        }
+    }
+}

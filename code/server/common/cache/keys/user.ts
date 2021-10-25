@@ -1,10 +1,9 @@
+import { ECommon_Services } from '../../../../common/types';
+import { cacheRedisType } from "../../types/cache";
+import StringUtil from "../../util/string";
 import { ICommon_Model_Admin } from './../../../../common/model/admin';
 import { ICommon_Model_User } from './../../../../common/model/user';
-import { ECommon_Services } from '../../../../common/types';
-import { IServer_Common_Nacos_Instance } from './../../types/nacos';
 import { RedisStringKey } from './base';
-import {cacheRedisType} from "../../types/cache"
-import StringUtil from "../../util/string"
 export namespace REDIS_USER {
     let USER_TOKEN_KEY=`${ECommon_Services.User}:user:{0}:token`
     let USER_INFO_KEY=`${ECommon_Services.User}:user:{0}:info`
