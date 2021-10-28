@@ -6,7 +6,7 @@ import { Err } from "../../../common/status/error";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
 export namespace teamMapper {
-    export async function checkGroup(name:string):Promise<boolean> {
+    export async function checkTeam(name:string):Promise<boolean> {
         if(!name) {
             throw Err.Common.paramError
         }
@@ -16,11 +16,11 @@ export namespace teamMapper {
     }
 
     
-    export async function createGroup(info:ICommon_Model_Team):Promise<void> {
+    export async function createTeam(info:ICommon_Model_Team):Promise<void> {
         if(!info || !info.name  ||info.id){
             throw  Err.Common.paramError
         }
-        let isExists=await checkGroup(info.name);
+        let isExists=await checkTeam(info.name);
         if(isExists) {
             throw Err.Team.teamExists
         }
@@ -29,7 +29,7 @@ export namespace teamMapper {
         await mysql.execute(generateCreateSql(teamModel,info))
     }
  
-    export async function getGroupById(id:string):Promise<ICommon_Model_Team> {
+    export async function getTeamById(id:string):Promise<ICommon_Model_Team> {
         if(!id) {
             throw  Err.Team.teamNotFound
         }
@@ -38,7 +38,7 @@ export namespace teamMapper {
         return ret
     }
 
-    export async function updateGroup(info:ICommon_Model_Team):Promise<void> {
+    export async function updateTeam(info:ICommon_Model_Team):Promise<void> {
         if(!info.id) {
             throw  Err.Team.teamNotFound
         }
@@ -48,7 +48,7 @@ export namespace teamMapper {
         await mysql.execute(generateUpdateSql(teamModel,info,{id}))
     }
 
-    export async function deleteGroup(id:string):Promise<void> {
+    export async function deleteTeam(id:string):Promise<void> {
         if(!id) {
             throw  Err.Team.teamNotFound
         }
@@ -62,7 +62,7 @@ export namespace teamMapper {
         }
         var mysql=getMysqlInstance();
         let ret=await mysql.execute(generateQuerySql(teamRoleModel,null,{
-            group_id:{
+            team_id:{
                 value:[teamId,null],
                 exp:"in"
             }
@@ -74,7 +74,7 @@ export namespace teamMapper {
         id:string,
         name:string,
         photo:string,
-        role:Omit<ICommon_Model_Team_Role,"group_id">
+        role:Omit<ICommon_Model_Team_Role,"team_id">
     }[]> {
         if(!teamId) {
             throw  Err.Team.teamNotFound
@@ -106,7 +106,7 @@ export namespace teamMapper {
                 }
             }
         },{
-            group_id:{
+            team_id:{
                 value:teamId,
                 model:teamUserModel
             }

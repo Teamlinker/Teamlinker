@@ -4,7 +4,7 @@ export interface ICommon_Model_Team_Role {
     id :string,
   name :string,
   description:string,
-  group_id:string
+  team_id:string
 }
 export const Table_Team_Role="team_role"
 

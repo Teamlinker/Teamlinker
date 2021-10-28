@@ -13,7 +13,7 @@ export default class Team extends Entity<ICommon_Model_Team> {
         } else if(this.item.id) {
             throw  Err.Team.teamExists;
         }
-        await teamMapper.createGroup(this.item)
+        await teamMapper.createTeam(this.item)
         await this.loadItem();
         return this.item;
     }
@@ -21,29 +21,29 @@ export default class Team extends Entity<ICommon_Model_Team> {
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
         }
-        await teamMapper.updateGroup(this.item)
+        await teamMapper.updateTeam(this.item)
         return this.item;
     }
     async delete(){
-        await teamMapper.deleteGroup(this.item.id);
+        await teamMapper.deleteTeam(this.item.id);
         emitServiceEvent(EServer_Common_Event_Types.Team.DELETE,this.item.id);
     }
     async loadItem():Promise<ICommon_Model_Team> {
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
         }
-        let obj = await teamMapper.getGroupById(this.item.id);
+        let obj = await teamMapper.getTeamById(this.item.id);
         this.item=obj;
         return this.item;
     }
     static async getItemById(id:string,reload:boolean=false):Promise<InstanceType<typeof Team>>{
-        let obj = await teamMapper.getGroupById(id);
+        let obj = await teamMapper.getTeamById(id);
         if (!obj) {
             return null
         }
-        let group = new Team;
-        group.setItem(obj);
-        return group;
+        let team = new Team;
+        team.setItem(obj);
+        return team;
     }
 
     async getRoles():Promise<ICommon_Model_Team_Role[]>{
@@ -58,7 +58,7 @@ export default class Team extends Entity<ICommon_Model_Team> {
         id:string,
         name:string,
         photo:string,
-        role:Omit<ICommon_Model_Team_Role,"group_id">
+        role:Omit<ICommon_Model_Team_Role,"team_id">
     }[]>{
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;

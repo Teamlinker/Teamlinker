@@ -9,63 +9,63 @@ import TeamService from "../service/team";
 class TeamController {
     @DHttpApi(teamApi.routes.create)
     async create(@DHttpReqParamRequired("name") name:string,@DHttpUser user:IUserSession):Promise<typeof teamApi.routes.create.res>{
-        let group=new TeamService
-        group.assignItem({
+        let team=new TeamService
+        team.assignItem({
             name,
             created_by:user.type==EServer_Common_User_Type.USER?user.userId:null
         });
-        let obj=await group.create()
+        let obj=await team.create()
         return obj
     }
 
     @DHttpApi(teamApi.routes.info)
     async info(@DHttpReqParamRequired("teamId") teamId:string):Promise<typeof teamApi.routes.create.res> {
-        let group = await TeamService.getItemById(teamId)
-        if(!group) {
+        let team = await TeamService.getItemById(teamId)
+        if(!team) {
             throw Err.Team.teamNotFound
         }
-        return group.getItem()
+        return team.getItem()
     }
 
     @DHttpApi(teamApi.routes.update)
     async update(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("name") name:string):Promise<typeof teamApi.routes.create.res> {
-        let group = await TeamService.getItemById(teamId)
-        if(!group) {
+        let team = await TeamService.getItemById(teamId)
+        if(!team) {
             throw Err.Team.teamNotFound
         }
-        group.assignItem({
+        team.assignItem({
             name
         })
-        let ret=await group.update()
+        let ret=await team.update()
         return ret
     }
 
     @DHttpApi(teamApi.routes.remove)
     async remove(@DHttpReqParamRequired("teamId") teamId:string) {
-        let group=await TeamService.getItemById(teamId)
-        if(!group) {
+        let team=await TeamService.getItemById(teamId)
+        if(!team) {
             throw Err.Team.teamNotFound
         }
-        await group.delete()
+        await team.delete()
     }
     
     @DHttpApi(teamApi.routes.roles)
     async roles(@DHttpReqParamRequired("teamId") teamId:string) :Promise<typeof teamApi.routes.roles.res> {
-        let group=await TeamService.getItemById(teamId)
-        if(!group) {
+        let team=await TeamService.getItemById(teamId)
+        if(!team) {
             throw Err.Team.teamNotFound
         }
-        let ret=await group.getRoles()
+        let ret=await team.getRoles()
         return ret;
     }
 
     @DHttpApi(teamApi.routes.members)
     async members(@DHttpReqParamRequired("teamId") teamId:string) :Promise<typeof teamApi.routes.members.res> {
-        let group=await TeamService.getItemById(teamId)
-        if(!group) {
+        let team=await TeamService.getItemById(teamId)
+        if(!team) {
             throw Err.Team.teamNotFound
         }
-        let ret=await group.members()
+        let ret=await team.members()
         return ret;
     }
 

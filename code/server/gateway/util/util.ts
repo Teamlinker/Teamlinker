@@ -115,7 +115,7 @@ export async function initSystem() {
         }
         await mysql.execute(`insert into ${Table_Project_User} (id,role,project_id,user_id) values ('${await generateSnowId()}','${projectRoleUserId}','${projectId}','${userId}')`)
         await mysql.execute(`insert into ${Table_Version} (version) values ('${getNacosInstance().version}')`)
-        let objGroupRole=OBTPConfig.Role.Group_Role,groupRoleUserId;
+        let objGroupRole=OBTPConfig.Role.Team_Role,groupRoleUserId;
         for(let key in objGroupRole) {
             let obj=objGroupRole[key]
             let groupRoleId=await generateSnowId()
@@ -130,7 +130,7 @@ export async function initSystem() {
                 await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${groupRoleId}','${objPermission[o.value]}')`)
             }
         }
-        await mysql.execute(`insert into ${Table_Team_User} (id,role,group_id,user_id) values ('${await generateSnowId()}','${groupRoleUserId}','${groupId}','${userId}')`)
+        await mysql.execute(`insert into ${Table_Team_User} (id,role,team_id,user_id) values ('${await generateSnowId()}','${groupRoleUserId}','${groupId}','${userId}')`)
     }
     console.log("init finish")
 }

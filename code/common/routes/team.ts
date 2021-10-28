@@ -49,7 +49,7 @@ const api={
                 id:string,
                 name:string,
                 photo:string,
-                role:Omit<ICommon_Model_Team_Role,"group_id">
+                role:Omit<ICommon_Model_Team_Role,"team_id">
             }[]>{}
         },
         addMember:{

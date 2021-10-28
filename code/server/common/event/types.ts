@@ -7,6 +7,6 @@ export namespace EServer_Common_Event_Types {
         DELETE="delete project"  //projectId:string
     }
     export enum Team {
-        DELETE="delete group" //teamId:string
+        DELETE="delete team" //teamId:string
     }
 }
