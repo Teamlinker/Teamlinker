@@ -2,7 +2,7 @@ import { BaseModel } from "./base"
 
 export interface ICommon_Model_Team_User {
     user_id :string,
-  group_id :string,
+  team_id :string,
   role:string,
   id :string ,
 }

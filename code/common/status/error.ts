@@ -66,11 +66,11 @@ export namespace Err {
     export let Team = {
         teamNotFound:{
             code:4000,
-            msg:"group not found"
+            msg:"team not found"
         },
         teamExists:{
             code:4001,
-            msg:"group exists"
+            msg:"team exists"
         },
     }
 }

@@ -12,11 +12,11 @@ export namespace Permission_Types {
         static readonly DELETE =new Project("DELETE","delete project")
         static readonly CREATE =new Project("CREATE","create project")
     }
-    export class Group extends Permission_Base {
-        static readonly READ =new Group("READ","read group")
-        static readonly EDIT =new Group("EDIT","edit group")
-        static readonly DELETE =new Group("DELETE","delete group")
-        static readonly CREATE =new Group("CREATE","create group")
-        static readonly MEMBER =new Group("MEMBER","modify group member")
+    export class Team extends Permission_Base {
+        static readonly READ =new Team("READ","read team")
+        static readonly EDIT =new Team("EDIT","edit team")
+        static readonly DELETE =new Team("DELETE","delete team")
+        static readonly CREATE =new Team("CREATE","create team")
+        static readonly MEMBER =new Team("MEMBER","modify team member")
     }
 }
