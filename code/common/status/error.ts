@@ -72,6 +72,24 @@ export namespace Err {
             code:4001,
             msg:"team exists"
         },
+        teamMemberExists:{
+            code:4002,
+            msg:"team member exists"
+        },
+        teamMemeberNotExists:{
+            code:4003,
+            msg:"team member not exists"
+        }
+    }
+    export let Role ={
+        roleNotFound:{
+            code:5000,
+            msg:"role not found"
+        },
+        roleNotExists:{
+            code:5001,
+            msg:"role not exists"
+        }
     }
 }
 

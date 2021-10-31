@@ -1,7 +1,6 @@
 import { ECommon_Services } from '../../../../common/types';
 import { cacheRedisType } from "../../types/cache";
 import StringUtil from "../../util/string";
-import { ICommon_Model_Admin } from './../../../../common/model/admin';
 import { ICommon_Model_User } from './../../../../common/model/user';
 import { RedisStringKey } from './base';
 export namespace REDIS_USER {
@@ -11,7 +10,6 @@ export namespace REDIS_USER {
     export function token(userId:string)
     {
         let obj=new RedisStringKey(StringUtil.format(USER_TOKEN_KEY,userId),cacheRedisType<string>().String,3600)
-        obj.setTTL
         return obj
     }
     export function info(userId:string)
@@ -21,7 +19,7 @@ export namespace REDIS_USER {
     }
     export function adminInfo(userId:string)
     {
-        let obj=new RedisStringKey(StringUtil.format(ADMIN_INFO_KEY,userId),cacheRedisType<ICommon_Model_Admin>().Object,3600)
+        let obj=new RedisStringKey(StringUtil.format(ADMIN_INFO_KEY,userId),cacheRedisType<ICommon_Model_User>().Object,3600)
         return obj
     }
 }

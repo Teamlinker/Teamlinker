@@ -69,4 +69,34 @@ class TeamController {
         return ret;
     }
 
+    @DHttpApi(teamApi.routes.addMember)
+    async addMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("userId") userId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.addMember.res> {
+        let team=await TeamService.getItemById(teamId)
+        if(!team) {
+            throw Err.Team.teamNotFound
+        }
+        await team.addMemeber(userId,roleId)
+        return;
+    }
+
+    @DHttpApi(teamApi.routes.removeMember)
+    async removeMemeber(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("userId") userId:string) :Promise<typeof teamApi.routes.removeMember.res> {
+        let team=await TeamService.getItemById(teamId)
+        if(!team) {
+            throw Err.Team.teamNotFound
+        }
+        await team.removeMemeber(userId)
+        return;
+    }
+
+    @DHttpApi(teamApi.routes.changeRole)
+    async changeRole(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("userId") userId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.changeRole.res> {
+        let team=await TeamService.getItemById(teamId)
+        if(!team) {
+            throw Err.Team.teamNotFound
+        }
+        await team.changeRole(userId,roleId)
+        return;
+    }
+
 }

@@ -67,4 +67,25 @@ export default class Team extends Entity<ICommon_Model_Team> {
         return ret;
     }
 
+    async addMemeber(userId:string,roleId:string){
+        if(!this.item || !this.item.id) {
+            throw  Err.Team.teamNotFound;
+        }
+        await teamMapper.addMember(this.item.id,userId,roleId)
+    }
+
+    async removeMemeber(userId:string) {
+        if(!this.item || !this.item.id) {
+            throw  Err.Team.teamNotFound;
+        }
+        await teamMapper.removeMember(this.item.id,userId)
+    }
+
+    async changeRole(userId:string,roleId:string){
+        if(!this.item || !this.item.id) {
+            throw  Err.Team.teamNotFound;
+        }
+        await teamMapper.changeRole(this.item.id,userId,roleId)
+    }
+
 }

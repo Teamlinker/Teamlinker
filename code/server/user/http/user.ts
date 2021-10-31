@@ -82,4 +82,13 @@ class UserController {
         }
         await user.delete()
     }
+
+    @DHttpApi(userApi.routes.active)
+    async active(@DHttpUser userInfo:IUserSession,@DHttpReqParamRequired("active") active:number) {
+        let user=await UserService.getItemById(userInfo.userId)
+        if(!user) {
+            throw Err.User.userNotFound
+        }
+        await user.active(active);
+    }
 }
