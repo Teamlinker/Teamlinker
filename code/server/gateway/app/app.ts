@@ -74,6 +74,17 @@ export default class GateWay extends Application {
             }
         }
         app.use(async (ctx, next) => {
+            ctx.set("Access-Control-Allow-Origin", ctx.get("origin"));
+            ctx.set("Access-Control-Allow-Headers", "X-Requested-With");
+            ctx.set("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE");
+            ctx.set("Access-Control-Allow-Credentials", "true");
+            if (ctx.get["access-control-request-headers"]) {
+                ctx.set("Access-Control-Allow-Headers", ctx.get("access-control-request-headers"))
+            }
+            ctx.set("Access-Control-Expose-Headers", "connection,content-length,date,x-powered-by,content-encoding,server,etag,accept-ranges,allow,content-language,set-cookie,doclever-request");
+            await next();
+        })
+        app.use(async (ctx, next) => {
             if (ctx.headers['content-type'] && ctx.headers['content-type'].split(';')[0] === 'multipart/form-data') {
                 const maxLength = 1024 * 1024 * 5;
                 if (ctx.headers && ctx.headers['content-length'] && Number(ctx.headers['content-length']) > maxLength) {
