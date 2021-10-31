@@ -1,9 +1,8 @@
 import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Project } from './../model/project';
 import { ICommon_Model_Project_Module } from './../model/project_module';
-import { ICommon_Model_User } from './../model/user';
 import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_Member } from './response';
+import { ECommon_Route_Res_Project_Member_Type, ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_Member } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/project",
@@ -145,6 +144,36 @@ const api={
                 data:ICommon_Route_Res_Project_Member[]
             }>{}
         },
+        addMember:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/member/item",
+            req:<{
+                projectId:string,
+                memberId:string,
+                type:ECommon_Route_Res_Project_Member_Type,
+                roleId:string
+            }>{},
+            res:{}
+        },
+        editMember:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/member/item",
+            req:<{
+                projectId:string,
+                memberId:string,
+                roleId:string
+            }>{},
+            res:{}
+        },
+        removeMember:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/member/item",
+            req:<{
+                projectId:string,
+                memberId:string,
+            }>{},
+            res:{}
+        }
     }
 }
 export=api
