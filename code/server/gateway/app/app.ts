@@ -19,7 +19,7 @@ import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Commo
 import { EServer_Common_User_Type } from '../../common/types/user';
 import { generateHttpErrorResponse, generateHttpOkResponse } from "../../common/util/http";
 import userRpcApi from '../rpc/user';
-import { parseFormData } from "../util/util";
+import { initSystem, parseFormData } from "../util/util";
 import { CacheService } from './../cache/service';
 var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi];
 var app = new Koa();
@@ -45,7 +45,7 @@ export default class GateWay extends Application {
     override async config() {
         let cacheService=new CacheService()
         cacheService.start()
-        //await initSystem()
+        await initSystem()
         await this.initKoa();
     }
     async initKoa() {

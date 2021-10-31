@@ -117,8 +117,8 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
     let keys="",values=""
     for(let key in obj) {
         let value=obj[key]
-        keys+=key+","
-        values+=((value!==null && value!==undefined)?("'"+value+"'"):"")+","
+        keys+=(value!==null && value!==undefined)?(key+","):""
+        values+=(value!==null && value!==undefined)?("'"+value+"'"+","):""
     }
     if(keys[keys.length-1]==","){
         keys=keys.substring(0,keys.length-1);
@@ -155,7 +155,7 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
 
 export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
     [param in keyof T["model"]]?:string|number|Date
-},objExpr?:{
+},objExpr:{
     [param in keyof T["model"]]?:EXPRVALUE
 },exprMode?:"and"|"or"):{
     value:string,

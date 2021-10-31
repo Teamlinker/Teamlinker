@@ -57,7 +57,8 @@ const api={
             path:"/add_member",
             req:<{
                 teamId:string,
-                userId:string                
+                userId:string,
+                roleId:string                
             }>{},
             res:{}
         },
@@ -76,7 +77,7 @@ const api={
             req:<{
                 teamId:string,
                 userId:string,
-                role:string             
+                roleId:string             
             }>{},
             res:{}
         },

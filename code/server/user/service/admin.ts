@@ -4,11 +4,11 @@ import { REDIS_USER } from "../../common/cache/keys/user";
 import { Entity } from "../../common/entity/entity";
 import { getNacosInstance } from '../../common/nacos/nacos';
 import { adminMapper } from '../mapper/admin';
-import { ICommon_Model_Admin } from './../../../common/model/admin';
+import { ICommon_Model_User } from './../../../common/model/user';
 import { EServer_Common_User_Type } from './../../common/types/user';
-export default class Admin extends Entity<ICommon_Model_Admin> {
+export default class Admin extends Entity<ICommon_Model_User> {
     
-    async create():Promise<ICommon_Model_Admin>{
+    async create():Promise<ICommon_Model_User>{
         if(!this.item) {
             throw  Err.User.userNotFound;
         } else if(this.item.id) {
@@ -18,7 +18,7 @@ export default class Admin extends Entity<ICommon_Model_Admin> {
         await this.loadItem();
         return this.item;
     }
-    async update():Promise<ICommon_Model_Admin>{
+    async update():Promise<ICommon_Model_User>{
         if(!this.item || !this.item.id) {
             throw  Err.User.userNotFound;
         }
@@ -28,7 +28,7 @@ export default class Admin extends Entity<ICommon_Model_Admin> {
     async delete(){
         await adminMapper.deleteUser(this.item.id);
     }
-    async loadItem():Promise<ICommon_Model_Admin> {
+    async loadItem():Promise<ICommon_Model_User> {
         if(!this.item || !this.item.id) {
             throw  Err.User.userNotFound;
         }

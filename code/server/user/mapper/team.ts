@@ -102,7 +102,7 @@ export namespace teamMapper {
             expression:{
                 id:{
                     model:teamUserModel,
-                    filed:"role"
+                    filed:"role_id"
                 }
             }
         },{
@@ -113,5 +113,78 @@ export namespace teamMapper {
         })
         let ret=await mysql.execute(sql)
         return ret;
+    }
+
+    export async function addMember(teamId:string,userId:string,roleId:string) {
+        if(!teamId) {
+            throw  Err.Team.teamNotFound
+        } else if(!userId) {
+            throw Err.User.userIdNotExists
+        } else if(!roleId) {
+            throw Err.Role.roleNotFound
+        }
+        let mysql=getMysqlInstance()
+        let existsMemeber=await mysql.executeOne(generateQuerySql(teamUserModel,[],{
+            user_id:userId,
+            team_id:teamId
+        }))
+        if(existsMemeber) {
+            throw Err.Team.teamMemberExists
+        }
+        let existsRole=await mysql.executeOne(generateQuerySql(teamRoleModel,[],{
+            id:roleId
+        }))
+        if(!existsRole) {
+            throw Err.Role.roleNotExists
+        }
+        await mysql.execute(generateCreateSql(teamUserModel,{
+            user_id:userId,
+            team_id:teamId,
+            role_id:roleId,
+            id:await generateSnowId()
+        }))
+    }
+
+    export async function removeMember(teamId:string,userId:string) {
+        if(!teamId) {
+            throw  Err.Team.teamNotFound
+        } else if(!userId) {
+            throw Err.User.userIdNotExists
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(teamUserModel,{
+            team_id:teamId,
+            user_id:userId
+        }))
+    }
+
+    export async function changeRole(teamId:string,userId:string,roleId:string) {
+        if(!teamId) {
+            throw  Err.Team.teamNotFound
+        } else if(!userId) {
+            throw Err.User.userIdNotExists
+        } else if(!roleId) {
+            throw Err.Role.roleNotFound
+        }
+        let mysql=getMysqlInstance()
+        let existsMemeber=await mysql.executeOne(generateQuerySql(teamUserModel,[],{
+            user_id:userId,
+            team_id:teamId
+        }))
+        if(!existsMemeber) {
+            throw Err.Team.teamMemeberNotExists
+        }
+        let existsRole=await mysql.executeOne(generateQuerySql(teamRoleModel,[],{
+            id:roleId
+        }))
+        if(!existsRole) {
+            throw Err.Role.roleNotExists
+        }
+        await mysql.execute(generateUpdateSql(teamUserModel,{
+            user_id:userId,
+            team_id:teamId
+        },{
+            role_id:roleId
+        }))
     }
 }

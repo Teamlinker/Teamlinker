@@ -5,7 +5,7 @@ import { generateQuerySql } from '../../util/sql';
 import StringUtil from '../../util/string';
 import { DPermission, PermissionBase } from '../base';
 import { permissionModel } from './../../../../common/model/permission';
-import { projectUserModel } from './../../../../common/model/project_user';
+import { projectMemberModel } from './../../../../common/model/project_member';
 import { rolelPermissionModel } from './../../../../common/model/role_permission';
 
 export type IPermission_Project_CacheValue =string[]
@@ -16,15 +16,15 @@ export class PermissionProjectRead extends PermissionBase<IPermission_Project_Ca
     key="permission:user:{0}:project:{1}"
     async create({userId,projectId}):Promise<IPermission_Project_CacheValue> {
         let mysql=getMysqlInstance()
-        let objProject=await mysql.executeOne(generateQuerySql(projectUserModel,[],{
+        let objProject=await mysql.executeOne(generateQuerySql(projectMemberModel,[],{
             project_id:projectId,
-            user_id:userId
+            member_id:userId
         }))
         if(!objProject) {
             return null
         }  
         let arrRolePermission=await mysql.execute(generateQuerySql(rolelPermissionModel,[],{
-            role_id:objProject.role
+            role_id:objProject.role_id
         }))
         let arr:string[]=[]
         for(let obj of arrRolePermission) {

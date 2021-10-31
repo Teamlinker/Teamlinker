@@ -1,13 +1,44 @@
+import * as projectApi from "../../../common/routes/project";
+import { Err } from "../../../common/status/error";
+import { DHttpApi, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import { IUserSession } from "../../common/rpc/api/user";
+import projectService from "../service/project";
 
 
-import * as projectApi from "../../../common/routes/project"
-import { DHttpApi, DHttpReqParamRequired } from "../../common/http/http"
-import Project from "../service/project"
 class ProjectController {
     @DHttpApi(projectApi.routes.basic)
-    async projectBasicInfo(@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof projectApi.routes.basic.res>{
-        let obj=await Project.getItemById(projectId);
+    async projectInfo(@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof projectApi.routes.basic.res>{
+        let obj=await projectService.getItemById(projectId);
         return obj.getItem();
+    }
+
+    @DHttpApi(projectApi.routes.create)
+    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("image") image:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession):Promise<typeof projectApi.routes.create.res>{
+        let obj=new projectService()
+        obj.assignItem({
+            keyword:keyword,
+            name:name,
+            created_by:user.userId,
+            description:description,
+            image:image
+        })
+        let ret=await obj.create()
+        return ret
+    }
+
+    @DHttpApi(projectApi.routes.edit)
+    async editProject(@DHttpReqParam("name") name:string,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("image") image:string,@DHttpReqParam("description") description:string,@DHttpReqParam("projectId") projectId:string):Promise<typeof projectApi.routes.edit.res>{
+        let obj=await projectService.getItemById(projectId);
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
+        let item=obj.getItem()
+        item.name=name;
+        item.keyword=keyword
+        item.image=image
+        item.description=description
+        let ret=await obj.update()
+        return ret;
     }
 
 }
