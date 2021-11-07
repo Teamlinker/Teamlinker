@@ -4,9 +4,13 @@ import { teamUserModel } from '../../../common/model/team_user';
 import { userModel } from '../../../common/model/user';
 import { Err } from "../../../common/status/error";
 import { getMysqlInstance } from "../../common/db/mysql";
+import { Mapper } from '../../common/entity/mapper';
 import { generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
-export namespace teamMapper {
-    export async function checkTeam(name:string):Promise<boolean> {
+class TeamMapper extends Mapper<typeof teamModel> {
+    constructor(){
+        super(teamModel)
+    }
+    async checkTeam(name:string):Promise<boolean> {
         if(!name) {
             throw Err.Common.paramError
         }
@@ -15,48 +19,14 @@ export namespace teamMapper {
         return !!ret;
     }
 
-    
-    export async function createTeam(info:ICommon_Model_Team):Promise<void> {
-        if(!info || !info.name  ||info.id){
-            throw  Err.Common.paramError
-        }
-        let isExists=await checkTeam(info.name);
+    override async createConfig(info:ICommon_Model_Team) {
+        let isExists=await this.checkTeam(info.name);
         if(isExists) {
             throw Err.Team.teamExists
         }
-        info.id=await generateSnowId()
-        var mysql=getMysqlInstance() 
-        await mysql.execute(generateCreateSql(teamModel,info))
-    }
- 
-    export async function getTeamById(id:string):Promise<ICommon_Model_Team> {
-        if(!id) {
-            throw  Err.Team.teamNotFound
-        }
-        var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne(generateQuerySql(teamModel,[],{id}))
-        return ret
     }
 
-    export async function updateTeam(info:ICommon_Model_Team):Promise<void> {
-        if(!info.id) {
-            throw  Err.Team.teamNotFound
-        }
-        var mysql=getMysqlInstance();
-        let id=info.id;
-        delete info.id,info.created_time,info.modified_time
-        await mysql.execute(generateUpdateSql(teamModel,info,{id}))
-    }
-
-    export async function deleteTeam(id:string):Promise<void> {
-        if(!id) {
-            throw  Err.Team.teamNotFound
-        }
-        var mysql=getMysqlInstance();
-        await mysql.execute(generateDeleteSql(teamModel,{id}))
-    }
-
-    export async function getRoles(teamId:string):Promise<ICommon_Model_Team_Role[]> {
+    async getRoles(teamId:string):Promise<ICommon_Model_Team_Role[]> {
         if(!teamId) {
             throw  Err.Team.teamNotFound
         }
@@ -70,7 +40,7 @@ export namespace teamMapper {
         return ret
     }
 
-    export async function members(teamId:string):Promise<{
+    async members(teamId:string):Promise<{
         id:string,
         name:string,
         photo:string,
@@ -115,7 +85,7 @@ export namespace teamMapper {
         return ret;
     }
 
-    export async function addMember(teamId:string,userId:string,roleId:string) {
+    async addMember(teamId:string,userId:string,roleId:string) {
         if(!teamId) {
             throw  Err.Team.teamNotFound
         } else if(!userId) {
@@ -145,7 +115,7 @@ export namespace teamMapper {
         }))
     }
 
-    export async function removeMember(teamId:string,userId:string) {
+    async removeMember(teamId:string,userId:string) {
         if(!teamId) {
             throw  Err.Team.teamNotFound
         } else if(!userId) {
@@ -158,7 +128,7 @@ export namespace teamMapper {
         }))
     }
 
-    export async function changeRole(teamId:string,userId:string,roleId:string) {
+    async changeRole(teamId:string,userId:string,roleId:string) {
         if(!teamId) {
             throw  Err.Team.teamNotFound
         } else if(!userId) {
@@ -188,3 +158,5 @@ export namespace teamMapper {
         }))
     }
 }
+
+export let teamMapper=new TeamMapper()

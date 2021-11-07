@@ -20,3 +20,12 @@ export type ICommon_Route_Res_Project_Member = {
         name:string
     }
 }
+
+export type ICommon_RouteRes_Project_ListTag = {
+    totalPage:number,
+    page:number,
+    data:{
+        id:string,
+        name:string
+    }[]
+}
