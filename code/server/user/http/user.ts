@@ -1,10 +1,11 @@
-import { IUserSession } from './../../common/rpc/api/user';
-import { DHttpApi, DHttpContext, DHttpReqParam, DHttpReqParamFile,DHttpContent, DHttpReqParamRequired, DHttpUser } from "../../common/http/http"
-import * as userApi from "../../../common/routes/user"
-import HttpContext from "../../common/http/context"
-import UserService from "../service/user"
-import { Err } from "../../../common/status/error"
+import * as userApi from "../../../common/routes/user";
+import { Err } from "../../../common/status/error";
 import { DComponent } from '../../common/decorate/component';
+import { EServer_Common_Event_Types } from '../../common/event/types';
+import HttpContext from "../../common/http/context";
+import { DHttpApi, DHttpContent, DHttpContext, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import UserService from "../service/user";
+import { IUserSession } from './../../common/rpc/api/user';
 @DComponent
 class UserController {
     @DHttpApi(userApi.routes.create)
@@ -80,7 +81,7 @@ class UserController {
         if(!user) {
             throw Err.User.userNotFound
         }
-        await user.delete()
+        await user.delete(EServer_Common_Event_Types.User.DELETE)
     }
 
     @DHttpApi(userApi.routes.active)

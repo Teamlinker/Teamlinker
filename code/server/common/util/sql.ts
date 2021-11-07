@@ -134,7 +134,7 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
 
 export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columns:K1[],objExpr?:{
     [param in keyof T["model"]]?:EXPRVALUE
-},exprMode?:"and"|"or"):{
+},exprMode?:"and"|"or",limit?:number,size?:number):{
     value:string,
     type:{
         [key in Extract<keyof T["model"],K1>]:T["model"][key]
@@ -148,7 +148,7 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
     }
     let expr=generateExp(objExpr,exprMode);
     return {
-        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}`,
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:model.model
     }
 }

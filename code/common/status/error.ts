@@ -7,6 +7,14 @@ export namespace Err {
         mysqlError:{
             code:2,
             msg:"mysql error"
+        },
+        itemNotFound:{
+            code:3,
+            msg:"item not found"
+        },
+        itemExists:{
+            code:4,
+            msg:"item exists"
         }
     }
     export let User = {

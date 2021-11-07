@@ -2,7 +2,7 @@ import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Project } from './../model/project';
 import { ICommon_Model_Project_Module } from './../model/project_module';
 import { ECommon_Services } from './../types';
-import { ECommon_Route_Res_Project_Member_Type, ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_Member } from './response';
+import { ECommon_Route_Res_Project_Member_Type, ICommon_RouteRes_Project_ListTag, ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_Member } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/project",
@@ -49,14 +49,7 @@ const api={
                 size:number,
                 keyword:string  
             }>{},
-            res:<{
-                totalPage:number,
-                page:number,
-                data:{
-                    id:string,
-                    name:string
-                }[]
-            }>{}
+            res:<ICommon_RouteRes_Project_ListTag>{}
         },
         createTag:{
             method:ECommon_HttpApi_Method.POST,
