@@ -8,7 +8,7 @@ import { IUserSession } from './../../common/rpc/api/user';
 @DComponent
 class AdminController {
     @DHttpApi(userApi.routes.loginAdmin)
-    async login(@DHttpReqParamRequired("name") username:string,@DHttpReqParamRequired("password") password:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.loginAdmin.res>{
+    async login(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.loginAdmin.res>{
         let user=await AdminService.getItemByName(username)
         if(!user) {
             throw  Err.User.userNotFound
