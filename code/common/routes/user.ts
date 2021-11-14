@@ -38,6 +38,7 @@ const api={
                 password:string
             }>{},
             res:<Omit<ICommon_Model_User,"password">>{},
+            ignoreValidate:true
         },
         logoutAdmin:{
             method:ECommon_HttpApi_Method.POST,

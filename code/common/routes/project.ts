@@ -89,11 +89,7 @@ const api={
             req:<{
                 projectId:string  
             }>{},
-            res:<{
-                totalPage:number,
-                page:number,
-                data:ICommon_Route_Res_Project_CreateModule_Data[]
-            }>{}
+            res:<ICommon_Route_Res_Project_CreateModule_Data[]>{}
         },
         createModule:{
             method:ECommon_HttpApi_Method.POST,
@@ -109,7 +105,6 @@ const api={
             method:ECommon_HttpApi_Method.PUT,
             path:"/module/item",
             req:<{
-                projectId:string,
                 parentModuleId?:string,
                 name?:string
                 moduleId:string  

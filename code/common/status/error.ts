@@ -70,6 +70,18 @@ export namespace Err {
             code:3002,
             msg:"project exists"
         },
+        Tag:{
+            tagSizeEmpty:{
+                code:3100,
+                msg:"tag size empty"
+            }
+        },
+        Module:{
+            moduleNotFound:{
+                code:3200,
+                msg:"module not found"
+            }
+        }
     }
     export let Team = {
         teamNotFound:{
