@@ -184,7 +184,7 @@ export default class GateWay extends Application {
                             ctx.set(key, ret.headers[key]);
                         }
                     }
-                    if(typeof(ret.data)=="string" || typeof(ret.data)=="number" || typeof(ret.data)=="boolean" || typeof(ret.data)=="object")
+                    if(ret.data===undefined || typeof(ret.data)=="string" || typeof(ret.data)=="number" || typeof(ret.data)=="boolean" || typeof(ret.data)=="object")
                     {
                         ctx.body = generateHttpOkResponse(ret.data);
                     } else {
