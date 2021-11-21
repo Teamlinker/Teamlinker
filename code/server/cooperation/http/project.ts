@@ -1,3 +1,4 @@
+import { ECommon_Model_Project_Member_Type } from "../../../common/model/project_member";
 import * as projectApi from "../../../common/routes/project";
 import { Err } from "../../../common/status/error";
 import { DHttpApi, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
@@ -39,6 +40,56 @@ class ProjectController {
         item.description=description
         let ret=await obj.update()
         return ret;
+    }
+
+    @DHttpApi(projectApi.routes.remove)
+    async removeProject(@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof projectApi.routes.remove.res>{
+        let obj=await ProjectService.getItemById(projectId);
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
+        await obj.delete()
+        return
+    }
+
+    @DHttpApi(projectApi.routes.listMember)
+    async listMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number):Promise<typeof projectApi.routes.listMember.res>{
+        let obj=await ProjectService.getItemById(projectId);
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
+        let ret=await obj.listMember(page,size)
+        return ret;
+    }
+
+    @DHttpApi(projectApi.routes.addMember)
+    async addMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string,@DHttpReqParamRequired("type") type:ECommon_Model_Project_Member_Type,@DHttpReqParamRequired("roleId") roleId:string):Promise<typeof projectApi.routes.addMember.res>{
+        let obj=await ProjectService.getItemById(projectId);
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
+        await obj.addMember(memberId,type,roleId)
+        return
+    }
+
+    @DHttpApi(projectApi.routes.editMember)
+    async editMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string,@DHttpReqParamRequired("roleId") roleId:string):Promise<typeof projectApi.routes.editMember.res>{
+        let obj=await ProjectService.getItemById(projectId);
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
+        await obj.editMember(memberId,roleId);
+        return
+    }
+
+    @DHttpApi(projectApi.routes.removeMember)
+    async removeMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string):Promise<typeof projectApi.routes.removeMember.res>{
+        let obj=await ProjectService.getItemById(projectId);
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
+        await obj.removeMember(memberId)
+        return
     }
 
 }
