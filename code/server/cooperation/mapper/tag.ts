@@ -1,14 +1,14 @@
-import { ICommon_RouteRes_Project_ListTag } from "../../../common/routes/response";
+import { ICommon_Route_Res_Project_ListTag } from "../../../common/routes/response";
 import { Err } from "../../../common/status/error";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from "../../common/entity/mapper";
-import { generateQuerySql } from '../../common/util/sql';
+import { generateDeleteSql, generateQuerySql } from '../../common/util/sql';
 import { projectLabelModel, Table_Project_Label } from './../../../common/model/project_label';
 class TagMapper extends Mapper<typeof projectLabelModel> {
     constructor() {
         super(projectLabelModel)
     }
-    async listTag(projectId:string,page:number,size:number,keyword:string):Promise<ICommon_RouteRes_Project_ListTag> {
+    async listTag(projectId:string,page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Project_ListTag> {
         if(!projectId || page===undefined || page<0 || size===undefined || size<=0) {
             throw Err.Common.paramError
         }
@@ -22,14 +22,26 @@ class TagMapper extends Mapper<typeof projectLabelModel> {
                     name:{
                         exp:"%like%",
                         value:keyword
-                }})
-            }))
+                }}),
+            },"and",{
+                filed:"name",
+                type:"asc"
+            },page*size,size))
         }
         return {
             totalPage:count,
             page:page,
             data:ret
         }
+    }
+    async deleteByProjectId(projectId:string) {
+        if(!projectId) {
+            throw Err.Project.Module.moduleNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectLabelModel,{
+            project_id:projectId
+        }))
     }
 }
 export let tagMapper=new TagMapper

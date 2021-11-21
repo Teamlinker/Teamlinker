@@ -6,7 +6,7 @@ const api={
     baseUrl:"/team",
     service:ECommon_Services.User,
     routes:{
-        create:{
+        create:{//创建团队
             method:ECommon_HttpApi_Method.POST,
             path:"/item",
             req:<{
@@ -14,7 +14,7 @@ const api={
             }>{},
             res:<ICommon_Model_Team>{}
         },
-        info:{
+        info:{//团队信息
             method:ECommon_HttpApi_Method.GET,
             path:"/item",
             req:<{
@@ -22,7 +22,7 @@ const api={
             }>{},
             res:<ICommon_Model_Team>{}
         },
-        update:{
+        update:{//更新团队信息
             method:ECommon_HttpApi_Method.PUT,
             path:"/item",
             req:<{
@@ -31,7 +31,7 @@ const api={
             }>{},
             res:<ICommon_Model_Team>{}
         },
-        remove:{
+        remove:{//删除团队
             method:ECommon_HttpApi_Method.DELETE,
             path:"/item",
             req:<{
@@ -39,7 +39,7 @@ const api={
             }>{},
             res:{}
         },
-        members:{
+        members:{//团队成员列表
             method:ECommon_HttpApi_Method.GET,
             path:"/members",
             req:<{
@@ -52,7 +52,7 @@ const api={
                 role:Omit<ICommon_Model_Team_Role,"team_id">
             }[]>{}
         },
-        addMember:{
+        addMember:{//添加团队成员
             method:ECommon_HttpApi_Method.POST,
             path:"/add_member",
             req:<{
@@ -62,7 +62,7 @@ const api={
             }>{},
             res:{}
         },
-        removeMember:{
+        removeMember:{//删除团队成员
             method:ECommon_HttpApi_Method.DELETE,
             path:"/remove_member",
             req:<{
@@ -71,7 +71,7 @@ const api={
             }>{},
             res:{}
         },
-        changeRole:{
+        changeRole:{//修改团队成员权限
             method:ECommon_HttpApi_Method.PUT,
             path:"/role",
             req:<{
@@ -81,7 +81,7 @@ const api={
             }>{},
             res:{}
         },
-        roles:{
+        roles:{//团队权限列表
             method:ECommon_HttpApi_Method.GET,
             path:"/roles",
             req:<{

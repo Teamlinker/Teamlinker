@@ -5,7 +5,7 @@ const api={
     baseUrl:"/user",
     service:ECommon_Services.User,
     routes:{
-        login:{
+        login:{//用户登录
             method:ECommon_HttpApi_Method.POST,
             path:"/login",
             req:<{
@@ -15,7 +15,7 @@ const api={
             res:<Omit<ICommon_Model_User,"password">>{},
             ignoreValidate:true
         },
-        checkUser:{
+        checkUser:{//检查用户是否可用
             method:ECommon_HttpApi_Method.GET,
             path:"/check_user",
             req:<{
@@ -24,13 +24,13 @@ const api={
             res:<boolean>{},
             ignoreValidate:true
         },
-        logout:{
+        logout:{//登出
             method:ECommon_HttpApi_Method.POST,
             path:"/logout",
             req:{},
             res:{},
         },
-        loginAdmin:{
+        loginAdmin:{//管理员登录
             method:ECommon_HttpApi_Method.POST,
             path:"/admin_login",
             req:<{
@@ -40,25 +40,25 @@ const api={
             res:<Omit<ICommon_Model_User,"password">>{},
             ignoreValidate:true
         },
-        logoutAdmin:{
+        logoutAdmin:{//管理员登出
             method:ECommon_HttpApi_Method.POST,
             path:"/admin_logout",
             req:{},
             res:{},
         },
-        refresh:{
+        refresh:{//刷新用户信息
             method:ECommon_HttpApi_Method.GET,
             path:"/refresh",
             req:{},
             res:<Omit<ICommon_Model_User,"password">>{},
         },
-        update:{
+        update:{//更新用户信息
             method:ECommon_HttpApi_Method.PUT,
             path:"/item",
             req:<Partial<Omit<ICommon_Model_User,"id" | "password" | "created_time" | "modified_time">>>{},
             res:<Omit<ICommon_Model_User,"password">>{},
         },
-        create:{
+        create:{//创建用户
             method:ECommon_HttpApi_Method.POST,
             path:"/item",
             req:<Partial<Omit<ICommon_Model_User,"id"  | "created_time" | "modified_time">> & {
@@ -67,13 +67,13 @@ const api={
             }>{},
             res:<Omit<ICommon_Model_User,"password">>{}
         },
-        remove:{
+        remove:{//删除用户
             method:ECommon_HttpApi_Method.DELETE,
             path:"/item",
             req:{},
             res:{},
         },
-        active:{
+        active:{//禁用、启用用户
             method:ECommon_HttpApi_Method.PUT,
             path:"/active",
             req:<{
