@@ -81,6 +81,16 @@ export namespace Err {
                 code:3200,
                 msg:"module not found"
             }
+        },
+        Member:{
+            memberExists:{
+                code:3300,
+                msg:"member exists"
+            },
+            memberNotExists:{
+                code:3301,
+                msg:"member not exists"
+            }
         }
     }
     export let Team = {

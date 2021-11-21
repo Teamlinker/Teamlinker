@@ -6,10 +6,13 @@ export interface ICommon_Model_Project_Member {
   modified_time :Date,
   project_id :string ,
   member_id :string ,
-  type:number
+  type:ECommon_Model_Project_Member_Type
 }
 export const Table_Project_Member="project_member"
-
+export enum ECommon_Model_Project_Member_Type {
+  USER,
+  TEAM
+}
 
 class ProjectMemberModel extends BaseModel {
   table=Table_Project_Member
