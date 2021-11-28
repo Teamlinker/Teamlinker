@@ -1,12 +1,11 @@
 import * as jwt from "jsonwebtoken";
+import { ICommon_Route_Res_User_List } from "../../../common/routes/response";
 import { Err } from '../../../common/status/error';
 import { REDIS_USER } from "../../common/cache/keys/user";
 import { Entity } from "../../common/entity/entity";
-import { EServer_Common_Event_Types } from '../../common/event/types';
 import { getNacosInstance } from '../../common/nacos/nacos';
-import { emitServiceEvent } from '../../common/rpc/rpc';
 import { userMapper } from '../mapper/user';
-import { ICommon_Model_User, userModel } from './../../../common/model/user';
+import { userModel } from './../../../common/model/user';
 import { EServer_Common_User_Type } from './../../common/types/user';
 export default class User extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
@@ -67,5 +66,44 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
     async clearCache(){
         await REDIS_USER.token(this.item.id).del()
         await REDIS_USER.info(this.item.id).del()
+    }
+
+    static async list(page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_User_List>{
+        let ret=await userMapper.list(page,size,keyword)
+        ret.data.forEach(item=>{
+            delete item.password
+            delete item.admin
+        })
+        return {
+            totalPage:ret.totalPage,
+            page:page,
+            data:ret.data
+        }
+    }
+
+    async projectList(page:number,size:number,keyword?:string){
+        let ret= await userMapper.projectList(page,size,this.item.id,keyword)
+        return {
+            ...ret,
+            page:page
+        };
+    }
+
+    async teamList(page:number,size:number,keyword?:string){
+        let ret= await userMapper.teamList(page,size,this.item.id,keyword)
+        return {
+            ...ret,
+            page:page
+        };
+    }
+
+    async profile(){
+        let ret={
+            info:this.getItem(),
+            project:(await this.projectList(0,10)).data,
+            team:(await this.teamList(0,10)).data
+        }
+        delete ret.info.password
+        return ret;
     }
 }

@@ -1,6 +1,7 @@
-import { moduleMapper } from "../mapper/module";
+import { ICommon_Route_Res_Project_List } from "../../../common/routes/response";
 import { Entity } from "../../common/entity/entity";
 import { EServer_Common_Event_Types } from "../../common/event/types";
+import { moduleMapper } from "../mapper/module";
 import { projectMapper } from '../mapper/project';
 import { projectModel } from './../../../common/model/project';
 import { ECommon_Model_Project_Member_Type } from './../../../common/model/project_member';
@@ -31,5 +32,14 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
 
     async editMember(memberId:string,roleId:string){
         await projectMapper.changeRole(this.item.id,memberId,roleId)
+    }
+
+    static async list(page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Project_List>{
+        let ret=await projectMapper.list(page,size,keyword)
+        return {
+            totalPage:ret.totalPage,
+            page:page,
+            data:ret.data
+        }
     }
 }

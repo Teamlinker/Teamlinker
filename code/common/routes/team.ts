@@ -1,6 +1,7 @@
 import { ICommon_Model_Team } from '../model/team';
 import { ICommon_Model_Team_Role } from '../model/team_role';
 import { ECommon_Services } from '../types';
+import { ICommon_Route_Res_Team_List } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/team",
@@ -88,7 +89,17 @@ const api={
                 teamId:string           
             }>{},
             res:<ICommon_Model_Team_Role[]>{}
-        }
+        },
+        list:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/list",
+            req:<{
+                keyword?:string,
+                page:number,
+                size:number             
+            }>{},
+            res:<ICommon_Route_Res_Team_List>{},
+        },
     }
 }
 export=api

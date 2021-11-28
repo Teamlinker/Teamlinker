@@ -1,5 +1,6 @@
 import { ICommon_Model_User } from './../model/user';
 import { ECommon_Services } from './../types';
+import { ICommon_Route_Res_User_List, ICommon_Route_Res_User_Profile, ICommon_Route_Res_User_ProjectList, ICommon_Route_Res_User_TeamList } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/user",
@@ -55,7 +56,7 @@ const api={
         update:{//更新用户信息
             method:ECommon_HttpApi_Method.PUT,
             path:"/item",
-            req:<Partial<Omit<ICommon_Model_User,"id" | "password" | "created_time" | "modified_time">>>{},
+            req:<Partial<Omit<ICommon_Model_User,"id" | "password" | "created_time" | "modified_time">> & {userId?:string}>{},
             res:<Omit<ICommon_Model_User,"password">>{},
         },
         create:{//创建用户
@@ -70,16 +71,68 @@ const api={
         remove:{//删除用户
             method:ECommon_HttpApi_Method.DELETE,
             path:"/item",
-            req:{},
+            req:<{
+                userId:string
+            }>{},
             res:{},
         },
         active:{//禁用、启用用户
             method:ECommon_HttpApi_Method.PUT,
             path:"/active",
             req:<{
-                active:number
+                active:number,
+                userId:string
             }>{},
             res:{},
+        },
+        list:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/list",
+            req:<{
+                keyword?:string,
+                page:number,
+                size:number             
+            }>{},
+            res:<ICommon_Route_Res_User_List>{},
+        },
+        resetPassword:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/reset_password",
+            req:<{
+                userId?:string,
+                password:string             
+            }>{},
+            res:{},
+        },
+        teamList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/team_list",
+            req:<{
+                userId?:string,
+                keyword?:string,
+                page:number,
+                size:number             
+            }>{},
+            res:<ICommon_Route_Res_User_TeamList>{},
+        },
+        projectList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/project_list",
+            req:<{
+                userId?:string,
+                keyword?:string,
+                page:number,
+                size:number             
+            }>{},
+            res:<ICommon_Route_Res_User_ProjectList>{},
+        },
+        profile:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/profile",
+            req:<{
+                userId?:string       
+            }>{},
+            res:<ICommon_Route_Res_User_Profile>{},
         }
     }
 }

@@ -135,7 +135,7 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
 export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columns:K1[],objExpr?:{
     [param in keyof T["model"]]?:EXPRVALUE
 },exprMode?:"and"|"or",order?:{
-    filed:K1,
+    field:keyof T["model"],
     type:"asc"|"desc"
 },limit?:number,size?:number):{
     value:string,
@@ -151,7 +151,7 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
     }
     let expr=generateExp(objExpr,exprMode);
     return {
-        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}${limit!==undefined?` limit ${limit},${size}`:""}${order?` order by ${order.filed} ${order.type}`:""}`,
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}${order?` order by ${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:model.model
     }
 }
@@ -222,7 +222,7 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
     expression:{
         [key in keyof T2["model"]]?:{
             model:T1,
-            filed:keyof T1["model"]
+            field:keyof T1["model"]
         }
     }
 },objExpr?:{
@@ -231,7 +231,7 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
         model:T1|T2
     }
 },exprMode?:"and"|"or",order?:{
-    filed:keyof (T1["model"] & T2["model"]),
+    field:keyof (T1["model"] & T2["model"]),
     model:T1|T2
     type:"asc"|"desc"
 },limit?:number,size?:number):{
@@ -258,7 +258,7 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
     let joinTable=joinModel.model.table
     let key=Object.keys(joinModel.expression)[0]
     let value=joinModel.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.filed}`
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
     let rename=mainModel.rename
     let renameJoin=joinModel.rename
     let aggregation={}
@@ -283,7 +283,7 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
     aggregation[table]=mainModel.aggregation??""
     aggregation[joinTable]=joinModel.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.filed} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -310,7 +310,7 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     expression:{
         [key in keyof T2["model"]]?:{
             model:T1|T3,
-            filed:keyof (T1 & T3)["model"]
+            field:keyof (T1 & T3)["model"]
         }
     }
 },joinModel2:{
@@ -324,7 +324,7 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     expression:{
         [key in keyof T3["model"]]?:{
             model:T1|T2,
-            filed:keyof (T1 & T2)["model"]
+            field:keyof (T1 & T2)["model"]
         }
     }
 },objExpr?:{
@@ -333,7 +333,7 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
         model:T1|T2|T3
     }
 },exprMode?:"and"|"or",order?:{
-    filed:keyof(T1["model"] & T2["model"] & T3["model"]),
+    field:keyof(T1["model"] & T2["model"] & T3["model"]),
     model:T1 | T2 | T3,
     type:"asc"|"desc"
 },limit?:number,size?:number):{
@@ -369,8 +369,8 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     let value=joinModel.expression[key]
     let key2=Object.keys(joinModel2.expression)[0]
     let value2=joinModel2.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.filed}`
-    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.filed}`
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
+    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field}`
     let rename=mainModel.rename
     let renameJoin=joinModel.rename
     let renameJoin2=joinModel2.rename
@@ -403,7 +403,7 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     aggregation[joinTable]=joinModel.aggregation??""
     aggregation[joinTable2]=joinModel2.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.filed} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -428,7 +428,7 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     expression:{
         [key in keyof T2["model"]]?:{
             model:T1|T3|T4,
-            filed:keyof (T1 & T3 & T4)["model"]
+            field:keyof (T1 & T3 & T4)["model"]
         }
     }
 },joinModel2:{
@@ -442,7 +442,7 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     expression:{
         [key in keyof T3["model"]]?:{
             model:T1|T2|T4,
-            filed:keyof (T1 & T2 & T4)["model"]
+            field:keyof (T1 & T2 & T4)["model"]
         }
     }
 },joinModel3:{
@@ -456,7 +456,7 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     expression:{
         [key in keyof T4["model"]]?:{
             model:T1|T2|T3,
-            filed:keyof (T1 & T2 & T3)["model"]
+            field:keyof (T1 & T2 & T3)["model"]
         }
     }
 },objExpr?:{
@@ -465,7 +465,7 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
         model:T1|T2|T3|T3
     }
 },exprMode?:"and"|"or",order?:{
-    filed:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"]),
+    field:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"]),
     model:T1 | T2 | T3 | T4,
     type:"asc"|"desc"
 },limit?:number,size?:number):{
@@ -510,9 +510,9 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     let value2=joinModel2.expression[key]
     let key3=Object.keys(joinModel3.expression)[0]
     let value3=joinModel3.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.filed}`
-    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.filed}`
-    let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.filed}`
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
+    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field}`
+    let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.field}`
     let rename=mainModel.rename
     let renameJoin=joinModel.rename
     let renameJoin2=joinModel2.rename
@@ -553,8 +553,20 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     aggregation[joinTable2]=joinModel2.aggregation??""
     aggregation[joinTable3]=joinModel3.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.filed} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
+    }
+}
+
+export function exculdeColumns<R1 extends keyof BaseModel["model"],R2 extends R1=null>(originColumns:R1[],excludeColums:R2[]):Exclude<R1,(any extends R2?null:R2)>[]{
+    if(originColumns && Array.isArray(originColumns) && originColumns.length>0 && excludeColums && Array.isArray(excludeColums) && excludeColums.length>0) {
+        let arr=originColumns.filter(item=>{
+            if(excludeColums.includes(item as unknown as R2)){
+                return false
+            }
+            return true;
+        })
+        return <any>arr;
     }
 }

@@ -3,7 +3,7 @@ import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Project } from './../model/project';
 import { ICommon_Model_Project_Module } from './../model/project_module';
 import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag } from './response';
+import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/project",
@@ -167,7 +167,17 @@ const api={
                 memberId:string,
             }>{},
             res:{}
-        }
+        },
+        list:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/list",
+            req:<{
+                keyword?:string,
+                page:number,
+                size:number             
+            }>{},
+            res:<ICommon_Route_Res_Project_List>{},
+        },
     }
 }
 export=api
