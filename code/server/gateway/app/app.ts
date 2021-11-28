@@ -202,8 +202,10 @@ export default class GateWay extends Application {
             console.log(`start`);
             let obj=getComponent<InstanceType<typeof PermissionProjectRead>>(PermissionProjectRead.name)
             console.log(obj)
+            
         })
     }
 }
+
 
 

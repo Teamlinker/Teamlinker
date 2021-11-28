@@ -92,5 +92,11 @@ class ProjectController {
         return
     }
 
+    @DHttpApi(projectApi.routes.list)
+    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number) :Promise<typeof projectApi.routes.list.res>{
+        let list=await ProjectService.list(page,size,keyword)
+        return list
+    }
+
 }
 export default new ProjectController

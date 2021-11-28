@@ -2,7 +2,7 @@ import * as teamApi from "../../../common/routes/team";
 import { Err } from '../../../common/status/error';
 import { DComponent } from "../../common/decorate/component";
 import { EServer_Common_Event_Types } from "../../common/event/types";
-import { DHttpApi, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import { DHttpApi, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
 import { IUserSession } from '../../common/rpc/api/user';
 import { EServer_Common_User_Type } from '../../common/types/user';
 import TeamService from "../service/team";
@@ -98,6 +98,12 @@ class TeamController {
         }
         await team.changeRole(userId,roleId)
         return;
+    }
+
+    @DHttpApi(teamApi.routes.list)
+    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number) :Promise<typeof teamApi.routes.list.res>{
+        let list=await TeamService.list(page,size,keyword)
+        return list
     }
 
 }

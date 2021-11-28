@@ -1,7 +1,8 @@
-import { projectModel } from '../../../common/model/project';
+import { ICommon_Model_Project, projectModel, Table_Project } from '../../../common/model/project';
 import { Err } from '../../../common/status/error';
 import { getMysqlInstance } from '../../common/db/mysql';
 import { Mapper } from "../../common/entity/mapper";
+import CommonUtil from "../../common/util/common";
 import { generateCreateSql, generateDeleteSql, generateLeftJoin3Sql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
 import { ECommon_Model_Project_Member_Type, projectMemberModel, Table_Project_Member } from './../../../common/model/project_member';
 import { projectRoleModel } from './../../../common/model/project_role';
@@ -18,7 +19,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         }
         let mysql=getMysqlInstance()
         let data:ICommon_Route_Res_Project_ListMemeber["data"]=[];
-        let count=await mysql.executeOne<number>(`select count(1) from ${Table_Project_Member} where project_id='${projectId}'`)
+        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Member} where project_id='${projectId}'`))[0],size)
         if(count>0) {
             let sql=generateLeftJoin3Sql({
                 model:projectMemberModel,
@@ -33,7 +34,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                 expression:{
                     id:{
                         model:projectMemberModel,
-                        filed:"role_id"
+                        field:"role_id"
                     }
                 },
                 aggregation:"role"
@@ -43,7 +44,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                 expression:{
                     id:{
                         model:projectMemberModel,
-                        filed:"member_id"
+                        field:"member_id"
                     }
                 },
                 aggregation:"user",
@@ -57,7 +58,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                 expression:{
                     id:{
                         model:projectMemberModel,
-                        filed:"member_id"
+                        field:"member_id"
                     }
                 },
                 aggregation:"team"
@@ -67,7 +68,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                     value:projectId
                 }
             },"and",{
-                filed:"created_time",
+                field:"created_time",
                 model:projectMemberModel,
                 type:"desc"
             },page*size,size)
@@ -176,6 +177,30 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         await mysql.execute(generateDeleteSql(projectMemberModel,{
             project_id:projectId
         }))
+    }
+
+    async list(page:number,size:number,keyword?:string):Promise<{
+        totalPage:number,
+        data:ICommon_Model_Project[]
+    }> {
+        if(page===undefined || page<0 || size===undefined || size<=0) {
+            throw Err.Common.paramError
+        }
+        var mysql=getMysqlInstance();
+        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project}${keyword?` where name like '%${keyword}%'`:""}`))[0],size)
+        let ret=await mysql.execute(generateQuerySql(projectModel,[],keyword?{
+            name:{
+                exp:"%like%",
+                value:keyword
+            }
+        }:null,"and",{
+            field:"name",
+            type:"asc"
+        },page*size,size))
+        return {
+            totalPage:count,
+            data:ret
+        };
     }
 }
 export let projectMapper=new ProjectMapper

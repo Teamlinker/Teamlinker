@@ -5,7 +5,9 @@ import { userModel } from '../../../common/model/user';
 import { Err } from "../../../common/status/error";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from '../../common/entity/mapper';
+import CommonUtil from '../../common/util/common';
 import { generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
+import { Table_Team } from './../../../common/model/team';
 class TeamMapper extends Mapper<typeof teamModel> {
     constructor(){
         super(teamModel)
@@ -58,7 +60,7 @@ class TeamMapper extends Mapper<typeof teamModel> {
             expression:{
                 id:{
                     model:teamUserModel,
-                    filed:"user_id"
+                    field:"user_id"
                 }
             },
             rename:{
@@ -72,7 +74,7 @@ class TeamMapper extends Mapper<typeof teamModel> {
             expression:{
                 id:{
                     model:teamUserModel,
-                    filed:"role_id"
+                    field:"role_id"
                 }
             }
         },{
@@ -156,6 +158,30 @@ class TeamMapper extends Mapper<typeof teamModel> {
         },{
             role_id:roleId
         }))
+    }
+
+    async list(page:number,size:number,keyword?:string):Promise<{
+        totalPage:number,
+        data:ICommon_Model_Team[]
+    }> {
+        if(page===undefined || page<0 || size===undefined || size<=0) {
+            throw Err.Common.paramError
+        }
+        var mysql=getMysqlInstance();
+        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team}${keyword?` where name like '%${keyword}%'`:""}`))[0],size)
+        let ret=await mysql.execute(generateQuerySql(teamModel,[],keyword?{
+            name:{
+                exp:"%like%",
+                value:keyword
+            }
+        }:null,"and",{
+            field:"name",
+            type:"asc"
+        },page*size,size))
+        return {
+            totalPage:count,
+            data:ret
+        };
     }
 }
 
