@@ -161,6 +161,7 @@ class TeamMapper extends Mapper<typeof teamModel> {
     }
 
     async list(page:number,size:number,keyword?:string):Promise<{
+        count:number,
         totalPage:number,
         data:ICommon_Model_Team[]
     }> {
@@ -168,7 +169,8 @@ class TeamMapper extends Mapper<typeof teamModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team}${keyword?` where name like '%${keyword}%'`:""}`))[0],size)
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team}${keyword?` where name like '%${keyword}%'`:""}`))[0]
+        let totalPage=CommonUtil.pageTotal(count,size)
         let ret=await mysql.execute(generateQuerySql(teamModel,[],keyword?{
             name:{
                 exp:"%like%",
@@ -179,7 +181,8 @@ class TeamMapper extends Mapper<typeof teamModel> {
             type:"asc"
         },page*size,size))
         return {
-            totalPage:count,
+            count:count,
+            totalPage:totalPage,
             data:ret
         };
     }

@@ -75,6 +75,7 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
             delete item.admin
         })
         return {
+            count:ret.count,
             totalPage:ret.totalPage,
             page:page,
             data:ret.data

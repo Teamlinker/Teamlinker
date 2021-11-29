@@ -179,7 +179,7 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
         } else {
             val="'"+value+"'"
         }
-        arrVal.push(`key=${val}`)
+        arrVal.push(`${key}=${val}`)
     }
     let expr=generateExp(objExpr,exprMode);
     return {

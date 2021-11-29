@@ -1,14 +1,14 @@
+import * as http from 'http';
+import * as sio from "socket.io";
+import * as ioClient from "socket.io-client";
+import { ECommon_Services } from '../../../common/types';
+import { REDIS_GATEWAY } from '../cache/keys/gateway';
+import { getEventsFunc } from "../event/event";
+import { EServer_Common_Event_Types } from '../event/types';
+import { getHttpRoutes, handleHttpCall } from '../http/http';
+import { getNacosInstance } from '../nacos/nacos';
 import { IServer_Common_Http_Proxy } from './../types/http';
 import { IServer_Common_Nacos_Instance } from './../types/nacos';
-import { ECommon_Services } from '../../../common/types';
-import { EServer_Common_Event_Types } from '../event/types';
-import * as sio from "socket.io"
-import * as ioClient from "socket.io-client"
-import { REDIS_GATEWAY } from '../cache/keys/gateway';
-import * as http from 'http';
-import { getHttpRoutes, handleHttpCall } from '../http/http';
-import {getEventsFunc} from "../event/event"
-import { getNacosInstance } from '../nacos/nacos';
 interface ISocketStruct {
     name:string,
     args:any[]
@@ -212,12 +212,8 @@ export function DRPCRecieve(target: Object, propertyName: string, descriptor: Ty
 async function validInstances(): Promise<string[]> {
     let objRedis = REDIS_GATEWAY.allInstances()
     let ret = await objRedis.scan()
-    return ret.map(item => {
-        return item[0].name ?? ""
-    }).filter(item => {
-        if (item) {
-            return true
-        }
+    return ret.map(item=>{
+        return item.substr(item.lastIndexOf(":")+1)
     })
 }
 

@@ -20,6 +20,7 @@ export type ICommon_Route_Res_Project_Member = {
 }
 
 export type ICommon_Route_Res_Project_ListTag = {
+    count:number,
     totalPage:number,
     page:number,
     data:{
@@ -29,6 +30,7 @@ export type ICommon_Route_Res_Project_ListTag = {
 }
 
 export type ICommon_Route_Res_Project_ListMemeber ={
+    count:number,
     totalPage:number,
     page:number,
     data:ICommon_Route_Res_Project_Member[]
@@ -41,24 +43,28 @@ export type ICommon_Route_Res_User_Profile={
 }
 
 export type ICommon_Route_Res_User_List = {
+    count:number,
     totalPage:number,
     page:number,
     data:Omit<ICommon_Model_User,"password">[]
 }
 
 export type ICommon_Route_Res_User_TeamList = {
+    count:number,
     totalPage:number,
     page:number,
     data:ICommon_Model_Team[]
 }
 
 export type ICommon_Route_Res_User_ProjectList = {
+    count:number,
     totalPage:number,
     page:number,
     data:ICommon_Model_Project[]
 }
 
 export type ICommon_Route_Res_Project_List = {
+    count:number,
     totalPage:number,
     page:number,
     data:ICommon_Model_Project[]
@@ -66,6 +72,7 @@ export type ICommon_Route_Res_Project_List = {
 
 
 export type ICommon_Route_Res_Team_List = {
+    count:number,
     totalPage:number,
     page:number,
     data:ICommon_Model_Team[]
