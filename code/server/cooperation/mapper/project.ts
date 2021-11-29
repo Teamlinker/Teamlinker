@@ -19,7 +19,8 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         }
         let mysql=getMysqlInstance()
         let data:ICommon_Route_Res_Project_ListMemeber["data"]=[];
-        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Member} where project_id='${projectId}'`))[0],size)
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Member} where project_id='${projectId}'`))[0]
+        let totalPage=CommonUtil.pageTotal(count,size)
         if(count>0) {
             let sql=generateLeftJoin3Sql({
                 model:projectMemberModel,
@@ -89,7 +90,8 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             }
         }
         return {
-            totalPage:count,
+            count:count,
+            totalPage:totalPage,
             page:page,
             data:data
         }
@@ -180,6 +182,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
     }
 
     async list(page:number,size:number,keyword?:string):Promise<{
+        count:number,
         totalPage:number,
         data:ICommon_Model_Project[]
     }> {
@@ -187,7 +190,8 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project}${keyword?` where name like '%${keyword}%'`:""}`))[0],size)
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project}${keyword?` where name like '%${keyword}%'`:""}`))[0]
+        let totalPage=CommonUtil.pageTotal(count,size)
         let ret=await mysql.execute(generateQuerySql(projectModel,[],keyword?{
             name:{
                 exp:"%like%",
@@ -198,7 +202,8 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             type:"asc"
         },page*size,size))
         return {
-            totalPage:count,
+            count:count,
+            totalPage:totalPage,
             data:ret
         };
     }

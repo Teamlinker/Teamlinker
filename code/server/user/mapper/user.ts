@@ -29,7 +29,7 @@ class UserMapper extends Mapper<typeof userModel> {
             throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name}))
+        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,admin:0}))
         return ret
     }
 
@@ -43,6 +43,7 @@ class UserMapper extends Mapper<typeof userModel> {
     }
 
     async list(page:number,size:number,keyword?:string):Promise<{
+        count:number,
         totalPage:number,
         data:ICommon_Model_User[]
     }> {
@@ -50,7 +51,8 @@ class UserMapper extends Mapper<typeof userModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_User} where admin=0${keyword?` and username like '%${keyword}%'`:""}`))[0],size)
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_User} where admin=0${keyword?` and username like '%${keyword}%'`:""}`))[0]
+        let totalPage=CommonUtil.pageTotal(count,size)
         let colums=keys<ICommon_Model_User>().map(item=>item.name);
         let ret=await mysql.execute(generateQuerySql(userModel,exculdeColumns(colums,[]),{
             admin:0,
@@ -64,12 +66,14 @@ class UserMapper extends Mapper<typeof userModel> {
             type:"asc"
         },page*size,size))
         return {
-            totalPage:count,
+            count:count,
+            totalPage:totalPage,
             data:ret
         };
     }
 
     async teamList(page:number,size:number,userId:string,keyword?:string):Promise<{
+        count:number,
         totalPage:number,
         data:ICommon_Model_Team[]
     }>{
@@ -77,7 +81,8 @@ class UserMapper extends Mapper<typeof userModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team_User} tu left join ${Table_Team} t on t.id=tu.team_id where tu.user_id='${userId}'${keyword?` and t.name like '%${keyword}%'`:""}`))[0],size)
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team_User} tu left join ${Table_Team} t on t.id=tu.team_id where tu.user_id='${userId}'${keyword?` and t.name like '%${keyword}%'`:""}`))[0]
+        let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateLeftJoinSql({
             model:teamUserModel,
         },{
@@ -111,12 +116,14 @@ class UserMapper extends Mapper<typeof userModel> {
         },page*size,size)
         let ret=await mysql.execute(sql)
         return {
-            totalPage:count,
+            count:count,
+            totalPage:totalPage,
             data:ret.map(item=>item.team)
         };
     }
 
     async projectList(page:number,size:number,userId:string,keyword?:string):Promise<{
+        count:number,
         totalPage:number,
         data:ICommon_Model_Project[]
     }>{
@@ -124,7 +131,8 @@ class UserMapper extends Mapper<typeof userModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=CommonUtil.pageTotal(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Member} pm left join ${Table_Project} p on p.id=pm.project_id where pm.member_id='${userId}'${keyword?` and p.name like '%${keyword}%'`:""}`))[0],size)
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Member} pm left join ${Table_Project} p on p.id=pm.project_id where pm.member_id='${userId}'${keyword?` and p.name like '%${keyword}%'`:""}`))[0]
+        let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateLeftJoinSql({
             model:projectMemberModel,
         },{
@@ -158,7 +166,8 @@ class UserMapper extends Mapper<typeof userModel> {
         },page*size,size)
         let ret=await mysql.execute(sql)
         return {
-            totalPage:count,
+            count:count,
+            totalPage:totalPage,
             data:ret.map(item=>item.project)
         };
     }

@@ -33,8 +33,8 @@ export class RedisStringKey<T> extends RedisBaseKey<T> {
     async set(value:T,ttl?:number){
         await this.redis.set(this.name,value,ttl??this.ttl);
     }
-    async scan():Promise<T[]>{
-        let ret=await this.redis.scan<T>(this.name,this.type);
+    async scan():Promise<string[]>{
+        let ret=await this.redis.scan(this.name);
         return ret
     }
 }

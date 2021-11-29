@@ -18,7 +18,7 @@ class AdminMapper extends Mapper<typeof userModel> {
             throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name}))
+        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,admin:1}))
         return ret
     }
 }

@@ -1,5 +1,5 @@
+import * as IORedis from "ioredis";
 import { IServer_Common_Config_Redis } from './../types/config';
-import * as IORedis from "ioredis"
 var g_redis:InstanceType<typeof Redis>;
 export function getRedisInstance(){
     return g_redis
@@ -69,14 +69,12 @@ export class Redis {
             await this.redis.set(key,String(value),"EX",ttl)
         }
     }
-    async scan<T>(key:string,type:T):Promise<T[]> {
-        let index=0,values=<T[]><unknown>[]
+    async scan(key:string):Promise<string[]> {
+        let index=0,values=<string[]>[]
         do {
             let ret=await this.redis.scan(index,"match",key);
             index=Number(ret[0])
-            values=values.concat(ret[1].map(item=>{
-                return this.parseType(item,type)
-            }));
+            values=values.concat(ret[1]);
         } while(index!=0)
         return values;
     }

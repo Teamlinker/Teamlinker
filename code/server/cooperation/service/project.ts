@@ -37,6 +37,7 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
     static async list(page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Project_List>{
         let ret=await projectMapper.list(page,size,keyword)
         return {
+            count:ret.count,
             totalPage:ret.totalPage,
             page:page,
             data:ret.data

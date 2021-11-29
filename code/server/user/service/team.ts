@@ -54,6 +54,7 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
     static async list(page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Team_List>{
         let ret=await teamMapper.list(page,size,keyword)
         return {
+            count:ret.count,
             totalPage:ret.totalPage,
             page:page,
             data:ret.data
