@@ -5,7 +5,7 @@ import { Mapper } from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
 import { generateCreateSql, generateDeleteSql, generateLeftJoin3Sql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
 import { ECommon_Model_Project_Member_Type, projectMemberModel, Table_Project_Member } from './../../../common/model/project_member';
-import { projectRoleModel } from './../../../common/model/project_role';
+import { ICommon_Model_Project_Role, projectRoleModel } from './../../../common/model/project_role';
 import { teamModel } from './../../../common/model/team';
 import { userModel } from './../../../common/model/user';
 import { ICommon_Route_Res_Project_ListMemeber } from './../../../common/routes/response';
@@ -164,10 +164,10 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             throw Err.Role.roleNotExists
         }
         await mysql.execute(generateUpdateSql(projectMemberModel,{
+            role_id:roleId
+        },{
             member_id:memberId,
             project_id:projectId
-        },{
-            role_id:roleId
         }))
     }
 
@@ -206,6 +206,28 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             totalPage:totalPage,
             data:ret
         };
+    }
+
+    async getRoles(projectId:string):Promise<ICommon_Model_Project_Role[]> {
+        if(!projectId) {
+            throw  Err.Project.projectNotFound
+        }
+        var mysql=getMysqlInstance();
+        let ret=await mysql.execute(generateQuerySql(projectRoleModel,null,{
+            project_id:{
+                type:"or",
+                values:[
+                    {
+                        exp:"is null"
+                    },
+                    {
+                        value:projectId,
+                        exp:"="
+                    }
+                ]
+            }
+        }))
+        return ret
     }
 }
 export let projectMapper=new ProjectMapper

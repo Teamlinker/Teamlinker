@@ -1,15 +1,18 @@
 import { ECommon_Model_Project_Member_Type } from "../../../common/model/project_member";
 import * as projectApi from "../../../common/routes/project";
 import { Err } from "../../../common/status/error";
-import { DHttpApi, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
 import { IUserSession } from "../../common/rpc/api/user";
 import ProjectService from "../service/project";
 
-
+@DHttpController(projectApi)
 class ProjectController {
     @DHttpApi(projectApi.routes.basic)
     async projectInfo(@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof projectApi.routes.basic.res>{
         let obj=await ProjectService.getItemById(projectId);
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
         return obj.getItem();
     }
 
@@ -96,6 +99,16 @@ class ProjectController {
     async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number) :Promise<typeof projectApi.routes.list.res>{
         let list=await ProjectService.list(page,size,keyword)
         return list
+    }
+
+    @DHttpApi(projectApi.routes.roles)
+    async roles(@DHttpReqParamRequired("projectId") projectId:string) :Promise<typeof projectApi.routes.roles.res> {
+        let project=await ProjectService.getItemById(projectId)
+        if(!project) {
+            throw Err.Project.projectNotFound
+        }
+        let ret=await project.getRoles()
+        return ret;
     }
 
 }

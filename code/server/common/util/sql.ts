@@ -8,14 +8,49 @@ const uid = new UniqueID({
 type EXPR={
     [key:string]:EXPRVALUE
 }
-type EXPRVALUE=string|number|boolean|string|Date|{
+type EXPRVALUEEXP ={
     value?:string|number|boolean|string[]|[number,number]|string|Date,
     exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"
+}
+type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
+    type:"and"|"or",
+    values:EXPRVALUEEXP[]
 }
 
 export async function generateSnowId() {
     let id =await uid.asyncGetUniqueID()
     return id as string
+}
+
+function isEXPRVALUEEXP(value:any):value is EXPRVALUEEXP {
+    return typeof(value)=="object" && value.value
+}
+
+function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[]) {
+    if (value.exp == "=" || value.exp=="<=" || value.exp==">" || value.exp=="<" || value.exp=="<>" || !value.exp) {
+        if(!value.exp) {
+            value.exp="="
+        }
+        let val = typeof (value.value) == "number" ? value.value : typeof (value.value) == "boolean" ? (value.value ? 1 : 0) : ("'" + value.value + "'")
+        arrExpr.push(`${key}${value.exp}${val}`)
+    } else if(value.exp=="is null") {
+        arrExpr.push(`${key} is null`)
+    } else if(value.exp=="in") {
+        arrExpr.push(`${key} in (${(<string[] | number[]>value.value).map((item)=>{
+            return typeof(item)=="number"?item:("'"+item+"'")
+        }).join(",")})`)
+    } else if(value.exp=="is not null") {
+        arrExpr.push(`${key} is not null`)
+    } else if(value.exp=="between") {
+        let val=value.value as [number,number];
+        arrExpr.push(`${key} between ${val[0]} and ${val[1]}`)
+    } else if(value.exp=="%like") {
+        arrExpr.push(`${key} like '%${value.value}'`)
+    } else if(value.exp=="like%") {
+        arrExpr.push(`${key} like '${value.value}%'`)
+    } else if(value.exp=="%like%") {
+        arrExpr.push(`${key} like '%${value.value}%'`)
+    }
 }
 
 function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{
@@ -28,31 +63,14 @@ function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{
                 arrExpr.push(`${key}=${val}`)
             } else if (typeof(value)=="object" && (value instanceof Date)){
                 arrExpr.push(`${key}=${value.getTime()}`)
-            } else {
-                if (value.exp == "=" || value.exp=="<=" || value.exp==">" || value.exp=="<" || value.exp=="<>" || !value.exp) {
-                    if(!value.exp) {
-                        value.exp="="
-                    }
-                    let val = typeof (value.value) == "number" ? value.value : typeof (value.value) == "boolean" ? (value.value ? 1 : 0) : ("'" + value.value + "'")
-                    arrExpr.push(`${key}${value.exp}${val}`)
-                } else if(value.exp=="is null") {
-                    arrExpr.push(`${key} is null`)
-                } else if(value.exp=="in") {
-                    arrExpr.push(`${key} in (${(<string[] | number[]>value.value).map((item)=>{
-                        return typeof(item)=="number"?item:("'"+item+"'")
-                    }).join(",")})`)
-                } else if(value.exp=="is not null") {
-                    arrExpr.push(`${key} is not null`)
-                } else if(value.exp=="between") {
-                    let val=value.value as [number,number];
-                    arrExpr.push(`${key} between ${val[0]} and ${val[1]}`)
-                } else if(value.exp=="%like") {
-                    arrExpr.push(`${key} like '%${value.value}'`)
-                } else if(value.exp=="like%") {
-                    arrExpr.push(`${key} like '${value.value}%'`)
-                } else if(value.exp=="%like%") {
-                    arrExpr.push(`${key} like '%${value.value}%'`)
+            } else if (isEXPRVALUEEXP(value)) {
+                handleExp(key,value,arrExpr)
+            }else {
+                let arr=[];
+                for(let obj of value.values) {
+                    handleExp(key,obj,arr)
                 }
+                arrExpr.push(`(${arr.join(` ${value.type?value.type:"and"} `)})`)
             }
         }
         expr=arrExpr.join(` ${exprMode?exprMode:"and"} `)
@@ -77,31 +95,14 @@ function generateLeftJoinExp(objExpr?:{
                 arrExpr.push(`${value.model.table}.${key}=${val}`)
             } else if (typeof(value.value)=="object" && (value.value instanceof Date)){
                 arrExpr.push(`${value.model.table}.${key}=${value.value.getTime()}`)
-            } else {
-                if (value.value.exp == "=" || value.value.exp=="<=" || value.value.exp==">" || value.value.exp=="<" || value.value.exp=="<>" || !value.value.exp) {
-                    if(!value.value.exp) {
-                        value.value.exp="="
-                    }
-                    let val = typeof (value.value) == "number" ? value.value : typeof (value.value) == "boolean" ? (value.value ? 1 : 0) : ("'" + value.value + "'")
-                    arrExpr.push(`${value.model.table}.${key}${value.value.exp}${val}`)
-                } else if(value.value.exp=="is null") {
-                    arrExpr.push(`${value.model.table}.${key} is null`)
-                } else if(value.value.exp=="in") {
-                    arrExpr.push(`${value.model.table}.${key} in (${(<string[] | number[]>value.value.value).map((item)=>{
-                        return typeof(item)=="number"?item:("'"+item+"'")
-                    }).join(",")})`)
-                } else if(value.value.exp=="is not null") {
-                    arrExpr.push(`${value.model.table}.${key} is not null`)
-                } else if(value.value.exp=="between") {
-                    let val=value.value.value as [number,number];
-                    arrExpr.push(`${value.model.table}.${key} between ${val[0]} and ${val[1]}`)
-                } else if(value.value.exp=="%like") {
-                    arrExpr.push(`${value.model.table}.${key} like '%${value.value.value}'`)
-                } else if(value.value.exp=="like%") {
-                    arrExpr.push(`${value.model.table}.${key} like '${value.value.value}%'`)
-                } else if(value.value.exp=="%like%") {
-                    arrExpr.push(`${value.model.table}.${key} like '%${value.value.value}%'`)
+            } else if (isEXPRVALUEEXP(value.value)) {
+                handleExp(key,value.value,arrExpr)
+            }else {
+                let arr=[];
+                for(let obj of value.value.values) {
+                    handleExp(key,obj,arr)
                 }
+                arrExpr.push(`(${arr.join(` ${value.value.type?value.value.type:"and"} `)})`)
             }
         }
         expr=arrExpr.join(` ${exprMode?exprMode:"and"} `)

@@ -69,6 +69,7 @@ class ModuleMapper extends Mapper<typeof projectModuleModel> {
                 }
             }
         }
+        await _delete(moduleId);
     }
     async deleteByProjectId(projectId:string) {
         if(!projectId) {

@@ -1,5 +1,5 @@
 import { ECommon_Model_Project_Member_Type } from '../model/project_member';
-import { Permission_Types } from '../permission/permission';
+import { ICommon_Model_Project_Role } from '../model/project_role';
 import { ICommon_Model_Project } from './../model/project';
 import { ICommon_Model_Project_Module } from './../model/project_module';
 import { ECommon_Services } from './../types';
@@ -15,8 +15,7 @@ const api={
             req:<{
                 projectId:string                
             }>{},
-            res:<ICommon_Model_Project>{},
-            permission:[Permission_Types.Project.READ]
+            res:<ICommon_Model_Project>{}
         },
         create:{//创建项目
             method:ECommon_HttpApi_Method.POST,
@@ -56,7 +55,7 @@ const api={
                 projectId:string,
                 page:number,
                 size:number,
-                keyword:string  
+                keyword?:string  
             }>{},
             res:<ICommon_Route_Res_Project_ListTag>{}
         },
@@ -177,6 +176,14 @@ const api={
                 size:number             
             }>{},
             res:<ICommon_Route_Res_Project_List>{},
+        },
+        roles:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/roles",
+            req:<{
+                projectId:string           
+            }>{},
+            res:<ICommon_Model_Project_Role[]>{}
         },
     }
 }

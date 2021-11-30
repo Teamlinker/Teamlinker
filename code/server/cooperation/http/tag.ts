@@ -1,9 +1,10 @@
 import * as projectApi from "../../../common/routes/project";
 import { DComponent } from "../../common/decorate/component";
-import { DHttpApi, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
 import TagService from "../service/tag";
 
 @DComponent
+@DHttpController(projectApi)
 class TagController {
      @DHttpApi(projectApi.routes.listTag)
      async listTag(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string):Promise<typeof projectApi.routes.listTag.res> {

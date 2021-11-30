@@ -1,8 +1,9 @@
 import * as projectApi from "../../../common/routes/project";
 import { DComponent } from "../../common/decorate/component";
-import { DHttpApi, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
 import ModuleService from "../service/module";
 @DComponent
+@DHttpController(projectApi)
 class ModuleController {
      @DHttpApi(projectApi.routes.listModule)
      async listModule(@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof projectApi.routes.listModule.res> {
@@ -30,7 +31,7 @@ class ModuleController {
           module.assignItem({
                id:moduleId,
                name:name,
-               parent_module_id:parentModuleId??null
+               parent_module_id:parentModuleId??undefined
           })
           let ret= await module.update();
           return ret;

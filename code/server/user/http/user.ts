@@ -3,11 +3,12 @@ import { Err } from "../../../common/status/error";
 import { DComponent } from '../../common/decorate/component';
 import { EServer_Common_Event_Types } from '../../common/event/types';
 import HttpContext from "../../common/http/context";
-import { DHttpApi, DHttpContent, DHttpContext, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import { DHttpApi, DHttpContent, DHttpContext, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
 import { EServer_Common_User_Type } from "../../common/types/user";
 import UserService from "../service/user";
 import { IUserSession } from './../../common/rpc/api/user';
 @DComponent
+@DHttpController(userApi)
 class UserController {
     @DHttpApi(userApi.routes.create)
     async create(@DHttpContent content:typeof userApi.routes.create.req,@DHttpUser userInfo:IUserSession):Promise<typeof userApi.routes.create.res>{

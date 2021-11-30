@@ -1,8 +1,8 @@
-import { ICommon_Http_Route } from './../../../common/routes/types';
-import { EServer_Common_Http_Structure_HandleParam_Category, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File, IServer_Common_Http_Structure, IServer_Common_Http_Structure_HandleParam } from "../types/http";
-import "reflect-metadata"
-import HttpContext from "./context"
+import "reflect-metadata";
 import { Err } from '../../../common/status/error';
+import { EServer_Common_Http_Structure_HandleParam_Category, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File, IServer_Common_Http_Structure, IServer_Common_Http_Structure_HandleParam } from "../types/http";
+import { ICommon_HttpApi, ICommon_Http_Route } from './../../../common/routes/types';
+import HttpContext from "./context";
 var g_objRoute:{
     [param:string]:IServer_Common_Http_Structure
 }={}
@@ -10,10 +10,27 @@ var g_objParam:{
     [param:string]:IServer_Common_Http_Structure_HandleParam[]
 }={}
 
+var g_objController:{
+    [param:string]:string[]
+}={}
 export function getHttpRoutes() {
     return g_objRoute;
 }
 
+export function DHttpController(objParam:ICommon_HttpApi) {
+    return function (target) {
+        let name=target.name;
+        if(Array.isArray(g_objController[name]) && g_objController[name].length>0) {
+            for(let obj of g_objController[name]) {
+                let arr=obj.split(" ")
+                arr[1]=objParam.baseUrl+arr[1]
+                let newName=arr.join(" ")
+                g_objRoute[newName]=g_objRoute[obj]
+                delete g_objRoute[obj]
+            }
+        }
+    }
+}
 
 export function DHttpApi(objParam:ICommon_Http_Route) {
     return function (target,propertyKey:string,desc:PropertyDescriptor) {
@@ -28,6 +45,10 @@ export function DHttpApi(objParam:ICommon_Http_Route) {
             handleParam:g_objParam[key]
         }
         g_objRoute[name]=temp
+        if(!g_objController[target.constructor.name]){
+            g_objController[target.constructor.name]=[]
+        }
+        g_objController[target.constructor.name].push(name)
     }
 }
 

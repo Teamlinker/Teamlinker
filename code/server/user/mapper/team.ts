@@ -35,8 +35,16 @@ class TeamMapper extends Mapper<typeof teamModel> {
         var mysql=getMysqlInstance();
         let ret=await mysql.execute(generateQuerySql(teamRoleModel,null,{
             team_id:{
-                value:[teamId,null],
-                exp:"in"
+                type:"or",
+                values:[
+                    {
+                        exp:"is null"
+                    },
+                    {
+                        value:teamId,
+                        exp:"="
+                    }
+                ]
             }
         }))
         return ret
@@ -153,10 +161,10 @@ class TeamMapper extends Mapper<typeof teamModel> {
             throw Err.Role.roleNotExists
         }
         await mysql.execute(generateUpdateSql(teamUserModel,{
+            role_id:roleId
+        },{
             user_id:userId,
             team_id:teamId
-        },{
-            role_id:roleId
         }))
     }
 

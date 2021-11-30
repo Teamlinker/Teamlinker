@@ -1,4 +1,6 @@
+import { ICommon_Model_Project_Role } from "../../../common/model/project_role";
 import { ICommon_Route_Res_Project_List } from "../../../common/routes/response";
+import { Err } from "../../../common/status/error";
 import { Entity } from "../../common/entity/entity";
 import { EServer_Common_Event_Types } from "../../common/event/types";
 import { moduleMapper } from "../mapper/module";
@@ -42,5 +44,13 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
             page:page,
             data:ret.data
         }
+    }
+
+    async getRoles():Promise<ICommon_Model_Project_Role[]>{
+        if(!this.item || !this.item.id) {
+            throw  Err.Project.projectNotFound;
+        }
+        let ret=await projectMapper.getRoles(this.item.id);
+        return ret;
     }
 }
