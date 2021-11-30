@@ -2,11 +2,12 @@ import * as teamApi from "../../../common/routes/team";
 import { Err } from '../../../common/status/error';
 import { DComponent } from "../../common/decorate/component";
 import { EServer_Common_Event_Types } from "../../common/event/types";
-import { DHttpApi, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
 import { IUserSession } from '../../common/rpc/api/user';
 import { EServer_Common_User_Type } from '../../common/types/user';
 import TeamService from "../service/team";
 @DComponent
+@DHttpController(teamApi)
 class TeamController {
     @DHttpApi(teamApi.routes.create)
     async create(@DHttpReqParamRequired("name") name:string,@DHttpUser user:IUserSession):Promise<typeof teamApi.routes.create.res>{

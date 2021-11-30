@@ -2,10 +2,11 @@ import * as userApi from "../../../common/routes/user";
 import { Err } from "../../../common/status/error";
 import { DComponent } from "../../common/decorate/component";
 import HttpContext from "../../common/http/context";
-import { DHttpApi, DHttpContext, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import { DHttpApi, DHttpContext, DHttpController, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
 import AdminService from "../service/admin";
 import { IUserSession } from './../../common/rpc/api/user';
 @DComponent
+@DHttpController(userApi)
 class AdminController {
     @DHttpApi(userApi.routes.loginAdmin)
     async login(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.loginAdmin.res>{

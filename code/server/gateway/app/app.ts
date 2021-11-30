@@ -155,7 +155,7 @@ export default class GateWay extends Application {
                     obj.method = ctx.req.method
                     obj.headers = <any>ctx.req.headers
                     obj.data = ctx.state.formData ?? ctx.state.p
-                    obj.path = apiPath
+                    obj.path = path
                     obj.user = ctx.state.user
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
