@@ -1,0 +1,252 @@
+<!--
+ * @Descripttion:
+ * @version:
+ * @Author: gqwu
+ * @Date: 2021-10-09 12:19:05
+ * @LastEditors: gqwu
+ * @LastEditTime: 2021-12-01 16:22:43
+-->
+<template>
+  <div class="app-container">
+    <el-row style="padding-bottom: 10px">
+      <el-button type="primary" size="small" @click="handleCreate"
+        >新增团队</el-button
+      >
+    </el-row>
+    <el-table
+      v-loading="listLoading"
+      :data="list"
+      element-loading-text="Loading"
+      border
+      fit
+      highlight-current-row
+    >
+      <el-table-column align="center" label="序号" width="95">
+        <template slot-scope="scope">
+          {{ page.pageIndex * page.pageSize + scope.$index + 1 }}
+        </template>
+      </el-table-column>
+      <el-table-column label="名称">
+        <template slot-scope="scope">
+          {{ scope.row.name }}
+        </template>
+      </el-table-column>
+      <el-table-column label="创建时间">
+        <template slot-scope="scope">
+          {{ scope.row.created_time }}
+        </template>
+      </el-table-column>
+      <el-table-column label="最后修改时间">
+        <template slot-scope="scope">
+          {{ scope.row.modified_time }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="操作"
+        align="center"
+        width="150"
+        fixed="right"
+        class-name="small-padding fixed-width"
+      >
+        <template slot-scope="{ row, $index }">
+          <el-button type="text" size="mini" @click="handleUpdate(row)">
+            编辑
+          </el-button>
+          <el-button type="text" size="mini" @click="handleRemove(row)">
+            删除
+          </el-button>
+          <el-button type="text" size="mini" @click="handleTeamInfo(row)">
+            团队成员
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <div class="pagination_box">
+      <el-pagination
+        layout="prev, pager, next"
+        background
+        :total="page.pageCount"
+        @current-change="pageCurChange"
+      >
+      </el-pagination>
+    </div>
+
+    <el-dialog
+      background
+      :title="textMap[dialogStatus]"
+      :visible.sync="dialogFormVisible"
+    >
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="temp"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left: 50px"
+      >
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="temp.name" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false"> 取消 </el-button>
+        <el-button
+          type="primary"
+          @click="dialogStatus === 'create' ? createData() : updateData()"
+        >
+          确定
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+      <span>确认删除吗</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="removeData">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog background title="团队成员" :visible.sync="dialogMemberVisible">
+      团队成员
+    </el-dialog>
+  </div>
+</template>
+<script>
+import "@/styles/common.scss";
+import {
+  getList,
+  createTemp,
+  editTemp,
+  removeTemp,
+  teamMembers,
+} from "@/api/team";
+import { fromTime } from "@/utils/utils";
+export default {
+  data() {
+    return {
+      list: null,
+      listLoading: true,
+      textMap: {
+        update: "编辑",
+        create: "创建",
+      },
+      dialogStatus: "",
+      dialogFormVisible: false,
+      rules: {
+        name: [{ required: true, message: "名称必填", trigger: "blur" }],
+      },
+      temp: {
+        teamId: undefined,
+        name: "",
+      },
+      dialogVisible: false,
+      dialogMemberVisible: false,
+      page: {
+        pageIndex: 0,
+        pageSize: 10,
+        pageCount: 0,
+      },
+    };
+  },
+  created() {
+    this.fetchData();
+  },
+  methods: {
+    fetchData() {
+      this.listLoading = true;
+      getList({
+        keyword: "",
+        page: this.page.pageIndex,
+        size: this.page.pageSize,
+      }).then((res) => {
+        var data = res.data.data;
+        data.forEach((item) => {
+          item.created_time = this.moment(item.created_time).format(
+            "YYYY-MM-DD HH:mm:ss"
+          );
+          item.modified_time = this.moment(item.modified_time).format(
+            "YYYY-MM-DD HH:mm:ss"
+          );
+        });
+        this.list = data;
+        this.page.pageCount = parseInt(res.data.count);
+        this.listLoading = false;
+      });
+    },
+    resetTemp() {
+      this.temp = {
+        teamId: undefined,
+        name: "",
+      };
+    },
+    handleCreate() {
+      this.resetTemp();
+      this.dialogStatus = "create";
+      this.dialogFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs["dataForm"].clearValidate();
+      });
+    },
+    handleUpdate(row) {
+      this.dialogStatus = "update";
+      this.$nextTick(() => {
+        this.$refs["dataForm"].clearValidate();
+      });
+      this.temp = row;
+      this.dialogFormVisible = true;
+    },
+    createData() {
+      this.$refs["dataForm"].validate((valid) => {
+        if (valid) {
+          createTemp(this.temp).then(() => {
+            this.fetchData();
+            this.dialogFormVisible = false;
+            this.$notify({
+              title: "Success",
+              message: "创建成功",
+              type: "success",
+              duration: 2000,
+            });
+          });
+        }
+      });
+    },
+    updateData() {
+      this.$refs["dataForm"].validate((valid) => {
+        if (valid) {
+          editTemp({ teamId: this.temp.id, name: this.temp.name }).then(() => {
+            this.fetchData();
+            this.dialogFormVisible = false;
+            this.$notify({
+              title: "Success",
+              message: "更新成功",
+              type: "success",
+              duration: 2000,
+            });
+          });
+        }
+      });
+    },
+    handleRemove(row) {
+      this.dialogVisible = true;
+      this.temp.teamId = row.id;
+    },
+    removeData() {
+      removeTemp({ teamId: this.temp.teamId }).then((res) => {
+        this.fetchData();
+        this.dialogVisible = false;
+      });
+    },
+    handleTeamInfo(row) {
+      this.dialogMemberVisible = true;
+      teamMembers({ teamId: "" }).then((res) => {});
+    },
+    pageCurChange(page) {
+      this.page.pageIndex = page - 1;
+      this.fetchData();
+    },
+  },
+};
+</script>
