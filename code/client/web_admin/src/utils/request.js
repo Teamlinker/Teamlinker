@@ -4,7 +4,7 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-11-21 21:59:02
+ * @LastEditTime: 2021-12-01 18:27:16
  */
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
@@ -64,17 +64,17 @@ service.interceptors.response.use(
       })
 
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
+      if (res.code === 1002) {
         // to re-login
-        MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
-          confirmButtonText: 'Re-Login',
-          cancelButtonText: 'Cancel',
-          type: 'warning'
-        }).then(() => {
-          store.dispatch('user/resetToken').then(() => {
-            location.reload()
-          })
-        })
+        // MessageBox.confirm('需要重新登录', '确认退出', {
+        //   confirmButtonText: 'Re-Login',
+        //   cancelButtonText: 'Cancel',
+        //   type: 'warning'
+        // }).then(() => {
+        //   store.dispatch('user/resetToken').then(() => {
+        //     location.reload()
+        //   })
+        // })
       }
       return Promise.reject(new Error(res.msg || 'Error'))
     } else {

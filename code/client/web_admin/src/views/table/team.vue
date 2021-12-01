@@ -4,7 +4,7 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-12-01 16:22:43
+ * @LastEditTime: 2021-12-01 19:47:42
 -->
 <template>
   <div class="app-container">
@@ -109,7 +109,102 @@
     </el-dialog>
 
     <el-dialog background title="团队成员" :visible.sync="dialogMemberVisible">
-      团队成员
+      <el-row style="padding-bottom: 10px">
+        <el-button type="primary" size="small" @click="handleMemberCreate"
+          >新增成员</el-button
+        >
+      </el-row>
+
+      <el-table
+        :data="memberList"
+        element-loading-text="Loading"
+        border
+        fit
+        highlight-current-row
+      >
+        <el-table-column align="center" label="序号" width="95">
+          <template slot-scope="scope">
+            {{ scope.$index + 1 }}
+          </template>
+        </el-table-column>
+        <el-table-column label="姓名">
+          <template slot-scope="scope">
+            {{ scope.row.name }}
+          </template>
+        </el-table-column>
+        <el-table-column label="photo">
+          <template slot-scope="scope">
+            {{ scope.row.photo }}
+          </template>
+        </el-table-column>
+        <el-table-column label="权限">
+          <template slot-scope="scope">
+            {{ scope.row.role.name }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          align="center"
+          width="150"
+          fixed="right"
+          class-name="small-padding fixed-width"
+        >
+          <template slot-scope="{ row, $index }">
+            <el-button type="text" size="mini" @click="handleMmberUpdate(row)">
+              修改权限
+            </el-button>
+            <el-button type="text" size="mini" @click="handleMemberRemove(row)">
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+
+    <el-dialog :title="memberTitle" :visible.sync="dialogMemberFormVisible">
+      <el-form
+        ref="dataMemberForm"
+        :rules="memberrules"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left: 50px"
+      >
+        <el-form-item label="用户">
+          <el-select
+            v-model="tempMember.userId"
+            placeholder="请选择"
+            :disabled="userDisabled"
+          >
+            <el-option
+              v-for="item in usersOptions"
+              :key="item.id"
+              :label="item.username"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="tempMember.roleId" placeholder="请选择">
+            <el-option
+              v-for="item in rolesOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogMemberFormVisible = false"> 取消 </el-button>
+        <el-button
+          type="primary"
+          @click="userDisabled ? updateMemberData() : createMemberData()"
+        >
+          确定
+        </el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -121,12 +216,20 @@ import {
   editTemp,
   removeTemp,
   teamMembers,
+  teamRoles,
+  removeMemberTemp,
+  createMemberTemp,
+  updateMemberTemp,
 } from "@/api/team";
+import { getList as getMemberList } from "@/api/user";
 import { fromTime } from "@/utils/utils";
 export default {
   data() {
     return {
       list: null,
+      memberList: null,
+      rolesOptions: null,
+      usersOptions: null,
       listLoading: true,
       textMap: {
         update: "编辑",
@@ -137,6 +240,7 @@ export default {
       rules: {
         name: [{ required: true, message: "名称必填", trigger: "blur" }],
       },
+      memberrules: {},
       temp: {
         teamId: undefined,
         name: "",
@@ -148,6 +252,10 @@ export default {
         pageSize: 10,
         pageCount: 0,
       },
+      dialogMemberFormVisible: false,
+      tempMember: { userId: "", roleId: "" },
+      memberTitle: "",
+      userDisabled: true,
     };
   },
   created() {
@@ -239,13 +347,112 @@ export default {
         this.dialogVisible = false;
       });
     },
+    fetchMemberData() {
+      teamMembers({
+        teamId: this.temp.teamId,
+      }).then((res) => {
+        this.memberList = res.data;
+      });
+    },
     handleTeamInfo(row) {
       this.dialogMemberVisible = true;
-      teamMembers({ teamId: "" }).then((res) => {});
+      this.temp.teamId = row.id;
+      this.fetchMemberData();
     },
     pageCurChange(page) {
       this.page.pageIndex = page - 1;
       this.fetchData();
+    },
+    getRoles() {
+      teamRoles({ teamId: this.temp.teamId }).then((res) => {
+        this.rolesOptions = res.data;
+      });
+    },
+    getUsers() {
+      getMemberList({
+        keyword: "",
+        page: 0,
+        size: 1000,
+      }).then((res) => {
+        this.usersOptions = res.data.data;
+      });
+    },
+    handleMemberCreate() {
+      this.tempMember.userId = "";
+      this.tempMember.roleId = "";
+      this.memberTitle = "新增成员";
+      this.userDisabled = false;
+      this.dialogMemberFormVisible = true;
+      this.getRoles();
+      this.getUsers();
+    },
+    createMemberData() {
+      createMemberTemp({
+        teamId: this.temp.teamId,
+        userId: this.tempMember.userId,
+        roleId: this.tempMember.roleId,
+      }).then((res) => {
+        this.$notify({
+          title: "Success",
+          message: "添加成功",
+          type: "success",
+          duration: 2000,
+        });
+        this.dialogMemberFormVisible = false;
+        this.fetchMemberData();
+      });
+    },
+    handleMemberRemove(row) {
+      this.$confirm("确定, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.removeMemberData(row);
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    },
+    removeMemberData(row) {
+      removeMemberTemp({ teamId: this.temp.teamId, userId: row.id }).then(
+        (res) => {
+          this.fetchMemberData();
+          this.$message({
+            type: "success",
+            message: "删除成功!",
+          });
+        }
+      );
+    },
+    handleMmberUpdate(row) {
+      this.memberTitle = "修改权限";
+      this.userDisabled = true;
+      this.dialogMemberFormVisible = true;
+      this.getUsers();
+      this.getRoles();
+      this.tempMember.userId = row.id;
+      this.tempMember.roleId = "";
+    },
+    updateMemberData() {
+      updateMemberTemp({
+        teamId: this.temp.teamId,
+        userId: this.tempMember.userId,
+        roleId: this.tempMember.roleId,
+      }).then((res) => {
+        this.$notify({
+          title: "Success",
+          message: "修改成功",
+          type: "success",
+          duration: 2000,
+        });
+        this.dialogMemberFormVisible = false;
+        this.fetchMemberData();
+      });
     },
   },
 };
