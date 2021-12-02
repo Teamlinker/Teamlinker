@@ -4,7 +4,7 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-11-29 16:21:04
+ * @LastEditTime: 2021-12-02 10:19:53
  */
 import request from '@/utils/request'
 
@@ -79,6 +79,91 @@ export function removeTagTemp(params) {
   return request({
     url: '/api/project/tag/item',
     method: 'delete',
+    params
+  })
+}
+
+//获取项目模块列表
+export function getModuleList(params) {
+  return request({
+    url: '/api/project/module/list',
+    method: 'get',
+    params
+  })
+}
+
+
+// 创建项目模块
+export function createModuleTemp(data) {
+  return request({
+    url: '/api/project/module/item',
+    method: 'post',
+    data
+  })
+}
+// 编辑项目模块
+export function editModuleTemp(data) {
+  return request({
+    url: '/api/project/module/item',
+    method: 'put',
+    data
+  })
+}
+
+
+// 删除模块
+export function removeModuleTemp(params) {
+  return request({
+    url: '/api/project/module/item',
+    method: 'delete',
+    params
+  })
+}
+
+//获取项目成员列表
+export function getMemberList(params) {
+  return request({
+    url: '/api/project/member/list',
+    method: 'get',
+    params
+  })
+}
+
+
+// 创建项目成员
+export function createMemberTemp(data) {
+  return request({
+    url: '/api/project/member/item',
+    method: 'post',
+    data
+  })
+}
+// 编辑项目成员
+export function editMemberTemp(data) {
+  return request({
+    url: '/api/project/member/item',
+    method: 'put',
+    data
+  })
+}
+
+
+// 删除成员
+export function removeMemberTemp(params) {
+  return request({
+    url: '/api/project/member/item',
+    method: 'delete',
+    params
+  })
+}
+
+
+// 项目成员权限列表
+
+export function projectRoles(params) {
+  return request({
+    url: '/api/project/roles',
+    method: 'get',
     params
   })
 }

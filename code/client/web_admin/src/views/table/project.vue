@@ -4,7 +4,7 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-12-01 16:07:05
+ * @LastEditTime: 2021-12-02 10:45:00
 -->
 <template>
   <div class="app-container">
@@ -44,7 +44,7 @@
       <el-table-column
         label="操作"
         align="center"
-        width="180"
+        width="200"
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row, $index }">
@@ -56,6 +56,12 @@
           </el-button>
           <el-button type="text" size="mini" @click="handleTag(row)">
             标签管理
+          </el-button>
+          <el-button type="text" size="mini" @click="handleModule(row)">
+            模块管理
+          </el-button>
+          <el-button type="text" size="mini" @click="handleMember(row)">
+            成员管理
           </el-button>
         </template>
       </el-table-column>
@@ -218,6 +224,144 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="模块管理" :visible.sync="dialogModuleVisible">
+      <el-row style="padding-bottom: 10px">
+        <el-button type="primary" size="small" @click="createModuleData"
+          >新增模块</el-button
+        >
+      </el-row>
+      <el-tree
+        :data="data"
+        show-checkbox
+        node-key="id"
+        default-expand-all
+        :expand-on-click-node="false"
+      >
+        <span class="custom-tree-node" slot-scope="{ node, data }">
+          <span>{{ node.label }}</span>
+          <span>
+            <el-button type="text" size="mini" @click="() => append(data)">
+              Append
+            </el-button>
+            <el-button
+              type="text"
+              size="mini"
+              @click="() => remove(node, data)"
+            >
+              Delete
+            </el-button>
+          </span>
+        </span>
+      </el-tree>
+    </el-dialog>
+
+    <el-dialog title="成员管理" :visible.sync="dialogMemberVisible">
+      <el-row style="padding-bottom: 10px">
+        <el-button type="primary" size="small" @click="handleCreateMember"
+          >新增成员</el-button
+        >
+      </el-row>
+      <el-table :data="memberlist" border fit highlight-current-row>
+        <el-table-column align="center" label="序号" width="95">
+          <template slot-scope="scope">
+            {{ scope.$index + 1 }}
+          </template>
+        </el-table-column>
+
+        <el-table-column align="center" label="姓名">
+          <template slot-scope="scope">
+            {{ scope.row.name }}
+          </template>
+        </el-table-column>
+
+        <el-table-column align="center" label="角色">
+          <template slot-scope="scope">
+            {{ scope.row.role.name }}
+          </template>
+        </el-table-column>
+
+        <el-table-column align="center" label="类型">
+          <template slot-scope="scope">
+            <span v-if="scope.row.type == '0'">用户</span>
+            <span v-else-if="scope.row.type == '1'">团队</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column
+          label="操作"
+          align="center"
+          width="100"
+          class-name="small-padding fixed-width"
+        >
+          <template slot-scope="{ row }">
+            <el-button type="text" size="mini" @click="handleMemberRemove(row)">
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <div class="pagination_box">
+        <el-pagination
+          layout="prev, pager, next"
+          background
+          :total="memberPage.pageCount"
+          @current-change="memberPageCurChange"
+        >
+        </el-pagination>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="新增" :visible.sync="dialogMemberFormVisible">
+      <el-form
+        ref="dataMemberForm"
+        :rules="memberrules"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left: 50px"
+      >
+        <el-form-item label="用户">
+          <el-select v-model="tempMember.memberId" placeholder="请选择">
+            <el-option
+              v-for="item in membersOptions"
+              :key="item.id"
+              :label="item.username"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="类型">
+          <el-select v-model="tempMember.type" placeholder="请选择">
+            <el-option
+              v-for="item in typeOptions"
+              :key="item.id"
+              :label="item.label"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="角色">
+          <el-select v-model="tempMember.roleId" placeholder="请选择">
+            <el-option
+              v-for="item in rolesOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogMemberFormVisible = false"> 取消 </el-button>
+        <el-button type="primary" @click="createMemberData()"> 确定 </el-button>
+      </div>
+    </el-dialog>
+
     <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
       <span>确认删除吗</span>
       <span slot="footer" class="dialog-footer">
@@ -272,8 +416,18 @@ import {
   createTagTemp,
   editTagTemp,
   removeTagTemp,
+  getModuleList,
+  createModuleTemp,
+  editModuleTemp,
+  removeModuleTemp,
+  getMemberList,
+  createMemberTemp,
+  editMemberTemp,
+  removeMemberTemp,
+  projectRoles,
 } from "@/api/project";
-
+import { getList as getAllMemberList } from "@/api/user";
+let id = 1000;
 export default {
   data() {
     return {
@@ -293,6 +447,7 @@ export default {
       tagrules: {
         name: [{ required: true, message: "名称必填", trigger: "blur" }],
       },
+      memberrules: {},
       temp: {
         projectId: undefined,
         keyword: "",
@@ -317,6 +472,39 @@ export default {
         pageIndex: 0,
         pageSize: 10,
         pageCount: 0,
+      },
+      memberPage: {
+        pageIndex: 0,
+        pageSize: 10,
+        pageCount: 0,
+      },
+      dialogModuleVisible: false,
+      data: [
+        {
+          id: null,
+          label: "一级 1",
+        },
+      ],
+      dialogMemberVisible: false,
+      memberlist: null,
+      dialogMemberFormVisible: false,
+      membersOptions: null,
+      rolesOptions: null,
+      typeOptions: [
+        {
+          id: "0",
+          label: "用户",
+        },
+        {
+          id: "1",
+          label: "团队",
+        },
+      ],
+      tempMember: {
+        projectId: "",
+        memberId: "",
+        roleId: "",
+        type: "0",
       },
     };
   },
@@ -501,6 +689,109 @@ export default {
     tagPageCurChange(page) {
       this.tagpage.pageIndex = page - 1;
       this.fetchTagList();
+    },
+    handleModule(row) {
+      this.dialogModuleVisible = true;
+      this.temp.projectId = row.id;
+      this.fetchModuleData();
+    },
+    fetchModuleData() {
+      getModuleList({ projectId: this.temp.projectId }).then((res) => {
+        debugger;
+      });
+    },
+    createModuleData() {
+      createModuleTemp({
+        projectId: this.temp.projectId,
+        parentModuleId: null,
+        name: "web端",
+      }).then((res) => {
+        this.fetchModuleData();
+      });
+    },
+    append(data) {
+      const newChild = { id: id++, label: "testtest", children: [] };
+      if (!data.children) {
+        this.$set(data, "children", []);
+      }
+      data.children.push(newChild);
+    },
+    fetchMemberData() {
+      getMemberList({
+        projectId: this.temp.projectId,
+        page: this.memberPage.pageIndex,
+        size: this.memberPage.pageSize,
+      }).then((res) => {
+        this.memberlist = res.data.data;
+        this.memberPage.pageCount = parseInt(res.count);
+      });
+    },
+    handleMember(row) {
+      this.temp.projectId = row.id;
+      this.dialogMemberVisible = true;
+      this.fetchMemberData();
+    },
+    handleCreateMember(row) {
+      this.dialogMemberFormVisible = true;
+      this.temp.memberId = row.id;
+      this.getMembers();
+      this.getRoles();
+      this.tempMember.memberId = "";
+      this.tempMember.roleId = "";
+      this.tempMember.type = "0";
+    },
+    createMemberData() {
+      createMemberTemp({
+        projectId: this.temp.projectId,
+        memberId: this.tempMember.memberId,
+        type: this.tempMember.type,
+        roleId: this.tempMember.roleId,
+      }).then((res) => {
+        this.fetchMemberData();
+        this.dialogMemberFormVisible = false;
+      });
+    },
+    updateMemberData() {
+      editMemberTemp({}).then((res) => {});
+    },
+    handleMemberRemove(row) {
+      this.$confirm("确定, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          removeMemberTemp({
+            projectId: this.temp.projectId,
+            memberId: row.id,
+          }).then((res) => {
+            this.fetchMemberData();
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    },
+    memberPageCurChange(page) {
+      this.memberPage.pageIndex = page - 1;
+      this.fetchMemberData();
+    },
+    getRoles() {
+      projectRoles({ projectId: this.temp.projectId }).then((res) => {
+        this.rolesOptions = res.data;
+      });
+    },
+    getMembers() {
+      getAllMemberList({
+        keyword: "",
+        page: 0,
+        size: 1000,
+      }).then((res) => {
+        this.membersOptions = res.data.data;
+      });
     },
   },
 };
