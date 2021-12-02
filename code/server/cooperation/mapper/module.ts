@@ -34,7 +34,7 @@ class ModuleMapper extends Mapper<typeof projectModuleModel> {
             }
             if(data.length>0){
                 for(let obj of data){
-                    obj.data=arguments.callee(obj.id)
+                    obj.data=_get(obj.id)
                 }
             }
             return data;
