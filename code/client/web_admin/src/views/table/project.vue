@@ -4,7 +4,7 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-12-02 10:45:00
+ * @LastEditTime: 2021-12-03 14:41:54
 -->
 <template>
   <div class="app-container">
@@ -225,13 +225,17 @@
     </el-dialog>
 
     <el-dialog title="模块管理" :visible.sync="dialogModuleVisible">
-      <el-row style="padding-bottom: 10px">
+      <!-- <el-row style="padding-bottom: 10px">
         <el-button type="primary" size="small" @click="createModuleData"
           >新增模块</el-button
         >
-      </el-row>
+      </el-row> -->
       <el-tree
         :data="data"
+        :props="{
+          label: 'name',
+          children: 'data',
+        }"
         show-checkbox
         node-key="id"
         default-expand-all
@@ -241,18 +245,57 @@
           <span>{{ node.label }}</span>
           <span>
             <el-button type="text" size="mini" @click="() => append(data)">
-              Append
+              添加
             </el-button>
             <el-button
               type="text"
               size="mini"
+              v-if="data.id != null"
+              @click="() => update(node, data)"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="text"
+              size="mini"
+              v-if="data.id != null"
               @click="() => remove(node, data)"
             >
-              Delete
+              删除
             </el-button>
           </span>
         </span>
       </el-tree>
+    </el-dialog>
+
+    <el-dialog
+      :title="textModuleMap[dialogModlueStatus]"
+      :visible.sync="dialogModuleFormVisible"
+    >
+      <el-form
+        ref="dataModuleForm"
+        :rules="tagrules"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left: 50px"
+      >
+        <el-form-item label="模块名称" prop="tempModule.name">
+          <el-input v-model="tempModule.name" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogModuleFormVisible = false"> 取消 </el-button>
+        <el-button
+          type="primary"
+          @click="
+            dialogModlueStatus === 'create'
+              ? createModuleData()
+              : updateModuleData()
+          "
+        >
+          确定
+        </el-button>
+      </div>
     </el-dialog>
 
     <el-dialog title="成员管理" :visible.sync="dialogMemberVisible">
@@ -437,7 +480,12 @@ export default {
         update: "编辑",
         create: "创建",
       },
+      textModuleMap: {
+        update: "编辑",
+        create: "创建",
+      },
       dialogStatus: "",
+      dialogModlueStatus: "",
       dialogFormVisible: false,
       dialogTagFormVisible: false,
       rules: {
@@ -482,7 +530,9 @@ export default {
       data: [
         {
           id: null,
-          label: "一级 1",
+          name: "",
+          disabled: true,
+          data: [],
         },
       ],
       dialogMemberVisible: false,
@@ -505,6 +555,10 @@ export default {
         memberId: "",
         roleId: "",
         type: "0",
+      },
+      dialogModuleFormVisible: false,
+      tempModule: {
+        name: "",
       },
     };
   },
@@ -693,28 +747,80 @@ export default {
     handleModule(row) {
       this.dialogModuleVisible = true;
       this.temp.projectId = row.id;
+      this.data[0].name = row.name;
       this.fetchModuleData();
     },
     fetchModuleData() {
       getModuleList({ projectId: this.temp.projectId }).then((res) => {
-        debugger;
+        if (res.code == "0") {
+          if (res.data.length > 0) {
+            this.data[0].data = res.data;
+            console.log(this.data);
+          }
+        }
       });
     },
     createModuleData() {
       createModuleTemp({
         projectId: this.temp.projectId,
-        parentModuleId: null,
-        name: "web端",
+        parentModuleId: this.temp.parentModuleId,
+        name: this.tempModule.name,
       }).then((res) => {
-        this.fetchModuleData();
+        if (res.code == "0") {
+          this.dialogModuleFormVisible = false;
+          this.fetchModuleData();
+        }
+      });
+    },
+    updateModuleData() {
+      editModuleTemp({
+        parentModuleId: this.temp.parentModuleId,
+        name: this.tempModule.name,
+        moduleId: this.temp.moduleId,
+      }).then((res) => {
+        if (res.code == "0") {
+          this.dialogModuleFormVisible = false;
+          this.fetchModuleData();
+        }
       });
     },
     append(data) {
-      const newChild = { id: id++, label: "testtest", children: [] };
-      if (!data.children) {
-        this.$set(data, "children", []);
-      }
-      data.children.push(newChild);
+      this.tempModule.name = "";
+      this.temp.parentModuleId = data.id;
+      this.dialogModuleFormVisible = true;
+      this.dialogModlueStatus = "create";
+    },
+    remove(node, data) {
+      let moduleId = data.id;
+      this.$confirm("确定, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          removeModuleTemp({ moduleId: moduleId }).then((res) => {
+            this.fetchModuleData();
+            this.$notify({
+              title: "Success",
+              message: "删除成功",
+              type: "success",
+              duration: 2000,
+            });
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
+    },
+    update(node, data) {
+      this.tempModule.name = data.name;
+      this.temp.parentModuleId = node.parent.data.id;
+      this.temp.moduleId = data.id;
+      this.dialogModuleFormVisible = true;
+      this.dialogModlueStatus = "update";
     },
     fetchMemberData() {
       getMemberList({
