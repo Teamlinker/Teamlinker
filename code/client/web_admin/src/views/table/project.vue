@@ -4,7 +4,7 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-12-03 14:41:54
+ * @LastEditTime: 2021-12-03 14:46:01
 -->
 <template>
   <div class="app-container">
@@ -47,7 +47,7 @@
         width="200"
         class-name="small-padding fixed-width"
       >
-        <template slot-scope="{ row, $index }">
+        <template slot-scope="{ row }">
           <el-button type="text" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
