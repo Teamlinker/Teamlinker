@@ -1,13 +1,14 @@
 import * as http from 'http';
 import * as sio from "socket.io";
 import * as ioClient from "socket.io-client";
+import { v4 as uuid } from 'uuid';
 import { ECommon_Services } from '../../../common/types';
 import { REDIS_GATEWAY } from '../cache/keys/gateway';
 import { getEventsFunc } from "../event/event";
 import { EServer_Common_Event_Types } from '../event/types';
 import { getHttpRoutes, handleHttpCall } from '../http/http';
 import { getNacosInstance } from '../nacos/nacos';
-import { IServer_Common_Http_Proxy } from './../types/http';
+import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy } from './../types/http';
 import { IServer_Common_Nacos_Instance } from './../types/nacos';
 interface ISocketStruct {
     name:string,
@@ -30,8 +31,63 @@ var g_Socket=<{
 }>{
     
 }
+
+async function postHttpCall(socket:ioClient.Socket,objProxy:IServer_Common_Http_Proxy,resolve,reject){
+    if(objProxy.bodyType==EServer_Common_Http_Body_Type.FORMDATA) {
+        let field:string,data:Buffer
+        for(let key in objProxy.data) {
+            let val=objProxy.data[key]
+            if(typeof(val)=="object" && typeof(val.data)=="object" && val.data instanceof Buffer) {
+                field=key;
+                data=val.data
+                continue
+            }
+        }
+        delete objProxy.data[field]["data"];
+        let id=uuid()
+        await emitAsync(socket,"http-call-large-start",id)
+        await emitAsync(socket,"http-call-large-header",{
+            id:id,
+            data:objProxy,
+        })
+        let len=800*1024;
+        for(let i=0;i<data.length;i+=len){
+            let temp=data.slice(i,i+((i+len<data.length)?len:(data.length-i)))
+            await emitAsync(socket,"http-call-large-data",{
+                id:id,
+                data:temp,
+                field:field
+            })
+        }
+        socket.emit("http-call-large-end",id,(res:IServer_Common_Http_Proxy)=>{
+            if(res.status<200 || res.status>=300) {
+                reject(res)
+            } else {
+                resolve(res)
+            }
+        })
+    } else {
+        socket.emit("http-call",objProxy,(res:IServer_Common_Http_Proxy)=>{
+            if(res.status<200 || res.status>=300) {
+                reject(res)
+            } else {
+                resolve(res)
+            }
+        })
+    }
+}
+
+function emitAsync(socket:ioClient.Socket,message:string,data:any) {
+    return new Promise(function(resolve,reject){
+        socket.emit(message,data,(data)=>{
+            resolve(data)
+        })
+    })
+}
 export class Rpc{
     private static io:InstanceType<typeof sio.Server>
+    private static largeMap:Map<string,IServer_Common_Http_Proxy>=new Map()
+    private static largeMapTimeout:Map<string,NodeJS.Timeout>=new Map()
     static start(port:number | http.Server){
         Rpc.io=new sio.Server(port,{
             transports: ['websocket', 'polling']
@@ -91,6 +147,74 @@ export class Rpc{
                     }
                 }
             })
+            socket.on("http-call-large-start",async (id:string,callback)=>{
+                if(id) {
+                    this.largeMap.set(id,null)
+                    let timer=setTimeout(()=>{
+                        if(this.largeMap.has(id)){
+                            this.largeMap.delete(id)
+                        }
+                    },60*1000)
+                    this.largeMapTimeout.set(id,timer)
+                }
+                callback()
+            })
+            socket.on("http-call-large-header",async (obj:{
+                id:string,
+                data:IServer_Common_Http_Proxy,
+            },callback)=>{
+                if(obj && obj.id && this.largeMap.has(obj.id)) {
+                    this.largeMap.set(obj.id,obj.data)
+                }
+                callback()
+            })
+            socket.on("http-call-large-data",async (obj:{
+                id:string,
+                data:Buffer,
+                field:string
+            },callback)=>{
+                if(obj && obj.id && this.largeMap.has(obj.id)) {
+                    let objHttp=this.largeMap.get(obj.id)
+                    if(!objHttp.data[obj.field]["data"]){
+                        objHttp.data[obj.field]["data"]=obj.data
+                    } else {
+                        objHttp.data[obj.field]["data"]=Buffer.concat([objHttp.data[obj.field]["data"],obj.data],objHttp.data[obj.field]["data"].length+obj.data.length)
+                    }
+                }
+                callback()
+            })
+            socket.on("http-call-large-end", async (id: string, callback) => {
+                if (id && this.largeMap.has(id)) {
+                    let arg = this.largeMap.get(id)
+                    this.largeMap.delete(id)
+                    this.largeMapTimeout.delete(id)
+                    let key = arg.method + " " + arg.path
+                    let objRoute = getHttpRoutes()
+                    for (let keyRoute in objRoute) {
+                        if (key == keyRoute) {
+                            try {
+                                let ret = await handleHttpCall(objRoute[keyRoute], arg)
+                                callback(ret)
+                                return
+                            } catch (err) {
+                                let obj: IServer_Common_Http_Proxy = <IServer_Common_Http_Proxy>{}
+                                obj.status = 500
+                                obj.data = {
+                                    code: err.code,
+                                    msg: err.msg ?? err.message
+                                }
+                                callback(obj)
+                                return
+                            }
+                        }
+                    }
+                    let obj: IServer_Common_Http_Proxy = <IServer_Common_Http_Proxy>{}
+                    obj.status = 404
+                    callback(obj)
+                } else {
+                    callback()
+                }
+            })
         })
     }
     static async validInstance(name:string):Promise<IServer_Common_Nacos_Instance>
@@ -116,25 +240,13 @@ export async function proxyRequest(objProxy:IServer_Common_Http_Proxy,targetServ
             }
             let socket=ioClient.io(`ws://${instance.ip}:${instance.port}`)
             g_Socket[targetServer]=socket
-            socket.on("connect",()=>{
-                socket.emit("http-call",objProxy,(res:IServer_Common_Http_Proxy)=>{
-                    if(res.status<200 || res.status>=300) {
-                        reject(res)
-                    } else {
-                        resolve(res)
-                    }
-                })
+            socket.on("connect",async ()=>{
+                postHttpCall(socket,objProxy,resolve,reject)
             })
         }
         else
         {
-            g_Socket[targetServer].emit("http-call",objProxy,(res:IServer_Common_Http_Proxy)=>{
-                if(res.status<200 || res.status>=300) {
-                    reject(res)
-                } else {
-                    resolve(res)
-                }
-            })
+            postHttpCall(g_Socket[targetServer],objProxy,resolve,reject)
         }
     })
 }

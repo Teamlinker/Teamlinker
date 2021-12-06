@@ -1,3 +1,5 @@
+import * as crypto from "crypto";
+import * as fs from "fs-extra";
 import { Table_Project } from '../../../common/model/project';
 import { Permission_Base, Permission_Types } from '../../../common/permission/permission';
 import { getMysqlInstance } from "../../common/db/mysql";
@@ -11,43 +13,64 @@ import { Table_Team } from './../../../common/model/team';
 import { Table_Team_Role } from './../../../common/model/team_role';
 import { Table_Team_User } from './../../../common/model/team_user';
 import { Table_User } from './../../../common/model/user';
-import { Table_Version } from './../../../common/model/version';
+import { ICommon_Version_Config, Table_Version } from './../../../common/model/version';
 import { OBTPConfig } from './obtp';
 export interface IServer_GateWay_FormData {
     isFile:boolean,
     name:string,
     fileName:string,
-    data:string
+    data:Buffer|string,
+    md5:string,
+    size:number
 }
-export function parseFormData(str:string) :IServer_GateWay_FormData[]{
-    if(!str) {
+
+function bufferSplit(buffer, separator) {
+    let result = [];
+    let index = 0;
+  
+    while ((index = buffer.indexOf(separator)) != -1) {
+      result.push(buffer.slice(0, index));
+      buffer = buffer.slice(index + separator.length);
+    }
+    result.push(buffer);
+  
+    return result;
+}
+
+export function parseFormData(str: Buffer, boundary: string): IServer_GateWay_FormData[] {
+    if (!str) {
         return null;
     }
-    let ret:IServer_GateWay_FormData[]=[];
-    let flag=str.substring(0,str.indexOf("\r\n"))
-    let reg=new RegExp(`^${flag}\r\n([\\w\\W]*)\r\n${flag}\-\-\r\n$`)
-    let match=str.match(reg)
-    let matchText=match[1];
-    let arr=matchText.split(`\r\n${flag}\r\n`)
-    for(let obj of arr) {
-        let headerText=obj.substring(0,obj.indexOf("\r\n\r\n"))
-        let content=obj.substr(headerText.length+4)
-        let arrHeader=headerText.split("; ")
-        let objForm=<IServer_GateWay_FormData>{}
-        for(let obj of arrHeader){
-            let arr=obj.split("=")
-            let key=arr[0]
-            let value=arr[1]
-            if(key=="filename"){
-                objForm.isFile=true;
-                objForm.fileName=value.split("\r\n")[0].replace(/[\'\"]/g,"");
-            } else if(key=="name") {
-                objForm.name=value.replace(/[\'\"]/g,"");
-            }
+    let ret: IServer_GateWay_FormData[] = [];
+    let result = bufferSplit(str, boundary)
+    result.pop()
+    result.shift()
+    result = result.map(item => item.slice(2, item.length - 2))
+    result.forEach(item => {
+        let obj=<IServer_GateWay_FormData>{}
+        let [info, data] = bufferSplit(item, '\r\n\r\n')
+        info = info.toString()
+        if (info.indexOf('\r\n') >= 0) {
+            let infoResult = info.split('\r\n')[0].split('; ')
+            let name = infoResult[1].split('=')[1]
+            name = name.substring(1, name.length - 1)
+            let filename = infoResult[2].split('=')[1]
+            filename = filename.substring(1, filename.length - 1)
+            obj.isFile=true;
+            obj.data=data;
+            obj.fileName=filename
+            obj.name=name;
+            obj.size=data.length;
+            obj.md5=crypto.createHash("md5").update(data).digest("hex")
+        } else {
+            let name = info.split('; ')[1].split('=')[1]
+            name = name.substring(1, name.length - 1)
+            const value = data.toString()
+            obj.name=name;
+            obj.data=value
         }
-        objForm.data=content;
-        ret.push(objForm)
-    }
+        ret.push(obj)
+    })
     return ret;
 }
 
@@ -112,7 +135,13 @@ export async function initSystem() {
             }
         }
         await mysql.execute(`insert into ${Table_Project_Member} (id,role_id,project_id,member_id,type) values ('${await generateSnowId()}','${projectRoleUserId}','${projectId}','${userId}',0)`)
-        await mysql.execute(`insert into ${Table_Version} (version) values ('${getNacosInstance().version}')`)
+        let config:ICommon_Version_Config={
+            fileBasePath:"/tmp/teamlinker"
+        }
+        await mysql.execute(`insert into ${Table_Version} (version,config) values ('${getNacosInstance().version}','${JSON.stringify(config)}')`)
+        if(!(await fs.pathExists(config.fileBasePath))) {
+            await fs.mkdirp(config.fileBasePath)
+        }
         let objGroupRole=OBTPConfig.Role.Team_Role,groupRoleUserId;
         for(let key in objGroupRole) {
             let obj=objGroupRole[key]

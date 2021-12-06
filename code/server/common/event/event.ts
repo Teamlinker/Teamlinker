@@ -6,7 +6,7 @@ var g_events=<{
 
 }
 
-export async function getEventsFunc(){
+export function getEventsFunc(){
     return g_events
 }
 

@@ -6,7 +6,7 @@ export interface ICommon_Model_Project {
   name :string,
   created_time :Date,
   modified_time :Date,
-  image :string,
+  photo :string,
   created_by :string ,
   description :string,
 }

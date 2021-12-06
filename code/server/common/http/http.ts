@@ -198,10 +198,12 @@ export async function handleHttpCall(obj:IServer_Common_Http_Structure,ctx:IServ
             }
             else if(obj.type=="Object")
             {
-                try {
-                    value=JSON.parse(value)
-                } catch {
-                    value={}
+                if(typeof(value)=="string") {
+                    try {
+                        value=JSON.parse(value)
+                    } catch {
+                        value={}
+                    }
                 }
             }
             arr.push(value)

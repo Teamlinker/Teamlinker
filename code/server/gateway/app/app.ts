@@ -1,8 +1,10 @@
 import * as http from "http";
 import * as Koa from "koa";
 import * as body from 'koa-bodyparser';
+import * as koaStaticServer from "koa-static-server";
 import { PassThrough } from "stream";
 import { Permission_Base } from '../../../common/permission/permission';
+import * as fileApi from "../../../common/routes/file";
 import * as projectApi from "../../../common/routes/project";
 import * as teamApi from "../../../common/routes/team";
 import { ICommon_HttpApi } from "../../../common/routes/types";
@@ -17,27 +19,26 @@ import { PermissionProjectRead } from '../../common/permission/project/relation'
 import { proxyRequest } from "../../common/rpc/rpc";
 import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
 import { EServer_Common_User_Type } from '../../common/types/user';
+import CommonUtil from "../../common/util/common";
 import { generateHttpErrorResponse, generateHttpOkResponse } from "../../common/util/http";
 import userRpcApi from '../rpc/user';
 import { initSystem, parseFormData } from "../util/util";
+import { ICommon_Version_Config } from './../../../common/model/version';
 import { CacheService } from './../cache/service';
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi];
 var app = new Koa();
-var pipe=function (from,to) :Promise<string>{
+var config=<ICommon_Version_Config>{}
+var pipe = function (from, to): Promise<Buffer> {
     return new Promise(function (resolve) {
-        let p=from.pipe(to);
-        let stream=new PassThrough();
-        from.pipe(stream);
-        p.on("finish",function () {
-            const originalReqData = [];
-            let size = 0;
-            stream.on("data",function (chunk) {
-                originalReqData.push(chunk);
-                size += chunk.length;
-            })
-            stream.on("end",function () {
-                resolve(Buffer.concat(originalReqData, size).toString());
-            })
+        from.pipe(to);
+        const originalReqData = [];
+        let size = 0;
+        to.on("data", function (chunk) {
+            originalReqData.push(chunk);
+            size += chunk.length;
+        })
+        to.on("end", function () {
+            resolve(Buffer.concat(originalReqData, size));
         })
     })
 }
@@ -49,6 +50,7 @@ export default class GateWay extends Application {
         await this.initKoa();
     }
     async initKoa() {
+        config=await CommonUtil.getGlobalConfig()
         let apiMap=<{
             [param:string]:{
                 [parem:string]:{
@@ -91,24 +93,27 @@ export default class GateWay extends Application {
                     ctx.body = generateHttpErrorResponse(Err.Http.overFileSize)
                     return;
                 }
-                let stream=new PassThrough()
-                let ret=await pipe(ctx.req,stream)
-                let arr = parseFormData(ret);
-                    let obj=<{
-                        [param:string]:string|IServer_Common_Http_Req_File
-                    }>{}
-                    for(let o of arr) {
-                        if(o.isFile) {
-                            obj[o.name]={
-                                data:o.data,
-                                fileName:o.fileName
-                            }
-                        } else {
-                            obj[o.name]=o.data
+                let stream = new PassThrough()
+                let ret = await pipe(ctx.req, stream)
+                const boundary = `--${ctx.headers['content-type'].split('; ')[1].split('=')[1]}`
+                let arr = parseFormData(ret, boundary);
+                let obj = <{
+                    [param: string]: string | IServer_Common_Http_Req_File
+                }>{}
+                for (let o of arr) {
+                    if (o.isFile) {
+                        obj[o.name] = {
+                            data: o.data as Buffer,
+                            fileName: o.fileName,
+                            size: o.size,
+                            md5: o.md5
                         }
+                    } else {
+                        obj[o.name] = o.data as string
                     }
-                    ctx.state.formData=obj
-                    await next();
+                }
+                ctx.state.formData = obj
+                await next();
             } else {
                 await next()
             }
@@ -198,6 +203,10 @@ export default class GateWay extends Application {
                 await next()
             }
         })
+        app.use(koaStaticServer({
+            rootDir:config.fileBasePath,
+            rootPath:"/file"
+        }))
         http.createServer(app.callback()).listen(getNacosInstance().serverPort,function(){
             console.log(`start`);
             let obj=getComponent<InstanceType<typeof PermissionProjectRead>>(PermissionProjectRead.name)

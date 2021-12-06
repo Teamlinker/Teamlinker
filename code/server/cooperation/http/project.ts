@@ -24,7 +24,7 @@ class ProjectController {
             name:name,
             created_by:user.userId,
             description:description,
-            image:image
+            photo:image
         })
         let ret=await obj.create()
         return ret
@@ -39,7 +39,7 @@ class ProjectController {
         let item=obj.getItem()
         item.name=name;
         item.keyword=keyword
-        item.image=image
+        item.photo=image
         item.description=description
         let ret=await obj.update()
         return ret;

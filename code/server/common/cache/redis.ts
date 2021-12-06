@@ -6,6 +6,7 @@ export function getRedisInstance(){
 }
 export class Redis {
     private redis:InstanceType<typeof IORedis>
+    private watchMap:Map<string,Function>=new Map
     private parseType(value:any,type:any){
         let t=typeof type;
         if(value==null)
@@ -47,7 +48,26 @@ export class Redis {
             password:info.password,
             db:info.db
         })
+        // @ts-ignore
+        this.redis.send_command('config', ['set', 'notify-keyspace-events', 'Ex'], ()=>{
+            let sub=this.redis.duplicate()
+            sub.subscribe(`__keyevent@${info.db}__:expired`,()=>{
+                sub.on("message",(channel,key)=>{
+                    if(this.watchMap.has(key)){
+                        let func=this.watchMap.get(key)
+                        this.watchMap.delete(key)
+                        func(key)
+                    }
+                })
+                sub.on("error",()=>{
+                    this.watchMap.clear()
+                })
+            })
+        })
         g_redis=this;
+    }
+    listenExpired(key:string,func:{(key:string):void}){
+        this.watchMap.set(key,func)
     }
     async get<T>(key:string,type:T):Promise<T> {
         let ret=await this.redis.get(key)
