@@ -5,6 +5,7 @@ import { emitServiceEvent } from '../rpc/rpc';
 import { Mapper } from './mapper';
 export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
     protected item:T["model"];
+    protected _item:T["model"];
     protected mapper:M
     constructor(mapper:M) {
         this.mapper=mapper
@@ -40,13 +41,25 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         }
         await this.mapper.create(this.item)
         await this.loadItem();
+        if(this.item["photo"]) {
+            emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item["photo"])
+        }
         return this.item;
     }
     async update():Promise<T["model"]>{
         if(!this.item || !this.item.id) {
             throw  Err.Common.itemNotFound;
         }
+        let ret=await this.mapper.getById(this.item.id)
         await this.mapper.update(this.item)
+        if(!ret["photo"] && this.item["photo"]) {
+            emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item["photo"])
+        } else if(ret["photo"] && ret["photo"]!=this.item["photo"]) {
+            if(this.item["photo"]) {
+                emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item["photo"])
+            }
+            emitServiceEvent(EServer_Common_Event_Types.File.UNREF,ret["photo"])
+        }
         return this.item;
     }
     async delete(eventPulish?:EServer_Common_Event_Types.Types){
@@ -54,7 +67,9 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         if(eventPulish) {
             emitServiceEvent(eventPulish,this.item.id);
         }
-        
+        if(this.item["photo"]) {
+            emitServiceEvent(EServer_Common_Event_Types.File.UNREF,this.item["photo"])
+        }
     }
     async loadItem():Promise<T["model"]>{
         if(!this.item || !this.item.id) {
