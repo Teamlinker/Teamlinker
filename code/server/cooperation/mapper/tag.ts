@@ -15,7 +15,7 @@ class TagMapper extends Mapper<typeof projectLabelModel> {
         }
         let mysql=getMysqlInstance()
         let ret:Pick<typeof projectLabelModel["model"],"id"|"name">[]=[]
-        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Label} where project_id='${projectId}'${keyword?` and name like %${keyword}%`:""}`))[0]
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Label} where project_id='${projectId}'${keyword?` and name like '%${keyword}%'`:""}`))[0]
         let totalPage=CommonUtil.pageTotal(count,size)
         if(count>0) {
             ret=await mysql.execute(generateQuerySql(projectLabelModel,["id","name"],{
