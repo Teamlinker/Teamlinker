@@ -4,10 +4,36 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-12-03 14:46:01
+ * @LastEditTime: 2021-12-07 17:03:52
 -->
 <template>
   <div class="app-container">
+    <div class="filter-container">
+      <el-input
+        v-model="listQuery.keyword"
+        placeholder="关键字"
+        style="width: 200px"
+        size="small"
+        @keyup.enter.native="handleFilter"
+      />
+      <el-button
+        type="primary"
+        size="small"
+        @click="handleFilter"
+        style="margin-left: 10px"
+      >
+        搜索
+      </el-button>
+      <el-button
+        type="primary"
+        size="small"
+        @click="handleReset"
+        style="margin-left: 10px"
+      >
+        重置
+      </el-button>
+    </div>
+
     <el-row style="padding-bottom: 10px">
       <el-button type="primary" size="small" @click="handleCreate"
         >新增项目</el-button
@@ -131,6 +157,31 @@
     </el-dialog>
 
     <el-dialog title="标签管理" :visible.sync="dialogTagVisible">
+      <div class="filter-container">
+        <el-input
+          v-model="tagListQuery.keyword"
+          placeholder="关键字"
+          style="width: 200px"
+          size="small"
+          @keyup.enter.native="handleTagFilter"
+        />
+        <el-button
+          type="primary"
+          size="small"
+          @click="handleTagFilter"
+          style="margin-left: 10px"
+        >
+          搜索
+        </el-button>
+        <el-button
+          type="primary"
+          size="small"
+          @click="handleTagReset"
+          style="margin-left: 10px"
+        >
+          重置
+        </el-button>
+      </div>
       <el-row style="padding-bottom: 10px">
         <el-button type="primary" size="small" @click="handleCreateTag"
           >新增标签</el-button
@@ -149,6 +200,7 @@
                 v-model="scope.row.name"
                 class="edit-input"
                 size="small"
+                style="width: 60%"
               />
               <el-button
                 class="cancel-btn"
@@ -156,6 +208,7 @@
                 icon="el-icon-refresh"
                 type="warning"
                 @click="cancelEdit(scope.row)"
+                style="margin-left: 10px"
               >
                 取消
               </el-button>
@@ -209,12 +262,13 @@
     <el-dialog title="新增" :visible.sync="dialogTagFormVisible">
       <el-form
         ref="dataTagForm"
+        :model="tempTag"
         :rules="tagrules"
         label-position="left"
         label-width="70px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="tag名称" prop="tempTag.name">
+        <el-form-item label="标签名称" prop="name">
           <el-input v-model="tempTag.name" />
         </el-form-item>
       </el-form>
@@ -225,11 +279,6 @@
     </el-dialog>
 
     <el-dialog title="模块管理" :visible.sync="dialogModuleVisible">
-      <!-- <el-row style="padding-bottom: 10px">
-        <el-button type="primary" size="small" @click="createModuleData"
-          >新增模块</el-button
-        >
-      </el-row> -->
       <el-tree
         :data="data"
         :props="{
@@ -274,12 +323,13 @@
     >
       <el-form
         ref="dataModuleForm"
-        :rules="tagrules"
+        :model="tempModule"
+        :rules="modulerules"
         label-position="left"
         label-width="70px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="模块名称" prop="tempModule.name">
+        <el-form-item label="模块名称" prop="name">
           <el-input v-model="tempModule.name" />
         </el-form-item>
       </el-form>
@@ -358,12 +408,13 @@
     <el-dialog title="新增" :visible.sync="dialogMemberFormVisible">
       <el-form
         ref="dataMemberForm"
+        :model="tempMember"
         :rules="memberrules"
         label-position="left"
         label-width="70px"
         style="width: 400px; margin-left: 50px"
       >
-        <el-form-item label="用户">
+        <el-form-item label="用户" prop="memberId">
           <el-select v-model="tempMember.memberId" placeholder="请选择">
             <el-option
               v-for="item in membersOptions"
@@ -375,7 +426,7 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="类型">
+        <el-form-item label="类型" prop="type">
           <el-select v-model="tempMember.type" placeholder="请选择">
             <el-option
               v-for="item in typeOptions"
@@ -387,7 +438,7 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="角色">
+        <el-form-item label="角色" prop="roleId">
           <el-select v-model="tempMember.roleId" placeholder="请选择">
             <el-option
               v-for="item in rolesOptions"
@@ -470,10 +521,11 @@ import {
   projectRoles,
 } from "@/api/project";
 import { getList as getAllMemberList } from "@/api/user";
-let id = 1000;
 export default {
   data() {
     return {
+      listQuery: { keyword: "" },
+      tagListQuery: { keyword: "" },
       list: null,
       listLoading: true,
       textMap: {
@@ -495,7 +547,14 @@ export default {
       tagrules: {
         name: [{ required: true, message: "名称必填", trigger: "blur" }],
       },
-      memberrules: {},
+      modulerules: {
+        name: [{ required: true, message: "名称必填", trigger: "blur" }],
+      },
+      memberrules: {
+        memberId: [{ required: true, message: "用户必填", trigger: "change" }],
+        roleId: [{ required: true, message: "角色必填", trigger: "change" }],
+        type: [{ required: true, message: "类型必填", trigger: "change" }],
+      },
       temp: {
         projectId: undefined,
         keyword: "",
@@ -569,7 +628,7 @@ export default {
     fetchData() {
       this.listLoading = true;
       getList({
-        keyword: "",
+        keyword: this.listQuery.keyword,
         page: this.page.pageIndex,
         size: this.page.pageSize,
       }).then((res) => {
@@ -577,6 +636,13 @@ export default {
         this.page.pageCount = parseInt(res.data.count);
         this.listLoading = false;
       });
+    },
+    handleFilter() {
+      this.page.pageIndex = 0;
+      this.fetchData();
+    },
+    handleReset() {
+      this.listQuery.keyword = "";
     },
     resetTemp() {
       this.temp = {
@@ -657,15 +723,24 @@ export default {
         }
       });
     },
+    handleTagFilter() {
+      this.tagpage.pageIndex = 0;
+      this.fetchTagList();
+    },
+    handleTagReset() {
+      this.tagListQuery.keyword = "";
+    },
     handleTag(row) {
       this.temp.projectId = row.id;
       this.dialogTagVisible = true;
+      this.tagListQuery.keyword = "";
+      this.tagpage.pageIndex = 0;
       this.fetchTagList();
     },
     fetchTagList() {
       getTagList({
         projectId: this.temp.projectId,
-        keyword: "",
+        keyword: this.tagListQuery.keyword,
         page: this.tagpage.pageIndex,
         size: this.tagpage.pageSize,
       }).then((res) => {
@@ -691,19 +766,23 @@ export default {
       });
     },
     createTagData() {
-      createTagTemp({
-        projectId: this.temp.projectId,
-        name: this.tempTag.name,
-      }).then((res) => {
-        if (res.code == "0") {
-          this.dialogTagFormVisible = false;
-          this.$notify({
-            title: "Success",
-            message: "创建成功",
-            type: "success",
-            duration: 2000,
+      this.$refs["dataTagForm"].validate((valid) => {
+        if (valid) {
+          createTagTemp({
+            projectId: this.temp.projectId,
+            name: this.tempTag.name,
+          }).then((res) => {
+            if (res.code == "0") {
+              this.dialogTagFormVisible = false;
+              this.$notify({
+                title: "Success",
+                message: "创建成功",
+                type: "success",
+                duration: 2000,
+              });
+              this.fetchTagList();
+            }
           });
-          this.fetchTagList();
         }
       });
     },
@@ -761,26 +840,34 @@ export default {
       });
     },
     createModuleData() {
-      createModuleTemp({
-        projectId: this.temp.projectId,
-        parentModuleId: this.temp.parentModuleId,
-        name: this.tempModule.name,
-      }).then((res) => {
-        if (res.code == "0") {
-          this.dialogModuleFormVisible = false;
-          this.fetchModuleData();
+      this.$refs["dataModuleForm"].validate((valid) => {
+        if (valid) {
+          createModuleTemp({
+            projectId: this.temp.projectId,
+            parentModuleId: this.temp.parentModuleId,
+            name: this.tempModule.name,
+          }).then((res) => {
+            if (res.code == "0") {
+              this.dialogModuleFormVisible = false;
+              this.fetchModuleData();
+            }
+          });
         }
       });
     },
     updateModuleData() {
-      editModuleTemp({
-        parentModuleId: this.temp.parentModuleId,
-        name: this.tempModule.name,
-        moduleId: this.temp.moduleId,
-      }).then((res) => {
-        if (res.code == "0") {
-          this.dialogModuleFormVisible = false;
-          this.fetchModuleData();
+      this.$refs["dataModuleForm"].validate((valid) => {
+        if (valid) {
+          editModuleTemp({
+            parentModuleId: this.temp.parentModuleId,
+            name: this.tempModule.name,
+            moduleId: this.temp.moduleId,
+          }).then((res) => {
+            if (res.code == "0") {
+              this.dialogModuleFormVisible = false;
+              this.fetchModuleData();
+            }
+          });
         }
       });
     },
@@ -847,18 +934,26 @@ export default {
       this.tempMember.type = "0";
     },
     createMemberData() {
-      createMemberTemp({
-        projectId: this.temp.projectId,
-        memberId: this.tempMember.memberId,
-        type: this.tempMember.type,
-        roleId: this.tempMember.roleId,
-      }).then((res) => {
-        this.fetchMemberData();
-        this.dialogMemberFormVisible = false;
+      this.$refs["dataMemberForm"].validate((valid) => {
+        if (valid) {
+          createMemberTemp({
+            projectId: this.temp.projectId,
+            memberId: this.tempMember.memberId,
+            type: this.tempMember.type,
+            roleId: this.tempMember.roleId,
+          }).then((res) => {
+            this.fetchMemberData();
+            this.dialogMemberFormVisible = false;
+          });
+        }
       });
     },
     updateMemberData() {
-      editMemberTemp({}).then((res) => {});
+      this.$refs["dataMemberForm"].validate((valid) => {
+        if (valid) {
+          editMemberTemp({}).then((res) => {});
+        }
+      });
     },
     handleMemberRemove(row) {
       this.$confirm("确定, 是否继续?", "提示", {
