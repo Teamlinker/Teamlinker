@@ -4,10 +4,36 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-11-30 11:22:28
+ * @LastEditTime: 2021-12-07 17:07:15
 -->
 <template>
   <div class="app-container">
+    <div class="filter-container">
+      <el-input
+        v-model="listQuery.keyword"
+        placeholder="关键字"
+        style="width: 200px"
+        size="small"
+        @keyup.enter.native="handleFilter"
+      />
+      <el-button
+        type="primary"
+        size="small"
+        @click="handleFilter"
+        style="margin-left: 10px"
+      >
+        搜索
+      </el-button>
+      <el-button
+        type="primary"
+        size="small"
+        @click="handleReset"
+        style="margin-left: 10px"
+      >
+        重置
+      </el-button>
+    </div>
+
     <el-row style="padding-bottom: 10px">
       <el-button type="primary" size="small" @click="handleCreate"
         >新增用户</el-button
@@ -182,6 +208,7 @@ import { fromTime } from "@/utils/utils";
 export default {
   data() {
     return {
+      listQuery: { keyword: "" },
       list: null,
       listLoading: true,
       textMap: {
@@ -214,7 +241,7 @@ export default {
     fetchData() {
       this.listLoading = true;
       getList({
-        keyword: "",
+        keyword: this.listQuery.keyword,
         page: this.page.pageIndex,
         size: this.page.pageSize,
       }).then((res) => {
@@ -232,6 +259,13 @@ export default {
         this.page.pageCount = parseInt(res.data.count);
         this.listLoading = false;
       });
+    },
+    handleFilter() {
+      this.page.pageIndex = 0;
+      this.fetchData();
+    },
+    handleReset() {
+      this.listQuery.keyword = "";
     },
     resetTemp() {
       this.temp = {
