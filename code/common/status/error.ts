@@ -121,5 +121,15 @@ export namespace Err {
             msg:"role not exists"
         }
     }
+    export let File ={
+        fileNotFound:{
+            code:6000,
+            msg:"file not found"
+        },
+        md5NotExists:{
+            code:6001,
+            msg:"md5 not exists"
+        }
+    }
 }
 

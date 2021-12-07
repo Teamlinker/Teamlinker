@@ -47,5 +47,7 @@ export interface IServer_Common_Http_Proxy {
 
 export interface IServer_Common_Http_Req_File {
     fileName:string,
-    data:string
+    data:Buffer,
+    md5:string,
+    size:number
 }

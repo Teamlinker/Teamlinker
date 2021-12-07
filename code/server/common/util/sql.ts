@@ -158,7 +158,10 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
 }
 
 export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
-    [param in keyof T["model"]]?:string|number|Date
+    [param in keyof T["model"]]?:string|number|Date|{
+        exp:"+"|"-",
+        value:number
+    }
 },objExpr:{
     [param in keyof T["model"]]?:EXPRVALUE
 },exprMode?:"and"|"or"):{
@@ -177,6 +180,8 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
             val=String(value)
         } else if(typeof(value)=="boolean") {
             val=value?1:0+""
+        } else if(typeof(value)=="object" && !(value instanceof Date) && value.exp) {
+            val=`${key}${value.exp}${value.value}`
         } else {
             val="'"+value+"'"
         }

@@ -65,7 +65,7 @@ class ModuleMapper extends Mapper<typeof projectModuleModel> {
             }))
             if(data.length>0){
                 for(let obj of data){
-                    await arguments.callee(obj)
+                    await _delete(obj)
                 }
             }
         }

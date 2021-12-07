@@ -72,6 +72,7 @@ class UserController {
             throw Err.User.userNotFound
         }
         delete (<any>content).password
+        delete (<any>content).userId
         user.assignItem(content)
         let obj=await user.update();
         delete obj.password
