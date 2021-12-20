@@ -1,0 +1,33 @@
+/*滚动条鼠标移上去*/
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #bbb;
+}
+
+/* router view transition */
+.fade-transform-enter-active,
+.fade-transform-leave-active {
+  transition: transform 0.35s, opacity 0.28s ease-in-out;
+}
+
+.fade-transform-enter-from {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.fade-transform-leave-to {
+  opacity: 0;
+  transform: scale(1.03);
+}
+// 全局 transition css
+
+.slide-fade-enter-active,.slide-fade-leave-active {
+  transition: transform 0.35s, opacity 0.28s ease-in-out;
+}
+.slide-fade-enter-from {
+  opacity: 0;
+  transform: scale(0.97);
+}
+.slide-fade-leave-to{
+  opacity: 0;
+  transform: scale(1.03);
+}
