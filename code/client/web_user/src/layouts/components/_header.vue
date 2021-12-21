@@ -100,8 +100,6 @@ export default defineComponent({
                     
                 }else{
                     message.info(msg || '登出失败')
-                    sessionStorage.removeItem('token')
-                    sessionStorage.removeItem('userInfo')
                 }
             }
         }
