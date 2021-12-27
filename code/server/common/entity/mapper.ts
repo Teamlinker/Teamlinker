@@ -28,7 +28,9 @@ export abstract class Mapper<T extends BaseModel> {
         return ret
     }
     async updateConfig(info:T["model"]){}
-    async update(info:T["model"]):Promise<void> {
+    async update(data:T["model"]):Promise<void> {
+        let info:T["model"]={}
+        Object.assign(info,data)
         if(!info.id) {
             throw  Err.Common.itemNotFound
         }

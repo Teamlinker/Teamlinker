@@ -171,5 +171,41 @@ class UserMapper extends Mapper<typeof userModel> {
             data:ret.map(item=>item.project)
         };
     }
+    async users(userIds:string[]){
+        if(!userIds){
+            throw Err.User.userIdNotExists
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(userModel,[],{
+            id:{
+                exp:"in",
+                value:userIds
+            }
+        }))
+        return ret;
+    }
+
+    async filter(name:string,size:number)
+    {
+        if(!name) {
+            throw Err.User.userNameNotExists
+        }
+        if(!size) {
+            throw Err.Common.paramError
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(userModel,["id","username","photo"],{
+            admin:0,
+            active:1,
+            username:{
+                exp:"%like%",
+                value:name
+            }
+        },"and",{
+            field:"username",
+            type:"asc"
+        },0,size))
+        return ret;
+    }
 }
 export let userMapper=new UserMapper()

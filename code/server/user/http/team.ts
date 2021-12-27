@@ -107,4 +107,10 @@ class TeamController {
         return list
     }
 
+    @DHttpApi(teamApi.routes.filterTeam)
+    async filterTeam(@DHttpReqParamRequired("name") name:string) :Promise<typeof teamApi.routes.filterTeam.res>{
+        let ret=await TeamService.filter(name,10);
+        return ret;
+    }
+
 }

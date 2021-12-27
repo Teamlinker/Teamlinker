@@ -3,6 +3,7 @@ import * as projectApi from "../../../common/routes/project";
 import { Err } from "../../../common/status/error";
 import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
 import { IUserSession } from "../../common/rpc/api/user";
+import { EServer_Common_User_Type } from "../../common/types/user";
 import ProjectService from "../service/project";
 
 @DHttpController(projectApi)
@@ -96,8 +97,14 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.list)
-    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number) :Promise<typeof projectApi.routes.list.res>{
-        let list=await ProjectService.list(page,size,keyword)
+    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof projectApi.routes.list.res>{
+        let user=""
+        if(userInfo.type==EServer_Common_User_Type.ADMIN && userId) {
+            user=userId
+        } else if(userInfo.type==EServer_Common_User_Type.USER) {
+            user=userInfo.userId
+        }
+        let list=await ProjectService.list(page,size,keyword,user)
         return list
     }
 

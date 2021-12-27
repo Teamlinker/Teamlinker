@@ -145,4 +145,16 @@ class UserController {
         let ret=await user.profile()
         return ret;
     }
+
+    @DHttpApi(userApi.routes.infos)
+    async infos(@DHttpReqParam("userIds") userIds:string) :Promise<typeof userApi.routes.infos.res>{
+        let ret=await UserService.userInfos(userIds)
+        return ret;
+    }
+
+    @DHttpApi(userApi.routes.filterUser)
+    async filterUser(@DHttpReqParamRequired("name") name:string) :Promise<typeof userApi.routes.filterUser.res>{
+        let ret=await UserService.filter(name,10);
+        return ret;
+    }
 }

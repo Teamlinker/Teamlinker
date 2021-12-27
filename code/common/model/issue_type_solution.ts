@@ -1,11 +1,18 @@
+import { BaseModel } from "./base"
+
 export interface ICommon_Model_Issue_Type_Solution {
     id :string ,
     name :string,
     description :string,
-    system :number,
+    reserved :number,
     created_time :Date,
     modified_time :Date,
-    created_by :string ,
-    modified_by :string ,
 }
 export const Table_Issue_Type_Solution="issue_type_solution"
+
+class IssueTypeSolutionModel extends BaseModel {
+    table=Table_Issue_Type_Solution
+    model=<ICommon_Model_Issue_Type_Solution>{}
+  }
+  
+export let issueTypeSolutionModel=new IssueTypeSolutionModel

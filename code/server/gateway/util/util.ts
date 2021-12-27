@@ -5,6 +5,10 @@ import { Permission_Base, Permission_Types } from '../../../common/permission/pe
 import { getMysqlInstance } from "../../common/db/mysql";
 import { getNacosInstance } from '../../common/nacos/nacos';
 import { generateSnowId } from '../../common/util/sql';
+import rpcFileApi from '../rpc/file';
+import { Table_Issue_Type } from './../../../common/model/issue_type';
+import { Table_Issue_Type_Solution } from './../../../common/model/issue_type_solution';
+import { Table_Issue_Type_Solution_Issue_Type } from './../../../common/model/issue_type_solution_issue_type';
 import { Table_Permission } from './../../../common/model/permission';
 import { Table_Project_Member } from './../../../common/model/project_member';
 import { Table_Project_Role } from './../../../common/model/project_role';
@@ -74,6 +78,41 @@ export function parseFormData(str: Buffer, boundary: string): IServer_GateWay_Fo
     return ret;
 }
 
+export async function handleImageFields(data:object){
+    let arr=<{
+        object:object,
+        key:string|number
+    }[]>[]
+    function _clone(o){
+        var k, b;
+        if(o && ((b = (o instanceof Array)) || o instanceof Object)) {
+            for(k in o){
+                if(o.hasOwnProperty(k)){
+                    if(["photo","image","icon","img"].includes(k) && typeof(o[k])=="string" && o[k].length>=18 && /^\d+$/.test(o[k])) {
+                        arr.push({
+                            object:o,
+                            key:k
+                        })
+                    } else {
+                        _clone(o[k])
+                    }
+                }
+            }
+        }
+    }
+    _clone(data)
+    if(arr.length>0) {
+        let ids=arr.map(item=>{
+            return item.object[item.key];
+        })
+        let paths=await rpcFileApi.getPaths(ids)
+        for(let i=0;i<arr.length;i++)
+        {
+            arr[i].object[arr[i].key]=paths[i]
+        }
+    }
+}
+
 async function resetSystem(){
     let mysql=getMysqlInstance()
     await mysql.execute(`delete from ${Table_Version}`) 
@@ -86,6 +125,9 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_Team_Role}`)
     await mysql.execute(`delete from ${Table_Team}`)  
     await mysql.execute(`delete from ${Table_Team_User}`)
+    await mysql.execute(`delete from ${Table_Issue_Type}`)
+    await mysql.execute(`delete from ${Table_Issue_Type_Solution}`)
+    await mysql.execute(`delete from ${Table_Issue_Type_Solution_Issue_Type}`)
 }
 
 export async function initSystem() {
@@ -158,6 +200,9 @@ export async function initSystem() {
             }
         }
         await mysql.execute(`insert into ${Table_Team_User} (id,role_id,team_id,user_id) values ('${await generateSnowId()}','${groupRoleUserId}','${groupId}','${userId}')`)
+        await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${await generateSnowId()}','Task',1)`)
+        await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${await generateSnowId()}','Bug',1)`)
+        await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${await generateSnowId()}','Ticket',1)`)
     }
     console.log("init finish")
 }

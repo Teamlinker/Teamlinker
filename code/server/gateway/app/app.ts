@@ -5,6 +5,7 @@ import * as koaStaticServer from "koa-static-server";
 import { PassThrough } from "stream";
 import { Permission_Base } from '../../../common/permission/permission';
 import * as fileApi from "../../../common/routes/file";
+import * as issueTypeApi from "../../../common/routes/issueType";
 import * as projectApi from "../../../common/routes/project";
 import * as teamApi from "../../../common/routes/team";
 import { ICommon_HttpApi } from "../../../common/routes/types";
@@ -22,10 +23,10 @@ import { EServer_Common_User_Type } from '../../common/types/user';
 import CommonUtil from "../../common/util/common";
 import { generateHttpErrorResponse, generateHttpOkResponse } from "../../common/util/http";
 import userRpcApi from '../rpc/user';
-import { initSystem, parseFormData } from "../util/util";
+import { handleImageFields, initSystem, parseFormData } from "../util/util";
 import { ICommon_Version_Config } from './../../../common/model/version';
 import { CacheService } from './../cache/service';
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi];
 var app = new Koa();
 var config=<ICommon_Version_Config>{}
 var pipe = function (from, to): Promise<Buffer> {
@@ -129,10 +130,10 @@ export default class GateWay extends Application {
         app.use(async function (ctx, next) {
             let path = ctx.path
             if(path.startsWith("/api/")) {
-                path = path.substr("/api".length)
+                path = path.substring("/api".length)
                 let method = ctx.req.method;
                 let baseUrl = path.substring(1, path.indexOf("/", 1))
-                let apiPath = path.substr(1 + baseUrl.length)
+                let apiPath = path.substring(1 + baseUrl.length)
                 if (apiMap[baseUrl] && apiMap[baseUrl][method + " " + apiPath]) {
                     let microServer = apiMap[baseUrl][method + " " + apiPath].service
                     let ignoreValidate = apiMap[baseUrl][method + " " + apiPath].ignoreValidate
@@ -191,6 +192,9 @@ export default class GateWay extends Application {
                     }
                     if(ret.data===undefined || typeof(ret.data)=="string" || typeof(ret.data)=="number" || typeof(ret.data)=="boolean" || typeof(ret.data)=="object")
                     {
+                        if(typeof(ret.data)=="object") {
+                            await handleImageFields(ret.data);
+                        }
                         ctx.body = generateHttpOkResponse(ret.data);
                     } else {
                         ctx.body = ret.data;

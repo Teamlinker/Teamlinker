@@ -23,7 +23,7 @@ const api={
             req:<{
                 keyword :string,
                 name :string,
-                image? :string,
+                photo? :string,
                 description? :string,                
             }>{},
             res:<ICommon_Model_Project>{}
@@ -34,7 +34,7 @@ const api={
             req:<{
                 keyword? :string,
                 name? :string,
-                image? :string,
+                photo? :string,
                 description? :string,       
                 projectId:string         
             }>{},
@@ -173,7 +173,8 @@ const api={
             req:<{
                 keyword?:string,
                 page:number,
-                size:number             
+                size:number,
+                userId?:string             
             }>{},
             res:<ICommon_Route_Res_Project_List>{},
         },

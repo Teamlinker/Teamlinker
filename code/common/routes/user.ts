@@ -133,6 +133,26 @@ const api={
                 userId?:string       
             }>{},
             res:<ICommon_Route_Res_User_Profile>{},
+        },
+        infos:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/infos",
+            req:<{
+                userIds:string       
+            }>{},
+            res:<Omit<ICommon_Model_User,"password"|"created_time"|"modified_time">[]>{},
+        },
+        filterUser:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/filter",
+            req:<{
+                name:string      
+            }>{},
+            res:<{
+                name:string,
+                id:string,
+                photo:string
+            }[]>{},
         }
     }
 }

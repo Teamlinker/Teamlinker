@@ -2,9 +2,7 @@ export interface ICommon_Model_Workflow_Solution {
     id :string ,
   created_time :Date,
   modified_time :Date,
-  created_by :string ,
-  modified_by :string,
-  system :number,
+  reserved :number,
   name :string,
   description :string,
 }

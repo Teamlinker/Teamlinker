@@ -36,8 +36,8 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         await projectMapper.changeRole(this.item.id,memberId,roleId)
     }
 
-    static async list(page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Project_List>{
-        let ret=await projectMapper.list(page,size,keyword)
+    static async list(page:number,size:number,keyword?:string,userId?:string):Promise<ICommon_Route_Res_Project_List>{
+        let ret=await projectMapper.list(page,size,keyword,userId)
         return {
             count:ret.count,
             totalPage:ret.totalPage,

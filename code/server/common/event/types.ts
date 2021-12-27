@@ -1,5 +1,5 @@
 export namespace EServer_Common_Event_Types {
-    export type Types= User|Project|Team|File
+    export type Types= User|Project|Team|File|IssueType
     export enum User {
         DELETE="delete user"  //userId:string
     }
@@ -12,5 +12,8 @@ export namespace EServer_Common_Event_Types {
     export enum File {
         REF="ref file",
         UNREF="unref file" //fileId:string
+    }
+    export enum IssueType {
+        DELETE="delete issueType" //issueTypeId:string
     }
 }
