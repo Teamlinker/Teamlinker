@@ -5,7 +5,8 @@ import { REDIS_USER } from "../../common/cache/keys/user";
 import { Entity } from "../../common/entity/entity";
 import { getNacosInstance } from '../../common/nacos/nacos';
 import { userMapper } from '../mapper/user';
-import { userModel } from './../../../common/model/user';
+import rpcFileApi from "../rpc/file";
+import { ICommon_Model_User, userModel } from './../../../common/model/user';
 import { EServer_Common_User_Type } from './../../common/types/user';
 export default class User extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
@@ -106,5 +107,48 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
         }
         delete ret.info.password
         return ret;
+    }
+
+    static async userInfos(userIds:string):Promise<Omit<ICommon_Model_User,"password"|"created_time"|"modified_time">[]>{
+        if(!userIds) {
+            throw Err.User.userIdNotExists
+        }
+        let ret=await userMapper.users(userIds.split(","))
+        for(let obj of ret) {
+            delete obj.password;
+            delete obj.created_time;
+            delete obj.modified_time;
+            if(obj.photo) {
+                obj.photo=await rpcFileApi.getPath(obj.photo)
+            }
+        }
+        return ret;
+    }
+
+    static async filter(name:string,size:number):Promise<{
+        name:string,
+        id:string,
+        photo:string
+    }[]>{
+        if(!name) {
+            throw Err.User.userNameNotExists
+        }
+        if(!size) {
+            throw Err.Common.paramError
+        }
+        let ret=await userMapper.filter(name,size);
+        let arr=<{
+            name:string,
+            id:string,
+            photo:string
+        }[]>[]
+        for(let obj of ret) {
+            arr.push({
+                name:obj.username,
+                id:obj.id,
+                photo:obj.photo?(await rpcFileApi.getPath(obj.photo)):obj.photo
+            })
+        }
+        return arr;
     }
 }

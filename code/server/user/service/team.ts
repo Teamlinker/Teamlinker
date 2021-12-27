@@ -3,6 +3,7 @@ import { ICommon_Route_Res_Team_List } from '../../../common/routes/response';
 import { Err } from '../../../common/status/error';
 import { Entity } from "../../common/entity/entity";
 import { teamMapper } from '../mapper/team';
+import rpcFileApi from "../rpc/file";
 import { teamModel } from './../../../common/model/team';
 export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
     constructor(){
@@ -59,6 +60,33 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
             page:page,
             data:ret.data
         }
+    }
+
+    static async filter(name:string,size:number):Promise<{
+        name:string,
+        id:string,
+        photo:string
+    }[]>{
+        if(!name) {
+            throw Err.User.userNameNotExists
+        }
+        if(!size) {
+            throw Err.Common.paramError
+        }
+        let ret=await teamMapper.filter(name,size);
+        let arr=<{
+            name:string,
+            id:string,
+            photo:string
+        }[]>[]
+        for(let obj of ret) {
+            arr.push({
+                name:obj.name,
+                id:obj.id,
+                photo:obj.photo?(await rpcFileApi.getPath(obj.photo)):obj.photo
+            })
+        }
+        return ret;
     }
 
 }

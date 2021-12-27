@@ -91,6 +91,16 @@ export namespace Err {
                 code:3301,
                 msg:"member not exists"
             }
+        },
+        Issue : {
+            issueTypeNotFound:{
+                code:3400,
+                msg:"issue type not found"
+            },
+            issueTypeForbidden:{
+                code:3401,
+                msg:"issue type forbidden"
+            }
         }
     }
     export let Team = {

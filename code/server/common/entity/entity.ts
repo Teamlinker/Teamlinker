@@ -3,6 +3,12 @@ import { Err } from '../../../common/status/error';
 import { EServer_Common_Event_Types } from '../event/types';
 import { emitServiceEvent } from '../rpc/rpc';
 import { Mapper } from './mapper';
+let imagefields=[
+    "photo",
+    "image",
+    "img",
+    "icon"
+]
 export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
     protected item:T["model"];
     protected _item:T["model"];
@@ -20,9 +26,9 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
     setItem(item:T["model"]) {
         this.item=item
     }
-    assignItem(item:Partial<T["model"]>) {
+    assignItem(item:Partial<T["model"]>,clear:boolean=false) {
         if(typeof(item)=="object") {
-            if(!this.item) {
+            if(!this.item || clear) {
                 this.item=<T>{}
             }
             for(let key in item) {
@@ -41,9 +47,11 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         }
         await this.mapper.create(this.item)
         await this.loadItem();
-        if(this.item["photo"]) {
-            emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item["photo"])
-        }
+        imagefields.forEach(item=>{
+            if(this.item[item]) {
+                emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item[item])
+            }
+        })
         return this.item;
     }
     async update():Promise<T["model"]>{
@@ -52,14 +60,17 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         }
         let ret=await this.mapper.getById(this.item.id)
         await this.mapper.update(this.item)
-        if(!ret["photo"] && this.item["photo"]) {
-            emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item["photo"])
-        } else if(ret["photo"] && ret["photo"]!=this.item["photo"]) {
-            if(this.item["photo"]) {
-                emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item["photo"])
+        imagefields.forEach(item=>{
+            if(!ret[item] && this.item[item]) {
+                emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item[item])
+            } else if(ret[item] && ret[item]!=this.item[item]) {
+                if(this.item[item]) {
+                    emitServiceEvent(EServer_Common_Event_Types.File.REF,this.item[item])
+                }
+                emitServiceEvent(EServer_Common_Event_Types.File.UNREF,ret[item])
             }
-            emitServiceEvent(EServer_Common_Event_Types.File.UNREF,ret["photo"])
-        }
+        })
+        await this.loadItem();
         return this.item;
     }
     async delete(eventPulish?:EServer_Common_Event_Types.Types){
@@ -67,9 +78,12 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         if(eventPulish) {
             emitServiceEvent(eventPulish,this.item.id);
         }
-        if(this.item["photo"]) {
-            emitServiceEvent(EServer_Common_Event_Types.File.UNREF,this.item["photo"])
-        }
+        imagefields.forEach(item=>{
+            if(this.item[item]) {
+                emitServiceEvent(EServer_Common_Event_Types.File.UNREF,this.item[item])
+            }
+        })
+        
     }
     async loadItem():Promise<T["model"]>{
         if(!this.item || !this.item.id) {

@@ -36,9 +36,13 @@ function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[]) {
     } else if(value.exp=="is null") {
         arrExpr.push(`${key} is null`)
     } else if(value.exp=="in") {
-        arrExpr.push(`${key} in (${(<string[] | number[]>value.value).map((item)=>{
-            return typeof(item)=="number"?item:("'"+item+"'")
-        }).join(",")})`)
+        if(typeof(value.value)=="string") {
+            arrExpr.push(`${key} in (${value.value})`)
+        } else {
+            arrExpr.push(`${key} in (${(<string[] | number[]>value.value).map((item)=>{
+                return typeof(item)=="number"?item:("'"+item+"'")
+            }).join(",")})`)
+        }
     } else if(value.exp=="is not null") {
         arrExpr.push(`${key} is not null`)
     } else if(value.exp=="between") {
@@ -574,5 +578,20 @@ export function exculdeColumns<R1 extends keyof BaseModel["model"],R2 extends R1
             return true;
         })
         return <any>arr;
+    }
+}
+
+export function generateCountSql<T extends BaseModel>(model:T,objExpr?:{
+    [param in keyof T["model"]]?:EXPRVALUE
+},exprMode?:"and"|"or"):{
+    value:string,
+    type:{
+        [key in keyof T["model"]]:T["model"][key]
+    }
+} {
+    let expr=generateExp(objExpr,exprMode);
+    return {
+        value:`select count(1) from ${model.table}${expr?(" where "+expr):""}`,
+        type:model.model
     }
 }

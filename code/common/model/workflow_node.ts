@@ -2,7 +2,7 @@ export interface ICommon_Model_Workflow_Node {
     id :string ,
   name :string,
   description :string,
-  system :number,
+  reserved :number,
   status :number,
   workflow_id :string ,
 }

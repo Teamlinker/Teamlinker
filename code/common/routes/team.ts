@@ -100,6 +100,18 @@ const api={
             }>{},
             res:<ICommon_Route_Res_Team_List>{},
         },
+        filterTeam:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/filter",
+            req:<{
+                name:string      
+            }>{},
+            res:<{
+                name:string,
+                id:string,
+                photo:string
+            }[]>{},
+        }
     }
 }
 export=api

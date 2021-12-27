@@ -6,6 +6,7 @@ import CommonUtil from "../../common/util/common";
 import { generateDeleteSql } from "../../common/util/sql";
 import "../event/file";
 import "../http/file";
+import "../rpc/file";
 import { ECommon_Model_File_Type, fileModel, ICommon_Model_File, Table_File } from './../../../common/model/file';
 import path = require("path");
 export default class File extends Application {

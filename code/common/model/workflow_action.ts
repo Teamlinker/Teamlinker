@@ -1,7 +1,7 @@
 export interface ICommon_Model_Workflow_Action {
     id :string ,
   name :string,
-  system :number,
+  reserved :number,
   description :string,
   source_node_id :string ,
   dest_node_id :string ,

@@ -30,4 +30,15 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
         await super.create()
         return this.item.id;
     }
+
+    static async getPaths(ids:string[]){
+        let ret=await fileMapper.getPaths(ids);
+        return ret.map(item=>{
+            if(item && item.path) {
+                return "/file"+item.path
+            } else {
+                return ""
+            }
+        })
+    }
 }

@@ -6,6 +6,6 @@ export interface ICommon_Model_Field_Solution {
   modified_by: string,
   name :string,
   description :string,
-  system :number,
+  reserved :number,
 }
 export const Table_Field_Solution="field_solution"

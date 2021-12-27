@@ -194,6 +194,27 @@ class TeamMapper extends Mapper<typeof teamModel> {
             data:ret
         };
     }
+
+    async filter(name:string,size:number)
+    {
+        if(!name) {
+            throw Err.User.userNameNotExists
+        }
+        if(!size) {
+            throw Err.Common.paramError
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(teamModel,["id","name","photo"],{
+            name:{
+                exp:"%like%",
+                value:name
+            }
+        },"and",{
+            field:"name",
+            type:"asc"
+        },0,size))
+        return ret;
+    }
 }
 
 export let teamMapper=new TeamMapper()

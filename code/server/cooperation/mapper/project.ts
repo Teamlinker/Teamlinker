@@ -181,7 +181,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         }))
     }
 
-    async list(page:number,size:number,keyword?:string):Promise<{
+    async list(page:number,size:number,keyword?:string,userId?:string):Promise<{
         count:number,
         totalPage:number,
         data:ICommon_Model_Project[]
@@ -190,14 +190,36 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project}${keyword?` where name like '%${keyword}%'`:""}`))[0]
+        let str=`select count(1) from ${Table_Project}`,keywrodStr="",userIdStr=""
+        if(keyword) {
+            keywrodStr=`name like '%${keyword}%'`
+        }
+        if(userId) {
+            userIdStr=`id in (select project_id from ${Table_Project_Member} where member_id='${userId}')`
+        }
+        if(keywrodStr && userIdStr) {
+            str+=" where "+keywrodStr+" and "+userIdStr
+        } else if(keywrodStr) {
+            str+=" where "+keywrodStr
+        } else if(userIdStr) {
+            str+=" where "+userIdStr
+        }
+        let count=Object.values(await mysql.executeOne<number>(str))[0]
         let totalPage=CommonUtil.pageTotal(count,size)
-        let ret=await mysql.execute(generateQuerySql(projectModel,[],keyword?{
-            name:{
-                exp:"%like%",
-                value:keyword
-            }
-        }:null,"and",{
+        let ret=await mysql.execute(generateQuerySql(projectModel,[],{
+            ...(keyword && {
+                name:{
+                    exp:"%like%",
+                    value:keyword
+                }
+            }),
+            ...(userId && {
+                id:{
+                    exp:"in",
+                    value:`select project_id from ${Table_Project_Member} where member_id='${userId}'`
+                }
+            })
+        },"and",{
             field:"name",
             type:"asc"
         },page*size,size))
