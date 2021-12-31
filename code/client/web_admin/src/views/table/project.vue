@@ -4,7 +4,7 @@
  * @Author: gqwu
  * @Date: 2021-10-09 12:19:05
  * @LastEditors: gqwu
- * @LastEditTime: 2021-12-07 17:03:52
+ * @LastEditTime: 2021-12-11 15:09:59
 -->
 <template>
   <div class="app-container">
@@ -121,8 +121,9 @@
         <el-form-item label="图片" prop="image">
           <el-upload
             class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
-            :show-file-list="false"
+            action="/api/file/upload"
+            accept="image/jpeg,image/jpg,image/png"
+            :http-request="submitUpload"
           >
             <img v-if="temp.image" :src="temp.image" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon" />
@@ -521,6 +522,7 @@ import {
   projectRoles,
 } from "@/api/project";
 import { getList as getAllMemberList } from "@/api/user";
+import { uploadFile, downFile } from "@/api/file";
 export default {
   data() {
     return {
@@ -992,6 +994,22 @@ export default {
         size: 1000,
       }).then((res) => {
         this.membersOptions = res.data.data;
+      });
+    },
+    submitUpload(params) {
+      const fileObj = params.file;
+      // FormData 对象
+      const form = new FormData();
+      // 文件对象
+      form.append("file", fileObj);
+      // 调用保存接口 将form的值全都传过去
+      uploadFile(form).then((res) => {
+        debugger;
+      });
+    },
+    downFile() {
+      downFile({ fileId: "11" }).then((res) => {
+        debugger;
       });
     },
   },
