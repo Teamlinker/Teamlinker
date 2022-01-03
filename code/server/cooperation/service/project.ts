@@ -5,7 +5,7 @@ import { Entity } from "../../common/entity/entity";
 import { EServer_Common_Event_Types } from "../../common/event/types";
 import { moduleMapper } from "../mapper/module";
 import { projectMapper } from '../mapper/project';
-import { projectModel } from './../../../common/model/project';
+import { ICommon_Model_Project, projectModel } from './../../../common/model/project';
 import { ECommon_Model_Project_Member_Type } from './../../../common/model/project_member';
 import { tagMapper } from './../mapper/tag';
 export default class Project extends Entity<typeof projectModel,typeof projectMapper> {
@@ -17,6 +17,15 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         await moduleMapper.deleteByProjectId(this.item.id)
         await tagMapper.deleteByProjectId(this.item.id)
         await projectMapper.clearMember(this.item.id);
+    }
+
+    override async create(): Promise<ICommon_Model_Project> {
+        let ret=await super.create();
+        let role=await projectMapper.getRoleByName("admin","")
+        if(role) {
+            await projectMapper.addMember(this.getId(),this.getItem().created_by,ECommon_Model_Project_Member_Type.USER,role.id)
+        }
+        return ret;
     }
 
     async listMember(page:number,size:number){

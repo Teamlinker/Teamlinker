@@ -119,13 +119,32 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         if(!existsRole) {
             throw Err.Role.roleNotExists
         }
-        await mysql.execute(generateCreateSql(projectMemberModel,{
-            member_id:memberId,
-            role_id:roleId,
-            project_id:projectId,
-            type:type,
-            id:await generateSnowId()
+        let isUser=false,isTeam=false;
+        let objUser=await mysql.executeOne(generateQuerySql(userModel,null,{
+            id:memberId
         }))
+        if(objUser) {
+            isUser=true
+        } else {
+            let objTeam=await mysql.executeOne(generateQuerySql(teamModel,[],{
+                id:memberId
+            }))
+            if(objTeam){
+                isTeam=true
+            }
+        }
+        if((isUser && type==ECommon_Model_Project_Member_Type.USER) || (isTeam && type==ECommon_Model_Project_Member_Type.TEAM)) {
+            await mysql.execute(generateCreateSql(projectMemberModel,{
+                member_id:memberId,
+                role_id:roleId,
+                project_id:projectId,
+                type:type,
+                id:await generateSnowId()
+            }))
+        } else {
+            throw Err.Project.Member.memberNotMatch
+        }
+        
     }
 
     async removeMember(projectId:string,memberId:string) {
@@ -248,6 +267,20 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                     }
                 ]
             }
+        }))
+        return ret
+    }
+
+    async getRoleByName(name:string,projectId:string):Promise<ICommon_Model_Project_Role> {
+        if(!name) {
+            throw  Err.Common.paramError
+        }
+        var mysql=getMysqlInstance();
+        let ret=await mysql.executeOne(generateQuerySql(projectRoleModel,null,{
+            project_id:projectId?projectId:{
+                exp:"is null"
+            },
+            name:name
         }))
         return ret
     }
