@@ -49,7 +49,7 @@ export abstract class Mapper<T extends BaseModel> {
 
     async delete(id):Promise<void> {
         if(!id) {
-            throw  Err.Common.itemNotFound
+            throw Err.Common.itemNotFound
         }
         var mysql=getMysqlInstance();
         await mysql.execute(generateDeleteSql(this.model,{id}))
