@@ -90,6 +90,10 @@ export namespace Err {
             memberNotExists:{
                 code:3301,
                 msg:"member not exists"
+            },
+            memberNotMatch:{
+                code:3302,
+                msg:"member not match"
             }
         },
         Issue : {

@@ -18,21 +18,21 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.create)
-    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("image") image:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession):Promise<typeof projectApi.routes.create.res>{
+    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession):Promise<typeof projectApi.routes.create.res>{
         let obj=new ProjectService()
         obj.assignItem({
             keyword:keyword,
             name:name,
             created_by:user.userId,
             description:description,
-            photo:image
+            photo:photo
         })
         let ret=await obj.create()
         return ret
     }
 
     @DHttpApi(projectApi.routes.edit)
-    async editProject(@DHttpReqParam("name") name:string,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("image") image:string,@DHttpReqParam("description") description:string,@DHttpReqParam("projectId") projectId:string):Promise<typeof projectApi.routes.edit.res>{
+    async editProject(@DHttpReqParam("name") name:string,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpReqParam("projectId") projectId:string):Promise<typeof projectApi.routes.edit.res>{
         let obj=await ProjectService.getItemById(projectId);
         if(!obj) {
             throw Err.Project.projectNotFound
@@ -40,7 +40,7 @@ class ProjectController {
         let item=obj.getItem()
         item.name=name;
         item.keyword=keyword
-        item.photo=image
+        item.photo=photo
         item.description=description
         let ret=await obj.update()
         return ret;
