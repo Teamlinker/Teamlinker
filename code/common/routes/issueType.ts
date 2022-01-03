@@ -50,6 +50,51 @@ const api={
             }>{},
             res:{}
         },
+        solutionList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/solution/list",
+            req:<{
+                           
+            }>{},
+            res:<ICommon_Model_Issue_Type[]>{}
+        },
+        solutionInfo:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/item",
+            req:<{
+                issueTypeId:string           
+            }>{},
+            res:<ICommon_Model_Issue_Type>{}
+        },
+        solutionCreate:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/item",
+            req:<{
+                name:string,
+                icon?:string,
+                description?:string       
+            }>{},
+            res:<ICommon_Model_Issue_Type>{}
+        },
+        solutionUpdate:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/item",
+            req:<{
+                issueTypeId:string,
+                name?:string,
+                icon?:string,
+                description?:string           
+            }>{},
+            res:<ICommon_Model_Issue_Type>{}
+        },
+        solutionDelete:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/item",
+            req:<{
+                issueTypeId:string           
+            }>{},
+            res:{}
+        },
     }
 }
 export=api

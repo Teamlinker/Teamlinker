@@ -23,7 +23,7 @@ export async function generateSnowId() {
 }
 
 function isEXPRVALUEEXP(value:any):value is EXPRVALUEEXP {
-    return typeof(value)=="object" && value.value
+    return typeof(value)=="object" && value.exp
 }
 
 function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[]) {
