@@ -1,0 +1,77 @@
+// 布局css module 可直接在js中使用
+
+// 侧边菜单宽度
+$menuSideWidth: 200px;
+// 侧边菜单 收缩后的宽度
+$menuSideWidthCollapse: 80px;
+// 菜单高度 logo系统名称区域和这个高度一致
+$menuHeaderHeight: 70px;
+// 菜单图标颜色
+$menuHeaderIconColor: #515a6e;
+//主要背景色对比选中色
+$transparent:transparent;
+//主要背景色
+$colorPrimary:#011440;
+//主要背景色对比选中色
+$colorPrimarySelect:#071E51;
+//主要背景色-对比文字色
+$colorPrimaryText:#AAB0BF;
+//表单背景色
+$formColor:#F1F5F9;
+// 白色
+$colorWhite:#fff;
+//白色背景色-对比文字色
+$colorwhiteText:#3c3c3c;
+
+// tags多页签高度
+$tagsHeight: 44px;
+// 版权高度
+$copyrightHeight: 64px;
+
+// 默认字体加粗
+$fontWeight: 100;
+
+// 通用行高
+$lineHeight: 32px;
+
+// 默认字体
+$defaultSize: 12px !default;
+
+@function containerHeight($px){
+  @return calc(100vh  - #{$px})
+};
+
+@function rem($px){
+    @return math.div($px , $defaultSize) * 1rem;
+};
+
+// 圆角
+$border-radius:3px;
+
+$fontTextColor:#9B9B9B;
+
+// 默认字体
+$fontFamilyBase:Inter, Roboto, Oxygen, "Fira Sans", "Helvetica Neue", sans-serif;
+
+@function pxClac($px,$dimension){
+  @return $px * $dimension
+}
+
+// px计算 $fpx 减去 $spx
+// @function subPx($fpx,$spx) { 
+//   @return calc($fpx - $spx)
+// };
+
+// @function pxClac($px,$dimension){
+//   @return $px * $dimension
+// };
+
+// 导出
+// :export {
+//   menuSideWidth: $menuSideWidth;
+//   menuSideWidthCollapse: $menuSideWidthCollapse;
+//   menuHeaderHeight: $menuHeaderHeight;
+//   copyrightHeight: $copyrightHeight;
+//   tagsHeight: $tagsHeight;
+//   menuHeaderIconColor: $menuHeaderIconColor;
+// }

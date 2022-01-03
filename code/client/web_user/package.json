@@ -1,0 +1,41 @@
+{
+  "name": "teamlinker-app",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "ant-design-vue": "^2.2.8",
+    "axios": "^0.21.3",
+    "js-cookie": "^3.0.1",
+    "lodash": "^4.17.21",
+    "mockjs": "^1.1.0",
+    "moment": "^2.29.1",
+    "nprogress": "^0.2.0",
+    "vite-plugin-style-import": "^1.2.1",
+    "vue": "3.2.8",
+    "vue-router": "^4.0.11",
+    "vue3-draggable-resizable": "^1.6.1",
+    "vuex": "^4.0.2",
+    "vuex-persistedstate": "^4.0.0-beta.3"
+  },
+  "devDependencies": {
+    "@iconify/json": "^1.1.314",
+    "@vitejs/plugin-legacy": "^1.5.2",
+    "@vitejs/plugin-vue": "^1.1.5",
+    "@vitejs/plugin-vue-jsx": "^1.2.0",
+    "@vue/compiler-sfc": "^3.1.5",
+    "sass": "^1.43.4",
+    "typescript": "^4.1.3",
+    "unplugin-vue-components": "^0.14.0",
+    "vite": "^2.0.5",
+    "vite-plugin-icons": "^0.3.2",
+    "vite-plugin-mock": "^2.9.6",
+    "vite-plugin-pages": "^0.7.0",
+    "vite-plugin-vue-layouts": "^0.2.2",
+    "vite-plugin-windicss": "^0.8.2",
+    "vite-svg-loader": "^1.5.1"
+  }
+}

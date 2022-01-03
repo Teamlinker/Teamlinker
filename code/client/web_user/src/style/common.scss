@@ -1,0 +1,21 @@
+// common.scss
+
+$defaultSize: 12px !default;
+
+@function rem($px){
+    @return $px / $defaultSize * 1rem;
+}
+// 颜色
+$primary-color: #3b94f3;
+$info-color: #70b4f9;
+$success-color: #1ed278;
+$warn-color: #ffa100;
+$danger-color: #ed6114;
+
+// 圆角
+
+$border-radius:3px;
+
+@function pxClac($px,$dimension){
+    @return $px * $dimension
+}
