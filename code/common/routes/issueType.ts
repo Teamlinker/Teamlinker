@@ -1,5 +1,7 @@
 import { ICommon_Model_Issue_Type } from './../model/issue_type';
+import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solution';
 import { ECommon_Services } from './../types';
+import { ICommon_Route_Res_IssueTypeSolution_Info } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/issuetype",
@@ -56,45 +58,61 @@ const api={
             req:<{
                            
             }>{},
-            res:<ICommon_Model_Issue_Type[]>{}
+            res:<ICommon_Model_Issue_Type_Solution[]>{}
         },
         solutionInfo:{
             method:ECommon_HttpApi_Method.GET,
-            path:"/item",
+            path:"/solution/item",
             req:<{
-                issueTypeId:string           
+                issueTypeSolutionId:string           
             }>{},
-            res:<ICommon_Model_Issue_Type>{}
+            res:<ICommon_Route_Res_IssueTypeSolution_Info>{}
         },
         solutionCreate:{
             method:ECommon_HttpApi_Method.POST,
-            path:"/item",
+            path:"/solution/item",
             req:<{
                 name:string,
-                icon?:string,
                 description?:string       
             }>{},
-            res:<ICommon_Model_Issue_Type>{}
+            res:<ICommon_Model_Issue_Type_Solution>{}
         },
         solutionUpdate:{
             method:ECommon_HttpApi_Method.PUT,
-            path:"/item",
+            path:"/solution/item",
             req:<{
-                issueTypeId:string,
+                issueTypeSolutionId:string,
                 name?:string,
-                icon?:string,
                 description?:string           
             }>{},
-            res:<ICommon_Model_Issue_Type>{}
+            res:<ICommon_Model_Issue_Type_Solution>{}
         },
         solutionDelete:{
             method:ECommon_HttpApi_Method.DELETE,
-            path:"/item",
+            path:"/solution/item",
             req:<{
-                issueTypeId:string           
+                issueTypeSolutionId:string           
             }>{},
             res:{}
         },
+        solutionAddIssueType:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/solution/issuetype",
+            req:<{
+                issueTypeSolutionId:string,
+                issueTypeId:string    
+            }>{},
+            res:{}
+        },
+        solutionRemoveIssueType:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/solution/issuetype",
+            req:<{
+                issueTypeSolutionId:string,
+                issueTypeId:string    
+            }>{},
+            res:{}
+        }
     }
 }
 export=api

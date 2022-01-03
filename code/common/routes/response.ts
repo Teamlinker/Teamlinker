@@ -1,6 +1,8 @@
+import { ICommon_Model_Issue_Type } from "../model/issue_type";
 import { ICommon_Model_Project } from "../model/project";
 import { ICommon_Model_Team } from '../model/team';
 import { ICommon_Model_User } from '../model/user';
+import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solution';
 import { ECommon_Model_Project_Member_Type } from './../model/project_member';
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -76,4 +78,8 @@ export type ICommon_Route_Res_Team_List = {
     totalPage:number,
     page:number,
     data:ICommon_Model_Team[]
+}
+
+export interface ICommon_Route_Res_IssueTypeSolution_Info extends ICommon_Model_Issue_Type_Solution {
+    data:ICommon_Model_Issue_Type[]
 }
