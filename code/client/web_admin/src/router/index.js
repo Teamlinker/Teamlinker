@@ -80,6 +80,12 @@ export const constantRoutes = [
         component: () => import('@/views/table/team'),
         meta: { title: '团队管理', icon: 'table' }
       },
+      {
+        path: 'issueType',
+        name: '事务管理',
+        component: () => import('@/views/table/issue'),
+        meta: { title: '事务管理', icon: 'table' }
+      },
       // {
       //   path: 'tree',
       //   name: 'Tree',

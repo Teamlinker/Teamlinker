@@ -676,7 +676,6 @@ export default {
     createData() {
       this.$refs["dataForm"].validate((valid) => {
         if (valid) {
-          this.temp.image = "000";
           createTemp(this.temp).then(() => {
             this.fetchData();
             this.dialogFormVisible = false;
@@ -1004,7 +1003,7 @@ export default {
       form.append("file", fileObj);
       // 调用保存接口 将form的值全都传过去
       uploadFile(form).then((res) => {
-        debugger;
+        this.temp.image = res.data;
       });
     },
     downFile() {
