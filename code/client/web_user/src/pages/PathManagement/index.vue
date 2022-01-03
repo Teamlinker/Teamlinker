@@ -1,37 +1,85 @@
 <template>
-  <div style="-webkit-font-smoothing: antialiased;text-transform: capitalize;overflow-x: hidden;">
-    <div class="tabsOrBreadcrumb">
-      <Breadcrumb></Breadcrumb>
-    </div>
-    <div
-      
-      class="container_main"
+  <div>
+    <a-form
+      ref="formRef"
+      :model="formState"
+      :rules="rules"
+      :label-col="labelCol"
+      :wrapper-col="wrapperCol"
     >
-      <div class="container_box">
-        最优路径管理
-      </div>
-    </div>
+      <a-form-item label="Activity name" name="name">
+        <a-input v-model:value="formState.name" />
+      </a-form-item>
+      <a-form-item label="Sub name" :name="['sub', 'name']">
+        <a-input v-model:value="formState.sub.name" />
+      </a-form-item>
+
+      <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+        <a-button type="primary" @click="onSubmit">Create</a-button>
+        <a-button style="margin-left: 10px" @click="resetForm">Reset</a-button>
+      </a-form-item>
+    </a-form>
   </div>
 </template>
-<script>
-import { defineComponent } from 'vue'
-
+<script lang="ts">
+import { defineComponent, reactive, ref, toRaw } from 'vue';
+import axios from '@/plugins/axios'
+import { message } from 'ant-design-vue';
 export default defineComponent({
-  name:'最优路径管理',
   setup() {
-    
+    const formRef = ref();
+    const formState = reactive({
+      name: undefined,
+      sub: { name: undefined },
+    });
+    const rules = {
+      name: {
+        required: true,
+        message: 'Please input name',
+      },
+      sub: {
+        name: [
+          {
+            required: true,
+            message: 'Please input name',
+          },
+        ],
+      },
+    };
+    const onSubmit = () => {
+      formRef.value
+        .validate()
+        .then(() => {
+          console.log('values', formState, toRaw(formState));
+          const params = toRaw(formState)
+         axios.post('/project/create',params).then(res=>{
+          console.log(res,'resss')
+          message.success('创建成功')
+        })
+        })
+        .catch(error => {
+          console.log('error', error);
+        });
+    };
+    const resetForm = () => {
+      formRef.value.resetFields();
+    };
     return {
-      
-    }
-  }
-})
-
-
+      formRef,
+      labelCol: { span: 4 },
+      wrapperCol: { span: 14 },
+      formState,
+      rules,
+      onSubmit,
+      resetForm,
+    };
+  },
+});
 </script>
 <route lang="yaml">
   meta:
     level: 1
-    name: '最优路径管理'
+    name: '33'
     icon: 'DashboardOutlined'
     layout: auth
 </route>

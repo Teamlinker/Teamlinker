@@ -54,7 +54,6 @@ export default defineComponent({
             return option.value.toUpperCase().indexOf(input.toUpperCase()) >= 0;
         };
         const userInfo = sessionStorage.getItem('userInfo')? JSON.parse(sessionStorage.getItem('userInfo')) : null
-        console.log(userInfo,'userInfo')
         // 搜搜
         const handleronSearch = (searchValue) => {
             console.log('onSearch',searchValue)

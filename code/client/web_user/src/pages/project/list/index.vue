@@ -7,6 +7,7 @@
       :pagination="pagination"
     >
       <template #action="{ record }">
+         <a @click="onGoSet(record.id)">项目设置</a>
         <a-popconfirm title="确认删除吗?" @confirm="onDelete(record.id)">
           <a>删除</a>
         </a-popconfirm>
@@ -16,6 +17,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive, toRefs, UnwrapRef } from "vue";
+import { useRouter } from "vue-router";
 import axios from "@/plugins/axios";
 import { columns } from "./columns";
 import { message } from 'ant-design-vue';
@@ -30,6 +32,7 @@ interface State {
 export default defineComponent({
   name: "项目列表",
   setup() {
+    const router = useRouter()
     const state: UnwrapRef<State> = reactive({
       pagination: {
         current: 1,
@@ -66,11 +69,15 @@ export default defineComponent({
         
        )
     };
-
+    const onGoSet = (id:string)=>{
+       console.log(id,'idddd')
+       router.push('/project/module?projectId='+id)
+    }
     return {
       columns,
       ...toRefs(state),
       onDelete,
+      onGoSet
     };
   },
 });
