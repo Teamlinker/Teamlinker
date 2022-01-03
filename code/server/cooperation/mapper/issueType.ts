@@ -1,7 +1,10 @@
+import { keys } from "../../../common/transform";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from "../../common/entity/mapper";
-import { generateQuerySql } from "../../common/util/sql";
+import { generateDeleteSql, generateLeftJoinSql, generateQuerySql } from "../../common/util/sql";
 import { ICommon_Model_Issue_Type, issueTypeModel } from './../../../common/model/issue_type';
+import { ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel } from './../../../common/model/issue_type_solution';
+import { issueTypeSolutionIssueTypeModel } from './../../../common/model/issue_type_solution_issue_type';
 class IssueTypeMapper extends Mapper<typeof issueTypeModel> {
     constructor() {
         super(issueTypeModel)
@@ -15,5 +18,46 @@ class IssueTypeMapper extends Mapper<typeof issueTypeModel> {
         }))
         return ret;
     }
+    async deleteFromSolution(issueTypeId:string) {
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(issueTypeSolutionIssueTypeModel,{
+            issue_type_id:issueTypeId
+        }))
+    }
 }
 export let issueTypeMapper=new IssueTypeMapper
+
+class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
+    constructor() {
+        super(issueTypeSolutionModel)
+    }
+    async list():Promise<ICommon_Model_Issue_Type_Solution[]>
+    {
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(issueTypeSolutionModel,[],null,null,{
+            field:"name",
+            type:"asc"
+        }))
+        return ret;
+    }
+
+    async getIssueTypesBySolutionId(issueTypeSolutionId:string):Promise<ICommon_Model_Issue_Type[]>{
+        let mysql=getMysqlInstance()
+        let fields=keys<typeof issueTypeModel["model"]>().map(item=>item.name);
+        let sql=generateLeftJoinSql({
+            model:issueTypeSolutionIssueTypeModel
+        },{
+            model:issueTypeModel,
+            columns:fields,
+            expression:{
+                id:{
+                    model:issueTypeSolutionIssueTypeModel,
+                    field:"issue_type_id"
+                }
+            }
+        })
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
+}
+export let issueTypeSolutionMapper=new IssueTypeSolutionMapper
