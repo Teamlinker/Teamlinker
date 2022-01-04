@@ -5,11 +5,14 @@
       :data-source="tableData"
       :rowKey="(record) => record.id"
       :pagination="pagination"
-    >
+    > 
+      <template #photo="{ record }">
+        <img :src="'http://175.27.166.37:13000'+record.photo" width="60"/>
+      </template>
       <template #action="{ record }">
          <a @click="onGoSet(record.id)">项目设置</a>
         <a-popconfirm title="确认删除吗?" @confirm="onDelete(record.id)">
-          <a>删除</a>
+          <a style="margin-left:10px">删除</a>
         </a-popconfirm>
       </template>
     </a-table>
@@ -21,6 +24,7 @@ import { useRouter } from "vue-router";
 import axios from "@/plugins/axios";
 import { columns } from "./columns";
 import { message } from 'ant-design-vue';
+
 interface State {
   tableData: Array<any>;
   pagination: {
