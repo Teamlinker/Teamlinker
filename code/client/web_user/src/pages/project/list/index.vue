@@ -1,5 +1,9 @@
 <template>
   <div>
+    <div class="search">
+      <a-input v-model:value="searchText" placeholder="Basic usage" />
+      <a-button @click="searchQuery">搜索</a-button>
+    </div>
     <a-table
       :columns="columns"
       :data-source="tableData"
@@ -19,49 +23,19 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, toRefs, UnwrapRef } from "vue";
+import { defineComponent, toRefs, ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "@/plugins/axios";
 import { columns } from "./columns";
 import { message } from 'ant-design-vue';
-
-interface State {
-  tableData: Array<any>;
-  pagination: {
-    current: Number;
-    total: Number;
-    onChange: Function;
-  };
-}
+import getTableFunc from '@/utils/list.ts'
 export default defineComponent({
   name: "项目列表",
   setup() {
+    const searchText = ref<string>('');
+    const {stateData,handleTableChange,initData,setUrl,searchQuery} = getTableFunc()
     const router = useRouter()
-    const state: UnwrapRef<State> = reactive({
-      pagination: {
-        current: 1,
-        total: 0,
-        onChange: () => {},
-      },
-      tableData: [],
-    });
-    let initData = async (page: number) => {
-      const params = {
-        page: page,
-        size: 10,
-      };
-        axios.get("project/list", { params: params }).then((res: any) => {
-        console.log(res, "resss");
-        state.tableData = res.data.data;
-        state.pagination.onChange = pageChange;
-        state.pagination.total = +res.data.count;
-      });
-    };
-    const pageChange = (page: number) => {
-      initData(page);
-      state.pagination.current = page;
-    };
-    initData(0);
+    setUrl('/project/list')
     const  onDelete = (key: string) => {
        const params = {
          projectId:key
@@ -78,10 +52,14 @@ export default defineComponent({
        router.push('/project/module?projectId='+id)
     }
     return {
+      searchText,
       columns,
-      ...toRefs(state),
+      ...toRefs(stateData),
       onDelete,
-      onGoSet
+      onGoSet,
+      handleTableChange,
+      setUrl,
+      searchQuery
     };
   },
 });

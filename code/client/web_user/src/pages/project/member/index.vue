@@ -54,6 +54,7 @@
 interface FormState {
   name: string;
   roleId: string;
+  type:Number
 }
 import { defineComponent, reactive, toRefs, ref, UnwrapRef, toRaw } from "vue";
 import { useRouter } from "vue-router";
@@ -69,6 +70,7 @@ export default defineComponent({
     let formState: UnwrapRef<FormState> = reactive({
       name: "",
       roleId: "",
+      type:0
     });
     const rules = reactive({
       name: [
@@ -94,82 +96,85 @@ export default defineComponent({
         timeout = null;
       }
       currentValue = value;
-
       function fake() {
         const params = {
           name: value,
         };
-        axios.get("/user/filter", { params: params }).then((res) => {
-          console.log(res, "resss");
+        Promise.all([axios.get("/user/filter",{params:params}),axios.get('/team/filter',{params:params})]).then(res=>{
           if (currentValue === value) {
-            const result = res.data;
-            const data: any[] = [];
-            result.forEach((r: any) => {
-              data.push({
-                value: r.id,
-                label: r.name,
-              });
-            });
-            console.log(data, "dataaaaaaaaaaaaaaa");
+            const userList = res[0].data.map(item=>{
+              return {
+                value:item.id,
+                label:item.name+'(个人)',
+                type:0
+              }
+            })
+            const teamList = res[1].data.map(item=>{
+              return {
+                value:item.id,
+                label:item.name+'(团队)',
+                type:1
+              }
+            })
+            let data = userList.concat(teamList)
             callback(data);
           }
-        });
-      }
 
+        })
+      }
       timeout = setTimeout(fake, 300);
     }
+    //名字搜索
     const handleSearch = (val: string) => {
       if (!val) {
         return false;
       }
       fetch(val, (d: any[]) => (nameList.value = d));
     };
+    //名字选择
     const handleChange = (val: string) => {
-      console.log(val, "valll2");
+      const type = nameList.value.filter(item=>item.value===val)[0].type
+      formState.type = type
     };
     let options = ref([]);
+    //获取成员列表
     const initData = () => {
       const id = router.currentRoute.value.query.projectId;
-      console.log(id, "projectId");
-      // 395922736190524416
-
       if (id) {
         const params = {
           projectId: id,
           page: 0,
           size: 10,
         };
-        axios.get("project/member/list", { params: params }).then((res) => {
+        axios.get("/project/member/list", { params: params }).then((res) => {
           console.log(res, "resss");
         });
       }
     };
     initData();
+    //新增成员
     const addMember = () => {
       visible.value = true;
       const id = router.currentRoute.value.query.projectId;
       axios
         .get("/project/roles", { params: { projectId: id } })
         .then((res: any) => {
-          console.log(res, "resss");
           options.value = res.data;
         });
     };
+    //提交表单
     const handleOk = (e: MouseEvent) => {
-      console.log(e);
       formRef.value.validate().then(() => {});
       let formData = toRaw(formState);
       const id = router.currentRoute.value.query.projectId;
       const params = {
         projectId: id,
         memberId: formData.name,
-        type: 1,
+        type: formData.type,
         roleId: formData.roleId,
       };
       axios.put("/project/member/item", params).then(() => {
-        // console.log(res, "resss");
         message.success("创建成功");
-        router.push("/projectList");
       });
     };
     const formRef = ref();
@@ -207,7 +212,7 @@ export default defineComponent({
 <route lang="yaml">
   meta:
     level: 1
-    name: '项目信息'
+    name: '项目成员'
     layout: auth
 </route>
 <style scoped>

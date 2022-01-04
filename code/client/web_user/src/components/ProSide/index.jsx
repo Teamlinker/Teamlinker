@@ -21,7 +21,9 @@ const ProSide = defineComponent({
     });
     const router = useRouter();
     const id = router.currentRoute.value.query.projectId;
-    const menuList = [{ url: "/project/module", name: "模块" },
+    const menuList = [
+                      { url: "/project/create", name: "详情" },
+                      { url: "/project/module", name: "模块" },
                       { url: "/project/tag", name: "标签" },
                       { url: "/project/member", name: "成员" }
                      ];
