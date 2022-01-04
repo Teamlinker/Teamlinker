@@ -5,7 +5,7 @@ export interface ICommon_Model_Issue_Type_Solution_Issue_Type {
   issue_type_id :string,
   issue_type_solution_id :string,
 }
-export const Table_Issue_Type_Solution_Issue_Type="issue_type"
+export const Table_Issue_Type_Solution_Issue_Type="issue_type_solution_issue_type"
 
 class IssueTypeSolutionIssueTypeModel extends BaseModel {
   table=Table_Issue_Type_Solution_Issue_Type

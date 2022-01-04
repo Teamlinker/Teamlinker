@@ -106,7 +106,7 @@ class IssueTypeController {
 
      @DHttpApi(issueTypeApi.routes.solutionDelete)
      async solutionDelete(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.solutionDelete.res> {
-         let obj=await IssueTypeService.getItemById(issueTypeSolutionId)
+         let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId)
          if(!obj) {
              throw Err.Project.Issue.issueTypeNotFound
          }
@@ -115,6 +115,32 @@ class IssueTypeController {
          }
          await obj.delete()
          return;
+     }
+
+     @DHttpApi(issueTypeApi.routes.solutionAddIssueType)
+     async solutionAddIssueType(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("issueTypeId") issueTypeId:string):Promise<typeof issueTypeApi.routes.solutionAddIssueType.res> {
+        let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
+        if(!obj) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        if(obj.getItem().reserved) {
+            throw Err.Project.Issue.issueTypeForbidden
+        }
+        await obj.addIssueType(issueTypeId)
+        return
+     }
+
+     @DHttpApi(issueTypeApi.routes.solutionRemoveIssueType)
+     async solutionRemoveIssueType(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("issueTypeId") issueTypeId:string):Promise<typeof issueTypeApi.routes.solutionRemoveIssueType.res> {
+        let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
+        if(!obj) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        if(obj.getItem().reserved) {
+            throw Err.Project.Issue.issueTypeForbidden
+        }
+        await obj.removeIssueType(issueTypeId)
+        return
      }
      
 }

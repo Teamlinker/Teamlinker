@@ -37,4 +37,12 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
             data:await issueTypeSolutionMapper.getIssueTypesBySolutionId(id)
         }
     }
+
+    async addIssueType(issueTypeId:string) {
+        await issueTypeSolutionMapper.addIssueType(issueTypeId,this.getId())
+    }
+
+    async removeIssueType(issueTypeId:string) {
+        await issueTypeSolutionMapper.removeIssueType(issueTypeId,this.getId())
+    }
 }

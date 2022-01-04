@@ -1,7 +1,8 @@
+import { Err } from "../../../common/status/error";
 import { keys } from "../../../common/transform";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from "../../common/entity/mapper";
-import { generateDeleteSql, generateLeftJoinSql, generateQuerySql } from "../../common/util/sql";
+import { generateCreateSql, generateDeleteSql, generateLeftJoinSql, generateQuerySql, generateSnowId } from "../../common/util/sql";
 import { ICommon_Model_Issue_Type, issueTypeModel } from './../../../common/model/issue_type';
 import { ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel } from './../../../common/model/issue_type_solution';
 import { issueTypeSolutionIssueTypeModel } from './../../../common/model/issue_type_solution_issue_type';
@@ -43,7 +44,7 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
 
     async getIssueTypesBySolutionId(issueTypeSolutionId:string):Promise<ICommon_Model_Issue_Type[]>{
         let mysql=getMysqlInstance()
-        let fields=keys<typeof issueTypeModel["model"]>().map(item=>item.name);
+        let fields=keys<ICommon_Model_Issue_Type>().map(item=>item.name);
         let sql=generateLeftJoinSql({
             model:issueTypeSolutionIssueTypeModel
         },{
@@ -55,9 +56,48 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
                     field:"issue_type_id"
                 }
             }
+        },{
+            issue_type_solution_id:{
+                model:issueTypeSolutionIssueTypeModel,
+                value:issueTypeSolutionId
+            }
         })
         let ret=await mysql.execute(sql)
         return ret;
+    }
+
+    async addIssueType(issueTypeId:string,issueTypeSolutionId:string) {
+        if(!issueTypeId) {
+            throw Err.Project.Issue.issueTypeNotFound
+        } else if (!issueTypeSolutionId) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.executeOne(generateQuerySql(issueTypeSolutionIssueTypeModel,[],{
+            issue_type_id:issueTypeId,
+            issue_type_solution_id:issueTypeSolutionId
+        }))
+        if(ret) {
+            throw Err.Project.Issue.issueTypeSolutionExists
+        }
+        await mysql.execute(generateCreateSql(issueTypeSolutionIssueTypeModel,{
+            id:await generateSnowId(),
+            issue_type_id:issueTypeId,
+            issue_type_solution_id:issueTypeSolutionId
+        }))
+    }
+
+    async removeIssueType(issueTypeId:string,issueTypeSolutionId:string) {
+        if(!issueTypeId) {
+            throw Err.Project.Issue.issueTypeNotFound
+        } else if (!issueTypeSolutionId) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(issueTypeSolutionIssueTypeModel,{
+            issue_type_id:issueTypeId,
+            issue_type_solution_id:issueTypeSolutionId
+        }))
     }
 }
 export let issueTypeSolutionMapper=new IssueTypeSolutionMapper

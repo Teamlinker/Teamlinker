@@ -104,7 +104,15 @@ export namespace Err {
             issueTypeForbidden:{
                 code:3401,
                 msg:"issue type forbidden"
-            }
+            },
+            issueTypeSolutionExists :{
+                code:3402,
+                msg:"issue type solution exists"
+            },
+            issueTypeSolutionNotFound:{
+                code:3403,
+                msg:"issue type solution not found"
+            },
         }
     }
     export let Team = {

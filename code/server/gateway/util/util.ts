@@ -135,74 +135,139 @@ export async function initSystem() {
     let mysql=getMysqlInstance()
     let ret=await mysql.execute<any[]>(`select * from ${Table_Version}`)
     if(ret===null || ret.length==0){
-        let objPermission=<{
-            [param:number]:string
-        }>{}
-        let adminId=await generateSnowId()
-        let userId=await generateSnowId()
-        let projectId=await generateSnowId()
-        let groupId=await generateSnowId()
-        await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${adminId}','teamlinker','teamlinker',1)`)
-        await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${userId}','sx','sx')`)
-        await mysql.execute(`insert into ${Table_Project} (id,name,keyword,created_by) values ('${projectId}','test','test','${userId}')`)
-        await mysql.execute(`insert into ${Table_Team} (id,name,created_by) values ('${groupId}','test_group','${userId}')`)
-        for(let key in Permission_Types) {
-            let value=Permission_Types[key]
-            let type=key
-            let keys=Object.keys(value)
-            for(let key of keys) {
-                let val=value[key]
-                if(val instanceof Permission_Base) {
-                    let name=val.toString()
-                    let value=val.value
-                    let id=await generateSnowId()
-                    await mysql.execute(`insert into ${Table_Permission} (id,name,type,value) values ('${id}','${name}','${type}','${value}')`)
-                    objPermission[value]=id
-                }
-            }
-        }
-        let objProjectRole=OBTPConfig.Role.Project_Role,projectRoleUserId;
-        for(let key in objProjectRole) {
-            let obj=objProjectRole[key]
-            let projectRoleId=await generateSnowId()
-            if(obj.name=="user") {
-                projectRoleUserId=projectRoleId
-            }
-            let name=obj.name
-            let description=obj.description
-            await mysql.execute(`insert into ${Table_Project_Role} (id,name,description) values ('${projectRoleId}','${name}','${description}')`)
-            for(let o of obj.permission) {
-                let id=await generateSnowId()
-                await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${projectRoleId}','${objPermission[o.value]}')`)
-            }
-        }
-        await mysql.execute(`insert into ${Table_Project_Member} (id,role_id,project_id,member_id,type) values ('${await generateSnowId()}','${projectRoleUserId}','${projectId}','${userId}',0)`)
-        let config:ICommon_Version_Config={
-            fileBasePath:"/tmp/teamlinker"
-        }
-        await mysql.execute(`insert into ${Table_Version} (version,config) values ('${getNacosInstance().version}','${JSON.stringify(config)}')`)
-        if(!(await fs.pathExists(config.fileBasePath))) {
-            await fs.mkdirp(config.fileBasePath)
-        }
-        let objGroupRole=OBTPConfig.Role.Team_Role,groupRoleUserId;
-        for(let key in objGroupRole) {
-            let obj=objGroupRole[key]
-            let groupRoleId=await generateSnowId()
-            if(obj.name=="user") {
-                groupRoleUserId=groupRoleId
-            }
-            let name=obj.name
-            let description=obj.description
-            await mysql.execute(`insert into ${Table_Team_Role} (id,name,description) values ('${groupRoleId}','${name}','${description}')`)
-            for(let o of obj.permission) {
-                let id=await generateSnowId()
-                await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${groupRoleId}','${objPermission[o.value]}')`)
-            }
-        }
-        await mysql.execute(`insert into ${Table_Team_User} (id,role_id,team_id,user_id) values ('${await generateSnowId()}','${groupRoleUserId}','${groupId}','${userId}')`)
-        await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${await generateSnowId()}','Task',1)`)
-        await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${await generateSnowId()}','Bug',1)`)
-        await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${await generateSnowId()}','Ticket',1)`)
+        let adminId=await initAdmin()
+        let userId=await initUser()
+        await initVersion()
+        let objPermission=await initPermission()
+        let {projectRoleUserId,groupRoleUserId}=await initRole(objPermission);
+        await initTeam(userId,groupRoleUserId);
+        await initProject(userId,projectRoleUserId)
+        await initIssueType()
     }
     console.log("init finish")
+}
+
+async function initUser():Promise<string> {
+    let mysql=getMysqlInstance()
+    let userId=await generateSnowId()
+    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${userId}','sx','sx')`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${await generateSnowId()}','wgq','wgq')`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${await generateSnowId()}','hxx','hxx')`)
+    return userId
+}
+
+async function initAdmin():Promise<string> {
+    let mysql=getMysqlInstance()
+    let adminId=await generateSnowId()
+    await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${adminId}','teamlinker','teamlinker',1)`)
+    return adminId
+}
+
+async function initTeam(userId:string,groupRoleUserId:string) {
+    let mysql=getMysqlInstance()
+    let groupId=await generateSnowId()
+    await mysql.execute(`insert into ${Table_Team} (id,name,created_by) values ('${groupId}','test_group','${userId}')`)
+    await mysql.execute(`insert into ${Table_Team_User} (id,role_id,team_id,user_id) values ('${await generateSnowId()}','${groupRoleUserId}','${groupId}','${userId}')`)
+}
+
+async function initProject(userId:string,projectRoleUserId:string):Promise<string> {
+    let mysql=getMysqlInstance()
+    let projectId=await generateSnowId()
+    await mysql.execute(`insert into ${Table_Project} (id,name,keyword,created_by) values ('${projectId}','test','test','${userId}')`)
+    await mysql.execute(`insert into ${Table_Project_Member} (id,role_id,project_id,member_id,type) values ('${await generateSnowId()}','${projectRoleUserId}','${projectId}','${userId}',0)`)
+    return projectId
+}
+
+async function initVersion() {
+    let mysql=getMysqlInstance()
+    let config:ICommon_Version_Config={
+        fileBasePath:"/tmp/teamlinker"
+    }
+    await mysql.execute(`insert into ${Table_Version} (version,config) values ('${getNacosInstance().version}','${JSON.stringify(config)}')`)
+    if(!(await fs.pathExists(config.fileBasePath))) {
+        await fs.mkdirp(config.fileBasePath)
+    }
+}
+
+async function initPermission():Promise<{
+    [param:number]:string
+}> {
+    let mysql=getMysqlInstance()
+    let objPermission=<{
+        [param:number]:string
+    }>{}
+    for(let key in Permission_Types) {
+        let value=Permission_Types[key]
+        let type=key
+        let keys=Object.keys(value)
+        for(let key of keys) {
+            let val=value[key]
+            if(val instanceof Permission_Base) {
+                let name=val.toString()
+                let value=val.value
+                let id=await generateSnowId()
+                await mysql.execute(`insert into ${Table_Permission} (id,name,type,value) values ('${id}','${name}','${type}','${value}')`)
+                objPermission[value]=id
+            }
+        }
+    }
+    return objPermission
+}
+
+async function initRole(objPermission:{
+    [param:number]:string
+}):Promise<{
+    projectRoleUserId:string,
+    groupRoleUserId:string
+}> {
+    let mysql = getMysqlInstance()
+    let objProjectRole = OBTPConfig.Role.Project_Role, projectRoleUserId;
+    for (let key in objProjectRole) {
+        let obj = objProjectRole[key]
+        let projectRoleId = await generateSnowId()
+        if (obj.name == "user") {
+            projectRoleUserId = projectRoleId
+        }
+        let name = obj.name
+        let description = obj.description
+        await mysql.execute(`insert into ${Table_Project_Role} (id,name,description) values ('${projectRoleId}','${name}','${description}')`)
+        for (let o of obj.permission) {
+            let id = await generateSnowId()
+            await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${projectRoleId}','${objPermission[o.value]}')`)
+        }
+    }
+    let objGroupRole = OBTPConfig.Role.Team_Role, groupRoleUserId;
+    for (let key in objGroupRole) {
+        let obj = objGroupRole[key]
+        let groupRoleId = await generateSnowId()
+        if (obj.name == "user") {
+            groupRoleUserId = groupRoleId
+        }
+        let name = obj.name
+        let description = obj.description
+        await mysql.execute(`insert into ${Table_Team_Role} (id,name,description) values ('${groupRoleId}','${name}','${description}')`)
+        for (let o of obj.permission) {
+            let id = await generateSnowId()
+            await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${groupRoleId}','${objPermission[o.value]}')`)
+        }
+    }
+    return {
+        projectRoleUserId,
+        groupRoleUserId
+    }
+}
+
+async function initIssueType() {
+    let mysql = getMysqlInstance()
+    let taskId=await generateSnowId()
+    let bugId=await generateSnowId()
+    let ticketId=await generateSnowId()
+    let solutionId=await generateSnowId()
+    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${taskId}','Task',1)`)
+    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${bugId}','Bug',1)`)
+    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${ticketId}','Ticket',1)`)
+    await mysql.execute(`insert into ${Table_Issue_Type_Solution} (id,name,description,reserved) values ('${solutionId}','Default','Default',1)`)
+    await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${taskId}','${solutionId}')`)
+    await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${bugId}','${solutionId}')`)
+    await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${ticketId}','${solutionId}')`)
 }
