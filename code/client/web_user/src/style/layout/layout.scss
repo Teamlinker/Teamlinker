@@ -19,7 +19,9 @@
   .ant-menu-root{
     height: 100vh;
   }
-  
+  .ant-layout{
+    background:#EDEEF1;;
+  }
   // 导航菜单样式重构 end
   .ant-pagination-item{
     border-radius:6px;
@@ -191,6 +193,7 @@
   }
   .ant-layout-content{
     overflow:hidden;
+    background:#fff;
   }
   .container_main{
     padding: 10px;
@@ -222,6 +225,7 @@
   padding: 0;
   height: $menuHeaderHeight;
   line-height: $menuHeaderHeight;
+  border-bottom: 1px solid #0052CC;
   @extend .color-white;
 }
 .ant-layout-sider{

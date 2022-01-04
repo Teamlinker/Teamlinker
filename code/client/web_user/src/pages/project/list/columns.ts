@@ -20,6 +20,7 @@ export const columns = [
   {
     title: '图片',
     dataIndex: 'photo',
+    slots: { customRender: 'photo' },
 },
   {
       title: '操作',

@@ -60,6 +60,7 @@ import { useStore } from "@/store";
 import { useRoute, useRouter } from "vue-router";
 import { message } from 'ant-design-vue'
 import { UserOutlined, LockOutlined } from "@ant-design/icons-vue";
+
 export default {
   name: "login",
   components: {
@@ -98,10 +99,7 @@ export default {
     
     const handleFinish = async (values) => {
       
-      const { code, message: msg } = await store.dispatch('user/login', values).finally(() => {
-        // state.loading = false
-        message.destroy()
-      })
+        await store.dispatch('user/login', values)
         const toPath = decodeURIComponent(route.query.redirect || '/')
         message.success('登录成功！')
         router.replace(toPath).then((_) => {

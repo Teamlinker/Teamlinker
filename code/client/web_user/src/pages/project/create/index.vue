@@ -122,18 +122,25 @@ export default defineComponent({
           if(projectId.value){
             params.projectId = projectId.value
             httpUrl = '/project/edit'
+             axios
+            .put(httpUrl, params)
+            .then(() => {
+              message.success("创建成功");
+              router.push("/project/list");
+            });
           }else{
             delete params.projectId
             console.log(params,'0000')
             httpUrl = '/project/create'
-          }
-          axios
-            .put(httpUrl, params)
+             axios
+            .post(httpUrl, params)
             .then(() => {
               // console.log(res, "resss");
               message.success("创建成功");
-              router.push("/projectList");
+              router.push("/project/list");
             });
+          }
+         
         })
         .catch((error: any) => {
           console.log("error", error);

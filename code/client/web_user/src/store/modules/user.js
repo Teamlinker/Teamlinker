@@ -51,8 +51,8 @@ const actions = {
   // eslint-disable-next-line no-unused-vars
   async logout() {
     try {
-      const response = await logout();
-        sessionStorage.removeItem("token");
+        const response = await logout();
+        sessionStorage.removeItem("token"); 
         sessionStorage.removeItem("userInfo");
         router.replace("/login");
       return Promise.resolve(response);
