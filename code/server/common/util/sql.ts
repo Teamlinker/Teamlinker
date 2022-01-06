@@ -186,6 +186,8 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
             val=value?1:0+""
         } else if(typeof(value)=="object" && !(value instanceof Date) && value.exp) {
             val=`${key}${value.exp}${value.value}`
+        } else if(value==="") {
+            val=null
         } else {
             val="'"+value+"'"
         }
