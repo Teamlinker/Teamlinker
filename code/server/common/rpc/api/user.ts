@@ -6,6 +6,11 @@ export interface IServer_Common_RPC_User_CheckSession {
 }
 export default interface IServer_Common_RPC_User {
     checkSession?(token:string):Promise<IServer_Common_RPC_User_CheckSession>
+    getUsersInfo?(userIds:string[]):Promise<{
+        id:string,
+        username:string,
+        photo?:string
+    }[]>
 }
 
 export type IUserSession=IServer_Common_RPC_User_CheckSession

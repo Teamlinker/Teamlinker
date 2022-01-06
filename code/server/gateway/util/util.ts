@@ -6,6 +6,7 @@ import { getMysqlInstance } from "../../common/db/mysql";
 import { getNacosInstance } from '../../common/nacos/nacos';
 import { generateSnowId } from '../../common/util/sql';
 import rpcFileApi from '../rpc/file';
+import rpcUserApi from '../rpc/user';
 import { Table_Issue_Type } from './../../../common/model/issue_type';
 import { Table_Issue_Type_Solution } from './../../../common/model/issue_type_solution';
 import { Table_Issue_Type_Solution_Issue_Type } from './../../../common/model/issue_type_solution_issue_type';
@@ -79,7 +80,11 @@ export function parseFormData(str: Buffer, boundary: string): IServer_GateWay_Fo
 }
 
 export async function handleImageFields(data:object){
-    let arr=<{
+    let arrImage=<{
+        object:object,
+        key:string|number
+    }[]>[]
+    let arrUser=<{
         object:object,
         key:string|number
     }[]>[]
@@ -89,7 +94,12 @@ export async function handleImageFields(data:object){
             for(k in o){
                 if(o.hasOwnProperty(k)){
                     if(["photo","image","icon","img"].includes(k) && typeof(o[k])=="string" && o[k].length>=18 && /^\d+$/.test(o[k])) {
-                        arr.push({
+                        arrImage.push({
+                            object:o,
+                            key:k
+                        })
+                    } else if(["created_by","modified_by"].includes(k) && typeof(o[k])=="string" && o[k].length>=18 && /^\d+$/.test(o[k])) {
+                        arrUser.push({
                             object:o,
                             key:k
                         })
@@ -101,16 +111,30 @@ export async function handleImageFields(data:object){
         }
     }
     _clone(data)
-    if(arr.length>0) {
-        let ids=arr.map(item=>{
-            return item.object[item.key];
-        })
-        let paths=await rpcFileApi.getPaths(ids)
-        for(let i=0;i<arr.length;i++)
-        {
-            arr[i].object[arr[i].key]=paths[i]
+    await Promise.all([(async ()=>{
+        if(arrImage.length>0) {
+            let ids=arrImage.map(item=>{
+                return item.object[item.key];
+            })
+            let paths=await rpcFileApi.getPaths(ids)
+            for(let i=0;i<arrImage.length;i++)
+            {
+                arrImage[i].object[arrImage[i].key]=paths[i]
+            }
         }
-    }
+    })(),(async ()=>{
+        if(arrUser.length>0) {
+            let ids=arrUser.map(item=>{
+                return item.object[item.key];
+            })
+            let paths=await rpcUserApi.getUsersInfo(ids)
+            for(let i=0;i<arrUser.length;i++)
+            {
+                arrUser[i].object[arrUser[i].key]=paths[i]
+            }
+        }
+    })()])
+    
 }
 
 async function resetSystem(){

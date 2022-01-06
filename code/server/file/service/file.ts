@@ -32,13 +32,21 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
     }
 
     static async getPaths(ids:string[]){
+        let arrId=[...ids]
         let ret=await fileMapper.getPaths(ids);
-        return ret.map(item=>{
-            if(item && item.path) {
-                return "/file"+item.path
-            } else {
-                return ""
-            }
+        let arrRetId=ret.map(item=>{
+            return item.id
         })
+        for(let i=0;i<arrId.length;i++) {
+            if(arrId[i] && arrRetId.includes(arrId[i])) {
+                let obj=ret[arrRetId.indexOf(arrId[i])]
+                if(obj && obj.path) {
+                    arrId[i]="/file"+obj.path
+                }
+            } else {
+                arrId[i]=null
+            }
+        }
+        return arrId;
     }
 }

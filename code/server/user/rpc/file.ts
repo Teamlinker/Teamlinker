@@ -6,5 +6,9 @@ class RpcFileApi implements IServer_Common_RPC_File {
     async getPath(fileId: string): Promise<string> {
         return null;
     }
+    @DRPCSend(ECommon_Services.File)
+    async getPaths(fileIds: string[]): Promise<string[]> {
+        return null;
+    }
 }
 export default new RpcFileApi

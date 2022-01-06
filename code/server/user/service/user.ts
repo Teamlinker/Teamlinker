@@ -109,7 +109,7 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
         return ret;
     }
 
-    static async userInfos(userIds:string):Promise<Omit<ICommon_Model_User,"password"|"created_time"|"modified_time">[]>{
+    static async userInfos(userIds:string,isGetPhoto:boolean=true):Promise<Omit<ICommon_Model_User,"password"|"created_time"|"modified_time">[]>{
         if(!userIds) {
             throw Err.User.userIdNotExists
         }
@@ -118,7 +118,7 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
             delete obj.password;
             delete obj.created_time;
             delete obj.modified_time;
-            if(obj.photo) {
+            if(obj.photo && isGetPhoto) {
                 obj.photo=await rpcFileApi.getPath(obj.photo)
             }
         }
