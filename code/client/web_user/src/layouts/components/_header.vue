@@ -54,9 +54,12 @@
                         <span class="anticon">{{userInfo.username}}</span>
                     </div>
                     <template #overlay>
-                        <a-menu class="menu" @click="onMenu">
-                            <a-menu-item key="logout">
+                        <a-menu class="menu">
+                            <a-menu-item key="logout"  @click="onMenu">
                                 <Icon :icon="LogoutOutlinedIcon" />退出登录
+                            </a-menu-item>
+                             <a-menu-item key="logout"  @click="onPerPage">
+                                <Icon :icon="HomeOutlined" />个人主页
                             </a-menu-item>
                         </a-menu>
                     </template>
@@ -82,14 +85,15 @@ import { defineComponent, reactive, toRefs } from 'vue'
 import { useStore } from '@/store'
 import { Icon } from './ICON.ts'
 import { message } from 'ant-design-vue'
-import { DownOutlined } from '@ant-design/icons-vue';
+import { DownOutlined, HomeOutlined } from '@ant-design/icons-vue';
 import axios from "@/plugins/axios";
 import routes from 'virtual:generated-pages';
 import { useRoute, useRouter } from 'vue-router'
 export default defineComponent({
     components:{
         Icon,
-        DownOutlined
+        DownOutlined,
+        HomeOutlined
     },
     emits: ['changeCompletely'],
     setup(props,context) {
@@ -162,13 +166,17 @@ export default defineComponent({
         const viewAllTeam = () => {
             router.push({ name: 'team-list' })
         }
+        const onPerPage = () =>{
+              router.push({ name: 'personalpage-index' })
+        }
         return {
             ...toRefs(state),
             userInfo,
             store,
             props,
             onMenu,
-            viewAllTeam
+            viewAllTeam,
+            onPerPage
             
         }
     }
