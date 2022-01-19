@@ -1,3 +1,5 @@
+import { BaseModel } from "./base"
+
 export interface ICommon_Model_Workflow {
     id :string ,
   name :string,
@@ -7,3 +9,10 @@ export interface ICommon_Model_Workflow {
   modified_time :Date,
 }
 export const Table_Workflow="workflow"
+
+class WorkflowModel extends BaseModel {
+  table=Table_Workflow
+  model=<ICommon_Model_Workflow>{}
+}
+
+export  let workflowModel=new WorkflowModel

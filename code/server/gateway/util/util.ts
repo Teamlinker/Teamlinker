@@ -1,17 +1,24 @@
 import * as crypto from "crypto";
 import * as fs from "fs-extra";
 import { Table_Project } from '../../../common/model/project';
+import { Table_Workflow, workflowModel } from "../../../common/model/workflow";
+import { workflowActionModel } from "../../../common/model/workflow_action";
+import { workflowNodeModel } from "../../../common/model/workflow_node";
+import { workflowSolutionModel } from "../../../common/model/workflow_solution";
+import { Table_Workflow_Solution_Issue_Type_Workflow, workflowSolutionIssueTypeWorkflowModel } from "../../../common/model/workflow_solution_issue_type_workflow";
 import { Permission_Base, Permission_Types } from '../../../common/permission/permission';
 import { getMysqlInstance } from "../../common/db/mysql";
 import { getNacosInstance } from '../../common/nacos/nacos';
-import { generateSnowId } from '../../common/util/sql';
+import { generateCreateSql, generateSnowId } from '../../common/util/sql';
 import rpcFileApi from '../rpc/file';
 import rpcUserApi from '../rpc/user';
 import { Table_Issue_Type } from './../../../common/model/issue_type';
 import { Table_Issue_Type_Solution } from './../../../common/model/issue_type_solution';
 import { Table_Issue_Type_Solution_Issue_Type } from './../../../common/model/issue_type_solution_issue_type';
 import { Table_Permission } from './../../../common/model/permission';
+import { Table_Project_Label } from './../../../common/model/project_label';
 import { Table_Project_Member } from './../../../common/model/project_member';
+import { Table_Project_Module } from './../../../common/model/project_module';
 import { Table_Project_Role } from './../../../common/model/project_role';
 import { Table_Role_Permission } from './../../../common/model/role_permission';
 import { Table_Team } from './../../../common/model/team';
@@ -19,6 +26,9 @@ import { Table_Team_Role } from './../../../common/model/team_role';
 import { Table_Team_User } from './../../../common/model/team_user';
 import { Table_User } from './../../../common/model/user';
 import { ICommon_Version_Config, Table_Version } from './../../../common/model/version';
+import { Table_Workflow_Action } from './../../../common/model/workflow_action';
+import { ECommon_Model_Workflow_Node_Status, Table_Workflow_Node } from './../../../common/model/workflow_node';
+import { Table_Workflow_Solution } from './../../../common/model/workflow_solution';
 import { OBTPConfig } from './obtp';
 export interface IServer_GateWay_FormData {
     isFile:boolean,
@@ -152,6 +162,13 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_Issue_Type}`)
     await mysql.execute(`delete from ${Table_Issue_Type_Solution}`)
     await mysql.execute(`delete from ${Table_Issue_Type_Solution_Issue_Type}`)
+    await mysql.execute(`delete from ${Table_Workflow}`)
+    await mysql.execute(`delete from ${Table_Workflow_Node}`)
+    await mysql.execute(`delete from ${Table_Workflow_Action}`)
+    await mysql.execute(`delete from ${Table_Workflow_Solution}`)
+    await mysql.execute(`delete from ${Table_Workflow_Solution_Issue_Type_Workflow}`)
+    await mysql.execute(`delete from ${Table_Project_Module}`)
+    await mysql.execute(`delete from ${Table_Project_Label}`)
 }
 
 export async function initSystem() {
@@ -166,7 +183,8 @@ export async function initSystem() {
         let {projectRoleUserId,groupRoleUserId}=await initRole(objPermission);
         await initTeam(userId,groupRoleUserId);
         await initProject(userId,projectRoleUserId)
-        await initIssueType()
+        let {issueTypeBugId,issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeTicketId}=await initIssueType()
+        await initWorkflow(issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeBugId,issueTypeTicketId)
     }
     console.log("init finish")
 }
@@ -294,4 +312,133 @@ async function initIssueType() {
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${taskId}','${solutionId}')`)
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${bugId}','${solutionId}')`)
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${ticketId}','${solutionId}')`)
+    return {
+        issueTypeTaskId:taskId,
+        issueTypeBugId:bugId,
+        issueTypeTicketId:ticketId,
+        issueTypeSolutionId:solutionId,
+        issueTypeSolutionName:"Default"
+    }
+}
+
+async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:string,issueTypeTaskId:string,issueTypeBugId:string,issueTypeTicketId:string) {
+    let mysql = getMysqlInstance()
+    let workflowId=await generateSnowId()
+    await mysql.execute(generateCreateSql(workflowModel,{
+        id:workflowId,
+        name:"default",
+        description:"",
+        reserved:1
+    }))
+    let workflowNodeOpenId=await generateSnowId()
+    let workflowNodeProgressId=await generateSnowId()
+    let workflowNodeClosedId=await generateSnowId()
+    let workflowNodeResolvedId=await generateSnowId()
+    await mysql.execute(generateCreateSql(workflowNodeModel,{
+        id:workflowNodeOpenId,
+        name:"open",
+        reserved:1,
+        status:ECommon_Model_Workflow_Node_Status.NOTSTART,
+        workflow_id:workflowId
+    }))
+    await mysql.execute(generateCreateSql(workflowNodeModel,{
+        id:workflowNodeProgressId,
+        name:"in progress",
+        reserved:1,
+        status:ECommon_Model_Workflow_Node_Status.INPROGRESS,
+        workflow_id:workflowId
+    }))
+    await mysql.execute(generateCreateSql(workflowNodeModel,{
+        id:workflowNodeClosedId,
+        name:"closed",
+        reserved:1,
+        status:ECommon_Model_Workflow_Node_Status.DONE,
+        workflow_id:workflowId
+    }))
+    await mysql.execute(generateCreateSql(workflowNodeModel,{
+        id:workflowNodeResolvedId,
+        name:"resolved",
+        reserved:1,
+        status:ECommon_Model_Workflow_Node_Status.DONE,
+        workflow_id:workflowId
+    }))
+    let actionOpenToProgressId=await generateSnowId()
+    let actionProgressToOpenId=await generateSnowId()
+    let actionOpenToClosedId=await generateSnowId()
+    let actionClosedToOpenId=await generateSnowId()
+    let actionProgressToResolvedId=await generateSnowId()
+    let actionResolvedToProgressId=await generateSnowId()
+    await mysql.execute(generateCreateSql(workflowActionModel,{
+        id:actionOpenToProgressId,
+        name:"open to progress",
+        reserved:1,
+        workflow_id:workflowId,
+        source_node_id:workflowNodeOpenId,
+        dest_node_id:workflowNodeProgressId
+    }))
+    await mysql.execute(generateCreateSql(workflowActionModel,{
+        id:actionProgressToOpenId,
+        name:"progress to open",
+        reserved:1,
+        workflow_id:workflowId,
+        source_node_id:workflowNodeProgressId,
+        dest_node_id:workflowNodeOpenId
+    }))
+    await mysql.execute(generateCreateSql(workflowActionModel,{
+        id:actionOpenToClosedId,
+        name:"open to close",
+        reserved:1,
+        workflow_id:workflowId,
+        source_node_id:workflowNodeOpenId,
+        dest_node_id:workflowNodeClosedId
+    }))
+    await mysql.execute(generateCreateSql(workflowActionModel,{
+        id:actionClosedToOpenId,
+        name:"closed to open",
+        reserved:1,
+        workflow_id:workflowId,
+        source_node_id:workflowNodeClosedId,
+        dest_node_id:workflowNodeOpenId
+    }))
+    await mysql.execute(generateCreateSql(workflowActionModel,{
+        id:actionProgressToResolvedId,
+        name:"progress to resolved",
+        reserved:1,
+        workflow_id:workflowId,
+        source_node_id:workflowNodeProgressId,
+        dest_node_id:workflowNodeResolvedId
+    }))
+    await mysql.execute(generateCreateSql(workflowActionModel,{
+        id:actionResolvedToProgressId,
+        name:"resolved to progress",
+        reserved:1,
+        workflow_id:workflowId,
+        source_node_id:workflowNodeResolvedId,
+        dest_node_id:workflowNodeProgressId
+    }))
+    let workflowSolutionId=await generateSnowId()
+    await mysql.execute(generateCreateSql(workflowSolutionModel,{
+        id:workflowSolutionId,
+        reserved:1,
+        name:issueTypeSolutionName,
+        issue_type_solution_id:issueTypeSolutionId
+    }))
+    await mysql.execute(generateCreateSql(workflowSolutionIssueTypeWorkflowModel,{
+        id:await generateSnowId(),
+        workflow_solution_id:workflowSolutionId,
+        workflow_id:workflowId,
+        issue_type_id:issueTypeTaskId
+    }))
+    await mysql.execute(generateCreateSql(workflowSolutionIssueTypeWorkflowModel,{
+        id:await generateSnowId(),
+        workflow_solution_id:workflowSolutionId,
+        workflow_id:workflowId,
+        issue_type_id:issueTypeBugId
+    }))
+    await mysql.execute(generateCreateSql(workflowSolutionIssueTypeWorkflowModel,{
+        id:await generateSnowId(),
+        workflow_solution_id:workflowSolutionId,
+        workflow_id:workflowId,
+        issue_type_id:issueTypeTicketId
+    }))
 }

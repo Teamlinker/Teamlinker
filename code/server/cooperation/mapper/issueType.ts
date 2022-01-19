@@ -1,3 +1,4 @@
+import { workflowSolutionIssueTypeWorkflowModel } from "../../../common/model/workflow_solution_issue_type_workflow";
 import { Err } from "../../../common/status/error";
 import { keys } from "../../../common/transform";
 import { getMysqlInstance } from "../../common/db/mysql";
@@ -97,6 +98,9 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
         await mysql.execute(generateDeleteSql(issueTypeSolutionIssueTypeModel,{
             issue_type_id:issueTypeId,
             issue_type_solution_id:issueTypeSolutionId
+        }))
+        await mysql.execute(generateDeleteSql(workflowSolutionIssueTypeWorkflowModel,{
+            issue_type_id:issueTypeId
         }))
     }
 }

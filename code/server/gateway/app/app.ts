@@ -10,6 +10,7 @@ import * as projectApi from "../../../common/routes/project";
 import * as teamApi from "../../../common/routes/team";
 import { ICommon_HttpApi } from "../../../common/routes/types";
 import * as userApi from "../../../common/routes/user";
+import * as workflowApi from "../../../common/routes/workflow";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
 import Application from "../../common/app/app";
@@ -26,7 +27,7 @@ import userRpcApi from '../rpc/user';
 import { handleImageFields, initSystem, parseFormData } from "../util/util";
 import { ICommon_Version_Config } from './../../../common/model/version';
 import { CacheService } from './../cache/service';
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi];
 var app = new Koa();
 var config=<ICommon_Version_Config>{}
 var pipe = function (from, to): Promise<Buffer> {

@@ -124,7 +124,7 @@ class IssueTypeController {
             throw Err.Project.Issue.issueTypeSolutionNotFound
         }
         if(obj.getItem().reserved) {
-            throw Err.Project.Issue.issueTypeForbidden
+            throw Err.Project.Issue.issueTypeSolutionForbidden
         }
         await obj.addIssueType(issueTypeId)
         return

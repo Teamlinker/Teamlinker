@@ -113,6 +113,48 @@ export namespace Err {
                 code:3403,
                 msg:"issue type solution not found"
             },
+            issueTypeSolutionForbidden:{
+                code:3404,
+                msg:"issue type solution forbidden"
+            },
+        },
+        Workflow:{
+            workflowNotFound:{
+                code:3500,
+                msg:"workflow not found"
+            },
+            workflowForbidden:{
+                code:3501,
+                msg:"workflow forbidden"
+            },
+            workflowNodeNotFound:{
+                code:3502,
+                msg:"workflow node not found"
+            },
+            workflowNodeForbidden:{
+                code:3503,
+                msg:"workflow node forbidden"
+            },
+            workflowActionNotFound:{
+                code:3504,
+                msg:"workflow action not found"
+            },
+            workflowActionForbidden:{
+                code:3505,
+                msg:"workflow action forbidden"
+            },
+            workflowSolutionNotFound:{
+                code:3506,
+                msg:"workflow solution not found"
+            },
+            workflowSolutionForbidden:{
+                code:3507,
+                msg:"workflow solution forbidden"
+            },
+            workflowOpenNodeDuplicate:{
+                code:3508,
+                msg:"workflow open node duplicate"
+            },
         }
     }
     export let Team = {
