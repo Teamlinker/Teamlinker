@@ -2,7 +2,35 @@
     <div class="header-container">
         <div class="menus-container"> 
             <div class="logo"><img src="~@/assets/img/logo.png" alt=""></div>
+           
             </div>
+             <div class="pj-menu">
+                <a-dropdown>
+                    <a class="ant-dropdown-link" @click.prevent>
+                    Teams
+                    <DownOutlined />
+                    </a>
+                    <template #overlay>
+                    <a-menu>
+                       
+                        <span class="rec-text">Recent teams</span>
+                       
+                        <a-menu-item v-for="(item,key,index) in teamList"  :index="index" :key="item.id">
+                        <a href="javascript:;">{{item.name}}</a>
+                        </a-menu-item>
+                       
+                        <span class="line"></span>
+                       
+                        <a-menu-item @click="viewAllTeam">
+                        <a href="javascript:;">View all team</a>
+                        </a-menu-item>
+                        <a-menu-item>
+                        <a href="javascript:;">Create team</a>
+                        </a-menu-item>
+                    </a-menu>
+                    </template>
+                </a-dropdown>
+             </div>
         <div class="right-container">
             <div class="space-item search">
                 <div class="search-main">
@@ -26,9 +54,12 @@
                         <span class="anticon">{{userInfo.username}}</span>
                     </div>
                     <template #overlay>
-                        <a-menu class="menu" @click="onMenu">
-                            <a-menu-item key="logout">
+                        <a-menu class="menu">
+                            <a-menu-item key="logout"  @click="onMenu">
                                 <Icon :icon="LogoutOutlinedIcon" />退出登录
+                            </a-menu-item>
+                             <a-menu-item key="logout"  @click="onPerPage">
+                                <Icon :icon="HomeOutlined" />个人主页
                             </a-menu-item>
                         </a-menu>
                     </template>
@@ -37,19 +68,37 @@
         </div>
     </div>
 </template>
-<script>
+<style>
+    .rec-text{
+        padding-left: 5px;
+        color: #A1A1A1;
+    }
+    .line{
+        display: inline-block;
+        width: 100%;
+        height: 1px;
+        background-color: #C4C4C4;
+    }
+</style>
+<script lang="ts">
 import { defineComponent, reactive, toRefs } from 'vue'
 import { useStore } from '@/store'
 import { Icon } from './ICON.ts'
 import { message } from 'ant-design-vue'
+import { DownOutlined, HomeOutlined } from '@ant-design/icons-vue';
+import axios from "@/plugins/axios";
+import routes from 'virtual:generated-pages';
+import { useRoute, useRouter } from 'vue-router'
 export default defineComponent({
     components:{
-        Icon
+        Icon,
+        DownOutlined,
+        HomeOutlined
     },
     emits: ['changeCompletely'],
     setup(props,context) {
         let store = useStore()
-        
+        const router = useRouter()
         const filterOption = (input, option) => {
             return option.value.toUpperCase().indexOf(input.toUpperCase()) >= 0;
         };
@@ -85,7 +134,8 @@ export default defineComponent({
             inputSearch:'',
             handlerCompletely:handlerCompletely,
             handlerSearch:handlerSearch,
-            routeMmatched:[]
+            routeMmatched:[],
+            teamList:[],
         })
        
 
@@ -102,13 +152,32 @@ export default defineComponent({
                 }
             }
         }
-        
+         const getTeamList = () => {
+            const params = {
+                page: 0,
+                size: 10,
+                keyword: "",
+            };
+            axios.get("/team/list", { params: params }).then((res:any) => {
+               state.teamList = res.data.data;
+            });
+        }
+        getTeamList();
+        const viewAllTeam = () => {
+            router.push({ name: 'team-list' })
+        }
+        const onPerPage = () =>{
+              router.push({ name: 'personalpage-index' })
+        }
         return {
             ...toRefs(state),
             userInfo,
             store,
             props,
-            onMenu
+            onMenu,
+            viewAllTeam,
+            onPerPage
+            
         }
     }
 })
