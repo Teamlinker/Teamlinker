@@ -5,7 +5,7 @@ import { Table_Workflow, workflowModel } from "../../../common/model/workflow";
 import { workflowActionModel } from "../../../common/model/workflow_action";
 import { workflowNodeModel } from "../../../common/model/workflow_node";
 import { workflowSolutionModel } from "../../../common/model/workflow_solution";
-import { Table_Workflow_Solution_Issue_Type_Workflow, workflowSolutionIssueTypeWorkflowModel } from "../../../common/model/workflow_solution_issue_type_workflow";
+import { Table_Workflow_Solution_Workflow_Issue_Type, workflowSolutionWorkflowIssueTypeModel } from "../../../common/model/workflow_solution_workflow_issue_type";
 import { Permission_Base, Permission_Types } from '../../../common/permission/permission';
 import { getMysqlInstance } from "../../common/db/mysql";
 import { getNacosInstance } from '../../common/nacos/nacos';
@@ -29,6 +29,7 @@ import { ICommon_Version_Config, Table_Version } from './../../../common/model/v
 import { Table_Workflow_Action } from './../../../common/model/workflow_action';
 import { ECommon_Model_Workflow_Node_Status, Table_Workflow_Node } from './../../../common/model/workflow_node';
 import { Table_Workflow_Solution } from './../../../common/model/workflow_solution';
+import { Table_Workflow_Solution_Issue_Type_Solution, workflowSolutionIssueTypeSolutionModel } from './../../../common/model/workflow_solution_issue_type_solution';
 import { OBTPConfig } from './obtp';
 export interface IServer_GateWay_FormData {
     isFile:boolean,
@@ -166,7 +167,8 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_Workflow_Node}`)
     await mysql.execute(`delete from ${Table_Workflow_Action}`)
     await mysql.execute(`delete from ${Table_Workflow_Solution}`)
-    await mysql.execute(`delete from ${Table_Workflow_Solution_Issue_Type_Workflow}`)
+    await mysql.execute(`delete from ${Table_Workflow_Solution_Workflow_Issue_Type}`)
+    await mysql.execute(`delete from ${Table_Workflow_Solution_Issue_Type_Solution}`)
     await mysql.execute(`delete from ${Table_Project_Module}`)
     await mysql.execute(`delete from ${Table_Project_Label}`)
 }
@@ -421,24 +423,31 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
         id:workflowSolutionId,
         reserved:1,
         name:issueTypeSolutionName,
+    }))
+    await mysql.execute(generateCreateSql(workflowSolutionIssueTypeSolutionModel,{
+        id:await generateSnowId(),
+        workflow_solution_id:workflowSolutionId,
         issue_type_solution_id:issueTypeSolutionId
     }))
-    await mysql.execute(generateCreateSql(workflowSolutionIssueTypeWorkflowModel,{
+    await mysql.execute(generateCreateSql(workflowSolutionWorkflowIssueTypeModel,{
         id:await generateSnowId(),
         workflow_solution_id:workflowSolutionId,
         workflow_id:workflowId,
-        issue_type_id:issueTypeTaskId
+        issue_type_id:issueTypeTaskId,
+        issue_type_solution_id:issueTypeSolutionId
     }))
-    await mysql.execute(generateCreateSql(workflowSolutionIssueTypeWorkflowModel,{
+    await mysql.execute(generateCreateSql(workflowSolutionWorkflowIssueTypeModel,{
         id:await generateSnowId(),
         workflow_solution_id:workflowSolutionId,
         workflow_id:workflowId,
-        issue_type_id:issueTypeBugId
+        issue_type_id:issueTypeBugId,
+        issue_type_solution_id:issueTypeSolutionId
     }))
-    await mysql.execute(generateCreateSql(workflowSolutionIssueTypeWorkflowModel,{
+    await mysql.execute(generateCreateSql(workflowSolutionWorkflowIssueTypeModel,{
         id:await generateSnowId(),
         workflow_solution_id:workflowSolutionId,
         workflow_id:workflowId,
-        issue_type_id:issueTypeTicketId
+        issue_type_id:issueTypeTicketId,
+        issue_type_solution_id:issueTypeSolutionId
     }))
 }

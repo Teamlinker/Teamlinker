@@ -112,7 +112,15 @@ const api={
                 issueTypeId:string    
             }>{},
             res:{}
-        }
+        },
+        solutionCopy:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/solution/copy",
+            req:<{
+                issueTypeSolutionId:string 
+            }>{},
+            res:<ICommon_Model_Issue_Type_Solution>{}
+        },
     }
 }
 export=api

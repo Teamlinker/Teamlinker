@@ -137,10 +137,64 @@ const api={
             req:<{
                 workflowSolutionId:string,
                 issueTypeId:string,
-                workflowId:string              
+                workflowId:string,
+                issueTypeSolutionId:string         
             }>{},
             res:{}
-        }
+        },
+        solutionCreate:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/solution/item",
+            req:<{
+                 name:string,
+                 description?:string        
+            }>{},
+            res:<ICommon_Model_Workflow_Solution>{}
+        },
+        solutionUpdate:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/solution/item",
+            req:<{
+                workflowSolutionId:string,
+                name?:string,
+                description?:string         
+            }>{},
+            res:<ICommon_Model_Workflow_Solution>{}
+        },
+        solutionDelete:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/solution/item",
+            req:<{
+                workflowSolutionId:string      
+            }>{},
+            res:{}
+        },
+        solutionBind:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/solution/bind",
+            req:<{
+                workflowSolutionId:string,
+                issueTypeSolutionId:string         
+            }>{},
+            res:{}
+        },
+        solutionUnBind:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/solution/unbind",
+            req:<{
+                workflowSolutionId:string,
+                issueTypeSolutionId:string         
+            }>{},
+            res:{}
+        },
+        solutionCopy:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/solution/copy",
+            req:<{
+                workflowSolutionId:string 
+            }>{},
+            res:<ICommon_Model_Workflow_Solution>{}
+        },
     }
 }
 export=api

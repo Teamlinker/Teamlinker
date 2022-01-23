@@ -54,4 +54,18 @@ export abstract class Mapper<T extends BaseModel> {
         var mysql=getMysqlInstance();
         await mysql.execute(generateDeleteSql(this.model,{id}))
     }
+    async copy(id):Promise<T["model"]> {
+        if(!id) {
+            throw Err.Common.itemNotFound
+        }
+        var mysql=getMysqlInstance();
+        let ret=await mysql.executeOne(generateQuerySql(this.model,[],{id}))
+        if(!ret) {
+            throw Err.Common.itemNotFound
+        }
+        delete ret.created_time,ret.modified_time,ret.id
+        await this.create(ret);
+        let obj=this.getById(ret.id)
+        return obj;
+    }
 }

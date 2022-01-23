@@ -103,9 +103,11 @@ export interface ICommon_Route_Res_Workflow_Info extends ICommon_Model_Workflow 
 }
 
 export interface ICommon_Route_Res_WorkflowSolution_Info extends ICommon_Model_Workflow_Solution {
-    issueTypeSolution:ICommon_Model_Issue_Type_Solution,
     data:{
-        issueType:ICommon_Model_Issue_Type,
-        workflow:ICommon_Model_Workflow
+        issueTypeSolution:ICommon_Model_Issue_Type_Solution,
+        data:{
+            issueType:ICommon_Model_Issue_Type,
+            workflow:ICommon_Model_Workflow
+        }[]
     }[]
 }

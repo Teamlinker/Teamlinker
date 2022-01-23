@@ -85,6 +85,18 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         })
         
     }
+
+    async copy() {
+        if(!this.item || !this.item.id) {
+            throw  Err.Common.itemNotFound;
+        }
+        const Cls = this.constructor as new (value: M) => this;
+        let obj=new Cls(this.mapper)
+        let data=await this.mapper.copy(this.item.id)
+        obj.setItem(data)
+        return obj;
+    }
+
     async loadItem():Promise<T["model"]>{
         if(!this.item || !this.item.id) {
             throw  Err.Common.itemNotFound;

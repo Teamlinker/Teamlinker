@@ -24,28 +24,23 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
     constructor(){
         super(issueTypeSolutionMapper)
     }
-
+    override async copy():Promise<this> {
+        let obj=await super.copy()
+        let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueSolutionId(this.getId())
+        if(objWorkflowSolution) {
+            await objWorkflowSolution.bindIssueTypeSolutions([obj.getId()])
+        }
+        return obj;
+    }
     override async create():Promise<ICommon_Model_Issue_Type_Solution> {
         let ret=await super.create();
-        let objWorkflowSolution=new WorkflowSolutionService()
-        objWorkflowSolution.assignItem({
-            name:this.getItem().name,
-            description:this.getItem().description,
-            issue_type_solution_id:this.getId()
-        })
-        await objWorkflowSolution.create()
+        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem()
+        objWorkflowReserved.bindIssueTypeSolutions([this.getId()])
         return ret;
     }
 
     override async update():Promise<ICommon_Model_Issue_Type_Solution> {
         let ret=await super.update();
-        let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueSolutionId(this.getId())
-        objWorkflowSolution.assignItem({
-            name:this.getItem().name
-        })
-        if(objWorkflowSolution) {
-            await objWorkflowSolution.update()
-        }
         return ret;
     }
 
@@ -53,7 +48,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         await super.delete()
         let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueSolutionId(this.getId())
         if(objWorkflowSolution) {
-            await objWorkflowSolution.delete()
+            await objWorkflowSolution.unbindIssueTypeSolutions([this.getId()]);
         }
     }
 
@@ -78,7 +73,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueSolutionId(this.getId())
         if(objWorkflowSolution) {
             let reserved=await WorkflowService.getReservedItem()
-            await objWorkflowSolution.assign(issueTypeId,reserved.getId())
+            await objWorkflowSolution.assign(issueTypeId,reserved.getId(),this.getId())
         }
     }
 
@@ -86,7 +81,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         await issueTypeSolutionMapper.removeIssueType(issueTypeId,this.getId())
         let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueSolutionId(this.getId())
         if(objWorkflowSolution) {
-            await objWorkflowSolution.deleteIssueType(issueTypeId)
+            await objWorkflowSolution.deleteIssueType(issueTypeId,this.getId())
         }
     }
 }

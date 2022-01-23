@@ -4,11 +4,10 @@ import { workflowSolutionModel } from "../../../common/model/workflow_solution";
 import { ICommon_Route_Res_Workflow_Info, ICommon_Route_Res_Workflow_Info_Action, ICommon_Route_Res_Workflow_Info_Node } from "../../../common/routes/response";
 import { Err } from "../../../common/status/error";
 import { Entity } from "../../common/entity/entity";
+import { EServer_Common_Event_Types } from "../../common/event/types";
 import { ECommon_Model_Workflow_Node_Status, ICommon_Model_Workflow_Node, workflowNodeModel } from './../../../common/model/workflow_node';
 import { ICommon_Route_Res_WorkflowSolution_Info } from './../../../common/routes/response';
-import { issueTypeSolutionMapper } from './../mapper/issueType';
 import { workflowActionMapper, workflowMapper, workflowNodeMapper, workflowSolutionMapper } from './../mapper/workflow';
-import { IssueTypeSolutionService } from "./issueType";
 export default class Workflow extends Entity<typeof workflowModel,typeof workflowMapper> {
     constructor(){
         super(workflowMapper)
@@ -79,6 +78,11 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
         obj.data=_accessNodesAndActions(null)
         return obj;
     }
+
+    override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
+        await super.delete()
+        await workflowMapper.revoke(this.getId())
+    }
 }
 
 export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel,typeof workflowSolutionMapper> {
@@ -96,42 +100,52 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
         return objService;
     }
     static async getReservedItem () {
-
+        let ret=await workflowSolutionMapper.getReservedItem()
+        let obj=new WorkflowSolutionService()
+        obj.setItem(ret)
+        return obj;
+    }
+    async bindIssueTypeSolutions(issueTypeSolutionIds:string[]) {
+        await workflowSolutionMapper.bindIssueTypeSolutionList(this.getId(),issueTypeSolutionIds)
+    }
+    async unbindIssueTypeSolutions(issueTypeSolutionIds:string[]=null) {
+        await workflowSolutionMapper.unbindIssueTypeSolution(this.getId(),issueTypeSolutionIds)
     }
     async info():Promise<ICommon_Route_Res_WorkflowSolution_Info> {
         let info:ICommon_Route_Res_WorkflowSolution_Info={
             ...this.getItem(),
-            issueTypeSolution:null,
             data:[]
         }
-        let objIssueTypeSolution=await IssueTypeSolutionService.getItemById(this.getItem().issue_type_solution_id)
-        if(!objIssueTypeSolution) {
-            throw Err.Project.Issue.issueTypeSolutionNotFound
+        let objIssueTypeSolutionList=await workflowSolutionMapper.getIssueTypeSolutionList(this.getId())
+        for(let obj of objIssueTypeSolutionList) {
+            info.data.push({
+                issueTypeSolution:obj,
+                data:await workflowSolutionMapper.workflowIssueTypeList(this.getId(),obj.id)
+            })
         }
-        info.issueTypeSolution=objIssueTypeSolution.getItem()
-        info.data=await workflowSolutionMapper.items(this.getId());
         return info;
     }
-    async assign(issueTypeId:string,workflowId:string) {
-        let issueTypeList=await issueTypeSolutionMapper.getIssueTypesBySolutionId(this.getItem().issue_type_solution_id);
-        let issueTypeIds=issueTypeList.map(item=>item.id)
-        if(!issueTypeIds.includes(issueTypeId)) {
-            throw Err.Project.Issue.issueTypeNotFound
-        }
+    async assign(issueTypeId:string,workflowId:string,issueTypeSolutionId:string) {
         let workflow=await Workflow.getItemById(workflowId)
         if(!workflow) {
             throw Err.Project.Workflow.workflowNotFound
         }
-        await workflowSolutionMapper.assign(this.getId(),workflowId,issueTypeId);
+        await workflowSolutionMapper.assign(this.getId(),workflowId,issueTypeId,issueTypeSolutionId);
+    }
+
+    override async copy(): Promise<this> {
+        let obj=await super.copy()
+        return obj;
     }
 
     override async delete() {
         await super.delete();
-        await workflowSolutionMapper.deleteItems(this.getId());
+        await workflowSolutionMapper.deleteItemsByWorkflowSolutionId(this.getId());
+        await workflowSolutionMapper.unbindIssueTypeSolution(this.getId())
     }
 
-    async deleteIssueType(issueTypeId:string) {
-        await workflowSolutionMapper.deleteIssueType(this.getId(),issueTypeId)
+    async deleteIssueType(issueTypeId:string,issueTypeSolutionId:string) {
+        await workflowSolutionMapper.deleteIssueType(this.getId(),issueTypeId,issueTypeSolutionId)
     }
     static async clearIssueType(issueTypeId:string) {
         await workflowSolutionMapper.clearIssueType(issueTypeId);

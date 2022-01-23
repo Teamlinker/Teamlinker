@@ -92,9 +92,6 @@ class IssueTypeController {
          if(!obj) {
              throw Err.Project.Issue.issueTypeNotFound
          }
-         if(obj.getItem().reserved) {
-             throw Err.Project.Issue.issueTypeForbidden
-         }
          obj.assignItem({
              id:issueTypeSolutionId,
              name,
@@ -123,9 +120,6 @@ class IssueTypeController {
         if(!obj) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
         }
-        if(obj.getItem().reserved) {
-            throw Err.Project.Issue.issueTypeSolutionForbidden
-        }
         await obj.addIssueType(issueTypeId)
         return
      }
@@ -136,11 +130,18 @@ class IssueTypeController {
         if(!obj) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
         }
-        if(obj.getItem().reserved) {
-            throw Err.Project.Issue.issueTypeForbidden
-        }
         await obj.removeIssueType(issueTypeId)
         return
+     }
+
+     @DHttpApi(issueTypeApi.routes.solutionCopy)
+     async solutionCopy(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.solutionCopy.res> {
+        let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
+        if(!obj) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        let ret=await obj.copy()
+        return ret.getItem();
      }
      
 }

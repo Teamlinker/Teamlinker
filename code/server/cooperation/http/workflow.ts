@@ -170,15 +170,72 @@ class WorkflowController {
         return ret;
      }
      @DHttpApi(workflowApi.routes.solutionAssign)
-     async solutionAssign(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeId") issueTypeId:string,@DHttpReqParamRequired("workflowId") workflowId:string):Promise<typeof workflowApi.routes.solutionAssign.res> {
+     async solutionAssign(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeId") issueTypeId:string,@DHttpReqParamRequired("workflowId") workflowId:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.solutionAssign.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
             throw Err.Project.Workflow.workflowActionNotFound
-        } else if(obj.getItem().reserved) {
-            throw Err.Project.Workflow.workflowSolutionForbidden
         }
-        await obj.assign(issueTypeId,workflowId)
+        await obj.assign(issueTypeId,workflowId,issueTypeSolutionId)
         return
+     }
+     @DHttpApi(workflowApi.routes.solutionCreate)
+     async solutionCreate(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("description") description:string):Promise<typeof workflowApi.routes.solutionCreate.res> {
+        let obj=new WorkflowSolutionService()
+        obj.assignItem({
+            name:name,
+            description:description
+        })
+        let ret=await obj.create();
+        return ret;
+     }
+     @DHttpApi(workflowApi.routes.solutionUpdate)
+     async solutionUpdate(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParam("name") name:string,@DHttpReqParam("description") description:string):Promise<typeof workflowApi.routes.solutionUpdate.res> {
+         let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowActionNotFound
+        }
+        obj.assignItem({
+            name,
+            description
+        })
+        let ret=await obj.update()
+        return ret;
+     }
+     @DHttpApi(workflowApi.routes.solutionDelete)
+     async solutionDelete(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string):Promise<typeof workflowApi.routes.solutionDelete.res> {
+         let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowActionNotFound
+        }
+        await obj.delete()
+        return
+     }
+     @DHttpApi(workflowApi.routes.solutionBind)
+     async solutionBind(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.solutionBind.res> {
+         let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowActionNotFound
+        }
+        await obj.bindIssueTypeSolutions([issueTypeSolutionId])
+        return
+     }
+     @DHttpApi(workflowApi.routes.solutionUnBind)
+     async solutionUnBind(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.solutionUnBind.res> {
+         let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowActionNotFound
+        }
+        await obj.unbindIssueTypeSolutions([issueTypeSolutionId])
+        return
+     }
+     @DHttpApi(workflowApi.routes.solutionCopy)
+     async solutionCopy(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string):Promise<typeof workflowApi.routes.solutionCopy.res> {
+         let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowActionNotFound
+        }
+        let ret=await obj.copy()
+        return ret.getItem()
      }
 
 }

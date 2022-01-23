@@ -117,6 +117,10 @@ export namespace Err {
                 code:3404,
                 msg:"issue type solution forbidden"
             },
+            issueTypeNotInIssueTypeSolution:{
+                code:3405,
+                msg:"issue type not in issue solution"
+            }
         },
         Workflow:{
             workflowNotFound:{
@@ -155,6 +159,10 @@ export namespace Err {
                 code:3508,
                 msg:"workflow open node duplicate"
             },
+            workflowSolutionNotBindIssueTypeSolution:{
+                code:3509,
+                msg:"workflow solution not bind issue type solution"
+            }
         }
     }
     export let Team = {
