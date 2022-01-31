@@ -221,12 +221,14 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
 
     async removeWorkflow(workflowId:string) {
         await workflowSolutionMapper.removeWorkflow(this.getId(),workflowId)
+        await FieldSolutionService.clearItemsByWorkflowIdAndWorkflowSolutionId(workflowId,this.getId())
     }
 
     override async delete() {
         await super.delete();
         await workflowSolutionMapper.deleteItemsByWorkflowSolutionId(this.getId());
         await workflowSolutionMapper.unbindIssueTypeSolution(this.getId())
+        await FieldSolutionService.clearItemsByWorkflowSolutionId(this.getId())
     }
 
     async deleteIssueType(issueTypeId:string,issueTypeSolutionId:string) {
@@ -286,6 +288,11 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
         }
         let ret=await super.update()
         return ret;
+    }
+
+    override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
+        await super.delete()
+        await FieldSolutionService.clearItemsByWorkflowNodeId(this.getId())
     }
 }
 

@@ -144,6 +144,29 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         await fieldSolutionMapper.clearItemsByWorkflowId(workflowId)
     }
 
+    static async clearItemsByWorkflowSolutionId(workflowSolutionId:string) {
+        if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        await fieldSolutionMapper.clearItemsByWorkflowSolutionId(workflowSolutionId)
+    }
+
+    static async clearItemsByWorkflowIdAndWorkflowSolutionId(workflowId:string,workflowSolutionId:string) {
+        if(!workflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        } else if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        await fieldSolutionMapper.clearItemsByWorkflowIdAndWorkflowSolutionId(workflowId,workflowSolutionId)
+    }
+
+    static async clearItemsByWorkflowNodeId(workflowNodeId:string) {
+        if(!workflowNodeId) {
+            throw Err.Project.Workflow.workflowNodeNotFound
+        }
+        await fieldSolutionMapper.clearItemsByWorkflowNodeId(workflowNodeId)
+    }
+
     static async getObjByFieldSolutionWorkflowNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId:string) {
         let ret=new FieldSolutionService
         let obj=await fieldSolutionMapper.getSolutionByFieldSolutionWorkflowNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId)

@@ -191,6 +191,73 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
         
     }
 
+    async clearItemsByWorkflowSolutionId(workflowSolutionId:string) {
+        if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        let arr=await mysql.execute(generateQuerySql(fieldSolutionWorkflowNodeFieldTypeModel,["id"],{
+            workflow_solution_id:workflowSolutionId
+        }))
+        await mysql.execute(generateDeleteSql(fieldSolutionWorkflowNodeFieldTypeModel,{
+            workflow_solution_id:workflowSolutionId
+        }))
+        if(arr.length>0) {
+            await mysql.execute(generateDeleteSql(fieldTypeConfigValueModel,{
+                field_solution_workflow_node_field_type_id:{
+                    exp:"in",
+                    value:arr.map(item=>item.id)
+                }
+            }))
+        }
+    }
+
+    async clearItemsByWorkflowNodeId(workflowNodeId:string) {
+        if(!workflowNodeId) {
+            throw Err.Project.Workflow.workflowNodeNotFound
+        }
+        let mysql=getMysqlInstance()
+        let arr=await mysql.execute(generateQuerySql(fieldSolutionWorkflowNodeFieldTypeModel,["id"],{
+            workflow_node_id:workflowNodeId
+        }))
+        await mysql.execute(generateDeleteSql(fieldSolutionWorkflowNodeFieldTypeModel,{
+            workflow_node_id:workflowNodeId
+        }))
+        if(arr.length>0) {
+            await mysql.execute(generateDeleteSql(fieldTypeConfigValueModel,{
+                field_solution_workflow_node_field_type_id:{
+                    exp:"in",
+                    value:arr.map(item=>item.id)
+                }
+            }))
+        }
+    }
+
+    async clearItemsByWorkflowIdAndWorkflowSolutionId(workflowId:string,workflowSolutionId:string) {
+        if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        } else if(!workflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        }
+        let mysql=getMysqlInstance()
+        let arr=await mysql.execute(generateQuerySql(fieldSolutionWorkflowNodeFieldTypeModel,["id"],{
+            workflow_solution_id:workflowSolutionId,
+            workflow_id:workflowId
+        }))
+        await mysql.execute(generateDeleteSql(fieldSolutionWorkflowNodeFieldTypeModel,{
+            workflow_solution_id:workflowSolutionId,
+            workflow_id:workflowId
+        }))
+        if(arr.length>0) {
+            await mysql.execute(generateDeleteSql(fieldTypeConfigValueModel,{
+                field_solution_workflow_node_field_type_id:{
+                    exp:"in",
+                    value:arr.map(item=>item.id)
+                }
+            }))
+        }
+    }
+
     async bindWorkflowSolution(fieldSolutionId:string,workflowSolutionId:string) {
         if(!fieldSolutionId) {
             throw Err.Project.Field.fieldSolutionNotFound
