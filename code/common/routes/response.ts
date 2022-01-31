@@ -1,7 +1,11 @@
+import { ICommon_Model_Field_Solution_Workflow_Node_Field_Type } from "../model/field_solution_workflow_node_field_type";
+import { ICommon_Model_Field_Type } from "../model/field_type";
+import { ICommon_Model_Field_Type_Config_Value } from "../model/field_type_config_value";
 import { ICommon_Model_Issue_Type } from "../model/issue_type";
 import { ICommon_Model_Project } from "../model/project";
 import { ICommon_Model_Team } from '../model/team';
 import { ICommon_Model_User } from '../model/user';
+import { ICommon_Model_Field_Solution } from './../model/field_solution';
 import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solution';
 import { ECommon_Model_Project_Member_Type } from './../model/project_member';
 import { ICommon_Model_Workflow } from './../model/workflow';
@@ -90,6 +94,11 @@ export interface ICommon_Route_Res_IssueTypeSolution_Info extends ICommon_Model_
 
 export interface ICommon_Route_Res_Workflow_Info_Node {
     node:ICommon_Model_Workflow_Node,
+    fields?:{
+        field:ICommon_Model_Field_Solution_Workflow_Node_Field_Type,
+        fieldType:ICommon_Model_Field_Type,
+        values?:ICommon_Model_Field_Type_Config_Value[]
+    }[]
     actions:ICommon_Route_Res_Workflow_Info_Action[]
 }
 
@@ -111,3 +120,20 @@ export interface ICommon_Route_Res_WorkflowSolution_Info extends ICommon_Model_W
         }[]
     }[]
 }
+
+export interface ICommon_Route_Res_FieldSolution_Info extends ICommon_Model_Field_Solution {
+    data:{
+        workflowSolution:ICommon_Model_Workflow_Solution,
+        data:{
+            workflow:ICommon_Model_Workflow,
+            node:ICommon_Route_Res_Workflow_Info_Node
+        }[]
+    }[]
+}
+
+export interface ICommon_Route_Res_listWorkflowNodeField {
+    field: ICommon_Model_Field_Solution_Workflow_Node_Field_Type,
+    fieldType: ICommon_Model_Field_Type,
+    values?: ICommon_Model_Field_Type_Config_Value[]
+}
+

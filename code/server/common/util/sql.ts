@@ -10,7 +10,7 @@ type EXPR={
 }
 type EXPRVALUEEXP ={
     value?:string|number|boolean|string[]|[number,number]|string|Date,
-    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"
+    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="
 }
 type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
     type:"and"|"or",
@@ -31,8 +31,22 @@ function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[]) {
         if(!value.exp) {
             value.exp="="
         }
-        let val = typeof (value.value) == "number" ? value.value : typeof (value.value) == "boolean" ? (value.value ? 1 : 0) : ("'" + value.value + "'")
-        arrExpr.push(`${key}${value.exp}${val}`)
+        if(value.exp=="> <" || value.exp=="> <=" || value.exp==">= <" || value.exp==">= <=" ) {
+            let val1 = value.value[0]
+            let val2 = value.value[1]
+            if(value.exp=="> <") {
+                arrExpr.push(`${key}>${val1} and ${key}<${val2}`)
+            } else if(value.exp==">= <=") {
+                arrExpr.push(`${key}>=${val1} and ${key}<=${val2}`)
+            } else if(value.exp==">= <") {
+                arrExpr.push(`${key}>=${val1} and ${key}<${val2}`)
+            } else if(value.exp=="> <=") {
+                arrExpr.push(`${key}>${val1} and ${key}<=${val2}`)
+            }
+        } else {
+            let val = typeof (value.value) == "number" ? value.value : typeof (value.value) == "boolean" ? (value.value ? 1 : 0) : ("'" + value.value + "'")
+            arrExpr.push(`${key}${value.exp}${val}`)
+        }
     } else if(value.exp=="is null") {
         arrExpr.push(`${key} is null`)
     } else if(value.exp=="in") {
@@ -133,6 +147,35 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
     }
     return {
         value:`insert into ${model.table} (${keys}) values (${values})`,
+        type:model.model
+    }
+}
+
+export function generateBatchCreateSql<T extends BaseModel>(model:T,arr:{
+    [param in keyof T["model"]]?:EXPRVALUE
+}[]):{
+    value:string,
+    type:T["model"]
+} {
+    let arrKey:string[]=[]
+    for(let item of arr) {
+        for(let key in item) {
+            if(!arrKey.includes(key)) {
+                arrKey.push(key)
+            }
+        }
+    }
+    let keys=arrKey.join(","),arrValues:string[]=[]
+    for(let item of arr) {
+        let arrValue:string[]=[]
+        for(let key of arrKey) {
+            let value=item[key]
+            arrValue.push((value!==undefined)?(value===null?"null":("'"+value+"'")):"default")
+        }
+        arrValues.push("("+arrValue.join(",")+")")
+    }
+    return {
+        value:`insert into ${model.table} (${keys}) values ${arrValues.join(",")}`,
         type:model.model
     }
 }
@@ -594,6 +637,38 @@ export function generateCountSql<T extends BaseModel>(model:T,objExpr?:{
     let expr=generateExp(objExpr,exprMode);
     return {
         value:`select count(1) from ${model.table}${expr?(" where "+expr):""}`,
+        type:model.model
+    }
+}
+
+export function generateMaxSql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columnMax:K1,objExpr?:{
+    [param in keyof T["model"]]?:EXPRVALUE
+},exprMode?:"and"|"or"):{
+    value:string,
+    type:{
+        [key in Extract<keyof T["model"],K1>]:T["model"][key]
+    }
+} {
+    let column=`max(${columnMax}) ${columnMax}`
+    let expr=generateExp(objExpr,exprMode);
+    return {
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}`,
+        type:model.model
+    }
+}
+
+export function generateMinSql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columnMin:K1,objExpr?:{
+    [param in keyof T["model"]]?:EXPRVALUE
+},exprMode?:"and"|"or"):{
+    value:string,
+    type:{
+        [key in Extract<keyof T["model"],K1>]:T["model"][key]
+    }
+} {
+    let column=`min(${columnMin}) ${columnMin}`
+    let expr=generateExp(objExpr,exprMode);
+    return {
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}`,
         type:model.model
     }
 }

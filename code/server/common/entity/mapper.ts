@@ -63,7 +63,12 @@ export abstract class Mapper<T extends BaseModel> {
         if(!ret) {
             throw Err.Common.itemNotFound
         }
-        delete ret.created_time,ret.modified_time,ret.id
+        delete ret.created_time;
+        delete ret.modified_time;
+        delete ret.id
+        if(ret.name) {
+            (ret as any).name+="(copy)"
+        }
         await this.create(ret);
         let obj=this.getById(ret.id)
         return obj;

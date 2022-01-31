@@ -4,6 +4,7 @@ import * as body from 'koa-bodyparser';
 import * as koaStaticServer from "koa-static-server";
 import { PassThrough } from "stream";
 import { Permission_Base } from '../../../common/permission/permission';
+import * as fieldApi from "../../../common/routes/field";
 import * as fileApi from "../../../common/routes/file";
 import * as issueTypeApi from "../../../common/routes/issueType";
 import * as projectApi from "../../../common/routes/project";
@@ -27,7 +28,7 @@ import userRpcApi from '../rpc/user';
 import { handleImageFields, initSystem, parseFormData } from "../util/util";
 import { ICommon_Version_Config } from './../../../common/model/version';
 import { CacheService } from './../cache/service';
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi];
 var app = new Koa();
 var config=<ICommon_Version_Config>{}
 var pipe = function (from, to): Promise<Buffer> {

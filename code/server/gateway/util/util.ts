@@ -9,9 +9,14 @@ import { Table_Workflow_Solution_Workflow_Issue_Type, workflowSolutionWorkflowIs
 import { Permission_Base, Permission_Types } from '../../../common/permission/permission';
 import { getMysqlInstance } from "../../common/db/mysql";
 import { getNacosInstance } from '../../common/nacos/nacos';
-import { generateCreateSql, generateSnowId } from '../../common/util/sql';
+import { generateBatchCreateSql, generateCreateSql, generateSnowId } from '../../common/util/sql';
 import rpcFileApi from '../rpc/file';
 import rpcUserApi from '../rpc/user';
+import { Table_Field_Solution } from './../../../common/model/field_solution';
+import { Table_Field_Solution_Workflow_Node_Field_Type } from './../../../common/model/field_solution_workflow_node_field_type';
+import { Table_Field_Solution_Workflow_Solution } from './../../../common/model/field_solution_workflow_solution';
+import { ECommon_Model_Field_Type, fieldTypeModel, Table_Field_Type } from './../../../common/model/field_type';
+import { Table_Field_Type_Config_Value } from './../../../common/model/field_type_config_value';
 import { Table_Issue_Type } from './../../../common/model/issue_type';
 import { Table_Issue_Type_Solution } from './../../../common/model/issue_type_solution';
 import { Table_Issue_Type_Solution_Issue_Type } from './../../../common/model/issue_type_solution_issue_type';
@@ -30,6 +35,7 @@ import { Table_Workflow_Action } from './../../../common/model/workflow_action';
 import { ECommon_Model_Workflow_Node_Status, Table_Workflow_Node } from './../../../common/model/workflow_node';
 import { Table_Workflow_Solution } from './../../../common/model/workflow_solution';
 import { Table_Workflow_Solution_Issue_Type_Solution, workflowSolutionIssueTypeSolutionModel } from './../../../common/model/workflow_solution_issue_type_solution';
+import { Table_Workflow_Solution_Workflow, workflowSolutionWorkflowModel } from './../../../common/model/workflow_solution_workflow';
 import { OBTPConfig } from './obtp';
 export interface IServer_GateWay_FormData {
     isFile:boolean,
@@ -169,8 +175,14 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_Workflow_Solution}`)
     await mysql.execute(`delete from ${Table_Workflow_Solution_Workflow_Issue_Type}`)
     await mysql.execute(`delete from ${Table_Workflow_Solution_Issue_Type_Solution}`)
+    await mysql.execute(`delete from ${Table_Workflow_Solution_Workflow}`)
     await mysql.execute(`delete from ${Table_Project_Module}`)
     await mysql.execute(`delete from ${Table_Project_Label}`)
+    await mysql.execute(`delete from ${Table_Field_Solution}`)
+    await mysql.execute(`delete from ${Table_Field_Solution_Workflow_Node_Field_Type}`)
+    await mysql.execute(`delete from ${Table_Field_Type}`)
+    await mysql.execute(`delete from ${Table_Field_Type_Config_Value}`)
+    await mysql.execute(`delete from ${Table_Field_Solution_Workflow_Solution}`)
 }
 
 export async function initSystem() {
@@ -187,6 +199,7 @@ export async function initSystem() {
         await initProject(userId,projectRoleUserId)
         let {issueTypeBugId,issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeTicketId}=await initIssueType()
         await initWorkflow(issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeBugId,issueTypeTicketId)
+        await initField()
     }
     console.log("init finish")
 }
@@ -424,6 +437,11 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
         reserved:1,
         name:issueTypeSolutionName,
     }))
+    await mysql.execute(generateCreateSql(workflowSolutionWorkflowModel,{
+        id:await generateSnowId(),
+        workflow_solution_id:workflowSolutionId,
+        workflow_id:workflowId
+    }))
     await mysql.execute(generateCreateSql(workflowSolutionIssueTypeSolutionModel,{
         id:await generateSnowId(),
         workflow_solution_id:workflowSolutionId,
@@ -450,4 +468,61 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
         issue_type_id:issueTypeTicketId,
         issue_type_solution_id:issueTypeSolutionId
     }))
+}
+
+async function initField() {
+    let mysql = getMysqlInstance()
+    let fieldTypeLabelId=await generateSnowId()
+    let fieldTypeMultiLabelId=await generateSnowId()
+    let fieldTypeTextId=await generateSnowId()
+    let fieldTypeMultiTextId=await generateSnowId()
+    let fieldTypeSelectId=await generateSnowId()
+    let fieldTypeMultiSelectId=await generateSnowId()
+    let fieldTypeSwitchId=await generateSnowId()
+    let fieldTypeTimeId=await generateSnowId()
+    let fieldTypeDateId=await generateSnowId()
+    let fieldTypeDateTimeId=await generateSnowId()
+    await mysql.execute(generateBatchCreateSql(fieldTypeModel,[{
+        id:fieldTypeLabelId,
+        name:"label",
+        type:ECommon_Model_Field_Type.LABEL
+    },{
+        id:fieldTypeMultiLabelId,
+        name:"multi label",
+        multi:1,
+        type:ECommon_Model_Field_Type.MULTILABEL
+    },{
+        id:fieldTypeTextId,
+        name:"text",
+        type:ECommon_Model_Field_Type.TEXT
+    },{
+        id:fieldTypeMultiTextId,
+        name:"multi text",
+        type:ECommon_Model_Field_Type.MULTITEXT
+    },{
+        id:fieldTypeSelectId,
+        name:"select",
+        type:ECommon_Model_Field_Type.SELECT
+    },{
+        id:fieldTypeMultiSelectId,
+        name:"multi select",
+        multi:1,
+        type:ECommon_Model_Field_Type.MULTISELECT
+    },{
+        id:fieldTypeSwitchId,
+        name:"switch",
+        type:ECommon_Model_Field_Type.SWITCH
+    },{
+        id:fieldTypeTimeId,
+        name:"timepicker",
+        type:ECommon_Model_Field_Type.TIME
+    },{
+        id:fieldTypeDateId,
+        name:"datepicker",
+        type:ECommon_Model_Field_Type.DATE
+    },{
+        id:fieldTypeDateTimeId,
+        name:"datetimepicker",
+        type:ECommon_Model_Field_Type.DATETIME
+    }]))
 }

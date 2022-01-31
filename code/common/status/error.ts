@@ -162,7 +162,53 @@ export namespace Err {
             workflowSolutionNotBindIssueTypeSolution:{
                 code:3509,
                 msg:"workflow solution not bind issue type solution"
+            },
+            workflowNotInWorkflowSolution:{
+                code:3510,
+                msg:"workflow not in workflow solution"
+            },
+            workflowNodeNotInWorkflow:{
+                code:3511,
+                msg:"worflow node not in workflow"
+            },
+            workflowAlreadyInWorkflowSolution:{
+                code:3512,
+                msg:"workflow already in workflow solution"
+            },
+            issueTypeSolutionDuplicate:{
+                code:3513,
+                msg:"issue type solution duplicate"
             }
+        },
+        Field:{
+            fieldTypeNotFound:{
+                code:3600,
+                msg:"field type not found"
+            },
+            fieldSolutionNotFound:{
+                code:3601,
+                msg:"field solution not found"
+            },
+            fieldSolutionWorkflowNodeFieldTypeNotFound:{
+                code:3602,
+                msg:"field solution workflow node field Type not found"
+            },
+            fieldTypeConfigValueIdNotFound:{
+                code:3603,
+                msg:"field type config value id not found"
+            },
+            workflowSolutionNotBind:{
+                code:3604,
+                msg:"workflow solution not bind"
+            },
+            workflowSolutionAlreadyBind:{
+                code:3605,
+                msg:"workflow solution already bind"
+            },
+            fieldTypeNotMatch:{
+                code:3606,
+                msg:"field type not match"
+            },
         }
     }
     export let Team = {

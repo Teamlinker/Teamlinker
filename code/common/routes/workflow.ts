@@ -195,6 +195,32 @@ const api={
             }>{},
             res:<ICommon_Model_Workflow_Solution>{}
         },
+        solutionListWorkflow:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/solution/workflow/list",
+            req:<{
+                workflowSolutionId:string,
+            }>{},
+            res:<ICommon_Model_Workflow[]>{}
+        },
+        solutionAddWorkflow:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/solution/workflow/item",
+            req:<{
+                workflowSolutionId:string,
+                workflowId:string
+            }>{},
+            res:{}
+        },
+        solutionRemoveWorkflow:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/solution/workflow/item",
+            req:<{
+                workflowSolutionId:string,
+                workflowId:string
+            }>{},
+            res:{}
+        },
     }
 }
 export=api

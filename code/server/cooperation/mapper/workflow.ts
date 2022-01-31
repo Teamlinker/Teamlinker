@@ -1,6 +1,7 @@
 import { ICommon_Model_Issue_Type } from "../../../common/model/issue_type";
 import { workflowSolutionModel } from "../../../common/model/workflow_solution";
 import { workflowSolutionIssueTypeSolutionModel } from "../../../common/model/workflow_solution_issue_type_solution";
+import { workflowSolutionWorkflowModel } from "../../../common/model/workflow_solution_workflow";
 import { workflowSolutionWorkflowIssueTypeModel } from "../../../common/model/workflow_solution_workflow_issue_type";
 import { Err } from '../../../common/status/error';
 import { keys } from "../../../common/transform";
@@ -68,6 +69,34 @@ class WorkflowMapper extends Mapper<typeof workflowModel> {
         }))
     }
 
+    async checkNode(workflowId:string,workflowNodeId:string):Promise<boolean> {
+        if(!workflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        } else if(!workflowNodeId) {
+            throw Err.Project.Workflow.workflowNodeNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.executeOne(generateQuerySql(workflowNodeModel,["id"],{
+            workflow_id:workflowId,
+            id:workflowNodeId
+        }))
+        return ret!=null
+    }
+
+    async checkAction(workflowId:string,workflowActionId:string):Promise<boolean> {
+        if(!workflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        } else if(!workflowActionId) {
+            throw Err.Project.Workflow.workflowActionNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.executeOne(generateQuerySql(workflowActionModel,["id"],{
+            workflow_id:workflowId,
+            id:workflowActionId
+        }))
+        return ret!=null
+    }
+
 }
 export let workflowMapper=new WorkflowMapper
 
@@ -129,7 +158,8 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
                     id:await generateSnowId(),
                     workflow_id:workflowId,
                     issue_type_id:obj.id,
-                    issue_type_solution_id:issueTypeSolutionId
+                    issue_type_solution_id:issueTypeSolutionId,
+                    workflow_solution_id:workflowSolutionId
                 }))
             }
         }
@@ -277,6 +307,9 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
         await mysql.execute(generateDeleteSql(workflowSolutionWorkflowIssueTypeModel,{
             workflow_solution_id:workflowSolutionId
         }))
+        await mysql.execute(generateDeleteSql(workflowSolutionWorkflowModel,{
+            workflow_solution_id:workflowSolutionId
+        }))
     }
 
     async deleteIssueType(workflowSolutionId:string,issueTypeId:string,issueTypeSolutionId:string) {
@@ -303,6 +336,90 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
         await mysql.execute(generateDeleteSql(workflowSolutionWorkflowIssueTypeModel,{
             issue_type_id:issueTypeId
         }))
+    }
+
+    async addWorkflow(workflowSolutionId:string,workflowId:string) {
+        if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        } else if(!workflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        }
+        let mysql=getMysqlInstance()
+        let obj=await mysql.executeOne(generateQuerySql(workflowSolutionWorkflowModel,["id"],{
+            workflow_id:workflowId,
+            workflow_solution_id:workflowSolutionId
+        }))
+        if(!obj) {
+            await mysql.execute(generateCreateSql(workflowSolutionWorkflowModel,{
+                id:await generateSnowId(),
+                workflow_id:workflowId,
+                workflow_solution_id:workflowSolutionId
+            }))
+        }
+    }
+
+    async removeWorkflow(workflowSolutionId:string,workflowId:string) {
+        if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        } else if(!workflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(workflowSolutionWorkflowModel,{
+            workflow_id:workflowId,
+            workflow_solution_id:workflowSolutionId
+        }))
+    }
+
+    async listWorkflow(workflowSolutionId:string):Promise<ICommon_Model_Workflow[]> {
+        if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:workflowSolutionWorkflowModel
+        },{
+            model:workflowModel,
+            columns:keys<ICommon_Model_Workflow>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:workflowSolutionWorkflowModel,
+                    field:"workflow_id"
+                }
+            }
+        },{
+            workflow_solution_id:{
+                model:workflowSolutionWorkflowModel,
+                value:workflowSolutionId
+            }
+        })
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
+
+    async checkWorkflow(workflowSolutionId:string,workflowId:string) {
+        if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        } else if(!workflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.executeOne(generateQuerySql(workflowSolutionWorkflowModel,["id"],{
+            workflow_id:workflowId,
+            workflow_solution_id:workflowSolutionId
+        }))
+        return ret!=null
+    }
+
+    async getItemsByIssueTypeSolutionId(issueTypeSolutionId:string) {
+        if(!issueTypeSolutionId) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(workflowSolutionIssueTypeSolutionModel,[],{
+            issue_type_solution_id:issueTypeSolutionId
+        }))
+        return ret
     }
 }
 export let workflowSolutionMapper=new WorkflowSolutionMapper

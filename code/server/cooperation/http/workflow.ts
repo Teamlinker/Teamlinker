@@ -164,7 +164,7 @@ class WorkflowController {
      async solutionInfo(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string):Promise<typeof workflowApi.routes.solutionInfo.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+            throw Err.Project.Workflow.workflowSolutionNotFound
         }
         let ret=await obj.info()
         return ret;
@@ -173,7 +173,7 @@ class WorkflowController {
      async solutionAssign(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeId") issueTypeId:string,@DHttpReqParamRequired("workflowId") workflowId:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.solutionAssign.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+            throw Err.Project.Workflow.workflowSolutionNotFound
         }
         await obj.assign(issueTypeId,workflowId,issueTypeSolutionId)
         return
@@ -192,7 +192,7 @@ class WorkflowController {
      async solutionUpdate(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParam("name") name:string,@DHttpReqParam("description") description:string):Promise<typeof workflowApi.routes.solutionUpdate.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+            throw Err.Project.Workflow.workflowSolutionNotFound
         }
         obj.assignItem({
             name,
@@ -205,7 +205,7 @@ class WorkflowController {
      async solutionDelete(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string):Promise<typeof workflowApi.routes.solutionDelete.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+            throw Err.Project.Workflow.workflowSolutionNotFound
         }
         await obj.delete()
         return
@@ -214,7 +214,7 @@ class WorkflowController {
      async solutionBind(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.solutionBind.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+            throw Err.Project.Workflow.workflowSolutionNotFound
         }
         await obj.bindIssueTypeSolutions([issueTypeSolutionId])
         return
@@ -223,7 +223,7 @@ class WorkflowController {
      async solutionUnBind(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.solutionUnBind.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+            throw Err.Project.Workflow.workflowSolutionNotFound
         }
         await obj.unbindIssueTypeSolutions([issueTypeSolutionId])
         return
@@ -232,10 +232,46 @@ class WorkflowController {
      async solutionCopy(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string):Promise<typeof workflowApi.routes.solutionCopy.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+            throw Err.Project.Workflow.workflowSolutionNotFound
         }
         let ret=await obj.copy()
         return ret.getItem()
+     }
+
+     @DHttpApi(workflowApi.routes.solutionListWorkflow)
+     async solutionListWorkflow(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string):Promise<typeof workflowApi.routes.solutionListWorkflow.res> {
+         let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        let ret=await obj.listWorkflow()
+        return ret
+     }
+     @DHttpApi(workflowApi.routes.solutionAddWorkflow)
+     async solutionAddWorkflow(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("workflowId") workflowId:string):Promise<typeof workflowApi.routes.solutionAddWorkflow.res> {
+         let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        let workflow=await WorkflowService.getItemById(workflowId)
+        if(workflow && workflow.getItem().reserved) {
+            throw Err.Project.Workflow.workflowSolutionForbidden
+        }
+        await obj.addWorkflow(workflowId)
+        return
+     }
+     @DHttpApi(workflowApi.routes.solutionRemoveWorkflow)
+     async solutionRemoveWorkflow(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("workflowId") workflowId:string):Promise<typeof workflowApi.routes.solutionRemoveWorkflow.res> {
+         let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        let workflow=await WorkflowService.getItemById(workflowId)
+        if(workflow && workflow.getItem().reserved) {
+            throw Err.Project.Workflow.workflowSolutionForbidden
+        }
+        await obj.removeWorkflow(workflowId)
+        return
      }
 
 }
