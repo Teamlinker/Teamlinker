@@ -91,7 +91,23 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         await fieldSolutionMapper.unbindWorkflowSolution(this.getId(),workflowSolutionId);
     }
 
-    async addWorkflowNodeField(workflowNodeId:string,workflowId:string,workflowSolutionId:string,fieldTypeId:string,name:string,optional:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type) {
+    static async getObjByWorkflowSolutionId(workflowSolutionId:string) {
+        let objWorkflowSolution=await WorkflowSolutionService.getItemById(workflowSolutionId)
+        if(!objWorkflowSolution) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        let ret=await fieldSolutionMapper.getItemByWorkflowSolutionId(workflowSolutionId)
+        if(ret) {
+            let fieldSolution=new FieldSolutionService()
+            fieldSolution.setItem(ret)
+            return fieldSolution
+        } else {
+            return null;
+        }
+        
+    }
+
+    async addWorkflowNodeField(workflowNodeId:string,workflowId:string,workflowSolutionId:string,fieldTypeId:string,name:string,optional:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,weight?:number) {
         if(!workflowNodeId) {
             throw Err.Project.Workflow.workflowNodeNotFound
         } else if(!workflowId) {
@@ -113,7 +129,7 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         if(!isIn) {
             throw Err.Project.Workflow.workflowNotInWorkflowSolution
         }
-        let ret=await fieldSolutionMapper.addWorkflowNodeField(this.getId(),workflowNodeId,workflowId,workflowSolutionId,fieldTypeId,name,optional,defaultValue,description,labelType);
+        let ret=await fieldSolutionMapper.addWorkflowNodeField(this.getId(),workflowNodeId,workflowId,workflowSolutionId,fieldTypeId,name,optional,defaultValue,description,labelType,weight);
         return ret;
     }
 
@@ -187,8 +203,8 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         return null
     }
 
-    async editWorkflowNodeField(fieldSolutionWorkflowNodeFieldTypeId:string,name?:string,optional?:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type) {
-        let ret=await fieldSolutionMapper.editWorkflowNodeField(fieldSolutionWorkflowNodeFieldTypeId,name,optional,defaultValue,description,labelType)
+    async editWorkflowNodeField(fieldSolutionWorkflowNodeFieldTypeId:string,name?:string,optional?:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,weight?:number) {
+        let ret=await fieldSolutionMapper.editWorkflowNodeField(fieldSolutionWorkflowNodeFieldTypeId,name,optional,defaultValue,description,labelType,weight)
         return ret;
     }
 
@@ -265,5 +281,13 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
             throw Err.Project.Field.workflowSolutionNotBind
         }
         await fieldSolutionMapper.workflowFieldsCopy(this.getId(),workflowSolutionId,workflowId,newFieldSolutionId,newWorkflowSolutionId)
+    }
+
+    static async getFieldTypesByFieldIds(fieldIds:string[]) {
+        if(!Array.isArray(fieldIds) || fieldIds.length==0) {
+            return [];
+        }
+        let arr=await fieldSolutionMapper.getFieldTypesByFieldIds(fieldIds)
+        return arr;
     }
 }

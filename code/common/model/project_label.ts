@@ -12,4 +12,4 @@ class ProjectLabelModel extends BaseModel {
     model=<ICommon_Model_Project_Lable>{}
   }
   
-  export let projectLabelModel=new ProjectLabelModel
+export let projectLabelModel=new ProjectLabelModel

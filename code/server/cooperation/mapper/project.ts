@@ -284,5 +284,16 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         }))
         return ret
     }
+
+    async getItemByKeyword(keyword:string) {
+        if(!keyword) {
+            throw  Err.Project.projectKeywordNotFound
+        }
+        var mysql=getMysqlInstance();
+        let ret=await mysql.executeOne(generateQuerySql(projectModel,null,{
+            keyword:keyword
+        }))
+        return ret
+    }
 }
 export let projectMapper=new ProjectMapper

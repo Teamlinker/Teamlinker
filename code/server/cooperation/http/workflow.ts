@@ -84,7 +84,7 @@ class WorkflowController {
         if (!obj) {
             throw Err.Project.Workflow.workflowNodeNotFound
         }
-        if (obj.getItem().reserved) {
+        if (obj.getItem().reserved && status) {
             throw Err.Project.Workflow.workflowNodeForbidden
         }
         obj.assignItem({

@@ -70,16 +70,36 @@ export namespace Err {
             code:3002,
             msg:"project exists"
         },
+        projectKeywordNotFound:{
+            code:3003,
+            msg:"project keyword not found"
+        },
+        projectIdNotMatch:{
+            code:3004,
+            msg:"project id not match"
+        },
         Tag:{
             tagSizeEmpty:{
                 code:3100,
                 msg:"tag size empty"
+            },
+            tagNotfound:{
+                code:3101,
+                msg:"tag not found"
+            },
+            tagIssueExists:{
+                code:3102,
+                msg:"tag issue exists"
             }
         },
         Module:{
             moduleNotFound:{
                 code:3200,
                 msg:"module not found"
+            },
+            moduleIssueExists:{
+                code:3201,
+                msg:"module issue exists"
             }
         },
         Member:{
@@ -120,6 +140,10 @@ export namespace Err {
             issueTypeNotInIssueTypeSolution:{
                 code:3405,
                 msg:"issue type not in issue solution"
+            },
+            issueTypeSolutionBindProject:{
+                code:3406,
+                msg:"issue type solution bind project"
             }
         },
         Workflow:{
@@ -209,6 +233,24 @@ export namespace Err {
                 code:3606,
                 msg:"field type not match"
             },
+        },
+        ProjectIssue:{
+            projectIssueNotFound:{
+                code:3700,
+                msg:"project issue not found"
+            },
+            uniqueKeyError:{
+                code:3701,
+                msg:"unique key error"
+            },
+            parentChildExists:{
+                code:3702,
+                msg:"parent child issue exists"
+            },
+            relatedExists:{
+                code:3703,
+                msg:"related issue exists"
+            }
         }
     }
     export let Team = {
@@ -247,6 +289,17 @@ export namespace Err {
         md5NotExists:{
             code:6001,
             msg:"md5 not exists"
+        }
+    }
+
+    export let Comment ={
+        commentNotFound:{
+            code:7000,
+            msg:"comment not found"
+        },
+        commentTypeNotFound:{
+            code:7001,
+            msg:"comment type not found"
         }
     }
 }

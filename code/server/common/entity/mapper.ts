@@ -54,7 +54,7 @@ export abstract class Mapper<T extends BaseModel> {
         var mysql=getMysqlInstance();
         await mysql.execute(generateDeleteSql(this.model,{id}))
     }
-    async copy(id):Promise<T["model"]> {
+    async copy(id:string,deletedFields?:string[]):Promise<T["model"]> {
         if(!id) {
             throw Err.Common.itemNotFound
         }
@@ -66,6 +66,11 @@ export abstract class Mapper<T extends BaseModel> {
         delete ret.created_time;
         delete ret.modified_time;
         delete ret.id
+        if(deletedFields && deletedFields.length>0) {
+            for(let obj of deletedFields) {
+                delete ret[obj]
+            }
+        }
         if(ret.name) {
             (ret as any).name+="(copy)"
         }

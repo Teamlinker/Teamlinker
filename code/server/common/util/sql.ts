@@ -128,7 +128,7 @@ function generateLeftJoinExp(objExpr?:{
     return expr;
 }
 export function generateCreateSql<T extends BaseModel>(model:T,obj:{
-    [param in keyof T["model"]]?:EXPRVALUE
+    [param in keyof T["model"]]?:T["model"][param]
 }):{
     value:string,
     type:T["model"]
@@ -137,7 +137,7 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
     for(let key in obj) {
         let value=obj[key]
         keys+=(value!==null && value!==undefined)?(key+","):""
-        values+=(value!==null && value!==undefined)?("'"+value+"'"+","):""
+        values+=(value!==null && value!==undefined)?("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'"+","):""
     }
     if(keys[keys.length-1]==","){
         keys=keys.substring(0,keys.length-1);
@@ -152,7 +152,7 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
 }
 
 export function generateBatchCreateSql<T extends BaseModel>(model:T,arr:{
-    [param in keyof T["model"]]?:EXPRVALUE
+    [param in keyof T["model"]]?:T["model"][param]
 }[]):{
     value:string,
     type:T["model"]
@@ -170,7 +170,7 @@ export function generateBatchCreateSql<T extends BaseModel>(model:T,arr:{
         let arrValue:string[]=[]
         for(let key of arrKey) {
             let value=item[key]
-            arrValue.push((value!==undefined)?(value===null?"null":("'"+value+"'")):"default")
+            arrValue.push((value!==undefined)?(value===null?"null":("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'")):"default")
         }
         arrValues.push("("+arrValue.join(",")+")")
     }
@@ -205,10 +205,10 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
 }
 
 export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
-    [param in keyof T["model"]]?:string|number|Date|{
+    [param in keyof T["model"]]?:{
         exp:"+"|"-",
         value:number
-    }
+    }|T["model"][param]
 },objExpr:{
     [param in keyof T["model"]]?:EXPRVALUE
 },exprMode?:"and"|"or"):{
@@ -227,8 +227,10 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
             val=String(value)
         } else if(typeof(value)=="boolean") {
             val=value?1:0+""
-        } else if(typeof(value)=="object" && !(value instanceof Date) && value.exp) {
+        } else if(typeof(value)=="object" && !(value instanceof Date) && !Array.isArray(value) && value.exp) {
             val=`${key}${value.exp}${value.value}`
+        } else if(Array.isArray(value)) {
+            val="'"+JSON.stringify(value)+"'"
         } else if(value==="") {
             val=null
         } else {

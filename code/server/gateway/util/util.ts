@@ -1,6 +1,7 @@
 import * as crypto from "crypto";
 import * as fs from "fs-extra";
 import { Table_Project } from '../../../common/model/project';
+import { Table_Project_Issue } from "../../../common/model/project_issue";
 import { Table_Workflow, workflowModel } from "../../../common/model/workflow";
 import { workflowActionModel } from "../../../common/model/workflow_action";
 import { workflowNodeModel } from "../../../common/model/workflow_node";
@@ -21,9 +22,17 @@ import { Table_Issue_Type } from './../../../common/model/issue_type';
 import { Table_Issue_Type_Solution } from './../../../common/model/issue_type_solution';
 import { Table_Issue_Type_Solution_Issue_Type } from './../../../common/model/issue_type_solution_issue_type';
 import { Table_Permission } from './../../../common/model/permission';
+import { Table_Project_Issue_Description } from './../../../common/model/project_issue_description';
+import { Table_Project_Issue_Field_Value } from './../../../common/model/project_issue_field_value';
+import { Table_Project_Issue_Parent } from './../../../common/model/project_issue_parent';
+import { Table_Project_Issue_Process } from './../../../common/model/project_issue_process';
+import { Table_Project_Issue_Related } from './../../../common/model/project_issue_related';
+import { projectIssueTypeSolutionModel, Table_Project_Issue_Solution } from './../../../common/model/project_issue_type_solution';
 import { Table_Project_Label } from './../../../common/model/project_label';
+import { Table_Project_Label_Issue } from './../../../common/model/project_label_issue';
 import { Table_Project_Member } from './../../../common/model/project_member';
 import { Table_Project_Module } from './../../../common/model/project_module';
+import { Table_Project_Module_Issue } from './../../../common/model/project_module_issue';
 import { Table_Project_Role } from './../../../common/model/project_role';
 import { Table_Role_Permission } from './../../../common/model/role_permission';
 import { Table_Team } from './../../../common/model/team';
@@ -115,7 +124,7 @@ export async function handleImageFields(data:object){
                             object:o,
                             key:k
                         })
-                    } else if(["created_by","modified_by"].includes(k) && typeof(o[k])=="string" && o[k].length>=18 && /^\d+$/.test(o[k])) {
+                    } else if(["created_by","modified_by","assigner_id","reporter_id"].includes(k) && typeof(o[k])=="string" && o[k].length>=18 && /^\d+$/.test(o[k])) {
                         arrUser.push({
                             object:o,
                             key:k
@@ -183,6 +192,15 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_Field_Type}`)
     await mysql.execute(`delete from ${Table_Field_Type_Config_Value}`)
     await mysql.execute(`delete from ${Table_Field_Solution_Workflow_Solution}`)
+    await mysql.execute(`delete from ${Table_Project_Issue}`)
+    await mysql.execute(`delete from ${Table_Project_Issue_Description}`)
+    await mysql.execute(`delete from ${Table_Project_Issue_Field_Value}`)
+    await mysql.execute(`delete from ${Table_Project_Issue_Parent}`)
+    await mysql.execute(`delete from ${Table_Project_Issue_Process}`)
+    await mysql.execute(`delete from ${Table_Project_Issue_Related}`)
+    await mysql.execute(`delete from ${Table_Project_Issue_Solution}`)
+    await mysql.execute(`delete from ${Table_Project_Module_Issue}`)
+    await mysql.execute(`delete from ${Table_Project_Label_Issue}`)
 }
 
 export async function initSystem() {
@@ -196,8 +214,8 @@ export async function initSystem() {
         let objPermission=await initPermission()
         let {projectRoleUserId,groupRoleUserId}=await initRole(objPermission);
         await initTeam(userId,groupRoleUserId);
-        await initProject(userId,projectRoleUserId)
-        let {issueTypeBugId,issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeTicketId}=await initIssueType()
+        let projectId=await initProject(userId,projectRoleUserId)
+        let {issueTypeBugId,issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeTicketId}=await initIssueType(projectId)
         await initWorkflow(issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeBugId,issueTypeTicketId)
         await initField()
     }
@@ -314,7 +332,7 @@ async function initRole(objPermission:{
     }
 }
 
-async function initIssueType() {
+async function initIssueType(projectId:string) {
     let mysql = getMysqlInstance()
     let taskId=await generateSnowId()
     let bugId=await generateSnowId()
@@ -327,6 +345,11 @@ async function initIssueType() {
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${taskId}','${solutionId}')`)
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${bugId}','${solutionId}')`)
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${ticketId}','${solutionId}')`)
+    await mysql.execute(generateCreateSql(projectIssueTypeSolutionModel,{
+        id:await generateSnowId(),
+        project_id:projectId,
+        issue_type_solution_id:solutionId
+    }))
     return {
         issueTypeTaskId:taskId,
         issueTypeBugId:bugId,
@@ -359,21 +382,18 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
     await mysql.execute(generateCreateSql(workflowNodeModel,{
         id:workflowNodeProgressId,
         name:"in progress",
-        reserved:1,
         status:ECommon_Model_Workflow_Node_Status.INPROGRESS,
         workflow_id:workflowId
     }))
     await mysql.execute(generateCreateSql(workflowNodeModel,{
         id:workflowNodeClosedId,
         name:"closed",
-        reserved:1,
         status:ECommon_Model_Workflow_Node_Status.DONE,
         workflow_id:workflowId
     }))
     await mysql.execute(generateCreateSql(workflowNodeModel,{
         id:workflowNodeResolvedId,
         name:"resolved",
-        reserved:1,
         status:ECommon_Model_Workflow_Node_Status.DONE,
         workflow_id:workflowId
     }))

@@ -7,6 +7,8 @@ import { ICommon_Model_Team } from '../model/team';
 import { ICommon_Model_User } from '../model/user';
 import { ICommon_Model_Field_Solution } from './../model/field_solution';
 import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solution';
+import { ICommon_Model_Project_Issue } from './../model/project_issue';
+import { ICommon_Model_Project_Issue_Field_Value } from './../model/project_issue_field_value';
 import { ECommon_Model_Project_Member_Type } from './../model/project_member';
 import { ICommon_Model_Workflow } from './../model/workflow';
 import { ICommon_Model_Workflow_Action } from './../model/workflow_action';
@@ -131,9 +133,23 @@ export interface ICommon_Route_Res_FieldSolution_Info extends ICommon_Model_Fiel
     }[]
 }
 
-export interface ICommon_Route_Res_listWorkflowNodeField {
+export interface ICommon_Route_Res_FieldSolution_ListWorkflowNodeField {
     field: ICommon_Model_Field_Solution_Workflow_Node_Field_Type,
     fieldType: ICommon_Model_Field_Type,
     values?: ICommon_Model_Field_Type_Config_Value[]
 }
 
+
+export type ICommon_Route_Req_ProjectIssue_Field={
+    fieldId:string,
+    value?:string[]|number|string,
+    configIds?:string[]
+}
+
+export interface ICommon_Route_Res_ProjectIssue_BasicInfo extends Omit<ICommon_Model_Project_Issue,"workflow_node_id"|"issue_type_id"|"project_id"> {
+    workflowNode:ICommon_Model_Workflow_Node
+    issueType:ICommon_Model_Issue_Type,
+    project:ICommon_Model_Project
+}
+
+export type ICommon_Route_Res_ProjectIssue_fieldsInfo = ICommon_Route_Res_FieldSolution_ListWorkflowNodeField & ICommon_Model_Project_Issue_Field_Value

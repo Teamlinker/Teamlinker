@@ -1,5 +1,6 @@
 import Application from "../../common/app/app";
 import "../http/field";
+import "../http/issue";
 import "../http/issueType";
 import "../http/module";
 import "../http/project";

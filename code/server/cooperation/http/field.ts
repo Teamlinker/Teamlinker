@@ -114,12 +114,13 @@ class FieldController {
     @DHttpReqParamRequired("workflowId") workflowId:string,
     @DHttpReqParamRequired("workflowNodeId") workflowNodeId:string,
     @DHttpReqParam("description") description:string,
-    @DHttpReqParam("lable_type") labelType:string): Promise<typeof fieldApi.routes.addWorkflowNodeField.res> {
+    @DHttpReqParam("lable_type") labelType:string,
+    @DHttpReqParam("weight") weight:number): Promise<typeof fieldApi.routes.addWorkflowNodeField.res> {
         let obj=await FieldSolutionService.getItemById(fieldSolutionId)
         if(!obj) {
             throw Err.Project.Field.fieldSolutionNotFound
         }
-        let ret=await obj.addWorkflowNodeField(workflowNodeId,workflowId,workflowSolutionId,fieldTypeId,name,optional,defaultValue,description)
+        let ret=await obj.addWorkflowNodeField(workflowNodeId,workflowId,workflowSolutionId,fieldTypeId,name,optional,defaultValue,description,weight)
         return ret;
     }
 
@@ -128,12 +129,13 @@ class FieldController {
     @DHttpReqParam("optional") optional:number,
     @DHttpReqParam("defaultValue") defaultValue:string,
     @DHttpReqParam("name") name:string,
-    @DHttpReqParam("description") description:string): Promise<typeof fieldApi.routes.editWorkflowNodeField.res> {
+    @DHttpReqParam("description") description:string,
+    @DHttpReqParam("weight") weight:number): Promise<typeof fieldApi.routes.editWorkflowNodeField.res> {
         let obj=await FieldSolutionService.getObjByFieldSolutionWorkflowNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId)
         if(!obj) {
             throw Err.Project.Field.fieldSolutionNotFound
         }
-        let ret=await obj.editWorkflowNodeField(fieldSolutionWorkflowNodeFieldTypeId,name,optional,defaultValue,description)
+        let ret=await obj.editWorkflowNodeField(fieldSolutionWorkflowNodeFieldTypeId,name,optional,defaultValue,description,weight)
         return ret;
     }
 

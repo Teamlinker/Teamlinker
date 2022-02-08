@@ -121,6 +121,37 @@ const api={
             }>{},
             res:<ICommon_Model_Issue_Type_Solution>{}
         },
+        solutionBindProject:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/solution/project",
+            req:<{
+                issueTypeSolutionId:string,
+                projectId:string
+            }>{},
+            res:{}
+        },
+        solutionUnbindProject:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/solution/project",
+            req:<{
+                issueTypeSolutionId:string,
+                projectId:string
+            }>{},
+            res:{}
+        },
+        solutionProjectList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/solution/project",
+            req:<{
+                issueTypeSolutionId:string 
+            }>{},
+            res:<{
+                id:string,
+                name:string,
+                photo:string,
+                description:string
+            }[]>{}
+        },
     }
 }
 export=api

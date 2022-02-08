@@ -143,5 +143,35 @@ class IssueTypeController {
         let ret=await obj.copy()
         return ret.getItem();
      }
+
+     @DHttpApi(issueTypeApi.routes.solutionBindProject)
+     async solutionBindProject(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof issueTypeApi.routes.solutionBindProject.res> {
+        let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
+        if(!obj) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        await obj.bindProject(projectId)
+        return 
+     }
+
+     @DHttpApi(issueTypeApi.routes.solutionUnbindProject)
+     async solutionUnbindProject(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof issueTypeApi.routes.solutionUnbindProject.res> {
+        let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
+        if(!obj) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        await obj.unbindProject(projectId)
+        return 
+     }
+
+     @DHttpApi(issueTypeApi.routes.solutionProjectList)
+     async solutionProjectList(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.solutionProjectList.res> {
+        let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
+        if(!obj) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        let ret=await obj.projectList()
+        return ret
+     }
      
 }

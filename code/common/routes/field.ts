@@ -3,7 +3,7 @@ import { ECommon_Services } from "../types";
 import { ICommon_Model_Field_Solution } from './../model/field_solution';
 import { ICommon_Model_Field_Type } from './../model/field_type';
 import { ICommon_Model_Field_Type_Config_Value } from './../model/field_type_config_value';
-import { ICommon_Route_Res_FieldSolution_Info, ICommon_Route_Res_listWorkflowNodeField } from "./response";
+import { ICommon_Route_Res_FieldSolution_Info, ICommon_Route_Res_FieldSolution_ListWorkflowNodeField } from "./response";
 import { ECommon_HttpApi_Method } from "./types";
 
 const api={
@@ -96,7 +96,7 @@ const api={
                 workflowId: string,
                 workflowSolutionId: string
             }>{},
-            res: <ICommon_Route_Res_listWorkflowNodeField[]>{}
+            res: <ICommon_Route_Res_FieldSolution_ListWorkflowNodeField[]>{}
         },
         addWorkflowNodeField:{
             method:ECommon_HttpApi_Method.POST,
@@ -111,7 +111,8 @@ const api={
                 workflowId: string,
                 workflowSolutionId: string,
                 description?: string,
-                lable_type?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type
+                lable_type?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,
+                weight?:number
             }>{},
             res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{}
         },
@@ -124,7 +125,8 @@ const api={
                 defaultValue?: string,
                 name?: string,
                 description?: string,
-                lable_type?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type
+                lable_type?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,
+                weight?:number
             }>{},
             res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{}
         },

@@ -302,6 +302,32 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
         
     }
 
+    async getItemByWorkflowSolutionId(workflowSolutionId:string) {
+        if(!workflowSolutionId) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:fieldSolutionWorkflowSolutionModel
+        },{
+            model:fieldSolutionModel,
+            columns:keys<ICommon_Model_Field_Solution>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:fieldSolutionWorkflowSolutionModel,
+                    field:"field_solution_id"
+                }
+            }
+        },{
+            workflow_solution_id:{
+                model:fieldSolutionWorkflowSolutionModel,
+                value:workflowSolutionId
+            }
+        })
+        let ret=await mysql.executeOne(sql)
+        return ret
+    }
+
     async checkWorkflowSolution(fieldSolutionId:string,workflowSolutionId:string):Promise<boolean> {
         if(!fieldSolutionId) {
             throw Err.Project.Field.fieldSolutionNotFound
@@ -316,7 +342,7 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
         return ret!=null
     }
 
-    async addWorkflowNodeField(fieldSolutionId:string,workflowNodeId:string,workflowId:string,workflowSolutionId:string,fieldTypeId:string,name:string,optional:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type):Promise<ICommon_Model_Field_Solution_Workflow_Node_Field_Type> {
+    async addWorkflowNodeField(fieldSolutionId:string,workflowNodeId:string,workflowId:string,workflowSolutionId:string,fieldTypeId:string,name:string,optional:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,weight?:number):Promise<ICommon_Model_Field_Solution_Workflow_Node_Field_Type> {
         if(!fieldSolutionId) {
             throw Err.Project.Field.fieldSolutionNotFound
         } else if(!workflowNodeId) {
@@ -351,7 +377,8 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
             optional,
             description,
             sort,
-            label_type:labelType
+            label_type:labelType,
+            weight
         }))
         let ret=await mysql.executeOne(generateQuerySql(fieldSolutionWorkflowNodeFieldTypeModel,[],{
             id:id
@@ -359,7 +386,7 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
         return ret;
     }
 
-    async editWorkflowNodeField(fieldSolutionWorkflowNodeFieldTypeId:string,name?:string,optional?:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type):Promise<ICommon_Model_Field_Solution_Workflow_Node_Field_Type> {
+    async editWorkflowNodeField(fieldSolutionWorkflowNodeFieldTypeId:string,name?:string,optional?:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,weight?:number):Promise<ICommon_Model_Field_Solution_Workflow_Node_Field_Type> {
         if(!fieldSolutionWorkflowNodeFieldTypeId) {
             throw Err.Project.Field.fieldSolutionWorkflowNodeFieldTypeNotFound
         }
@@ -369,7 +396,8 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
             optional,
             default_value:defaultValue,
             description,
-            label_type:labelType
+            label_type:labelType,
+            weight
         },{
             id:fieldSolutionWorkflowNodeFieldTypeId
         }))
@@ -645,6 +673,41 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
         if(arr.length>0) {
             await mysql.execute(generateBatchCreateSql(fieldTypeConfigValueModel,arr))
         }
+    }
+
+    async getFieldTypesByFieldIds(fieldIds:string[]):Promise<{
+        fieldId:string,
+        fieldType:ICommon_Model_Field_Type
+    }[]> {
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:fieldSolutionWorkflowNodeFieldTypeModel,
+            columns:["id"],
+            rename:{
+                fields:["id"],
+                newFields:["fieldId"]
+            }
+        },{
+            model:fieldTypeModel,
+            columns:keys<ICommon_Model_Field_Type>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:fieldSolutionWorkflowNodeFieldTypeModel,
+                    field:"field_type_id"
+                }
+            },
+            aggregation:"fieldType"
+        },{
+            id:{
+                model:fieldSolutionWorkflowNodeFieldTypeModel,
+                value:{
+                    exp:"in",
+                    value:fieldIds
+                }
+            }
+        })
+        let arr=await mysql.execute(sql)
+        return arr;
     }
 }
 

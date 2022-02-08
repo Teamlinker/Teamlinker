@@ -1,3 +1,4 @@
+import { ICommon_Model_Issue_Type } from '../model/issue_type';
 import { ECommon_Model_Project_Member_Type } from '../model/project_member';
 import { ICommon_Model_Project_Role } from '../model/project_role';
 import { ICommon_Model_Project } from './../model/project';
@@ -185,6 +186,14 @@ const api={
                 projectId:string           
             }>{},
             res:<ICommon_Model_Project_Role[]>{}
+        },
+        issueTypelist:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/issuetype/list",
+            req:<{
+                  projectId:string         
+            }>{},
+            res:<ICommon_Model_Issue_Type[]>{}
         },
     }
 }

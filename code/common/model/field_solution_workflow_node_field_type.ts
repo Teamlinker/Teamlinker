@@ -18,7 +18,8 @@ export interface ICommon_Model_Field_Solution_Workflow_Node_Field_Type {
   workflow_solution_id:string,
   description:string,
   sort:number,
-  label_type:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type
+  label_type:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,
+  weight:number
 }
 export const Table_Field_Solution_Workflow_Node_Field_Type="field_solution_workflow_node_field_type"
 
