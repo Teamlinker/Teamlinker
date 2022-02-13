@@ -3,11 +3,12 @@ import { ICommon_Model_Project_Issue, projectIssueModel } from "../../../common/
 import { ICommon_Model_Project_Lable, projectLabelModel } from "../../../common/model/project_label";
 import { ICommon_Model_Project_Module, projectModuleModel } from "../../../common/model/project_module";
 import { workflowNodeModel } from "../../../common/model/workflow_node";
+import { ICommon_Route_Res_Project_filter } from "../../../common/routes/response";
 import { Err } from "../../../common/status/error";
 import { keys } from "../../../common/transform";
 import { getMysqlInstance } from '../../common/db/mysql';
 import { Mapper } from "../../common/entity/mapper";
-import { generateBatchCreateSql, generateCreateSql, generateDeleteSql, generateLeftJoin3Sql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
+import { generateBatchCreateSql, generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateLeftJoin3Sql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
 import { fieldSolutionWorkflowNodeFieldTypeModel } from './../../../common/model/field_solution_workflow_node_field_type';
 import { ICommon_Model_Issue_Type, issueTypeModel } from './../../../common/model/issue_type';
 import { projectIssueDescriptionModel } from './../../../common/model/project_issue_description';
@@ -590,6 +591,118 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             project_issue_id:projectIssueId,
             project_module_id:projectModuleId
         }))
+    }
+
+    async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,tagId? :string):Promise<ICommon_Route_Res_Project_filter[]> {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        let setId:Set<string>=new Set;
+        if(moduleId) {
+            let arrModuleIssueId=(await mysql.execute(generateQuerySql(projectModuleIssueModel,["id"],{
+                project_module_id:moduleId
+            }))).map(item=>item.id)
+            for(let obj of arrModuleIssueId) {
+                setId.add(obj)
+            }
+        }
+        if(tagId) {
+            let arrLabelIssueId=(await mysql.execute(generateQuerySql(projectLabelIssueModel,["id"],{
+                project_label_id:tagId
+            }))).map(item=>item.id)
+            for(let obj of arrLabelIssueId) {
+                setId.add(obj)
+            }
+        }
+        let sql=generateLeftJoin2Sql({
+            model:projectIssueModel,
+            columns:["id","assigner_id","reporter_id","unique_id","name","unique_id","created_time","created_by"]
+        },{
+            model:issueTypeModel,
+            columns:["id","icon","name"],
+            aggregation:"issueType",
+            expression:{
+                id:{
+                    model:projectIssueModel,
+                    field:"issue_type_id"
+                }
+            }
+        },{
+            model:workflowNodeModel,
+            columns:["status"],
+            expression:{
+                id:{
+                    model:projectIssueModel,
+                    field:"workflow_node_id"
+                }
+            }
+        },{
+            project_id:{
+                model:projectIssueModel,
+                value:projectId
+            },
+            ...(createdBy && {
+                created_by:{
+                    model:projectIssueModel,
+                    value:createdBy
+                }
+            }),
+            ...(issueTypeId && {
+                issue_type_id:{
+                    model:issueTypeModel,
+                    value:issueTypeId
+                }
+            }),
+            ...(name && {
+                name:{
+                    model:projectIssueModel,
+                    value:{
+                        exp:"%like%",
+                        value:name
+                    }
+                }
+            }),
+            ...(Number.isInteger(priority) && {
+                priority:{
+                    model:projectIssueModel,
+                    value:priority
+                }
+            }),
+            ...(assignerId && {
+                assigner_id:{
+                    model:projectIssueModel,
+                    value:assignerId
+                }
+            }),
+            ...(reporterId && {
+                reporter_id:{
+                    model:projectIssueModel,
+                    value:reporterId
+                }
+            }),
+            ...(status && {
+                status:{
+                    model:workflowNodeModel,
+                    value:status
+                }
+            }),
+            ...(((tagId || moduleId) && setId.size>0) && {
+                id:{
+                    model:projectIssueModel,
+                    value:{
+                        exp:"in",
+                        value:Array.from(setId)
+                    }
+                }
+            }),
+        },"and",{
+            model:projectIssueModel,
+            field:"name",
+            type:"asc"
+        },page*size,size)
+        let ret=await mysql.execute(sql)
+        return ret;
     }
 }
 

@@ -26,7 +26,7 @@ function isEXPRVALUEEXP(value:any):value is EXPRVALUEEXP {
     return typeof(value)=="object" && value.exp
 }
 
-function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[]) {
+function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[],table?:string) {
     if (value.exp == "=" || value.exp=="<=" || value.exp==">" || value.exp=="<" || value.exp=="<>" || !value.exp) {
         if(!value.exp) {
             value.exp="="
@@ -35,39 +35,39 @@ function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[]) {
             let val1 = value.value[0]
             let val2 = value.value[1]
             if(value.exp=="> <") {
-                arrExpr.push(`${key}>${val1} and ${key}<${val2}`)
+                arrExpr.push(`${table?(table+"."):""}${key}>${val1} and ${key}<${val2}`)
             } else if(value.exp==">= <=") {
-                arrExpr.push(`${key}>=${val1} and ${key}<=${val2}`)
+                arrExpr.push(`${table?(table+"."):""}${key}>=${val1} and ${key}<=${val2}`)
             } else if(value.exp==">= <") {
-                arrExpr.push(`${key}>=${val1} and ${key}<${val2}`)
+                arrExpr.push(`${table?(table+"."):""}${key}>=${val1} and ${key}<${val2}`)
             } else if(value.exp=="> <=") {
-                arrExpr.push(`${key}>${val1} and ${key}<=${val2}`)
+                arrExpr.push(`${table?(table+"."):""}${key}>${val1} and ${key}<=${val2}`)
             }
         } else {
             let val = typeof (value.value) == "number" ? value.value : typeof (value.value) == "boolean" ? (value.value ? 1 : 0) : ("'" + value.value + "'")
-            arrExpr.push(`${key}${value.exp}${val}`)
+            arrExpr.push(`${table?(table+"."):""}${key}${value.exp}${val}`)
         }
     } else if(value.exp=="is null") {
-        arrExpr.push(`${key} is null`)
+        arrExpr.push(`${table?(table+"."):""}${key} is null`)
     } else if(value.exp=="in") {
         if(typeof(value.value)=="string") {
-            arrExpr.push(`${key} in (${value.value})`)
+            arrExpr.push(`${table?(table+"."):""}${key} in (${value.value})`)
         } else {
-            arrExpr.push(`${key} in (${(<string[] | number[]>value.value).map((item)=>{
+            arrExpr.push(`${table?(table+"."):""}${key} in (${(<string[] | number[]>value.value).map((item)=>{
                 return typeof(item)=="number"?item:("'"+item+"'")
             }).join(",")})`)
         }
     } else if(value.exp=="is not null") {
-        arrExpr.push(`${key} is not null`)
+        arrExpr.push(`${table?(table+"."):""}${key} is not null`)
     } else if(value.exp=="between") {
         let val=value.value as [number,number];
-        arrExpr.push(`${key} between ${val[0]} and ${val[1]}`)
+        arrExpr.push(`${table?(table+"."):""}${key} between ${val[0]} and ${val[1]}`)
     } else if(value.exp=="%like") {
-        arrExpr.push(`${key} like '%${value.value}'`)
+        arrExpr.push(`${table?(table+"."):""}${key} like '%${value.value}'`)
     } else if(value.exp=="like%") {
-        arrExpr.push(`${key} like '${value.value}%'`)
+        arrExpr.push(`${table?(table+"."):""}${key} like '${value.value}%'`)
     } else if(value.exp=="%like%") {
-        arrExpr.push(`${key} like '%${value.value}%'`)
+        arrExpr.push(`${table?(table+"."):""}${key} like '%${value.value}%'`)
     }
 }
 
@@ -114,11 +114,11 @@ function generateLeftJoinExp(objExpr?:{
             } else if (typeof(value.value)=="object" && (value.value instanceof Date)){
                 arrExpr.push(`${value.model.table}.${key}=${value.value.getTime()}`)
             } else if (isEXPRVALUEEXP(value.value)) {
-                handleExp(key,value.value,arrExpr)
+                handleExp(key,value.value,arrExpr,value.model.table)
             }else {
                 let arr=[];
                 for(let obj of value.value.values) {
-                    handleExp(key,obj,arr)
+                    handleExp(key,obj,arr,value.model.table)
                 }
                 arrExpr.push(`(${arr.join(` ${value.value.type?value.value.type:"and"} `)})`)
             }
@@ -672,5 +672,597 @@ export function generateMinSql<T extends BaseModel,K1 extends keyof T["model"]>(
     return {
         value:`select ${column} from ${model.table}${expr?(" where "+expr):""}`,
         type:model.model
+    }
+}
+
+type COLUMNSVALUEVALUETYPE<T>={
+    exp:"="|"<>"|"<"|">"|">="|"<=",
+    value:string|number,
+    field:T
+}
+
+type COLUMNSVALUETYPE<R,K>={
+    exp:"count"|"sum"|"avg"|"max"|"min",
+    value:R|COLUMNSVALUEVALUETYPE<R>,
+    rename:K
+}
+
+function ISCOLUMNSVALUEVALUETYPE<R,K>(value:COLUMNSVALUETYPE<R,K>["value"]):value is COLUMNSVALUEVALUETYPE<R> {
+    if(typeof(value)=="object" && (value as COLUMNSVALUEVALUETYPE<R>).exp && (value as COLUMNSVALUEVALUETYPE<R>).value!==undefined && (value as COLUMNSVALUEVALUETYPE<R>).value!==null) {
+        return true
+    }
+}
+
+function ISCOLUMNSVALUETYPE<T,R,K>(value:T|COLUMNSVALUETYPE<R,K>):value is COLUMNSVALUETYPE<R,K> {
+    if(typeof(value)=="object" && (value as COLUMNSVALUETYPE<R,K>).exp && (value as COLUMNSVALUETYPE<R,K>).value && (value as COLUMNSVALUETYPE<R,K>).rename) {
+        return true
+    }
+}
+
+function handleEachColumn<T,R,K>(column:T|COLUMNSVALUETYPE<R,K>) {
+    if(typeof(column)=="string") {
+        return column
+    } else if(ISCOLUMNSVALUETYPE(column)) {
+        let str=column.exp+"("
+        if(typeof(column.value)=="string") {
+            str+=column.value
+        } else if(ISCOLUMNSVALUEVALUETYPE(column.value)) {
+            str+=column.value.field+column.value.exp+(typeof(column.value.value=="string")?("'"+column.value.value+"'"):column.value.value)
+        }
+        str+=") "+column.rename
+        return str
+    }
+}
+
+function handleLeftJoinEachColumn<T,R,K>(column:T|COLUMNSVALUETYPE<R,K>,table:string):{
+    rename:string,
+    exp:boolean,
+    field:string
+} {
+    if(typeof(column)=="string") {
+        return {
+            rename:column,
+            exp:false,
+            field:column
+        }
+    } else if(ISCOLUMNSVALUETYPE(column)) {
+        let str=column.exp+"("
+        if(typeof(column.value)=="string") {
+            str+=table+"."+column.value
+        } else if(ISCOLUMNSVALUEVALUETYPE(column.value)) {
+            str+=table+"."+column.value.field+column.value.exp+(typeof(column.value.value=="string")?("'"+column.value.value+"'"):column.value.value)
+        }
+        str+=") "
+        return {
+            rename:<string><unknown>column.rename,
+            field:str,
+            exp:true
+        }
+    }
+}
+
+function handleColums<T,R,K>(columns:{
+    columns:T[],
+    calcColumns:COLUMNSVALUETYPE<R,K>[]
+}) {
+    let column="",arrColumn:string[]=[]
+    let arr=[...columns.columns,...columns.calcColumns]
+    if(arr.length>0) {
+        for(let obj of arr){
+            let str=handleEachColumn(obj)
+            arrColumn.push(str)
+        }
+        column=arrColumn.join(",")
+    } else {
+        column="*"
+    }
+    return column;
+}
+
+type HAVINGEXP={
+    func:"sum"|"max"|"min"|"avg"|"count"
+    exp:"="|">"|"<"|"<>"|">="|"<=",
+    value:string|number
+}
+
+function generateHavingExp(obj:{
+    [param:string]:HAVINGEXP
+},objMode:"and"|"or"):string {
+    let arr=[]
+    for(let key in obj) {
+        let val=obj[key]
+        arr.push(`${val.func}(${key})${val.exp}${typeof(val.value)=="string"?("'"+val.value+"'"):val.value}`)
+    }
+    let ret=arr.join(` ${objMode?objMode:"and"} `)
+    return ret;
+}
+
+function generateLeftJoinHavingExp<T extends BaseModel>(obj:{
+    [param:string]:{
+        model:T,
+        exp:HAVINGEXP
+    }
+},objMode:"and"|"or"):string {
+    let arr=[]
+    for(let key in obj) {
+        let val=obj[key]
+        arr.push(`${val.exp.func}(${val.model.table}.${key})${val.exp}${typeof(val.exp.value)=="string"?("'"+val.exp.value+"'"):val.exp.value}`)
+    }
+    let ret=arr.join(` ${objMode?objMode:"and"} `)
+    return ret;
+}
+
+export function testSql<T extends BaseModel,K1 extends keyof T["model"]=null,R extends keyof T["model"]=null,RR extends string=null,O extends boolean=false>(model:T,groups:(keyof T["model"])[],columns:{
+    columns:K1[],
+    calcColumns:COLUMNSVALUETYPE<R,RR>[]
+},objExpr?:{
+    [param in keyof T["model"]]?:EXPRVALUE
+},exprMode?:"and"|"or",having?:{
+    [param in keyof T["model"]]?:HAVINGEXP
+},havingMode?:"and"|"or",order?:{
+    field:O extends false?(keyof T["model"]):RR,
+    isVitualField:O,
+    type:"asc"|"desc"
+},limit?:number,size?:number):{
+    value:string,
+    type:Rename<{
+        [key in K1|R]:T["model"][key]
+    },R,RR>
+} {
+    return null
+}
+
+export function generateGroupSql<T extends BaseModel,K1 extends keyof T["model"],R extends keyof T["model"],RR extends string=null,O extends boolean=false>(model:T,groups:(keyof T["model"])[],columns:{
+    columns:K1[],
+    calcColumns:COLUMNSVALUETYPE<R,RR>[]
+},objExpr?:{
+    [param in keyof T["model"]]?:EXPRVALUE
+},exprMode?:"and"|"or",having?:{
+    [param in keyof T["model"]]?:HAVINGEXP
+},havingMode?:"and"|"or",order?:{
+    field:O extends false?(keyof T["model"]):RR,
+    isVitualField:O,
+    type:"asc"|"desc"
+},limit?:number,size?:number):{
+    value:string,
+    type:Rename<{
+        [key in K1|R]:T["model"][key]
+    },R,RR>
+} {
+    let column=handleColums(columns)
+    let expr=generateExp(objExpr,exprMode);
+    let havingExpr=generateHavingExp(having,havingMode);
+    return {
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        type:model.model
+    }
+}
+
+export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1 extends keyof T1["model"]=null,K2 extends keyof T2["model"]=null,F1 extends string=null,F2 extends string=null,R1 extends keyof T1["model"]=null,RR1 extends string=null,R2 extends keyof T2["model"]=null,RR2 extends string=null,O extends boolean=false>(mainModel:{
+    model:T1,
+    columns?:{
+        columns:K1[],
+        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+    },
+    aggregation?:F1,
+},joinModel:{
+    model:T2,
+    columns?:{
+        columns:K2[],
+        calcColumns:COLUMNSVALUETYPE<R2,RR2>[]
+    },
+    aggregation?:F2
+    expression:{
+        [key in keyof T2["model"]]?:{
+            model:T1,
+            field:keyof T1["model"]
+        }
+    }
+},groups:(keyof T1["model"])[],objExpr?:{
+    [param in keyof (T1 & T2)["model"]]?:{
+        value:EXPRVALUE,
+        model:T1|T2
+    }
+},exprMode?:"and"|"or",having?:{
+    [param in keyof T1["model"]]?:{
+        model:T1,
+        exp:HAVINGEXP
+    }
+},havingMode?:"and"|"or",order?:{
+    field:O extends false?(keyof(T1["model"] & T2["model"])):(RR1|RR2),
+    model:T1 | T2,
+    isVitualField:O,
+    type:"asc"|"desc"
+},limit?:number,size?:number):{
+    value:string,
+    type:(F1 extends null ? Rename<{
+        [key in K1|R1]:T1["model"][key]
+    },R1,RR1>:{
+        [key in F1]:Rename<{
+            [key in K1|R1]:T1["model"][key]
+        },R1,RR1>
+    }) & (F2 extends null ? Rename<{
+        [key in K2|R2]:T2["model"][key]
+    },R2,RR2>:{
+        [key in F2]:Rename<{
+            [key in K2|R2]:T2["model"][key]
+        },R2,RR2>
+    }),
+    aggregation:{
+        [key:string]:string
+    }
+} {
+    let expr=generateLeftJoinExp(objExpr,exprMode);
+    let table=mainModel.model.table
+    let joinTable=joinModel.model.table
+    let key=Object.keys(joinModel.expression)[0]
+    let value=joinModel.expression[key]
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
+    let aggregation={}
+    let column=""
+    let havingExpr=generateLeftJoinHavingExp(having,havingMode);
+    if(mainModel.columns) {
+        let arr=[]
+        if(mainModel.columns.columns && mainModel.columns.columns.length>0) {
+            arr=arr.concat(mainModel.columns.columns)
+        }
+        if(mainModel.columns.calcColumns && mainModel.columns.calcColumns.length>0) {
+            arr=arr.concat(mainModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,table)
+            return `${val.exp?"":table}${val.field} _${table}__${val.rename}`
+        }).join(",")
+        column+=str;
+    }
+    if(joinModel.columns) {
+        let arr=[]
+        if(joinModel.columns.columns && joinModel.columns.columns.length>0) {
+            arr=arr.concat(joinModel.columns.columns)
+        }
+        if(joinModel.columns.calcColumns && joinModel.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable)
+            return `${val.exp?"":joinTable}${val.field} _${joinTable}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    column=column.trim()
+    if(column[0]==",")
+    {
+        column=column.substr(1)
+    }
+    aggregation[table]=mainModel.aggregation??""
+    aggregation[joinTable]=joinModel.aggregation??""
+    return {
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field}`:(order.model.table+"."+order.field)} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        type:null,
+        aggregation:aggregation
+    }
+}
+
+export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T3 extends BaseModel,K1 extends keyof T1["model"]=null,K2 extends keyof T2["model"]=null,K3 extends keyof T3["model"]=null,F1 extends string=null,F2 extends string=null,F3 extends string=null,R1 extends keyof T1["model"]=null,RR1 extends string=null,R2 extends keyof T2["model"]=null,RR2 extends string=null,R3 extends keyof T3["model"]=null,RR3 extends string=null,O extends boolean=false>(mainModel:{
+    model:T1,
+    columns?:{
+        columns:K1[],
+        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+    },
+    aggregation?:F1,
+},joinModel:{
+    model:T2,
+    columns?:{
+        columns:K2[],
+        calcColumns:COLUMNSVALUETYPE<R2,RR2>[]
+    },
+    aggregation?:F2,
+    expression:{
+        [key in keyof T2["model"]]?:{
+            model:T1|T3,
+            field:keyof (T1 & T3)["model"]
+        }
+    }
+},joinModel2:{
+    model:T3,
+    columns?:{
+        columns:K3[],
+        calcColumns:COLUMNSVALUETYPE<R3,RR3>[]
+    },
+    aggregation?:F3,
+    expression:{
+        [key in keyof T3["model"]]?:{
+            model:T1|T2,
+            field:keyof (T1 & T2)["model"]
+        }
+    }
+},groups:(keyof T1["model"])[],objExpr?:{
+    [param in keyof (T1 & T2 & T3)["model"]]?:{
+        value:EXPRVALUE,
+        model:T1|T2|T3
+    }
+},exprMode?:"and"|"or",having?:{
+    [param in keyof T1["model"]]?:{
+        model:T1,
+        exp:HAVINGEXP
+    }
+},havingMode?:"and"|"or",order?:{
+    field:O extends false?(keyof(T1["model"] & T2["model"] & T3["model"])):(RR1|RR2|RR3),
+    model:T1 | T2 | T3,
+    isVitualField:O,
+    type:"asc"|"desc"
+},limit?:number,size?:number):{
+    value:string,
+    type:(F1 extends null ? Rename<{
+        [key in K1|R1]:T1["model"][key]
+    },R1,RR1>:{
+        [key in F1]:Rename<{
+            [key in K1|R1]:T1["model"][key]
+        },R1,RR1>
+    }) & (F2 extends null ? Rename<{
+        [key in K2|R2]:T2["model"][key]
+    },R2,RR2>:{
+        [key in F2]:Rename<{
+            [key in K2|R2]:T2["model"][key]
+        },R2,RR2>
+    }) & (F3 extends null ? Rename<{
+        [key in K3|R3]:T3["model"][key]
+    },R3,RR3>:{
+        [key in F3]:Rename<{
+            [key in K3|R3]:T3["model"][key]
+        },R3,RR3>
+    }),
+    aggregation:{
+        [key:string]:string
+    }
+} {
+    let expr=generateLeftJoinExp(objExpr,exprMode);
+    let table=mainModel.model.table
+    let joinTable=joinModel.model.table
+    let joinTable2=joinModel2.model.table
+    let key=Object.keys(joinModel.expression)[0]
+    let value=joinModel.expression[key]
+    let key2=Object.keys(joinModel2.expression)[0]
+    let value2=joinModel2.expression[key]
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
+    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field}`
+    let havingExpr=generateLeftJoinHavingExp(having,havingMode);
+    let aggregation={}
+    let column=""
+    if(mainModel.columns) {
+        let arr=[]
+        if(mainModel.columns.columns && mainModel.columns.columns.length>0) {
+            arr=arr.concat(mainModel.columns.columns)
+        }
+        if(mainModel.columns.calcColumns && mainModel.columns.calcColumns.length>0) {
+            arr=arr.concat(mainModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,table)
+            return `${val.exp?"":(table+".")}${val.field} _${table}__${val.rename}`
+        }).join(",")
+        column+=str;
+    }
+    if(joinModel.columns) {
+        let arr=[]
+        if(joinModel.columns.columns && joinModel.columns.columns.length>0) {
+            arr=arr.concat(joinModel.columns.columns)
+        }
+        if(joinModel.columns.calcColumns && joinModel.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable)
+            return `${val.exp?"":(joinTable+".")}${val.field} _${joinTable}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel2.columns) {
+        let arr=[]
+        if(joinModel2.columns.columns && joinModel2.columns.columns.length>0) {
+            arr=arr.concat(joinModel2.columns.columns)
+        }
+        if(joinModel2.columns.calcColumns && joinModel2.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel2.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable2)
+            return `${val.exp?"":(joinTable2+".")}${val.field} _${joinTable2}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    column=column.trim()
+    if(column[0]==",")
+    {
+        column=column.substr(1)
+    }
+    aggregation[table]=mainModel.aggregation??""
+    aggregation[joinTable]=joinModel.aggregation??""
+    aggregation[joinTable2]=joinModel2.aggregation??""
+    return {
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field}`:(order.model.table+"."+order.field)} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        type:null,
+        aggregation:aggregation
+    }
+}
+
+export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T3 extends BaseModel,T4 extends BaseModel,K1 extends keyof T1["model"]=null,K2 extends keyof T2["model"]=null,K3 extends keyof T3["model"]=null,K4 extends keyof T4["model"]=null,F1 extends string=null,F2 extends string=null,F3 extends string=null,F4 extends string=null,R1 extends keyof T1["model"]=null,RR1 extends string=null,R2 extends keyof T2["model"]=null,RR2 extends string=null,R3 extends keyof T3["model"]=null,RR3 extends string=null,R4 extends keyof T4["model"]=null,RR4 extends string=null,O extends boolean=false>(mainModel:{
+    model:T1,
+    columns?:{
+        columns:K1[],
+        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+    },
+    aggregation?:F1
+},joinModel:{
+    model:T2,
+    columns?:{
+        columns:K1[],
+        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+    },
+    aggregation?:F2,
+    expression:{
+        [key in keyof T2["model"]]?:{
+            model:T1|T3|T4,
+            field:keyof (T1 & T3 & T4)["model"]
+        }
+    }
+},joinModel2:{
+    model:T3,
+    columns?:{
+        columns:K1[],
+        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+    },
+    aggregation?:F3,
+    expression:{
+        [key in keyof T3["model"]]?:{
+            model:T1|T2|T4,
+            field:keyof (T1 & T2 & T4)["model"]
+        }
+    }
+},joinModel3:{
+    model:T4,
+    columns?:{
+        columns:K1[],
+        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+    },
+    aggregation?:F4,
+    expression:{
+        [key in keyof T4["model"]]?:{
+            model:T1|T2|T3,
+            field:keyof (T1 & T2 & T3)["model"]
+        }
+    }
+},groups:(keyof T1["model"])[],objExpr?:{
+    [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
+        value:EXPRVALUE,
+        model:T1|T2|T3|T3
+    }
+},exprMode?:"and"|"or",having?:{
+    [param in keyof T1["model"]]?:{
+        model:T1,
+        exp:HAVINGEXP
+    }
+},havingMode?:"and"|"or",order?:{
+    field:O extends false?(keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"])):(RR1|RR2|RR3|RR4),
+    model:T1 | T2 | T3 | T4,
+    isVitualField:O,
+    type:"asc"|"desc"
+},limit?:number,size?:number):{
+    value:string,
+    type:(F1 extends null ? Rename<{
+        [key in K1|R1]:T1["model"][key]
+    },R1,RR1>:{
+        [key in F1]:Rename<{
+            [key in K1|R1]:T1["model"][key]
+        },R1,RR1>
+    }) & (F2 extends null ? Rename<{
+        [key in K2|R2]:T2["model"][key]
+    },R2,RR2>:{
+        [key in F2]:Rename<{
+            [key in K2|R2]:T2["model"][key]
+        },R2,RR2>
+    }) & (F3 extends null ? Rename<{
+        [key in K3|R3]:T3["model"][key]
+    },R3,RR3>:{
+        [key in F3]:Rename<{
+            [key in K3|R3]:T3["model"][key]
+        },R3,RR3>
+    }) & (F4 extends null ? Rename<{
+        [key in K4|R4]:T4["model"][key]
+    },R4,RR4>:{
+        [key in F4]:Rename<{
+            [key in K4|R4]:T4["model"][key]
+        },R4,RR4>
+    }),
+    aggregation:{
+        [key:string]:string
+    }
+} {
+    let expr=generateLeftJoinExp(objExpr,exprMode);
+    let table=mainModel.model.table
+    let joinTable=joinModel.model.table
+    let joinTable2=joinModel2.model.table
+    let joinTable3=joinModel3.model.table
+    let key=Object.keys(joinModel.expression)[0]
+    let value=joinModel.expression[key]
+    let key2=Object.keys(joinModel2.expression)[0]
+    let value2=joinModel2.expression[key]
+    let key3=Object.keys(joinModel3.expression)[0]
+    let value3=joinModel3.expression[key]
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
+    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field}`
+    let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.field}`
+    let havingExpr=generateLeftJoinHavingExp(having,havingMode);
+    let aggregation={}
+    let column=""
+    if(mainModel.columns) {
+        let arr=[]
+        if(mainModel.columns.columns && mainModel.columns.columns.length>0) {
+            arr=arr.concat(mainModel.columns.columns)
+        }
+        if(mainModel.columns.calcColumns && mainModel.columns.calcColumns.length>0) {
+            arr=arr.concat(mainModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,table)
+            return `${val.exp?"":table}${val.field} _${table}__${val.rename}`
+        }).join(",")
+        column+=str;
+    }
+    if(joinModel.columns) {
+        let arr=[]
+        if(joinModel.columns.columns && joinModel.columns.columns.length>0) {
+            arr=arr.concat(joinModel.columns.columns)
+        }
+        if(joinModel.columns.calcColumns && joinModel.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable)
+            return `${val.exp?"":joinTable}${val.field} _${joinTable}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel2.columns) {
+        let arr=[]
+        if(joinModel2.columns.columns && joinModel2.columns.columns.length>0) {
+            arr=arr.concat(joinModel2.columns.columns)
+        }
+        if(joinModel2.columns.calcColumns && joinModel2.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel2.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable2)
+            return `${val.exp?"":joinTable2}${val.field} _${joinTable2}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel3.columns) {
+        let arr=[]
+        if(joinModel3.columns.columns && joinModel3.columns.columns.length>0) {
+            arr=arr.concat(joinModel3.columns.columns)
+        }
+        if(joinModel3.columns.calcColumns && joinModel3.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel3.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable3)
+            return `${val.exp?"":joinTable3}${val.field} _${joinTable3}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    column=column.trim()
+    if(column[0]==",")
+    {
+        column=column.substr(1)
+    }
+    aggregation[table]=mainModel.aggregation??""
+    aggregation[joinTable]=joinModel.aggregation??""
+    aggregation[joinTable2]=joinModel2.aggregation??""
+    aggregation[joinTable3]=joinModel3.aggregation??""
+    return {
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field}`:(order.model.table+"."+order.field)} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        type:null,
+        aggregation:aggregation
     }
 }

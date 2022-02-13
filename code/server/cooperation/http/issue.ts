@@ -310,6 +310,21 @@ class IssueController {
           await projectIssue.unbindModule(moduleId)
           return
      }
-
+     @DHttpApi(projectIssueApi.routes.filter)
+     async filter(@DHttpReqParamRequired("projectId") projectId :string,
+     @DHttpReqParam("createdBy") createdBy :string,
+     @DHttpReqParam("issueTypeId") issueTypeId :string,
+     @DHttpReqParam("name") name :string,
+     @DHttpReqParam("priority") priority :number,
+     @DHttpReqParam("assignerId") assignerId :string,
+     @DHttpReqParam("reporterId") reporterId :string,
+     @DHttpReqParam("status") status :number,
+     @DHttpReqParam("moduleId") moduleId :string,
+     @DHttpReqParam("tagId") tagId :string,
+     @DHttpReqParamRequired("page") page :number,
+     @DHttpReqParamRequired("size") size :number):Promise<typeof projectIssueApi.routes.filter.res> {
+          let ret=await ProjectIssueService.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,tagId)
+          return ret;
+     }
 
 }

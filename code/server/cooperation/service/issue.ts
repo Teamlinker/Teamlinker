@@ -377,5 +377,14 @@ export default class ProjectIssue extends Entity<typeof projectIssueModel,typeof
         }
         await projectIssueMapper.unbindIssueModule(this.getId(),moduleId)
     }
+
+    static async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,tagId? :string) {
+        let project=await ProjectService.getItemById(projectId)
+        if(!project) {
+            throw Err.Project.projectNotFound
+        }
+        let ret=await projectIssueMapper.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,tagId)
+        return ret;
+    }
     
 }

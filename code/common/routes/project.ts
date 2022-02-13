@@ -4,7 +4,7 @@ import { ICommon_Model_Project_Role } from '../model/project_role';
 import { ICommon_Model_Project } from './../model/project';
 import { ICommon_Model_Project_Module } from './../model/project_module';
 import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag } from './response';
+import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag, ICommon_Route_Res_recentProjectList_Item } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/project",
@@ -195,6 +195,14 @@ const api={
             }>{},
             res:<ICommon_Model_Issue_Type[]>{}
         },
+        recentProjectList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/recent/list",
+            req:<{
+                       
+            }>{},
+            res:<ICommon_Route_Res_recentProjectList_Item[]>{}
+        }
     }
 }
 export=api

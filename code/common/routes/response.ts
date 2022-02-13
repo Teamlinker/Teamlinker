@@ -153,3 +153,29 @@ export interface ICommon_Route_Res_ProjectIssue_BasicInfo extends Omit<ICommon_M
 }
 
 export type ICommon_Route_Res_ProjectIssue_fieldsInfo = ICommon_Route_Res_FieldSolution_ListWorkflowNodeField & ICommon_Model_Project_Issue_Field_Value
+
+
+export interface ICommon_Route_Res_recentProjectList_Item {
+    id:string,
+    name:string,
+    photo:string,
+    notstart:number,
+    inprogress:number,
+    done:number
+}
+
+export interface ICommon_Route_Res_Project_filter {
+    id:string,
+    name:string,
+    unique_id:number,
+    status:number,
+    issueType:{
+        id:string,
+        icon:string,
+        name:string
+    },
+    assigner_id:string,
+    reporter_id:string,
+    created_time:Date|string,
+    created_by:string
+}

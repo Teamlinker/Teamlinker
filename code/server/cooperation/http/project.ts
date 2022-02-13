@@ -128,5 +128,11 @@ class ProjectController {
         return ret;
     }
 
+    @DHttpApi(projectApi.routes.recentProjectList)
+    async recentProjectList(@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.recentProjectList.res> {
+        let ret=await ProjectService.recentProjectList(user.userId);
+        return ret;
+    }
+
 }
 export default new ProjectController

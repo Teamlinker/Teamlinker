@@ -4,7 +4,7 @@ import { ECommon_Services } from "../types";
 import { ICommon_Model_Project_Issue } from './../model/project_issue';
 import { ICommon_Model_Project_Lable } from './../model/project_label';
 import { ICommon_Model_Project_Module } from './../model/project_module';
-import { ICommon_Route_Req_ProjectIssue_Field, ICommon_Route_Res_FieldSolution_ListWorkflowNodeField, ICommon_Route_Res_ProjectIssue_BasicInfo, ICommon_Route_Res_ProjectIssue_fieldsInfo } from "./response";
+import { ICommon_Route_Req_ProjectIssue_Field, ICommon_Route_Res_FieldSolution_ListWorkflowNodeField, ICommon_Route_Res_ProjectIssue_BasicInfo, ICommon_Route_Res_ProjectIssue_fieldsInfo, ICommon_Route_Res_Project_filter } from "./response";
 import { ECommon_HttpApi_Method } from "./types";
 
 const api={
@@ -269,6 +269,25 @@ const api={
                 moduleId:string
             }>{},
             res:{}
+        },
+        filter:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/filter",
+            req:<{
+                projectId :string,
+                createdBy?:string,
+                issueTypeId:string,
+                name?:string,
+                priority?:number,
+                assignerId?:string,
+                reporterId?:string
+                status?:number,
+                moduleId?:string,
+                tagId?:string,
+                page:number,
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_Project_filter[]>{}
         }
     }
 }
