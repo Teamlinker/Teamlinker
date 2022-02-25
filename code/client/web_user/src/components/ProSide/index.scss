@@ -14,6 +14,10 @@
         .item{
             padding-left:40px;
             margin-bottom:15px;
+            color:#333;
+            &.active{
+                color:#0052CC;
+            }
         }
     }
 }

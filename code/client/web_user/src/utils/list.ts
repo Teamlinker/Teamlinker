@@ -8,33 +8,37 @@ interface State {
     pageSize:Number,
     onChange: Function;
   };
+  queryParams?:any
 }
 export default function getTableFunc() {
   const stateData: UnwrapRef<State> = reactive({
     pagination: {
-      current: 0,
+      current: 1,
       total: 0,
-      pageSize:1,
+      pageSize:10,
       onChange:()=>{}
     },
     tableData: [],
+    queryParams:{}
   });
   const url:Ref = ref('')
   let handleTableChange =(current:any)=> {
-    console.log(current,'current')
-    stateData.pagination.current = current-1;
+    stateData.pagination.current = current;
     initData()
   }
   let setUrl = (val:string)=>{
     url.value = val
     initData()
   }
-  let initData = () => {
-    console.log(url.value,'url.value')
-    const params = {
-      page: stateData.pagination.current,
+  let initData = (page?:Number) => {
+    if(page){
+      stateData.pagination.current = page;
+    }
+    let params = {
+      page: +stateData.pagination.current-1,
       size: stateData.pagination.pageSize,
     };
+    params = Object.assign(params,stateData.queryParams)
     axios.get(url.value, { params: params }).then((res: any) => {
     stateData.tableData = res.data.data;
     stateData.pagination.onChange = handleTableChange;
@@ -42,7 +46,7 @@ export default function getTableFunc() {
     });
   };
   let searchQuery = ()=>{
-    
+    initData(1)
   }
   return {
     stateData,
