@@ -8,6 +8,7 @@ import { workflowNodeModel } from "../../../common/model/workflow_node";
 import { workflowSolutionModel } from "../../../common/model/workflow_solution";
 import { Table_Workflow_Solution_Workflow_Issue_Type, workflowSolutionWorkflowIssueTypeModel } from "../../../common/model/workflow_solution_workflow_issue_type";
 import { Permission_Base, Permission_Types } from '../../../common/permission/permission';
+import { getRedisInstance } from "../../common/cache/redis";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { getNacosInstance } from '../../common/nacos/nacos';
 import { generateBatchCreateSql, generateCreateSql, generateSnowId } from '../../common/util/sql';
@@ -203,7 +204,13 @@ async function resetSystem(){
     await mysql.execute(`delete from ${Table_Project_Label_Issue}`)
 }
 
+async function flushRedis() {
+    let redis=getRedisInstance()
+    await redis.flush()
+}
+
 export async function initSystem() {
+    await flushRedis()
     await resetSystem()
     let mysql=getMysqlInstance()
     let ret=await mysql.execute<any[]>(`select * from ${Table_Version}`)

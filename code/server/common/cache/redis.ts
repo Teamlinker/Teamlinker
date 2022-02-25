@@ -102,8 +102,12 @@ export class Redis {
         let ret=await this.redis.ttl(key);
         return ret;
     }
-    async setTTL(key:string,seconds:number):Promise<void> {
-        await this.redis.expire(key,seconds);
+    async setTTL(key:string,seconds:number=-1):Promise<void> {
+        if(seconds==-1) {
+            await this.redis.persist(key)
+        } else {
+            await this.redis.expire(key,seconds);
+        }
     }
     async del(key:string) {
         await this.redis.del(key);
@@ -111,5 +115,55 @@ export class Redis {
     async exists(key:string) {
         let ret=await this.redis.exists(key)
         return !!ret
+    }
+    async flush() {
+        await this.redis.flushdb()
+    }
+    async sGet(key:string):Promise<string[]> {
+        let exist=await this.exists(key)
+        if(exist) {
+            let ret=await this.redis.smembers(key)
+            return ret;
+        }
+        return null;
+    }
+    async sSet(key:string,values:string[],ttl:number=-1) {
+        if(values && values.length>0) {
+            await this.redis.sadd(key,...values)
+            await this.setTTL(key,ttl);
+        }
+        
+    }
+    async hGet(key:string,field:string):Promise<string> {
+        let exist=await this.exists(key)
+        if(exist) {
+            let ret=await this.redis.hget(key,field);
+            return ret
+        }
+        return null;
+    }
+    async hSet(key:string,obj:{
+        [param:string]:IORedis.ValueType
+    },ttl:number=-1){
+        if(Object.keys(obj).length>0) {
+            await this.redis.hset(key,obj)
+            await this.setTTL(key,ttl);
+        }
+    }
+    async hGetAll(key:string) :Promise<object>{
+        let exist=await this.exists(key)
+        if(exist) {
+            let ret=await this.redis.hgetall(key);
+            return ret;
+        }
+        return null;
+    }
+    async hGetAllKey(key:string) {
+        let exist=await this.exists(key)
+        if(exist) {
+            let ret=await this.redis.hkeys(key)
+            return ret;
+        }
+        return null;
     }
 }

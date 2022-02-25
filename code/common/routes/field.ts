@@ -1,4 +1,5 @@
 import { ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type, ICommon_Model_Field_Solution_Workflow_Node_Field_Type } from '../model/field_solution_workflow_node_field_type';
+import { Permission_Types } from '../permission/permission';
 import { ECommon_Services } from "../types";
 import { ICommon_Model_Field_Solution } from './../model/field_solution';
 import { ICommon_Model_Field_Type } from './../model/field_type';
@@ -16,7 +17,8 @@ const api={
             req:<{
                                
             }>{},
-            res:<ICommon_Model_Field_Type[]>{}
+            res:<ICommon_Model_Field_Type[]>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         typeInfo:{
             method:ECommon_HttpApi_Method.GET,
@@ -24,7 +26,8 @@ const api={
             req:<{
                 fieldTypeId:string                
             }>{},
-            res:<ICommon_Model_Field_Type>{}
+            res:<ICommon_Model_Field_Type>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         solutionList:{
             method:ECommon_HttpApi_Method.GET,
@@ -32,7 +35,8 @@ const api={
             req:<{
                                
             }>{},
-            res:<ICommon_Model_Field_Solution[]>{}
+            res:<ICommon_Model_Field_Solution[]>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         solutionInfo:{
             method:ECommon_HttpApi_Method.GET,
@@ -40,7 +44,8 @@ const api={
             req:<{
                 fieldSolutionId:string                
             }>{},
-            res:<ICommon_Route_Res_FieldSolution_Info>{}
+            res:<ICommon_Route_Res_FieldSolution_Info>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         solutionCreate:{
             method:ECommon_HttpApi_Method.POST,
@@ -49,7 +54,8 @@ const api={
                  name:string,
                  description?:string             
             }>{},
-            res:<ICommon_Model_Field_Solution>{}
+            res:<ICommon_Model_Field_Solution>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         solutionEdit:{
             method:ECommon_HttpApi_Method.PUT,
@@ -59,7 +65,8 @@ const api={
                 name?:string,
                 description?:string             
             }>{},
-            res:<ICommon_Model_Field_Solution>{}
+            res:<ICommon_Model_Field_Solution>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         solutionDelete:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -67,7 +74,8 @@ const api={
             req:<{
                 fieldSolutionId:string             
             }>{},
-            res:{}
+            res:{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         bindWorkflowSolution:{
             method:ECommon_HttpApi_Method.PUT,
@@ -76,7 +84,8 @@ const api={
                 fieldSolutionId:string,
                 workflowSolutionId:string             
             }>{},
-            res:{}
+            res:{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         unbindWorkflowSolution:{
             method:ECommon_HttpApi_Method.PUT,
@@ -85,7 +94,8 @@ const api={
                 fieldSolutionId:string,
                 workflowSolutionId:string             
             }>{},
-            res:{}
+            res:{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         listWorkflowNodeField:{
             method:ECommon_HttpApi_Method.GET,
@@ -96,7 +106,8 @@ const api={
                 workflowId: string,
                 workflowSolutionId: string
             }>{},
-            res: <ICommon_Route_Res_FieldSolution_ListWorkflowNodeField[]>{}
+            res: <ICommon_Route_Res_FieldSolution_ListWorkflowNodeField[]>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         addWorkflowNodeField:{
             method:ECommon_HttpApi_Method.POST,
@@ -114,7 +125,8 @@ const api={
                 lable_type?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,
                 weight?:number
             }>{},
-            res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{}
+            res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         editWorkflowNodeField:{
             method:ECommon_HttpApi_Method.PUT,
@@ -128,7 +140,8 @@ const api={
                 lable_type?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,
                 weight?:number
             }>{},
-            res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{}
+            res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         deleteWorkflowNodeField:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -136,7 +149,8 @@ const api={
             req: <{
                 fieldSolutionWorkflowNodeFieldTypeId:string
             }>{},
-            res: {}
+            res: {},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         moveWorkflowNodeField:{
             method:ECommon_HttpApi_Method.PUT,
@@ -145,7 +159,8 @@ const api={
                 fieldSolutionWorkflowNodeFieldTypeId:string,
                 sort:number
             }>{},
-            res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{}
+            res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         listWorkflowNodeFieldConfig:{
             method:ECommon_HttpApi_Method.GET,
@@ -153,7 +168,8 @@ const api={
             req: <{
                 fieldSolutionWorkflowNodeFieldTypeId :string
             }>{},
-            res: <ICommon_Model_Field_Type_Config_Value[]>{}
+            res: <ICommon_Model_Field_Type_Config_Value[]>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         addWorkflowNodeFieldConfig:{
             method:ECommon_HttpApi_Method.POST,
@@ -164,7 +180,8 @@ const api={
                 name :string,
                 selected :number,
             }>{},
-            res: <ICommon_Model_Field_Type_Config_Value>{}
+            res: <ICommon_Model_Field_Type_Config_Value>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         editWorkflowNodeFieldConfig:{
             method:ECommon_HttpApi_Method.PUT,
@@ -175,7 +192,8 @@ const api={
                 name? :string,
                 selected? :number
             }>{},
-            res: <ICommon_Model_Field_Type_Config_Value>{}
+            res: <ICommon_Model_Field_Type_Config_Value>{},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         deleteWorkflowNodeFieldConfig:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -183,7 +201,8 @@ const api={
             req: <{
                 fieldTypeConfigValueId :string
             }>{},
-            res: {}
+            res: {},
+            permission:[Permission_Types.Admin.ADMIN]
         },
         workflowFieldsCopy:{
             method:ECommon_HttpApi_Method.POST,
@@ -195,7 +214,8 @@ const api={
                 newFieldSolutionId:string,
                 newWorkflowSolutionId:string
             }>{},
-            res:{}
+            res:{},
+            permission:[Permission_Types.Admin.ADMIN]
         }
     }
 }

@@ -2,7 +2,9 @@ export default class StringUtil {
     static format(str: string, ...arg: any[]) {
         let a = str;
         for (let k in arg) {
-            a = a.replace("{" + k + "}", String(arg[k]))
+            if(arg[k]!==undefined && arg[k]!==null) {
+                a = a.replace("{" + k + "}", String(arg[k]))
+            }
         }
         return a
     }

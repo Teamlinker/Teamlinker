@@ -16,10 +16,8 @@ import * as workflowApi from "../../../common/routes/workflow";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
 import Application from "../../common/app/app";
-import { getComponent } from "../../common/decorate/component";
 import { getNacosInstance } from "../../common/nacos/nacos";
-import { processPermission } from '../../common/permission/base';
-import { PermissionProjectRead } from '../../common/permission/project/relation';
+import { deletePermission, processPermission } from '../../common/permission/base';
 import { proxyRequest } from "../../common/rpc/rpc";
 import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
 import { EServer_Common_User_Type } from '../../common/types/user';
@@ -60,7 +58,10 @@ export default class GateWay extends Application {
                 [parem:string]:{
                     service:string,
                     ignoreValidate:boolean,
-                    permission:Permission_Base[]
+                    permission:Permission_Base[]|{
+                        data:Permission_Base[],
+                        delete:boolean
+                    }
                 }
             }
         }>{}
@@ -169,10 +170,18 @@ export default class GateWay extends Application {
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }
-                    if(permission && permission.length>0) {
+                    let permissionDelete:object;
+                    if(permission && ((Array.isArray(permission) && permission.length>0) || (typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data) && permission.data.length>0))) {
                         if(ctx.state.user) {
                             if(ctx.state.user.type==EServer_Common_User_Type.USER) {
-                                let isCheck =await processPermission(permission,Object.assign({},obj.data,{userId:ctx.state.user?ctx.state.user.userId:undefined}))
+                                let per=Array.isArray(permission)?permission:permission.data;
+                                let [isCheck,map] =await processPermission(per,Object.assign({},obj.data,{
+                                    userId:ctx.state.user?ctx.state.user.userId:undefined,
+                                    isAdmin:ctx.state.user.type===EServer_Common_User_Type.ADMIN
+                                }))
+                                if(isCheck && typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data)) {
+                                    permissionDelete=map;
+                                }
                                 if(!isCheck) {
                                     throw Err.User.accessDenied
                                 }
@@ -202,6 +211,9 @@ export default class GateWay extends Application {
                     } else {
                         ctx.body = ret.data;
                     }
+                    if(permissionDelete) {
+                        deletePermission(permissionDelete)
+                    }
                     await next()
                 } else {
                     await next()
@@ -216,9 +228,6 @@ export default class GateWay extends Application {
         }))
         http.createServer(app.callback()).listen(getNacosInstance().serverPort,function(){
             console.log(`start`);
-            let obj=getComponent<InstanceType<typeof PermissionProjectRead>>(PermissionProjectRead.name)
-            console.log(obj)
-            
         })
     }
 }
