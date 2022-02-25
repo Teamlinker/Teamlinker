@@ -62,6 +62,7 @@ export default defineComponent({
     const doPathSide=(route)=>{
       let path = route || router.currentRoute.value.path;
       state.isProSide = [
+      "/project/edit", 
       "/project/module",
       "/project/tag",
       "/project/member",

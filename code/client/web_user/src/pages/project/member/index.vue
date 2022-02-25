@@ -1,10 +1,33 @@
 <template>
-  <div>
-    <div style="margin-left: 240px">
-      <div class="add-member" @click="addMember">
-        <a-button>添加成员</a-button>
+  <div class="list">
+    <div class="search">
+      <a-space>
+        <a-input
+          allowClear
+          v-model:value="queryParams.keyword"
+          placeholder="成员姓名"
+          @keyup.enter.prevent="searchQuery(queryParams.keyword)"
+        />
+        <a-button @click="searchQuery(queryParams.keyword)" type="primary"
+          >搜索</a-button
+        >
+      </a-space>
+      <div>
+        <a-button @click="addMember" type="primary">新增成员</a-button>
       </div>
-      <a-modal v-model:visible="visible" title="添加成员" @ok="handleOk">
+    </div>
+    <a-table
+      :columns="columns"
+      :data-source="tableData"
+      :rowKey="(record) => record.id"
+      :pagination="pagination"
+    >
+      <template #action="{ record }">
+        <a @click="onDelete(record.id)">删除</a>
+      </template>
+    </a-table>
+    <div style="margin-left: 240px">
+      <a-modal v-model:visible="visible" :confirm-loading="confirmLoading" title="添加成员" @ok="handleOk">
         <a-form
           ref="formRef"
           :model="formState"
@@ -12,11 +35,11 @@
           :label-col="labelCol"
           :wrapper-col="wrapperCol"
         >
-          <a-form-item label="名字" name="name">
+          <a-form-item label="姓名" name="memberId">
             <a-select
-              v-model:value="formState.name"
+              v-model:value="formState.memberId"
               show-search
-              placeholder="input search text"
+              placeholder="请输入成员姓名"
               style="width: 200px"
               :default-active-first-option="false"
               :show-arrow="false"
@@ -35,7 +58,6 @@
               style="width: 200px"
               allowClear
               :filter-option="filterRoleOption"
-              @change="handleRoleChange"
             >
               <a-select-option
                 :value="item.id"
@@ -52,31 +74,46 @@
 </template>
 <script lang="ts">
 interface FormState {
-  name: string;
+  memberId: string;
   roleId: string;
-  type:Number
+  type: Number;
 }
-import { defineComponent, reactive, toRefs, ref, UnwrapRef, toRaw } from "vue";
+import {
+  defineComponent,
+  reactive,
+  toRefs,
+  ref,
+  UnwrapRef,
+  toRaw,
+  onActivated,
+} from "vue";
 import { useRouter } from "vue-router";
 import axios from "@/plugins/axios";
-import { message } from 'ant-design-vue';
+import { message } from "ant-design-vue";
+import { columns } from "./columns";
+import getTableFunc from "@/utils/list.ts";
 export default defineComponent({
   name: "项目信息",
   setup() {
+    const { stateData, handleTableChange, setUrl, searchQuery, initData } =
+      getTableFunc();
     const router = useRouter();
-    const state = reactive({});
+    const projectId = ref<any>("");
+    const confirmLoading = ref<boolean>(false);
     const visible = ref<boolean>(false);
-    const nameList = ref<any[]>([]);
+    const nameList = ref<any>();
+    const options = ref([]);
+    const formRef = ref();
     let formState: UnwrapRef<FormState> = reactive({
-      name: "",
+      memberId: "",
       roleId: "",
-      type:0
+      type: 0,
     });
     const rules = reactive({
-      name: [
+      memberId: [
         {
           required: true,
-          message: "请输入项目名称",
+          message: "请输入成员姓名",
           trigger: "blur",
         },
       ],
@@ -90,6 +127,7 @@ export default defineComponent({
     });
     let timeout: any;
     let currentValue = "";
+    //姓名搜索
     function fetch(value: string, callback: any) {
       if (timeout) {
         clearTimeout(timeout);
@@ -100,95 +138,120 @@ export default defineComponent({
         const params = {
           name: value,
         };
-        Promise.all([axios.get("/user/filter",{params:params}),axios.get('/team/filter',{params:params})]).then(res=>{
+        Promise.all([
+          axios.get("/user/filter", { params: params }),
+          axios.get("/team/filter", { params: params }),
+        ]).then((res) => {
           if (currentValue === value) {
-            const userList = res[0].data.map(item=>{
+            const userList = res[0].data.map((item: any) => {
               return {
-                value:item.id,
-                label:item.name+'(个人)',
-                type:0
-              }
-            })
-            const teamList = res[1].data.map(item=>{
+                value: item.id,
+                label: item.name + "(个人)",
+                type: 0,
+              };
+            });
+            const teamList = res[1].data.map((item: any) => {
               return {
-                value:item.id,
-                label:item.name+'(团队)',
-                type:1
-              }
-            })
-            let data = userList.concat(teamList)
+                value: item.id,
+                label: item.name + "(团队)",
+                type: 1,
+              };
+            });
+            let data = userList.concat(teamList);
             callback(data);
           }
-
-        })
+        });
       }
       timeout = setTimeout(fake, 300);
     }
-    //名字搜索
     const handleSearch = (val: string) => {
       if (!val) {
         return false;
       }
       fetch(val, (d: any[]) => (nameList.value = d));
     };
-    //名字选择
     const handleChange = (val: string) => {
-      const type = nameList.value.filter(item=>item.value===val)[0].type
-      formState.type = type
+      console.log(val, "valll2");
     };
-    let options = ref([]);
-    //获取成员列表
-    const initData = () => {
-      const id = router.currentRoute.value.query.projectId;
-      if (id) {
-        const params = {
-          projectId: id,
-          page: 0,
-          size: 10,
-        };
-        axios.get("/project/member/list", { params: params }).then((res) => {
-          console.log(res, "resss");
-        });
-      }
-    };
-    initData();
     //新增成员
     const addMember = () => {
       visible.value = true;
-      const id = router.currentRoute.value.query.projectId;
-      axios
-        .get("/project/roles", { params: { projectId: id } })
-        .then((res: any) => {
-          options.value = res.data;
-        });
+        resetForm()
     };
-    //提交表单
+    //resetForm
+    const resetForm = () =>{
+      formState.memberId=''
+      formState.roleId=''
+    }
+    //表单提交
     const handleOk = (e: MouseEvent) => {
-      formRef.value.validate().then(() => {});
-      let formData = toRaw(formState);
-      const id = router.currentRoute.value.query.projectId;
-      const params = {
-        projectId: id,
-        memberId: formData.name,
-        type: formData.type,
+      formRef.value.validate().then(() => {
+       confirmLoading.value = true;
+       let formData = toRaw(formState);
+       const type = nameList.value.filter((item:any)=>item.value===formData.memberId)[0].type
+       const params = {
+        projectId: projectId.value,
+        memberId: formData.memberId,
+        type: type,
         roleId: formData.roleId,
       };
       axios.put("/project/member/item", params).then(() => {
-        message.success("创建成功");
+        message.success("操作成功");
+        initData();
+      }).finally(()=>{
+        confirmLoading.value = false;
+      })
       });
+   
     };
-    const formRef = ref();
 
-    const handleRoleChange = (value: string) => {
-      console.log(`selected ${value}`);
-    };
     const filterRoleOption = (input: string, option: any) => {
       return option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0;
     };
+    //删除
+    const onDelete = (id: string) => {
+      const params = {
+        projectId:projectId.value,
+        memberId:id
+      }
+      axios.delete('/project/member/item',{params:params}).then(()=>{
+        message.success('操作成功');
+         let page = stateData.pagination.current
+        if (
+          stateData.pagination.total % stateData.pagination.pageSize === 1 ||
+          stateData.pagination.pageSize === 1
+        ) {
+          page = stateData.pagination.current - 1
+        }
+        initData(page)
+      })
+    };
+    //获取角色
+    const getRole = () => {
+      axios
+        .get("/project/roles", { params: { projectId: projectId.value } })
+        .then((res: any) => {
+          console.log(res, "resss");
+          options.value = res.data;
+        });
+    };
+    onActivated(() => {
+      const id = router.currentRoute.value.query.projectId;
+      projectId.value = id
+      stateData.queryParams = { projectId: id };
+      setUrl("/project/member/list");
+      getRole();
+    });
     return {
-      ...toRefs(state),
+      columns,
+      ...toRefs(stateData),
+      handleTableChange,
+      setUrl,
+      initData,
+      searchQuery,
       addMember,
       visible,
+      confirmLoading,
       handleOk,
       formRef,
       labelCol: {
@@ -203,8 +266,8 @@ export default defineComponent({
       options,
       handleSearch,
       handleChange,
-      handleRoleChange,
       filterRoleOption,
+      onDelete
     };
   },
 });
@@ -212,12 +275,20 @@ export default defineComponent({
 <route lang="yaml">
   meta:
     level: 1
-    name: '项目成员'
+    name: '项目信息'
     layout: auth
 </route>
-<style scoped>
-.add-member {
-  margin-top: 50px;
-  margin-left: 50px;
+<style lang="scss" scoped>
+.list {
+  margin: 0 20px;
+}
+.search {
+  margin: 20px 0;
+  display: flex;
+  .ant-space {
+    ::v-deep() {
+      flex: 1;
+    }
+  }
 }
 </style>
