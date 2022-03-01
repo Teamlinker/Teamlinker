@@ -90,8 +90,9 @@ export type ICommon_Route_Res_Team_List = {
     data:ICommon_Model_Team[]
 }
 
-export interface ICommon_Route_Res_IssueTypeSolution_Info extends ICommon_Model_Issue_Type_Solution {
-    data:ICommon_Model_Issue_Type[]
+export interface ICommon_Route_Res_IssueTypeSolution_List_Item extends ICommon_Model_Issue_Type_Solution {
+    issueTypeList:ICommon_Model_Issue_Type[],
+    projectList:Pick<ICommon_Model_Project,"name"|"photo"|"id"|"description">[]
 }
 
 export interface ICommon_Route_Res_Workflow_Info_Node {

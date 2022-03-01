@@ -69,6 +69,9 @@ export class Redis {
     listenExpired(key:string,func:{(key:string):void}){
         this.watchMap.set(key,func)
     }
+    getIORedis() {
+        return this.redis;
+    }
     async get<T>(key:string,type:T):Promise<T> {
         let ret=await this.redis.get(key)
         let value=this.parseType(ret,type);

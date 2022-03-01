@@ -1,8 +1,6 @@
-import { projectModuleModel } from './../../../common/model/project_module';
-import { projectLabelModel } from './../../../common/model/project_label';
-import { REDIS_GATEWAY } from '../cache/keys/gateway';
 import { ECommon_Model_Project_Member_Type, projectMemberModel } from '../../../common/model/project_member';
 import { Permission_Types } from '../../../common/permission/permission';
+import { REDIS_GATEWAY } from '../cache/keys/gateway';
 import { getRedisInstance } from '../cache/redis';
 import { getMysqlInstance } from '../db/mysql';
 import { DComponent, getComponent } from '../decorate/component';
@@ -10,6 +8,8 @@ import { generateLeftJoinSql, generateQuerySql } from '../util/sql';
 import StringUtil from '../util/string';
 import { commentModel } from './../../../common/model/comment';
 import { projectIssueModel } from './../../../common/model/project_issue';
+import { projectLabelModel } from './../../../common/model/project_label';
+import { projectModuleModel } from './../../../common/model/project_module';
 import { DPermission, PermissionBase } from './base';
 import { PermissionTeam } from './team';
 
@@ -111,59 +111,68 @@ abstract class PermissionProject extends PermissionBase<IPermission_Project> {
         })
     }
     async generatorValue({userId,projectId}: { [param: string]: any; userId?: string; isAdmin?: boolean;project:string }, keys: string[]): Promise<IPermission_Project> {
-        let redis=getRedisInstance()
-        let mysql=getMysqlInstance()
-        let permissionsSet=new Set<string>();
-        let exist=await redis.exists(keys[2])
-        if(exist) {
-            let arr=await redis.sGet(keys[2])
-            return arr;
-        }
-        exist=await redis.exists(keys[0])
-        if(!exist) {
-            let ret=await mysql.execute(generateQuerySql(projectMemberModel,["member_id","role_id"],{
-                project_id:projectId,
-                type:ECommon_Model_Project_Member_Type.USER
-            }))
-            let map={}
-            for(let obj of ret) {
-                map[obj.member_id]=obj.role_id
+        try {
+            await this.tryLock(keys.map(item=>item.replace(/\:/g,"")));
+            let redis = getRedisInstance()
+            let mysql = getMysqlInstance()
+            let permissionsSet = new Set<string>();
+            let exist = await redis.exists(keys[2])
+            if (exist) {
+                let arr = await redis.sGet(keys[2])
+                await this.unlock()
+                return arr;
             }
-            await redis.hSet(keys[0],map)
-        }
-        let roleId=await redis.hGet(keys[0],userId)
-        if(roleId) {
-            let role=await this.getRolePermissionList(roleId)
-            for(let o of role) {
-                permissionsSet.add(o)
+            exist = await redis.exists(keys[0])
+            if (!exist) {
+                let ret = await mysql.execute(generateQuerySql(projectMemberModel, ["member_id", "role_id"], {
+                    project_id: projectId,
+                    type: ECommon_Model_Project_Member_Type.USER
+                }))
+                let map = {}
+                for (let obj of ret) {
+                    map[obj.member_id] = obj.role_id
+                }
+                await redis.hSet(keys[0], map)
             }
-        }
-        exist=await redis.exists(keys[1])
-        if(!exist) {
-            let ret=await mysql.execute(generateQuerySql(projectMemberModel,["member_id","role_id"],{
-                project_id:projectId,
-                type:ECommon_Model_Project_Member_Type.TEAM
-            }))
-            let map={}
-            for(let obj of ret) {
-                map[obj.member_id]=obj.role_id
-            }
-            await redis.hSet(keys[1],map)
-        }
-        let teamPermission=getComponent<PermissionTeam>(PermissionTeam.name)
-        let relationship=await redis.hGetAll(keys[1])
-        for(let teamId in relationship) {
-            let keys=await teamPermission.buildKey({teamId})
-            let obj=await teamPermission.generatorValue({teamId,userId},keys)
-            if(obj && obj.length>0) {
-                for(let o of obj) {
+            let roleId = await redis.hGet(keys[0], userId)
+            if (roleId) {
+                let role = await this.getRolePermissionList(roleId)
+                for (let o of role) {
                     permissionsSet.add(o)
                 }
             }
-        }
-        let arr=Array.from(permissionsSet)
-        await redis.sSet(keys[2],arr,3600*24)
-        return arr;
+            exist = await redis.exists(keys[1])
+            if (!exist) {
+                let ret = await mysql.execute(generateQuerySql(projectMemberModel, ["member_id", "role_id"], {
+                    project_id: projectId,
+                    type: ECommon_Model_Project_Member_Type.TEAM
+                }))
+                let map = {}
+                for (let obj of ret) {
+                    map[obj.member_id] = obj.role_id
+                }
+                await redis.hSet(keys[1], map)
+            }
+            let teamPermission = getComponent<PermissionTeam>(PermissionTeam.name)
+            let relationship = await redis.hGetAll(keys[1])
+            for (let teamId in relationship) {
+                let keys = await teamPermission.buildKey({ teamId })
+                let obj = await teamPermission.generatorValue({ teamId, userId }, keys)
+                if (obj && obj.length > 0) {
+                    for (let o of obj) {
+                        permissionsSet.add(o)
+                    }
+                }
+            }
+            let arr = Array.from(permissionsSet)
+            await redis.sSet(keys[2], arr, 3600 * 24)
+            await this.unlock()
+            return arr;
+        } catch (err) {
+            console.error("generatorValue error:" + err)
+            await this.unlock()
+        };
+        
     }
 
 }

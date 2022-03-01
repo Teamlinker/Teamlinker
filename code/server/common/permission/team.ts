@@ -27,28 +27,35 @@ export class PermissionTeam extends PermissionBase<IPermission_Team> {
         });
     }
     async generatorValue({userId,teamId}: { [param: string]: any; userId?: string; isAdmin?: boolean;teamId:string },keys:string[]): Promise<IPermission_Team> {
-        let redis=getRedisInstance()
-        let mysql=getMysqlInstance()
-        let permissionsSet=new Set<string>();
-        let exist=await redis.exists(keys[0])
-        if(!exist) {
-            let ret=await mysql.execute(generateQuerySql(teamUserModel,["user_id","role_id"],{
-                team_id:teamId
-            }))
-            let map={}
-            for(let obj of ret) {
-                map[obj.user_id]=obj.role_id
+        try {
+            await this.tryLock(keys.map(item=>item.replace(/\:/g,"")));
+            let redis=getRedisInstance()
+            let mysql=getMysqlInstance()
+            let permissionsSet=new Set<string>();
+            let exist=await redis.exists(keys[0])
+            if(!exist) {
+                let ret=await mysql.execute(generateQuerySql(teamUserModel,["user_id","role_id"],{
+                    team_id:teamId
+                }))
+                let map={}
+                for(let obj of ret) {
+                    map[obj.user_id]=obj.role_id
+                }
+                await redis.hSet(keys[0],map)
             }
-            await redis.hSet(keys[0],map)
-        }
-        let roleId=await redis.hGet(keys[0],userId)
-        if(roleId) {
-            let role=await this.getRolePermissionList(roleId)
-            for(let o of role) {
-                permissionsSet.add(o)
+            let roleId=await redis.hGet(keys[0],userId)
+            if(roleId) {
+                let role=await this.getRolePermissionList(roleId)
+                for(let o of role) {
+                    permissionsSet.add(o)
+                }
             }
+            await this.unlock()
+            return Array.from(permissionsSet)
+        } catch(err) {
+            console.error("generatorValue error:" + err)
+            await this.unlock()
         }
-        return Array.from(permissionsSet)
     }
 }
 

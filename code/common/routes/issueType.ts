@@ -2,7 +2,7 @@ import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Issue_Type } from './../model/issue_type';
 import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solution';
 import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_IssueTypeSolution_Info } from './response';
+import { ICommon_Route_Res_IssueTypeSolution_List_Item } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/issuetype",
@@ -64,7 +64,7 @@ const api={
             req:<{
                            
             }>{},
-            res:<ICommon_Model_Issue_Type_Solution[]>{},
+            res:<ICommon_Route_Res_IssueTypeSolution_List_Item[]>{},
             permission:[Permission_Types.Admin.ADMIN]
         },
         solutionInfo:{
@@ -73,7 +73,7 @@ const api={
             req:<{
                 issueTypeSolutionId:string           
             }>{},
-            res:<ICommon_Route_Res_IssueTypeSolution_Info>{},
+            res:<ICommon_Route_Res_IssueTypeSolution_List_Item>{},
             permission:[Permission_Types.Admin.ADMIN]
         },
         solutionCreate:{

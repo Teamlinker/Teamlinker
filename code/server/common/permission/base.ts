@@ -1,3 +1,4 @@
+import Redlock, { Lock } from "redlock";
 import { Permission_Base } from "../../../common/permission/permission";
 import { getRedisInstance } from "../cache/redis";
 import { getMysqlInstance } from "../db/mysql";
@@ -8,6 +9,8 @@ import { rolelPermissionModel } from './../../../common/model/role_permission';
 var g_Permission=new WeakMap<Permission_Base,PermissionBase>()
 
 export abstract class PermissionBase<T=any> {
+    static Lock:InstanceType<typeof Redlock>
+    lock:Lock;
     abstract fieldName:string;
     abstract keys:string[];
     abstract check(obj:T):boolean
@@ -68,6 +71,23 @@ export abstract class PermissionBase<T=any> {
         }
         return list;
     } 
+    async tryLock(keys:string[]){
+        if(!PermissionBase.Lock) {
+            PermissionBase.Lock=new Redlock([getRedisInstance().getIORedis()],{
+                driftFactor:0.01,
+                retryCount:10,
+                retryDelay:100,
+                retryJitter:100,
+                automaticExtensionThreshold:500
+            })
+        }
+        this.lock=await PermissionBase.Lock.acquire(keys,5000)
+    }
+    async unlock() {
+        if(this.lock) {
+            await this.lock.release();
+        }
+    }
 }
 
 export async function deletePermission(objKey:object) {
