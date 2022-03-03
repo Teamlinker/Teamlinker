@@ -4,7 +4,7 @@ import { Err } from "../../../common/status/error";
 import { keys } from "../../../common/transform";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from "../../common/entity/mapper";
-import { generateCreateSql, generateDeleteSql, generateLeftJoinSql, generateQuerySql, generateSnowId } from "../../common/util/sql";
+import { generateCreateSql, generateDeleteSql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
 import { ICommon_Model_Issue_Type, issueTypeModel } from './../../../common/model/issue_type';
 import { ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel } from './../../../common/model/issue_type_solution';
 import { issueTypeSolutionIssueTypeModel } from './../../../common/model/issue_type_solution_issue_type';
@@ -128,6 +128,20 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
         }))
     }
 
+    async updateProject(issueTypeSolutionId:string,projectId:string) {
+        if(!issueTypeSolutionId) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        } else if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateUpdateSql(projectIssueTypeSolutionModel,{
+            issue_type_solution_id:issueTypeSolutionId
+        },{
+            project_id:projectId
+        }))
+    }
+
     async unbindProject(issueTypeSolutionId:string,projectId:string) {
         if(!issueTypeSolutionId) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
@@ -135,9 +149,11 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
             throw Err.Project.projectNotFound
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectIssueTypeSolutionModel,{
-            project_id:projectId,
-            issue_type_solution_id:issueTypeSolutionId
+        let item=await this.getReservedItem();
+        await mysql.execute(generateUpdateSql(projectIssueTypeSolutionModel,{
+            issue_type_solution_id:item.id
+        },{
+            project_id:projectId
         }))
     }
 

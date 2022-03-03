@@ -113,15 +113,17 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
     }
 
     async bindProject(projectId:string) {
-        let objExist=await IssueTypeSolutionService.getObjByProjectId(projectId)
-        if(objExist) {
-            throw Err.Project.Issue.issueTypeSolutionBindProject
-        }
         let objProject=await ProjectService.getItemById(projectId)
         if(!objProject) {
             throw Err.Project.projectNotFound
         }
-        await issueTypeSolutionMapper.bindProject(this.getId(),projectId)
+        let objExist=await IssueTypeSolutionService.getObjByProjectId(projectId)
+        if(objExist) {
+            await issueTypeSolutionMapper.updateProject(this.getId(),projectId)
+        } else {
+            await issueTypeSolutionMapper.bindProject(this.getId(),projectId)
+        }
+        
     }
 
     async unbindProject(projectId:string) {

@@ -24,7 +24,7 @@ import { EServer_Common_User_Type } from '../../common/types/user';
 import CommonUtil from "../../common/util/common";
 import { generateHttpErrorResponse, generateHttpOkResponse } from "../../common/util/http";
 import userRpcApi from '../rpc/user';
-import { handleImageFields, initSystem, parseFormData } from "../util/util";
+import { handleImageFields, parseFormData } from "../util/util";
 import { ICommon_Version_Config } from './../../../common/model/version';
 import { CacheService } from './../cache/service';
 var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi];
@@ -48,7 +48,7 @@ export default class GateWay extends Application {
     override async config() {
         let cacheService=new CacheService()
         cacheService.start()
-        await initSystem()
+        //await initSystem()
         await this.initKoa();
     }
     async initKoa() {
