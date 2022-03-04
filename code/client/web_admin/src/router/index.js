@@ -86,6 +86,18 @@ export const constantRoutes = [
         component: () => import('@/views/table/issue'),
         meta: { title: '事务管理', icon: 'table' }
       },
+      {
+        path:'issueCategorySheme',
+        name:'事务类型方案',
+        component: () => import('@/views/table/categorySheme'),
+        meta: { title: '事务类型方案', icon: 'table' }
+      },
+      {
+        path:'workfow',
+        name:'工作流',
+        component: () => import('@/views/table/workflow'),
+        meta: { title: '工作流', icon: 'table' }
+      }
       // {
       //   path: 'tree',
       //   name: 'Tree',
@@ -94,6 +106,7 @@ export const constantRoutes = [
       // }
     ]
   },
+ 
 
   // {
   //   path: '/form',
