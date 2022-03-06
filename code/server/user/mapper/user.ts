@@ -141,7 +141,7 @@ class UserMapper extends Mapper<typeof userModel> {
             expression:{
                 id:{
                     model:projectMemberModel,
-                    field:"member_id"
+                    field:"project_id"
                 }
             },
             aggregation:"project"
