@@ -68,7 +68,7 @@ export default defineComponent({
       state.info.sign = state.info.sign || 'Your signature'
       state.info.location = state.info.location || 'Your location'
       state.info.phone = state.info.phone || 'Your number'
-      state.info.email = state.info.location || 'Your email'
+      state.info.email = state.info.eamil || 'Your email'
     })
     
      const goToTeam = ()=>{
