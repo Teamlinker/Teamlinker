@@ -1,13 +1,16 @@
 import { ICommon_Model_Project, projectModel, Table_Project } from '../../../common/model/project';
+import { workflowNodeModel } from '../../../common/model/workflow_node';
 import { Err } from '../../../common/status/error';
 import { getMysqlInstance } from '../../common/db/mysql';
 import { Mapper } from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
-import { generateCreateSql, generateDeleteSql, generateLeftJoin3Sql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
+import { generateCreateSql, generateDeleteSql, generateGroupLeftJoin2Sql, generateLeftJoin3Sql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
+import { projectIssueModel } from './../../../common/model/project_issue';
 import { ECommon_Model_Project_Member_Type, projectMemberModel, Table_Project_Member } from './../../../common/model/project_member';
 import { ICommon_Model_Project_Role, projectRoleModel } from './../../../common/model/project_role';
 import { teamModel } from './../../../common/model/team';
 import { userModel } from './../../../common/model/user';
+import { ECommon_Model_Workflow_Node_Status } from './../../../common/model/workflow_node';
 import { ICommon_Route_Res_Project_ListMemeber } from './../../../common/routes/response';
 class ProjectMapper extends Mapper<typeof projectModel>{
     constructor(){
@@ -283,6 +286,91 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             name:name
         }))
         return ret
+    }
+
+    async getItemByKeyword(keyword:string) {
+        if(!keyword) {
+            throw  Err.Project.projectKeywordNotFound
+        }
+        var mysql=getMysqlInstance();
+        let ret=await mysql.executeOne(generateQuerySql(projectModel,null,{
+            keyword:keyword
+        }))
+        return ret
+    }
+
+    async recentProjectList(userId:string) {
+        if(!userId) {
+            throw Err.User.userIdNotExists
+        }
+        var mysql=getMysqlInstance();
+        let sql=generateGroupLeftJoin2Sql({
+            model:projectIssueModel
+        },{
+            model:workflowNodeModel,
+            expression:{
+                id:{
+                    model:projectIssueModel,
+                    field:"workflow_node_id"
+                }
+            },
+            columns:{
+                columns:[],
+                calcColumns:[{
+                    exp:"sum",
+                    value:{
+                        field:"status",
+                        exp:"=",
+                        value:ECommon_Model_Workflow_Node_Status.NOTSTART
+                    },
+                    rename:"notstart"
+                },{
+                    exp:"sum",
+                    value:{
+                        field:"status",
+                        exp:"=",
+                        value:ECommon_Model_Workflow_Node_Status.INPROGRESS
+                    },
+                    rename:"inprogress",
+                },{
+                    exp:"sum",
+                    value:{
+                        field:"status",
+                        exp:"=",
+                        value:ECommon_Model_Workflow_Node_Status.DONE
+                    },
+                    rename:"done"
+                }]
+            }
+        },{
+            model:projectModel,
+            expression:{
+                id:{
+                    model:projectIssueModel,
+                    field:"project_id"
+                }
+            },
+            columns:{
+                columns:["id","name","photo"],
+                calcColumns:[]
+            }
+        },["project_id"],{
+            assigner_id:{
+                model:projectIssueModel,
+                value:userId
+            },
+            reporter_id:{
+                model:projectIssueModel,
+                value:userId
+            },
+        },"or",null,"and",{
+            isVitualField:true,
+            field:"notstart",
+            model:workflowNodeModel,
+            type:"desc"
+        },0,20)
+        let ret=await mysql.execute(sql)
+        return ret;
     }
 }
 export let projectMapper=new ProjectMapper

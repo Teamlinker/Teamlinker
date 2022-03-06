@@ -70,16 +70,36 @@ export namespace Err {
             code:3002,
             msg:"project exists"
         },
+        projectKeywordNotFound:{
+            code:3003,
+            msg:"project keyword not found"
+        },
+        projectIdNotMatch:{
+            code:3004,
+            msg:"project id not match"
+        },
         Tag:{
             tagSizeEmpty:{
                 code:3100,
                 msg:"tag size empty"
+            },
+            tagNotfound:{
+                code:3101,
+                msg:"tag not found"
+            },
+            tagIssueExists:{
+                code:3102,
+                msg:"tag issue exists"
             }
         },
         Module:{
             moduleNotFound:{
                 code:3200,
                 msg:"module not found"
+            },
+            moduleIssueExists:{
+                code:3201,
+                msg:"module issue exists"
             }
         },
         Member:{
@@ -113,6 +133,124 @@ export namespace Err {
                 code:3403,
                 msg:"issue type solution not found"
             },
+            issueTypeSolutionForbidden:{
+                code:3404,
+                msg:"issue type solution forbidden"
+            },
+            issueTypeNotInIssueTypeSolution:{
+                code:3405,
+                msg:"issue type not in issue solution"
+            },
+            issueTypeSolutionBindProject:{
+                code:3406,
+                msg:"issue type solution bind project"
+            }
+        },
+        Workflow:{
+            workflowNotFound:{
+                code:3500,
+                msg:"workflow not found"
+            },
+            workflowForbidden:{
+                code:3501,
+                msg:"workflow forbidden"
+            },
+            workflowNodeNotFound:{
+                code:3502,
+                msg:"workflow node not found"
+            },
+            workflowNodeForbidden:{
+                code:3503,
+                msg:"workflow node forbidden"
+            },
+            workflowActionNotFound:{
+                code:3504,
+                msg:"workflow action not found"
+            },
+            workflowActionForbidden:{
+                code:3505,
+                msg:"workflow action forbidden"
+            },
+            workflowSolutionNotFound:{
+                code:3506,
+                msg:"workflow solution not found"
+            },
+            workflowSolutionForbidden:{
+                code:3507,
+                msg:"workflow solution forbidden"
+            },
+            workflowOpenNodeDuplicate:{
+                code:3508,
+                msg:"workflow open node duplicate"
+            },
+            workflowSolutionNotBindIssueTypeSolution:{
+                code:3509,
+                msg:"workflow solution not bind issue type solution"
+            },
+            workflowNotInWorkflowSolution:{
+                code:3510,
+                msg:"workflow not in workflow solution"
+            },
+            workflowNodeNotInWorkflow:{
+                code:3511,
+                msg:"worflow node not in workflow"
+            },
+            workflowAlreadyInWorkflowSolution:{
+                code:3512,
+                msg:"workflow already in workflow solution"
+            },
+            issueTypeSolutionDuplicate:{
+                code:3513,
+                msg:"issue type solution duplicate"
+            }
+        },
+        Field:{
+            fieldTypeNotFound:{
+                code:3600,
+                msg:"field type not found"
+            },
+            fieldSolutionNotFound:{
+                code:3601,
+                msg:"field solution not found"
+            },
+            fieldSolutionWorkflowNodeFieldTypeNotFound:{
+                code:3602,
+                msg:"field solution workflow node field Type not found"
+            },
+            fieldTypeConfigValueIdNotFound:{
+                code:3603,
+                msg:"field type config value id not found"
+            },
+            workflowSolutionNotBind:{
+                code:3604,
+                msg:"workflow solution not bind"
+            },
+            workflowSolutionAlreadyBind:{
+                code:3605,
+                msg:"workflow solution already bind"
+            },
+            fieldTypeNotMatch:{
+                code:3606,
+                msg:"field type not match"
+            },
+        },
+        ProjectIssue:{
+            projectIssueNotFound:{
+                code:3700,
+                msg:"project issue not found"
+            },
+            uniqueKeyError:{
+                code:3701,
+                msg:"unique key error"
+            },
+            parentChildExists:{
+                code:3702,
+                msg:"parent child issue exists"
+            },
+            relatedExists:{
+                code:3703,
+                msg:"related issue exists"
+            }
         }
     }
     export let Team = {
@@ -151,6 +289,17 @@ export namespace Err {
         md5NotExists:{
             code:6001,
             msg:"md5 not exists"
+        }
+    }
+
+    export let Comment ={
+        commentNotFound:{
+            code:7000,
+            msg:"comment not found"
+        },
+        commentTypeNotFound:{
+            code:7001,
+            msg:"comment type not found"
         }
     }
 }

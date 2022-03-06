@@ -26,12 +26,12 @@ class ModuleController {
           return ret;
      }
      @DHttpApi(projectApi.routes.editModule)
-     async editModule(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("parentModuleId") parentModuleId:string,@DHttpReqParam("moduleId") moduleId:string):Promise<typeof projectApi.routes.editModule.res>{
+     async editModule(@DHttpReqParam("name") name:string,@DHttpReqParam("parentModuleId") parentModuleId:string,@DHttpReqParamRequired("moduleId") moduleId:string):Promise<typeof projectApi.routes.editModule.res>{
           let module=new ModuleService()
           module.assignItem({
                id:moduleId,
                name:name,
-               parent_module_id:parentModuleId??undefined
+               parent_module_id:parentModuleId?parentModuleId:(parentModuleId===""?null:undefined)
           })
           let ret= await module.update();
           return ret;

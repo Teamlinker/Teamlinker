@@ -1,5 +1,6 @@
 import { ICommon_Model_Team } from '../model/team';
 import { ICommon_Model_Team_Role } from '../model/team_role';
+import { Permission_Types } from '../permission/permission';
 import { ECommon_Services } from '../types';
 import { ICommon_Route_Res_Team_List } from './response';
 import { ECommon_HttpApi_Method } from "./types";
@@ -30,7 +31,8 @@ const api={
                 teamId:string,
                 name:string                
             }>{},
-            res:<ICommon_Model_Team>{}
+            res:<ICommon_Model_Team>{},
+            permission:[Permission_Types.Team.EDIT]
         },
         remove:{//删除团队
             method:ECommon_HttpApi_Method.DELETE,
@@ -38,7 +40,11 @@ const api={
             req:<{
                 teamId:string                
             }>{},
-            res:{}
+            res:{},
+            permission:{
+                data:[Permission_Types.Team.DELETE],
+                delete:true
+            }
         },
         members:{//团队成员列表
             method:ECommon_HttpApi_Method.GET,
@@ -51,7 +57,8 @@ const api={
                 name:string,
                 photo:string,
                 role:Omit<ICommon_Model_Team_Role,"team_id">
-            }[]>{}
+            }[]>{},
+            permission:[Permission_Types.Team.READ]
         },
         addMember:{//添加团队成员
             method:ECommon_HttpApi_Method.POST,
@@ -61,7 +68,11 @@ const api={
                 userId:string,
                 roleId:string                
             }>{},
-            res:{}
+            res:{},
+            permission:{
+                data:[Permission_Types.Team.EDIT],
+                delete:true
+            }
         },
         removeMember:{//删除团队成员
             method:ECommon_HttpApi_Method.DELETE,
@@ -70,7 +81,11 @@ const api={
                 teamId:string,
                 userId:string                
             }>{},
-            res:{}
+            res:{},
+            permission:{
+                data:[Permission_Types.Team.EDIT],
+                delete:true
+            }
         },
         changeRole:{//修改团队成员权限
             method:ECommon_HttpApi_Method.PUT,
@@ -80,7 +95,11 @@ const api={
                 userId:string,
                 roleId:string             
             }>{},
-            res:{}
+            res:{},
+            permission:{
+                data:[Permission_Types.Team.EDIT],
+                delete:true
+            }
         },
         roles:{//团队权限列表
             method:ECommon_HttpApi_Method.GET,
@@ -88,7 +107,8 @@ const api={
             req:<{
                 teamId:string           
             }>{},
-            res:<ICommon_Model_Team_Role[]>{}
+            res:<ICommon_Model_Team_Role[]>{},
+            permission:[Permission_Types.Team.READ]
         },
         list:{
             method:ECommon_HttpApi_Method.GET,

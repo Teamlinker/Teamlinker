@@ -7,7 +7,7 @@ export interface ICommon_Model_Issue_Type {
     description:string,
     reserved:number,
     created_time:Date,
-    modify_time:Date,
+    modified_time:Date,
 }
 export const Table_Issue_Type="issue_type"
 

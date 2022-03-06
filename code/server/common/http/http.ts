@@ -6,6 +6,9 @@ import HttpContext from "./context";
 var g_objRoute:{
     [param:string]:IServer_Common_Http_Structure
 }={}
+var g_objRouteBack:{
+    [param:string]:IServer_Common_Http_Structure
+}={}
 var g_objParam:{
     [param:string]:IServer_Common_Http_Structure_HandleParam[]
 }={}
@@ -25,10 +28,11 @@ export function DHttpController(objParam:ICommon_HttpApi) {
                 let arr=obj.split(" ")
                 arr[1]=objParam.baseUrl+arr[1]
                 let newName=arr.join(" ")
-                g_objRoute[newName]=g_objRoute[obj]
-                delete g_objRoute[obj]
+                g_objRoute[newName]=g_objRouteBack[obj]
+                delete g_objRouteBack[obj]
             }
         }
+        g_objRouteBack={}
     }
 }
 
@@ -44,7 +48,7 @@ export function DHttpApi(objParam:ICommon_Http_Route) {
             handle:handle,
             handleParam:g_objParam[key]
         }
-        g_objRoute[name]=temp
+        g_objRouteBack[name]=temp
         if(!g_objController[target.constructor.name]){
             g_objController[target.constructor.name]=[]
         }

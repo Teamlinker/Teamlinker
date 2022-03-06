@@ -1,10 +1,14 @@
 import { BaseModel } from "./base"
 
+export enum ECommon_Model_Comment_Type {
+    PROJECT
+}
+
 export interface ICommon_Model_Comment {
     id:string,
-    type:number,
+    type:ECommon_Model_Comment_Type,
     type_id:string,
-    user_id:string,
+    created_by:string,
     content:string,
     created_time:Date,
     modified_time:Date

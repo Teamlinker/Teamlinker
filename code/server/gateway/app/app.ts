@@ -4,29 +4,30 @@ import * as body from 'koa-bodyparser';
 import * as koaStaticServer from "koa-static-server";
 import { PassThrough } from "stream";
 import { Permission_Base } from '../../../common/permission/permission';
+import * as fieldApi from "../../../common/routes/field";
 import * as fileApi from "../../../common/routes/file";
+import * as issueApi from "../../../common/routes/issue";
 import * as issueTypeApi from "../../../common/routes/issueType";
 import * as projectApi from "../../../common/routes/project";
 import * as teamApi from "../../../common/routes/team";
 import { ICommon_HttpApi } from "../../../common/routes/types";
 import * as userApi from "../../../common/routes/user";
+import * as workflowApi from "../../../common/routes/workflow";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
 import Application from "../../common/app/app";
-import { getComponent } from "../../common/decorate/component";
 import { getNacosInstance } from "../../common/nacos/nacos";
-import { processPermission } from '../../common/permission/base';
-import { PermissionProjectRead } from '../../common/permission/project/relation';
+import { deletePermission, processPermission } from '../../common/permission/base';
 import { proxyRequest } from "../../common/rpc/rpc";
 import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
 import { EServer_Common_User_Type } from '../../common/types/user';
 import CommonUtil from "../../common/util/common";
 import { generateHttpErrorResponse, generateHttpOkResponse } from "../../common/util/http";
 import userRpcApi from '../rpc/user';
-import { handleImageFields, initSystem, parseFormData } from "../util/util";
+import { handleImageFields, parseFormData } from "../util/util";
 import { ICommon_Version_Config } from './../../../common/model/version';
 import { CacheService } from './../cache/service';
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi];
 var app = new Koa();
 var config=<ICommon_Version_Config>{}
 var pipe = function (from, to): Promise<Buffer> {
@@ -47,7 +48,7 @@ export default class GateWay extends Application {
     override async config() {
         let cacheService=new CacheService()
         cacheService.start()
-        await initSystem()
+        //await initSystem()
         await this.initKoa();
     }
     async initKoa() {
@@ -57,7 +58,10 @@ export default class GateWay extends Application {
                 [parem:string]:{
                     service:string,
                     ignoreValidate:boolean,
-                    permission:Permission_Base[]
+                    permission:Permission_Base[]|{
+                        data:Permission_Base[],
+                        delete:boolean
+                    }
                 }
             }
         }>{}
@@ -166,10 +170,18 @@ export default class GateWay extends Application {
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }
-                    if(permission && permission.length>0) {
+                    let permissionDelete:object;
+                    if(permission && ((Array.isArray(permission) && permission.length>0) || (typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data) && permission.data.length>0))) {
                         if(ctx.state.user) {
                             if(ctx.state.user.type==EServer_Common_User_Type.USER) {
-                                let isCheck =await processPermission(permission,Object.assign({},obj.data,{userId:ctx.state.user?ctx.state.user.userId:undefined}))
+                                let per=Array.isArray(permission)?permission:permission.data;
+                                let [isCheck,map] =await processPermission(per,Object.assign({},obj.data,{
+                                    userId:ctx.state.user?ctx.state.user.userId:undefined,
+                                    isAdmin:ctx.state.user.type===EServer_Common_User_Type.ADMIN
+                                }))
+                                if(isCheck && typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data)) {
+                                    permissionDelete=map;
+                                }
                                 if(!isCheck) {
                                     throw Err.User.accessDenied
                                 }
@@ -199,6 +211,9 @@ export default class GateWay extends Application {
                     } else {
                         ctx.body = ret.data;
                     }
+                    if(permissionDelete) {
+                        deletePermission(permissionDelete)
+                    }
                     await next()
                 } else {
                     await next()
@@ -213,9 +228,6 @@ export default class GateWay extends Application {
         }))
         http.createServer(app.callback()).listen(getNacosInstance().serverPort,function(){
             console.log(`start`);
-            let obj=getComponent<InstanceType<typeof PermissionProjectRead>>(PermissionProjectRead.name)
-            console.log(obj)
-            
         })
     }
 }

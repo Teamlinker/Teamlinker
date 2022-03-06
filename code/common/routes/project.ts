@@ -1,9 +1,11 @@
+import { ICommon_Model_Issue_Type } from '../model/issue_type';
 import { ECommon_Model_Project_Member_Type } from '../model/project_member';
 import { ICommon_Model_Project_Role } from '../model/project_role';
+import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Project } from './../model/project';
 import { ICommon_Model_Project_Module } from './../model/project_module';
 import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag } from './response';
+import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag, ICommon_Route_Res_recentProjectList_Item } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/project",
@@ -15,7 +17,8 @@ const api={
             req:<{
                 projectId:string                
             }>{},
-            res:<ICommon_Model_Project>{}
+            res:<ICommon_Model_Project>{},
+            permission:[Permission_Types.Project.READ]
         },
         create:{//创建项目
             method:ECommon_HttpApi_Method.POST,
@@ -38,7 +41,8 @@ const api={
                 description? :string,       
                 projectId:string         
             }>{},
-            res:<ICommon_Model_Project>{}
+            res:<ICommon_Model_Project>{},
+            permission:[Permission_Types.Project.EDIT]
         },
         remove:{//删除项目
             method:ECommon_HttpApi_Method.DELETE,
@@ -46,7 +50,11 @@ const api={
             req:<{ 
                 projectId:string         
             }>{},
-            res:{}
+            res:{},
+            permission:{
+                data:[Permission_Types.Project.EDIT],
+                delete:true
+            }
         },
         listTag:{//tag列表
             method:ECommon_HttpApi_Method.GET,
@@ -57,7 +65,8 @@ const api={
                 size:number,
                 keyword?:string  
             }>{},
-            res:<ICommon_Route_Res_Project_ListTag>{}
+            res:<ICommon_Route_Res_Project_ListTag>{},
+            permission:[Permission_Types.Project.READ]
         },
         createTag:{//创建tag
             method:ECommon_HttpApi_Method.POST,
@@ -69,7 +78,8 @@ const api={
             res:<{
                 id:string,
                 name:string
-            }>{}
+            }>{},
+            permission:[Permission_Types.Project.EDIT]
         },
         editTag:{//编辑tag
             method:ECommon_HttpApi_Method.PUT,
@@ -81,7 +91,8 @@ const api={
             res:<{
                 id:string,
                 name:string
-            }>{}
+            }>{},
+            permission:[Permission_Types.Project.EDIT]
         },
         removeTag:{//删除tag
             method:ECommon_HttpApi_Method.DELETE,
@@ -89,7 +100,8 @@ const api={
             req:<{
                 tagId:string 
             }>{},
-            res:{}
+            res:{},
+            permission:[Permission_Types.Project.EDIT]
         },
         listModule:{//module列表
             method:ECommon_HttpApi_Method.GET,
@@ -97,7 +109,8 @@ const api={
             req:<{
                 projectId:string  
             }>{},
-            res:<ICommon_Route_Res_Project_CreateModule_Data[]>{}
+            res:<ICommon_Route_Res_Project_CreateModule_Data[]>{},
+            permission:[Permission_Types.Project.READ]
         },
         createModule:{//创建module
             method:ECommon_HttpApi_Method.POST,
@@ -107,7 +120,8 @@ const api={
                 parentModuleId?:string,
                 name:string  
             }>{},
-            res:<ICommon_Model_Project_Module>{}
+            res:<ICommon_Model_Project_Module>{},
+            permission:[Permission_Types.Project.EDIT]
         },
         editModule:{//编辑module
             method:ECommon_HttpApi_Method.PUT,
@@ -117,7 +131,8 @@ const api={
                 name?:string
                 moduleId:string  
             }>{},
-            res:<ICommon_Model_Project_Module>{}
+            res:<ICommon_Model_Project_Module>{},
+            permission:[Permission_Types.Project.EDIT]
         },
         removeModule:{//删除module
             method:ECommon_HttpApi_Method.DELETE,
@@ -125,7 +140,8 @@ const api={
             req:<{
                 moduleId:string  
             }>{},
-            res:{}
+            res:{},
+            permission:[Permission_Types.Project.EDIT]
         },
         listMember:{//成员列表
             method:ECommon_HttpApi_Method.GET,
@@ -135,7 +151,8 @@ const api={
                 page:number,
                 size:number
             }>{},
-            res:<ICommon_Route_Res_Project_ListMemeber>{}
+            res:<ICommon_Route_Res_Project_ListMemeber>{},
+            permission:[Permission_Types.Project.READ]
         },
         addMember:{//添加成员（用户，团队）
             method:ECommon_HttpApi_Method.POST,
@@ -146,7 +163,11 @@ const api={
                 type:ECommon_Model_Project_Member_Type,
                 roleId:string
             }>{},
-            res:{}
+            res:{},
+            permission:{
+                data:[Permission_Types.Project.EDIT],
+                delete:true
+            }
         },
         editMember:{//编辑成员
             method:ECommon_HttpApi_Method.PUT,
@@ -156,7 +177,11 @@ const api={
                 memberId:string,
                 roleId:string
             }>{},
-            res:{}
+            res:{},
+            permission:{
+                data:[Permission_Types.Project.EDIT],
+                delete:true
+            }
         },
         removeMember:{//删除成员
             method:ECommon_HttpApi_Method.DELETE,
@@ -165,7 +190,11 @@ const api={
                 projectId:string,
                 memberId:string,
             }>{},
-            res:{}
+            res:{},
+            permission:{
+                data:[Permission_Types.Project.EDIT],
+                delete:true
+            }
         },
         list:{
             method:ECommon_HttpApi_Method.GET,
@@ -184,8 +213,26 @@ const api={
             req:<{
                 projectId:string           
             }>{},
-            res:<ICommon_Model_Project_Role[]>{}
+            res:<ICommon_Model_Project_Role[]>{},
+            permission:[Permission_Types.Project.READ]
         },
+        issueTypelist:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/issuetype/list",
+            req:<{
+                  projectId:string         
+            }>{},
+            res:<ICommon_Model_Issue_Type[]>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        recentProjectList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/recent/list",
+            req:<{
+                       
+            }>{},
+            res:<ICommon_Route_Res_recentProjectList_Item[]>{}
+        }
     }
 }
 export=api

@@ -1,4 +1,7 @@
 import { Permission_Base, Permission_Types } from "../../../common/permission/permission";
+import "../../common/permission/project";
+import "../../common/permission/team";
+
 function getAllPermissions(obj):Permission_Base[] {
     let arr:Permission_Base[] =[]
     let keys = Object.keys(obj)
@@ -27,7 +30,7 @@ export namespace OBTPConfig {
             user:{
                 name:"user",
                 description:"",
-                permission:[Permission_Types.Project.READ]
+                permission:[Permission_Types.Project.READ,Permission_Types.Project.EDIT]
             }
         }
         export const Team_Role=<{

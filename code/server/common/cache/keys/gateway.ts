@@ -1,8 +1,8 @@
 import { ECommon_Services } from '../../../../common/types';
+import { cacheRedisType } from "../../types/cache";
+import StringUtil from "../../util/string";
 import { IServer_Common_Nacos_Instance } from './../../types/nacos';
 import { RedisStringKey } from './base';
-import {cacheRedisType} from "../../types/cache"
-import StringUtil from "../../util/string"
 export namespace REDIS_GATEWAY {
     let INSTANCE_KEY=`${ECommon_Services.GateWay}:instance:{0}`
     let INSTANCES_KEY=`${ECommon_Services.GateWay}:instance:*`
@@ -14,5 +14,27 @@ export namespace REDIS_GATEWAY {
     export function allInstances() {
         let obj=new RedisStringKey(INSTANCES_KEY,cacheRedisType<IServer_Common_Nacos_Instance[]>().Object);
         return obj;
+    }
+    export namespace Permission {
+        let commentCacheKey="permission:user:{0}:projectIssueComment:{1}"
+        let projectIssueCacheKey="permission:user:{0}:projectIssue:{1}"
+        let labelCacheKey="permission:user:{0}:label:{1}"
+        let moduleCacheKey="permission:user:{0}:module:{1}"
+        export function projectIdFromProjectIssueComment(commentId:string,userId:string) {
+            let obj=new RedisStringKey(StringUtil.format(commentCacheKey,userId,commentId),cacheRedisType<string>().String,1000*10);
+            return obj;
+        }
+        export function projectIdFromProjectIssue(projectIssueId:string,userId:string) {
+            let obj=new RedisStringKey(StringUtil.format(projectIssueCacheKey,userId,projectIssueId),cacheRedisType<string>().String,1000*10);
+            return obj;
+        }
+        export function projectIdFromLabel(labelId:string,userId:string) {
+            let obj=new RedisStringKey(StringUtil.format(labelCacheKey,userId,labelId),cacheRedisType<string>().String,1000*10);
+            return obj;
+        }
+        export function projectIdFromProjectModule(moduleId:string,userId:string) {
+            let obj=new RedisStringKey(StringUtil.format(moduleCacheKey,userId,moduleId),cacheRedisType<string>().String,1000*10);
+            return obj;
+        }
     }
 }

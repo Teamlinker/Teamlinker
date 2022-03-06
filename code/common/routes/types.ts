@@ -13,7 +13,10 @@ export interface ICommon_Http_Route {
     req:any,
     res:any,
     ignoreValidate?:boolean,
-    permission?:Permission_Base[]
+    permission?:Permission_Base[]|{
+        data:Permission_Base[],
+        delete:boolean
+    }
 }
 
 export interface ICommon_HttpApi {

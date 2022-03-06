@@ -85,6 +85,18 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         })
         
     }
+
+    async copy(deletedFields?:(keyof T["model"])[]) {
+        if(!this.item || !this.item.id) {
+            throw  Err.Common.itemNotFound;
+        }
+        const Cls = this.constructor as new (value: M) => this;
+        let obj=new Cls(this.mapper)
+        let data=await this.mapper.copy(this.item.id,deletedFields as string[])
+        obj.setItem(data)
+        return obj;
+    }
+
     async loadItem():Promise<T["model"]>{
         if(!this.item || !this.item.id) {
             throw  Err.Common.itemNotFound;
@@ -94,6 +106,9 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         return this.item;
     } 
     static async getItemById<Type>(this:{new():Type},id:string):Promise<Type>{
+        if(!id) {
+            return null
+        }
         let user = new this() as any;
         let obj = await user.mapper.getById(id);
         if(obj) {

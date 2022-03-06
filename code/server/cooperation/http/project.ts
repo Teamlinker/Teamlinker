@@ -118,5 +118,21 @@ class ProjectController {
         return ret;
     }
 
+    @DHttpApi(projectApi.routes.issueTypelist)
+    async issueTypelist(@DHttpReqParamRequired("projectId") projectId:string) :Promise<typeof projectApi.routes.issueTypelist.res> {
+        let project=await ProjectService.getItemById(projectId)
+        if(!project) {
+            throw Err.Project.projectNotFound
+        }
+        let ret=await project.issueTypeList()
+        return ret;
+    }
+
+    @DHttpApi(projectApi.routes.recentProjectList)
+    async recentProjectList(@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.recentProjectList.res> {
+        let ret=await ProjectService.recentProjectList(user.userId);
+        return ret;
+    }
+
 }
 export default new ProjectController

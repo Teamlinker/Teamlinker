@@ -19,4 +19,7 @@ export namespace Permission_Types {
         static readonly CREATE =new Team("CREATE","create team")
         static readonly MEMBER =new Team("MEMBER","modify team member")
     }
+    export class Admin extends Permission_Base {
+        static readonly ADMIN =new Team("ADMIN","admin")
+    } 
 }
