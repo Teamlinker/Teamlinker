@@ -14,3 +14,12 @@ export function logout(params) {
     params
   })
 }
+
+
+export function getProfile(params) {
+  return axios({
+    url: '/user/profile',
+    method: 'get',
+    params
+  })
+}
