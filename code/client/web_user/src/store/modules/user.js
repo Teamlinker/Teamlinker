@@ -1,11 +1,15 @@
-import { login, logout } from "@/api/user";
+import { login, logout,getProfile } from "@/api/user";
 import { getAuth, setAuth, removeAuth } from "@/utils/auth";
 import router, { resetRouter } from "@/router";
+// import axios from "axios";
+import axios from "@/plugins/axios";
+// import { resolve } from "path";
 
 const state = {
   userInfo: null,
   token: getAuth(),
   rules: [], // 权限id集合
+  profile:{}
 };
 
 const getters = {
@@ -22,6 +26,10 @@ const mutations = {
   SET_RULES: (state, rules) => {
     state.rules = rules;
   },
+  SET_PROFILE:(state,profile)=>{
+    state.profile = profile;
+    console.log( state.profile)
+  }
 };
 const actions = {
   // 登录
@@ -45,6 +53,15 @@ const actions = {
       commit("SET_RULES", rules);
       resolve(userInfo);
     });
+  },
+  
+
+   // 获取用户信息
+  async getProfile({ commit, state }) {
+    const response = await getProfile({});
+    const { data } = response;
+    commit("SET_PROFILE",data);
+    return Promise.resolve(data);
   },
 
   // 退出登录

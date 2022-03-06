@@ -5,15 +5,20 @@
       <template #renderItem="{ item }">
         <a-list-item>
           <a-list-item-meta
-            description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+           
           >
+          
             <template #title>
               <a href="https://www.antdv.com/">{{ item.title }}</a>
             </template>
+            <template #description>
+              <a href="https://www.antdv.com/">{{ item.description }}</a>
+            </template>
             <template #avatar>
-              <a-avatar
-                src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+              <a-avatar v-if="item.photo"
+                :src="item.photo"
               />
+              <a-avatar  v-else/>
             </template>
           </a-list-item-meta>
         </a-list-item>
@@ -22,14 +27,15 @@
   </div>
 </template>
 <style scoped>
-.name{
-    font-weight: 500;
+.name {
+  font-weight: 500;
 }
 </style>
 <script lang="ts">
 import { defineComponent, reactive, toRefs, ref, Ref } from "vue";
 import { UserOutlined } from "@ant-design/icons-vue";
 import { useRouter } from "vue-router";
+import { useStore } from "@/store";
 import axios from "@/plugins/axios";
 export default defineComponent({
   name: "Your Projects",
@@ -38,22 +44,17 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
-    const state = reactive({
-      data: [
-        {
-          title: "Ant Design Title 1",
-        },
-        {
-          title: "Ant Design Title 2",
-        },
-        {
-          title: "Ant Design Title 3",
-        },
-        {
-          title: "Ant Design Title 4",
-        },
-      ],
+    const state:any = reactive({
+      data: [],
     });
+    useStore()
+      .dispatch("user/getProfile")
+      .then((res: any) => {
+        state.data = res.project;
+        for(let i=0;i<state.data.length;i++){
+          state.data[i].title =  state.data[i].name
+        }
+      });
     return {
       ...toRefs(state),
     };
