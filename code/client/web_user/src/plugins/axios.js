@@ -21,7 +21,6 @@ _axios.interceptors.request.use(
 
 _axios.interceptors.response.use(
     function (response) {
-        console.log(response,'response')
         if(response.headers.token){
             sessionStorage.setItem('token',response.headers.token)
         }

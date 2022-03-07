@@ -2,13 +2,90 @@
     display: flex;
     width: 100%;
     height: 100%;
+    .area1{
+        .photo{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+    }
 }
 .left{
     width: 272px;
     background: #EDEEF1;
+    .title{
+        display: flex;
+        padding: 35px 0 20px 50px;
+        font-size: 18px;
+        color: #333333;
+    }
+    .icon{
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        margin-right: 10px;
+    }
+    .location{
+        display: flex;
+        align-items: center;
+        .icon{
+            background: url('@/assets/img/location.svg') no-repeat;
+            background-size: contain;
+        }
+    }
+    .email{
+        display: flex;
+        align-items: center;
+        .icon{
+            background: url('@/assets/img/email.svg') no-repeat;
+            background-size: contain;
+        }
+    }
+    .number{
+        display: flex;
+        align-items: center;
+        .icon{
+            background: url('@/assets/img/number.svg') no-repeat;
+            background-size: contain;
+        }
+    }
+    .department{
+        display: flex;
+        align-items: center;
+        .icon{
+            background: url('@/assets/img/department.svg') no-repeat;
+            background-size: contain;
+        }
+    }
+    .info_area{ 
+        padding-left: 70px;
+    }
+    .name,.sign{
+        display: flex;
+        justify-content: center;
+        height: 24px;
+    }
 }
 .right{
     width: calc(100% - 272px);
     box-sizing: border-box;
     padding: 20px 30px 0 30px;
+}
+.area3,.area4{
+  padding: 0 50px;
+  margin-top: 20px;
+  >div{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+  .arrow{
+      
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      background: url('@/assets/img/arrow-right.svg') no-repeat;
+      background-size: contain;
+  }
 }
