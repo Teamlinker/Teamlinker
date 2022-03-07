@@ -97,6 +97,12 @@ export const constantRoutes = [
         name:'工作流',
         component: () => import('@/views/table/workflow'),
         meta: { title: '工作流', icon: 'table' }
+      },
+      {
+        path:'workfowDraw',
+        name:'工作流绘制',
+        component: () => import('@/views/table/ef/panel'),
+        meta: { title: '工作流', icon: 'table' }
       }
       // {
       //   path: 'tree',
