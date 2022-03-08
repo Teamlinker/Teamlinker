@@ -111,7 +111,10 @@ export interface ICommon_Route_Res_Workflow_Info_Action {
 }
 
 export interface ICommon_Route_Res_Workflow_Info extends ICommon_Model_Workflow {
-    data:ICommon_Route_Res_Workflow_Info_Node
+    data:{
+        nodes:ICommon_Model_Workflow_Node[],
+        actions:ICommon_Model_Workflow_Action[]
+    }
 }
 
 export interface ICommon_Route_Res_WorkflowSolution_Info extends ICommon_Model_Workflow_Solution {

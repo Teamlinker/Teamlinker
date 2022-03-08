@@ -66,7 +66,9 @@ const api={
                 name :string,
                 description? :string,
                 status? :ECommon_Model_Workflow_Node_Status,
-                workflowId :string
+                workflowId :string,
+                x:number,
+                y:number
             }>{},
             res:<ICommon_Model_Workflow_Node>{},
             permission:[Permission_Types.Admin.ADMIN]
@@ -79,6 +81,8 @@ const api={
                 name? :string,
                 description? :string,
                 status? :ECommon_Model_Workflow_Node_Status,
+                x?:number,
+                y:number
             }>{},
             res:<ICommon_Model_Workflow_Node>{},
             permission:[Permission_Types.Admin.ADMIN]

@@ -106,9 +106,13 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
     async info():Promise<ICommon_Route_Res_Workflow_Info> {
         let obj:ICommon_Route_Res_Workflow_Info={
             ...this.getItem(),
-            data: null
+            data: {
+                nodes:[],
+                actions:[]
+            }
         };
-        obj.data=await this.accessNodesAndActions()
+        obj.data.nodes=await workflowMapper.nodeList(this.getId());
+        obj.data.actions=await workflowMapper.actionList(this.getId());
         return obj;
     }
 

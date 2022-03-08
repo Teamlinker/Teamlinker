@@ -13,6 +13,8 @@ export interface ICommon_Model_Workflow_Node {
   reserved :number,
   status :ECommon_Model_Workflow_Node_Status,
   workflow_id :string ,
+  x:number,
+  y:number
 }
 export const Table_Workflow_Node="workflow_node"
 

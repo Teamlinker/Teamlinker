@@ -66,20 +66,22 @@ class WorkflowController {
     }
 
     @DHttpApi(workflowApi.routes.addNode)
-    async addNode(@DHttpReqParamRequired("workflowId") workflowId: string, @DHttpReqParamRequired("name") name: string, @DHttpReqParam("description") description: string, @DHttpReqParam("status") status: ECommon_Model_Workflow_Node_Status): Promise<typeof workflowApi.routes.addNode.res> {
+    async addNode(@DHttpReqParamRequired("workflowId") workflowId: string, @DHttpReqParamRequired("name") name: string, @DHttpReqParam("description") description: string, @DHttpReqParam("status") status: ECommon_Model_Workflow_Node_Status,@DHttpReqParamRequired("x") x: number,@DHttpReqParamRequired("y") y: number): Promise<typeof workflowApi.routes.addNode.res> {
         let obj = new WorkflowNodeService;
         obj.assignItem({
             workflow_id: workflowId,
             name: name,
             description: description,
-            status: status
+            status: status,
+            x,
+            y
         })
         let ret = await obj.create()
         return ret;
     }
 
     @DHttpApi(workflowApi.routes.editNode)
-    async editNode(@DHttpReqParamRequired("workflowNodeId") workflowNodeId: string, @DHttpReqParam("name") name: string, @DHttpReqParam("description") description: string, @DHttpReqParam("status") status: ECommon_Model_Workflow_Node_Status): Promise<typeof workflowApi.routes.editNode.res> {
+    async editNode(@DHttpReqParamRequired("workflowNodeId") workflowNodeId: string, @DHttpReqParam("name") name: string, @DHttpReqParam("description") description: string, @DHttpReqParam("status") status: ECommon_Model_Workflow_Node_Status,@DHttpReqParam("x") x: number,@DHttpReqParam("y") y: number): Promise<typeof workflowApi.routes.editNode.res> {
         let obj = await WorkflowNodeService.getItemById(workflowNodeId);
         if (!obj) {
             throw Err.Project.Workflow.workflowNodeNotFound
@@ -90,7 +92,9 @@ class WorkflowController {
         obj.assignItem({
             name: name,
             description: description,
-            status: status
+            status: status,
+            x:x,
+            y:y
         })
         let ret = await obj.update()
         return ret;
