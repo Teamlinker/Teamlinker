@@ -41,12 +41,15 @@
       <el-table-column
         label="操作"
         align="center"
-        width="420"
+        width="320"
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row }">
           <el-button type="text" size="mini" @click="handleUpdate(row)">
             编辑
+          </el-button>
+          <el-button type="text" size="mini" @click="handleDraw(row)">
+            编辑流程
           </el-button>
           <el-button type="text" size="mini" @click="handleRemove(row)">
             删除
@@ -163,6 +166,14 @@ export default {
       this.dialogStatus = 'update'
       this.temp = Object.assign({}, row)
       this.dialogFormVisible = true
+    },
+    handleDraw(row){
+     this.$router.push({
+       path:'/example/workfowDraw',
+       query:{
+         workflowId:row.id
+       }
+     })
     },
     doSuccess() {
       this.fetchData()
