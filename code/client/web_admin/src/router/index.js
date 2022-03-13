@@ -101,8 +101,15 @@ export const constantRoutes = [
       {
         path:'workfowDraw',
         name:'工作流绘制',
+        hidden:true,
         component: () => import('@/views/table/ef/panel'),
         meta: { title: '工作流', icon: 'table' }
+      },
+      {
+        path:'workfowSolution',
+        name:'工作流方案',
+        component: () => import('@/views/table/workflowSolution'),
+        meta: { title: '工作流方案', icon: 'table' }
       },
       {
         path:'fieldSolution',

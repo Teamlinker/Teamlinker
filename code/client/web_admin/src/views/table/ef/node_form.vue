@@ -6,9 +6,6 @@
             </div>
             <div class="ef-node-form-body">
                 <el-form :model="node" ref="dataForm" label-width="80px" v-show="type === 'node'">
-                    <!-- <el-form-item label="类型">
-                        <el-input v-model="node.type" :disabled="true"></el-input>
-                    </el-form-item> -->
                     <el-form-item label="名称">
                         <el-input v-model="node.name"></el-input>
                     </el-form-item>
@@ -21,9 +18,6 @@
                     <el-form-item label="top坐标">
                         <el-input v-model="node.top" :disabled="true"></el-input>
                     </el-form-item>
-                    <!-- <el-form-item label="ico图标">
-                        <el-input v-model="node.ico"></el-input>
-                    </el-form-item> -->
                     <el-form-item label="状态">
                         <el-select v-model="node.status" placeholder="请选择">
                             <el-option
@@ -35,7 +29,6 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item>
-                        <el-button icon="el-icon-close">重置</el-button>
                         <el-button type="primary" icon="el-icon-check" @click="save">保存</el-button>
                     </el-form-item>
                 </el-form>
@@ -47,12 +40,11 @@
                         <el-input v-model="line.description"></el-input>
                     </el-form-item>
                     <el-form-item>
-                        <el-button icon="el-icon-close">重置</el-button>
                         <el-button type="primary" icon="el-icon-check" @click="saveLine">保存</el-button>
                     </el-form-item>
                 </el-form>
+                 <div class="delEle" @click="delEle"><el-button type="danger" plain>删除</el-button></div>
             </div>
-            <!--            <div class="el-node-form-tag"></div>-->
         </div>
     </div>
 
@@ -60,7 +52,6 @@
 
 <script>
     import { cloneDeep } from 'lodash'
-
     export default {
         data() {
             return {
@@ -104,7 +95,7 @@
             // 修改连线
             saveLine() {
                 console.log(this.line,'this.line')
-                this.$emit('setLineLabel', this.line)
+                this.$emit('editAction', this.line)
             },
             save() {
                 this.data.nodeList.filter((node) => {
@@ -118,6 +109,9 @@
                         this.$emit('repaintEverything',node)
                     }
                 })
+            },
+            delEle(){
+                this.$emit('deleteElement')
             }
         }
     }

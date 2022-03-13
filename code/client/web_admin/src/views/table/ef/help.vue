@@ -24,15 +24,11 @@
             </el-tab-pane>
             <el-tab-pane label="如何连线">
                 <el-divider content-position="left">如何连线</el-divider>
-                <div>鼠标移动到节点中左侧的图标上，当鼠标变为+时按下鼠标移动到另一个节点中松开鼠标</div>
+                <div>鼠标移动到节点中左侧的图标上，点击节点端点出现，从端点拖线连接</div>
             </el-tab-pane>
             <el-tab-pane label="如何添加条件">
-                <el-divider content-position="left">如何添加条件</el-divider>
-                <div>点击画布中的连线，在页面右侧会出现一个表单，输入新的条件，点击【保存】</div>
-            </el-tab-pane>
-            <el-tab-pane label="如何进行后端交互存储">
-                <el-divider content-position="left">如何进行后端交互存储</el-divider>
-                <div>参考: https://gitee.com/xiaoka2017/easy-flow-sdk</div>
+                <el-divider content-position="left">如何修改过渡</el-divider>
+                <div>点击画布中的连线，在页面右侧会出现一个表单，输入新的过渡，点击【保存】</div>
             </el-tab-pane>
         </el-tabs>
     </el-dialog>
