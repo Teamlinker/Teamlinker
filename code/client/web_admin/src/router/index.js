@@ -103,6 +103,12 @@ export const constantRoutes = [
         name:'工作流绘制',
         component: () => import('@/views/table/ef/panel'),
         meta: { title: '工作流', icon: 'table' }
+      },
+      {
+        path:'fieldSolution',
+        name:'字段方案',
+        component: () => import('@/views/table/fieldSolution'),
+        meta: { title: '字段方案', icon: 'table' }
       }
       // {
       //   path: 'tree',
