@@ -70,3 +70,73 @@ export function getWorkflowList(params){
       data
     })
   }
+  export function solutionList(params){
+    return request({
+      url: '/api/workflow/solution/list',
+      method: 'get',
+      params
+    })
+  }
+  export function solutionCreate(data){
+    return request({
+      url: '/api/workflow/solution/item',
+      method: 'post',
+      data
+    })
+  }
+  export function solutionUpdate(data){
+    return request({
+      url: '/api/workflow/solution/item',
+      method: 'put',
+      data
+    })
+  }
+  export function solutionDelete(params){
+    return request({
+      url: '/api/workflow/solution/item',
+      method: 'delete',
+      params
+    })
+  }
+  export function solutionCopy(data){
+    return request({
+      url: '/api/workflow/solution/copy',
+      method: 'post',
+      data
+    })
+  }
+  export function solutionBind(data){
+    return request({
+      url: '/api/workflow/solution/bind',
+      method: 'put',
+      data
+    })
+  }
+  export function solutionUnBind(data){
+    return request({
+      url: '/api/workflow/solution/unbind',
+      method: 'put',
+      data
+    })
+  }
+  export function solutionListWorkflow(params){
+    return request({
+      url: '/api/workflow/solution/workflow/list',
+      method: 'get',
+      params
+    })
+  }
+  export function solutionAddWorkflow(data){
+    return request({
+      url: '/api/workflow/solution/workflow/item',
+      method: 'post',
+      data
+    })
+  }
+  export function solutionRemoveWorkflow(params){
+    return request({
+      url: '/api/workflow/solution/workflow/item',
+      method: 'delete',
+      params
+    })
+  }
