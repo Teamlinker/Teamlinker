@@ -48,8 +48,8 @@
           <el-button type="text" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button type="text" size="mini" @click="handleSettings(row)">
-            配置字段方案
+          <el-button type="text" size="mini" @click="handleWorkflow(row)">
+            配置工作流方案
           </el-button>
           <el-button type="text" size="mini" @click="handleRemove(row)">
             删除
@@ -86,130 +86,136 @@
   </div>
 </template>
 <script>
-import '@/styles/common.scss'
-import {getFieldSolutionList,createFieldSolution ,deleteFieldSolution,editFieldSolution} from '@/api/fieldSolution'
+import "@/styles/common.scss";
+import {
+  getFieldSolutionList,
+  createFieldSolution,
+  deleteFieldSolution,
+  editFieldSolution,
+} from "@/api/fieldSolution";
 export default {
   data() {
     return {
       listLoading: false,
       textMap: {
-        update: '编辑',
-        create: '创建'
+        update: "编辑",
+        create: "创建",
       },
       list: [],
-      dialogStatus: '',
+      dialogStatus: "",
       dialogFormVisible: false,
       temp: {
-        name:'',
-        description:''
+        name: "",
+        description: "",
       },
       rules: {
-        name: [{ required: true, message: '名称必填', trigger: 'blur' }]
-      }
-    }
+        name: [{ required: true, message: "名称必填", trigger: "blur" }],
+      },
+    };
   },
   methods: {
     fetchData() {
-      this.listLoading = true
+      this.listLoading = true;
       getFieldSolutionList({}).then((res) => {
-        var data = res.data
+        var data = res.data;
         data.forEach((item) => {
           item.created_time = this.moment(item.created_time).format(
-            'YYYY-MM-DD HH:mm:ss'
-          )
+            "YYYY-MM-DD HH:mm:ss"
+          );
           item.modify_time = this.moment(item.modify_time).format(
-            'YYYY-MM-DD HH:mm:ss'
-          )
-        })
-        this.list = data
-        this.listLoading = false
-      })
+            "YYYY-MM-DD HH:mm:ss"
+          );
+        });
+        this.list = data;
+        this.listLoading = false;
+      });
     },
     resetTemp() {
       this.temp = {
         fieldSolutionId: undefined,
-        name: '',
-        description: ''
-      }
+        name: "",
+        description: "",
+      };
     },
     handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
+      this.resetTemp();
+      this.dialogStatus = "create";
+      this.dialogFormVisible = true;
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+        this.$refs["dataForm"].clearValidate();
+      });
     },
     createData() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs["dataForm"].validate((valid) => {
         if (valid) {
-          const params = this.temp
+          const params = this.temp;
           createFieldSolution(params).then(() => {
-            this.doSuccess()
-          })
+            this.doSuccess();
+          });
         }
-      })
+      });
     },
     updateData() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs["dataForm"].validate((valid) => {
         if (valid) {
           const params = {
             fieldSolutionId: this.temp.id,
             name: this.temp.name,
-            description: this.temp.description
-          }
+            description: this.temp.description,
+          };
           editFieldSolution(params).then(() => {
-            this.doSuccess()
-          })
+            this.doSuccess();
+          });
         }
-      })
+      });
     },
     handleUpdate(row) {
-      this.dialogStatus = 'update'
-      this.temp = Object.assign({}, row)
-      this.dialogFormVisible = true
+      this.dialogStatus = "update";
+      this.temp = Object.assign({}, row);
+      this.dialogFormVisible = true;
     },
     doSuccess() {
-      this.fetchData()
-      this.dialogFormVisible = false
+      this.fetchData();
+      this.dialogFormVisible = false;
       this.$notify({
-        title: 'Success',
-        message: '操作成功',
-        type: 'success',
-        duration: 2000
-      })
+        title: "Success",
+        message: "操作成功",
+        type: "success",
+        duration: 2000,
+      });
     },
-     handleRemove(row) {
-      this.temp.fieldSolutionId = row.id
-      this.$confirm('确定删除, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+    handleRemove(row) {
+      this.temp.fieldSolutionId = row.id;
+      this.$confirm("确定删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       })
         .then(() => {
-          this.removeData()
+          this.removeData();
         })
         .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
     removeData() {
       deleteFieldSolution({
-        fieldSolutionId: this.temp.fieldSolutionId
+        fieldSolutionId: this.temp.fieldSolutionId,
       }).then(() => {
-        this.doSuccess()
-      })
+        this.doSuccess();
+      });
+    },
+    //配置工作流
+    handleWorkflow(row) {
+      this.$router.push({ path: "/fieldSolution/configWorkflowSolution", query: {fieldSolutionId:row.id} });
     },
   },
   created() {
-    this.fetchData()
+    this.fetchData();
   },
-  handleSettings(){
-    
-  }
-}
+};
 </script>
 
