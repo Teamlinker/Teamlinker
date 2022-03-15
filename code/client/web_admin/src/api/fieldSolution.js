@@ -32,3 +32,45 @@ export function editFieldSolution(data){
     data
   })
 }
+
+//字段方案详情
+export function fieldSolutionDetail(params){
+  return request({
+    url: '/api/field/solution/item',
+    method: 'get',
+    params
+  })
+}
+//工作流节点字段列表
+export function workflowNodeList(params){
+  return request({
+    url: '/api/field/solution/field/list',
+    method: 'get',
+    params
+  })
+}
+//绑定工作流方案
+export function bindFieldSolution(data){
+  return request({
+    url: '/api/field/solution/bind',
+    method: 'put',
+    data
+  })
+}
+//解绑工作流方案
+export function unbindFieldSolution(data){
+  return request({
+    url: '/api/field/solution/unbind',
+    method: 'put',
+    data
+  })
+}
+//字段类型列表
+export function fieldTypeList(params){
+  return request({
+    url: '/api/field/type/list',
+    method: 'get',
+    params
+  })
+}
+
