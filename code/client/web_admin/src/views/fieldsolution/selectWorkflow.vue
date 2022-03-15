@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-         <el-table
+    <el-table
       v-loading="listLoading"
       :data="list"
       element-loading-text="Loading"
@@ -40,26 +40,35 @@
 </template>
 <script>
 import "@/styles/common.scss";
-import {solutionListWorkflow} from '@/api/workflow'
+import { solutionListWorkflow } from "@/api/workflow";
 
 export default {
   data() {
     return {
-     listLoading: false,
+      listLoading: false,
       list: [],
     };
   },
   methods: {
     fetchData() {
-      this.listLoading = true
-      solutionListWorkflow({workflowSolutionId:this.$route.query.workflowSolutionId}).then((res) => {
-        var data = res.data
-        this.list = data
-        this.listLoading = false
-      })
+      this.listLoading = true;
+      solutionListWorkflow({
+        workflowSolutionId: this.$route.query.workflowSolutionId,
+      }).then((res) => {
+        var data = res.data;
+        this.list = data;
+        this.listLoading = false;
+      });
     },
     handleConfig(row) {
-       this.$router.push({ path: "/fieldSolution/fs-workflow", query: {fieldSolutionId:this.$route.query.fieldSolutionId,workflowSolutionId:this.$route.query.workflowSolutionId,workflowId:row.id} });
+      this.$router.push({
+        path: "/fieldSolution/fs-workflow",
+        query: {
+          fieldSolutionId: this.$route.query.fieldSolutionId,
+          workflowSolutionId: this.$route.query.workflowSolutionId,
+          workflowId: row.id,
+        },
+      });
     },
   },
   created() {
@@ -68,6 +77,5 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-
 </style>
 

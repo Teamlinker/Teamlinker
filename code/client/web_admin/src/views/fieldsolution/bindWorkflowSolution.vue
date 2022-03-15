@@ -65,7 +65,12 @@ export default {
           console.log(error);
         });
     },
-    handleCancel() {},
+    handleCancel() {
+      this.$router.push({
+        path: "/fieldSolution/list",
+        query: {},
+      });
+    },
   },
   created() {
     this.fetchData();

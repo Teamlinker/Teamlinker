@@ -5,7 +5,7 @@
     <div>{{ workflowDetail.description || "-" }}</div>
     <div>
       <el-button type="primary" size="small" @click="handleAdd"
-        >Add  Field type</el-button
+        >Add Field type</el-button
       >
     </div>
     <div>
@@ -17,9 +17,34 @@
         fit
         highlight-current-row
       >
-        <el-table-column label="name">
+        <el-table-column label="Type">
           <template slot-scope="scope">
-            {{ scope.row.name }}
+            {{ scope.row.fieldType.name }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Name">
+          <template slot-scope="scope">
+            {{ scope.row.field.name }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Description">
+          <template slot-scope="scope">
+            {{ scope.row.field.description }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Default value">
+          <template slot-scope="scope">
+            {{ scope.row.field.default_value }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Optional">
+          <template slot-scope="scope">
+            {{ scope.row.field.optional }}
+          </template>
+        </el-table-column>
+        <el-table-column label="Weight">
+          <template slot-scope="scope">
+            {{ scope.row.field.weight }}
           </template>
         </el-table-column>
         <el-table-column
@@ -28,8 +53,16 @@
           width="320"
           class-name="small-padding fixed-width"
         >
-          <template>
-            <el-button type="text" size="mini"> delete </el-button>
+          <template slot-scope="{ row }">
+            <el-button type="text" size="mini" @click="handleEdit(row)">
+              edit
+            </el-button>
+             <el-button type="text" size="mini" @click="handleCopy(row)">
+              copy
+            </el-button>
+            <el-button type="text" size="mini" @click="handleDelete(row)">
+              delete
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -38,7 +71,7 @@
 </template>
 <script>
 import "@/styles/common.scss";
-import { workflowNodeList } from "@/api/fieldSolution";
+import { workflowNodeList, deleteField,copyField } from "@/api/fieldSolution";
 import { workflowDetail } from "@/api/workflow";
 
 export default {
@@ -71,11 +104,46 @@ export default {
         this.listLoading = false;
       });
     },
-    handleAdd(){
+    handleAdd() {
       this.$router.push({
         path: "/fieldSolution/addWorkflowField",
-        query: { fieldSolutionId: this.$route.query.fieldSolutionId, workflowNodeId: this.$route.query.workflowNodeId, workflowId: this.$route.query.workflowId,  workflowSolutionId: this.$route.query.workflowSolutionId},
+        query: {
+          fieldSolutionId: this.$route.query.fieldSolutionId,
+          workflowNodeId: this.$route.query.workflowNodeId,
+          workflowId: this.$route.query.workflowId,
+          workflowSolutionId: this.$route.query.workflowSolutionId,
+        },
       });
+    },
+    handleDelete(row) {
+      deleteField({ fieldSolutionWorkflowNodeFieldTypeId: row.field.id }).then(
+        (res) => {
+          this.$message({
+            message: "delete success",
+            type: "success",
+          });
+          this.fetchData();
+        }
+      );
+    },
+    handleEdit(row) {  
+      this.$router.push({
+        path: "/fieldSolution/addWorkflowField2",
+        query: {
+          fieldSolutionId: this.$route.query.fieldSolutionId,
+          workflowNodeId: this.$route.query.workflowNodeId,
+          workflowId: this.$route.query.workflowId,
+          workflowSolutionId: this.$route.query.workflowSolutionId,
+          fieldTypeId: row.fieldType.id,
+          fieldType: row.fieldType.type,
+          opeType:'edit'
+        },
+      });
+    },
+    handleCopy(row){
+      copyField({}).then(res=>{
+        
+      })
     }
   },
   created() {

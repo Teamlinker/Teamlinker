@@ -73,4 +73,44 @@ export function fieldTypeList(params){
     params
   })
 }
+//添加工作流节点字段
+export function addField(data){
+  return request({
+    url: '/api/field/solution/field/item',
+    method: 'post',
+    data
+  })
+}
+//删除工作流节点字段
+export function deleteField(params){
+  return request({
+    url: '/api/field/solution/field/item',
+    method: 'delete',
+    params
+  })
+}
+//编辑工作流节点字段
+export function editField(data){
+  return request({
+    url: '/api/field/solution/field/item',
+    method: 'put',
+    data
+  })
+}
+//复制工作流节点字段
+export function copyField(data){
+  return request({
+    url: '/api/field/solution/workflow/copy',
+    method: 'post',
+    data
+  })
+}
+//添加节点字段值
+export function addFieldValue(data){
+  return request({
+    url: '/api/field/solution/field/config/item',
+    method: 'post',
+    data
+  })
+}
 
