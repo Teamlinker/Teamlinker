@@ -38,7 +38,7 @@
 </template>
 <script>
 import "@/styles/common.scss";
-import { addField, fieldDetails,editField } from "@/api/fieldSolution";
+import { addField, fieldDetails, editField } from "@/api/fieldSolution";
 
 export default {
   data() {
@@ -89,8 +89,15 @@ export default {
               fieldType == 2 ||
               fieldType == 1
             ) {
+              let path = "";
+              if (fieldType == 5 || fieldType == 6) {
+                path = "/fieldSolution/addWorkflowField3";
+              }
+              if (fieldType == 2 || fieldType == 1) {
+                path = "/fieldSolution/addWorkflowField4";
+              }
               this.$router.push({
-                path: "/fieldSolution/addWorkflowField3",
+                path: path,
                 query: {
                   fieldSolutionId: this.$route.query.fieldSolutionId,
                   workflowId: this.$route.query.workflowId,
@@ -122,9 +129,10 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           let param = Object.assign(this.form, {
-            fieldSolutionWorkflowNodeFieldTypeId: this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+            fieldSolutionWorkflowNodeFieldTypeId:
+              this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
           });
-          
+
           editField(param).then((res) => {
             //单选-5和多选-6 单标签-2和多标签-1需要编辑值 其他的不需要跳到下一步编辑
             let fieldType = this.$route.query.fieldType;
@@ -141,9 +149,10 @@ export default {
                   workflowId: this.$route.query.workflowId,
                   workflowNodeId: this.$route.query.workflowNodeId,
                   workflowSolutionId: this.$route.query.workflowSolutionId,
-                  fieldSolutionWorkflowNodeFieldTypeId: this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+                  fieldSolutionWorkflowNodeFieldTypeId:
+                    this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
                   fieldType: this.$route.query.fieldType,
-                  opeType:'edit'
+                  opeType: "edit",
                 },
               });
             } else {

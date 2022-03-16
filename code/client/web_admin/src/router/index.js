@@ -189,10 +189,17 @@ export const constantRoutes = [
       },   
       {
         path: 'addWorkflowField3',
-        name: 'addWorkflowField',
+        name: 'Edit Field',
         component: () => import('@/views/fieldsolution/addWorkflowField3'),
         hidden:true,
-        meta: { title: 'addWorkflowField', icon: 'table' }
+        meta: { title: 'Edit Field', icon: 'table' }
+      },    
+      {
+        path: 'addWorkflowField4',
+        name: 'Edit Field',
+        component: () => import('@/views/fieldsolution/addWorkflowField4'),
+        hidden:true,
+        meta: { title: 'Edit Field', icon: 'table' }
       },    
     ]
   },
