@@ -200,7 +200,7 @@ export async function handleHttpCall(obj:IServer_Common_Http_Structure,ctx:IServ
                     value=false
                 }
             }
-            else if(obj.type=="Object")
+            else if(obj.type=="Object" || obj.type=="Array")
             {
                 if(typeof(value)=="string") {
                     try {

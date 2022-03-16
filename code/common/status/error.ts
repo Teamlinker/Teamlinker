@@ -233,6 +233,10 @@ export namespace Err {
                 code:3606,
                 msg:"field type not match"
             },
+            fieldConfigValueAlreadySelected: {
+                code:3607,
+                msg:"field config value already selected"
+            }
         },
         ProjectIssue:{
             projectIssueNotFound:{

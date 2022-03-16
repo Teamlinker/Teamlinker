@@ -459,6 +459,32 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
         }))
         return ret
     }
+
+    async getItemsByWorkflowId(workflowId:string) {
+        if(!workflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:workflowSolutionWorkflowModel
+        },{
+            model:workflowSolutionModel,
+            columns:keys<ICommon_Model_Workflow_Solution>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:workflowSolutionWorkflowModel,
+                    field:"workflow_solution_id"
+                }
+            },
+        },{
+            workflow_id:{
+                model:workflowSolutionWorkflowModel,
+                value:workflowId
+            }
+        })
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
 }
 export let workflowSolutionMapper=new WorkflowSolutionMapper
 

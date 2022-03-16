@@ -128,13 +128,7 @@ export interface ICommon_Route_Res_WorkflowSolution_Info extends ICommon_Model_W
 }
 
 export interface ICommon_Route_Res_FieldSolution_Info extends ICommon_Model_Field_Solution {
-    data:{
-        workflowSolution:ICommon_Model_Workflow_Solution,
-        data:{
-            workflow:ICommon_Model_Workflow,
-            node:ICommon_Route_Res_Workflow_Info_Node
-        }[]
-    }[]
+    workflowSolutionList:ICommon_Model_Workflow_Solution[]
 }
 
 export interface ICommon_Route_Res_FieldSolution_ListWorkflowNodeField {

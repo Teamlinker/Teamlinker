@@ -109,6 +109,15 @@ const api={
             res: <ICommon_Route_Res_FieldSolution_ListWorkflowNodeField[]>{},
             permission:[Permission_Types.Admin.ADMIN]
         },
+        workflowNodeFieldInfo:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/solution/field/item",
+            req: <{
+                fieldSolutionWorkflowNodeFieldTypeId: string
+            }>{},
+            res: <ICommon_Route_Res_FieldSolution_ListWorkflowNodeField>{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
         addWorkflowNodeField:{
             method:ECommon_HttpApi_Method.POST,
             path:"/solution/field/item",
@@ -122,10 +131,19 @@ const api={
                 workflowId: string,
                 workflowSolutionId: string,
                 description?: string,
-                lable_type?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,
                 weight?:number
             }>{},
             res: <ICommon_Model_Field_Solution_Workflow_Node_Field_Type>{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
+        editWorkflowNodeFieldLabelType:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/solution/field/item/label",
+            req: <{
+                fieldSolutionWorkflowNodeFieldTypeId: string,
+                labelType:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type
+            }>{},
+            res: {},
             permission:[Permission_Types.Admin.ADMIN]
         },
         editWorkflowNodeField:{
@@ -176,11 +194,13 @@ const api={
             path:"/solution/field/config/item",
             req: <{
                 fieldSolutionWorkflowNodeFieldTypeId :string,
-                value :string,
-                name :string,
-                selected :number,
+                data:{
+                    value :string,
+                    name :string,
+                    selected :number
+                }[]
             }>{},
-            res: <ICommon_Model_Field_Type_Config_Value>{},
+            res: <ICommon_Model_Field_Type_Config_Value[]>{},
             permission:[Permission_Types.Admin.ADMIN]
         },
         editWorkflowNodeFieldConfig:{
@@ -215,6 +235,26 @@ const api={
                 newWorkflowSolutionId:string
             }>{},
             res:{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
+        workflowCanCopyedList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/solution/workflow/copy/list",
+            req:<{
+                fieldSolutionId:string,
+                workflowSolutionId:string,
+                workflowId:string
+            }>{},
+            res:<{
+                workflowSolution:{
+                    id:string,
+                    name:string
+                },
+                fieldSolution:{
+                    id:string,
+                    name:string
+                }
+            }[]>{},
             permission:[Permission_Types.Admin.ADMIN]
         }
     }

@@ -104,6 +104,16 @@ class FieldController {
         return ret;
     }
 
+    @DHttpApi(fieldApi.routes.workflowNodeFieldInfo)
+    async workflowNodeFieldInfo(@DHttpReqParamRequired("fieldSolutionWorkflowNodeFieldTypeId") fieldSolutionWorkflowNodeFieldTypeId:string): Promise<typeof fieldApi.routes.workflowNodeFieldInfo.res> {
+        let obj=await FieldSolutionService.getObjByFieldSolutionWorkflowNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId)
+        if(!obj) {
+            throw Err.Project.Field.fieldSolutionNotFound
+        }
+        let ret=await obj.workflowNodeFieldInfo(fieldSolutionWorkflowNodeFieldTypeId)
+        return ret;
+    }
+
     @DHttpApi(fieldApi.routes.addWorkflowNodeField)
     async addWorkflowNodeField(@DHttpReqParamRequired("fieldSolutionId") fieldSolutionId:string,
     @DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,
@@ -114,7 +124,6 @@ class FieldController {
     @DHttpReqParamRequired("workflowId") workflowId:string,
     @DHttpReqParamRequired("workflowNodeId") workflowNodeId:string,
     @DHttpReqParam("description") description:string,
-    @DHttpReqParam("lable_type") labelType:string,
     @DHttpReqParam("weight") weight:number): Promise<typeof fieldApi.routes.addWorkflowNodeField.res> {
         let obj=await FieldSolutionService.getItemById(fieldSolutionId)
         if(!obj) {
@@ -122,6 +131,17 @@ class FieldController {
         }
         let ret=await obj.addWorkflowNodeField(workflowNodeId,workflowId,workflowSolutionId,fieldTypeId,name,optional,defaultValue,description,weight)
         return ret;
+    }
+
+    @DHttpApi(fieldApi.routes.editWorkflowNodeFieldLabelType)
+    async editWorkflowNodeFieldLabelType(@DHttpReqParamRequired("fieldSolutionWorkflowNodeFieldTypeId") fieldSolutionWorkflowNodeFieldTypeId:string,
+    @DHttpReqParamRequired("labelType") labelType:number): Promise<typeof fieldApi.routes.editWorkflowNodeFieldLabelType.res> {
+        let obj=await FieldSolutionService.getObjByFieldSolutionWorkflowNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId)
+        if(!obj) {
+            throw Err.Project.Field.fieldSolutionNotFound
+        }
+        await obj.editWorkflowNodeFieldLableType(fieldSolutionWorkflowNodeFieldTypeId,labelType)
+        return;
     }
 
     @DHttpApi(fieldApi.routes.editWorkflowNodeField)
@@ -171,14 +191,16 @@ class FieldController {
 
     @DHttpApi(fieldApi.routes.addWorkflowNodeFieldConfig)
     async addWorkflowNodeFieldConfig(@DHttpReqParamRequired("fieldSolutionWorkflowNodeFieldTypeId") fieldSolutionWorkflowNodeFieldTypeId:string,
-    @DHttpReqParamRequired("value") value:string,
-    @DHttpReqParamRequired("name") name:string,
-    @DHttpReqParamRequired("selected") selected:number): Promise<typeof fieldApi.routes.addWorkflowNodeFieldConfig.res> {
+    @DHttpReqParamRequired("data") data:{
+        value :string,
+        name :string,
+        selected :number
+    }[]): Promise<typeof fieldApi.routes.addWorkflowNodeFieldConfig.res> {
         let obj=await FieldSolutionService.getObjByFieldSolutionWorkflowNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId)
         if(!obj) {
             throw Err.Project.Field.fieldSolutionNotFound
         }
-        let ret=await obj.addWorkflowNodeFieldConfig(fieldSolutionWorkflowNodeFieldTypeId,value,name,selected)
+        let ret=await obj.addWorkflowNodeFieldConfigs(fieldSolutionWorkflowNodeFieldTypeId,data)
         return ret;
     }
 
@@ -189,7 +211,7 @@ class FieldController {
     @DHttpReqParam("selected") selected:number): Promise<typeof fieldApi.routes.editWorkflowNodeFieldConfig.res> {
         let obj=await FieldSolutionService.getObjByFieldTypeConfigValueId(fieldTypeConfigValueId)
         if(!obj) {
-            throw Err.Project.Field.fieldTypeConfigValueIdNotFound
+            throw Err.Project.Field.fieldSolutionNotFound
         }
         let ret=await obj.editWorkflowNodeFieldConfig(fieldTypeConfigValueId,value,name,selected)
         return ret;
@@ -199,7 +221,7 @@ class FieldController {
     async deleteWorkflowNodeFieldConfig(@DHttpReqParamRequired("fieldTypeConfigValueId") fieldTypeConfigValueId:string): Promise<typeof fieldApi.routes.deleteWorkflowNodeFieldConfig.res> {
         let obj=await FieldSolutionService.getObjByFieldTypeConfigValueId(fieldTypeConfigValueId)
         if(!obj) {
-            throw Err.Project.Field.fieldTypeConfigValueIdNotFound
+            throw Err.Project.Field.fieldSolutionNotFound
         }
         await obj.deleteWorkflowNodeFieldConfig(fieldTypeConfigValueId)
         return
@@ -213,10 +235,22 @@ class FieldController {
     @DHttpReqParamRequired("newWorkflowSolutionId") newWorkflowSolutionId:string): Promise<typeof fieldApi.routes.workflowFieldsCopy.res> {
         let obj=await FieldSolutionService.getItemById(fieldSolutionId)
         if(!obj) {
-            throw Err.Project.Field.fieldTypeConfigValueIdNotFound
+            throw Err.Project.Field.fieldSolutionNotFound
         }
         await obj.workflowFieldsCopy(workflowSolutionId,workflowId,newFieldSolutionId,newWorkflowSolutionId)
         return
+    }
+
+    @DHttpApi(fieldApi.routes.workflowCanCopyedList)
+    async workflowCanCopyedList(@DHttpReqParamRequired("fieldSolutionId") fieldSolutionId:string,
+    @DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,
+    @DHttpReqParamRequired("workflowId") workflowId:string): Promise<typeof fieldApi.routes.workflowCanCopyedList.res> {
+        let obj=await FieldSolutionService.getItemById(fieldSolutionId)
+        if(!obj) {
+            throw Err.Project.Field.fieldSolutionNotFound
+        }
+        let ret=await obj.getIfCopyedWorkflowList(workflowId,workflowSolutionId)
+        return ret;
     }
 
 }
