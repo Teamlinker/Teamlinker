@@ -142,8 +142,15 @@ export default {
               fieldType == 2 ||
               fieldType == 1
             ) {
+              let path = "";
+              if (fieldType == 5 || fieldType == 6) {
+                path = "/fieldSolution/addWorkflowField3";
+              }
+              if (fieldType == 2 || fieldType == 1) {
+                path = "/fieldSolution/addWorkflowField4";
+              }
               this.$router.push({
-                path: "/fieldSolution/addWorkflowField3",
+                path: path,
                 query: {
                   fieldSolutionId: this.$route.query.fieldSolutionId,
                   workflowId: this.$route.query.workflowId,

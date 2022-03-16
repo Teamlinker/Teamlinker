@@ -113,11 +113,19 @@ export function copyField(data){
     data
   })
 }
-//添加节点字段值
+//添加节点字段值--select
 export function addFieldValue(data){
   return request({
     url: '/api/field/solution/field/config/item',
     method: 'post',
+    data
+  })
+}
+//添加节点字段值--label
+export function addFieldLabelValue(data){
+  return request({
+    url: '/api/field/solution/field/item/label',
+    method: 'put',
     data
   })
 }

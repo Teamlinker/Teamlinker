@@ -29,7 +29,11 @@
 </template>
 <script>
 import "@/styles/common.scss";
-import { addFieldValue, fieldDetails } from "@/api/fieldSolution";
+import {
+  addFieldValue,
+  fieldDetails,
+  addFieldLabelValue,
+} from "@/api/fieldSolution";
 
 export default {
   data() {
@@ -37,11 +41,11 @@ export default {
       value1: [],
       multiple: false,
       option: [
-        { value: "user", label: "user" },
-        { value: "release", label: "release" },
-        { value: "issue", label: "issue" },
-        { value: "module", label: "module" },
-        { value: "tag", label: "tag" },
+        { value: "USER", label: "USER" },
+        { value: "RELEASE", label: "RELEASE" },
+        { value: "ISSUE", label: "ISSUE" },
+        { value: "MODULE", label: "MODULE" },
+        { value: "TAG", label: "TAG" },
       ],
     };
   },
@@ -55,19 +59,16 @@ export default {
       });
     },
     handleSave(formName) {
-      if (this.$route.query.opeType == "edit") {
-        this.handleUpdate();
-        return;
-      }
-      return;
-      let param = Object.assign(
-        { data: this.option },
-        {
-          fieldSolutionWorkflowNodeFieldTypeId:
-            this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
-        }
-      );
-      addFieldValue(param).then((res) => {
+      // if (this.$route.query.opeType == "edit") {
+      //   this.handleUpdate();
+      //   return;
+      // }
+      let param = {
+        fieldSolutionWorkflowNodeFieldTypeId:
+          this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+          labelType:this.value1
+      };
+      addFieldLabelValue(param).then((res) => {
         this.$router.push({
           path: "/fieldSolution/workflowField",
           query: {
@@ -93,7 +94,7 @@ export default {
       this.multiple = true;
     }
     if (this.$route.query.opeType == "edit") {
-      this.getFieldDetails();
+      // this.getFieldDetails();
     }
   },
 };
