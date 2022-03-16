@@ -1,14 +1,13 @@
 import { fieldSolutionModel } from "../../../common/model/field_solution";
-import { ICommon_Model_Field_Solution_Workflow_Node_Field_Type } from "../../../common/model/field_solution_workflow_node_field_type";
 import { ICommon_Model_Field_Type_Config_Value } from "../../../common/model/field_type_config_value";
 import { Err } from "../../../common/status/error";
 import { Entity } from "../../common/entity/entity";
 import { EServer_Common_Event_Types } from "../../common/event/types";
 import { ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type } from './../../../common/model/field_solution_workflow_node_field_type';
-import { fieldTypeModel, ICommon_Model_Field_Type } from './../../../common/model/field_type';
+import { ECommon_Model_Field_Type, fieldTypeModel } from './../../../common/model/field_type';
 import { ICommon_Route_Res_FieldSolution_Info } from './../../../common/routes/response';
 import { fieldSolutionMapper, fieldTypeMapper } from './../mapper/field';
-import WorkflowService, { WorkflowSolutionService } from './workflow';
+import { WorkflowSolutionService } from './workflow';
 
 export default class FieldType extends Entity<typeof fieldTypeModel,typeof fieldTypeMapper> {
     constructor(){
@@ -32,35 +31,8 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
 
     async info() :Promise<ICommon_Route_Res_FieldSolution_Info>{
         let ret:ICommon_Route_Res_FieldSolution_Info={
-            data:[],
+            workflowSolutionList:await fieldSolutionMapper.getBindWorkflowSolutionList(this.getId()),
             ...this.getItem()
-        }
-        let workflowSolutionList=await fieldSolutionMapper.getBindWorkflowSolutionList(this.getId())
-        for(let objWorkflowSolution of workflowSolutionList) {
-            let workflowSolution=await WorkflowSolutionService.getItemById(objWorkflowSolution.id)
-            let workflowList=await workflowSolution.listWorkflow()
-            let arr:ICommon_Route_Res_FieldSolution_Info["data"][0]["data"]=[]
-            for (let obj of workflowList) {
-                let workflowService = await WorkflowService.getItemById(obj.id)
-                let node = await workflowService.accessNodesAndActions(async (nodeId: string): Promise<{
-                    field: ICommon_Model_Field_Solution_Workflow_Node_Field_Type,
-                    fieldType: ICommon_Model_Field_Type,
-                    values?: ICommon_Model_Field_Type_Config_Value[]
-                }[]> => {
-                    let ret = await fieldSolutionMapper.getWorkflowNodeFieldList(this.getId(), nodeId, obj.id, workflowSolution.getId())
-                    return ret;
-                })
-                let objTemp: ICommon_Route_Res_FieldSolution_Info["data"][0]["data"][0] = {
-                    workflow: obj,
-                    node: node
-                }
-                arr.push(objTemp)
-            }
-            let obj:ICommon_Route_Res_FieldSolution_Info["data"][0]={
-                workflowSolution:objWorkflowSolution,
-                data:arr
-            }
-            ret.data.push(obj)
         }
         return ret;
     }
@@ -107,7 +79,7 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         
     }
 
-    async addWorkflowNodeField(workflowNodeId:string,workflowId:string,workflowSolutionId:string,fieldTypeId:string,name:string,optional:number,defaultValue?:string,description?:string,labelType?:ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type,weight?:number) {
+    async addWorkflowNodeField(workflowNodeId:string,workflowId:string,workflowSolutionId:string,fieldTypeId:string,name:string,optional:number,defaultValue?:string,description?:string,weight?:number) {
         if(!workflowNodeId) {
             throw Err.Project.Workflow.workflowNodeNotFound
         } else if(!workflowId) {
@@ -129,8 +101,22 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         if(!isIn) {
             throw Err.Project.Workflow.workflowNotInWorkflowSolution
         }
-        let ret=await fieldSolutionMapper.addWorkflowNodeField(this.getId(),workflowNodeId,workflowId,workflowSolutionId,fieldTypeId,name,optional,defaultValue,description,labelType,weight);
+        let ret=await fieldSolutionMapper.addWorkflowNodeField(this.getId(),workflowNodeId,workflowId,workflowSolutionId,fieldTypeId,name,optional,defaultValue,description,weight);
         return ret;
+    }
+
+    async editWorkflowNodeFieldLableType(fieldSolutionWorkflowNodeFieldTypeId:string,labelType:number) {
+        let obj=await fieldSolutionMapper.getFieldByNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId);
+        if(!obj) {
+            throw Err.Project.Field.fieldSolutionWorkflowNodeFieldTypeNotFound
+        }
+        let objFieldType=await FieldType.getItemById(obj.field_type_id)
+        if(!objFieldType) {
+            throw Err.Project.Field.fieldTypeNotFound
+        } else if(objFieldType.getItem().type!=ECommon_Model_Field_Type.LABEL && objFieldType.getItem().type!=ECommon_Model_Field_Type.MULTILABEL) {
+            throw Err.Project.Field.fieldTypeNotMatch
+        }
+        await fieldSolutionMapper.editWorkflowNodeFieldLableType(obj.id,labelType);
     }
 
     async listWorkflowNodeField(workflowNodeId:string,workflowId:string,workflowSolutionId:string) {
@@ -151,6 +137,27 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         }
         let ret=await fieldSolutionMapper.getWorkflowNodeFieldList(this.getId(),workflowNodeId,workflowId,workflowSolutionId);
         return ret;
+    }
+
+    async workflowNodeFieldInfo(fieldSolutionWorkflowNodeFieldTypeId:string) {
+        if(!fieldSolutionWorkflowNodeFieldTypeId) {
+            throw Err.Project.Field.fieldSolutionWorkflowNodeFieldTypeNotFound
+        }
+        let ret=await fieldSolutionMapper.workflowNodeFieldInfo(fieldSolutionWorkflowNodeFieldTypeId)
+        return ret;
+    }
+
+    async getIfCopyedWorkflowList(workflowId:string,workflowSolutionId:string) {
+        let ret=await WorkflowSolutionService.getItemListByWorkflowId(workflowId)
+        let workflowSolutionIds=ret.map(item=>item.id)
+        let arr=await fieldSolutionMapper.getFieldSolutionWorkflowSolutionListByWorkflowSolutionIds(workflowSolutionIds)
+        return arr.filter(obj=>{
+            if(obj.workflowSolution.id==workflowSolutionId && obj.fieldSolution.id==this.getId()) {
+                return false
+            } else {
+                return true
+            }
+        })
     }
 
     static async clearItemsByWorkflowId(workflowId:string) {
@@ -222,7 +229,24 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         return ret;
     }
 
-    async addWorkflowNodeFieldConfig(fieldSolutionWorkflowNodeFieldTypeId :string,value :string,name :string,selected :number) {
+    async addWorkflowNodeFieldConfigs(fieldSolutionWorkflowNodeFieldTypeId :string,data:{
+        value :string,
+        name :string,
+        selected :number
+    }[]) {
+        if(data.length==0) {
+            return []
+        }
+        let isSelected = false
+        for(let o of data) {
+            if(o.selected) {
+                if(!isSelected) {
+                    isSelected=true
+                } else {
+                    throw Err.Project.Field.fieldConfigValueAlreadySelected
+                }
+            }
+        }
         let obj=await fieldSolutionMapper.getFieldByNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId)
         if(!obj) {
             throw Err.Project.Field.fieldSolutionWorkflowNodeFieldTypeNotFound
@@ -230,14 +254,40 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         let objFieldType=await FieldType.getItemById(obj.field_type_id)
         if(!objFieldType) {
             throw Err.Project.Field.fieldTypeNotFound
-        } else if(!objFieldType.getItem().multi) {
+        } else if(objFieldType.getItem().type!=ECommon_Model_Field_Type.SELECT && objFieldType.getItem().type!=ECommon_Model_Field_Type.MULTISELECT) {
             throw Err.Project.Field.fieldTypeNotMatch
         }
-        let ret=await fieldSolutionMapper.addWorkflowNodeFieldConfig(fieldSolutionWorkflowNodeFieldTypeId,value,name,selected)
-        return ret;
+        if (isSelected && objFieldType.getItem().type==ECommon_Model_Field_Type.SELECT) {
+            let isExist = await fieldSolutionMapper.checkFieldConfigValueSelectedExist(fieldSolutionWorkflowNodeFieldTypeId)
+            if(isExist) {
+                throw Err.Project.Field.fieldConfigValueAlreadySelected
+            }
+        }
+        let arr:ICommon_Model_Field_Type_Config_Value[]=[];
+        for(let obj of data) {
+            let ret=await fieldSolutionMapper.addWorkflowNodeFieldConfig(fieldSolutionWorkflowNodeFieldTypeId,obj.value,obj.name,obj.selected)
+            arr.push(ret)
+        }
+        return arr;
     }
 
     async editWorkflowNodeFieldConfig(fieldTypeConfigValueId :string,value? :string,name? :string,selected? :number) {
+        let obj=await fieldSolutionMapper.getFieldByFieldTypeConfigId(fieldTypeConfigValueId)
+        if(!obj) {
+            throw Err.Project.Field.fieldSolutionWorkflowNodeFieldTypeNotFound
+        }
+        let objFieldType=await FieldType.getItemById(obj.field_type_id)
+        if(!objFieldType) {
+            throw Err.Project.Field.fieldTypeNotFound
+        } else if(objFieldType.getItem().type!=ECommon_Model_Field_Type.SELECT && objFieldType.getItem().type!=ECommon_Model_Field_Type.MULTISELECT) {
+            throw Err.Project.Field.fieldTypeNotMatch
+        }
+        if(selected && objFieldType.getItem().type==ECommon_Model_Field_Type.SELECT) {
+            let isExist = await fieldSolutionMapper.checkFieldConfigValueSelectedExist(obj.id)
+            if(isExist) {
+                throw Err.Project.Field.fieldConfigValueAlreadySelected
+            }
+        }
         let ret=await fieldSolutionMapper.editWorkflowNodeFieldConfig(fieldTypeConfigValueId,value,name,selected)
         return ret;
     }
