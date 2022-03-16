@@ -38,8 +38,7 @@
 </template>
 <script>
 import "@/styles/common.scss";
-import { addField } from "@/api/fieldSolution";
-import { workflowDetail } from "@/api/workflow";
+import { addField, fieldDetails,editField } from "@/api/fieldSolution";
 
 export default {
   data() {
@@ -59,14 +58,19 @@ export default {
     };
   },
   methods: {
-    getWorkflowDetail() {
-      workflowDetail({ workflowId: this.$route.query.workflowId }).then(
-        (res) => {
-          
-        }
-      );
+    getFieldDetails() {
+      fieldDetails({
+        fieldSolutionWorkflowNodeFieldTypeId:
+          this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+      }).then((res) => {
+        this.form = res.data.field;
+      });
     },
     handleSave(formName) {
+      if (this.$route.query.opeType == "edit") {
+        this.handleUpdate("ruleForm");
+        return;
+      }
       this.$refs[formName].validate((valid) => {
         if (valid) {
           let param = Object.assign(this.form, {
@@ -114,10 +118,56 @@ export default {
         }
       });
     },
+    handleUpdate(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          let param = Object.assign(this.form, {
+            fieldSolutionWorkflowNodeFieldTypeId: this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+          });
+          
+          editField(param).then((res) => {
+            //单选-5和多选-6 单标签-2和多标签-1需要编辑值 其他的不需要跳到下一步编辑
+            let fieldType = this.$route.query.fieldType;
+            if (
+              fieldType == 5 ||
+              fieldType == 6 ||
+              fieldType == 2 ||
+              fieldType == 1
+            ) {
+              this.$router.push({
+                path: "/fieldSolution/addWorkflowField3",
+                query: {
+                  fieldSolutionId: this.$route.query.fieldSolutionId,
+                  workflowId: this.$route.query.workflowId,
+                  workflowNodeId: this.$route.query.workflowNodeId,
+                  workflowSolutionId: this.$route.query.workflowSolutionId,
+                  fieldSolutionWorkflowNodeFieldTypeId: this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+                  fieldType: this.$route.query.fieldType,
+                  opeType:'edit'
+                },
+              });
+            } else {
+              this.$router.push({
+                path: "/fieldSolution/workflowField",
+                query: {
+                  fieldSolutionId: this.$route.query.fieldSolutionId,
+                  workflowId: this.$route.query.workflowId,
+                  workflowNodeId: this.$route.query.workflowNodeId,
+                  workflowSolutionId: this.$route.query.workflowSolutionId,
+                },
+              });
+            }
+          });
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
   },
   created() {
     if (this.$route.query.opeType == "edit") {
-      this.getWorkflowDetail();
+      this.getFieldDetails();
     }
   },
 };

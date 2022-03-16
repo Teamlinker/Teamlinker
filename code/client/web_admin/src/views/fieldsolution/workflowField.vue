@@ -134,6 +134,7 @@ export default {
           workflowNodeId: this.$route.query.workflowNodeId,
           workflowId: this.$route.query.workflowId,
           workflowSolutionId: this.$route.query.workflowSolutionId,
+          fieldSolutionWorkflowNodeFieldTypeId:row.field.id,
           fieldTypeId: row.fieldType.id,
           fieldType: row.fieldType.type,
           opeType:'edit'

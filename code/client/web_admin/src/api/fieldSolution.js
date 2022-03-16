@@ -97,6 +97,14 @@ export function editField(data){
     data
   })
 }
+//查看工作流节点字段
+export function fieldDetails(params){
+  return request({
+    url: '/api/field/solution/field/item',
+    method: 'get',
+    params
+  })
+}
 //复制工作流节点字段
 export function copyField(data){
   return request({

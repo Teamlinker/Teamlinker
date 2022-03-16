@@ -14,18 +14,18 @@
       fit
       highlight-current-row
     >
-      <el-table-column align="center" label="index" width="95">
+      <el-table-column align="center" label="Index" width="95">
         <template slot-scope="scope">
           {{ scope.$index + 1 }}
         </template>
       </el-table-column>
-      <el-table-column label="name">
+      <el-table-column label="Workflow Solution Name">
         <template slot-scope="scope">
-          {{ scope.row.workflowSolution.name }}
+          {{ scope.row.name }}
         </template>
       </el-table-column>
       <el-table-column
-        label="operation"
+        label="Operation"
         align="center"
         width="320"
         class-name="small-padding fixed-width"
@@ -63,7 +63,7 @@ export default {
       fieldSolutionDetail({
         fieldSolutionId: this.$route.query.fieldSolutionId,
       }).then((res) => {
-        var data = res.data.data;
+        var data = res.data.workflowSolutionList;
         this.list = data;
         this.listLoading = false;
       });
@@ -91,7 +91,7 @@ export default {
         path: "/fieldSolution/selectWorkflow",
         query: {
           fieldSolutionId: this.$route.query.fieldSolutionId,
-          workflowSolutionId: row.workflowSolution.id,
+          workflowSolutionId: row.id,
         },
       });
     },
