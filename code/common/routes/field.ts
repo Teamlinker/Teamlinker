@@ -195,6 +195,7 @@ const api={
             req: <{
                 fieldSolutionWorkflowNodeFieldTypeId :string,
                 data:{
+                    id?:string,
                     value :string,
                     name :string,
                     selected :number

@@ -230,6 +230,7 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
     }
 
     async addWorkflowNodeFieldConfigs(fieldSolutionWorkflowNodeFieldTypeId :string,data:{
+        id?:string
         value :string,
         name :string,
         selected :number
@@ -263,11 +264,21 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
                 throw Err.Project.Field.fieldConfigValueAlreadySelected
             }
         }
+        let existIds=(await fieldSolutionMapper.listWorkflowNodeFieldConfig(fieldSolutionWorkflowNodeFieldTypeId)).map(item=>item.id);
         let arr:ICommon_Model_Field_Type_Config_Value[]=[];
         for(let obj of data) {
-            let ret=await fieldSolutionMapper.addWorkflowNodeFieldConfig(fieldSolutionWorkflowNodeFieldTypeId,obj.value,obj.name,obj.selected)
-            arr.push(ret)
+            if(obj.id) {
+                if(existIds.includes(obj.id)) {
+                    let ret=await fieldSolutionMapper.editWorkflowNodeFieldConfig(obj.id,obj.value,obj.name,obj.selected)
+                    arr.push(ret)
+                    existIds.splice(existIds.indexOf(obj.id),1)
+                }
+            } else {
+                let ret=await fieldSolutionMapper.addWorkflowNodeFieldConfig(fieldSolutionWorkflowNodeFieldTypeId,obj.value,obj.name,obj.selected)
+                arr.push(ret)
+            }
         }
+        await fieldSolutionMapper.deleteWorkflowNodeFieldConfigs(existIds)
         return arr;
     }
 

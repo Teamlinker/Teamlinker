@@ -660,6 +660,21 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
         }))
     }
 
+    async deleteWorkflowNodeFieldConfigs(fieldTypeConfigValueIds :string[]) {
+        if(!fieldTypeConfigValueIds) {
+            throw Err.Project.Field.fieldTypeConfigValueIdNotFound
+        }
+        if(fieldTypeConfigValueIds.length>0) {
+            let mysql=getMysqlInstance()
+            await mysql.execute(generateDeleteSql(fieldTypeConfigValueModel,{
+                id:{
+                    exp:"in",
+                    value:fieldTypeConfigValueIds
+                }
+            }))
+        }
+    }
+
     async getSolutionByFieldSolutionWorkflowNodeFieldTypeId(fieldSolutionWorkflowNodeFieldTypeId:string) {
         if(!fieldSolutionWorkflowNodeFieldTypeId) {
             throw Err.Project.Field.fieldSolutionWorkflowNodeFieldTypeNotFound
