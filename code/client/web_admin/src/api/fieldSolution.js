@@ -97,6 +97,14 @@ export function editField(data){
     data
   })
 }
+//查看工作流节点字段
+export function fieldDetails(params){
+  return request({
+    url: '/api/field/solution/field/item',
+    method: 'get',
+    params
+  })
+}
 //复制工作流节点字段
 export function copyField(data){
   return request({
@@ -105,11 +113,19 @@ export function copyField(data){
     data
   })
 }
-//添加节点字段值
+//添加节点字段值--select
 export function addFieldValue(data){
   return request({
     url: '/api/field/solution/field/config/item',
     method: 'post',
+    data
+  })
+}
+//添加节点字段值--label
+export function addFieldLabelValue(data){
+  return request({
+    url: '/api/field/solution/field/item/label',
+    method: 'put',
     data
   })
 }

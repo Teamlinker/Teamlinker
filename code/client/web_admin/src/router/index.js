@@ -93,24 +93,31 @@ export const constantRoutes = [
         meta: { title: '事务类型方案', icon: 'table' }
       },
       {
-        path:'workfow',
+        path:'workflow',
         name:'工作流',
         component: () => import('@/views/table/workflow'),
         meta: { title: '工作流', icon: 'table' }
       },
       {
-        path:'workfowDraw',
+        path:'workflowDraw',
         name:'工作流绘制',
         hidden:true,
         component: () => import('@/views/table/ef/panel'),
         meta: { title: '工作流', icon: 'table' }
       },
       {
-        path:'workfowSolution',
+        path:'workflowSolution',
         name:'工作流方案',
         component: () => import('@/views/table/workflowSolution'),
         meta: { title: '工作流方案', icon: 'table' }
       },
+      {
+        path:'configWorkflow',
+        hidden:true,
+        name:'配置工作流',
+        component: () => import('@/views/table/configWorkflowSolution/workflow'),
+        meta: { title: '配置工作流', icon: 'table' }
+      }
       // {
       //   path:'fieldSolution',
       //   name:'字段方案',
@@ -182,17 +189,23 @@ export const constantRoutes = [
       },
       {
         path: 'addWorkflowField2',
-        name: 'addWorkflowField',
+        name: 'addWorkflowField2',
         component: () => import('@/views/fieldsolution/addWorkflowField2'),
         hidden:true,
         meta: { title: 'addWorkflowField', icon: 'table' }
       },   
       {
         path: 'addWorkflowField3',
-        name: 'addWorkflowField',
         component: () => import('@/views/fieldsolution/addWorkflowField3'),
         hidden:true,
-        meta: { title: 'addWorkflowField', icon: 'table' }
+        meta: { title: 'Edit Field', icon: 'table' }
+      },    
+      {
+        path: 'addWorkflowField4',
+        name: 'addWorkflowField4',
+        component: () => import('@/views/fieldsolution/addWorkflowField4'),
+        hidden:true,
+        meta: { title: 'Edit Field', icon: 'table' }
       },    
     ]
   },
