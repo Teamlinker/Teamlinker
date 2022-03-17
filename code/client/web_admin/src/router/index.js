@@ -93,24 +93,31 @@ export const constantRoutes = [
         meta: { title: '事务类型方案', icon: 'table' }
       },
       {
-        path:'workfow',
+        path:'workflow',
         name:'工作流',
         component: () => import('@/views/table/workflow'),
         meta: { title: '工作流', icon: 'table' }
       },
       {
-        path:'workfowDraw',
+        path:'workflowDraw',
         name:'工作流绘制',
         hidden:true,
         component: () => import('@/views/table/ef/panel'),
         meta: { title: '工作流', icon: 'table' }
       },
       {
-        path:'workfowSolution',
+        path:'workflowSolution',
         name:'工作流方案',
         component: () => import('@/views/table/workflowSolution'),
         meta: { title: '工作流方案', icon: 'table' }
       },
+      {
+        path:'configWorkflow',
+        hidden:true,
+        name:'配置工作流',
+        component: () => import('@/views/table/configWorkflowSolution/workflow'),
+        meta: { title: '配置工作流', icon: 'table' }
+      }
       // {
       //   path:'fieldSolution',
       //   name:'字段方案',
