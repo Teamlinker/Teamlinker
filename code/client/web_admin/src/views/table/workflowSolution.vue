@@ -308,6 +308,15 @@ export default {
         },
       });
     },
+    bindIssueType(row){
+       this.$router.push({
+        path: "/example/configIssueType",
+        query: {
+          workflowSolutionId: row.id,
+          name: row.name,
+        },
+      });
+    }
   },
 };
 </script>

@@ -117,6 +117,13 @@ export const constantRoutes = [
         name:'配置工作流',
         component: () => import('@/views/table/configWorkflowSolution/workflow'),
         meta: { title: '配置工作流', icon: 'table' }
+      },
+      {
+        path:'configIssueType',
+        hidden:true,
+        name:'配置事务类型',
+        component: () => import('@/views/table/configWorkflowSolution/configIssueType'),
+        meta: { title: '配置事务类型', icon: 'table' }
       }
       // {
       //   path:'fieldSolution',
