@@ -140,3 +140,18 @@ export function getWorkflowList(params){
       params
     })
   }
+  export function solutionInfo(params){
+    return request({
+      url: '/api/workflow/solution/item',
+      method: 'get',
+      params
+    })
+  }
+  export function solutionAssign(data){
+    return request({
+      url: '/api/workflow/solution/assign',
+      method: 'put',
+      data
+    })
+  }
+  
