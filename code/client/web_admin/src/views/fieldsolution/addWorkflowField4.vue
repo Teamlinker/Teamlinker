@@ -6,7 +6,6 @@
       <div style="margin-top: 20px">
         <el-select
           v-model="value1"
-          :multiple="multiple"
           placeholder="please select"
         >
           <el-option
@@ -39,13 +38,12 @@ export default {
   data() {
     return {
       value1: [],
-      multiple: false,
       option: [
-        { value: "USER", label: "USER" },
-        { value: "RELEASE", label: "RELEASE" },
-        { value: "ISSUE", label: "ISSUE" },
-        { value: "MODULE", label: "MODULE" },
-        { value: "TAG", label: "TAG" },
+        { value: "0", label: "USER" },
+        { value: "1", label: "RELEASE" },
+        { value: "2", label: "ISSUE" },
+        { value: "3", label: "MODULE" },
+        { value: "4", label: "TAG" },
       ],
     };
   },
@@ -88,11 +86,6 @@ export default {
     },
   },
   created() {
-    if (this.$route.query.fieldType == 2) {
-      this.multiple = false;
-    } else {
-      this.multiple = true;
-    }
     if (this.$route.query.opeType == "edit") {
       // this.getFieldDetails();
     }

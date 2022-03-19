@@ -67,7 +67,7 @@ import { addFieldValue, fieldDetails } from "@/api/fieldSolution";
 export default {
   data() {
     return {
-      option: [{ name: "", value: "", selected: 0 }],
+      option: [{ id: "", name: "", value: "", selected: 0 }],
       form: {
         name: "",
         value: "",
@@ -96,10 +96,6 @@ export default {
       });
     },
     handleSave(formName) {
-      if (this.$route.query.opeType == "edit") {
-        this.handleUpdate();
-        return;
-      }
       let param = Object.assign(
         { data: this.option },
         {
@@ -117,12 +113,6 @@ export default {
             workflowSolutionId: this.$route.query.workflowSolutionId,
           },
         });
-      });
-    },
-    handleUpdate() {
-      this.$notify.info({
-        title: "消息",
-        message: "gengxinjiekou",
       });
     },
     addItem(item, index) {
