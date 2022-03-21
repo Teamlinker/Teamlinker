@@ -136,6 +136,7 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
         }))
         return obj;
     }
+
     async bindIssueTypeSolutionList(workflowSolutionId:string,issueTypeSolutionIds:string[]) {
         if(!issueTypeSolutionIds || issueTypeSolutionIds.length==0) {
             throw Err.Project.Issue.issueTypeSolutionNotFound

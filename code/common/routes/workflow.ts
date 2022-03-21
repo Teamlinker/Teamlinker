@@ -249,6 +249,15 @@ const api={
             res:{},
             permission:[Permission_Types.Admin.ADMIN]
         },
+        getBindWorkflowSolution:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/solution/bind",
+            req:<{
+                issueTypeSolutionId:string,
+            }>{},
+            res:<ICommon_Model_Workflow_Solution>{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
     }
 }
 export=api

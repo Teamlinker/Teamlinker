@@ -170,12 +170,17 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
         obj.setItem(ret)
         return obj;
     }
+
     async bindIssueTypeSolutions(issueTypeSolutionIds:string[]) {
+        let existIssueTypeSolutionIds=[];
         for(let issueTypeSolutionId of issueTypeSolutionIds) {
             let arr=await workflowSolutionMapper.getItemsByIssueTypeSolutionId(issueTypeSolutionId)
             if(arr && arr.length>0) {
-                throw Err.Project.Workflow.issueTypeSolutionDuplicate
+                existIssueTypeSolutionIds.push(issueTypeSolutionId)
             }
+        }
+        if(existIssueTypeSolutionIds.length>0) {
+            await this.unbindIssueTypeSolutions(existIssueTypeSolutionIds)
         }
         await workflowSolutionMapper.bindIssueTypeSolutionList(this.getId(),issueTypeSolutionIds)
     }

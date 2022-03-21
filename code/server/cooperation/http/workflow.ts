@@ -277,5 +277,12 @@ class WorkflowController {
         await obj.removeWorkflow(workflowId)
         return
      }
-
+     @DHttpApi(workflowApi.routes.getBindWorkflowSolution)
+     async getBindWorkflowSolution(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.getBindWorkflowSolution.res> {
+         let obj=await WorkflowSolutionService.getItemByIssueTypeSolutionId(issueTypeSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        return obj.getItem()
+     }
 }
