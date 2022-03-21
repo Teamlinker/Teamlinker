@@ -202,6 +202,10 @@ export namespace Err {
             issueTypeSolutionDuplicate:{
                 code:3513,
                 msg:"issue type solution duplicate"
+            },
+            unbindReservedWorkflowSolutionForbidden:{
+                code:3514,
+                msg:"unbind reserved workflow solution forbidden"
             }
         },
         Field:{

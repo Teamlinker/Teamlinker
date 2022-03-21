@@ -185,7 +185,12 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
         await workflowSolutionMapper.bindIssueTypeSolutionList(this.getId(),issueTypeSolutionIds)
     }
     async unbindIssueTypeSolutions(issueTypeSolutionIds:string[]=null) {
+        if(this.getItem().reserved) {
+            throw Err.Project.Workflow.unbindReservedWorkflowSolutionForbidden
+        }
         await workflowSolutionMapper.unbindIssueTypeSolution(this.getId(),issueTypeSolutionIds)
+        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem()
+        objWorkflowReserved.bindIssueTypeSolutions(issueTypeSolutionIds)
     }
     async getIssueTypeAndWorkflowList() {
         let arr:ICommon_Route_Res_WorkflowSolution_Info["data"]=[]
