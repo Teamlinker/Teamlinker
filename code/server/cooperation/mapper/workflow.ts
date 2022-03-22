@@ -210,6 +210,25 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
             }})
         }))
     }
+
+    async clearIssueTypeSolution(issueTypeSolutionIds:string[]) {
+        if(!issueTypeSolutionIds) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(workflowSolutionIssueTypeSolutionModel,{
+            issue_type_solution_id:{
+                exp:"in",
+                value:issueTypeSolutionIds
+            }
+        }))
+        await mysql.execute(generateDeleteSql(workflowSolutionWorkflowIssueTypeModel,{
+            issue_type_solution_id:{
+                exp:"in",
+                value:issueTypeSolutionIds
+            }
+        }))
+    }
     async workflowIssueTypeList(workflowSolutionId:string,issueTypeSolutionId:string):Promise<{
         issueType:ICommon_Model_Issue_Type,
         workflow:ICommon_Model_Workflow

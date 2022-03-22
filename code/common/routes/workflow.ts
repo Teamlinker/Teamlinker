@@ -201,7 +201,7 @@ const api={
             res:{},
             permission:[Permission_Types.Admin.ADMIN]
         },
-        solutionUnBind:{
+        solutionReset:{
             method:ECommon_HttpApi_Method.PUT,
             path:"/solution/unbind",
             req:<{
