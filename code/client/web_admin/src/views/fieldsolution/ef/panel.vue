@@ -4,32 +4,8 @@
       <!--顶部工具菜单-->
       <el-col :span="24">
         <div class="ef-tooltar">
-          <el-link type="primary" :underline="false">{{ title }}</el-link>
-          <el-divider direction="vertical"></el-divider>
-          <el-button
-            type="text"
-            icon="el-icon-plus"
-            size="large"
-            @click="zoomAdd"
-          ></el-button>
-          <el-divider direction="vertical"></el-divider>
-          <el-button
-            type="text"
-            icon="el-icon-minus"
-            size="large"
-            @click="zoomSub"
-          ></el-button>
-          <div style="float: right; margin-right: 5px">
-            <el-button
-              type="info"
-              plain
-              round
-              icon="el-icon-document"
-              @click="openHelp"
-              size="mini"
-              >帮助</el-button
-            >
-          </div>
+         <div class="workflow-title">{{title}}</div>
+         <div class="workflow-description">{{description}}</div>
         </div>
       </el-col>
     </el-row>
@@ -166,6 +142,7 @@ export default {
       }).then((res) => {
         const data = res.data.data
         this.title = res.data.name
+        this.description = res.data.description
         const nodes = data.nodes.map((item) => {
           return {
             ...item,
@@ -712,12 +689,6 @@ export default {
       this.zoom = this.zoom - 0.1
       this.$refs.efContainer.style.transform = `scale(${this.zoom})`
       this.jsPlumb.setZoom(this.zoom)
-    },
-    openHelp() {
-      this.flowHelpVisible = true
-      this.$nextTick(function () {
-        this.$refs.flowHelp.init()
-      })
     }
   }
 }

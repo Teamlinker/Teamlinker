@@ -4,32 +4,8 @@
       <!--顶部工具菜单-->
       <el-col :span="24">
         <div class="ef-tooltar">
-          <el-link type="primary" :underline="false">{{ title }}</el-link>
-          <el-divider direction="vertical"></el-divider>
-          <el-button
-            type="text"
-            icon="el-icon-plus"
-            size="large"
-            @click="zoomAdd"
-          ></el-button>
-          <el-divider direction="vertical"></el-divider>
-          <el-button
-            type="text"
-            icon="el-icon-minus"
-            size="large"
-            @click="zoomSub"
-          ></el-button>
-          <div style="float: right; margin-right: 5px">
-            <el-button
-              type="info"
-              plain
-              round
-              icon="el-icon-document"
-              @click="openHelp"
-              size="mini"
-              >帮助</el-button
-            >
-          </div>
+         <div class="workflow-title">{{title}}</div>
+         <div class="workflow-description">{{description}}</div>
         </div>
       </el-col>
     </el-row>
@@ -83,7 +59,6 @@ import { jsPlumb } from "jsplumb";
 import { easyFlowMixin } from "./mixins";
 import flowNode from "./node";
 import nodeMenu from "./node_menu";
-import FlowHelp from "./help";
 import FlowNodeForm from "./node_form";
 import AddAction from "./action.vue";
 import lodash from "lodash";
@@ -99,6 +74,7 @@ export default {
   data() {
     return {
       title: "",
+      description:"",
       // jsPlumb 实例
       jsPlumb: null,
       // 控制画布销毁
@@ -129,7 +105,6 @@ export default {
     flowNode,
     nodeMenu,
     FlowNodeForm,
-    FlowHelp,
     AddAction,
   },
   directives: {
@@ -181,6 +156,7 @@ export default {
       }).then((res) => {
         const data = res.data.data;
         this.title = res.data.name;
+        this.description = res.data.description;
         const nodes = data.nodes.map((item) => {
           return {
             ...item,
@@ -268,6 +244,7 @@ export default {
               from: this.actionSourceId,
               to: this.actionTargetId,
             });
+            
             this.actionVisible = true;
             for (let i = 0; i < this.data.nodeList.length; i++) {
               const nodeId = this.data.nodeList[i].id;
@@ -404,7 +381,6 @@ export default {
         this.actionVisible = false;
         const data = res.data;
         const { source_node_id, dest_node_id, id, name, description } = data;
-
         this.setLineLabel({
           id: id,
           from: source_node_id,
@@ -417,9 +393,7 @@ export default {
     },
     // 加载流程图
     loadEasyFlow() {
-      // 初始化节点
-
-      // 初始化连线
+     // 初始化连线
       for (var i = 0; i < this.data.lineList.length; i++) {
         let line = this.data.lineList[i];
         var connParam = {
@@ -444,12 +418,6 @@ export default {
         source: from,
         target: to,
       })[0];
-      if (!label || label === "") {
-        conn.removeClass("flowLabel");
-        conn.addClass("emptyFlowLabel");
-      } else {
-        conn.addClass("flowLabel");
-      }
       conn.setLabel({
         label: label,
       });
@@ -460,6 +428,12 @@ export default {
           line.description = description;
         }
       });
+      if (!label || label === "") {
+        conn.removeClass("flowLabel");
+        conn.addClass("emptyFlowLabel");
+      } else {
+        conn.addClass("flowLabel");
+      }
     },
     editAction(line) {
       const params = {
@@ -650,28 +624,17 @@ export default {
         { anchors: "LeftMiddle" },
         this.sourceEndPoint
       );
-      // const tip = new Tooltip(point1.canvas, {
-      //   title: "222",
-      //   placement: "top",
-      //   trigger: "manual",
-      //   container: point1.canvas,
-      // });
-      point1.bind("mouseover", () => {
-        // alert(1);
-        this.endTT = true;
-      });
-      // point1.bind("mouseout", () => {
-      //   // alert(2);
-      //   this.endTT = false;
-      // });
     },
     mouseoverNode(nodeId) {
-      this.nodeAddPoint(nodeId);
+     this.nodeAddPoint(nodeId);
+      for (let i = 0; i < this.data.nodeList.length; i++) {
+        const nodeId2 = this.data.nodeList[i].id;
+        if (nodeId2 !== nodeId) {
+          this.hideEndPoint(nodeId2);
+        }
+      }
     },
     mouseoutNode(nodeId) {
-      if (nodeId !== this.activeElement.nodeId && !this.endTT) {
-        this.hideEndPoint(nodeId);
-      }
     },
     clickNode(nodeId, nodeName) {
       this.nodeAddPoint(nodeId);
@@ -756,13 +719,7 @@ export default {
       this.zoom = this.zoom - 0.1;
       this.$refs.efContainer.style.transform = `scale(${this.zoom})`;
       this.jsPlumb.setZoom(this.zoom);
-    },
-    openHelp() {
-      this.flowHelpVisible = true;
-      this.$nextTick(function () {
-        this.$refs.flowHelp.init();
-      });
-    },
+    }
   },
 };
 </script>

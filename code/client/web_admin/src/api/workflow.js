@@ -154,4 +154,11 @@ export function getWorkflowList(params){
       data
     })
   }
+  export function getBindWorkflowSolution(params){
+    return request({
+      url: '/api/workflow/solution/bind',
+      method: 'get',
+      params
+    })
+  }
   

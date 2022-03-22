@@ -1,7 +1,7 @@
 <template>
     <div class="flow-menu" ref="tool">
         <div v-for="menu  in  menuList" :key="menu.id">
-            <span class="ef-node-pmenu" @click="menu.open = !menu.open"><i :class="{'el-icon-caret-bottom': menu.open,'el-icon-caret-right': !menu.open}"></i>&nbsp;{{menu.name}}</span>
+            <span class="ef-node-pmenu"><i class="el-icon-plus"></i>{{menu.name}}</span>
             <ul v-show="menu.open" class="ef-node-menu-ul">
                 <draggable @end="end" @start="move" v-model="menu.children" :options="draggableOptions">
                     <li v-for="subMenu in menu.children" class="ef-node-menu-li" :key="subMenu.id" :type="subMenu.type">
@@ -41,14 +41,14 @@
                     {
                         id: '1',
                         type: 'group',
-                        name: '节点',
+                        name: 'Add Node',
                         ico: 'el-icon-video-play',
                         open: true,
                         children: [
                             {
                                 id: '11',
                                 type: 'timer',
-                                name: 'node',
+                                name: 'nodeName',
                                 // ico: 'el-icon-time',
                                 // 自定义覆盖样式
                                 style: {}
