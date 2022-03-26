@@ -10,6 +10,7 @@ import { commentModel } from './../../../common/model/comment';
 import { projectIssueModel } from './../../../common/model/project_issue';
 import { projectLabelModel } from './../../../common/model/project_label';
 import { projectModuleModel } from './../../../common/model/project_module';
+import { projectReleaseModel } from './../../../common/model/project_release';
 import { DPermission, PermissionBase } from './base';
 import { PermissionTeam } from './team';
 
@@ -18,11 +19,11 @@ export type IPermission_Project =string[]
 abstract class PermissionProject extends PermissionBase<IPermission_Project> {
     fieldName="projectId"
     keys=["permission:project:{0}:user","permission:project:{0}:team","permission:user:{0}:project:{1}"]
-    async translateToField({commentId,projectIssueId,userId,tagId,moduleId}: { [param: string]: any; userId?: string; isAdmin?: boolean;commentId:string,projectIssueId:string,tagId:string,moduleId:string }): Promise<string> {
+    async translateToField({commentId,projectIssueId,tagId,moduleId,projectReleaseId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,tagId:string,moduleId:string,projectReleaseId:string }): Promise<string> {
         let mysql=getMysqlInstance()
         let projectId:string
         if(commentId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectIssueComment(commentId,userId)
+            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectIssueComment(commentId)
             let exists=await objRedis.exists()
             if(exists) {
                 projectId=await objRedis.get()
@@ -52,7 +53,7 @@ abstract class PermissionProject extends PermissionBase<IPermission_Project> {
             }
             return projectId;
         } else if(projectIssueId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectIssue(projectIssueId,userId)
+            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectIssue(projectIssueId)
             let exists=await objRedis.exists()
             if(exists) {
                 projectId=await objRedis.get()
@@ -67,7 +68,7 @@ abstract class PermissionProject extends PermissionBase<IPermission_Project> {
             } 
             return projectId;
         } else if(tagId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromLabel(tagId,userId)
+            let objRedis=REDIS_GATEWAY.Permission.projectIdFromLabel(tagId)
             let exists=await objRedis.exists()
             if(exists) {
                 projectId=await objRedis.get()
@@ -82,13 +83,28 @@ abstract class PermissionProject extends PermissionBase<IPermission_Project> {
             } 
             return projectId;
         } else if(moduleId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectModule(moduleId,userId)
+            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectModule(moduleId)
             let exists=await objRedis.exists()
             if(exists) {
                 projectId=await objRedis.get()
             } else {
                 let ret=await mysql.executeOne(generateQuerySql(projectModuleModel,["project_id"],{
                     id:moduleId
+                }))
+                if(ret) {
+                    projectId=ret.project_id
+                    await objRedis.set(projectId)
+                }
+            } 
+            return projectId;
+        } else if(projectReleaseId) {
+            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectRelease(projectReleaseId)
+            let exists=await objRedis.exists()
+            if(exists) {
+                projectId=await objRedis.get()
+            } else {
+                let ret=await mysql.executeOne(generateQuerySql(projectReleaseModel,["project_id"],{
+                    id:projectReleaseId
                 }))
                 if(ret) {
                     projectId=ret.project_id

@@ -4,6 +4,7 @@ import "../http/issue";
 import "../http/issueType";
 import "../http/module";
 import "../http/project";
+import "../http/release";
 import "../http/tag";
 import "../http/workflow";
 export default class Cooperation extends Application {

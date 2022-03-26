@@ -10,6 +10,7 @@ import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solutio
 import { ICommon_Model_Project_Issue } from './../model/project_issue';
 import { ICommon_Model_Project_Issue_Field_Value } from './../model/project_issue_field_value';
 import { ECommon_Model_Project_Member_Type } from './../model/project_member';
+import { ICommon_Model_Project_Release } from './../model/project_release';
 import { ICommon_Model_Workflow } from './../model/workflow';
 import { ICommon_Model_Workflow_Action } from './../model/workflow_action';
 import { ICommon_Model_Workflow_Node } from './../model/workflow_node';
@@ -176,4 +177,29 @@ export interface ICommon_Route_Res_Project_filter {
     reporter_id:string,
     created_time:Date|string,
     created_by:string
+}
+
+export interface ICommon_Route_Res_Release_List {
+    count:number,
+    totalPage:number,
+    page:number,
+    data:ICommon_Route_Res_Release_Item[]
+}
+
+export interface ICommon_Route_Res_Release_Item extends ICommon_Model_Project_Release {
+    notstart:number,
+    inprogress:number,
+    done:number
+}
+
+export interface ICommon_Route_Res_Release_Info extends ICommon_Route_Res_Release_Item{
+    issueList:(Omit<ICommon_Model_Project_Issue,"issue_type_id"|"workflow_node_id"> & {
+        issueType:ICommon_Model_Issue_Type,
+        workflowNode:ICommon_Model_Workflow_Node
+    })[]
+}
+
+export interface ICommon_Route_Res_Release_IfCanRelease {
+    result:boolean,
+    unDoneIssueList?:ICommon_Model_Project_Issue[]
 }

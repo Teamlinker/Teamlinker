@@ -258,6 +258,32 @@ export namespace Err {
             relatedExists:{
                 code:3703,
                 msg:"related issue exists"
+            },
+            issueProjectNotMatch:{
+                code:3704,
+                msg:"issue project not match"
+            }
+        },
+        Release: {
+            releaseNotFound:{
+                code:3800,
+                msg:"release not found"
+            },
+            releaseIssueDuplicate:{
+                code:3801,
+                msg:"release issue duplicate"
+            },
+            releaseSizeEmpty:{
+                code:3802,
+                msg:"release size empty"
+            },
+            releaseDateError:{
+                code:3803,
+                msg:"release date error"
+            },
+            releaseStartDateNotLessReleaseDate:{
+                code:3804,
+                msg:"release start date not less release date"
             }
         }
     }

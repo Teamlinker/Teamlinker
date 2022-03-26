@@ -519,7 +519,7 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
 },objExpr?:{
     [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
         value:EXPRVALUE,
-        model:T1|T2|T3|T3
+        model:T1|T2|T3|T4
     }
 },exprMode?:"and"|"or",order?:{
     field:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"]),
@@ -633,13 +633,15 @@ export function generateCountSql<T extends BaseModel>(model:T,objExpr?:{
 },exprMode?:"and"|"or"):{
     value:string,
     type:{
-        [key in keyof T["model"]]:T["model"][key]
+        "count(1)":string
     }
 } {
     let expr=generateExp(objExpr,exprMode);
     return {
         value:`select count(1) from ${model.table}${expr?(" where "+expr):""}`,
-        type:model.model
+        type:{
+            "count(1)":""
+        }
     }
 }
 
