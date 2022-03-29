@@ -201,7 +201,7 @@ const api={
             res:{},
             permission:[Permission_Types.Admin.ADMIN]
         },
-        solutionUnBind:{
+        solutionReset:{
             method:ECommon_HttpApi_Method.PUT,
             path:"/solution/unbind",
             req:<{
@@ -247,6 +247,15 @@ const api={
                 workflowId:string
             }>{},
             res:{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
+        getBindWorkflowSolution:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/solution/bind",
+            req:<{
+                issueTypeSolutionId:string,
+            }>{},
+            res:<ICommon_Model_Workflow_Solution>{},
             permission:[Permission_Types.Admin.ADMIN]
         },
     }

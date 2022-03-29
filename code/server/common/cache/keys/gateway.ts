@@ -16,24 +16,29 @@ export namespace REDIS_GATEWAY {
         return obj;
     }
     export namespace Permission {
-        let commentCacheKey="permission:user:{0}:projectIssueComment:{1}"
-        let projectIssueCacheKey="permission:user:{0}:projectIssue:{1}"
-        let labelCacheKey="permission:user:{0}:label:{1}"
-        let moduleCacheKey="permission:user:{0}:module:{1}"
-        export function projectIdFromProjectIssueComment(commentId:string,userId:string) {
-            let obj=new RedisStringKey(StringUtil.format(commentCacheKey,userId,commentId),cacheRedisType<string>().String,1000*10);
+        let commentCacheKey="permission:projectIssueComment:{0}"
+        let projectIssueCacheKey="permission:projectIssue:{0}"
+        let labelCacheKey="permission:label:{0}"
+        let moduleCacheKey="permission:module:{0}"
+        let releaseCacheKey="permission:release:{0}"
+        export function projectIdFromProjectIssueComment(commentId:string) {
+            let obj=new RedisStringKey(StringUtil.format(commentCacheKey,commentId),cacheRedisType<string>().String,1000*10);
             return obj;
         }
-        export function projectIdFromProjectIssue(projectIssueId:string,userId:string) {
-            let obj=new RedisStringKey(StringUtil.format(projectIssueCacheKey,userId,projectIssueId),cacheRedisType<string>().String,1000*10);
+        export function projectIdFromProjectIssue(projectIssueId:string) {
+            let obj=new RedisStringKey(StringUtil.format(projectIssueCacheKey,projectIssueId),cacheRedisType<string>().String,1000*10);
             return obj;
         }
-        export function projectIdFromLabel(labelId:string,userId:string) {
-            let obj=new RedisStringKey(StringUtil.format(labelCacheKey,userId,labelId),cacheRedisType<string>().String,1000*10);
+        export function projectIdFromLabel(labelId:string) {
+            let obj=new RedisStringKey(StringUtil.format(labelCacheKey,labelId),cacheRedisType<string>().String,1000*10);
             return obj;
         }
-        export function projectIdFromProjectModule(moduleId:string,userId:string) {
-            let obj=new RedisStringKey(StringUtil.format(moduleCacheKey,userId,moduleId),cacheRedisType<string>().String,1000*10);
+        export function projectIdFromProjectModule(moduleId:string) {
+            let obj=new RedisStringKey(StringUtil.format(moduleCacheKey,moduleId),cacheRedisType<string>().String,1000*10);
+            return obj;
+        }
+        export function projectIdFromProjectRelease(releaseId:string) {
+            let obj=new RedisStringKey(StringUtil.format(releaseCacheKey,releaseId),cacheRedisType<string>().String,1000*10);
             return obj;
         }
     }

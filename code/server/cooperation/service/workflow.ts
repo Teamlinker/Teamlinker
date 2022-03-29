@@ -170,18 +170,37 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
         obj.setItem(ret)
         return obj;
     }
+
     async bindIssueTypeSolutions(issueTypeSolutionIds:string[]) {
+        let existIssueTypeSolutionIds=[];
         for(let issueTypeSolutionId of issueTypeSolutionIds) {
             let arr=await workflowSolutionMapper.getItemsByIssueTypeSolutionId(issueTypeSolutionId)
             if(arr && arr.length>0) {
-                throw Err.Project.Workflow.issueTypeSolutionDuplicate
+                existIssueTypeSolutionIds.push(issueTypeSolutionId)
             }
+        }
+        if(existIssueTypeSolutionIds.length>0) {
+            await WorkflowSolutionService.clearIssueTypeSolutions(existIssueTypeSolutionIds)
         }
         await workflowSolutionMapper.bindIssueTypeSolutionList(this.getId(),issueTypeSolutionIds)
     }
     async unbindIssueTypeSolutions(issueTypeSolutionIds:string[]=null) {
         await workflowSolutionMapper.unbindIssueTypeSolution(this.getId(),issueTypeSolutionIds)
     }
+
+    static async clearIssueTypeSolutions(issueTypeSolutionIds:string[]) {
+        await workflowSolutionMapper.clearIssueTypeSolution(issueTypeSolutionIds)
+    }
+
+    async resetIssueTypeSolutions(issueTypeSolutionIds:string[]=null) {
+        if(this.getItem().reserved) {
+            throw Err.Project.Workflow.unbindReservedWorkflowSolutionForbidden
+        }
+        await workflowSolutionMapper.unbindIssueTypeSolution(this.getId(),issueTypeSolutionIds)
+        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem()
+        objWorkflowReserved.bindIssueTypeSolutions(issueTypeSolutionIds)
+    }
+
     async getIssueTypeAndWorkflowList() {
         let arr:ICommon_Route_Res_WorkflowSolution_Info["data"]=[]
         let objIssueTypeSolutionList=await workflowSolutionMapper.getIssueTypeSolutionList(this.getId())

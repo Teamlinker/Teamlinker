@@ -136,6 +136,7 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
         }))
         return obj;
     }
+
     async bindIssueTypeSolutionList(workflowSolutionId:string,issueTypeSolutionIds:string[]) {
         if(!issueTypeSolutionIds || issueTypeSolutionIds.length==0) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
@@ -207,6 +208,25 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
                 exp:"in",
                 value:issueTypeSolutionIds
             }})
+        }))
+    }
+
+    async clearIssueTypeSolution(issueTypeSolutionIds:string[]) {
+        if(!issueTypeSolutionIds) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(workflowSolutionIssueTypeSolutionModel,{
+            issue_type_solution_id:{
+                exp:"in",
+                value:issueTypeSolutionIds
+            }
+        }))
+        await mysql.execute(generateDeleteSql(workflowSolutionWorkflowIssueTypeModel,{
+            issue_type_solution_id:{
+                exp:"in",
+                value:issueTypeSolutionIds
+            }
         }))
     }
     async workflowIssueTypeList(workflowSolutionId:string,issueTypeSolutionId:string):Promise<{

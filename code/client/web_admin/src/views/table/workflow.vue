@@ -169,7 +169,7 @@ export default {
     },
     handleDraw(row){
      this.$router.push({
-       path:'/example/workfowDraw',
+       path:'/example/workflowDraw',
        query:{
          workflowId:row.id
        }

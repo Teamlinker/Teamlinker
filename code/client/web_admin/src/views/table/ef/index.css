@@ -7,12 +7,11 @@
 
 /*顶部工具栏*/
 .ef-tooltar {
-    padding-left: 10px;
     box-sizing: border-box;
-    height: 42px;
-    line-height: 42px;
+    padding:10px;
     z-index: 3;
     border-bottom: 1px solid #DADCE0;
+    line-height:24px;
 }
 
 .jtk-overlay {
@@ -187,11 +186,12 @@
 
 /* 连线中的label 样式*/
 .jtk-overlay.flowLabel:not(.aLabel) {
-    padding: 4px 10px;
+    /* padding: 4px 10px; */
     background-color: white;
     color: #565758 !important;
-    border: 1px solid #E0E3E7;
-    border-radius: 10px;
+    font-size:12px;
+    /* border: 1px solid #E0E3E7; */
+    /* border-radius: 10px; */
 }
 
 /* label 为空的样式 */
@@ -225,4 +225,13 @@
 
 .ef-drop-hover{
     border: 1px dashed #1879FF;
+}
+.workflow-title{
+   font-size:20px;
+   margin-bottom:5px;
+   color:#000;
+}
+.workflow-description{
+   font-size:14px;
+   color:#333;
 }

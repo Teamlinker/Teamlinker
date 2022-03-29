@@ -56,12 +56,13 @@ router.beforeEach((to, from, next) => {
       next({ path: setting.indexPage })
       NProgress.done()
     }else{
-      const hasRoute = router.hasRoute(to.name!)
-      isGetMenus({ to, from, next, hasRoute })
-      if (allowList.includes(to.name as string) || hasRoute) {
-        // 在免登录名单，直接进入
-        next()
-      }
+      // const hasRoute = router.hasRoute(to.name!)
+      // isGetMenus({ to, from, next, hasRoute })
+      // if (allowList.includes(to.name as string) || hasRoute) {
+      //   // 在免登录名单，直接进入
+      //   next()
+      // }
+      next()
       NProgress.done()
     }
   }else{

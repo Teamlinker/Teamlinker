@@ -223,13 +223,13 @@ class WorkflowController {
         await obj.bindIssueTypeSolutions([issueTypeSolutionId])
         return
      }
-     @DHttpApi(workflowApi.routes.solutionUnBind)
-     async solutionUnBind(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.solutionUnBind.res> {
+     @DHttpApi(workflowApi.routes.solutionReset)
+     async solutionReset(@DHttpReqParamRequired("workflowSolutionId") workflowSolutionId:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.solutionReset.res> {
          let obj=await WorkflowSolutionService.getItemById(workflowSolutionId);
          if (!obj) {
             throw Err.Project.Workflow.workflowSolutionNotFound
         }
-        await obj.unbindIssueTypeSolutions([issueTypeSolutionId])
+        await obj.resetIssueTypeSolutions([issueTypeSolutionId])
         return
      }
      @DHttpApi(workflowApi.routes.solutionCopy)
@@ -277,5 +277,12 @@ class WorkflowController {
         await obj.removeWorkflow(workflowId)
         return
      }
-
+     @DHttpApi(workflowApi.routes.getBindWorkflowSolution)
+     async getBindWorkflowSolution(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof workflowApi.routes.getBindWorkflowSolution.res> {
+         let obj=await WorkflowSolutionService.getItemByIssueTypeSolutionId(issueTypeSolutionId);
+         if (!obj) {
+            throw Err.Project.Workflow.workflowSolutionNotFound
+        }
+        return obj.getItem()
+     }
 }
