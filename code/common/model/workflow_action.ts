@@ -3,7 +3,6 @@ import { BaseModel } from "./base"
 export interface ICommon_Model_Workflow_Action {
     id :string ,
   name :string,
-  reserved :number,
   description :string,
   source_node_id :string ,
   dest_node_id :string ,

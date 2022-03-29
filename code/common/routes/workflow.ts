@@ -59,6 +59,15 @@ const api={
             res:{},
             permission:[Permission_Types.Admin.ADMIN]
         },
+        copy:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/copy",
+            req:<{
+                workflowId:string
+            }>{},
+            res:<ICommon_Model_Workflow>{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
         addNode:{
             method:ECommon_HttpApi_Method.POST,
             path:"/node",
