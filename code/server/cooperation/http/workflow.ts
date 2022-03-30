@@ -65,6 +65,16 @@ class WorkflowController {
         return;
     }
 
+    @DHttpApi(workflowApi.routes.copy)
+    async copy(@DHttpReqParamRequired("workflowId") workflowId: string): Promise<typeof workflowApi.routes.copy.res> {
+        let obj = await WorkflowService.getItemById(workflowId)
+        if (!obj) {
+            throw Err.Project.Workflow.workflowNotFound
+        }
+        let ret=await obj.copy()
+        return ret.getItem();
+    }
+
     @DHttpApi(workflowApi.routes.addNode)
     async addNode(@DHttpReqParamRequired("workflowId") workflowId: string, @DHttpReqParamRequired("name") name: string, @DHttpReqParam("description") description: string, @DHttpReqParam("status") status: ECommon_Model_Workflow_Node_Status,@DHttpReqParamRequired("x") x: number,@DHttpReqParamRequired("y") y: number): Promise<typeof workflowApi.routes.addNode.res> {
         let obj = new WorkflowNodeService;
@@ -86,7 +96,7 @@ class WorkflowController {
         if (!obj) {
             throw Err.Project.Workflow.workflowNodeNotFound
         }
-        if (obj.getItem().reserved && status) {
+        if ((obj.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART && status!==undefined && status!==ECommon_Model_Workflow_Node_Status.NOTSTART) || (obj.getItem().status!=ECommon_Model_Workflow_Node_Status.NOTSTART && status===ECommon_Model_Workflow_Node_Status.NOTSTART)) {
             throw Err.Project.Workflow.workflowNodeForbidden
         }
         obj.assignItem({
@@ -106,7 +116,7 @@ class WorkflowController {
         if (!obj) {
             throw Err.Project.Workflow.workflowNodeNotFound
         }
-        if (obj.getItem().reserved) {
+        if (obj.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART) {
             throw Err.Project.Workflow.workflowNodeForbidden
         }
         await obj.delete()
@@ -133,9 +143,6 @@ class WorkflowController {
         if (!obj) {
             throw Err.Project.Workflow.workflowActionNotFound
         }
-        if (obj.getItem().reserved) {
-            throw Err.Project.Workflow.workflowActionForbidden
-        }
         obj.assignItem({
             name: name,
             description: description,
@@ -151,9 +158,6 @@ class WorkflowController {
         let obj = await WorkflowActionService.getItemById(workflowActionId);
         if (!obj) {
             throw Err.Project.Workflow.workflowActionNotFound
-        }
-        if (obj.getItem().reserved) {
-            throw Err.Project.Workflow.workflowActionForbidden
         }
         await obj.delete()
         return;

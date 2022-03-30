@@ -7,7 +7,7 @@ import { Err } from '../../../common/status/error';
 import { keys } from "../../../common/transform";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from "../../common/entity/mapper";
-import { generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
+import { generateBatchCreateSql, generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
 import { issueTypeModel } from './../../../common/model/issue_type';
 import { ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel } from './../../../common/model/issue_type_solution';
 import { issueTypeSolutionIssueTypeModel } from './../../../common/model/issue_type_solution_issue_type';
@@ -67,6 +67,33 @@ class WorkflowMapper extends Mapper<typeof workflowModel> {
         },{
             workflow_id:workflowId
         }))
+    }
+
+    async copyItem(originWorkflowId:string,newWorkflowId:string) {
+        if(!originWorkflowId || !newWorkflowId) {
+            throw Err.Project.Workflow.workflowNotFound
+        }
+        let mysql=getMysqlInstance()
+        let nodeList=await this.nodeList(originWorkflowId)
+        let actionList=await this.actionList(originWorkflowId)
+        for(let obj of nodeList) {
+            let oldId=obj.id;
+            obj.id=await generateSnowId()
+            obj.workflow_id=newWorkflowId
+            for(let action of actionList) {
+                if(action.dest_node_id==oldId) {
+                    action.dest_node_id=obj.id
+                } else if(action.source_node_id==oldId) {
+                    action.source_node_id=obj.id
+                }
+            }
+        }
+        for(let obj of actionList) {
+            obj.id=await generateSnowId()
+            obj.workflow_id=newWorkflowId
+        }
+        await mysql.execute(generateBatchCreateSql(workflowNodeModel,nodeList))
+        await mysql.execute(generateBatchCreateSql(workflowActionModel,actionList))
     }
 
     async checkNode(workflowId:string,workflowNodeId:string):Promise<boolean> {

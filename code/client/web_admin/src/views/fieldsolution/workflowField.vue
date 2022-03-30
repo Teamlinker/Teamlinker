@@ -57,7 +57,7 @@
             <el-button type="text" size="mini" @click="handleEdit(row)">
               edit
             </el-button>
-             <el-button type="text" size="mini" @click="handleCopy(row)">
+            <el-button type="text" size="mini" @click="handleCopy(row)">
               copy
             </el-button>
             <el-button type="text" size="mini" @click="handleDelete(row)">
@@ -67,19 +67,118 @@
         </el-table-column>
       </el-table>
     </div>
+
+    <el-dialog title="copy" :visible.sync="dialogFormVisible">
+      <el-form
+        :model="ruleForm"
+        :rules="rules"
+        ref="ruleForm"
+        label-width="150px"
+        class="demo-ruleForm"
+      >
+        <el-form-item label="fieldSolution" prop="fieldSolution">
+          <el-select
+            v-model="ruleForm.fieldSolution"
+            placeholder="please select fieldSolution" @change="fieldSolutionChange"
+          >
+            <el-option
+              v-for="item in fieldSolutionListOption"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="workflowSolution" prop="workflowSolution">
+          <el-select
+            v-model="ruleForm.workflowSolution"
+            placeholder="please select workflowSolution"
+          >
+            <el-option
+              v-for="item in workflowSolutionListOption"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="workflow" prop="workflow">
+          <el-select
+            v-model="ruleForm.workflow"
+            placeholder="please select workflow"
+          >
+            <el-option
+              v-for="item in workflowListOption"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="copy('ruleForm')"> 确定 </el-button>
+          <el-button @click="dialogFormVisible = false"> 取消 </el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 <script>
 import "@/styles/common.scss";
-import { workflowNodeList, deleteField,copyField } from "@/api/fieldSolution";
-import { workflowDetail } from "@/api/workflow";
+import {
+  workflowNodeList,
+  deleteField,
+  copyField,
+  getFieldSolutionList,
+  fieldSolutionDetail
+} from "@/api/fieldSolution";
+import { workflowDetail, solutionList } from "@/api/workflow";
 
 export default {
   data() {
     return {
-      workflowDetail: null,
+      dialogFormVisible: false,
+      workflowDetail: {
+        name: "",
+        description: "",
+      },
       listLoading: false,
       list: [],
+      ruleForm: {
+        fieldSolution: "",
+        workflowSolution: "",
+        workflow: "",
+      },
+      rules: {
+        fieldSolution: [
+          {
+            required: true,
+            message: "please select fieldSolution",
+            trigger: "change",
+          },
+        ],
+        workflowSolution: [
+          {
+            required: true,
+            message: "please select workflowSolution",
+            trigger: "change",
+          },
+        ],
+        workflow: [
+          {
+            required: true,
+            message: "please select workflow",
+            trigger: "change",
+          },
+        ],
+      },
+      fieldSolutionListOption: [],
+      workflowSolutionListOption: [],
+      workflowListOption: [],
     };
   },
   methods: {
@@ -126,7 +225,7 @@ export default {
         }
       );
     },
-    handleEdit(row) {  
+    handleEdit(row) {
       this.$router.push({
         path: "/fieldSolution/addWorkflowField2",
         query: {
@@ -134,22 +233,37 @@ export default {
           workflowNodeId: this.$route.query.workflowNodeId,
           workflowId: this.$route.query.workflowId,
           workflowSolutionId: this.$route.query.workflowSolutionId,
-          fieldSolutionWorkflowNodeFieldTypeId:row.field.id,
+          fieldSolutionWorkflowNodeFieldTypeId: row.field.id,
           fieldTypeId: row.fieldType.id,
           fieldType: row.fieldType.type,
-          opeType:'edit'
+          opeType: "edit",
         },
       });
     },
-    handleCopy(row){
-      copyField({}).then(res=>{
-        
-      })
-    }
+    getFieldSolutionListOption() {
+      getFieldSolutionList().then((res) => {
+        this.fieldSolutionListOption = res.data;
+      });
+    },
+    getWorkflowSolutionList(param) {
+      fieldSolutionDetail(param).then((res) => {
+        debugger
+        this.workflowSolutionListOption = res.data;
+      });
+    },
+    fieldSolutionChange(id) {
+      debugger
+        this.getWorkflowSolutionList({fieldTypeId:id})
+    },
+    handleCopy(row) {
+      copyField({}).then((res) => {});
+    },
+    copy() {},
   },
   created() {
     this.getWorkflowDetail();
     this.fetchData();
+    this.getFieldSolutionListOption();
   },
 };
 </script>

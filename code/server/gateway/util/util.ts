@@ -242,6 +242,8 @@ async function initAdmin():Promise<string> {
     let mysql=getMysqlInstance()
     let adminId=await generateSnowId()
     await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${adminId}','teamlinker','teamlinker',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${await generateSnowId()}','wgq_admin','123456',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${await generateSnowId()}','hxx_admin','123456',1)`)
     return adminId
 }
 
@@ -382,7 +384,6 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
     await mysql.execute(generateCreateSql(workflowNodeModel,{
         id:workflowNodeOpenId,
         name:"open",
-        reserved:1,
         status:ECommon_Model_Workflow_Node_Status.NOTSTART,
         workflow_id:workflowId
     }))
@@ -413,7 +414,6 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
     await mysql.execute(generateCreateSql(workflowActionModel,{
         id:actionOpenToProgressId,
         name:"open to progress",
-        reserved:1,
         workflow_id:workflowId,
         source_node_id:workflowNodeOpenId,
         dest_node_id:workflowNodeProgressId
@@ -421,7 +421,6 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
     await mysql.execute(generateCreateSql(workflowActionModel,{
         id:actionProgressToOpenId,
         name:"progress to open",
-        reserved:1,
         workflow_id:workflowId,
         source_node_id:workflowNodeProgressId,
         dest_node_id:workflowNodeOpenId
@@ -429,7 +428,6 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
     await mysql.execute(generateCreateSql(workflowActionModel,{
         id:actionOpenToClosedId,
         name:"open to close",
-        reserved:1,
         workflow_id:workflowId,
         source_node_id:workflowNodeOpenId,
         dest_node_id:workflowNodeClosedId
@@ -437,7 +435,6 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
     await mysql.execute(generateCreateSql(workflowActionModel,{
         id:actionClosedToOpenId,
         name:"closed to open",
-        reserved:1,
         workflow_id:workflowId,
         source_node_id:workflowNodeClosedId,
         dest_node_id:workflowNodeOpenId
@@ -445,7 +442,6 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
     await mysql.execute(generateCreateSql(workflowActionModel,{
         id:actionProgressToResolvedId,
         name:"progress to resolved",
-        reserved:1,
         workflow_id:workflowId,
         source_node_id:workflowNodeProgressId,
         dest_node_id:workflowNodeResolvedId
@@ -453,7 +449,6 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
     await mysql.execute(generateCreateSql(workflowActionModel,{
         id:actionResolvedToProgressId,
         name:"resolved to progress",
-        reserved:1,
         workflow_id:workflowId,
         source_node_id:workflowNodeResolvedId,
         dest_node_id:workflowNodeProgressId

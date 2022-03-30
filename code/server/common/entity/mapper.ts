@@ -66,6 +66,7 @@ export abstract class Mapper<T extends BaseModel> {
         delete ret.created_time;
         delete ret.modified_time;
         delete ret.id
+        delete ret.reserved
         if(deletedFields && deletedFields.length>0) {
             for(let obj of deletedFields) {
                 delete ret[obj]
@@ -75,7 +76,7 @@ export abstract class Mapper<T extends BaseModel> {
             (ret as any).name+="(copy)"
         }
         await this.create(ret);
-        let obj=this.getById(ret.id)
+        let obj=await this.getById(ret.id)
         return obj;
     }
 }
