@@ -78,7 +78,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
     static async getInfoById(id: string): Promise<ICommon_Route_Res_IssueTypeSolution_List_Item> {
         let ret=await IssueTypeSolutionService.getItemById(id);
         if(!ret){
-            throw Err.Project.Issue.issueTypeNotFound
+            throw Err.Project.Issue.issueTypeSolutionNotFound
         }
         return {
             ...ret.getItem(),

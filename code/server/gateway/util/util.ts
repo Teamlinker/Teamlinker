@@ -385,25 +385,33 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
         id:workflowNodeOpenId,
         name:"open",
         status:ECommon_Model_Workflow_Node_Status.NOTSTART,
-        workflow_id:workflowId
+        workflow_id:workflowId,
+        x:50,
+        y:45
     }))
     await mysql.execute(generateCreateSql(workflowNodeModel,{
         id:workflowNodeProgressId,
         name:"in progress",
         status:ECommon_Model_Workflow_Node_Status.INPROGRESS,
-        workflow_id:workflowId
+        workflow_id:workflowId,
+        x:281,
+        y:177
     }))
     await mysql.execute(generateCreateSql(workflowNodeModel,{
         id:workflowNodeClosedId,
         name:"closed",
         status:ECommon_Model_Workflow_Node_Status.DONE,
-        workflow_id:workflowId
+        workflow_id:workflowId,
+        x:59,
+        y:502
     }))
     await mysql.execute(generateCreateSql(workflowNodeModel,{
         id:workflowNodeResolvedId,
         name:"resolved",
         status:ECommon_Model_Workflow_Node_Status.DONE,
-        workflow_id:workflowId
+        workflow_id:workflowId,
+        x:507,
+        y:503
     }))
     let actionOpenToProgressId=await generateSnowId()
     let actionProgressToOpenId=await generateSnowId()

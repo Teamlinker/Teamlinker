@@ -332,7 +332,7 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
         super(workflowNodeMapper)
     }
     override async create(): Promise<ICommon_Model_Workflow_Node> {
-        if(this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART) {
+        if(this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART || this.getItem().status===undefined) {
             let obj=await workflowNodeMapper.getOpenNode(this.getItem().workflow_id)
             if(obj) {
                 throw Err.Project.Workflow.workflowOpenNodeDuplicate
