@@ -44,6 +44,17 @@
                 {{ scope.row.workflow.name }}
               </template>
             </el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button
+                  type="text"
+                  size="mini"
+                  @click="handleEdit(props.row.issueTypeSolution.id, scope.row)"
+                >
+                  编辑
+                </el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </template>
       </el-table-column>
@@ -54,9 +65,7 @@
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row }">
-          <el-button type="text" size="mini" @click="handleRemove(row)">
-            删除
-          </el-button>
+          <el-button type="text" size="mini" @click="handleRemove(row)"> 删除 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -69,10 +78,7 @@
         label-width="120px"
       >
         <el-form-item label="事务类型方案" prop="issueTypeSolutionId">
-          <el-select
-            v-model="dataForm.issueTypeSolutionId"
-            placeholder="请选择"
-          >
+          <el-select v-model="dataForm.issueTypeSolutionId" placeholder="请选择">
             <el-option
               v-for="item in issueTypeSolutionList"
               :key="item.id"
@@ -133,9 +139,9 @@ import {
   solutionBind,
   solutionUnBind,
   solutionAssign,
-  getBindWorkflowSolution
-} from '@/api/workflow'
-import { getIssueSolutionList } from '@/api/issueType'
+  getBindWorkflowSolution,
+} from "@/api/workflow";
+import { getIssueSolutionList } from "@/api/issueType";
 export default {
   data() {
     return {
@@ -149,157 +155,162 @@ export default {
       workflowList: [],
       rules: {
         issueTypeSolutionId: [
-          { required: true, message: '事务类型方案必选', trigger: 'change' }
-        ]
+          { required: true, message: "事务类型方案必选", trigger: "change" },
+        ],
       },
       rules2: {
-        issueTypeId: [
-          { required: true, message: '事务类型必选', trigger: 'change' }
-        ],
-        workflowId: [
-          { required: true, message: '工作流必选', trigger: 'change' }
-        ]
+        issueTypeId: [{ required: true, message: "事务类型必选", trigger: "change" }],
+        workflowId: [{ required: true, message: "工作流必选", trigger: "change" }],
       },
       temp: {},
       dataForm2: {},
-      assignVisible: false
-    }
+      assignVisible: false,
+    };
   },
   methods: {
     getSolutionInfo() {
-      this.listLoading = true
-      solutionInfo({ workflowSolutionId: this.workflowSolutionId }).then(
-        (res) => {
-          this.listLoading = false
-          const data = res.data.data
-          this.list = data
-        }
-      )
+      this.listLoading = true;
+      solutionInfo({ workflowSolutionId: this.workflowSolutionId }).then((res) => {
+        this.listLoading = false;
+        const data = res.data.data;
+        this.list = data;
+      });
     },
     //获取工作流列表
     getWorkflowList() {
       solutionListWorkflow({
-        workflowSolutionId: this.workflowSolutionId
+        workflowSolutionId: this.workflowSolutionId,
       }).then((res) => {
-        var data = res.data
-        this.workflowList = data
-      })
+        var data = res.data;
+        this.workflowList = data;
+      });
     },
     handleAdd() {
-      this.visible = true
-      this.dataForm = {}
+      this.visible = true;
+      this.dataForm = {};
     },
     handleRemove(row) {
-      this.temp.issueTypeSolutionId = row.issueTypeSolution.id
-      this.$confirm('确定删除, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+      this.temp.issueTypeSolutionId = row.issueTypeSolution.id;
+      this.$confirm("确定删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       })
         .then(() => {
-          this.removeData()
+          this.removeData();
         })
         .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
     removeData() {
       solutionUnBind({
         workflowSolutionId: this.workflowSolutionId,
-        issueTypeSolutionId: this.temp.issueTypeSolutionId
+        issueTypeSolutionId: this.temp.issueTypeSolutionId,
       }).then(() => {
-        this.doSuccess()
-      })
+        this.doSuccess();
+      });
     },
     doSuccess() {
       this.$notify({
-        title: 'Success',
-        message: '操作成功',
-        type: 'success',
-        duration: 2000
-      })
-      this.getSolutionInfo()
+        title: "Success",
+        message: "操作成功",
+        type: "success",
+        duration: 2000,
+      });
+      this.getSolutionInfo();
     },
     //获取事务类型列表
     getIssueTypeList() {
       getIssueSolutionList({}).then((res) => {
-        this.issueTypeSolutionList = res.data
-      })
+        this.issueTypeSolutionList = res.data;
+      });
     },
     submit() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs["dataForm"].validate((valid) => {
         if (valid) {
-          const issueTypeSolutionId = this.dataForm.issueTypeSolutionId
+          const issueTypeSolutionId = this.dataForm.issueTypeSolutionId;
           getBindWorkflowSolution({
-            issueTypeSolutionId: issueTypeSolutionId
+            issueTypeSolutionId: issueTypeSolutionId,
           }).then((res) => {
             if (res.data.name) {
               this.$confirm(
                 `此事务类型方案已绑定${res.data.name}工作流方案, 是否继续?`,
-                '提示',
+                "提示",
                 {
-                  confirmButtonText: '确定',
-                  cancelButtonText: '取消',
-                  type: 'warning'
+                  confirmButtonText: "确定",
+                  cancelButtonText: "取消",
+                  type: "warning",
                 }
               )
                 .then(() => {
-                  this.bindIssueTypeSolution()
+                  this.bindIssueTypeSolution();
                 })
-                .catch(() => {})
-            }else{
-              this.bindIssueTypeSolution()
+                .catch(() => {});
+            } else {
+              this.bindIssueTypeSolution();
             }
-          })
+          });
         }
-      })
+      });
+    },
+    handleEdit(id, item) {
+      this.temp.issueTypeSolutionId = id;
+      this.assignVisible = true;
+      this.dataForm2 = {
+        issueTypeId: item.issueType.id,
+        workflowId: item.workflow.id,
+      };
+      this.issueTypeList = this.issueTypeSolutionList.filter(
+        (item) => item.id === id
+      )[0].issueTypeList;
     },
     //绑定事务类型方案
     bindIssueTypeSolution() {
-      const issueTypeSolutionId = this.dataForm.issueTypeSolutionId
-      this.temp.issueTypeSolutionId = issueTypeSolutionId
+      const issueTypeSolutionId = this.dataForm.issueTypeSolutionId;
+      this.temp.issueTypeSolutionId = issueTypeSolutionId;
       const params = {
         workflowSolutionId: this.workflowSolutionId,
-        issueTypeSolutionId: issueTypeSolutionId
-      }
+        issueTypeSolutionId: issueTypeSolutionId,
+      };
       solutionBind(params).then(() => {
-        this.visible = false
-        this.assignVisible = true
-        this.dataForm2 = {}
-        this.dataForm.issueTypeSolutionId = undefined
+        this.visible = false;
+        this.assignVisible = true;
+        this.dataForm2 = {};
+        this.dataForm.issueTypeSolutionId = undefined;
         this.issueTypeList = this.issueTypeSolutionList.filter(
           (item) => item.id === issueTypeSolutionId
-        )[0].issueTypeList
-      })
+        )[0].issueTypeList;
+      });
     },
     submitAssign() {
-      this.$refs['dataForm2'].validate((valid) => {
+      this.$refs["dataForm2"].validate((valid) => {
         if (valid) {
           const params = {
             workflowSolutionId: this.workflowSolutionId,
             issueTypeId: this.dataForm2.issueTypeId,
             workflowId: this.dataForm2.workflowId,
-            issueTypeSolutionId: this.temp.issueTypeSolutionId
-          }
+            issueTypeSolutionId: this.temp.issueTypeSolutionId,
+          };
           solutionAssign(params).then(() => {
-            this.assignVisible = false
-            this.doSuccess()
-          })
+            this.assignVisible = false;
+            this.doSuccess();
+          });
         }
-      })
-    }
+      });
+    },
   },
   created() {
-    this.workflowSolutionId = this.$route.query.workflowSolutionId
-    this.workflowSolutionName = this.$route.query.name
-    this.getWorkflowList()
-    this.getSolutionInfo()
-    this.getIssueTypeList()
-  }
-}
+    this.workflowSolutionId = this.$route.query.workflowSolutionId;
+    this.workflowSolutionName = this.$route.query.name;
+    this.getWorkflowList();
+    this.getSolutionInfo();
+    this.getIssueTypeList();
+  },
+};
 </script>
 <style scoped>
 .operate {

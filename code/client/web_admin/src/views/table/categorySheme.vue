@@ -147,7 +147,7 @@
         <el-form-item label="项目名称" prop="project">
           <el-select v-model="projectForm.project" placeholder="请选择">
             <el-option
-              v-for="item in projectList"
+              v-for="item in projectList2"
               :key="item.id"
               :label="item.name"
               :value="item.id"
@@ -172,7 +172,7 @@
         <el-form-item label="事务类型" prop="type">
           <el-select v-model="issueTypeForm.type" placeholder="请选择">
             <el-option
-              v-for="item in issueList"
+              v-for="item in issueList2"
               :key="item.id"
               :label="item.name"
               :value="item.id"
@@ -234,6 +234,8 @@ export default {
       },
       project: "",
       projectList: [],
+      projectList2: [],
+      issueList2: [],
       proVisible: false,
       projectForm: { project: undefined },
       issueTypeVisible: false,
@@ -243,6 +245,8 @@ export default {
   },
   created() {
     this.fetchData();
+    this.getAllProjectList();
+    this.getAllIssue();
   },
   methods: {
     fetchData() {
@@ -345,22 +349,28 @@ export default {
         this.doSuccess();
       });
     },
-    getProjectList(queryString, cb) {
+    getProjectList() {
       if (this.unBind) {
-        solutionProjectList({
-          issueTypeSolutionId: this.temp.id,
-        }).then((res) => {
-          this.projectList = res.data;
-        });
+        this.projectList2 = this.temp.projectList;
       } else {
-        getAllProject({
-          keyword: queryString,
-          page: 0,
-          size: 10,
-        }).then((res) => {
-          this.projectList = res.data.data;
-        });
+        const bindProIds = this.temp.projectList.map((item) => item.id);
+        this.projectList2 = this.projectList.filter(
+          (item) => !bindProIds.includes(item.id)
+        );
       }
+    },
+    getAllProjectList() {
+      getAllProject({
+        page: 0,
+        size: 10,
+      }).then((res) => {
+        this.projectList = res.data.data;
+      });
+    },
+    getAllIssue() {
+      getList({}).then((res) => {
+        this.issueList = res.data;
+      });
     },
     bindProject(row, unBind) {
       this.projectForm.project = "";
@@ -406,20 +416,19 @@ export default {
     },
     bindIssueType(row, unBind) {
       this.issueTypeForm.type = "";
+      this.temp = row;
       if (unBind) {
         this.unBind = true;
-        this.issueList = row.issueTypeList;
+        this.issueList2 = row.issueTypeList;
       } else {
         this.unBind = false;
         this.getIssueList();
       }
-      this.temp = row;
       this.issueTypeVisible = true;
     },
     getIssueList() {
-      getList({}).then((res) => {
-        this.issueList = res.data;
-      });
+      const bindIssueIds = this.temp.issueTypeList.map((item) => item.id);
+      this.issueList2 = this.issueList.filter((item) => !bindIssueIds.includes(item.id));
     },
     submitIssue() {
       this.$refs["issueTypeForm"].validate((valid) => {

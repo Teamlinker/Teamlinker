@@ -4,8 +4,8 @@
       <!--顶部工具菜单-->
       <el-col :span="24">
         <div class="ef-tooltar">
-         <div class="workflow-title">{{title}}</div>
-         <div class="workflow-description">{{description}}</div>
+          <div class="workflow-title">{{ title }}</div>
+          <div class="workflow-description">{{ description }}</div>
         </div>
       </el-col>
     </el-row>
@@ -74,7 +74,7 @@ export default {
   data() {
     return {
       title: "",
-      description:"",
+      description: "",
       // jsPlumb 实例
       jsPlumb: null,
       // 控制画布销毁
@@ -244,7 +244,7 @@ export default {
               from: this.actionSourceId,
               to: this.actionTargetId,
             });
-            
+
             this.actionVisible = true;
             for (let i = 0; i < this.data.nodeList.length; i++) {
               const nodeId = this.data.nodeList[i].id;
@@ -393,7 +393,7 @@ export default {
     },
     // 加载流程图
     loadEasyFlow() {
-     // 初始化连线
+      // 初始化连线
       for (var i = 0; i < this.data.lineList.length; i++) {
         let line = this.data.lineList[i];
         var connParam = {
@@ -553,6 +553,7 @@ export default {
         name: nodeName,
         x: left,
         y: top,
+        status: 1,
       };
       addNode(node).then((res) => {
         const nodeInfo = Object.assign({}, node, res.data);
@@ -626,7 +627,7 @@ export default {
       );
     },
     mouseoverNode(nodeId) {
-     this.nodeAddPoint(nodeId);
+      this.nodeAddPoint(nodeId);
       for (let i = 0; i < this.data.nodeList.length; i++) {
         const nodeId2 = this.data.nodeList[i].id;
         if (nodeId2 !== nodeId) {
@@ -634,8 +635,7 @@ export default {
         }
       }
     },
-    mouseoutNode(nodeId) {
-    },
+    mouseoutNode(nodeId) {},
     clickNode(nodeId, nodeName) {
       this.nodeAddPoint(nodeId);
       for (let i = 0; i < this.data.nodeList.length; i++) {
@@ -719,7 +719,7 @@ export default {
       this.zoom = this.zoom - 0.1;
       this.$refs.efContainer.style.transform = `scale(${this.zoom})`;
       this.jsPlumb.setZoom(this.zoom);
-    }
+    },
   },
 };
 </script>
