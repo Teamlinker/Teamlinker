@@ -26,7 +26,11 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         super(issueTypeSolutionMapper)
     }
     override async copy():Promise<this> {
+        let arr=await issueTypeSolutionMapper.getIssueTypesBySolutionId(this.getId());
         let obj=await super.copy()
+        for(let o of arr) {
+            await issueTypeSolutionMapper.addIssueType(o.id,obj.getId());
+        }
         let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueTypeSolutionId(this.getId())
         if(objWorkflowSolution) {
             await objWorkflowSolution.bindIssueTypeSolutions([obj.getId()])
@@ -74,7 +78,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
     static async getInfoById(id: string): Promise<ICommon_Route_Res_IssueTypeSolution_List_Item> {
         let ret=await IssueTypeSolutionService.getItemById(id);
         if(!ret){
-            throw Err.Project.Issue.issueTypeNotFound
+            throw Err.Project.Issue.issueTypeSolutionNotFound
         }
         return {
             ...ret.getItem(),

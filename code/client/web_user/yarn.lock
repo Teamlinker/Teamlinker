@@ -388,9 +388,9 @@
   "version" "1.0.4"
 
 "@types/node@*":
-  "integrity" "sha512-eMhwJXc931Ihh4tkU+Y7GiLzT/y/DBNpNtr4yU9O2w3SYBsr9NaOPhQlLKRmoWtI54uNwuo0IOUFQjVOTZYRvw=="
-  "resolved" "https://registry.npmmirror.com/@types/node/download/@types/node-17.0.0.tgz"
-  "version" "17.0.0"
+  "integrity" "sha512-1QUk+WAUD4t8iR+Oj+UgI8oJa6yyxaB8a8pHaC8uqM6RrS1qbL7bf3Pwl5rHv0psm2CuDErgho6v5N+G+5fwtQ=="
+  "resolved" "https://registry.npmjs.org/@types/node/-/node-17.0.7.tgz"
+  "version" "17.0.7"
 
 "@types/resolve@1.17.1":
   "integrity" "sha1-Ov1q2JZ8d+Q3bFmKgt3Vj0bsRdY="

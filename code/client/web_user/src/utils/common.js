@@ -18,23 +18,25 @@ const layoutsAuth = '/src/layouts/auth.vue'
  * @return {*}
  */
 
+
  export function formartRoutes(routes,filterRoutes) {
-    let res  = []
-    routes.forEach(item => {
-        let tmp = {...item}
-        res.push(tmp)
-    })
-    let newRoutes = res
-    let childrenRoutes = newRoutes[0].children
-    childrenRoutes.forEach((item,index) => {
-        filterRoutes.forEach((citem) => {
-            if(citem.name === item.name){
-                newRoutes.push(item)
-                childrenRoutes.splice(index,1)
-            }
-        })
-    })
-    newRoutes[0].children = childrenRoutes
-    newRoutes[0].component = () => import(layoutsAuth)
-    return newRoutes
+    console.log(routes,filterRoutes)
+   let res  = []
+   routes.forEach(item => {
+       let tmp = {...item}
+       res.push(tmp)
+   })
+   let newRoutes = res
+   let childrenRoutes = newRoutes[0].children
+   childrenRoutes.forEach((item,index) => {
+       filterRoutes.forEach((citem) => {
+           if(citem.name === item.name){
+               newRoutes.push(item)
+               childrenRoutes.splice(index,1)
+           }
+       })
+   })
+   // newRoutes[0].children = childrenRoutes
+   // newRoutes[0].component = () => import(layoutsAuth)
+   return newRoutes
 }

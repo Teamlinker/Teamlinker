@@ -139,8 +139,7 @@ export default defineComponent({
         })
        
 
-        const onMenu = async (item) => {
-            if(item.key == "logout"){
+        const onMenu = async () => {
                 message.destroy()
                 const { code, message: msg } = await store.dispatch('user/logout')
                 
@@ -150,7 +149,7 @@ export default defineComponent({
                 }else{
                     message.info(msg || '登出失败')
                 }
-            }
+            
         }
          const getTeamList = () => {
             const params = {

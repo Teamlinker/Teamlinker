@@ -7,9 +7,6 @@
       :label-col="labelCol"
       :wrapper-col="wrapperCol"
     >
-      <a-form-item label="关键词" name="keyword" v-if="!projectId">
-        <a-input v-model:value="formState.keyword" />
-      </a-form-item>
       <a-form-item label="关键词" v-if="projectId">
         {{ formState.keyword }}
       </a-form-item>

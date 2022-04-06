@@ -92,10 +92,12 @@ export default defineConfig({
   // 打包配置
   build: {
     // cssCodeSplit: false, // 启用/禁用 CSS 代码拆分 禁用后 css拆成独立文件
-    sourcemap: true, // 是否打包sourcemap
+    sourcemap: false, // 是否打包sourcemap
+    minify:false,
+    brotliSize:false,
     terserOptions: {
       compress: {
-        keep_infinity: true,
+        keep_infinity: false,
         // drop_console: VITE_DROP_CONSOLE
       }
     }

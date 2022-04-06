@@ -32,7 +32,6 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
         let workflowNode=new WorkflowNodeService
         workflowNode.assignItem({
             name:"Open",
-            reserved:1,
             workflow_id:obj.id,
             status:ECommon_Model_Workflow_Node_Status.NOTSTART
         })
@@ -120,6 +119,12 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
         await super.delete()
         await workflowMapper.revoke(this.getId())
         await FieldSolutionService.clearItemsByWorkflowId(this.getId())
+    }
+
+    override async copy(deletedFields?: (keyof ICommon_Model_Workflow)[]): Promise<this> {
+        let objNew=await super.copy()
+        await workflowMapper.copyItem(this.getId(),objNew.getId());
+        return objNew
     }
 
     async checkNode(workflowNodeId:string) {
@@ -327,7 +332,7 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
         super(workflowNodeMapper)
     }
     override async create(): Promise<ICommon_Model_Workflow_Node> {
-        if(this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART) {
+        if(this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART || this.getItem().status===undefined) {
             let obj=await workflowNodeMapper.getOpenNode(this.getItem().workflow_id)
             if(obj) {
                 throw Err.Project.Workflow.workflowOpenNodeDuplicate
