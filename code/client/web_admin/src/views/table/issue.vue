@@ -1,34 +1,8 @@
 <template>
   <div class="app-container">
-    <!-- <div class="filter-container">
-      <el-input
-        v-model="listQuery.keyword"
-        placeholder="关键字"
-        style="width: 200px"
-        size="small"
-        @keyup.enter.native="handleFilter"
-      />
-      <el-button
-        type="primary"
-        size="small"
-        @click="handleFilter"
-        style="margin-left: 10px"
-      >
-        搜索
-      </el-button>
-      <el-button
-        type="primary"
-        size="small"
-        @click="handleReset"
-        style="margin-left: 10px"
-      >
-        重置
-      </el-button>
-    </div> -->
-
     <el-row style="padding-bottom: 10px">
       <el-button type="primary" size="small" @click="handleCreate"
-        >新增问题类型</el-button
+        >新增事务类型</el-button
       >
     </el-row>
     <el-table
@@ -86,16 +60,6 @@
       </el-table-column>
     </el-table>
 
-    <!-- <div class="pagination_box">
-      <el-pagination
-        layout="prev, pager, next"
-        background
-        :total="page.pageCount"
-        @current-change="pageCurChange"
-      >
-      </el-pagination>
-    </div> -->
-
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -111,7 +75,7 @@
         <el-form-item label="描述" prop="description">
           <el-input type="textarea" :rows="2" v-model="temp.description" />
         </el-form-item>
-        <el-form-item label="图标" prop="icon">
+        <!-- <el-form-item label="图标" prop="icon">
           <el-upload
             class="avatar-uploader"
             action="/api/file/upload"
@@ -122,7 +86,7 @@
             <img v-if="temp.icon" :src="temp.icon" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false"> 取消 </el-button>
@@ -164,7 +128,7 @@ export default {
       },
       dialogStatus: "",
       dialogFormVisible: false,
-      temp: {},
+      temp: {name:'',description:''},
       issueRules: {
         name: [{ required: true, message: "名称必填", trigger: "blur" }],
       },
@@ -191,8 +155,6 @@ export default {
           );
         });
         this.list = data;
-        // this.list = res.data.data;
-        // this.page.pageCount = parseInt(res.data.count);
         this.listLoading = false;
       });
     },
@@ -228,7 +190,7 @@ export default {
     createData() {
       this.$refs["dataForm"].validate((valid) => {
         if (valid) {
-          createTemp({ issueTypeId: this.temp.issueTypeId }).then(() => {
+          createTemp({ name: this.temp.name,description:this.temp.description }).then(() => {
             this.fetchData();
             this.dialogFormVisible = false;
             this.$notify({
