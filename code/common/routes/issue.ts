@@ -305,7 +305,7 @@ const api={
             req:<{
                 projectId :string,
                 createdBy?:string,
-                issueTypeId:string,
+                issueTypeId?:string,
                 name?:string,
                 priority?:number,
                 assignerId?:string,

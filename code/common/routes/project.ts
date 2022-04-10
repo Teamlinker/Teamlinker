@@ -5,7 +5,7 @@ import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Project } from './../model/project';
 import { ICommon_Model_Project_Module } from './../model/project_module';
 import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag, ICommon_Route_Res_recentProjectList_Item } from './response';
+import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag, ICommon_Route_Res_Project_User_Item, ICommon_Route_Res_recentProjectList_Item } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
     baseUrl:"/project",
@@ -232,6 +232,16 @@ const api={
                        
             }>{},
             res:<ICommon_Route_Res_recentProjectList_Item[]>{}
+        },
+        listUser:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user/list",
+            req:<{
+                projectId:string,
+                keyword?:string
+            }>{},
+            res:<ICommon_Route_Res_Project_User_Item[]>{},
+            permission:[Permission_Types.Project.READ]
         }
     }
 }

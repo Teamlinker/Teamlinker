@@ -146,4 +146,9 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         let ret=await projectMapper.recentProjectList(userId)
         return ret
     }
+
+    async listUser(keyword?:string) {
+        let arr=await projectMapper.listUser(this.getId(),keyword)
+        return arr;
+    }
 }

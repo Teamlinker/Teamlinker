@@ -203,3 +203,9 @@ export interface ICommon_Route_Res_Release_IfCanRelease {
     result:boolean,
     unDoneIssueList?:ICommon_Model_Project_Issue[]
 }
+
+export interface ICommon_Route_Res_Project_User_Item {
+    id:string,
+    photo:string,
+    username:string
+}
