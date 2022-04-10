@@ -5,17 +5,18 @@
     <div class="project-list">
       <div
         class="project-item"
-        v-for="(item, index) in [1, 2, 3, 4, 5]"
+        v-for="(item, index) in listData"
         :key="index"
       >
         <div class="pro-cont">
           <div class="pro-info">
             <div class="avatar"><UserOutlined /></div>
-            <div class="pro-name">project name</div>
+            <div class="pro-name">{{item.name}}</div>
           </div>
           <div class="pro-detail">
-            <div>My open issues</div>
-            <div>Done issues</div>
+            <div>No start:{{item.notstart}}</div>
+            <div>Inprogress:{{item.inprogress}}</div>
+            <div>Done issues:{{item.done}}</div>
           </div>
         </div>
       </div>
@@ -23,13 +24,35 @@
   </div>
 </template>
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent, reactive, toRefs, ref } from "vue";
 import { UserOutlined } from '@ant-design/icons-vue'
+import axios from "@/plugins/axios";
 export default defineComponent({
   components: {
     UserOutlined
   },
-  setup() {}
+  setup() {
+   const state = reactive({
+      listData: [],
+    });
+    const getRecentProject = ()=>{
+      axios.get('/project/recent/list', {  }).then((res) => {
+        if(res?.code == '0'){
+          state.listData = res.data
+        }else{
+          message.info(res.message)
+          
+        }
+      })
+    }
+    getRecentProject()
+    return {
+      ...toRefs(state),
+    }
+
+  },
+
+  
 })
 </script>
 <style lang="scss" scoped>

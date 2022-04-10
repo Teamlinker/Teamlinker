@@ -80,8 +80,13 @@
         label="Priority"
         name="priority"
       >
-        <a-input-number v-model:value="formState.priority" />
+        <a-radio-group v-model:value="formState.priority" button-style="solid">
+        <a-radio-button value="0">high</a-radio-button>
+        <a-radio-button value="1">middle</a-radio-button>
+        <a-radio-button value="2">low</a-radio-button>
+      </a-radio-group>
       </a-form-item>
+     
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button type="primary" @click="onSubmit">创建</a-button>
         <a-button style="margin-left: 10px" @click="resetForm">重置</a-button>
@@ -92,8 +97,14 @@
 <script lang="ts">
 import { defineComponent, ref, UnwrapRef, reactive } from 'vue'
 import axios from '@/plugins/axios'
+import { message } from 'ant-design-vue';
 interface FormState {
-  name: string
+    projectId:string,
+    issueTypeId:string,
+    name: string,
+    reporterId?:string,
+    assignerId?:string,
+    priority?:string, //高 中 低
 }
 export default defineComponent({
   setup() {
@@ -104,7 +115,7 @@ export default defineComponent({
       name: '',
       reporterId:'',
       assignerId:'',
-      priority:''
+      priority:'0'
     })
     const projectList = ref([])
     const issueTypeList = ref([])
@@ -155,7 +166,23 @@ export default defineComponent({
       ]
     })
     const onSubmit = () => {
-      formRef.value.validate().then(() => {})
+      formRef.value.validate().then(() => {
+        let params = {
+          projectId:formState.projectId,
+          issueTypeId:formState.issueTypeId,
+          name:formState.name,
+          reporterId:'432818911597206528 ',
+          assignerId:'432818911597206528 ',
+          priority:formState.priority,  
+        }
+         axios.post("/issue/item", params).then((res:any) => {
+               if(res.code == '0'){
+                 message.success('create success');
+               }else{
+                 message.info(res.message);
+               }
+            });
+      })
     }
     const resetForm = () => {
       formRef.value.resetFields()

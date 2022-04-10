@@ -31,6 +31,7 @@
       </template>
       <template #action="{ record }">
         <a @click="onGoSet(record.id)">项目设置</a>
+        <a @click="onGoSetIssue(record.id)" style="margin-left:5px;">事务</a>
         <a-popconfirm title="确认删除吗?" @confirm="onDelete(record.id)">
           <a style="margin-left: 10px">删除</a>
         </a-popconfirm>
@@ -73,6 +74,9 @@ export default defineComponent({
       console.log(id, 'idddd')
       router.push('/project/edit?projectId=' + id)
     }
+     const onGoSetIssue = (id: string) => {
+      router.push('/issue/list?projectId=' + id)
+    }
     const createProject = () => {
       router.push('/project/create')
     }
@@ -89,6 +93,7 @@ export default defineComponent({
       ...toRefs(stateData),
       onDelete,
       onGoSet,
+      onGoSetIssue,
       handleTableChange,
       setUrl,
       searchQuery,
