@@ -2,15 +2,14 @@
   <div style="-webkit-font-smoothing: antialiased; text-transform: capitalize">
     <a-layout class="h-screen">
       <a-layout-header>
-        <Header
-          :collapsed="showCompletely"
-          @change-completely="changeCompletely"
-        />
+        <Header :collapsed="showCompletely" @change-completely="changeCompletely" />
       </a-layout-header>
-      <!-- <a-layout> -->
       <a-layout>
-        <a-layout-sider v-if="isProSide">
-          <pro-side v-if="isProSide"></pro-side>
+        <a-layout-sider v-if="metaType === 'proset'">
+          <pro-sider></pro-sider>
+        </a-layout-sider>
+        <a-layout-sider v-if="metaType === 'proside'">
+          <proindex-sider></proindex-sider>
         </a-layout-sider>
         <a-layout-content>
           <router-view v-slot="{ Component }">
@@ -33,58 +32,50 @@
   </div>
 </template>
 <script>
-import { defineComponent, reactive, toRefs,watch } from "vue";
-import { useRouter } from "vue-router";
+import { defineComponent, reactive, toRefs, watch } from "vue";
 import { useStore } from "@/store";
-import Sider from "./components/_sider.vue";
 import Header from "./components/_header.vue";
 import { getAuth } from "@/utils/auth";
-
+import ProSider from "./components/pro-side.vue";
+import ProindexSider from "./components/proindex-side.vue";
+import { useRouter } from "vue-router";
 export default defineComponent({
   name: "有鉴权布局",
   components: {
-    Sider,
     Header,
+    ProSider,
+    ProindexSider,
   },
   setup() {
     const userInfo = sessionStorage.getItem("userInfo");
     let store = useStore();
     const token = getAuth("TOKEN");
     const state = reactive({
-      isProSide:false,
       showCompletely: true,
       year: new Date().getFullYear(),
+      metaType: "",
     });
+
     const changeCompletely = () => {
       state.showCompletely = !state.showCompletely;
     };
     const router = useRouter();
-    const doPathSide=(route)=>{
-      let path = route || router.currentRoute.value.path;
-      state.isProSide = [
-      "/project/edit", 
-      "/project/module",
-      "/project/tag",
-      "/project/member",
-      ].includes(path);
-    }
-    doPathSide()
+    state.metaType = router.currentRoute.value.meta.type;
     watch(
-      () => router.currentRoute.value.path,
+      () => router.currentRoute.value.meta.type,
       (val) => {
-        doPathSide(val)
+        state.metaType = val;
       }
-    )
- 
+    );
     return {
       ...toRefs(state),
       token,
       userInfo,
-      changeCompletely
+      changeCompletely,
+      router,
     };
   },
 });
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

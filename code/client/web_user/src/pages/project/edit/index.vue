@@ -1,25 +1,22 @@
 <template>
   <div>
-   <create-pro></create-pro>
+    <create-pro></create-pro>
   </div>
 </template>
 <script lang="ts">
-import CreatePro from '../create/form.vue'
-import {
-  defineComponent
-} from "vue";
+import CreatePro from "../create/form.vue";
+import { defineComponent } from "vue";
 export default defineComponent({
   components: {
-   CreatePro
+    CreatePro,
   },
-  setup() {
-    
-  },
+  setup() {},
 });
 </script>
 <route lang="yaml">
-  meta:
-    level: 1
-    name: '编辑项目'
-    layout: auth
+meta:
+  level: 1
+  type: "proset"
+  name: "编辑项目"
+  layout: auth
 </route>

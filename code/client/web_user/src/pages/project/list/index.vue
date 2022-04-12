@@ -8,9 +8,7 @@
           placeholder="项目名称"
           @keyup.enter.prevent="searchEnterFun(ueryParams.keyword)"
         />
-        <a-button @click="searchQuery(queryParams.keyword)" type="primary"
-          >搜索</a-button
-        >
+        <a-button @click="searchQuery(queryParams.keyword)" type="primary">搜索</a-button>
       </a-space>
       <div>
         <a-button @click="createProject" type="primary">创建项目</a-button>
@@ -22,6 +20,9 @@
       :rowKey="(record) => record.id"
       :pagination="pagination"
     >
+      <template #name="{ record }">
+        <a @click="onGoSet(record.id)">{{ record.name }}</a>
+      </template>
       <template #photo="{ record }">
         <img
           :src="'http://175.27.166.37:13000' + record.photo"
@@ -30,78 +31,81 @@
         />
       </template>
       <template #action="{ record }">
-        <a @click="onGoSet(record.id)">项目设置</a>
-        <a @click="onGoSetIssue(record.id)" style="margin-left:5px;">事务</a>
-        <a-popconfirm title="确认删除吗?" @confirm="onDelete(record.id)">
+        <a @click="onGoPro(record.id, record.name)">项目主页</a>
+        <!-- <a-popconfirm title="确认删除吗?" @confirm="onDelete(record.id)">
           <a style="margin-left: 10px">删除</a>
-        </a-popconfirm>
+        </a-popconfirm> -->
       </template>
     </a-table>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, toRefs, ref, onActivated } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from '@/plugins/axios'
-import { columns } from './columns'
-import { message } from 'ant-design-vue'
-import getTableFunc from '@/utils/list.ts'
+import { defineComponent, toRefs, ref, onActivated } from "vue";
+import { useRouter } from "vue-router";
+import axios from "@/plugins/axios";
+import { columns } from "./columns";
+import { message } from "ant-design-vue";
+import getTableFunc from "@/utils/list.ts";
 export default defineComponent({
-  name: '项目列表',
+  name: "项目列表",
   setup() {
-    const searchText = ref<string>('')
-    const { stateData, handleTableChange, initData, setUrl, searchQuery } =
-      getTableFunc()
-    const router = useRouter()
+    const searchText = ref<string>("");
+    const {
+      stateData,
+      handleTableChange,
+      initData,
+      setUrl,
+      searchQuery,
+    } = getTableFunc();
+    const router = useRouter();
 
     //删除项目
-    const onDelete = (key: string) => {
-      const params = {
-        projectId: key
-      }
-      axios.delete('/project/remove', { params: params }).then(() => {
-        message.success('删除成功')
-        let cur
-        if (stateData.pagination.total % 10 === 1) {
-          cur = stateData.pagination.current - 1
-        } else {
-          cur = stateData.pagination.current - 1
-        }
-        initData(cur)
-      })
-    }
+    // const onDelete = (key: string) => {
+    //   const params = {
+    //     projectId: key
+    //   }
+    //   axios.delete('/project/remove', { params: params }).then(() => {
+    //     message.success('删除成功')
+    //     let cur
+    //     if (stateData.pagination.total % 10 === 1) {
+    //       cur = stateData.pagination.current - 1
+    //     } else {
+    //       cur = stateData.pagination.current - 1
+    //     }
+    //     initData(cur)
+    //   })
+    // }
     const onGoSet = (id: string) => {
-      console.log(id, 'idddd')
-      router.push('/project/edit?projectId=' + id)
-    }
-     const onGoSetIssue = (id: string) => {
-      router.push('/issue/list?projectId=' + id)
-    }
+      router.push("/project/edit?projectId=" + id);
+    };
+    const onGoPro = (id: string, name: string) => {
+      router.push("/board?projectId=" + id + "&projectName=" + name);
+    };
     const createProject = () => {
-      router.push('/project/create')
-    }
+      router.push("/project/create");
+    };
     const searchEnterFun = (val: string) => {
-      searchQuery({ keyword: val })
-    }
+      searchQuery({ keyword: val });
+    };
     onActivated(() => {
-      setUrl('/project/list')
-    })
+      setUrl("/project/list");
+    });
 
     return {
       searchText,
       columns,
       ...toRefs(stateData),
-      onDelete,
+      // onDelete,
       onGoSet,
-      onGoSetIssue,
+      onGoPro,
       handleTableChange,
       setUrl,
       searchQuery,
       createProject,
-      searchEnterFun
-    }
-  }
-})
+      searchEnterFun,
+    };
+  },
+});
 </script>
 <style lang="scss" scoped>
 .list {
@@ -118,8 +122,8 @@ export default defineComponent({
 }
 </style>
 <route lang="yaml">
-  meta:
-    level: 1
-    name: '项目列表'
-    layout: auth
+meta:
+  level: 1
+  name: "项目列表"
+  layout: auth
 </route>
