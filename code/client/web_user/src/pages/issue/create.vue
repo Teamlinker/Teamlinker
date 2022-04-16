@@ -51,7 +51,7 @@
             :value="item.id"
             v-for="item in memberList"
             :key="item.id"
-            >{{ item.name }}</a-select-option
+            >{{ item.username }}</a-select-option
           >
         </a-select>
       </a-form-item>
@@ -66,7 +66,7 @@
             :value="item.id"
             v-for="item in memberList"
             :key="item.id"
-            >{{ item.name }}</a-select-option
+            >{{ item.username }}</a-select-option
           >
         </a-select>
       </a-form-item>
@@ -139,7 +139,7 @@ export default defineComponent({
            issueTypeList.value = res.data
        })
        const memberParams = Object.assign({},params,{page:0,size:10})
-       axios.get("/project/member/list", { params: memberParams }).then(res=>{
+       axios.get("/project/user/list", { params: {projectId: val,} }).then(res=>{
            memberList.value = res.data
        })
    }
@@ -171,8 +171,8 @@ export default defineComponent({
           projectId:formState.projectId,
           issueTypeId:formState.issueTypeId,
           name:formState.name,
-          reporterId:'432818911597206528 ',
-          assignerId:'432818911597206528 ',
+          reporterId:formState.reporterId,
+          assignerId:formState.assignerId,
           priority:formState.priority,  
         }
          axios.post("/issue/item", params).then((res:any) => {

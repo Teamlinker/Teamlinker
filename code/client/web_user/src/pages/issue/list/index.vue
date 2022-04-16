@@ -2,89 +2,171 @@
   <div class="list">
     <div class="search">
       <a-space>
-        <a-input
+        <a-input allowClear v-model:value="name" placeholder="name" />
+        <a-select
+          placeholder="select priority"
+          v-model:value="priority"
+          :options="priorityOptions"
+        ></a-select>
+        <a-select
+          v-model:value="assigner"
+          show-search
+          placeholder="please select assigner"
           allowClear
-          v-model:value="queryParams.name"
-          placeholder="名称"
-          @keyup.enter.prevent="searchEnterFun(ueryParams.keyword)"
-        />
-        <a-select  placeholder="select priority" v-model:value="queryParams.priority" style="width: 120px"  :options="priorityOptions"></a-select>
-        <a-select  placeholder="select assigner" v-model:value="queryParams.assigner" style="width: 120px"  :options="assignerOptions"></a-select>
-        <a-select  placeholder="select reporter" v-model:value="queryParams.reporter" style="width: 120px"  :options="reporterOptions"></a-select>
-        <a-button @click="searchQuery(queryParams.name)" type="primary"
-          >搜索</a-button
         >
+          <a-select-option
+            :value="item.id"
+            v-for="item in assignerOptions"
+            :key="item.id"
+            >{{ item.username }}</a-select-option
+          >
+        </a-select>
+        <a-select
+          v-model:value="reporter"
+          show-search
+          placeholder="please select reporter"
+          allowClear
+        >
+          <a-select-option
+            :value="item.id"
+            v-for="item in reporterOptions"
+            :key="item.id"
+            >{{ item.username }}</a-select-option
+          >
+        </a-select>
+        <a-button @click="searchQuery" type="primary">搜索</a-button>
       </a-space>
-      <div>
-        <a-button @click="createProject" type="primary">创建事务</a-button>
-      </div>
     </div>
     <a-table
       :columns="columns"
       :data-source="tableData"
-      :rowKey="(record) => record.id"
       :pagination="pagination"
     >
-      <template #photo="{ record }">
-        <img
-          :src="'http://175.27.166.37:13000' + record.photo"
-          width="60"
-          v-if="record.photo"
-        />
-      </template>
-      <template #action="{ record }">
-        <a @click="onGoSet(record.id)">项目设置</a>
-        <a-popconfirm title="确认删除吗?" @confirm="onDelete(record.id)">
-          <a style="margin-left: 10px">删除</a>
-        </a-popconfirm>
-      </template>
     </a-table>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, toRefs, ref, onActivated } from 'vue'
-import type { SelectProps } from 'ant-design-vue';
-import { useRouter } from 'vue-router'
-import axios from '@/plugins/axios'
-import { message } from 'ant-design-vue'
+import {
+  defineComponent,
+  reactive,
+  toRefs,
+  ref,
+  UnwrapRef,
+  toRaw,
+  onActivated,
+} from "vue";
+import type { SelectProps } from "ant-design-vue";
+import { useRouter } from "vue-router";
+import axios from "@/plugins/axios";
+import { message } from "ant-design-vue";
 export default defineComponent({
-  name: '事务列表',
+  name: "事务列表",
   setup() {
-    const priorityOptions = ref<SelectProps['options']>([
+    let priorityOptions = ref<SelectProps["options"]>([
       {
-        value: '0',
-        label: '高',
+        value: "0",
+        label: "高",
       },
       {
-        value: '1',
-        label: '中',
+        value: "1",
+        label: "中",
       },
       {
-        value: '2',
-        label: '低',
+        value: "2",
+        label: "低",
       },
     ]);
-     const assignerOptions = ref<SelectProps['options']>([]);
-     const reporterOptions = ref<SelectProps['options']>([]);
-    const stateData = {
-      queryParams:{
-        name:'',
-        priority:'',
-        assigner:'',
-        reporter:'',
-      }
-    }
-    const searchQuery = ()=>{
 
-    }
+    let assignerOptions = ref([]);
+    let reporterOptions = ref([]);
+    let name = ref<string>();
+    let priority = ref<string>();
+    let assigner = ref<string>();
+    let reporter = ref<string>();
+    const columns = [
+      {
+        title: "name",
+        dataIndex: "name",
+        key: "name",
+      },
+      {
+        title: "status",
+        dataIndex: "status",
+        key: "status",
+      },
+      {
+        title: "issueType",
+        dataIndex: "issueType.name",
+        key: "issueType.name",
+      },
+      {
+        title: "creater",
+        dataIndex: "created_by.username",
+        key: "created_by.username",
+      },
+      {
+        title: "assigner",
+        dataIndex: "assigner_id",
+        key: "assigner_id",
+      },
+      {
+        title: "reporter",
+        dataIndex: "reporter_id",
+        key: "reporter_id",
+      },
+    ];
+    let tableData = ref([]);
+    let queryParams = {
+      projectId: "435445521716893696",
+      name: name.value,
+      priority: priority.value,
+      assigner: assigner.value,
+      reporter: reporter.value,
+      page: 0,
+      size: 10,
+    };
+    const getUser = () => {
+      const params = {
+        projectId: "435445521716893696",
+      };
+      axios.get("/project/user/list", { params: params }).then((res: any) => {
+        assignerOptions.value = res.data;
+        reporterOptions.value = res.data;
+      });
+    };
+    getUser();
+    let searchQuery = () => {
+      queryParams = {
+        projectId: "435445521716893696",
+        name: name.value,
+        priority: priority.value,
+        assigner: assigner.value,
+        reporter: reporter.value,
+        page: 0,
+        size: 10,
+      };
+      getList();
+    };
+    const getList = () => {
+      axios.get("/issue/filter", { params: queryParams }).then((res: any) => {
+        tableData.value = res.data;
+      });
+    };
+    getList();
     return {
       priorityOptions,
-      ...toRefs(stateData),
+      assignerOptions,
+      reporterOptions,
+      name,
+      priority,
+      assigner,
+      reporter,
+      columns,
+      tableData,
       searchQuery,
-
-    }
-  }
-})
+    };
+  },
+});
 </script>
 <style lang="scss" scoped>
 .list {
