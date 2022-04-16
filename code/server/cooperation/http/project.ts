@@ -134,5 +134,15 @@ class ProjectController {
         return ret;
     }
 
+    @DHttpApi(projectApi.routes.listUser)
+    async listUser(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParam("keyword") keyword:string) :Promise<typeof projectApi.routes.listUser.res> {
+        let project=await ProjectService.getItemById(projectId)
+        if(!project) {
+            throw Err.Project.projectNotFound
+        }
+        let ret=await project.listUser(keyword);
+        return ret;
+    }
+
 }
 export default new ProjectController

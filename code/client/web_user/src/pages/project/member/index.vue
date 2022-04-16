@@ -8,9 +8,7 @@
           placeholder="成员姓名"
           @keyup.enter.prevent="searchQuery(queryParams.keyword)"
         />
-        <a-button @click="searchQuery(queryParams.keyword)" type="primary"
-          >搜索</a-button
-        >
+        <a-button @click="searchQuery(queryParams.keyword)" type="primary">搜索</a-button>
       </a-space>
       <div>
         <a-button @click="addMember" type="primary">新增成员</a-button>
@@ -27,7 +25,12 @@
       </template>
     </a-table>
     <div style="margin-left: 240px">
-      <a-modal v-model:visible="visible" :confirm-loading="confirmLoading" title="添加成员" @ok="handleOk">
+      <a-modal
+        v-model:visible="visible"
+        :confirm-loading="confirmLoading"
+        title="添加成员"
+        @ok="handleOk"
+      >
         <a-form
           ref="formRef"
           :model="formState"
@@ -59,12 +62,9 @@
               allowClear
               :filter-option="filterRoleOption"
             >
-              <a-select-option
-                :value="item.id"
-                v-for="item in options"
-                :key="item.id"
-                >{{ item.name }}</a-select-option
-              >
+              <a-select-option :value="item.id" v-for="item in options" :key="item.id">{{
+                item.name
+              }}</a-select-option>
             </a-select>
           </a-form-item>
         </a-form>
@@ -95,8 +95,13 @@ import getTableFunc from "@/utils/list.ts";
 export default defineComponent({
   name: "项目信息",
   setup() {
-    const { stateData, handleTableChange, setUrl, searchQuery, initData } =
-      getTableFunc();
+    const {
+      stateData,
+      handleTableChange,
+      setUrl,
+      searchQuery,
+      initData,
+    } = getTableFunc();
     const router = useRouter();
     const projectId = ref<any>("");
     const confirmLoading = ref<boolean>(false);
@@ -176,33 +181,37 @@ export default defineComponent({
     //新增成员
     const addMember = () => {
       visible.value = true;
-        resetForm()
+      resetForm();
     };
     //resetForm
-    const resetForm = () =>{
-      formState.memberId=''
-      formState.roleId=''
-    }
+    const resetForm = () => {
+      formState.memberId = "";
+      formState.roleId = "";
+    };
     //表单提交
     const handleOk = (e: MouseEvent) => {
       formRef.value.validate().then(() => {
-       confirmLoading.value = true;
-       let formData = toRaw(formState);
-       const type = nameList.value.filter((item:any)=>item.value===formData.memberId)[0].type
-       const params = {
-        projectId: projectId.value,
-        memberId: formData.memberId,
-        type: type,
-        roleId: formData.roleId,
-      };
-      axios.put("/project/member/item", params).then(() => {
-        message.success("操作成功");
-        initData();
-      }).finally(()=>{
-        confirmLoading.value = false;
-      })
+        confirmLoading.value = true;
+        let formData = toRaw(formState);
+        const type = nameList.value.filter(
+          (item: any) => item.value === formData.memberId
+        )[0].type;
+        const params = {
+          projectId: projectId.value,
+          memberId: formData.memberId,
+          type: type,
+          roleId: formData.roleId,
+        };
+        axios
+          .put("/project/member/item", params)
+          .then(() => {
+            message.success("操作成功");
+            initData();
+          })
+          .finally(() => {
+            confirmLoading.value = false;
+          });
       });
-   
     };
 
     const filterRoleOption = (input: string, option: any) => {
@@ -211,20 +220,20 @@ export default defineComponent({
     //删除
     const onDelete = (id: string) => {
       const params = {
-        projectId:projectId.value,
-        memberId:id
-      }
-      axios.delete('/project/member/item',{params:params}).then(()=>{
-        message.success('操作成功');
-         let page = stateData.pagination.current
+        projectId: projectId.value,
+        memberId: id,
+      };
+      axios.delete("/project/member/item", { params: params }).then(() => {
+        message.success("操作成功");
+        let page = stateData.pagination.current;
         if (
           stateData.pagination.total % stateData.pagination.pageSize === 1 ||
           stateData.pagination.pageSize === 1
         ) {
-          page = stateData.pagination.current - 1
+          page = stateData.pagination.current - 1;
         }
-        initData(page)
-      })
+        initData(page);
+      });
     };
     //获取角色
     const getRole = () => {
@@ -237,7 +246,7 @@ export default defineComponent({
     };
     onActivated(() => {
       const id = router.currentRoute.value.query.projectId;
-      projectId.value = id
+      projectId.value = id;
       stateData.queryParams = { projectId: id };
       setUrl("/project/member/list");
       getRole();
@@ -267,16 +276,17 @@ export default defineComponent({
       handleSearch,
       handleChange,
       filterRoleOption,
-      onDelete
+      onDelete,
     };
   },
 });
 </script>
 <route lang="yaml">
-  meta:
-    level: 1
-    name: '项目信息'
-    layout: auth
+meta:
+  level: 1
+  type: "proset"
+  name: "项目信息"
+  layout: auth
 </route>
 <style lang="scss" scoped>
 .list {

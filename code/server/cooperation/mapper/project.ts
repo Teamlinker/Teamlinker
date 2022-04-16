@@ -4,11 +4,12 @@ import { Err } from '../../../common/status/error';
 import { getMysqlInstance } from '../../common/db/mysql';
 import { Mapper } from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
-import { generateCreateSql, generateDeleteSql, generateGroupLeftJoin2Sql, generateLeftJoin3Sql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
+import { generateCreateSql, generateDeleteSql, generateGroupLeftJoin2Sql, generateLeftJoin3Sql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
 import { projectIssueModel } from './../../../common/model/project_issue';
 import { ECommon_Model_Project_Member_Type, projectMemberModel, Table_Project_Member } from './../../../common/model/project_member';
 import { ICommon_Model_Project_Role, projectRoleModel } from './../../../common/model/project_role';
 import { teamModel } from './../../../common/model/team';
+import { teamUserModel } from './../../../common/model/team_user';
 import { userModel } from './../../../common/model/user';
 import { ECommon_Model_Workflow_Node_Status } from './../../../common/model/workflow_node';
 import { ICommon_Route_Res_Project_ListMemeber } from './../../../common/routes/response';
@@ -371,6 +372,106 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         },0,20)
         let ret=await mysql.execute(sql)
         return ret;
+    }
+
+    async listUser(projectId:string,keyword?:string) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let userMap=new Map<string,{
+            id:string,
+            username:string,
+            photo:string
+        }>()
+        var mysql=getMysqlInstance();
+        let sql1=generateLeftJoinSql({
+            model:projectMemberModel
+        },{
+            model:userModel,
+            columns:["id","photo","username"],
+            expression:{
+                id:{
+                    model:projectMemberModel,
+                    field:"member_id"
+                }
+            }
+        },{
+            type:{
+                model:projectMemberModel,
+                value:ECommon_Model_Project_Member_Type.USER
+            },
+            project_id:{
+                model:projectMemberModel,
+                value:projectId
+            },
+            ...(keyword && {
+                username:{
+                    model:userModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
+                    }
+                }
+            })
+        })
+        let users=await mysql.execute(sql1)
+        for(let user of users) {
+            if(!userMap.has(user.id)) {
+                userMap.set(user.id,user);
+            }
+        }
+        let teams = await mysql.execute(generateQuerySql(projectMemberModel,["member_id"],{
+            type:ECommon_Model_Project_Member_Type.TEAM,
+            project_id:projectId
+        }))
+        if(teams.length>0) {
+            let sql = generateLeftJoinSql({
+                model:teamUserModel
+            },{
+                model:userModel,
+                columns:["id","photo","username"],
+                expression:{
+                    id:{
+                        model:teamUserModel,
+                        field:"user_id"
+                    }
+                }
+            },{
+                team_id:{
+                    model:teamUserModel,
+                    value:{
+                        exp:"in",
+                        value:teams.map(item=>item.member_id)
+                    }
+                },
+                ...(keyword && {
+                    username:{
+                        model:userModel,
+                        value:{
+                            exp:"%like%",
+                            value:keyword
+                        }
+                    }
+                })
+            })
+            let arr=await mysql.execute(sql)
+            for(let user of arr) {
+                if(!userMap.has(user.id)) {
+                    userMap.set(user.id,user);
+                }
+            }
+        }
+        let arr=Array.from(userMap.values());
+        arr.sort(function(obj1,obj2) {
+            if(obj1.username>obj2.username){
+                return 1
+            } else if(obj1.username<obj2.username) {
+                return -1
+            } else {
+                return 0
+            }
+        })
+        return arr;
     }
 }
 export let projectMapper=new ProjectMapper

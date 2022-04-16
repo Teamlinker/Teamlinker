@@ -22,7 +22,7 @@ const routesWithLayout = formartRoutes(setupLayouts(routes),filterRoutes(routes)
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes: routesWithLayout
 })
 
