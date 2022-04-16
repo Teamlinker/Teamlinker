@@ -185,7 +185,7 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
                 await mysql.execute(generateCreateSql(workflowSolutionWorkflowIssueTypeModel,{
                     id:await generateSnowId(),
                     workflow_id:workflowId,
-                    issue_type_id:obj.id,
+                    issue_type_id:obj.issue_type_id,
                     issue_type_solution_id:issueTypeSolutionId,
                     workflow_solution_id:workflowSolutionId
                 }))
