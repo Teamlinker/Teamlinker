@@ -1,9 +1,7 @@
-import { UniqueID } from 'nodejs-snowflake';
+import { Snowflake } from 'nodejs-snowflake';
 import { BaseModel } from '../../../common/model/base';
 
-const uid = new UniqueID({
-    returnNumber: false
-}); 
+const uid = new Snowflake(); 
 
 type EXPR={
     [key:string]:EXPRVALUE
@@ -18,8 +16,8 @@ type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
 }
 
 export async function generateSnowId() {
-    let id =await uid.asyncGetUniqueID()
-    return id as string
+    let id =uid.getUniqueID()
+    return String(id)
 }
 
 function isEXPRVALUEEXP(value:any):value is EXPRVALUEEXP {

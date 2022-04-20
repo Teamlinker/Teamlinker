@@ -1,0 +1,36 @@
+{
+    "redis":{
+        "url":"localhost",
+        "port":6379,
+        "db":0
+    },
+    "mysql":{
+        "url":"175.27.166.37",
+        "port":3306,
+        "database":"teamlinker_dev",
+        "username":"root",
+        "password":"sxsxsxsxsxSX1!"
+    },
+    "services":{
+        "gateway":{
+            "port":13000,
+            "rpcServer":false
+        },
+        "user":{
+            "port":13001,
+            "rpcServer":true,
+            "global": {
+                "jwt": "teamlinker"
+            }
+        },
+        "cooperation":{
+            "port":13002,
+            "rpcServer":true
+        },
+        "file":{
+            "port":13003,
+            "rpcServer":true
+        }
+    },
+    "version":"1.0.0"
+}
