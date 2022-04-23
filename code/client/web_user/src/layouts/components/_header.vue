@@ -60,6 +60,9 @@
         </template>
       </a-dropdown>
     </div>
+    <div class="create-issue">
+      <a-button type="primary" @click="showIssueModal">create</a-button>
+    </div>
     <div class="right-container">
       <div class="space-item search">
         <div class="search-main">
@@ -103,6 +106,9 @@
         </a-dropdown>
       </div>
     </div>
+    <a-modal v-model:visible="visible" @ok="handleOk">
+      <create-issue ref="issueRef" @hideIssueModal="hideIssueModal"></create-issue>
+    </a-modal>
   </div>
 </template>
 <style>
@@ -119,9 +125,12 @@
 .pj-menu {
   width: 120px;
 }
+.create-issue {
+  margin-right: 100px;
+}
 </style>
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from "vue";
+import { defineComponent, reactive, toRefs, ref } from "vue";
 import { useStore } from "@/store";
 import { Icon } from "./ICON.ts";
 import { message } from "ant-design-vue";
@@ -129,11 +138,13 @@ import { DownOutlined, HomeOutlined } from "@ant-design/icons-vue";
 import axios from "@/plugins/axios";
 import routes from "virtual:generated-pages";
 import { useRoute, useRouter } from "vue-router";
+import CreateIssue from "./createIssue.vue";
 export default defineComponent({
   components: {
     Icon,
     DownOutlined,
     HomeOutlined,
+    CreateIssue,
   },
   emits: ["changeCompletely"],
   setup(props, context) {
@@ -165,6 +176,16 @@ export default defineComponent({
           : "MenuUnfoldOutlined";
       context.emit("changeCompletely", null);
     };
+    const showIssueModal = () => {
+      state.visible = true;
+    };
+    const hideIssueModal = () => {
+      state.visible = false;
+    };
+    const issueRef = ref(null);
+    const handleOk = () => {
+      issueRef.value.onSubmit();
+    };
     const state = reactive({
       SearchOutlinedIcon: "SearchOutlined",
       BellOutlinedIcon: "BellOutlined",
@@ -180,6 +201,7 @@ export default defineComponent({
       routeMmatched: [],
       teamList: [],
       projectList: [],
+      visible: false,
     });
 
     const onMenu = async () => {
@@ -231,6 +253,10 @@ export default defineComponent({
       onPerPage,
       viewAllProject,
       createProject,
+      showIssueModal,
+      hideIssueModal,
+      handleOk,
+      issueRef,
     };
   },
 });

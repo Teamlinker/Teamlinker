@@ -203,7 +203,7 @@ export default defineComponent({
           roleId: formData.roleId,
         };
         axios
-          .put("/project/member/item", params)
+          .post("/project/member/item", params)
           .then(() => {
             message.success("操作成功");
             initData();
