@@ -1,0 +1,33 @@
+import { ECommon_Services } from "../types"
+import { ECommon_HttpApi_Method } from "./types"
+
+const api={
+    baseUrl:"/gateway",
+    service:ECommon_Services.GateWay,
+    routes:{
+        needConfig:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/needconfig",
+            req:<{
+                              
+            }>{},
+            res:<number>{},
+            ignoreValidate:true
+        },
+        editConfig:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/config",
+            req:<{
+                dbUrl:string,
+                dbPort?:number,
+                dbDatabase?:string,
+                dbUsername?:string,
+                dbPassword?:string       
+            }>{},
+            res:{},
+            ignoreValidate:true
+        }
+    }
+}
+
+export=api

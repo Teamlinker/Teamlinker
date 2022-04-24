@@ -2,7 +2,8 @@
     "redis":{
         "url":"localhost",
         "port":6379,
-        "db":0
+        "db":0,
+        "password":""
     },
     "mysql":{
         "url":"175.27.166.37",

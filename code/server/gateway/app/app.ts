@@ -1,11 +1,11 @@
-import * as http from "http";
+
 import * as Koa from "koa";
-import * as body from 'koa-bodyparser';
 import * as koaStaticServer from "koa-static-server";
-import { PassThrough } from "stream";
+import * as path from "path";
 import { Permission_Base } from '../../../common/permission/permission';
 import * as fieldApi from "../../../common/routes/field";
 import * as fileApi from "../../../common/routes/file";
+import * as gatewayApi from "../../../common/routes/gateway";
 import * as issueApi from "../../../common/routes/issue";
 import * as issueTypeApi from "../../../common/routes/issueType";
 import * as projectApi from "../../../common/routes/project";
@@ -16,44 +16,22 @@ import * as userApi from "../../../common/routes/user";
 import * as workflowApi from "../../../common/routes/workflow";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
-import Application from "../../common/app/app";
-import { getNacosInstance } from "../../common/nacos/nacos";
+import Application, { ECommon_Application_Mode } from "../../common/app/app";
 import { deletePermission, processPermission } from '../../common/permission/base';
 import { proxyRequest } from "../../common/rpc/rpc";
-import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File } from "../../common/types/http";
+import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy } from "../../common/types/http";
 import { EServer_Common_User_Type } from '../../common/types/user';
-import CommonUtil from "../../common/util/common";
-import { generateHttpErrorResponse, generateHttpOkResponse } from "../../common/util/http";
+import { generateHttpOkResponse } from "../../common/util/http";
+import "../http/gateway";
 import userRpcApi from '../rpc/user';
-import { handleImageFields, parseFormData } from "../util/util";
-import { ICommon_Version_Config } from './../../../common/model/version';
+import { checkIfNeedInit, handleImageFields } from "../util/util";
 import { CacheService } from './../cache/service';
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi];
-var app = new Koa();
-var config=<ICommon_Version_Config>{}
-var pipe = function (from, to): Promise<Buffer> {
-    return new Promise(function (resolve) {
-        from.pipe(to);
-        const originalReqData = [];
-        let size = 0;
-        to.on("data", function (chunk) {
-            originalReqData.push(chunk);
-            size += chunk.length;
-        })
-        to.on("end", function () {
-            resolve(Buffer.concat(originalReqData, size));
-        })
-    })
-}
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi];
 export default class GateWay extends Application {
-    override async config() {
+    override async config(app: Koa<Koa.DefaultState, Koa.DefaultContext>) {
         let cacheService=new CacheService()
         cacheService.start()
-        //await initSystem()
-        await this.initKoa();
-    }
-    async initKoa() {
-        config=await CommonUtil.getGlobalConfig()
+        await checkIfNeedInit()
         let apiMap=<{
             [param:string]:{
                 [parem:string]:{
@@ -81,57 +59,6 @@ export default class GateWay extends Application {
                 };
             }
         }
-        app.use(async (ctx, next) => {
-            ctx.set("Access-Control-Allow-Origin", ctx.get("origin"));
-            ctx.set("Access-Control-Allow-Headers", "X-Requested-With");
-            ctx.set("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE");
-            ctx.set("Access-Control-Allow-Credentials", "true");
-            if (ctx.get["access-control-request-headers"]) {
-                ctx.set("Access-Control-Allow-Headers", ctx.get("access-control-request-headers"))
-            }
-            ctx.set("Access-Control-Expose-Headers", "connection,content-length,date,x-powered-by,content-encoding,server,etag,accept-ranges,allow,content-language,set-cookie,doclever-request");
-            await next();
-        })
-        app.use(async (ctx, next) => {
-            if (ctx.headers['content-type'] && ctx.headers['content-type'].split(';')[0] === 'multipart/form-data') {
-                const maxLength = 1024 * 1024 * 5;
-                if (ctx.headers && ctx.headers['content-length'] && Number(ctx.headers['content-length']) > maxLength) {
-                    ctx.body = generateHttpErrorResponse(Err.Http.overFileSize)
-                    return;
-                }
-                let stream = new PassThrough()
-                let ret = await pipe(ctx.req, stream)
-                const boundary = `--${ctx.headers['content-type'].split('; ')[1].split('=')[1]}`
-                let arr = parseFormData(ret, boundary);
-                let obj = <{
-                    [param: string]: string | IServer_Common_Http_Req_File
-                }>{}
-                for (let o of arr) {
-                    if (o.isFile) {
-                        obj[o.name] = {
-                            data: o.data as Buffer,
-                            fileName: o.fileName,
-                            size: o.size,
-                            md5: o.md5
-                        }
-                    } else {
-                        obj[o.name] = o.data as string
-                    }
-                }
-                ctx.state.formData = obj
-                await next();
-            } else {
-                await next()
-            }
-        })
-        app.use(body());
-        app.use(async (ctx, next) => {
-            try {
-                await next()
-            } catch (err) {
-                ctx.body = generateHttpErrorResponse(err.data??err)
-            }
-        })
         app.use(async function (ctx, next) {
             let path = ctx.path
             if(path.startsWith("/api/")) {
@@ -224,12 +151,17 @@ export default class GateWay extends Application {
             }
         })
         app.use(koaStaticServer({
-            rootDir:config.fileBasePath,
-            rootPath:"/file"
+            rootDir:Application.teamlinkerPath,
+            rootPath:"/file",
+            last:false
         }))
-        http.createServer(app.callback()).listen(getNacosInstance().serverPort,function(){
-            console.log(`start`);
-        })
+        if(Application.mode!=ECommon_Application_Mode.MICRO) {
+            app.use(koaStaticServer({
+                rootDir:Application.debug?path.resolve(__dirname,"../../../client/dist"):path.join(__dirname,"../../../../../../client/dist"),
+                rootPath:"/",
+                last:false
+            }))
+        }
     }
 }
 

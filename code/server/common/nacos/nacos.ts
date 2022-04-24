@@ -1,8 +1,8 @@
+import got from "got";
+import * as nacos from "nacos";
+import { IServer_Common_Config, IServer_Common_Config_Base, IServer_Common_Config_Redis, IServer_Common_Global_Config } from "../types/config";
 import { IServer_Common_Config_Mysql } from './../types/config';
 import { IServer_Common_Nacos_Instance_List } from './../types/nacos';
-import {IServer_Common_Config,IServer_Common_Config_Redis,IServer_Common_Config_Base,IServer_Common_Global_Config} from "../types/config"
-import * as nacos from "nacos"
-import got from "got"
 const NacosConfigClient=nacos.NacosConfigClient
 const NacosNamingClient=(<any>nacos).NacosNamingClient
 var g_nacos:InstanceType<typeof Nacos>;
@@ -48,8 +48,8 @@ export default class Nacos<T extends IServer_Common_Config_Base> {
         g_nacos=this;
     }
     async init(){
-        const content= await this.config.getConfig(this.configName, 'DEFAULT_GROUP');
-        const obj=JSON.parse(content)
+        const content= await got(`http://${this.nacosUrl}:${this.nacosPort}/nacos/v1/cs/configs?tenant=${this.nacosNamespace}&dataId=${this.configName}&group=DEFAULT_GROUP&username=${this.username}&password=${this.password}`)
+        const obj=JSON.parse(content.body)
         this.objConfig=obj
         this.objConfigCurrentService=this.objConfig.services[this.name]
         this.objConfigCurrent=this.objConfig.services[this.name].config

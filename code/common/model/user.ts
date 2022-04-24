@@ -13,7 +13,7 @@ export interface ICommon_Model_User {
   location :string,
   title :string,
   active:number,
-  admin:number
+  is_admin:number
 }
 export const Table_User="user"
 

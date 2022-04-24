@@ -8,17 +8,17 @@ class AdminMapper extends Mapper<typeof userModel> {
         super(userModel)
     }
     override async createConfig(info:ICommon_Model_User) {
-        info.admin=1
+        info.is_admin=1
     }
     override async updateConfig(info:ICommon_Model_User) {
-        info.admin=1
+        info.is_admin=1
     }
     async getUserByName(name:string):Promise<ICommon_Model_User> {
         if(!name) {
             throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,admin:1}))
+        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,is_admin:1}))
         return ret
     }
 }

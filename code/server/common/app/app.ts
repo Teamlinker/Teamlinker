@@ -1,42 +1,187 @@
+
+import path = require("path");
+import os = require("os")
+import * as http from "http";
+import * as Koa from "koa";
+import * as body from 'koa-bodyparser';
+import { PassThrough } from "stream";
 import * as yargs from "yargs";
+import { Err } from "../../../common/status/error";
+import { getConfigInstance } from '../config/config';
 import { initComponent } from "../decorate/component";
-import { getNacosInstance } from '../nacos/nacos';
+import { internalRouter } from "../rpc/http";
+import { IServer_Common_Http_Req_File } from "../types/http";
+import CommonUtil from "../util/common";
+import { generateHttpErrorResponse } from "../util/http";
 import { init } from "../util/init";
 import { Rpc } from './../rpc/rpc';
+var pipe = function (from, to): Promise<Buffer> {
+    return new Promise(function (resolve) {
+        from.pipe(to);
+        const originalReqData = [];
+        let size = 0;
+        to.on("data", function (chunk) {
+            originalReqData.push(chunk);
+            size += chunk.length;
+        })
+        to.on("end", function () {
+            resolve(Buffer.concat(originalReqData, size));
+        })
+    })
+}
+export enum ECommon_Application_Mode {
+    MICRO,
+    DOCKER,
+    SINGLE
+}
 export default abstract class Application{
+    private app=new Koa()
+    public static needReset:boolean=false
+    public static debug:boolean=false
+    public static mode:ECommon_Application_Mode;
+    public static serviceName:string;
+    public static teamlinkerPath:string=(os.platform()=="darwin" || os.platform()=="win32")?path.resolve(os.homedir(),"teamlinker-files"):"/opt/teamlinker-files"
+    public static configPath:string=path.join(this.teamlinkerPath,"teamlinker.config.json")
+    
+    public static privateConfig:{
+        "redis":{
+            "url":string,
+            "port":number,
+            "db":number
+        },
+        "mysql":{
+            "url":string,
+            "port":number,
+            "database":string,
+            "username":string,
+            "password":string
+        },
+        "services":{
+            [param:string]:{
+                "port":number,
+                "rpcServer":false,
+                "global"?:{
+                    [param:string]:any
+                }
+            }
+        },
+        "version":string
+    }
+    public static currentConfigObj:typeof Application.privateConfig["services"][string]
     Application(){
 
     }
-    async start() {
+    async start(callback?:(app:typeof this)=>void) {
         let argv=yargs.argv
-        if(argv["nacosPort"]) {
-            process.env.nacosPort=argv["nacosPort"]
+        if(argv["reset"]) {
+            Application.needReset=true
         }
-        if(argv["nacosUrl"]) {
-            process.env.nacosUrl=argv["nacosUrl"]
+        if(argv["debug"]) {
+            Application.debug=true
         }
-        if(argv["nacosName"]) {
-            process.env.nacosName=argv["nacosName"]
-        }
-        if(argv["nacosId"]) {
-            process.env.nacosId=argv["nacosId"]
-        }
-        if(argv["nacosNamespace"]) {
-            process.env.nacosNamespace=argv["nacosNamespace"]
-        }
-        if(argv["nacosUsername"]) {
-            process.env.nacosUsername=argv["nacosUsername"]
-        }
-        if(argv["nacosPassword"]) {
-            process.env.nacosPassword=argv["nacosPassword"]
+        if(argv["name"]) {
+            Application.serviceName = argv["name"];
+            Application.mode = ECommon_Application_Mode.DOCKER
+            Application.privateConfig = require(Application.configPath)
+            Application.currentConfigObj=Application.privateConfig["services"][Application.serviceName]
+        } else {
+            Application.mode = ECommon_Application_Mode.MICRO
+            if(argv["nacosPort"]) {
+                process.env.nacosPort=argv["nacosPort"]
+            }
+            if(argv["nacosUrl"]) {
+                process.env.nacosUrl=argv["nacosUrl"]
+            }
+            if(argv["nacosName"]) {
+                process.env.nacosName=argv["nacosName"]
+                Application.serviceName = argv["nacosName"];
+            }
+            if(argv["nacosId"]) {
+                process.env.nacosId=argv["nacosId"]
+            }
+            if(argv["nacosNamespace"]) {
+                process.env.nacosNamespace=argv["nacosNamespace"]
+            }
+            if(argv["nacosUsername"]) {
+                process.env.nacosUsername=argv["nacosUsername"]
+            }
+            if(argv["nacosPassword"]) {
+                process.env.nacosPassword=argv["nacosPassword"]
+            }
         }
         initComponent()
         await init()
-        if(getNacosInstance().rpcServer) {
-            await Rpc.start(getNacosInstance().serverPort)
+        await this.initKoa();
+        await this.config(this.app);
+        await this.initRoute()
+        let httpServer = http.createServer(this.app.callback())
+        let port=getConfigInstance().serverPort
+        httpServer.listen(port,async ()=>{
+            if(getConfigInstance().rpcServer) {
+                await Rpc.start(httpServer)
+            }
+            console.log(`start`);
+        })
+        if(callback) {
+            callback(this)
         }
-        await this.config();
     }
-    async config(){}
-    
+    async initKoa() {
+        this.app.use(async (ctx, next) => {
+            ctx.set("Access-Control-Allow-Origin", ctx.get("origin"));
+            ctx.set("Access-Control-Allow-Headers", "X-Requested-With");
+            ctx.set("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE");
+            ctx.set("Access-Control-Allow-Credentials", "true");
+            if (ctx.get["access-control-request-headers"]) {
+                ctx.set("Access-Control-Allow-Headers", ctx.get("access-control-request-headers"))
+            }
+            ctx.set("Access-Control-Expose-Headers", "connection,content-length,date,x-powered-by,content-encoding,server,etag,accept-ranges,allow,content-language,set-cookie,doclever-request");
+            await next();
+        })
+        this.app.use(async (ctx, next) => {
+            if (ctx.headers['content-type'] && ctx.headers['content-type'].split(';')[0] === 'multipart/form-data') {
+                const maxLength = 1024 * 1024 * 5;
+                if (ctx.headers && ctx.headers['content-length'] && Number(ctx.headers['content-length']) > maxLength) {
+                    ctx.body = generateHttpErrorResponse(Err.Http.overFileSize)
+                    return;
+                }
+                let stream = new PassThrough()
+                let ret = await pipe(ctx.req, stream)
+                const boundary = `--${ctx.headers['content-type'].split('; ')[1].split('=')[1]}`
+                let arr = CommonUtil.parseFormData(ret, boundary);
+                let obj = <{
+                    [param: string]: string | IServer_Common_Http_Req_File
+                }>{}
+                for (let o of arr) {
+                    if (o.isFile) {
+                        obj[o.name] = {
+                            data: o.data as Buffer,
+                            fileName: o.fileName,
+                            size: o.size,
+                            md5: o.md5
+                        }
+                    } else {
+                        obj[o.name] = o.data as string
+                    }
+                }
+                ctx.state.formData = obj
+                await next();
+            } else {
+                await next()
+            }
+        })
+        this.app.use(body());
+        this.app.use(async (ctx, next) => {
+            try {
+                await next()
+            } catch (err) {
+                ctx.body = generateHttpErrorResponse(err.data??err)
+            }
+        })
+    }
+    async initRoute() {
+        this.app.use(internalRouter.routes());
+    }
+    abstract config(app:typeof this.app);
+
 }

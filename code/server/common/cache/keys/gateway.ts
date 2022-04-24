@@ -2,17 +2,23 @@ import { ECommon_Services } from '../../../../common/types';
 import { cacheRedisType } from "../../types/cache";
 import StringUtil from "../../util/string";
 import { IServer_Common_Nacos_Instance } from './../../types/nacos';
-import { RedisStringKey } from './base';
+import { RedisBatchStringKey, RedisStringKey } from './base';
 export namespace REDIS_GATEWAY {
     let INSTANCE_KEY=`${ECommon_Services.GateWay}:instance:{0}`
     let INSTANCES_KEY=`${ECommon_Services.GateWay}:instance:*`
-    export function instances(key:string)
+    export async function instances(key:string)
     {
         let obj=new RedisStringKey(StringUtil.format(INSTANCE_KEY,key),cacheRedisType<IServer_Common_Nacos_Instance[]>().Object)
         return obj
     }
-    export function allInstances() {
+    export async function allServices() {
         let obj=new RedisStringKey(INSTANCES_KEY,cacheRedisType<IServer_Common_Nacos_Instance[]>().Object);
+        return obj;
+    }
+    export async function allInstances() {
+        let objRedis = await REDIS_GATEWAY.allServices()
+        let ret = await objRedis.scan()
+        let obj=new RedisBatchStringKey(ret,cacheRedisType<IServer_Common_Nacos_Instance[][]>().Array);
         return obj;
     }
     export namespace Permission {

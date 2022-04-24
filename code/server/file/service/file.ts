@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import { v4 as uuid } from "uuid";
+import Application from "../../common/app/app";
 import { Entity } from "../../common/entity/entity";
-import CommonUtil from "../../common/util/common";
 import { fileModel } from './../../../common/model/file';
 import { fileMapper } from './../mapper/file';
 import path = require("path");
@@ -20,10 +20,9 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
         }
     }
     async upload(data:Buffer){
-        let config = await CommonUtil.getGlobalConfig();
-        let dirPath = path.join(config.fileBasePath,(new Date).toLocaleDateString().replace(/\//g,""))
+        let dirPath = path.join(Application.teamlinkerPath,(new Date).toLocaleDateString().replace(/\//g,""))
         let filePath=path.join(dirPath,uuid())+this.item.filename.substr(this.item.filename.lastIndexOf("."));
-        let dbPath=filePath.substr(config.fileBasePath.length);
+        let dbPath=filePath.substring(Application.teamlinkerPath.length);
         await fs.ensureDir(dirPath)
         fs.writeFile(filePath,data)
         this.item.path=dbPath

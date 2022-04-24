@@ -1,8 +1,8 @@
 import * as jwt from "jsonwebtoken";
 import { Err } from '../../../common/status/error';
 import { REDIS_USER } from "../../common/cache/keys/user";
+import { getConfigInstance } from '../../common/config/config';
 import { Entity } from "../../common/entity/entity";
-import { getNacosInstance } from '../../common/nacos/nacos';
 import { userModel } from './../../../common/model/user';
 import { EServer_Common_User_Type } from './../../common/types/user';
 import { adminMapper } from './../mapper/admin';
@@ -22,7 +22,7 @@ export default class Admin extends Entity<typeof userModel,typeof adminMapper> {
     }
 
     async startSession():Promise<string>{
-        let secret=getNacosInstance().globalConfig.jwt;
+        let secret=getConfigInstance().globalConfig.jwt;
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
         }

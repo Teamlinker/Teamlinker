@@ -65,7 +65,7 @@ const api={
             req:<Partial<Omit<ICommon_Model_User,"id"  | "created_time" | "modified_time">> & {
                 username:string,
                 password:string,
-                admin?:number
+                is_admin?:number
             }>{},
             res:<Omit<ICommon_Model_User,"password">>{}
         },

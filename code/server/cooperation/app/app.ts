@@ -1,3 +1,4 @@
+import { DefaultContext, DefaultState } from "koa";
 import Application from "../../common/app/app";
 import "../http/field";
 import "../http/issue";
@@ -8,8 +9,7 @@ import "../http/release";
 import "../http/tag";
 import "../http/workflow";
 export default class Cooperation extends Application {
-    override async config() {
+    override async config(app: import("koa")<DefaultState, DefaultContext>) {
         
     }
 }
-

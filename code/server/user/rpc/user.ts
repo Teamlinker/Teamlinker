@@ -1,18 +1,18 @@
-
 import * as jwt from "jsonwebtoken";
 import { REDIS_USER } from "../../common/cache/keys/user";
-import { getNacosInstance } from "../../common/nacos/nacos";
+import { getConfigInstance } from '../../common/config/config';
 import IServer_Common_RPC_User, { IServer_Common_RPC_User_CheckSession } from "../../common/rpc/api/user";
 import { DRPCRecieve } from "../../common/rpc/rpc";
 import UserService from "../service/user";
 import rpcFileApi from "./file";
+
 class RpcUserApi implements IServer_Common_RPC_User {
     @DRPCRecieve
     async checkSession(token:string):Promise<IServer_Common_RPC_User_CheckSession> {
         if(!token) {
             return null;
         }
-        let secret=getNacosInstance().globalConfig.jwt;
+        let secret=getConfigInstance().globalConfig.jwt;
         return new Promise(function(resolve){
             jwt.verify(token,secret,async function(err,decoded) {
                 if(err) {

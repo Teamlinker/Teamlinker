@@ -1,5 +1,7 @@
-import * as crypto from "crypto";
+
 import * as fs from "fs-extra";
+import * as Importer from "mysql2-import";
+import * as path from "path";
 import { Table_Project } from '../../../common/model/project';
 import { Table_Project_Issue } from "../../../common/model/project_issue";
 import { Table_Workflow, workflowModel } from "../../../common/model/workflow";
@@ -8,10 +10,12 @@ import { workflowNodeModel } from "../../../common/model/workflow_node";
 import { workflowSolutionModel } from "../../../common/model/workflow_solution";
 import { Table_Workflow_Solution_Workflow_Issue_Type, workflowSolutionWorkflowIssueTypeModel } from "../../../common/model/workflow_solution_workflow_issue_type";
 import { Permission_Base, Permission_Types } from '../../../common/permission/permission';
+import Application, { ECommon_Application_Mode } from '../../common/app/app';
 import { getRedisInstance } from "../../common/cache/redis";
+import { getConfigInstance } from '../../common/config/config';
 import { getMysqlInstance } from "../../common/db/mysql";
-import { getNacosInstance } from '../../common/nacos/nacos';
-import { generateBatchCreateSql, generateCreateSql, generateSnowId } from '../../common/util/sql';
+import CommonUtil from "../../common/util/common";
+import { generateBatchCreateSql, generateCreateSql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
 import rpcFileApi from '../rpc/file';
 import rpcUserApi from '../rpc/user';
 import { Table_Field_Solution } from './../../../common/model/field_solution';
@@ -40,71 +44,14 @@ import { Table_Team } from './../../../common/model/team';
 import { Table_Team_Role } from './../../../common/model/team_role';
 import { Table_Team_User } from './../../../common/model/team_user';
 import { Table_User } from './../../../common/model/user';
-import { ICommon_Version_Config, Table_Version } from './../../../common/model/version';
+import { Table_Version, versionModel } from './../../../common/model/version';
 import { Table_Workflow_Action } from './../../../common/model/workflow_action';
 import { ECommon_Model_Workflow_Node_Status, Table_Workflow_Node } from './../../../common/model/workflow_node';
 import { Table_Workflow_Solution } from './../../../common/model/workflow_solution';
 import { Table_Workflow_Solution_Issue_Type_Solution, workflowSolutionIssueTypeSolutionModel } from './../../../common/model/workflow_solution_issue_type_solution';
 import { Table_Workflow_Solution_Workflow, workflowSolutionWorkflowModel } from './../../../common/model/workflow_solution_workflow';
 import { OBTPConfig } from './obtp';
-export interface IServer_GateWay_FormData {
-    isFile:boolean,
-    name:string,
-    fileName:string,
-    data:Buffer|string,
-    md5:string,
-    size:number
-}
 
-function bufferSplit(buffer, separator) {
-    let result = [];
-    let index = 0;
-  
-    while ((index = buffer.indexOf(separator)) != -1) {
-      result.push(buffer.slice(0, index));
-      buffer = buffer.slice(index + separator.length);
-    }
-    result.push(buffer);
-  
-    return result;
-}
-
-export function parseFormData(str: Buffer, boundary: string): IServer_GateWay_FormData[] {
-    if (!str) {
-        return null;
-    }
-    let ret: IServer_GateWay_FormData[] = [];
-    let result = bufferSplit(str, boundary)
-    result.pop()
-    result.shift()
-    result = result.map(item => item.slice(2, item.length - 2))
-    result.forEach(item => {
-        let obj=<IServer_GateWay_FormData>{}
-        let [info, data] = bufferSplit(item, '\r\n\r\n')
-        info = info.toString()
-        if (info.indexOf('\r\n') >= 0) {
-            let infoResult = info.split('\r\n')[0].split('; ')
-            let name = infoResult[1].split('=')[1]
-            name = name.substring(1, name.length - 1)
-            let filename = infoResult[2].split('=')[1]
-            filename = filename.substring(1, filename.length - 1)
-            obj.isFile=true;
-            obj.data=data;
-            obj.fileName=filename
-            obj.name=name;
-            obj.size=data.length;
-            obj.md5=crypto.createHash("md5").update(data).digest("hex")
-        } else {
-            let name = info.split('; ')[1].split('=')[1]
-            name = name.substring(1, name.length - 1)
-            const value = data.toString()
-            obj.name=name;
-            obj.data=value
-        }
-        ret.push(obj)
-    })
-    return ret;
-}
 
 export async function handleImageFields(data:object){
     let arrImage=<{
@@ -165,43 +112,48 @@ export async function handleImageFields(data:object){
 }
 
 async function resetSystem(){
-    let mysql=getMysqlInstance()
-    await mysql.execute(`delete from ${Table_Version}`) 
-    await mysql.execute(`delete from ${Table_Permission}`) 
-    await mysql.execute(`delete from ${Table_Project_Role}`) 
-    await mysql.execute(`delete from ${Table_Role_Permission}`) 
-    await mysql.execute(`delete from ${Table_User}`) 
-    await mysql.execute(`delete from ${Table_Project}`) 
-    await mysql.execute(`delete from ${Table_Project_Member}`) 
-    await mysql.execute(`delete from ${Table_Team_Role}`)
-    await mysql.execute(`delete from ${Table_Team}`)  
-    await mysql.execute(`delete from ${Table_Team_User}`)
-    await mysql.execute(`delete from ${Table_Issue_Type}`)
-    await mysql.execute(`delete from ${Table_Issue_Type_Solution}`)
-    await mysql.execute(`delete from ${Table_Issue_Type_Solution_Issue_Type}`)
-    await mysql.execute(`delete from ${Table_Workflow}`)
-    await mysql.execute(`delete from ${Table_Workflow_Node}`)
-    await mysql.execute(`delete from ${Table_Workflow_Action}`)
-    await mysql.execute(`delete from ${Table_Workflow_Solution}`)
-    await mysql.execute(`delete from ${Table_Workflow_Solution_Workflow_Issue_Type}`)
-    await mysql.execute(`delete from ${Table_Workflow_Solution_Issue_Type_Solution}`)
-    await mysql.execute(`delete from ${Table_Workflow_Solution_Workflow}`)
-    await mysql.execute(`delete from ${Table_Project_Module}`)
-    await mysql.execute(`delete from ${Table_Project_Label}`)
-    await mysql.execute(`delete from ${Table_Field_Solution}`)
-    await mysql.execute(`delete from ${Table_Field_Solution_Workflow_Node_Field_Type}`)
-    await mysql.execute(`delete from ${Table_Field_Type}`)
-    await mysql.execute(`delete from ${Table_Field_Type_Config_Value}`)
-    await mysql.execute(`delete from ${Table_Field_Solution_Workflow_Solution}`)
-    await mysql.execute(`delete from ${Table_Project_Issue}`)
-    await mysql.execute(`delete from ${Table_Project_Issue_Description}`)
-    await mysql.execute(`delete from ${Table_Project_Issue_Field_Value}`)
-    await mysql.execute(`delete from ${Table_Project_Issue_Parent}`)
-    await mysql.execute(`delete from ${Table_Project_Issue_Process}`)
-    await mysql.execute(`delete from ${Table_Project_Issue_Related}`)
-    await mysql.execute(`delete from ${Table_Project_Issue_Solution}`)
-    await mysql.execute(`delete from ${Table_Project_Module_Issue}`)
-    await mysql.execute(`delete from ${Table_Project_Label_Issue}`)
+    try {
+        let mysql=getMysqlInstance()
+        await mysql.execute(`delete from ${Table_Version}`) 
+        await mysql.execute(`delete from ${Table_Permission}`) 
+        await mysql.execute(`delete from ${Table_Project_Role}`) 
+        await mysql.execute(`delete from ${Table_Role_Permission}`) 
+        await mysql.execute(`delete from ${Table_User}`) 
+        await mysql.execute(`delete from ${Table_Project}`) 
+        await mysql.execute(`delete from ${Table_Project_Member}`) 
+        await mysql.execute(`delete from ${Table_Team_Role}`)
+        await mysql.execute(`delete from ${Table_Team}`)  
+        await mysql.execute(`delete from ${Table_Team_User}`)
+        await mysql.execute(`delete from ${Table_Issue_Type}`)
+        await mysql.execute(`delete from ${Table_Issue_Type_Solution}`)
+        await mysql.execute(`delete from ${Table_Issue_Type_Solution_Issue_Type}`)
+        await mysql.execute(`delete from ${Table_Workflow}`)
+        await mysql.execute(`delete from ${Table_Workflow_Node}`)
+        await mysql.execute(`delete from ${Table_Workflow_Action}`)
+        await mysql.execute(`delete from ${Table_Workflow_Solution}`)
+        await mysql.execute(`delete from ${Table_Workflow_Solution_Workflow_Issue_Type}`)
+        await mysql.execute(`delete from ${Table_Workflow_Solution_Issue_Type_Solution}`)
+        await mysql.execute(`delete from ${Table_Workflow_Solution_Workflow}`)
+        await mysql.execute(`delete from ${Table_Project_Module}`)
+        await mysql.execute(`delete from ${Table_Project_Label}`)
+        await mysql.execute(`delete from ${Table_Field_Solution}`)
+        await mysql.execute(`delete from ${Table_Field_Solution_Workflow_Node_Field_Type}`)
+        await mysql.execute(`delete from ${Table_Field_Type}`)
+        await mysql.execute(`delete from ${Table_Field_Type_Config_Value}`)
+        await mysql.execute(`delete from ${Table_Field_Solution_Workflow_Solution}`)
+        await mysql.execute(`delete from ${Table_Project_Issue}`)
+        await mysql.execute(`delete from ${Table_Project_Issue_Description}`)
+        await mysql.execute(`delete from ${Table_Project_Issue_Field_Value}`)
+        await mysql.execute(`delete from ${Table_Project_Issue_Parent}`)
+        await mysql.execute(`delete from ${Table_Project_Issue_Process}`)
+        await mysql.execute(`delete from ${Table_Project_Issue_Related}`)
+        await mysql.execute(`delete from ${Table_Project_Issue_Solution}`)
+        await mysql.execute(`delete from ${Table_Project_Module_Issue}`)
+        await mysql.execute(`delete from ${Table_Project_Label_Issue}`)
+    } catch (err) {
+        console.log("db reset error:",err);
+    }
+    
 }
 
 async function flushRedis() {
@@ -209,9 +161,102 @@ async function flushRedis() {
     await redis.flush()
 }
 
+export async function checkIfNeedInit() {
+    if(Application.mode!=ECommon_Application_Mode.MICRO) {
+        let mysql=getMysqlInstance()
+        let config=getConfigInstance()
+        let bExist=false;
+        try {
+            let ret=await mysql.executeOne(`select * from version;`)
+            if(ret) {
+                bExist=true;
+            }
+        } catch(err) {
+            bExist=false
+        }
+        if(!bExist) {
+            let sqlPath=Application.debug?path.join(__dirname,"../../init.sql"):path.join(__dirname,"../../../../../init.sql")
+            let importer = new Importer({
+                host:config.mysqlInfo.url,
+                user:config.mysqlInfo.username,
+                password:config.mysqlInfo.password,
+                database:config.mysqlInfo.database,
+                port:config.mysqlInfo.port
+            })
+            console.log("exec sql start")
+            await importer.import(sqlPath)
+            console.log("exec sql end")
+            await initSystem()
+        } else {
+            await checkIfNeedPatch()
+            if(Application.needReset) {
+                await flushRedis()
+                await resetSystem()
+            }
+        }
+    } else {
+        await initSystem()
+    }
+
+}
+
+async function checkIfNeedPatch() {
+    if(Application.mode==ECommon_Application_Mode.MICRO) {
+        return;
+    }
+    let curVersion = getConfigInstance().version;
+    var stat = fs.pathExistsSync(Application.debug?path.join(__dirname, "../../patch/dist"):path.join(__dirname, "../../../../../patch/dist"));
+    if (!stat) {
+        return;
+    }
+    let files = fs.readdirSync(Application.debug?path.join(__dirname, "../../patch/dist"):path.join(__dirname, "../../../../../patch/dist"));
+    files = files.filter(function (obj) {
+        if (obj != "." && obj != ".." && obj.endsWith(".js")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }).sort(function (obj1, obj2) {
+        let ret= CommonUtil.versionDiff(obj1, obj2);
+        if(ret) {
+            return 1
+        } else {
+            return -1
+        }
+    })
+    if(files.length==0) {
+        return;
+    }
+    let version = "0.0.0";
+    let mysql=getMysqlInstance()
+    let ret=await mysql.executeOne(generateQuerySql(versionModel,[]))
+    version=ret.version
+    let index = -1;
+    for (let i = 0; i < files.length; i++) {
+        let bMax = CommonUtil.versionDiff(files[i], version);
+        if (bMax) {
+            index = i;
+            break;
+        }
+    }
+    if (index > -1) {
+        console.log("patch start");
+        for (let i = index; i < files.length; i++) {
+            await (require(path.join(Application.debug?path.join(__dirname, "../../patch/dist"):path.join(__dirname, "../../../../../patch/dist") , files[i]))());
+        }
+        console.log("patch end");
+    }
+    mysql.execute(generateUpdateSql(versionModel,{
+        version:curVersion
+    }))
+}
+
 export async function initSystem() {
-    await flushRedis()
-    await resetSystem()
+    if(Application.needReset) {
+        await flushRedis()
+        await resetSystem()
+    }
     let mysql=getMysqlInstance()
     let ret=await mysql.execute<any[]>(`select * from ${Table_Version}`)
     if(ret===null || ret.length==0){
@@ -241,9 +286,9 @@ async function initUser():Promise<string> {
 async function initAdmin():Promise<string> {
     let mysql=getMysqlInstance()
     let adminId=await generateSnowId()
-    await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${adminId}','teamlinker','teamlinker',1)`)
-    await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${await generateSnowId()}','wgq_admin','123456',1)`)
-    await mysql.execute(`insert into ${Table_User} (id,username,password,admin) values ('${await generateSnowId()}','hxx_admin','123456',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,is_admin) values ('${adminId}','teamlinker','teamlinker',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,is_admin) values ('${await generateSnowId()}','wgq_admin','123456',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,is_admin) values ('${await generateSnowId()}','hxx_admin','123456',1)`)
     return adminId
 }
 
@@ -264,13 +309,7 @@ async function initProject(userId:string,projectRoleUserId:string):Promise<strin
 
 async function initVersion() {
     let mysql=getMysqlInstance()
-    let config:ICommon_Version_Config={
-        fileBasePath:"/tmp/teamlinker"
-    }
-    await mysql.execute(`insert into ${Table_Version} (version,config) values ('${getNacosInstance().version}','${JSON.stringify(config)}')`)
-    if(!(await fs.pathExists(config.fileBasePath))) {
-        await fs.mkdirp(config.fileBasePath)
-    }
+    await mysql.execute(`insert into ${Table_Version} (version) values ('${getConfigInstance().version}')`)
 }
 
 async function initPermission():Promise<{

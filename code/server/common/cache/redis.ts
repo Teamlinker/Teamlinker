@@ -77,6 +77,22 @@ export class Redis {
         let value=this.parseType(ret,type);
         return value
     }
+    async mget<T>(key:string[],type:T):Promise<T> {
+        let ret=await this.redis.mget(key)
+        ret=ret.map(item=>{
+            return this.parseType(item,type)
+        })
+        return <T><unknown>ret
+    }
+    async mset(obj:{
+        [param:string]:any
+    }) {
+        if(obj===null || obj===undefined)
+        {
+            return
+        }
+        await this.redis.mset(obj)
+    }
     async set(key:string,value:any,ttl?:number)
     {
         if(value===null || value===undefined)

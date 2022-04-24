@@ -29,7 +29,7 @@ class UserMapper extends Mapper<typeof userModel> {
             throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,admin:0}))
+        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,is_admin:0}))
         return ret
     }
 
@@ -51,11 +51,11 @@ class UserMapper extends Mapper<typeof userModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_User} where admin=0${keyword?` and username like '%${keyword}%'`:""}`))[0]
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_User} where is_admin=0${keyword?` and username like '%${keyword}%'`:""}`))[0]
         let totalPage=CommonUtil.pageTotal(count,size)
         let colums=keys<ICommon_Model_User>().map(item=>item.name);
         let ret=await mysql.execute(generateQuerySql(userModel,exculdeColumns(colums,[]),{
-            admin:0,
+            is_admin:0,
             ...(keyword && {username:{
                 exp:"%like%",
                 value:keyword
@@ -195,7 +195,7 @@ class UserMapper extends Mapper<typeof userModel> {
         }
         let mysql=getMysqlInstance()
         let ret=await mysql.execute(generateQuerySql(userModel,["id","username","photo"],{
-            admin:0,
+            is_admin:0,
             active:1,
             username:{
                 exp:"%like%",

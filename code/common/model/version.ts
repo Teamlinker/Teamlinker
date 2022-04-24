@@ -1,11 +1,7 @@
 import { BaseModel } from "./base"
 
-export interface ICommon_Version_Config {
-    fileBasePath:string
-}
 export interface ICommon_Model_Version {
-    version:string,
-    config:string
+    version:string
 }
 export const Table_Version="version"
 
@@ -14,4 +10,4 @@ class VersionModel extends BaseModel {
     model=<ICommon_Model_Version>{}
   }
   
-  export  let versionModel=new VersionModel
+export  let versionModel=new VersionModel

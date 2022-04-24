@@ -15,7 +15,11 @@ export namespace Err {
         itemExists:{
             code:4,
             msg:"item exists"
-        }
+        },
+        mysqlNotConfig:{
+            code:5,
+            msg:"mysql not config"
+        },
     }
     export let User = {
         userNotFound:{

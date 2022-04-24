@@ -13,20 +13,39 @@ export function getMysqlInstance(){
 export default class Mysql {
     private sql:PromisePool;
     constructor(info:IServer_Common_Config_Mysql){
-        let con=mysql.createPool({
-            host:info.url,
-            port:info.port,
-            user:info.username,
-            password:info.password,
-            database:info.database,
-            waitForConnections: true,
-            connectionLimit: 10,
-            queueLimit: 0,
-            supportBigNumbers:true,
-            bigNumberStrings:true
-        })
-        this.sql=con.promise();
+        if(info.url) {
+            let con=mysql.createPool({
+                host:info.url,
+                port:info.port??3306,
+                user:info.username??"",
+                password:info.password??"",
+                database:info.database??"",
+                waitForConnections: true,
+                connectionLimit: 10,
+                queueLimit: 0,
+                supportBigNumbers:true,
+                bigNumberStrings:true
+            })
+            this.sql=con.promise();
+        }
         g_mysqlConnection=this;
+    }
+    async reload(info:IServer_Common_Config_Mysql) {
+        if(info.url) {
+            let con=mysql.createPool({
+                host:info.url,
+                port:info.port??3306,
+                user:info.username??"",
+                password:info.password??"",
+                database:info.database??"",
+                waitForConnections: true,
+                connectionLimit: 10,
+                queueLimit: 0,
+                supportBigNumbers:true,
+                bigNumberStrings:true
+            })
+            this.sql=con.promise();
+        }
     }
     async executeOne<T>(sqlText:string|{
         value:string,
@@ -36,6 +55,9 @@ export default class Mysql {
         }
     }):Promise<T> {
         try{
+            if(!this.sql) {
+                throw Err.Common.mysqlNotConfig
+            }
             let [rows]=await this.sql.query(typeof(sqlText)=="string"?sqlText:sqlText.value);
             if((rows as any[]).length>0){
                 if(typeof(sqlText)=="string" || !sqlText.aggregation)
@@ -81,6 +103,9 @@ export default class Mysql {
         }
     }):Promise<T[]> {
         try{
+            if(!this.sql) {
+                throw Err.Common.mysqlNotConfig
+            }
             let [rows]=await this.sql.query(typeof(sqlText)=="string"?sqlText:sqlText.value);
             if(typeof(sqlText)=="string" || !sqlText.aggregation)
             {

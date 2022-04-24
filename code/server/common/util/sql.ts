@@ -1,7 +1,8 @@
-import { Snowflake } from 'nodejs-snowflake';
+import * as intFormat from "biguint-format";
+import * as FlakeId from 'flake-idgen';
 import { BaseModel } from '../../../common/model/base';
 
-const uid = new Snowflake(); 
+const uid = new FlakeId(); 
 
 type EXPR={
     [key:string]:EXPRVALUE
@@ -16,8 +17,8 @@ type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
 }
 
 export async function generateSnowId() {
-    let id =uid.getUniqueID()
-    return String(id)
+    let id = intFormat(uid.next(),"dec") as string
+    return id
 }
 
 function isEXPRVALUEEXP(value:any):value is EXPRVALUEEXP {
@@ -207,7 +208,7 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
         exp:"+"|"-",
         value:number
     }|T["model"][param]
-},objExpr:{
+},objExpr?:{
     [param in keyof T["model"]]?:EXPRVALUE
 },exprMode?:"and"|"or"):{
     value:string,

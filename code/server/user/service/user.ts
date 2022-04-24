@@ -2,8 +2,8 @@ import * as jwt from "jsonwebtoken";
 import { ICommon_Route_Res_User_List } from "../../../common/routes/response";
 import { Err } from '../../../common/status/error';
 import { REDIS_USER } from "../../common/cache/keys/user";
+import { getConfigInstance } from '../../common/config/config';
 import { Entity } from "../../common/entity/entity";
-import { getNacosInstance } from '../../common/nacos/nacos';
 import { userMapper } from '../mapper/user';
 import rpcFileApi from "../rpc/file";
 import { ICommon_Model_User, userModel } from './../../../common/model/user';
@@ -25,7 +25,7 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
     }
 
     async startSession():Promise<string>{
-        let secret=getNacosInstance().globalConfig.jwt;
+        let secret=getConfigInstance().globalConfig.jwt;
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
         }
@@ -73,7 +73,7 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
         let ret=await userMapper.list(page,size,keyword)
         ret.data.forEach(item=>{
             delete item.password
-            delete item.admin
+            delete item.is_admin
         })
         return {
             count:ret.count,

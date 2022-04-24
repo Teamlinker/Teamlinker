@@ -49,6 +49,28 @@ export class RedisStringKey<T> extends RedisBaseKey<T> {
     }
 }
 
+export class RedisBatchStringKey<T> extends RedisBaseKey<T> {
+    protected names:string[];
+    constructor(names:string[],type:T){
+        super(null,type,-1)
+        this.names=this.names
+    }
+    async get():Promise<T>{
+        let ret=await this.redis.mget(this.names,this.type)
+        return ret
+    }
+    async set(values:T){
+        if(!values) {
+            return;
+        }
+        let obj={}
+        for(let i=0;i<this.names.length;i++) {
+            obj[this.names[i]]=values[i];
+        }
+        await this.redis.mset(obj);
+    }
+}
+
 
 export class RedisSetKey extends RedisBaseKey<string[]> {
     constructor(name:string,ttl?:number){

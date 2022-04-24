@@ -3,6 +3,7 @@ class CacheRedisType<T>{
     public String=""
     public Object:T=<T>{}
     public Boolean=true
+    public Array:T=<T><unknown>[]
 }
 export function cacheRedisType<T=any>(){
     return new CacheRedisType<T>()

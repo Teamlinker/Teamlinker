@@ -1,15 +1,19 @@
+import got from "got";
 import * as http from 'http';
 import * as sio from "socket.io";
 import * as ioClient from "socket.io-client";
 import { v4 as uuid } from 'uuid';
 import { ECommon_Services } from '../../../common/types';
+import Application from '../app/app';
 import { REDIS_GATEWAY } from '../cache/keys/gateway';
+import { getConfigInstance } from '../config/config';
 import { getEventsFunc } from "../event/event";
 import { EServer_Common_Event_Types } from '../event/types';
 import { getHttpRoutes, handleHttpCall } from '../http/http';
-import { getNacosInstance } from '../nacos/nacos';
 import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy } from './../types/http';
 import { IServer_Common_Nacos_Instance } from './../types/nacos';
+import { ECommon_Internal_Http } from "./http";
+
 interface ISocketStruct {
     name:string,
     args:any[]
@@ -17,6 +21,13 @@ interface ISocketStruct {
 interface ISocketRPCResponseStruct {
     code:number,
     msg?:string,
+    data?:any
+}
+enum ESocketRPCBroadCastType {
+    RELOAD_DATABASE="reload_database"
+}
+interface ISocketRPCBroadCastStruct {
+    type:ESocketRPCBroadCastType,
     data?:any
 }
 var g_RevieveFunc={
@@ -27,7 +38,7 @@ var g_RevieveInstance={
     
 }
 var g_Socket=<{
-    [name:string]:ioClient.Socket
+    [name:string]:(ioClient.Socket|sio.Socket)[]
 }>{
     
 }
@@ -88,11 +99,26 @@ export class Rpc{
     private static io:InstanceType<typeof sio.Server>
     private static largeMap:Map<string,IServer_Common_Http_Proxy>=new Map()
     private static largeMapTimeout:Map<string,NodeJS.Timeout>=new Map()
-    static start(port:number | http.Server){
-        Rpc.io=new sio.Server(port,{
+    static broadcast(data:ISocketRPCBroadCastStruct) {
+        sendRPCMessage(ECommon_Services.GateWay,(socket)=>{
+            socket.emit("boardcast",data)
+        })
+    }
+    static start(portOrServer:number | http.Server){
+        Rpc.io=new sio.Server(portOrServer,{
             transports: ['websocket', 'polling']
         })
-        Rpc.io.on("connection",(socket)=>{
+        Rpc.io.on("connection",(socket:sio.Socket)=>{
+            let fromService=socket.handshake.query.service as string
+            if(!fromService) {
+                return;
+            }
+            if(g_Socket[fromService]) {
+                g_Socket[fromService]=g_Socket[fromService].concat(socket)
+            } else {
+                g_Socket[fromService]=[socket]
+            }
+            handleSocketError(fromService,socket);
             socket.on("rpc-call",async (arg:ISocketStruct,callback)=>{
                 let funcName=arg.name
                 if(g_RevieveFunc[funcName] && g_RevieveInstance[funcName])
@@ -219,36 +245,66 @@ export class Rpc{
     }
     static async validInstance(name:string):Promise<IServer_Common_Nacos_Instance>
     {
-        let objRedis=REDIS_GATEWAY.instances(name)
+        let objRedis=await REDIS_GATEWAY.instances(name)
         let ret=await objRedis.get()
-        return ret?ret[0]:null
+        return ret?ret[Math.floor(Math.random()*ret.length)]:null
     }
 }
 
 export async function proxyRequest(objProxy:IServer_Common_Http_Proxy,targetServer:ECommon_Services):Promise<IServer_Common_Http_Proxy> {
     return new Promise(async function(resolve,reject){
-        if(!g_Socket[targetServer] || !g_Socket[targetServer].connected)
-        {
-            if(g_Socket[targetServer] && !g_Socket[targetServer].connected) {
-                g_Socket[targetServer].close()
+        if (targetServer == ECommon_Services.GateWay) {
+            let key = objProxy.method + " " + objProxy.path
+            let objRoute = getHttpRoutes()
+            for (let keyRoute in objRoute) {
+                if (key == keyRoute) {
+                    try {
+                        let ret = await handleHttpCall(objRoute[keyRoute], objProxy)
+                        if(ret.status<200 || ret.status>=300) {
+                            reject(ret)
+                        } else {
+                            resolve(ret)
+                        }
+                        return
+                    } catch (err) {
+                        let obj: IServer_Common_Http_Proxy = <IServer_Common_Http_Proxy>{}
+                        obj.status = 500
+                        obj.data = {
+                            code: err.code,
+                            msg: err.msg ?? err.message
+                        }
+                        reject(obj)
+                        return
+                    }
+                }
             }
-            let instance=await Rpc.validInstance(targetServer)
-            if(!instance)
-            {
-                resolve(null)
-                return
-            }
-            let socket=ioClient.io(`ws://${instance.ip}:${instance.port}`)
-            g_Socket[targetServer]=socket
-            socket.on("connect",async ()=>{
+            let obj: IServer_Common_Http_Proxy = <IServer_Common_Http_Proxy>{}
+            obj.status = 404
+            reject(obj)
+        } else {
+            await sendRPCMessage(targetServer,(socket)=>{
                 postHttpCall(socket,objProxy,resolve,reject)
             })
         }
-        else
-        {
-            postHttpCall(g_Socket[targetServer],objProxy,resolve,reject)
-        }
+        
     })
+}
+
+export async function emitRPCBoradCast(data:ISocketRPCBroadCastStruct) {
+    if(Application.serviceName==ECommon_Services.GateWay) {
+        await handleRPCBoradCast(data)
+    } else {
+        await Rpc.broadcast(data);
+    }
+}
+
+export async function handleRPCBoradCast(data:ISocketRPCBroadCastStruct) {
+    if(data.type==ESocketRPCBroadCastType.RELOAD_DATABASE) {
+        let arr=await allInstances()
+        for(let obj of arr) {
+            got(`http://${obj.ip}:${obj.port}/${ECommon_Internal_Http.RELOAD_DATABASE}`)
+        }
+    }
 }
 
 export function DRPCSend(rpcName:ECommon_Services){
@@ -256,40 +312,8 @@ export function DRPCSend(rpcName:ECommon_Services){
         descriptor.value = function () {
             let args=Array.from(arguments)
             return new Promise(async function(resolve,reject){
-                if(!g_Socket[rpcName] || !g_Socket[rpcName].connected)
-                {
-                    if(g_Socket[rpcName] && !g_Socket[rpcName].connected) {
-                        g_Socket[rpcName].close()
-                    }
-                    let instance=await Rpc.validInstance(rpcName)
-                    if(!instance)
-                    {
-                        resolve(null)
-                        return
-                    }
-                    let socket=ioClient.io(`ws://${instance.ip}:${instance.port}`)
-                    g_Socket[rpcName]=socket
-                    socket.on("connect",()=>{
-                        socket.emit("rpc-call",<ISocketStruct>{
-                            name:propertyName,
-                            args:args
-                        },(res:ISocketRPCResponseStruct)=>{
-                            if(res.code==0)
-                            {
-                                resolve(res.data)
-                            } else {
-                                reject({
-                                    code:res.code,
-                                    msg:res.msg
-                                })
-                            }
-                            
-                        })
-                    })
-                }
-                else
-                {
-                    g_Socket[rpcName].emit("rpc-call",<ISocketStruct>{
+                await sendRPCMessage(rpcName,(socket)=>{
+                    socket.emit("rpc-call",<ISocketStruct>{
                         name:propertyName,
                         args:args
                     },(res:ISocketRPCResponseStruct)=>{
@@ -304,7 +328,7 @@ export function DRPCSend(rpcName:ECommon_Services){
                         }
                         
                     })
-                }
+                })
             })
         }
     }
@@ -322,17 +346,29 @@ export function DRPCRecieve(target: Object, propertyName: string, descriptor: Ty
 }
 
 async function validInstances(): Promise<string[]> {
-    let objRedis = REDIS_GATEWAY.allInstances()
+    let objRedis =await REDIS_GATEWAY.allServices()
     let ret = await objRedis.scan()
     return ret.map(item=>{
-        return item.substr(item.lastIndexOf(":")+1)
+        return item.substring(item.lastIndexOf(":")+1)
     })
+}
+
+async function allInstances(): Promise<IServer_Common_Nacos_Instance[]> {
+    let objRedis =await REDIS_GATEWAY.allInstances()
+    let ret = await objRedis.get()
+    let instanceList:IServer_Common_Nacos_Instance[]=[]
+    for(let obj of ret) {
+        for(let obj1 of obj) {
+            instanceList.push(obj1);
+        }
+    }
+    return instanceList;
 }
 
 export async function emitServiceEvent(event: EServer_Common_Event_Types.Types, obj: any,exceptMe:boolean=false) {
     let arrServiceName = await validInstances()
     arrServiceName=arrServiceName.filter(item=>{
-        return getNacosInstance().serviceName!=item
+        return getConfigInstance().serviceName!=item
     })
     if(!exceptMe) {
         let objFunc = getEventsFunc()
@@ -345,28 +381,96 @@ export async function emitServiceEvent(event: EServer_Common_Event_Types.Types, 
         }
     }
     for (let serviceName of arrServiceName) {
-        if (!g_Socket[serviceName] || !g_Socket[serviceName].connected) {
-            if (g_Socket[serviceName] && !g_Socket[serviceName].connected) {
-                g_Socket[serviceName].close()
-            }
-            let instance = await Rpc.validInstance(serviceName)
-            if (!instance) {
-                return
-            }
-            let socket = ioClient.io(`ws://${instance.ip}:${instance.port}`)
-            g_Socket[serviceName] = socket
-            socket.on("connect", () => {
-                socket.emit("event-call", <ISocketStruct>{
-                    name: event,
-                    args: obj
-                })
-            })
-        }
-        else {
-            g_Socket[serviceName].emit("event-call", <ISocketStruct>{
+        await sendRPCMessage(serviceName,(socket)=>{
+            socket.emit("event-call", <ISocketStruct>{
                 name: event,
                 args: obj
             })
+        })
+    }
+}
+
+async function sendRPCMessage(serviceName:string,emitFunc:(socket:ioClient.Socket)=>void) {
+    let socket: ioClient.Socket;
+    if (g_Socket[serviceName] && g_Socket[serviceName].length > 0) {
+        let arrInvalidSocket: (typeof socket)[] = []
+        for (let obj of g_Socket[serviceName]) {
+            if (!obj.connected) {
+                arrInvalidSocket.push(obj as ioClient.Socket)
+            } else {
+                socket = obj as ioClient.Socket
+            }
+        }
+        arrInvalidSocket.forEach(obj => {
+            obj.close()
+            for (let i = 0; i < g_Socket[serviceName].length; i++) {
+                if (g_Socket[serviceName][i] == socket) {
+                    g_Socket[serviceName].splice(i,1)
+                    break
+                }
+            }
+        })
+    }
+    if (!socket) {
+        let instance = await Rpc.validInstance(serviceName)
+        if (!instance) {
+            return
+        }
+        let socket = ioClient.io(`ws://${instance.ip}:${instance.port}`,{
+            query:{
+                service:serviceName
+            }
+        })
+        g_Socket[serviceName] = [socket]
+        socket.on("connect", () => {
+            if (emitFunc) {
+                emitFunc(socket)
+            }
+        })
+        if(Application.serviceName==ECommon_Services.GateWay) {
+            socket.on("broadcast", async (data: ISocketRPCBroadCastStruct, callback) => {
+                handleRPCBoradCast(data)
+            })
+        }
+        handleSocketError(serviceName,socket);
+    }
+    else {
+        if (emitFunc) {
+            emitFunc(socket)
         }
     }
+}
+
+async function handleSocketError(serviceName:string,socket:ioClient.Socket|sio.Socket) {
+    socket.on("disconnect", () => {
+        if (g_Socket[serviceName]) {
+            for (let i = 0; i < g_Socket[serviceName].length; i++) {
+                if (g_Socket[serviceName][i] == socket) {
+                    g_Socket[serviceName].splice(i,1)
+                    break
+                }
+            }
+        }
+    })
+    socket.on("connect_error", () => {
+        if (g_Socket[serviceName]) {
+            for (let i = 0; i < g_Socket[serviceName].length; i++) {
+                if (g_Socket[serviceName][i] == socket) {
+                    g_Socket[serviceName].splice(i,1)
+                    break
+                }
+            }
+        }
+    })
+    socket.on("error", () => {
+        socket.disconnect()
+        if (g_Socket[serviceName]) {
+            for (let i = 0; i < g_Socket[serviceName].length; i++) {
+                if (g_Socket[serviceName][i] == socket) {
+                    g_Socket[serviceName].splice(i,1)
+                    break
+                }
+            }
+        }
+    })
 }
