@@ -1,55 +1,57 @@
 <template>
   <div class="side-box">
-      <div class="name">{{proName}}</div>
-      <div class="list">
-        <router-link
-          v-for="(item, index) in menuList"
-          :key="index"
-          :to="item.url + '?projectId=' + id+'&projectName='+proName"
+    <div class="name">{{ proName }}</div>
+    <div class="list">
+      <router-link
+        v-for="(item, index) in menuList"
+        :key="index"
+        :to="item.url + '?projectId=' + id + '&projectName=' + proName"
+      >
+        <div
+          :class="['item', path == item.url || path == item.activeUrl ? 'active' : '']"
         >
-          <div :class="['item',path === item.url ? 'active' : '']">
-            {{ item.name }}
-          </div>
-        </router-link>
+          {{ item.name }}
+        </div>
+      </router-link>
     </div>
   </div>
 </template>
 <script>
-import { defineComponent, ref,watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { defineComponent, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 export default defineComponent({
   setup(props) {
-    const menuList = ref()
-    const route = useRoute()
-    const id = ref()
-    const path = ref()
-    const proName = ref()
-    id.value = route.query.projectId
+    const menuList = ref();
+    const route = useRoute();
+    const id = ref();
+    const path = ref();
+    const proName = ref();
+    id.value = route.query.projectId;
     menuList.value = [
-      { url: '/board', name: 'Board' },
-      { url: '/issue/list', name: 'issue' },
-      { url: '/project/edit', name: 'Settings' }
-    ]
-    path.value = route.path
-    proName.value = route.query.projectName
+      { url: "/board", name: "Board" },
+      { url: "/issue/list", name: "issue", activeUrl: "/issue/detail" },
+      { url: "/project/edit", name: "Settings" },
+    ];
+    path.value = route.path;
+    proName.value = route.query.projectName;
     watch(
       () => route.path,
       (val) => {
-        path.value = val
+        path.value = val;
       }
-    )
+    );
     return {
       menuList,
       id,
       path,
-      proName
-    }
-  }
-})
+      proName,
+    };
+  },
+});
 </script>
 <style lang="scss" scoped>
 .side-box {
-  padding-top:40px;
+  padding-top: 40px;
   .name {
     padding-left: 20px;
     font-size: 18px;
