@@ -86,3 +86,4 @@ package-lock.json
 .vscode/
 
 code/client/web_admin/vue-element-admin/node_modules/
+code/docker/teamlinker

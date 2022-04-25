@@ -71,7 +71,7 @@ export default abstract class Application{
     Application(){
 
     }
-    async start(callback?:(app:typeof this)=>void) {
+    async start(serviceName?:string,callback?:(app:typeof this)=>void) {
         let argv=yargs.argv
         if(argv["reset"]) {
             Application.needReset=true
@@ -80,7 +80,10 @@ export default abstract class Application{
             Application.debug=true
         }
         if(argv["name"]) {
-            Application.serviceName = argv["name"];
+            serviceName=argv["name"]
+        }
+        if(serviceName) {
+            Application.serviceName = serviceName;
             Application.mode = ECommon_Application_Mode.DOCKER
             Application.privateConfig = require(Application.configPath)
             Application.currentConfigObj=Application.privateConfig["services"][Application.serviceName]

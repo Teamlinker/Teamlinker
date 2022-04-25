@@ -10,7 +10,6 @@
     "user": "ttsc -p ./user",
     "cooperation": "ttsc -p ./cooperation",
     "file": "ttsc -p ./file",
-    "docker": "ttsc -p ./gateway && ttsc -p ./user && ttsc -p ./cooperation && ttsc -p ./file && pkg ./gateway/dist/server/gateway/index.js -o ./gateway/dist/server/gateway/gateway -t node16-linux && cp ./gateway/dist/server/gateway/gateway ../docker/server && pkg ./user/dist/server/user/index.js -o ./user/dist/server/user/user -t node16-linux && cp ./user/dist/server/user/user ../docker/server && pkg ./cooperation/dist/server/cooperation/index.js -o ./cooperation/dist/server/cooperation/cooperation -t node16-linux && cp ./cooperation/dist/server/cooperation/cooperation ../docker/server && pkg ./file/dist/server/file/index.js -o ./file/dist/server/file/file -t node16-linux && cp ./file/dist/server/file/file ../docker/server",
     "build": "node ./build.js"
   },
   "pkg": {
