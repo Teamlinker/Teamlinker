@@ -41,7 +41,21 @@
       :columns="columns"
       :data-source="tableData"
       :pagination="pagination"
+      class="table_area"
     >
+     <template #bodyCell="{ column, text, record }">
+       <template v-if="column.dataIndex === 'operation'">
+        <!-- <a-popconfirm
+          v-if="dataSource.length"
+          title="Sure to delete?"
+          @confirm="onDelete(record.key)"
+        >
+          <a>Delete</a>
+        </a-popconfirm> -->
+        <a>Delete</a>
+      </template>
+     </template>
+    
     </a-table>
   </div>
 </template>
@@ -83,6 +97,7 @@ export default defineComponent({
     let priority = ref<string>();
     let assigner = ref<string>();
     let reporter = ref<string>();
+    const router = useRouter();
     const columns = [
       {
         title: "name",
@@ -114,10 +129,14 @@ export default defineComponent({
         dataIndex: "reporter_id",
         key: "reporter_id",
       },
+       {
+        title: 'operation',
+        dataIndex: 'operation',
+      },
     ];
     let tableData = ref([]);
     let queryParams = {
-      projectId: "435445521716893696",
+      projectId: router.currentRoute.value.query.projectId,
       name: name.value,
       priority: priority.value,
       assigner: assigner.value,
@@ -127,7 +146,7 @@ export default defineComponent({
     };
     const getUser = () => {
       const params = {
-        projectId: "435445521716893696",
+        projectId: router.currentRoute.value.query.projectId,
       };
       axios.get("/project/user/list", { params: params }).then((res: any) => {
         assignerOptions.value = res.data;
@@ -137,7 +156,7 @@ export default defineComponent({
     getUser();
     let searchQuery = () => {
       queryParams = {
-        projectId: "435445521716893696",
+        projectId: router.currentRoute.value.query.projectId,
         name: name.value,
         priority: priority.value,
         assigner: assigner.value,
@@ -171,6 +190,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .list {
   margin: 0 20px;
+  box-sizing: border-box;
+  height: 100%;
 }
 .search {
   margin: 20px 0;
@@ -180,6 +201,10 @@ export default defineComponent({
       flex: 1;
     }
   }
+}
+.table_area{
+  height: calc(100% - 100px);
+  overflow: auto;
 }
 </style>
 <route lang="yaml">
