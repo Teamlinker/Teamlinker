@@ -62,7 +62,7 @@ export default {
     },
     handleConfig(row) {
       this.$router.push({
-        path: "/fieldSolution/fs-workflow",
+        path: "/example/fs-workflow",
         query: {
           fieldSolutionId: this.$route.query.fieldSolutionId,
           workflowSolutionId: this.$route.query.workflowSolutionId,
@@ -76,6 +76,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
-
+<style lang="scss" scoped></style>

@@ -35,9 +35,7 @@
     </div>
 
     <el-row style="padding-bottom: 10px">
-      <el-button type="primary" size="small" @click="handleCreate"
-        >新增项目</el-button
-      >
+      <el-button type="primary" size="small" @click="handleCreate">新增项目</el-button>
     </el-row>
     <el-table
       v-loading="listLoading"
@@ -74,12 +72,8 @@
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row }">
-          <el-button type="text" size="mini" @click="handleUpdate(row)">
-            编辑
-          </el-button>
-          <el-button type="text" size="mini" @click="handleRemove(row)">
-            删除
-          </el-button>
+          <el-button type="text" size="mini" @click="handleUpdate(row)"> 编辑 </el-button>
+          <el-button type="text" size="mini" @click="handleRemove(row)"> 删除 </el-button>
           <el-button type="text" size="mini" @click="handleTag(row)">
             标签管理
           </el-button>
@@ -109,7 +103,7 @@
         :rules="rules"
         :model="temp"
         label-position="left"
-        label-width="70px"
+        label-width="80px"
         style="width: 400px; margin-left: 50px"
       >
         <el-form-item label="项目名称" prop="name">
@@ -339,9 +333,7 @@
         <el-button
           type="primary"
           @click="
-            dialogModlueStatus === 'create'
-              ? createModuleData()
-              : updateModuleData()
+            dialogModlueStatus === 'create' ? createModuleData() : updateModuleData()
           "
         >
           确定
@@ -668,7 +660,7 @@ export default {
       this.$nextTick(() => {
         this.$refs["dataForm"].clearValidate();
       });
-      viewTemp({ projectId: row.projectId }).then((res) => {
+      viewTemp({ projectId: row.id }).then((res) => {
         this.temp = res.data;
         this.dialogFormVisible = true;
       });
@@ -693,6 +685,7 @@ export default {
       this.$refs["dataForm"].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp);
+          tempData.projectId = this.temp.id;
           editTemp(tempData).then(() => {
             this.fetchData();
             this.dialogFormVisible = false;

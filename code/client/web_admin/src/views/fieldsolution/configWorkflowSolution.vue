@@ -70,7 +70,7 @@ export default {
     },
     handleBind() {
       this.$router.push({
-        path: "/fieldSolution/bindWorkflowSolution",
+        path: "/example/bindWorkflowSolution",
         query: { fieldSolutionId: this.$route.query.fieldSolutionId },
       });
     },
@@ -88,7 +88,7 @@ export default {
     },
     handleConfig(row) {
       this.$router.push({
-        path: "/fieldSolution/selectWorkflow",
+        path: "/example/selectWorkflow",
         query: {
           fieldSolutionId: this.$route.query.fieldSolutionId,
           workflowSolutionId: row.id,
@@ -101,4 +101,3 @@ export default {
   },
 };
 </script>
-

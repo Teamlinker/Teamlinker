@@ -82,10 +82,20 @@
       >
         <template slot-scope="{ row }">
           <el-button type="text" size="mini" @click="handleUpdate(row)"> 编辑 </el-button>
-          <el-button type="text" size="mini" @click="bindProject(row)">
+          <el-button
+            type="text"
+            size="mini"
+            @click="bindProject(row)"
+            v-if="row.name !== 'Default'"
+          >
             绑定项目
           </el-button>
-          <el-button type="text" size="mini" @click="bindProject(row, 'unBind')">
+          <el-button
+            type="text"
+            size="mini"
+            @click="bindProject(row, 'unBind')"
+            v-if="row.name !== 'Default'"
+          >
             解绑项目
           </el-button>
           <el-button type="text" size="mini" @click="bindIssueType(row)">

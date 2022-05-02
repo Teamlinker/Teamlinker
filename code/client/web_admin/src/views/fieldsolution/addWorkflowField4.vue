@@ -4,10 +4,7 @@
     <div>Config Lable type</div>
     <div>
       <div style="margin-top: 20px">
-        <el-select
-          v-model="value1"
-          placeholder="please select"
-        >
+        <el-select v-model="value1" placeholder="please select">
           <el-option
             v-for="item in option"
             :key="item.value"
@@ -18,9 +15,7 @@
         </el-select>
       </div>
       <div style="margin-top: 20px">
-        <el-button type="primary" @click="handleSave('ruleForm')"
-          >save</el-button
-        >
+        <el-button type="primary" @click="handleSave('ruleForm')">save</el-button>
         <el-button>cancel</el-button>
       </div>
     </div>
@@ -28,11 +23,7 @@
 </template>
 <script>
 import "@/styles/common.scss";
-import {
-  addFieldValue,
-  fieldDetails,
-  addFieldLabelValue,
-} from "@/api/fieldSolution";
+import { addFieldValue, fieldDetails, addFieldLabelValue } from "@/api/fieldSolution";
 
 export default {
   data() {
@@ -50,8 +41,8 @@ export default {
   methods: {
     getFieldDetails() {
       fieldDetails({
-        fieldSolutionWorkflowNodeFieldTypeId:
-          this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+        fieldSolutionWorkflowNodeFieldTypeId: this.$route.query
+          .fieldSolutionWorkflowNodeFieldTypeId,
       }).then((res) => {
         this.option = res.data.values;
       });
@@ -62,13 +53,13 @@ export default {
       //   return;
       // }
       let param = {
-        fieldSolutionWorkflowNodeFieldTypeId:
-          this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
-          labelType:this.value1
+        fieldSolutionWorkflowNodeFieldTypeId: this.$route.query
+          .fieldSolutionWorkflowNodeFieldTypeId,
+        labelType: this.value1,
       };
       addFieldLabelValue(param).then((res) => {
         this.$router.push({
-          path: "/fieldSolution/workflowField",
+          path: "/example/workflowField",
           query: {
             fieldSolutionId: this.$route.query.fieldSolutionId,
             workflowId: this.$route.query.workflowId,
@@ -92,6 +83,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
-
+<style lang="scss" scoped></style>

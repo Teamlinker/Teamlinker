@@ -45,15 +45,11 @@
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row }">
-          <el-button type="text" size="mini" @click="handleUpdate(row)">
-            编辑
-          </el-button>
+          <el-button type="text" size="mini" @click="handleUpdate(row)"> 编辑 </el-button>
           <el-button type="text" size="mini" @click="handleWorkflow(row)">
             配置工作流方案
           </el-button>
-          <el-button type="text" size="mini" @click="handleRemove(row)">
-            删除
-          </el-button>
+          <el-button type="text" size="mini" @click="handleRemove(row)"> 删除 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -122,9 +118,7 @@ export default {
           item.created_time = this.moment(item.created_time).format(
             "YYYY-MM-DD HH:mm:ss"
           );
-          item.modify_time = this.moment(item.modify_time).format(
-            "YYYY-MM-DD HH:mm:ss"
-          );
+          item.modify_time = this.moment(item.modify_time).format("YYYY-MM-DD HH:mm:ss");
         });
         this.list = data;
         this.listLoading = false;
@@ -210,7 +204,10 @@ export default {
     },
     //配置工作流
     handleWorkflow(row) {
-      this.$router.push({ path: "/fieldSolution/configWorkflowSolution", query: {fieldSolutionId:row.id} });
+      this.$router.push({
+        path: "/example/configWorkflowSolution",
+        query: { fieldSolutionId: row.id },
+      });
     },
   },
   created() {
@@ -218,4 +215,3 @@ export default {
   },
 };
 </script>
-

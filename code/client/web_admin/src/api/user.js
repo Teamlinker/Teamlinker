@@ -47,6 +47,14 @@ export function createTemp(data) {
     data
   })
 }
+//创建用户
+export function editTemp(data) {
+  return request({
+    url: '/api/user/item',
+    method: 'put',
+    data
+  })
+}
 // 删除用户
 export function removeTemp(params) {
   return request({
