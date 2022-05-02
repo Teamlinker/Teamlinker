@@ -27,9 +27,7 @@
           <el-input v-model="form.weight" style="width: 200px"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSave('ruleForm')"
-            >save</el-button
-          >
+          <el-button type="primary" @click="handleSave('ruleForm')">save</el-button>
           <el-button>cancel</el-button>
         </el-form-item>
       </el-form>
@@ -51,17 +49,15 @@ export default {
         weight: 50,
       },
       rules: {
-        name: [
-          { required: true, message: "please input name", trigger: "blur" },
-        ],
+        name: [{ required: true, message: "please input name", trigger: "blur" }],
       },
     };
   },
   methods: {
     getFieldDetails() {
       fieldDetails({
-        fieldSolutionWorkflowNodeFieldTypeId:
-          this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+        fieldSolutionWorkflowNodeFieldTypeId: this.$route.query
+          .fieldSolutionWorkflowNodeFieldTypeId,
       }).then((res) => {
         this.form = res.data.field;
       });
@@ -83,18 +79,13 @@ export default {
           addField(param).then((res) => {
             //单选-5和多选-6 单标签-2和多标签-1需要编辑值 其他的不需要跳到下一步编辑
             let fieldType = this.$route.query.fieldType;
-            if (
-              fieldType == 5 ||
-              fieldType == 6 ||
-              fieldType == 2 ||
-              fieldType == 1
-            ) {
+            if (fieldType == 5 || fieldType == 6 || fieldType == 2 || fieldType == 1) {
               let path = "";
               if (fieldType == 5 || fieldType == 6) {
-                path = "/fieldSolution/addWorkflowField3";
+                path = "/example/addWorkflowField3";
               }
               if (fieldType == 2 || fieldType == 1) {
-                path = "/fieldSolution/addWorkflowField4";
+                path = "/example/addWorkflowField4";
               }
               this.$router.push({
                 path: path,
@@ -109,7 +100,7 @@ export default {
               });
             } else {
               this.$router.push({
-                path: "/fieldSolution/workflowField",
+                path: "/example/workflowField",
                 query: {
                   fieldSolutionId: this.$route.query.fieldSolutionId,
                   workflowId: this.$route.query.workflowId,
@@ -129,25 +120,20 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           let param = Object.assign(this.form, {
-            fieldSolutionWorkflowNodeFieldTypeId:
-              this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+            fieldSolutionWorkflowNodeFieldTypeId: this.$route.query
+              .fieldSolutionWorkflowNodeFieldTypeId,
           });
 
           editField(param).then((res) => {
             //单选-5和多选-6 单标签-2和多标签-1需要编辑值 其他的不需要跳到下一步编辑
             let fieldType = this.$route.query.fieldType;
-            if (
-              fieldType == 5 ||
-              fieldType == 6 ||
-              fieldType == 2 ||
-              fieldType == 1
-            ) {
+            if (fieldType == 5 || fieldType == 6 || fieldType == 2 || fieldType == 1) {
               let path = "";
               if (fieldType == 5 || fieldType == 6) {
-                path = "/fieldSolution/addWorkflowField3";
+                path = "/example/addWorkflowField3";
               }
               if (fieldType == 2 || fieldType == 1) {
-                path = "/fieldSolution/addWorkflowField4";
+                path = "/example/addWorkflowField4";
               }
               this.$router.push({
                 path: path,
@@ -156,15 +142,15 @@ export default {
                   workflowId: this.$route.query.workflowId,
                   workflowNodeId: this.$route.query.workflowNodeId,
                   workflowSolutionId: this.$route.query.workflowSolutionId,
-                  fieldSolutionWorkflowNodeFieldTypeId:
-                    this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+                  fieldSolutionWorkflowNodeFieldTypeId: this.$route.query
+                    .fieldSolutionWorkflowNodeFieldTypeId,
                   fieldType: this.$route.query.fieldType,
                   opeType: "edit",
                 },
               });
             } else {
               this.$router.push({
-                path: "/fieldSolution/workflowField",
+                path: "/example/workflowField",
                 query: {
                   fieldSolutionId: this.$route.query.fieldSolutionId,
                   workflowId: this.$route.query.workflowId,
@@ -188,6 +174,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
-
+<style lang="scss" scoped></style>

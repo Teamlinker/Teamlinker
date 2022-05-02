@@ -4,9 +4,7 @@
     <div>{{ workflowDetail.name || "-" }}</div>
     <div>{{ workflowDetail.description || "-" }}</div>
     <div>
-      <el-button type="primary" size="small" @click="handleAdd"
-        >Add Field type</el-button
-      >
+      <el-button type="primary" size="small" @click="handleAdd">Add Field type</el-button>
     </div>
     <div>
       <el-table
@@ -54,12 +52,8 @@
           class-name="small-padding fixed-width"
         >
           <template slot-scope="{ row }">
-            <el-button type="text" size="mini" @click="handleEdit(row)">
-              edit
-            </el-button>
-            <el-button type="text" size="mini" @click="handleCopy(row)">
-              copy
-            </el-button>
+            <el-button type="text" size="mini" @click="handleEdit(row)"> edit </el-button>
+            <el-button type="text" size="mini" @click="handleCopy(row)"> copy </el-button>
             <el-button type="text" size="mini" @click="handleDelete(row)">
               delete
             </el-button>
@@ -79,7 +73,8 @@
         <el-form-item label="fieldSolution" prop="fieldSolution">
           <el-select
             v-model="ruleForm.fieldSolution"
-            placeholder="please select fieldSolution" @change="fieldSolutionChange"
+            placeholder="please select fieldSolution"
+            @change="fieldSolutionChange"
           >
             <el-option
               v-for="item in fieldSolutionListOption"
@@ -105,10 +100,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="workflow" prop="workflow">
-          <el-select
-            v-model="ruleForm.workflow"
-            placeholder="please select workflow"
-          >
+          <el-select v-model="ruleForm.workflow" placeholder="please select workflow">
             <el-option
               v-for="item in workflowListOption"
               :key="item.id"
@@ -134,7 +126,7 @@ import {
   deleteField,
   copyField,
   getFieldSolutionList,
-  fieldSolutionDetail
+  fieldSolutionDetail,
 } from "@/api/fieldSolution";
 import { workflowDetail, solutionList } from "@/api/workflow";
 
@@ -183,11 +175,9 @@ export default {
   },
   methods: {
     getWorkflowDetail() {
-      workflowDetail({ workflowId: this.$route.query.workflowId }).then(
-        (res) => {
-          this.workflowDetail = res.data;
-        }
-      );
+      workflowDetail({ workflowId: this.$route.query.workflowId }).then((res) => {
+        this.workflowDetail = res.data;
+      });
     },
     fetchData() {
       this.listLoading = true;
@@ -205,7 +195,7 @@ export default {
     },
     handleAdd() {
       this.$router.push({
-        path: "/fieldSolution/addWorkflowField",
+        path: "/example/addWorkflowField",
         query: {
           fieldSolutionId: this.$route.query.fieldSolutionId,
           workflowNodeId: this.$route.query.workflowNodeId,
@@ -215,19 +205,17 @@ export default {
       });
     },
     handleDelete(row) {
-      deleteField({ fieldSolutionWorkflowNodeFieldTypeId: row.field.id }).then(
-        (res) => {
-          this.$message({
-            message: "delete success",
-            type: "success",
-          });
-          this.fetchData();
-        }
-      );
+      deleteField({ fieldSolutionWorkflowNodeFieldTypeId: row.field.id }).then((res) => {
+        this.$message({
+          message: "delete success",
+          type: "success",
+        });
+        this.fetchData();
+      });
     },
     handleEdit(row) {
       this.$router.push({
-        path: "/fieldSolution/addWorkflowField2",
+        path: "/example/addWorkflowField2",
         query: {
           fieldSolutionId: this.$route.query.fieldSolutionId,
           workflowNodeId: this.$route.query.workflowNodeId,
@@ -247,13 +235,13 @@ export default {
     },
     getWorkflowSolutionList(param) {
       fieldSolutionDetail(param).then((res) => {
-        debugger
+        debugger;
         this.workflowSolutionListOption = res.data;
       });
     },
     fieldSolutionChange(id) {
-      debugger
-        this.getWorkflowSolutionList({fieldTypeId:id})
+      debugger;
+      this.getWorkflowSolutionList({ fieldTypeId: id });
     },
     handleCopy(row) {
       copyField({}).then((res) => {});
@@ -267,6 +255,4 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped>
-</style>
-
+<style lang="scss" scoped></style>

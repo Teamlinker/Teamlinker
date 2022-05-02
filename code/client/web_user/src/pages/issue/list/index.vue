@@ -41,7 +41,12 @@
       :columns="columns"
       :data-source="tableData"
       :pagination="pagination"
+      :rowKey="(record) => record.id"
+      class="table_area"
     >
+      <template #action="{ record }">
+        <a @click="onGoDetail(record)">details</a>
+      </template>
     </a-table>
   </div>
 </template>
@@ -83,6 +88,7 @@ export default defineComponent({
     let priority = ref<string>();
     let assigner = ref<string>();
     let reporter = ref<string>();
+    const router = useRouter();
     const columns = [
       {
         title: "name",
@@ -114,10 +120,18 @@ export default defineComponent({
         dataIndex: "reporter_id",
         key: "reporter_id",
       },
+      {
+        title: "action",
+        key: "action",
+        dataIndex: "action",
+        slots: { customRender: "action" },
+        width: "20%",
+        ellipsis: true,
+      },
     ];
     let tableData = ref([]);
     let queryParams = {
-      projectId: "435445521716893696",
+      projectId: router.currentRoute.value.query.projectId,
       name: name.value,
       priority: priority.value,
       assigner: assigner.value,
@@ -127,7 +141,7 @@ export default defineComponent({
     };
     const getUser = () => {
       const params = {
-        projectId: "435445521716893696",
+        projectId: router.currentRoute.value.query.projectId,
       };
       axios.get("/project/user/list", { params: params }).then((res: any) => {
         assignerOptions.value = res.data;
@@ -137,7 +151,7 @@ export default defineComponent({
     getUser();
     let searchQuery = () => {
       queryParams = {
-        projectId: "435445521716893696",
+        projectId: router.currentRoute.value.query.projectId,
         name: name.value,
         priority: priority.value,
         assigner: assigner.value,
@@ -153,6 +167,10 @@ export default defineComponent({
       });
     };
     getList();
+    const onGoDetail = (obj) => {
+      let path = `/issue/detail?projectIssueId=${obj.id}&uniqueKey=${obj.unique_id}&projectName=${router.currentRoute.value.query.projectName}&projectId=${router.currentRoute.value.query.projectId}`;
+      router.push(path);
+    };
     return {
       priorityOptions,
       assignerOptions,
@@ -164,6 +182,7 @@ export default defineComponent({
       columns,
       tableData,
       searchQuery,
+      onGoDetail,
     };
   },
 });
@@ -171,6 +190,8 @@ export default defineComponent({
 <style lang="scss" scoped>
 .list {
   margin: 0 20px;
+  box-sizing: border-box;
+  height: 100%;
 }
 .search {
   margin: 20px 0;
@@ -181,10 +202,15 @@ export default defineComponent({
     }
   }
 }
+.table_area {
+  height: calc(100% - 100px);
+  overflow: auto;
+}
 </style>
 <route lang="yaml">
   meta:
     level: 1
+    type: 'proside'
     name: '事务列表'
     layout: auth
 </route>

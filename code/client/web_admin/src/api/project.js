@@ -28,7 +28,7 @@ export function createTemp(data) {
 export function editTemp(data) {
   return request({
     url: '/api/project/edit',
-    method: 'post',
+    method: 'put',
     data
   })
 }

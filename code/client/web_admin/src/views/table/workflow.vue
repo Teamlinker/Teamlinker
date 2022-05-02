@@ -1,9 +1,7 @@
 <template>
   <div class="app-container">
     <el-row style="padding-bottom: 10px">
-      <el-button type="primary" size="small" @click="handleCreate"
-        >新增工作流</el-button
-      >
+      <el-button type="primary" size="small" @click="handleCreate">新增工作流</el-button>
     </el-row>
     <el-table
       v-loading="listLoading"
@@ -45,13 +43,23 @@
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row }">
-          <el-button type="text" size="mini" @click="handleUpdate(row)">
+          <el-button
+            v-if="row.reserved !== 1"
+            type="text"
+            size="mini"
+            @click="handleUpdate(row)"
+          >
             编辑
           </el-button>
           <el-button type="text" size="mini" @click="handleDraw(row)">
             编辑流程
           </el-button>
-          <el-button type="text" size="mini" @click="handleRemove(row)">
+          <el-button
+            v-if="row.reserved !== 1"
+            type="text"
+            size="mini"
+            @click="handleRemove(row)"
+          >
             删除
           </el-button>
         </template>
@@ -86,133 +94,135 @@
   </div>
 </template>
 <script>
-import '@/styles/common.scss'
-import '@/styles/upload.scss'
-import { getWorkflowList,createWorkflow,editWorkflow,deleteWorkflow } from '@/api/workflow'
+import "@/styles/common.scss";
+import "@/styles/upload.scss";
+import {
+  getWorkflowList,
+  createWorkflow,
+  editWorkflow,
+  deleteWorkflow,
+} from "@/api/workflow";
 export default {
   data() {
     return {
       listLoading: false,
       textMap: {
-        update: '编辑',
-        create: '创建'
+        update: "编辑",
+        create: "创建",
       },
       list: [],
-      dialogStatus: '',
+      dialogStatus: "",
       dialogFormVisible: false,
       temp: {},
       rules: {
-        name: [{ required: true, message: '名称必填', trigger: 'blur' }]
-      }
-    }
+        name: [{ required: true, message: "名称必填", trigger: "blur" }],
+      },
+    };
   },
   methods: {
     fetchData() {
-      this.listLoading = true
+      this.listLoading = true;
       getWorkflowList({}).then((res) => {
-        var data = res.data
+        var data = res.data;
         data.forEach((item) => {
           item.created_time = this.moment(item.created_time).format(
-            'YYYY-MM-DD HH:mm:ss'
-          )
-          item.modify_time = this.moment(item.modify_time).format(
-            'YYYY-MM-DD HH:mm:ss'
-          )
-        })
-        this.list = data
-        this.listLoading = false
-      })
+            "YYYY-MM-DD HH:mm:ss"
+          );
+          item.modify_time = this.moment(item.modify_time).format("YYYY-MM-DD HH:mm:ss");
+        });
+        this.list = data;
+        this.listLoading = false;
+      });
     },
     resetTemp() {
       this.temp = {
         workflowId: undefined,
-        name: '',
-        description: ''
-      }
+        name: "",
+        description: "",
+      };
     },
     handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
+      this.resetTemp();
+      this.dialogStatus = "create";
+      this.dialogFormVisible = true;
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+        this.$refs["dataForm"].clearValidate();
+      });
     },
     createData() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs["dataForm"].validate((valid) => {
         if (valid) {
-          const params = this.temp
+          const params = this.temp;
           createWorkflow(params).then(() => {
-            this.doSuccess()
-          })
+            this.doSuccess();
+          });
         }
-      })
+      });
     },
     updateData() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs["dataForm"].validate((valid) => {
         if (valid) {
           const params = {
             workflowId: this.temp.id,
             name: this.temp.name,
-            description: this.temp.description
-          }
+            description: this.temp.description,
+          };
           editWorkflow(params).then(() => {
-            this.doSuccess()
-          })
+            this.doSuccess();
+          });
         }
-      })
+      });
     },
     handleUpdate(row) {
-      this.dialogStatus = 'update'
-      this.temp = Object.assign({}, row)
-      this.dialogFormVisible = true
+      this.dialogStatus = "update";
+      this.temp = Object.assign({}, row);
+      this.dialogFormVisible = true;
     },
-    handleDraw(row){
-     this.$router.push({
-       path:'/example/workflowDraw',
-       query:{
-         workflowId:row.id
-       }
-     })
+    handleDraw(row) {
+      this.$router.push({
+        path: "/example/workflowDraw",
+        query: {
+          workflowId: row.id,
+        },
+      });
     },
     doSuccess() {
-      this.fetchData()
-      this.dialogFormVisible = false
+      this.fetchData();
+      this.dialogFormVisible = false;
       this.$notify({
-        title: 'Success',
-        message: '操作成功',
-        type: 'success',
-        duration: 2000
-      })
+        title: "Success",
+        message: "操作成功",
+        type: "success",
+        duration: 2000,
+      });
     },
-     handleRemove(row) {
-      this.temp.workflowId = row.id
-      this.$confirm('确定删除, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+    handleRemove(row) {
+      this.temp.workflowId = row.id;
+      this.$confirm("确定删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       })
         .then(() => {
-          this.removeData()
+          this.removeData();
         })
         .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消删除'
-          })
-        })
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
     removeData() {
       deleteWorkflow({
-        workflowId: this.temp.workflowId
+        workflowId: this.temp.workflowId,
       }).then(() => {
-        this.doSuccess()
-      })
+        this.doSuccess();
+      });
     },
   },
   created() {
-    this.fetchData()
-  }
-}
+    this.fetchData();
+  },
+};
 </script>
-

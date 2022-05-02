@@ -58,7 +58,7 @@ export const constantRoutes = [
   {
     path: '/example',
     component: Layout,
-    redirect: '/example/table',
+    redirect: '/example/project',
     name: 'teamlinker',
     meta: { title: 'teamlinker', icon: 'el-icon-s-help' },
     children: [
@@ -124,98 +124,81 @@ export const constantRoutes = [
         name:'配置事务类型',
         component: () => import('@/views/table/configWorkflowSolution/configIssueType'),
         meta: { title: '配置事务类型', icon: 'table' }
-      }
-      // {
-      //   path:'fieldSolution',
-      //   name:'字段方案',
-      //   component: () => import('@/views/table/fieldSolution'),
-      //   meta: { title: '字段方案', icon: 'table' }
-      // }
-      // {
-      //   path: 'tree',
-      //   name: 'Tree',
-      //   component: () => import('@/views/tree/index'),
-      //   meta: { title: 'Tree', icon: 'tree' }
-      // }
+      },
+
+          {
+            path: 'fieldList',
+            name: 'Form',
+            component: () => import('@/views/table/fieldSolution'),
+            meta: { title: 'fieldSolution', icon: 'table' }
+          },
+          {
+            path: 'configWorkflowSolution',
+            name: 'configWorkflowSolution',
+            component: () => import('@/views/fieldsolution/configWorkflowSolution'),
+            hidden:true,
+            meta: { title: 'configWorkflowSolution', icon: 'table' }
+          },
+          {
+            path: 'bindWorkflowSolution',
+            name: 'bindWorkflowSolution',
+            component: () => import('@/views/fieldsolution/bindWorkflowSolution'),
+            hidden:true,
+            meta: { title: 'bindWorkflowSolution', icon: 'table' }
+          },
+          {
+            path: 'selectWorkflow',
+            name: 'selectWorkflow',
+            component: () => import('@/views/fieldsolution/selectWorkflow'),
+            hidden:true,
+            meta: { title: 'selectWorkflow', icon: 'table' }
+          },
+          {
+            path: 'fs-workflow',
+            name: 'fs-workflow',
+            component: () => import('@/views/fieldsolution/ef/panel'),
+            hidden:true,
+            meta: { title: 'fs-workflow', icon: 'table' }
+          },
+          {
+            path: 'workflowField',
+            name: 'workflowField',
+            component: () => import('@/views/fieldsolution/workflowField'),
+            hidden:true,
+            meta: { title: 'workflowField', icon: 'table' }
+          },
+          {
+            path: 'addWorkflowField',
+            name: 'addWorkflowField',
+            component: () => import('@/views/fieldsolution/addWorkflowField'),
+            hidden:true,
+            meta: { title: 'addWorkflowField', icon: 'table' }
+          },
+          {
+            path: 'addWorkflowField2',
+            name: 'addWorkflowField2',
+            component: () => import('@/views/fieldsolution/addWorkflowField2'),
+            hidden:true,
+            meta: { title: 'addWorkflowField', icon: 'table' }
+          },   
+          {
+            path: 'addWorkflowField3',
+            component: () => import('@/views/fieldsolution/addWorkflowField3'),
+            hidden:true,
+            meta: { title: 'Edit Field', icon: 'table' }
+          },    
+          {
+            path: 'addWorkflowField4',
+            name: 'addWorkflowField4',
+            component: () => import('@/views/fieldsolution/addWorkflowField4'),
+            hidden:true,
+            meta: { title: 'Edit Field', icon: 'table' }
+          },    
+        
+      
     ]
   },
-  {
-    path: '/fieldSolution',
-    component: Layout,
-    redirect: '/fieldSolution/list',
-    name: 'fieldSolution',
-    meta: { title: 'fieldSolution', icon: 'el-icon-s-help' },
-    children: [
-      {
-        path: 'list',
-        name: 'Form',
-        component: () => import('@/views/table/fieldSolution'),
-        meta: { title: 'fieldSolution', icon: 'table' }
-      },
-      {
-        path: 'configWorkflowSolution',
-        name: 'configWorkflowSolution',
-        component: () => import('@/views/fieldsolution/configWorkflowSolution'),
-        hidden:true,
-        meta: { title: 'configWorkflowSolution', icon: 'table' }
-      },
-      {
-        path: 'bindWorkflowSolution',
-        name: 'bindWorkflowSolution',
-        component: () => import('@/views/fieldsolution/bindWorkflowSolution'),
-        hidden:true,
-        meta: { title: 'bindWorkflowSolution', icon: 'table' }
-      },
-      {
-        path: 'selectWorkflow',
-        name: 'selectWorkflow',
-        component: () => import('@/views/fieldsolution/selectWorkflow'),
-        hidden:true,
-        meta: { title: 'selectWorkflow', icon: 'table' }
-      },
-      {
-        path: 'fs-workflow',
-        name: 'fs-workflow',
-        component: () => import('@/views/fieldsolution/ef/panel'),
-        hidden:true,
-        meta: { title: 'fs-workflow', icon: 'table' }
-      },
-      {
-        path: 'workflowField',
-        name: 'workflowField',
-        component: () => import('@/views/fieldsolution/workflowField'),
-        hidden:true,
-        meta: { title: 'workflowField', icon: 'table' }
-      },
-      {
-        path: 'addWorkflowField',
-        name: 'addWorkflowField',
-        component: () => import('@/views/fieldsolution/addWorkflowField'),
-        hidden:true,
-        meta: { title: 'addWorkflowField', icon: 'table' }
-      },
-      {
-        path: 'addWorkflowField2',
-        name: 'addWorkflowField2',
-        component: () => import('@/views/fieldsolution/addWorkflowField2'),
-        hidden:true,
-        meta: { title: 'addWorkflowField', icon: 'table' }
-      },   
-      {
-        path: 'addWorkflowField3',
-        component: () => import('@/views/fieldsolution/addWorkflowField3'),
-        hidden:true,
-        meta: { title: 'Edit Field', icon: 'table' }
-      },    
-      {
-        path: 'addWorkflowField4',
-        name: 'addWorkflowField4',
-        component: () => import('@/views/fieldsolution/addWorkflowField4'),
-        hidden:true,
-        meta: { title: 'Edit Field', icon: 'table' }
-      },    
-    ]
-  },
+
 
   // {
   //   path: '/form',

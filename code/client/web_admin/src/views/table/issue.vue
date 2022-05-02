@@ -25,7 +25,9 @@
       </el-table-column>
       <el-table-column label="图标">
         <template slot-scope="scope">
-          {{ scope.row.icon }}
+          <div>
+            <img :src="domain + scope.row.icon" height="60" v-if="scope.row.icon" />
+          </div>
         </template>
       </el-table-column>
       <el-table-column label="描述">
@@ -49,13 +51,9 @@
         width="200"
         class-name="small-padding fixed-width"
       >
-        <template slot-scope="{ row }">
-          <el-button type="text" size="mini" @click="handleUpdate(row)">
-            编辑
-          </el-button>
-          <el-button type="text" size="mini" @click="handleRemove(row)">
-            删除
-          </el-button>
+        <template slot-scope="{ row }" v-if="row.reserved !== 1">
+          <el-button type="text" size="mini" @click="handleUpdate(row)"> 编辑 </el-button>
+          <el-button type="text" size="mini" @click="handleRemove(row)"> 删除 </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -75,18 +73,23 @@
         <el-form-item label="描述" prop="description">
           <el-input type="textarea" :rows="2" v-model="temp.description" />
         </el-form-item>
-        <!-- <el-form-item label="图标" prop="icon">
+        <el-form-item label="图标" prop="icon">
           <el-upload
             class="avatar-uploader"
             action="/api/file/upload"
             accept="image/jpeg,image/jpg,image/png"
             ref="my-upload"
+            :on-change="onchange"
             :http-request="submitUpload"
+            :show-file-list="false"
           >
-            <img v-if="temp.icon" :src="temp.icon" class="avatar" />
-            <i v-else class="el-icon-plus avatar-uploader-icon" />
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <i v-if="!imageUrl" class="el-icon-plus avatar-uploader-icon" />
           </el-upload>
-        </el-form-item> -->
+          <div style="margin-left: 80px" v-if="imageUrl">
+            <i class="el-icon-delete" @click="deleteImg()"></i>
+          </div>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false"> 取消 </el-button>
@@ -103,19 +106,14 @@
 <script>
 import "@/styles/common.scss";
 import "@/styles/upload.scss";
-import {
-  getList,
-  createTemp,
-  editTemp,
-  viewTemp,
-  removeTemp,
-} from "@/api/issueType";
+import { getList, createTemp, editTemp, viewTemp, removeTemp } from "@/api/issueType";
 import { uploadFile, downFile } from "@/api/file";
 export default {
   data() {
     return {
       listQuery: { keyword: "" },
       list: null,
+      domain: "",
       listLoading: true,
       page: {
         pageIndex: 0,
@@ -128,14 +126,16 @@ export default {
       },
       dialogStatus: "",
       dialogFormVisible: false,
-      temp: {name:'',description:''},
+      temp: { name: "", description: "" },
       issueRules: {
         name: [{ required: true, message: "名称必填", trigger: "blur" }],
       },
+      imageUrl: "",
     };
   },
   created() {
     this.fetchData();
+    this.domain = process.env.VUE_APP_BASE_DOMAIN;
   },
   methods: {
     fetchData() {
@@ -150,9 +150,7 @@ export default {
           item.created_time = this.moment(item.created_time).format(
             "YYYY-MM-DD HH:mm:ss"
           );
-          item.modify_time = this.moment(item.modify_time).format(
-            "YYYY-MM-DD HH:mm:ss"
-          );
+          item.modify_time = this.moment(item.modify_time).format("YYYY-MM-DD HH:mm:ss");
         });
         this.list = data;
         this.listLoading = false;
@@ -169,9 +167,10 @@ export default {
       this.temp = {
         issueTypeId: undefined,
         name: "",
-        icon: "",
+        icon: null,
         description: "",
       };
+      this.imageUrl = "";
       // this.$refs["my-upload"].clearFiles();
     },
     handleCreate() {
@@ -184,13 +183,18 @@ export default {
     },
     handleUpdate(row) {
       this.dialogStatus = "update";
-      this.temp = row;
+      this.temp = Object.assign({}, row);
+      this.imageUrl = row.icon ? this.domain + row.icon : "";
       this.dialogFormVisible = true;
     },
     createData() {
       this.$refs["dataForm"].validate((valid) => {
         if (valid) {
-          createTemp({ name: this.temp.name,description:this.temp.description }).then(() => {
+          createTemp({
+            name: this.temp.name,
+            description: this.temp.description,
+            icon: this.temp.icon,
+          }).then(() => {
             this.fetchData();
             this.dialogFormVisible = false;
             this.$notify({
@@ -207,6 +211,10 @@ export default {
       this.$refs["dataForm"].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp);
+          tempData.issueTypeId = this.temp.id;
+          if (tempData.icon.indexOf("file") > 0) {
+            delete tempData.icon;
+          }
           editTemp(tempData).then(() => {
             this.fetchData();
             this.dialogFormVisible = false;
@@ -250,7 +258,18 @@ export default {
         }
       });
     },
-
+    //当上传图片后，调用onchange方法，获取图片本地路径
+    onchange(file, fileList) {
+      var _this = this;
+      var event = event || window.event;
+      var file = event.target.files[0];
+      var reader = new FileReader();
+      //转base64
+      reader.onload = function (e) {
+        _this.imageUrl = e.target.result; //将图片路径赋值给src
+      };
+      reader.readAsDataURL(file);
+    },
     submitUpload(params) {
       const fileObj = params.file;
       // FormData 对象
@@ -259,8 +278,13 @@ export default {
       form.append("file", fileObj);
       // 调用保存接口 将form的值全都传过去
       uploadFile(form).then((res) => {
+        console.log(res, "resss");
         this.temp.icon = res.data;
       });
+    },
+    deleteImg() {
+      this.imageUrl = "";
+      this.temp.icon = null;
     },
     downFile() {
       downFile({ fileId: "11" }).then((res) => {
@@ -270,3 +294,47 @@ export default {
   },
 };
 </script>
+<style scoped lang="scss">
+img-div {
+  width: 180px;
+  height: 180px;
+  margin-right: 15px;
+  position: relative;
+  .delete-img {
+    display: none;
+  }
+  &:hover {
+    .delete-img {
+      display: block;
+      position: absolute;
+      width: 180px;
+      height: 40px;
+      line-height: 40px;
+      left: 0px;
+      top: 140px;
+      background: rgba(59, 60, 61, 0.5);
+      // box-sizing: content-box;
+      z-index: 999;
+      cursor: pointer;
+      text-align: right;
+      i {
+        margin: 8px 10px 0 0;
+        display: block;
+        font-size: 24px;
+        color: white;
+      }
+    }
+  }
+  img {
+    border: 1px dashed #d9d9d9;
+    border-radius: 5px;
+    box-sizing: border-box;
+    width: 180px;
+    height: 180px;
+    margin-top: 0px;
+    &:hover {
+      border: 1px dashed #409eff;
+    }
+  }
+}
+</style>

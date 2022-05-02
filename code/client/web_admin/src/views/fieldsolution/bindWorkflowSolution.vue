@@ -12,12 +12,8 @@
         </el-option>
       </el-select>
       <div class="btn-area">
-        <el-button type="primary" size="small" @click="handleNext"
-          >next</el-button
-        >
-        <el-button type="info" size="small" @click="handleCancel"
-          >cancel</el-button
-        >
+        <el-button type="primary" size="small" @click="handleNext">next</el-button>
+        <el-button type="info" size="small" @click="handleCancel">cancel</el-button>
       </div>
     </div>
   </div>
@@ -54,7 +50,7 @@ export default {
       })
         .then((res) => {
           this.$router.push({
-            path: "/fieldSolution/selectWorkflow",
+            path: "/example/selectWorkflow",
             query: {
               fieldSolutionId: this.$route.query.fieldSolutionId,
               workflowSolutionId: this.value,
@@ -67,7 +63,7 @@ export default {
     },
     handleCancel() {
       this.$router.push({
-        path: "/fieldSolution/list",
+        path: "/example/fieldList",
         query: {},
       });
     },
@@ -91,4 +87,3 @@ export default {
   }
 }
 </style>
-

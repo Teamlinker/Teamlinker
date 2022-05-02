@@ -52,9 +52,7 @@
         </div>
       </div>
       <div>
-        <el-button type="primary" @click="handleSave('ruleForm')"
-          >save</el-button
-        >
+        <el-button type="primary" @click="handleSave('ruleForm')">save</el-button>
         <el-button>cancel</el-button>
       </div>
     </div>
@@ -74,20 +72,16 @@ export default {
         selected: 0,
       },
       rules: {
-        name: [
-          { required: true, message: "please input name", trigger: "blur" },
-        ],
-        value: [
-          { required: true, message: "please input value", trigger: "blur" },
-        ],
+        name: [{ required: true, message: "please input name", trigger: "blur" }],
+        value: [{ required: true, message: "please input value", trigger: "blur" }],
       },
     };
   },
   methods: {
     getFieldDetails() {
       fieldDetails({
-        fieldSolutionWorkflowNodeFieldTypeId:
-          this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+        fieldSolutionWorkflowNodeFieldTypeId: this.$route.query
+          .fieldSolutionWorkflowNodeFieldTypeId,
       }).then((res) => {
         this.option = res.data.values;
         if (this.option.length == 0) {
@@ -99,13 +93,13 @@ export default {
       let param = Object.assign(
         { data: this.option },
         {
-          fieldSolutionWorkflowNodeFieldTypeId:
-            this.$route.query.fieldSolutionWorkflowNodeFieldTypeId,
+          fieldSolutionWorkflowNodeFieldTypeId: this.$route.query
+            .fieldSolutionWorkflowNodeFieldTypeId,
         }
       );
       addFieldValue(param).then((res) => {
         this.$router.push({
-          path: "/fieldSolution/workflowField",
+          path: "/example/workflowField",
           query: {
             fieldSolutionId: this.$route.query.fieldSolutionId,
             workflowId: this.$route.query.workflowId,
@@ -152,4 +146,3 @@ export default {
   }
 }
 </style>
-

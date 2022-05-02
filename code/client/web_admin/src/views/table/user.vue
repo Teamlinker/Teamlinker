@@ -35,9 +35,7 @@
     </div>
 
     <el-row style="padding-bottom: 10px">
-      <el-button type="primary" size="small" @click="handleCreate"
-        >新增用户</el-button
-      >
+      <el-button type="primary" size="small" @click="handleCreate">新增用户</el-button>
     </el-row>
     <el-table
       v-loading="listLoading"
@@ -97,12 +95,12 @@
           {{ scope.row.modified_time }}
         </template>
       </el-table-column>
-      <el-table-column label="状态">
+      <!-- <el-table-column label="状态">
         <template slot-scope="scope">
           <span v-if="scope.row.originActive == '1'">启用</span>
           <span v-else-if="scope.row.originActive == '0'">禁用</span>
         </template>
-      </el-table-column>
+      </el-table-column> -->
 
       <el-table-column
         label="启用/禁用"
@@ -134,9 +132,8 @@
           <!-- <el-button type="text" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button> -->
-          <el-button type="text" size="mini" @click="handleRemove(row)">
-            删除
-          </el-button>
+          <el-button type="text" size="mini" @click="handleEdit(row)"> 编辑 </el-button>
+          <el-button type="text" size="mini" @click="handleRemove(row)"> 删除 </el-button>
           <el-button type="text" size="mini" @click="handleResetPwd(row)">
             重置密码
           </el-button>
@@ -164,14 +161,54 @@
         :rules="rules"
         :model="temp"
         label-position="left"
-        label-width="70px"
-        style="width: 400px; margin-left: 50px"
+        label-width="90px"
+        style="width: 500px; margin-left: 50px"
       >
         <el-form-item label="名称" prop="username">
           <el-input v-model="temp.username" />
         </el-form-item>
-        <el-form-item label="密码" prop="password">
+        <el-form-item label="密码" prop="password" v-if="dialogStatus === 'create'">
           <el-input v-model="temp.password" show-password />
+        </el-form-item>
+        <el-form-item label="是否管理员" prop="is_admin">
+          <el-select v-model="temp.is_admin" placeholder="请选择">
+            <el-option
+              v-for="item in adminOpt"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="头像" prop="photo">
+          <el-upload
+            class="avatar-uploader"
+            action="/api/file/upload"
+            accept="image/jpeg,image/jpg,image/png"
+            ref="my-upload"
+            :on-change="onchange"
+            :http-request="submitUpload"
+            :show-file-list="false"
+          >
+            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <i v-if="!imageUrl" class="el-icon-plus avatar-uploader-icon" />
+          </el-upload>
+          <div style="margin-left: 80px" v-if="imageUrl">
+            <i class="el-icon-delete" @click="deleteImg()"></i>
+          </div>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="temp.email" />
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="temp.phone" />
+        </el-form-item>
+        <el-form-item label="签名" prop="sign">
+          <el-input v-model="temp.sign" />
+        </el-form-item>
+        <el-form-item label="地址" prop="location">
+          <el-input v-model="temp.location" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -196,15 +233,17 @@
 </template>
 <script>
 import "@/styles/common.scss";
+import "@/styles/upload.scss";
 import {
   getList,
   createTemp,
+  editTemp,
   removeTemp,
   activeTemp,
   resetPwd,
 } from "@/api/user";
 import { fromTime } from "@/utils/utils";
-
+import { uploadFile } from "@/api/file";
 export default {
   data() {
     return {
@@ -215,6 +254,10 @@ export default {
         update: "编辑",
         create: "创建",
       },
+      adminOpt: [
+        { label: "是", value: 1 },
+        { label: "否", value: 0 },
+      ],
       dialogStatus: "",
       dialogFormVisible: false,
       rules: {
@@ -232,6 +275,7 @@ export default {
         pageSize: 10,
         pageCount: 0,
       },
+      imageUrl: "",
     };
   },
   created() {
@@ -282,15 +326,13 @@ export default {
         this.$refs["dataForm"].clearValidate();
       });
     },
-    handleUpdate(row) {
+    handleEdit(row) {
       this.dialogStatus = "update";
       this.$nextTick(() => {
         this.$refs["dataForm"].clearValidate();
       });
-      viewTemp({ projectId: row.projectId }).then((res) => {
-        this.temp = res.data;
-        this.dialogFormVisible = true;
-      });
+      this.temp = Object.assign({}, row);
+      this.dialogFormVisible = true;
     },
     createData() {
       this.$refs["dataForm"].validate((valid) => {
@@ -311,7 +353,10 @@ export default {
     updateData() {
       this.$refs["dataForm"].validate((valid) => {
         if (valid) {
+          console.log(this.temp, "this.temp");
           const tempData = Object.assign({}, this.temp);
+          tempData.userId = this.temp.id;
+          delete tempData.id;
           editTemp(tempData).then(() => {
             this.fetchData();
             this.dialogFormVisible = false;
@@ -334,6 +379,33 @@ export default {
         this.fetchData();
         this.dialogVisible = false;
       });
+    },
+    //当上传图片后，调用onchange方法，获取图片本地路径
+    onchange(file, fileList) {
+      var _this = this;
+      var event = event || window.event;
+      var file = event.target.files[0];
+      var reader = new FileReader();
+      //转base64
+      reader.onload = function (e) {
+        _this.imageUrl = e.target.result; //将图片路径赋值给src
+      };
+      reader.readAsDataURL(file);
+    },
+    submitUpload(params) {
+      const fileObj = params.file;
+      // FormData 对象
+      const form = new FormData();
+      // 文件对象
+      form.append("file", fileObj);
+      // 调用保存接口 将form的值全都传过去
+      uploadFile(form).then((res) => {
+        this.temp.photo = res.data;
+      });
+    },
+    deleteImg() {
+      this.imageUrl = "";
+      this.temp.photo = null;
     },
     activeChange(row) {
       activeTemp({ active: row.active, userId: row.id }).then((res) => {
