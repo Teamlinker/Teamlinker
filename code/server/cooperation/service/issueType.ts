@@ -55,6 +55,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         if(objWorkflowSolution) {
             await objWorkflowSolution.unbindIssueTypeSolutions([this.getId()]);
         }
+        await issueTypeSolutionMapper.resetProjects(this.getId());
     }
 
     static async list(){

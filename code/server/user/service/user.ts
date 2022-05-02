@@ -73,7 +73,6 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
         let ret=await userMapper.list(page,size,keyword)
         ret.data.forEach(item=>{
             delete item.password
-            delete item.is_admin
         })
         return {
             count:ret.count,
