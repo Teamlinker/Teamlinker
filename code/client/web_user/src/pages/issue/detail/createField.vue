@@ -1,7 +1,6 @@
 <template>
   <div class="create-issue">
     <div v-html="html"></div>
-    <a-button type="primary" @click="goToNextNode">next node</a-button>
   </div>
 </template>
 <script lang="ts">
@@ -9,21 +8,22 @@ import { defineComponent, reactive, toRefs, ref, inject } from "vue";
 import axios from "@/plugins/axios";
 import { message } from "ant-design-vue";
 import { useRouter } from "vue-router";
+import { notification } from "ant-design-vue";
 interface FormState {
   name: string;
 }
 export default defineComponent({
   emits: ["hideIssueModal"],
-  props:['workflowActionId','projectIssueId'],
+  props: ["workflowActionId", "projectIssueId"],
   setup(props, content) {
     const state: any = reactive({
       html: "",
-      workflowActionId:props.workflowActionId,
-      projectIssueId:props.projectIssueId
+      workflowActionId: props.workflowActionId,
+      projectIssueId: props.projectIssueId,
+      list: "",
     });
 
     const getField = () => {
-      console.log(state.projectIssueId,state.workflowActionId)
       axios
         .get("/issue/item/next", {
           params: {
@@ -45,6 +45,7 @@ export default defineComponent({
           //       {"id":"6926817707836833799","name":"timepicker","icon":null,"description":null,"multi":0,"type":7}
           //   ]
           let list = res.data;
+          state.list = list;
           var html = "";
           for (let i = 0; i < list.length; i++) {
             if (list[i].fieldType.type == "1") {
@@ -52,7 +53,7 @@ export default defineComponent({
             } else if (list[i].fieldType.type == "3") {
               html =
                 html +
-                `<div><span>${list[i].field.name}</span><input class='custom-text' type='text' /><div>`;
+                `<div class='item'><span class='left'>${list[i].field.name}</span><input id='ele${list[i].field.id}' class='custom-text' type='text' /><div>`;
               state.html = html;
             } else if (list[i].fieldType.type == "4") {
             } else if (list[i].fieldType.type == "5") {
@@ -65,10 +66,46 @@ export default defineComponent({
         });
     };
     getField();
-    const goToNextNode = () => {};
+    const openNotificationWithIcon = (type: string) => {
+      notification[type]({
+        message: "success",
+        description: "success",
+      });
+    };
+    const onSubmit = () => {
+      let list = state.list;
+      let value = [];
+      for (let i = 0; i < list.length; i++) {
+        let obj:any = {}
+        if (list[i].fieldType.type == "1") {
+        } else if (list[i].fieldType.type == "2") {
+        } else if (list[i].fieldType.type == "3") {
+          obj.fieldId = list[i].field.id
+          obj.value = (document.getElementById(`ele${list[i].field.id}`) as any).value
+          value.push(obj)
+        } else if (list[i].fieldType.type == "4") {
+        } else if (list[i].fieldType.type == "5") {
+        } else if (list[i].fieldType.type == "6") {
+        } else if (list[i].fieldType.type == "7") {
+        } else if (list[i].fieldType.type == "8") {
+        } else if (list[i].fieldType.type == "9") {
+        }
+      }
+      axios
+        .post("/issue/item/next", {
+          projectIssueId: state.projectIssueId,
+          workflowActionId: state.workflowActionId,
+          value: value,
+        })
+        .then((res: any) => {
+          if (res.code == "0") {
+            openNotificationWithIcon("success");
+          }
+        });
+    };
     return {
       ...toRefs(state),
-      goToNextNode,
+      onSubmit,
     };
   },
 });
@@ -85,8 +122,17 @@ export default defineComponent({
   margin-top: 50px;
 }
 </style>
-<style>
+<style lang="scss">
 .custom-text {
   border: 1px solid #ccc;
+}
+.item {
+  padding: 10px;
+  .left {
+    display: inline-block;
+    width: 150px;
+    text-align: right;
+    margin-right: 5px;
+  }
 }
 </style>

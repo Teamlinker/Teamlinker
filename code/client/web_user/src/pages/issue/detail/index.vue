@@ -23,7 +23,7 @@
       <div class="right">
         <div class="details">
           <div style="font-weight: 600">Details</div>
-          <div style="position: relative;">
+          <div style="position: relative">
             <a class="ant-dropdown-link" @click="selectActions">
               {{ workflowNode.name }}
               <down-outlined />
@@ -111,7 +111,7 @@
       </div>
     </div>
 
-    <a-modal v-model:visible="visible">
+    <a-modal v-model:visible="visible" @ok="handleOk">
       <create-field
         ref="issueRef"
         :workflowActionId="workflowActionId"
@@ -279,6 +279,9 @@ export default defineComponent({
     const selectActions = () => {
       state.showDown = !state.showDown;
     };
+    const handleOk = () => {
+      issueRef.value.onSubmit();
+    };
     return {
       addDesc,
       cancel,
@@ -290,6 +293,7 @@ export default defineComponent({
       showModal,
       issueRef,
       selectActions,
+      handleOk
     };
   },
 });
