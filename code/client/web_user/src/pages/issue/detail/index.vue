@@ -23,6 +23,30 @@
       <div class="right">
         <div class="details">
           <div style="font-weight: 600">Details</div>
+          <div style="position: relative;">
+            <a class="ant-dropdown-link" @click="selectActions">
+              {{ workflowNode.name }}
+              <down-outlined />
+            </a>
+            <div v-show="showDown" class="down-area">
+              <!-- <a-select @change="showModal" style="width: 100px">
+                <a-select-option
+                  :value="item.id"
+                  v-for="item in actionsOptions"
+                  :key="item.id"
+                  >{{ item.name }}</a-select-option
+                >
+              </a-select> -->
+              <div
+                class="down-item"
+                v-for="(item, index) in actionsOptions"
+                :key="index"
+                @click="showModal(item.id)"
+              >
+                {{ item.name }}
+              </div>
+            </div>
+          </div>
           <a-row class="item">
             <a-col :span="6" class="item_left">assigner</a-col>
             <a-col :span="18">
@@ -86,14 +110,29 @@
         </div>
       </div>
     </div>
+
+    <a-modal v-model:visible="visible">
+      <create-field
+        ref="issueRef"
+        :workflowActionId="workflowActionId"
+        :projectIssueId="projectIssueId"
+      ></create-field>
+    </a-modal>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, toRefs, ref } from "vue";
+import { defineComponent, reactive, toRefs, ref, provide } from "vue";
 import { useRoute } from "vue-router";
 import axios from "@/plugins/axios";
 import { notification } from "ant-design-vue";
+import CreateField from "./createField.vue";
+import { validateSearch } from "ant-design-vue/lib/vc-mentions/src/util";
+import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
 export default defineComponent({
+  components: {
+    CreateField,
+    DownOutlined,
+  },
   setup() {
     const state: any = reactive({
       baseInfo: { issueType: {}, name: "" },
@@ -118,10 +157,17 @@ export default defineComponent({
           label: "低",
         },
       ],
+      actionsOptions: [],
+      workflowNode: {},
+      visible: false,
+      projectIssueId: "",
+      workflowActionId: "",
+      showDown: false,
     });
+    const issueRef = ref(null);
     const route = useRoute();
     const query = route.query;
-
+    state.projectIssueId = route.query.projectIssueId;
     const getMemberList = () => {
       const params = {
         projectId: route.query.projectId,
@@ -141,6 +187,7 @@ export default defineComponent({
         state.reporter_id =
           res.data && res.data.reporter_id && res.data.reporter_id.id;
         state.priority = res.data && res.data.priority;
+        state.workflowNode = res.data && res.data.workflowNode;
       });
     };
     const getDescInfo = () => {
@@ -213,6 +260,25 @@ export default defineComponent({
       };
       updateBaseInfo(params);
     };
+    const getActions = () => {
+      axios
+        .get("/issue/item/actions", {
+          params: { projectIssueId: route.query.projectIssueId },
+        })
+        .then((res: any) => {
+          if (res.code == "0") {
+            state.actionsOptions = res.data;
+          }
+        });
+    };
+    getActions();
+    const showModal = (val) => {
+      state.workflowActionId = val;
+      state.visible = true;
+    };
+    const selectActions = () => {
+      state.showDown = !state.showDown;
+    };
     return {
       addDesc,
       cancel,
@@ -220,7 +286,10 @@ export default defineComponent({
       ...toRefs(state),
       handleAssignerChange,
       handleReporterChange,
-      handlePriorityChange
+      handlePriorityChange,
+      showModal,
+      issueRef,
+      selectActions,
     };
   },
 });
@@ -260,6 +329,19 @@ export default defineComponent({
         // text-align: right;
         // margin-right: 5px;
       }
+    }
+    .down-area {
+      position: absolute;
+      z-index: 999;
+      background-color: #fff;
+      border: 1px solid #f1f1f1;
+    }
+    .down-item {
+      width: 200px;
+      padding: 5px 0;
+    }
+    .down-item:hover {
+      background-color: #f1f1f1;
     }
   }
 }

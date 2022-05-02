@@ -41,21 +41,12 @@
       :columns="columns"
       :data-source="tableData"
       :pagination="pagination"
+      :rowKey="(record) => record.id"
       class="table_area"
     >
-     <template #bodyCell="{ column, text, record }">
-       <template v-if="column.dataIndex === 'operation'">
-        <!-- <a-popconfirm
-          v-if="dataSource.length"
-          title="Sure to delete?"
-          @confirm="onDelete(record.key)"
-        >
-          <a>Delete</a>
-        </a-popconfirm> -->
-        <a>Delete</a>
+      <template #action="{ record }">
+        <a @click="onGoDetail(record)">details</a>
       </template>
-     </template>
-    
     </a-table>
   </div>
 </template>
@@ -129,9 +120,13 @@ export default defineComponent({
         dataIndex: "reporter_id",
         key: "reporter_id",
       },
-       {
-        title: 'operation',
-        dataIndex: 'operation',
+      {
+        title: "action",
+        key: "action",
+        dataIndex: "action",
+        slots: { customRender: "action" },
+        width: "20%",
+        ellipsis: true,
       },
     ];
     let tableData = ref([]);
@@ -172,6 +167,10 @@ export default defineComponent({
       });
     };
     getList();
+    const onGoDetail = (obj) => {
+      let path = `/issue/detail?projectIssueId=${obj.id}&uniqueKey=${obj.unique_id}&projectName=${router.currentRoute.value.query.projectName}&projectId=${router.currentRoute.value.query.projectId}`;
+      router.push(path);
+    };
     return {
       priorityOptions,
       assignerOptions,
@@ -183,6 +182,7 @@ export default defineComponent({
       columns,
       tableData,
       searchQuery,
+      onGoDetail,
     };
   },
 });
@@ -202,7 +202,7 @@ export default defineComponent({
     }
   }
 }
-.table_area{
+.table_area {
   height: calc(100% - 100px);
   overflow: auto;
 }
@@ -210,6 +210,7 @@ export default defineComponent({
 <route lang="yaml">
   meta:
     level: 1
+    type: 'proside'
     name: '事务列表'
     layout: auth
 </route>
