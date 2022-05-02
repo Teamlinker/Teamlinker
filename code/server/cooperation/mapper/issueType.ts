@@ -157,6 +157,19 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
         }))
     }
 
+    async resetProjects(issueTypeSolutionId:string) {
+        if(!issueTypeSolutionId) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        let mysql=getMysqlInstance()
+        let item=await this.getReservedItem();
+        await mysql.execute(generateUpdateSql(projectIssueTypeSolutionModel,{
+            issue_type_solution_id:item.id
+        },{
+            issue_type_solution_id:issueTypeSolutionId
+        }))
+    }
+
     async projectList(issueTypeSolutionId:string) {
         if(!issueTypeSolutionId) {
             throw Err.Project.Issue.issueTypeSolutionNotFound

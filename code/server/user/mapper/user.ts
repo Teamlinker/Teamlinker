@@ -55,12 +55,10 @@ class UserMapper extends Mapper<typeof userModel> {
         let totalPage=CommonUtil.pageTotal(count,size)
         let colums=keys<ICommon_Model_User>().map(item=>item.name);
         let ret=await mysql.execute(generateQuerySql(userModel,exculdeColumns(colums,[]),{
-            is_admin:0,
             ...(keyword && {username:{
                 exp:"%like%",
                 value:keyword
             }}),
-            
         },"and",{
             field:"username",
             type:"asc"
