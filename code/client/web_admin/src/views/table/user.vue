@@ -67,7 +67,9 @@
       </el-table-column>
       <el-table-column label="头像">
         <template slot-scope="scope">
-          {{ scope.row.photo }}
+          <div>
+            <img :src="domain + scope.row.photo" height="60" v-if="scope.row.photo" />
+          </div>
         </template>
       </el-table-column>
       <el-table-column label="邮箱">
@@ -198,6 +200,9 @@
             <i class="el-icon-delete" @click="deleteImg()"></i>
           </div>
         </el-form-item>
+        <el-form-item label="标题" prop="title">
+          <el-input v-model="temp.title" />
+        </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="temp.email" />
         </el-form-item>
@@ -276,10 +281,12 @@ export default {
         pageCount: 0,
       },
       imageUrl: "",
+      domain: "",
     };
   },
   created() {
     this.fetchData();
+    this.domain = process.env.VUE_APP_BASE_DOMAIN;
   },
   methods: {
     fetchData() {
@@ -332,6 +339,7 @@ export default {
         this.$refs["dataForm"].clearValidate();
       });
       this.temp = Object.assign({}, row);
+      this.imageUrl = row.photo ? this.domain + row.photo : "";
       this.dialogFormVisible = true;
     },
     createData() {
@@ -353,11 +361,32 @@ export default {
     updateData() {
       this.$refs["dataForm"].validate((valid) => {
         if (valid) {
-          console.log(this.temp, "this.temp");
           const tempData = Object.assign({}, this.temp);
-          tempData.userId = this.temp.id;
-          delete tempData.id;
-          editTemp(tempData).then(() => {
+          const {
+            photo,
+            sign,
+            title,
+            username,
+            phone,
+            is_admin,
+            email,
+            location,
+          } = tempData;
+          const params = {
+            userId: tempData.id,
+            phone: phone,
+            photo: photo,
+            sign: sign,
+            title: title,
+            username: username,
+            is_admin: is_admin,
+            email: email,
+            location: location,
+          };
+          if (params.photo.indexOf("file") > 0) {
+            delete params.photo;
+          }
+          editTemp(params).then(() => {
             this.fetchData();
             this.dialogFormVisible = false;
             this.$notify({
