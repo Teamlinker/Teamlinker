@@ -212,7 +212,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp);
           tempData.issueTypeId = this.temp.id;
-          if (tempData.icon.indexOf("file") > 0) {
+          if (tempData.icon && tempData.icon.indexOf("file") > 0) {
             delete tempData.icon;
           }
           editTemp(tempData).then(() => {
@@ -266,7 +266,7 @@ export default {
       var reader = new FileReader();
       //转base64
       reader.onload = function (e) {
-        _this.imageUrl = e.target.result; //将图片路径赋值给src
+        _this.localImgUrl = e.target.result; //将图片路径赋值给src
       };
       reader.readAsDataURL(file);
     },
@@ -280,6 +280,7 @@ export default {
       uploadFile(form).then((res) => {
         console.log(res, "resss");
         this.temp.icon = res.data;
+        this.imageUrl = this.localImgUrl;
       });
     },
     deleteImg() {

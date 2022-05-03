@@ -23,6 +23,7 @@
     "normalize.css": "7.0.0",
     "nprogress": "0.2.0",
     "path-to-regexp": "2.4.0",
+    "qs": "^6.10.3",
     "vue": "2.6.10",
     "vue-router": "3.0.6",
     "vuedraggable": "^2.24.3",

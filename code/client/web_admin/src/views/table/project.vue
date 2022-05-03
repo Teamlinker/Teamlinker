@@ -408,7 +408,15 @@
         style="width: 400px; margin-left: 50px"
       >
         <el-form-item label="用户" prop="memberId">
-          <el-select v-model="tempMember.memberId" placeholder="请选择">
+          <el-select
+            v-model="tempMember.memberId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入关键词"
+            :remote-method="getMembers"
+            :loading="memberLoading"
+          >
             <el-option
               v-for="item in membersOptions"
               :key="item.id"
@@ -576,7 +584,7 @@ export default {
       },
       memberPage: {
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: 100,
         pageCount: 0,
       },
       dialogModuleVisible: false,
@@ -613,6 +621,7 @@ export default {
       tempModule: {
         name: "",
       },
+      memberLoading: false,
     };
   },
   created() {
@@ -921,7 +930,7 @@ export default {
     handleCreateMember(row) {
       this.dialogMemberFormVisible = true;
       this.temp.memberId = row.id;
-      this.getMembers();
+      // this.getMembers();
       this.getRoles();
       this.tempMember.memberId = "";
       this.tempMember.roleId = "";
@@ -979,14 +988,23 @@ export default {
         this.rolesOptions = res.data;
       });
     },
-    getMembers() {
-      getAllMemberList({
-        keyword: "",
-        page: 0,
-        size: 1000,
-      }).then((res) => {
-        this.membersOptions = res.data.data;
-      });
+    getMembers(keyword) {
+      if (keyword !== "") {
+        this.memberLoading = true;
+        getAllMemberList({
+          keyword: keyword,
+          page: 0,
+          size: 1000,
+        }).then((res) => {
+          this.memberLoading = false;
+          const memberIds = this.memberlist.map((item) => item.id);
+          this.membersOptions = res.data.data.filter(
+            (item) => !memberIds.includes(item.id)
+          );
+        });
+      } else {
+        this.membersOptions = [];
+      }
     },
     submitUpload(params) {
       const fileObj = params.file;

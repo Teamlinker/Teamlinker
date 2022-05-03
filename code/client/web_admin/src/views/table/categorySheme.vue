@@ -155,7 +155,7 @@
         label-width="80px"
       >
         <el-form-item label="项目名称" prop="project">
-          <el-select v-model="projectForm.project" placeholder="请选择">
+          <el-select v-model="projectForm.project" filterable placeholder="请选择">
             <el-option
               v-for="item in projectList2"
               :key="item.id"

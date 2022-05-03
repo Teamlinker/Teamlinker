@@ -4,7 +4,8 @@ export function uploadFile(data) {
   return request({
     url: '/api/file/upload',
     method: 'post',
-    data
+    data,
+    type:'upload'
   })
 }
 

@@ -323,7 +323,17 @@ export default {
         userId: undefined,
         username: "",
         password: "",
+        phone: "",
+        photo: "",
+        sign: "",
+        title: "",
+        username: "",
+        is_admin: "",
+        email: "",
+        location: "",
       };
+      this.imageUrl = "";
+      this.localImgUrl = "";
     },
     handleCreate() {
       this.resetTemp();
@@ -383,7 +393,7 @@ export default {
             email: email,
             location: location,
           };
-          if (params.photo.indexOf("file") > 0) {
+          if (params.photo && params.photo.indexOf("file") > 0) {
             delete params.photo;
           }
           editTemp(params).then(() => {
@@ -417,7 +427,7 @@ export default {
       var reader = new FileReader();
       //转base64
       reader.onload = function (e) {
-        _this.imageUrl = e.target.result; //将图片路径赋值给src
+        _this.localImgUrl = e.target.result; //将图片路径赋值给src
       };
       reader.readAsDataURL(file);
     },
@@ -429,11 +439,13 @@ export default {
       form.append("file", fileObj);
       // 调用保存接口 将form的值全都传过去
       uploadFile(form).then((res) => {
+        this.imageUrl = this.localImgUrl;
         this.temp.photo = res.data;
       });
     },
     deleteImg() {
       this.imageUrl = "";
+      this.localImgUrl = "";
       this.temp.photo = null;
     },
     activeChange(row) {
