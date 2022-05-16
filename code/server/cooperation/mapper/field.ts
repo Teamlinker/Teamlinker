@@ -10,7 +10,7 @@ import { generateBatchCreateSql, generateCreateSql, generateDeleteSql, generateL
 import { ICommon_Model_Field_Solution } from './../../../common/model/field_solution';
 import { ECommon_Model_Field_Solution_Workflow_Node_Field_Type_Label_Type } from './../../../common/model/field_solution_workflow_node_field_type';
 import { fieldSolutionWorkflowSolutionModel } from './../../../common/model/field_solution_workflow_solution';
-import { fieldTypeModel, ICommon_Model_Field_Type } from './../../../common/model/field_type';
+import { ECommon_Model_Field_Type, fieldTypeModel, ICommon_Model_Field_Type } from './../../../common/model/field_type';
 import { fieldTypeConfigValueModel } from './../../../common/model/field_type_config_value';
 
 class FieldTypeMapper extends Mapper<typeof fieldTypeModel> {
@@ -26,6 +26,63 @@ class FieldTypeMapper extends Mapper<typeof fieldTypeModel> {
         }))
         return ret;
     }
+
+    async init() {
+        let mysql = getMysqlInstance()
+        let fieldTypeLabelId = await generateSnowId()
+        let fieldTypeMultiLabelId = await generateSnowId()
+        let fieldTypeTextId = await generateSnowId()
+        let fieldTypeMultiTextId = await generateSnowId()
+        let fieldTypeSelectId = await generateSnowId()
+        let fieldTypeMultiSelectId = await generateSnowId()
+        let fieldTypeSwitchId = await generateSnowId()
+        let fieldTypeTimeId = await generateSnowId()
+        let fieldTypeDateId = await generateSnowId()
+        let fieldTypeDateTimeId = await generateSnowId()
+        await mysql.execute(generateBatchCreateSql(fieldTypeModel, [{
+            id: fieldTypeLabelId,
+            name: "label",
+            type: ECommon_Model_Field_Type.LABEL
+        }, {
+            id: fieldTypeMultiLabelId,
+            name: "multi label",
+            multi: 1,
+            type: ECommon_Model_Field_Type.MULTILABEL
+        }, {
+            id: fieldTypeTextId,
+            name: "text",
+            type: ECommon_Model_Field_Type.TEXT
+        }, {
+            id: fieldTypeMultiTextId,
+            name: "multi text",
+            type: ECommon_Model_Field_Type.MULTITEXT
+        }, {
+            id: fieldTypeSelectId,
+            name: "select",
+            type: ECommon_Model_Field_Type.SELECT
+        }, {
+            id: fieldTypeMultiSelectId,
+            name: "multi select",
+            multi: 1,
+            type: ECommon_Model_Field_Type.MULTISELECT
+        }, {
+            id: fieldTypeSwitchId,
+            name: "switch",
+            type: ECommon_Model_Field_Type.SWITCH
+        }, {
+            id: fieldTypeTimeId,
+            name: "timepicker",
+            type: ECommon_Model_Field_Type.TIME
+        }, {
+            id: fieldTypeDateId,
+            name: "datepicker",
+            type: ECommon_Model_Field_Type.DATE
+        }, {
+            id: fieldTypeDateTimeId,
+            name: "datetimepicker",
+            type: ECommon_Model_Field_Type.DATETIME
+        }]))
+    }
 }
 
 export let fieldTypeMapper=new FieldTypeMapper
@@ -34,10 +91,15 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
     constructor() {
         super(fieldSolutionModel)
     }
-    async list():Promise<ICommon_Model_Field_Solution[]>
+    async list(organizationId:string):Promise<ICommon_Model_Field_Solution[]>
     {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
         let mysql=getMysqlInstance()
-        let ret=await mysql.execute(generateQuerySql(fieldSolutionModel,[],null,null,{
+        let ret=await mysql.execute(generateQuerySql(fieldSolutionModel,[],{
+            organization_id:organizationId
+        },null,{
             field:"name",
             type:"asc"
         }))
@@ -214,6 +276,49 @@ class FieldSolutionMapper extends Mapper<typeof fieldSolutionModel> {
                 }
             }))
         } 
+    }
+
+    async clearFieldSolutionByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(fieldSolutionModel,["id"],{
+            organization_id:organizationId
+        }))
+        let fieldSolutionIds=ret.map(item=>item.id)
+        if(fieldSolutionIds.length>0) {
+            await mysql.execute(generateDeleteSql(fieldSolutionModel,{
+                organization_id:organizationId
+            }))
+            await mysql.execute(generateDeleteSql(fieldSolutionWorkflowSolutionModel,{
+                field_solution_id:{
+                    exp:"in",
+                    value:fieldSolutionIds
+                }
+            }))
+            let arrField=await mysql.execute(generateQuerySql(fieldSolutionWorkflowNodeFieldTypeModel,["id"],{
+                field_solution_id:{
+                    exp:"in",
+                    value:fieldSolutionIds
+                }
+            }))
+            await mysql.execute(generateDeleteSql(fieldSolutionWorkflowNodeFieldTypeModel,{
+                field_solution_id:{
+                    exp:"in",
+                    value:fieldSolutionIds
+                }
+            }))
+            if(arrField.length>0) {
+                await mysql.execute(generateDeleteSql(fieldTypeConfigValueModel,{
+                    field_solution_workflow_node_field_type_id:{
+                        exp:"in",
+                        value:arrField.map(item=>item.id)
+                    }
+                }))
+            } 
+        }
+        
     }
 
     async clearItemsByWorkflowId(workflowId:string) {

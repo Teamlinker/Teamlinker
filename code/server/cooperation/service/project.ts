@@ -5,8 +5,11 @@ import { Entity } from "../../common/entity/entity";
 import { EServer_Common_Event_Types } from "../../common/event/types";
 import { moduleMapper } from "../mapper/module";
 import { projectMapper } from '../mapper/project';
+import ProjectIssueService from "../service/issue";
 import { ICommon_Model_Project, projectModel } from './../../../common/model/project';
 import { ECommon_Model_Project_Member_Type } from './../../../common/model/project_member';
+import { issueTypeSolutionMapper } from './../mapper/issueType';
+import { releaseMapper } from './../mapper/release';
 import { tagMapper } from './../mapper/tag';
 import { FieldSolutionService } from './field';
 import { IssueTypeSolutionService } from './issueType';
@@ -20,6 +23,10 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         await moduleMapper.deleteByProjectId(this.item.id)
         await tagMapper.deleteByProjectId(this.item.id)
         await projectMapper.clearMember(this.item.id);
+        await projectMapper.clearRole(this.item.id);
+        await ProjectIssueService.clearByProjectIds([this.item.id]);
+        await releaseMapper.clear(this.item.id);
+        await issueTypeSolutionMapper.clearProjects([this.item.id]);
     }
 
     override async create(): Promise<ICommon_Model_Project> {
@@ -28,7 +35,7 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         if(role) {
             await projectMapper.addMember(this.getId(),this.getItem().created_by,ECommon_Model_Project_Member_Type.USER,role.id)
         }
-        let issueTypeSolution=await IssueTypeSolutionService.getReservedItem()
+        let issueTypeSolution=await IssueTypeSolutionService.getReservedItem(ret.organization_id)
         await issueTypeSolution.bindProject(this.getId())
         return ret;
     }
@@ -50,8 +57,8 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         await projectMapper.changeRole(this.item.id,memberId,roleId)
     }
 
-    static async list(page:number,size:number,keyword?:string,userId?:string):Promise<ICommon_Route_Res_Project_List>{
-        let ret=await projectMapper.list(page,size,keyword,userId)
+    static async list(organizationId:string,page:number,size:number,keyword?:string,userId?:string):Promise<ICommon_Route_Res_Project_List>{
+        let ret=await projectMapper.list(organizationId,page,size,keyword,userId)
         return {
             count:ret.count,
             totalPage:ret.totalPage,
@@ -150,5 +157,21 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
     async listUser(keyword?:string) {
         let arr=await projectMapper.listUser(this.getId(),keyword)
         return arr;
+    }
+
+    static async getProjectListByOrganizationId(organizationId:string) {
+        let ret=await projectMapper.getProjectListByOrganizationId(organizationId);
+        return ret;
+    }
+
+    static async clearProjects(projectIds:string[]) {
+        await projectMapper.clearProjects(projectIds);
+        await moduleMapper.deleteByProjectIds(projectIds)
+        await tagMapper.deleteByProjectIds(projectIds)
+        await projectMapper.clearMemberByProjectIds(projectIds);
+        await projectMapper.clearRoleByProjectIds(projectIds);
+        await ProjectIssueService.clearByProjectIds(projectIds);
+        await releaseMapper.clearByProjectIds(projectIds);
+        await issueTypeSolutionMapper.clearProjects(projectIds);
     }
 }

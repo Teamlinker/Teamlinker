@@ -27,6 +27,7 @@ export namespace REDIS_GATEWAY {
         let labelCacheKey="permission:label:{0}"
         let moduleCacheKey="permission:module:{0}"
         let releaseCacheKey="permission:release:{0}"
+        let organizationRoleCacheKey="permission:organization:{0}:user:{1}"
         export function projectIdFromProjectIssueComment(commentId:string) {
             let obj=new RedisStringKey(StringUtil.format(commentCacheKey,commentId),cacheRedisType<string>().String,1000*10);
             return obj;
@@ -45,6 +46,10 @@ export namespace REDIS_GATEWAY {
         }
         export function projectIdFromProjectRelease(releaseId:string) {
             let obj=new RedisStringKey(StringUtil.format(releaseCacheKey,releaseId),cacheRedisType<string>().String,1000*10);
+            return obj;
+        }
+        export function organizationRole(organizationId:string,userId:string) {
+            let obj=new RedisStringKey(StringUtil.format(organizationRoleCacheKey,organizationId,userId),cacheRedisType<string>().String,3600);
             return obj;
         }
     }

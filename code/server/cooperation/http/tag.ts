@@ -1,4 +1,4 @@
-import * as projectApi from "../../../common/routes/project";
+import projectApi from "../../../common/routes/project";
 import { DComponent } from "../../common/decorate/component";
 import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
 import TagService from "../service/tag";

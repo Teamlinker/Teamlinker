@@ -1,5 +1,5 @@
 import { ECommon_Model_Comment_Type } from "../../../common/model/comment";
-import * as projectIssueApi from "../../../common/routes/issue";
+import projectIssueApi from "../../../common/routes/issue";
 import { ICommon_Route_Req_ProjectIssue_Field } from "../../../common/routes/response";
 import { Err } from "../../../common/status/error";
 import { DComponent } from "../../common/decorate/component";

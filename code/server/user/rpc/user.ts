@@ -3,7 +3,9 @@ import { REDIS_USER } from "../../common/cache/keys/user";
 import { getConfigInstance } from '../../common/config/config';
 import IServer_Common_RPC_User, { IServer_Common_RPC_User_CheckSession } from "../../common/rpc/api/user";
 import { DRPCRecieve } from "../../common/rpc/rpc";
+import AdminService from "../service/admin";
 import UserService from "../service/user";
+import { OrganizationService } from './../service/organization';
 import rpcFileApi from "./file";
 
 class RpcUserApi implements IServer_Common_RPC_User {
@@ -35,13 +37,14 @@ class RpcUserApi implements IServer_Common_RPC_User {
         })
     }
     @DRPCRecieve
-    async getUsersInfo?(userIds:string[]):Promise<{
+    async getUsersInfo?(userIds:string[],organizationId:string):Promise<{
         id:string,
         username:string,
-        photo?:string
+        photo?:string,
+        nickname?:string
     }[]> {
         let arrUser:any[]=[...userIds];
-        let arr=await UserService.userInfos(userIds.join(","),false);
+        let arr=await UserService.userInfos(userIds.join(","),false,organizationId);
         let ret=arr.map(item=>{
             return {
                 id:item.id,
@@ -65,6 +68,58 @@ class RpcUserApi implements IServer_Common_RPC_User {
             item.photo=arrImage[index]
         })
         return arrUser;
+    }
+
+    @DRPCRecieve
+    async initAdmin():Promise<string[]> {
+        let obj1=new AdminService
+        obj1.assignItem({
+            username:"teamlinker",
+            password:"teamlinker"
+        })
+        await obj1.create()
+        let obj2=new AdminService
+        obj2.assignItem({
+            username:"wgq_admin",
+            password:"123456"
+        })
+        await obj2.create()
+        let obj3=new AdminService
+        obj3.assignItem({
+            username:"hxx_admin",
+            password:"123456"
+        })
+        await obj3.create()
+        return [obj1.getId(),obj2.getId(),obj3.getId()]
+    }
+
+    @DRPCRecieve
+    async initUser():Promise<string[]> {
+        let obj1=new UserService
+        obj1.assignItem({
+            username:"sx",
+            password:"sx"
+        })
+        await obj1.create()
+        let obj2=new UserService
+        obj2.assignItem({
+            username:"wgq",
+            password:"wgq"
+        })
+        await obj2.create()
+        let obj3=new UserService
+        obj3.assignItem({
+            username:"hxx",
+            password:"hxx"
+        })
+        await obj3.create()
+        return [obj1.getId(),obj2.getId(),obj3.getId()]
+    }
+
+    @DRPCRecieve
+    async initOrganization(adminIds: string[], userIds: string[]): Promise<string> {
+        let ret=await OrganizationService.init(adminIds,userIds)
+        return ret;
     }
 }
 export default new RpcUserApi;

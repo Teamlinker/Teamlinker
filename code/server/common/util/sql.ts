@@ -16,6 +16,25 @@ type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
     values:EXPRVALUEEXP[]
 }
 
+type QUERYJOINEXPSIMPLE = {
+    value:EXPRVALUE,
+    model:{
+        table:string
+    }
+}
+
+type QUERYJOINMULTI = {
+    [param :string]:{ 
+        value:EXPRVALUE,
+        model:{
+            table:string
+        }
+    }
+}
+
+type QUERYJOINEXP=QUERYJOINEXPSIMPLE|QUERYJOINMULTI
+
+
 export async function generateSnowId() {
     let id = intFormat(uid.next(),"dec") as string
     return id
@@ -95,32 +114,53 @@ function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{
     return expr;
 }
 
+function isQueryJoinSimple(obj:QUERYJOINEXP):obj is QUERYJOINEXPSIMPLE {
+    return (obj as QUERYJOINEXPSIMPLE).model!==undefined && (obj as QUERYJOINEXPSIMPLE).model.table!==undefined
+}
+
 function generateLeftJoinExp(objExpr?:{
-    [param :string]:{
-        value:EXPRVALUE,
-        model:{
-            table:string
-        }
-    }
+    [param :string]:QUERYJOINEXP
 },exprMode?:"and"|"or"):string{
     let expr="",arrExpr=[]
     if(objExpr) {
         for(let key in objExpr) {
             let value=objExpr[key]
-            if(typeof(value.value)!="object") {
-                let val=typeof(value.value)=="number"?value.value:typeof(value.value)=="boolean"?(value.value?1:0):("'"+value.value+"'")
-                arrExpr.push(`${value.model.table}.${key}=${val}`)
-            } else if (typeof(value.value)=="object" && (value.value instanceof Date)){
-                arrExpr.push(`${value.model.table}.${key}=${value.value.getTime()}`)
-            } else if (isEXPRVALUEEXP(value.value)) {
-                handleExp(key,value.value,arrExpr,value.model.table)
-            }else {
-                let arr=[];
-                for(let obj of value.value.values) {
-                    handleExp(key,obj,arr,value.model.table)
+            if(isQueryJoinSimple(value)) {
+                if(typeof(value.value)!="object") {
+                    let val=typeof(value.value)=="number"?value.value:typeof(value.value)=="boolean"?(value.value?1:0):("'"+value.value+"'")
+                    arrExpr.push(`${value.model.table}.${key}=${val}`)
+                } else if (typeof(value.value)=="object" && (value.value instanceof Date)){
+                    arrExpr.push(`${value.model.table}.${key}=${value.value.getTime()}`)
+                } else if (isEXPRVALUEEXP(value.value)) {
+                    handleExp(key,value.value,arrExpr,value.model.table)
+                }else {
+                    let arr=[];
+                    for(let obj of value.value.values) {
+                        handleExp(key,obj,arr,value.model.table)
+                    }
+                    arrExpr.push(`(${arr.join(` ${value.value.type?value.value.type:"and"} `)})`)
                 }
-                arrExpr.push(`(${arr.join(` ${value.value.type?value.value.type:"and"} `)})`)
-            }
+            } else {
+                let arr=[]
+                for(let k in value){
+                    let v=value[k];
+                    if(typeof(v.value)!="object") {
+                        let val=typeof(v.value)=="number"?v.value:typeof(v.value)=="boolean"?(v.value?1:0):("'"+v.value+"'")
+                        arr.push(`${v.model.table}.${k}=${val}`)
+                    } else if (typeof(v.value)=="object" && (v.value instanceof Date)){
+                        arr.push(`${v.model.table}.${k}=${v.value.getTime()}`)
+                    } else if (isEXPRVALUEEXP(v.value)) {
+                        handleExp(k,v.value,arr,v.model.table)
+                    }else {
+                        let arr1=[];
+                        for(let obj of v.value.values) {
+                            handleExp(k,obj,arr1,v.model.table)
+                        }
+                        arr.push(`(${arr1.join(` ${v.value.type?v.value.type:"and"} `)})`)
+                    }
+                }
+                arrExpr.push(`(${arr.join(` ${key.startsWith("$and")?"and":"or"} `)})`)
+            }        
         }
         expr=arrExpr.join(` ${exprMode?exprMode:"and"} `)
     }
@@ -282,9 +322,14 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
         }
     }
 },objExpr?:{
-    [param in keyof (T1 & T2)["model"]]?:{
+    [param in ((keyof (T1 & T2)["model"])|`${"$and"|"$or"}${number}`)]?:{
         value:EXPRVALUE,
         model:T1|T2
+    }|{
+        [param in keyof (T1 & T2)["model"]]?:{ 
+            value:EXPRVALUE,
+            model:T1|T2
+        }
     }
 },exprMode?:"and"|"or",order?:{
     field:keyof (T1["model"] & T2["model"]),
@@ -387,6 +432,11 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     [param in keyof (T1 & T2 & T3)["model"]]?:{
         value:EXPRVALUE,
         model:T1|T2|T3
+    }|{
+        [param in keyof (T1 & T2 & T3)["model"]]?:{ 
+            value:EXPRVALUE,
+            model:T1|T2|T3
+        }
     }
 },exprMode?:"and"|"or",order?:{
     field:keyof(T1["model"] & T2["model"] & T3["model"]),
@@ -519,6 +569,11 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
         value:EXPRVALUE,
         model:T1|T2|T3|T4
+    }|{
+        [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{ 
+            value:EXPRVALUE,
+            model:T1|T2|T3|T4
+        }
     }
 },exprMode?:"and"|"or",order?:{
     field:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"]),

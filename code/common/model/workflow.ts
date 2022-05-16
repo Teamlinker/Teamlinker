@@ -7,6 +7,7 @@ export interface ICommon_Model_Workflow {
   reserved :number,
   created_time :Date,
   modified_time :Date,
+  organization_id:string
 }
 export const Table_Workflow="workflow"
 

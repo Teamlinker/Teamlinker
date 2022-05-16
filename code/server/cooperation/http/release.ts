@@ -1,5 +1,5 @@
 import { ECommon_Model_Project_Release_Status } from "../../../common/model/project_release";
-import * as releaseApi from "../../../common/routes/release";
+import releaseApi from "../../../common/routes/release";
 import { Err } from "../../../common/status/error";
 import { DComponent } from "../../common/decorate/component";
 import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";

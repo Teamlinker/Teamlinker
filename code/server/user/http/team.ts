@@ -1,20 +1,26 @@
-import * as teamApi from "../../../common/routes/team";
+import { ECommon_User_Type } from "../../../common/model/user";
+import teamApi from "../../../common/routes/team";
 import { Err } from '../../../common/status/error';
 import { DComponent } from "../../common/decorate/component";
 import { EServer_Common_Event_Types } from "../../common/event/types";
-import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpHeaderRequired, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
 import { IUserSession } from '../../common/rpc/api/user';
-import { EServer_Common_User_Type } from '../../common/types/user';
 import TeamService from "../service/team";
+import { OrganizationService } from './../service/organization';
 @DComponent
 @DHttpController(teamApi)
 class TeamController {
     @DHttpApi(teamApi.routes.create)
-    async create(@DHttpReqParamRequired("name") name:string,@DHttpUser user:IUserSession):Promise<typeof teamApi.routes.create.res>{
+    async create(@DHttpReqParamRequired("name") name:string,@DHttpUser user:IUserSession,@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof teamApi.routes.create.res>{
+        let organization = OrganizationService.getItemById(organizationId)
+        if(!organization) {
+            throw Err.Organization.organizationNotFound
+        }
         let team=new TeamService
         team.assignItem({
             name,
-            created_by:user.type==EServer_Common_User_Type.USER?user.userId:null
+            created_by:user.type==ECommon_User_Type.USER?user.userId:null,
+            organization_id:organizationId
         });
         let obj=await team.create()
         return obj
@@ -102,14 +108,22 @@ class TeamController {
     }
 
     @DHttpApi(teamApi.routes.list)
-    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number) :Promise<typeof teamApi.routes.list.res>{
-        let list=await TeamService.list(page,size,keyword)
+    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpHeaderRequired("organizationid") organizationId:string) :Promise<typeof teamApi.routes.list.res>{
+        let organization = OrganizationService.getItemById(organizationId)
+        if(!organization) {
+            throw Err.Organization.organizationNotFound
+        }
+        let list=await TeamService.list(organizationId ,page,size,keyword)
         return list
     }
 
     @DHttpApi(teamApi.routes.filterTeam)
-    async filterTeam(@DHttpReqParamRequired("name") name:string) :Promise<typeof teamApi.routes.filterTeam.res>{
-        let ret=await TeamService.filter(name,10);
+    async filterTeam(@DHttpReqParamRequired("name") name:string,@DHttpHeaderRequired("organizationid") organizationId:string) :Promise<typeof teamApi.routes.filterTeam.res>{
+        let organization = OrganizationService.getItemById(organizationId)
+        if(!organization) {
+            throw Err.Organization.organizationNotFound
+        }
+        let ret=await TeamService.filter(organizationId,name,10);
         return ret;
     }
 

@@ -8,6 +8,7 @@ import { generateCreateSql, generateDeleteSql, generateGroupLeftJoin2Sql, genera
 import { projectIssueModel } from './../../../common/model/project_issue';
 import { ECommon_Model_Project_Member_Type, projectMemberModel, Table_Project_Member } from './../../../common/model/project_member';
 import { ICommon_Model_Project_Role, projectRoleModel } from './../../../common/model/project_role';
+import { rolelPermissionModel } from './../../../common/model/role_permission';
 import { teamModel } from './../../../common/model/team';
 import { teamUserModel } from './../../../common/model/team_user';
 import { userModel } from './../../../common/model/user';
@@ -204,7 +205,23 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         }))
     }
 
-    async list(page:number,size:number,keyword?:string,userId?:string):Promise<{
+    async clearMemberByProjectIds(projectIds:string[]) {
+        if(!projectIds) {
+            throw  Err.Project.projectNotFound
+        }
+        if(projectIds.length==0) {
+            return;
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectMemberModel,{
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        }))
+    }
+
+    async list(organizationId:string,page:number,size:number,keyword?:string,userId?:string):Promise<{
         count:number,
         totalPage:number,
         data:ICommon_Model_Project[]
@@ -212,8 +229,11 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         if(page===undefined || page<0 || size===undefined || size<=0) {
             throw Err.Common.paramError
         }
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
         var mysql=getMysqlInstance();
-        let str=`select count(1) from ${Table_Project}`,keywrodStr="",userIdStr=""
+        let str=`select count(1) from ${Table_Project} where organization_id=${organizationId}`,keywrodStr="",userIdStr=""
         if(keyword) {
             keywrodStr=`name like '%${keyword}%'`
         }
@@ -230,6 +250,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         let count=Object.values(await mysql.executeOne<number>(str))[0]
         let totalPage=CommonUtil.pageTotal(count,size)
         let ret=await mysql.execute(generateQuerySql(projectModel,[],{
+            organization_id:organizationId,
             ...(keyword && {
                 name:{
                     exp:"%like%",
@@ -472,6 +493,83 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             }
         })
         return arr;
+    }
+
+    async clearRole(projectId:string) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(projectRoleModel,["id"],{
+            project_id:projectId
+        }))
+        if(ret.length>0) {
+            await mysql.execute(generateDeleteSql(projectRoleModel,{
+                project_id:projectId
+            }))
+            await mysql.execute(generateDeleteSql(rolelPermissionModel,{
+                role_id:{
+                    exp:"in",
+                    value:ret.map(item=>item.id)
+                }
+            }))
+        }
+    }
+
+    async clearRoleByProjectIds(projectIds:string[]) {
+        if(!projectIds) {
+            throw Err.Project.projectNotFound
+        }
+        if(projectIds.length==0) {
+            return;
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(projectRoleModel,["id"],{
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        }))
+        if(ret.length>0) {
+            await mysql.execute(generateDeleteSql(projectRoleModel,{
+                project_id:{
+                    exp:"in",
+                    value:projectIds
+                }
+            }))
+            await mysql.execute(generateDeleteSql(rolelPermissionModel,{
+                role_id:{
+                    exp:"in",
+                    value:ret.map(item=>item.id)
+                }
+            }))
+        }
+    }
+
+    async getProjectListByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(projectModel,[],{
+            organization_id:organizationId
+        },"and",{
+            field:"name",
+            type:"asc"
+        }))
+        return ret;
+    }
+    async clearProjects(projectIds:string[]){
+        if(!projectIds || projectIds.length==0) {
+            return;
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectModel,{
+            id:{
+                exp:"in",
+                value:projectIds
+            }
+        }))
     }
 }
 export let projectMapper=new ProjectMapper

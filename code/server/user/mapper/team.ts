@@ -168,23 +168,26 @@ class TeamMapper extends Mapper<typeof teamModel> {
         }))
     }
 
-    async list(page:number,size:number,keyword?:string):Promise<{
+    async list(organizationId:string,page:number,size:number,keyword?:string):Promise<{
         count:number,
         totalPage:number,
         data:ICommon_Model_Team[]
     }> {
-        if(page===undefined || page<0 || size===undefined || size<=0) {
+        if(page===undefined || page<0 || size===undefined || size<=0 || !organizationId) {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team}${keyword?` where name like '%${keyword}%'`:""}`))[0]
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team}${keyword?` where organization_id='${organizationId}' name like '%${keyword}%'`:""}`))[0]
         let totalPage=CommonUtil.pageTotal(count,size)
-        let ret=await mysql.execute(generateQuerySql(teamModel,[],keyword?{
-            name:{
-                exp:"%like%",
-                value:keyword
-            }
-        }:null,"and",{
+        let ret=await mysql.execute(generateQuerySql(teamModel,[],{
+            organization_id:organizationId,
+            ...(keyword && {
+                name:{
+                    exp:"%like%",
+                    value:keyword
+                }
+            })
+        },"and",{
             field:"name",
             type:"asc"
         },page*size,size))
@@ -195,20 +198,22 @@ class TeamMapper extends Mapper<typeof teamModel> {
         };
     }
 
-    async filter(name:string,size:number)
+    async filter(organizationId:string,name:string,size:number)
     {
         if(!name) {
             throw Err.User.userNameNotExists
-        }
-        if(!size) {
+        } else if(!size) {
             throw Err.Common.paramError
+        } else if(!organizationId) {
+            throw Err.Organization.organizationNotFound
         }
         let mysql=getMysqlInstance()
         let ret=await mysql.execute(generateQuerySql(teamModel,["id","name","photo"],{
             name:{
                 exp:"%like%",
                 value:name
-            }
+            },
+            organization_id:organizationId
         },"and",{
             field:"name",
             type:"asc"

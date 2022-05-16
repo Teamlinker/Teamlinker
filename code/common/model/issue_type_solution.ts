@@ -7,6 +7,7 @@ export interface ICommon_Model_Issue_Type_Solution {
     reserved :number,
     created_time :Date,
     modified_time :Date,
+    organization_id:string
 }
 export const Table_Issue_Type_Solution="issue_type_solution"
 

@@ -1,4 +1,4 @@
-import * as userApi from "../../../common/routes/user";
+import userApi from "../../../common/routes/user";
 import { Err } from "../../../common/status/error";
 import { DComponent } from "../../common/decorate/component";
 import HttpContext from "../../common/http/context";

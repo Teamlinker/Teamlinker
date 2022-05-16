@@ -2,11 +2,13 @@ import { ICommon_Model_Field_Solution_Workflow_Node_Field_Type } from "../model/
 import { ICommon_Model_Field_Type } from "../model/field_type";
 import { ICommon_Model_Field_Type_Config_Value } from "../model/field_type_config_value";
 import { ICommon_Model_Issue_Type } from "../model/issue_type";
+import { ICommon_Model_Organization } from "../model/organization";
 import { ICommon_Model_Project } from "../model/project";
 import { ICommon_Model_Team } from '../model/team';
 import { ICommon_Model_User } from '../model/user';
 import { ICommon_Model_Field_Solution } from './../model/field_solution';
 import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solution';
+import { ICommon_Model_Organization_User } from './../model/organization_user';
 import { ICommon_Model_Project_Issue } from './../model/project_issue';
 import { ICommon_Model_Project_Issue_Field_Value } from './../model/project_issue_field_value';
 import { ECommon_Model_Project_Member_Type } from './../model/project_member';
@@ -208,4 +210,21 @@ export interface ICommon_Route_Res_Project_User_Item {
     id:string,
     photo:string,
     username:string
+}
+
+export interface ICommon_Route_Res_Organization_User {
+    count:number,
+    totalPage:number,
+    data:(Omit<ICommon_Model_Organization_User,"user_id"> & {
+        user_id:{
+            id:string,
+            username:string,
+            photo:string
+        }
+    })[]
+}
+
+export interface ICommon_Route_Res_Organization_List {
+    create:ICommon_Model_Organization[],
+    join:ICommon_Model_Organization[]
 }

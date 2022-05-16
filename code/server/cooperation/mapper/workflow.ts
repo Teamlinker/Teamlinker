@@ -8,6 +8,8 @@ import { keys } from "../../../common/transform";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from "../../common/entity/mapper";
 import { generateBatchCreateSql, generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
+import { fieldSolutionWorkflowNodeFieldTypeModel } from './../../../common/model/field_solution_workflow_node_field_type';
+import { fieldSolutionWorkflowSolutionModel } from './../../../common/model/field_solution_workflow_solution';
 import { issueTypeModel } from './../../../common/model/issue_type';
 import { ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel } from './../../../common/model/issue_type_solution';
 import { issueTypeSolutionIssueTypeModel } from './../../../common/model/issue_type_solution_issue_type';
@@ -19,17 +21,23 @@ class WorkflowMapper extends Mapper<typeof workflowModel> {
     constructor() {
         super(workflowModel)
     }
-    async getReservedItem() {
+    async getReservedItem(organizationId:string) {
         let mysql=getMysqlInstance()
         let ret=await mysql.executeOne(generateQuerySql(workflowModel,[],{
-            reserved:1
+            reserved:1,
+            organization_id:organizationId
         }))
         return ret;
     }
-    async list():Promise<ICommon_Model_Workflow[]>
+    async list(organizationId:string):Promise<ICommon_Model_Workflow[]>
     {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
         let mysql=getMysqlInstance()
-        let ret=await mysql.execute(generateQuerySql(workflowModel,[],null,null,{
+        let ret=await mysql.execute(generateQuerySql(workflowModel,[],{
+            organization_id:organizationId
+        },null,{
             field:"name",
             type:"asc"
         }))
@@ -56,12 +64,12 @@ class WorkflowMapper extends Mapper<typeof workflowModel> {
         return ret;
     }
 
-    async revoke(workflowId:string) {
+    async revoke(workflowId:string,organizationId:string) {
         if(!workflowId) {
             throw Err.Project.Workflow.workflowNotFound
         }
         let mysql=getMysqlInstance()
-        let objWorkflow=await workflowMapper.getReservedItem()
+        let objWorkflow=await workflowMapper.getReservedItem(organizationId)
         await mysql.execute(generateUpdateSql(workflowSolutionWorkflowIssueTypeModel,{
             workflow_id:objWorkflow.id
         },{
@@ -124,6 +132,106 @@ class WorkflowMapper extends Mapper<typeof workflowModel> {
         return ret!=null
     }
 
+    async init(organizationId: string) {
+        if (!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql = getMysqlInstance()
+        let workflowId = await generateSnowId()
+        await mysql.execute(generateCreateSql(workflowModel, {
+            id: workflowId,
+            name: "default",
+            description: "",
+            reserved: 1,
+            organization_id: organizationId
+        }))
+        let workflowNodeOpenId = await generateSnowId()
+        let workflowNodeProgressId = await generateSnowId()
+        let workflowNodeClosedId = await generateSnowId()
+        let workflowNodeResolvedId = await generateSnowId()
+        await mysql.execute(generateCreateSql(workflowNodeModel, {
+            id: workflowNodeOpenId,
+            name: "open",
+            status: ECommon_Model_Workflow_Node_Status.NOTSTART,
+            workflow_id: workflowId,
+            x: 50,
+            y: 45
+        }))
+        await mysql.execute(generateCreateSql(workflowNodeModel, {
+            id: workflowNodeProgressId,
+            name: "in progress",
+            status: ECommon_Model_Workflow_Node_Status.INPROGRESS,
+            workflow_id: workflowId,
+            x: 281,
+            y: 177
+        }))
+        await mysql.execute(generateCreateSql(workflowNodeModel, {
+            id: workflowNodeClosedId,
+            name: "closed",
+            status: ECommon_Model_Workflow_Node_Status.DONE,
+            workflow_id: workflowId,
+            x: 59,
+            y: 502
+        }))
+        await mysql.execute(generateCreateSql(workflowNodeModel, {
+            id: workflowNodeResolvedId,
+            name: "resolved",
+            status: ECommon_Model_Workflow_Node_Status.DONE,
+            workflow_id: workflowId,
+            x: 507,
+            y: 503
+        }))
+        let actionOpenToProgressId = await generateSnowId()
+        let actionProgressToOpenId = await generateSnowId()
+        let actionOpenToClosedId = await generateSnowId()
+        let actionClosedToOpenId = await generateSnowId()
+        let actionProgressToResolvedId = await generateSnowId()
+        let actionResolvedToProgressId = await generateSnowId()
+        await mysql.execute(generateCreateSql(workflowActionModel, {
+            id: actionOpenToProgressId,
+            name: "open to progress",
+            workflow_id: workflowId,
+            source_node_id: workflowNodeOpenId,
+            dest_node_id: workflowNodeProgressId
+        }))
+        await mysql.execute(generateCreateSql(workflowActionModel, {
+            id: actionProgressToOpenId,
+            name: "progress to open",
+            workflow_id: workflowId,
+            source_node_id: workflowNodeProgressId,
+            dest_node_id: workflowNodeOpenId
+        }))
+        await mysql.execute(generateCreateSql(workflowActionModel, {
+            id: actionOpenToClosedId,
+            name: "open to close",
+            workflow_id: workflowId,
+            source_node_id: workflowNodeOpenId,
+            dest_node_id: workflowNodeClosedId
+        }))
+        await mysql.execute(generateCreateSql(workflowActionModel, {
+            id: actionClosedToOpenId,
+            name: "closed to open",
+            workflow_id: workflowId,
+            source_node_id: workflowNodeClosedId,
+            dest_node_id: workflowNodeOpenId
+        }))
+        await mysql.execute(generateCreateSql(workflowActionModel, {
+            id: actionProgressToResolvedId,
+            name: "progress to resolved",
+            workflow_id: workflowId,
+            source_node_id: workflowNodeProgressId,
+            dest_node_id: workflowNodeResolvedId
+        }))
+        await mysql.execute(generateCreateSql(workflowActionModel, {
+            id: actionResolvedToProgressId,
+            name: "resolved to progress",
+            workflow_id: workflowId,
+            source_node_id: workflowNodeResolvedId,
+            dest_node_id: workflowNodeProgressId
+        }))
+        return workflowId;
+    }
+
 }
 export let workflowMapper=new WorkflowMapper
 
@@ -131,17 +239,23 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
     constructor() {
         super(workflowSolutionModel)
     }
-    async getReservedItem() {
+    async getReservedItem(organizationId:string) {
         let mysql=getMysqlInstance()
         let ret=await mysql.executeOne(generateQuerySql(workflowSolutionModel,[],{
-            reserved:1
+            reserved:1,
+            organization_id:organizationId
         }))
         return ret;
     }
-    async list():Promise<ICommon_Model_Workflow_Solution[]>
+    async list(organizationId:string):Promise<ICommon_Model_Workflow_Solution[]>
     {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
         let mysql=getMysqlInstance()
-        let ret=await mysql.execute(generateQuerySql(workflowSolutionModel,[],null,null,{
+        let ret=await mysql.execute(generateQuerySql(workflowSolutionModel,[],{
+            organization_id:organizationId
+        },null,{
             field:"name",
             type:"asc"
         }))
@@ -164,14 +278,14 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
         return obj;
     }
 
-    async bindIssueTypeSolutionList(workflowSolutionId:string,issueTypeSolutionIds:string[]) {
+    async bindIssueTypeSolutionList(workflowSolutionId:string,issueTypeSolutionIds:string[],organizationId:string) {
         if(!issueTypeSolutionIds || issueTypeSolutionIds.length==0) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
         } else if(!workflowSolutionId) {
             throw Err.Project.Workflow.workflowSolutionNotFound
         }
         let mysql=getMysqlInstance()
-        let workflowId=(await workflowMapper.getReservedItem()).id;
+        let workflowId=(await workflowMapper.getReservedItem(organizationId)).id;
         for(let issueTypeSolutionId of issueTypeSolutionIds) {
             await mysql.execute(generateCreateSql(workflowSolutionIssueTypeSolutionModel,{
                 id:await generateSnowId(),
@@ -531,6 +645,115 @@ class WorkflowSolutionMapper extends Mapper<typeof workflowSolutionModel> {
         })
         let ret=await mysql.execute(sql)
         return ret;
+    }
+
+    async clearByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql=getMysqlInstance()
+        let workflowSolutionList =await mysql.execute(generateQuerySql(workflowSolutionModel,["id"],{
+            organization_id:organizationId
+        }))
+        if(workflowSolutionList.length>0){
+            let ids=workflowSolutionList.map(item=>item.id);
+            await mysql.execute(generateDeleteSql(workflowSolutionModel,{
+                organization_id:organizationId
+            }))
+            await mysql.execute(generateDeleteSql(workflowSolutionIssueTypeSolutionModel,{
+                workflow_solution_id:{
+                    exp:"in",
+                    value:ids
+                }
+            }))
+            await mysql.execute(generateDeleteSql(workflowSolutionWorkflowModel,{
+                workflow_solution_id:{
+                    exp:"in",
+                    value:ids
+                }
+            }))
+            await mysql.execute(generateDeleteSql(workflowSolutionWorkflowIssueTypeModel,{
+                workflow_solution_id:{
+                    exp:"in",
+                    value:ids
+                }
+            }))
+            await mysql.execute(generateDeleteSql(fieldSolutionWorkflowSolutionModel,{
+                workflow_solution_id:{
+                    exp:"in",
+                    value:ids
+                }
+            }))
+            await mysql.execute(generateDeleteSql(fieldSolutionWorkflowNodeFieldTypeModel,{
+                workflow_solution_id:{
+                    exp:"in",
+                    value:ids
+                }
+            }))
+        }
+        let workflowList =await mysql.execute(generateQuerySql(workflowModel,["id"],{
+            organization_id:organizationId
+        }))
+        if(workflowList.length>0) {
+            let ids=workflowSolutionList.map(item=>item.id);
+            await mysql.execute(generateDeleteSql(workflowModel,{
+                organization_id:organizationId
+            }))
+            await mysql.execute(generateDeleteSql(workflowNodeModel,{
+                workflow_id:{
+                    exp:"in",
+                    value:ids
+                }
+            }))
+            await mysql.execute(generateDeleteSql(workflowActionModel,{
+                workflow_id:{
+                    exp:"in",
+                    value:ids
+                }
+            }))
+        }
+    }
+
+    async init(issueTypeSolutionId: string, issueTypeSolutionName: string, issueTypeTaskId: string, issueTypeBugId: string, issueTypeTicketId: string, workflowId: string, organizationId: string) {
+        let mysql=getMysqlInstance()
+        let workflowSolutionId = await generateSnowId()
+        await mysql.execute(generateCreateSql(workflowSolutionModel, {
+            id: workflowSolutionId,
+            reserved: 1,
+            name: issueTypeSolutionName,
+            organization_id: organizationId
+        }))
+        await mysql.execute(generateCreateSql(workflowSolutionWorkflowModel, {
+            id: await generateSnowId(),
+            workflow_solution_id: workflowSolutionId,
+            workflow_id: workflowId
+        }))
+        await mysql.execute(generateCreateSql(workflowSolutionIssueTypeSolutionModel, {
+            id: await generateSnowId(),
+            workflow_solution_id: workflowSolutionId,
+            issue_type_solution_id: issueTypeSolutionId
+        }))
+        await mysql.execute(generateCreateSql(workflowSolutionWorkflowIssueTypeModel, {
+            id: await generateSnowId(),
+            workflow_solution_id: workflowSolutionId,
+            workflow_id: workflowId,
+            issue_type_id: issueTypeTaskId,
+            issue_type_solution_id: issueTypeSolutionId
+        }))
+        await mysql.execute(generateCreateSql(workflowSolutionWorkflowIssueTypeModel, {
+            id: await generateSnowId(),
+            workflow_solution_id: workflowSolutionId,
+            workflow_id: workflowId,
+            issue_type_id: issueTypeBugId,
+            issue_type_solution_id: issueTypeSolutionId
+        }))
+        await mysql.execute(generateCreateSql(workflowSolutionWorkflowIssueTypeModel, {
+            id: await generateSnowId(),
+            workflow_solution_id: workflowSolutionId,
+            workflow_id: workflowId,
+            issue_type_id: issueTypeTicketId,
+            issue_type_solution_id: issueTypeSolutionId
+        }))
     }
 }
 export let workflowSolutionMapper=new WorkflowSolutionMapper

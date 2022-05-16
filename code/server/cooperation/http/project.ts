@@ -1,9 +1,9 @@
 import { ECommon_Model_Project_Member_Type } from "../../../common/model/project_member";
-import * as projectApi from "../../../common/routes/project";
+import { ECommon_User_Type } from "../../../common/model/user";
+import projectApi from "../../../common/routes/project";
 import { Err } from "../../../common/status/error";
-import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpHeaderRequired, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
 import { IUserSession } from "../../common/rpc/api/user";
-import { EServer_Common_User_Type } from "../../common/types/user";
 import ProjectService from "../service/project";
 
 @DHttpController(projectApi)
@@ -18,14 +18,15 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.create)
-    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession):Promise<typeof projectApi.routes.create.res>{
+    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession,@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof projectApi.routes.create.res>{
         let obj=new ProjectService()
         obj.assignItem({
             keyword:keyword,
             name:name,
             created_by:user.userId,
             description:description,
-            photo:photo
+            photo:photo,
+            organization_id:organizationId
         })
         let ret=await obj.create()
         return ret
@@ -97,14 +98,14 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.list)
-    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof projectApi.routes.list.res>{
+    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession,@DHttpHeaderRequired("organizationid") organizationId:string) :Promise<typeof projectApi.routes.list.res>{
         let user=""
-        if(userInfo.type==EServer_Common_User_Type.ADMIN && userId) {
+        if(userInfo.type==ECommon_User_Type.ADMIN && userId) {
             user=userId
-        } else if(userInfo.type==EServer_Common_User_Type.USER) {
+        } else if(userInfo.type==ECommon_User_Type.USER) {
             user=userInfo.userId
         }
-        let list=await ProjectService.list(page,size,keyword,user)
+        let list=await ProjectService.list(organizationId,page,size,keyword,user)
         return list
     }
 

@@ -6,8 +6,7 @@ import { getConfigInstance } from '../../common/config/config';
 import { Entity } from "../../common/entity/entity";
 import { userMapper } from '../mapper/user';
 import rpcFileApi from "../rpc/file";
-import { ICommon_Model_User, userModel } from './../../../common/model/user';
-import { EServer_Common_User_Type } from './../../common/types/user';
+import { ECommon_User_Type, ICommon_Model_User, userModel } from './../../../common/model/user';
 export default class User extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
         super(userMapper)
@@ -32,7 +31,7 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
         return new Promise(async (resolve,reject)=>{
             jwt.sign({
                 userId:this.item.id,
-                type:EServer_Common_User_Type.USER
+                type:ECommon_User_Type.USER
             },secret,async (err,token)=>{
                 if(err) {
                     reject(err)
@@ -82,37 +81,37 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
         }
     }
 
-    async projectList(page:number,size:number,keyword?:string){
-        let ret= await userMapper.projectList(page,size,this.item.id,keyword)
+    async projectList(page:number,size:number,keyword?:string,organizationId?:string){
+        let ret= await userMapper.projectList(page,size,this.item.id,organizationId,keyword)
         return {
             ...ret,
             page:page
         };
     }
 
-    async teamList(page:number,size:number,keyword?:string){
-        let ret= await userMapper.teamList(page,size,this.item.id,keyword)
+    async teamList(page:number,size:number,keyword?:string,organizationId?:string){
+        let ret= await userMapper.teamList(page,size,this.item.id,organizationId,keyword)
         return {
             ...ret,
             page:page
         };
     }
 
-    async profile(){
+    async profile(organizationId?:string){
         let ret={
-            info:this.getItem(),
-            project:(await this.projectList(0,10)).data,
-            team:(await this.teamList(0,10)).data
+            info:User.userInfos(this.getId(),true,organizationId)[0],
+            project:(await this.projectList(0,10,undefined,organizationId)).data,
+            team:(await this.teamList(0,10,undefined,organizationId)).data
         }
         delete ret.info.password
         return ret;
     }
 
-    static async userInfos(userIds:string,isGetPhoto:boolean=true):Promise<Omit<ICommon_Model_User,"password"|"created_time"|"modified_time">[]>{
+    static async userInfos(userIds:string,isGetPhoto:boolean=true,organizationId?:string):Promise<Omit<ICommon_Model_User,"password"|"created_time"|"modified_time">[]>{
         if(!userIds) {
             throw Err.User.userIdNotExists
         }
-        let ret=await userMapper.users(userIds.split(","))
+        let ret=await userMapper.users(userIds.split(","),organizationId)
         for(let obj of ret) {
             delete obj.password;
             delete obj.created_time;

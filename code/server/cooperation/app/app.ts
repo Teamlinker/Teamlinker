@@ -8,6 +8,7 @@ import "../http/project";
 import "../http/release";
 import "../http/tag";
 import "../http/workflow";
+import "../rpc/cooperation";
 export default class Cooperation extends Application {
     override async config(app: import("koa")<DefaultState, DefaultContext>) {
         

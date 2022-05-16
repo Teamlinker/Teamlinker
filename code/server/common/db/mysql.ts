@@ -72,7 +72,7 @@ export default class Mysql {
                             let table=key.substring(1,key.indexOf("__"))
                             if(table in aggregation) {
                                 if(aggregation[table]) {
-                                    if(!(aggregation[table] in ret)){
+                                    if(!(aggregation[table] in ret) || typeof(ret[aggregation[table]])!="object"){
                                         ret[aggregation[table]]={}
                                     }
                                     ret[aggregation[table]][key.substr(table.length+3)]=item[key]
@@ -119,7 +119,7 @@ export default class Mysql {
                             let table=key.substring(1,key.indexOf("__"))
                             if(table in aggregation) {
                                 if(aggregation[table]) {
-                                    if(!(aggregation[table] in ret)){
+                                    if(!(aggregation[table] in ret) || typeof(ret[aggregation[table]])!="object"){
                                         ret[aggregation[table]]={}
                                     }
                                     ret[aggregation[table]][key.substr(table.length+3)]=item[key]

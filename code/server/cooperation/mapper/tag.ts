@@ -46,5 +46,21 @@ class TagMapper extends Mapper<typeof projectLabelModel> {
             project_id:projectId
         }))
     }
+
+    async deleteByProjectIds(projectIds:string[]) {
+        if(!projectIds) {
+            throw Err.Project.Module.moduleNotFound
+        }
+        if(projectIds.length==0) {
+            return;
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectLabelModel,{
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        }))
+    }
 }
 export let tagMapper=new TagMapper

@@ -1,19 +1,19 @@
-import { BaseModel } from "./base"
 
+import { BaseModel } from "./base"
+export enum ECommon_User_Type {
+  USER,
+  ADMIN
+}
 export interface ICommon_Model_User {
     id :string,
   username :string,
   photo:string,
-  email :string,
-  phone :string,
   created_time :Date,
   modified_time :Date,
   password :string,
   sign :string,
-  location :string,
-  title :string,
   active:number,
-  is_admin:number
+  role:ECommon_User_Type
 }
 export const Table_User="user"
 

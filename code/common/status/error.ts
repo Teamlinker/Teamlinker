@@ -59,6 +59,10 @@ export namespace Err {
         requireParam:{
             code:2001,
             msg:"require param"
+        },
+        requireHeader:{
+            code:2002,
+            msg:"require header"
         }
     }
     export let Project = {
@@ -338,6 +342,33 @@ export namespace Err {
         commentTypeNotFound:{
             code:7001,
             msg:"comment type not found"
+        }
+    }
+
+    export let Organization = {
+        ownerNotFound:{
+            code:8000,
+            msg:"owner not found"
+        },
+        organizationNotFound:{
+            code:8001,
+            msg:"organization not found"
+        },
+        userAlreadyExists:{
+            code:8002,
+            msg:"user already exists"
+        },
+        userNotFound:{
+            code:8003,
+            msg:"user not found"
+        },
+        ownerDeleteForbidden:{
+            code:8004,
+            msg:"owner delete forbidden"
+        },
+        nicknameEmpty:{
+            code:8005,
+            msg:"nickname empty"
         }
     }
 }

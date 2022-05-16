@@ -1,7 +1,7 @@
-import * as fieldApi from "../../../common/routes/field";
+import fieldApi from "../../../common/routes/field";
 import { Err } from "../../../common/status/error";
 import { DComponent } from "../../common/decorate/component";
-import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpHeaderRequired, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
 import FieldTypeService from "../service/field";
 import { FieldSolutionService } from './../service/field';
 @DComponent
@@ -23,8 +23,8 @@ class FieldController {
     }
 
     @DHttpApi(fieldApi.routes.solutionList)
-    async solutionList(): Promise<typeof fieldApi.routes.solutionList.res> {
-        let ret = await FieldSolutionService.list()
+    async solutionList(@DHttpHeaderRequired("organizationid") organizationId:string): Promise<typeof fieldApi.routes.solutionList.res> {
+        let ret = await FieldSolutionService.list(organizationId)
         return ret;
     }
 
@@ -39,11 +39,12 @@ class FieldController {
     }
 
     @DHttpApi(fieldApi.routes.solutionCreate)
-    async solutionCreate(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("description") description:string): Promise<typeof fieldApi.routes.solutionCreate.res> {
+    async solutionCreate(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("description") description:string,@DHttpHeaderRequired("organizationid") organizationId:string): Promise<typeof fieldApi.routes.solutionCreate.res> {
         let service=new FieldSolutionService
         service.assignItem({
             name,
-            description
+            description,
+            organization_id:organizationId
         })
         let ret=await service.create()
         return ret;

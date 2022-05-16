@@ -5,7 +5,8 @@ export interface ICommon_Model_Field_Solution {
   created_time :Date,
   modified_time :Date ,
   name :string,
-  description :string
+  description :string,
+  organization_id:string
 }
 export const Table_Field_Solution="field_solution"
 

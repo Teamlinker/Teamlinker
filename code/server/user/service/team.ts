@@ -52,8 +52,8 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
         await teamMapper.changeRole(this.item.id,userId,roleId)
     }
 
-    static async list(page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Team_List>{
-        let ret=await teamMapper.list(page,size,keyword)
+    static async list(organizationId:string,page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Team_List>{
+        let ret=await teamMapper.list(organizationId,page,size,keyword)
         return {
             count:ret.count,
             totalPage:ret.totalPage,
@@ -62,7 +62,7 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
         }
     }
 
-    static async filter(name:string,size:number):Promise<{
+    static async filter(organizationId:string,name:string,size:number):Promise<{
         name:string,
         id:string,
         photo:string
@@ -73,7 +73,7 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
         if(!size) {
             throw Err.Common.paramError
         }
-        let ret=await teamMapper.filter(name,size);
+        let ret=await teamMapper.filter(organizationId,name,size);
         let arr=<{
             name:string,
             id:string,

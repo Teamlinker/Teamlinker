@@ -7,7 +7,7 @@ class RpcUserApi implements IServer_Common_RPC_User {
         return null
     }
     @DRPCSend(ECommon_Services.User)
-    async getUsersInfo(userIds: string[]): Promise<{ id: string; username: string; photo?: string; }[]> {
+    async getUsersInfo(userIds: string[],organizationId:string): Promise<{ id: string; username: string; photo?: string;nickname?:string }[]> {
         return null;
     }
 }

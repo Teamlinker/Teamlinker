@@ -65,7 +65,7 @@ const api={
             req:<Partial<Omit<ICommon_Model_User,"id"  | "created_time" | "modified_time">> & {
                 username:string,
                 password:string,
-                is_admin?:number
+                role?:number
             }>{},
             res:<Omit<ICommon_Model_User,"password">>{}
         },
@@ -158,4 +158,4 @@ const api={
     }
 }
 
-export=api
+export default api

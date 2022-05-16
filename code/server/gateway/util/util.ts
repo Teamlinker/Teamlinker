@@ -1,4 +1,3 @@
-
 import * as fs from "fs-extra";
 import * as Importer from "mysql2-import";
 import * as path from "path";
@@ -26,6 +25,8 @@ import { Table_Field_Type_Config_Value } from './../../../common/model/field_typ
 import { Table_Issue_Type } from './../../../common/model/issue_type';
 import { Table_Issue_Type_Solution } from './../../../common/model/issue_type_solution';
 import { Table_Issue_Type_Solution_Issue_Type } from './../../../common/model/issue_type_solution_issue_type';
+import { organizationModel, Table_Organization } from './../../../common/model/organization';
+import { ECommon_Organization_User_Role, organizationUserModel, Table_Organization_User } from './../../../common/model/organization_user';
 import { Table_Permission } from './../../../common/model/permission';
 import { Table_Project_Issue_Description } from './../../../common/model/project_issue_description';
 import { Table_Project_Issue_Field_Value } from './../../../common/model/project_issue_field_value';
@@ -53,7 +54,8 @@ import { Table_Workflow_Solution_Workflow, workflowSolutionWorkflowModel } from 
 import { OBTPConfig } from './obtp';
 
 
-export async function handleImageFields(data:object){
+
+export async function handleImageFields(data:object,organizationId:string){
     let arrImage=<{
         object:object,
         key:string|number
@@ -101,7 +103,7 @@ export async function handleImageFields(data:object){
             let ids=arrUser.map(item=>{
                 return item.object[item.key];
             })
-            let paths=await rpcUserApi.getUsersInfo(ids)
+            let paths=await rpcUserApi.getUsersInfo(ids,organizationId)
             for(let i=0;i<arrUser.length;i++)
             {
                 arrUser[i].object[arrUser[i].key]=paths[i]
@@ -150,6 +152,8 @@ async function resetSystem(){
         await mysql.execute(`delete from ${Table_Project_Issue_Solution}`)
         await mysql.execute(`delete from ${Table_Project_Module_Issue}`)
         await mysql.execute(`delete from ${Table_Project_Label_Issue}`)
+        await mysql.execute(`delete from ${Table_Organization}`)
+        await mysql.execute(`delete from ${Table_Organization_User}`)
     } catch (err) {
         console.log("db reset error:",err);
     }
@@ -260,49 +264,80 @@ export async function initSystem() {
     let mysql=getMysqlInstance()
     let ret=await mysql.execute<any[]>(`select * from ${Table_Version}`)
     if(ret===null || ret.length==0){
-        let adminId=await initAdmin()
-        let userId=await initUser()
+        let adminIds=await initAdmin()
+        let userIds=await initUser()
+        let organizationId=await initOrganization(adminIds,userIds);
         await initVersion()
         let objPermission=await initPermission()
         let {projectRoleUserId,groupRoleUserId}=await initRole(objPermission);
-        await initTeam(userId,groupRoleUserId);
-        let projectId=await initProject(userId,projectRoleUserId)
-        let {issueTypeBugId,issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeTicketId}=await initIssueType(projectId)
-        await initWorkflow(issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeBugId,issueTypeTicketId)
+        await initTeam(userIds[0],groupRoleUserId,organizationId);
+        let projectId=await initProject(userIds[0],projectRoleUserId,organizationId)
+        let {issueTypeBugId,issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeTicketId}=await initIssueType(projectId,organizationId)
+        await initWorkflow(issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeBugId,issueTypeTicketId,organizationId)
         await initField()
     }
     console.log("init finish")
 }
 
-async function initUser():Promise<string> {
+async function initOrganization(adminIds:string[],userIds:string[]):Promise<string> {
     let mysql=getMysqlInstance()
-    let userId=await generateSnowId()
-    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${userId}','sx','sx')`)
-    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${await generateSnowId()}','wgq','wgq')`)
-    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${await generateSnowId()}','hxx','hxx')`)
-    return userId
+    let id=await generateSnowId()
+    await mysql.executeOne(generateCreateSql(organizationModel,{
+        id,
+        name:"default",
+        user_id:adminIds[0]
+    }))
+    let i=0;
+    for(let adminId of adminIds) {
+        await mysql.execute(generateCreateSql(organizationUserModel,{
+            id:await generateSnowId(),
+            nickname:"test"+(i++),
+            organization_id:id,
+            role:ECommon_Organization_User_Role.ADMIN,
+            user_id:adminId
+        }))
+    }
+    for(let userId of userIds) {
+        await mysql.execute(generateCreateSql(organizationUserModel,{
+            id:await generateSnowId(),
+            nickname:"test"+(i++),
+            organization_id:id,
+            role:ECommon_Organization_User_Role.USER,
+            user_id:userId
+        }))
+    }
+    return id;
 }
 
-async function initAdmin():Promise<string> {
+async function initUser():Promise<string[]> {
     let mysql=getMysqlInstance()
-    let adminId=await generateSnowId()
-    await mysql.execute(`insert into ${Table_User} (id,username,password,is_admin) values ('${adminId}','teamlinker','teamlinker',1)`)
-    await mysql.execute(`insert into ${Table_User} (id,username,password,is_admin) values ('${await generateSnowId()}','wgq_admin','123456',1)`)
-    await mysql.execute(`insert into ${Table_User} (id,username,password,is_admin) values ('${await generateSnowId()}','hxx_admin','123456',1)`)
-    return adminId
+    let userIds=[await generateSnowId(),await generateSnowId(),await generateSnowId()]
+    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${userIds[0]}','sx','sx')`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${userIds[1]}','wgq','wgq')`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password) values ('${userIds[2]}','hxx','hxx')`)
+    return userIds
 }
 
-async function initTeam(userId:string,groupRoleUserId:string) {
+async function initAdmin():Promise<string[]> {
+    let mysql=getMysqlInstance()
+    let adminIds=[await generateSnowId(),await generateSnowId(),await generateSnowId()]
+    await mysql.execute(`insert into ${Table_User} (id,username,password,role) values ('${adminIds[0]}','teamlinker','teamlinker',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,role) values ('${adminIds[1]}','wgq_admin','123456',1)`)
+    await mysql.execute(`insert into ${Table_User} (id,username,password,role) values ('${adminIds[2]}','hxx_admin','123456',1)`)
+    return adminIds
+}
+
+async function initTeam(userId:string,groupRoleUserId:string,organizationId:string) {
     let mysql=getMysqlInstance()
     let groupId=await generateSnowId()
-    await mysql.execute(`insert into ${Table_Team} (id,name,created_by) values ('${groupId}','test_group','${userId}')`)
+    await mysql.execute(`insert into ${Table_Team} (id,name,created_by,organization_id) values ('${groupId}','test_group','${userId}','${organizationId}')`)
     await mysql.execute(`insert into ${Table_Team_User} (id,role_id,team_id,user_id) values ('${await generateSnowId()}','${groupRoleUserId}','${groupId}','${userId}')`)
 }
 
-async function initProject(userId:string,projectRoleUserId:string):Promise<string> {
+async function initProject(userId:string,projectRoleUserId:string,organizationId:string):Promise<string> {
     let mysql=getMysqlInstance()
     let projectId=await generateSnowId()
-    await mysql.execute(`insert into ${Table_Project} (id,name,keyword,created_by) values ('${projectId}','test','test','${userId}')`)
+    await mysql.execute(`insert into ${Table_Project} (id,name,keyword,created_by,organization_id) values ('${projectId}','test','test','${userId}','${organizationId}')`)
     await mysql.execute(`insert into ${Table_Project_Member} (id,role_id,project_id,member_id,type) values ('${await generateSnowId()}','${projectRoleUserId}','${projectId}','${userId}',0)`)
     return projectId
 }
@@ -380,16 +415,16 @@ async function initRole(objPermission:{
     }
 }
 
-async function initIssueType(projectId:string) {
+async function initIssueType(projectId:string,organizationId:string) {
     let mysql = getMysqlInstance()
     let taskId=await generateSnowId()
     let bugId=await generateSnowId()
     let ticketId=await generateSnowId()
     let solutionId=await generateSnowId()
-    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${taskId}','Task',1)`)
-    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${bugId}','Bug',1)`)
-    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved) values ('${ticketId}','Ticket',1)`)
-    await mysql.execute(`insert into ${Table_Issue_Type_Solution} (id,name,description,reserved) values ('${solutionId}','Default','Default',1)`)
+    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved,organization_id) values ('${taskId}','Task',1,'${organizationId}')`)
+    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved,organization_id) values ('${bugId}','Bug',1,'${organizationId}')`)
+    await mysql.execute(`insert into ${Table_Issue_Type} (id,name,reserved,organization_id) values ('${ticketId}','Ticket',1,'${organizationId}')`)
+    await mysql.execute(`insert into ${Table_Issue_Type_Solution} (id,name,description,reserved,organization_id) values ('${solutionId}','Default','Default',1,'${organizationId}')`)
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${taskId}','${solutionId}')`)
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${bugId}','${solutionId}')`)
     await mysql.execute(`insert into ${Table_Issue_Type_Solution_Issue_Type} (id,issue_type_id,issue_type_solution_id) values ('${await generateSnowId()}','${ticketId}','${solutionId}')`)
@@ -407,14 +442,15 @@ async function initIssueType(projectId:string) {
     }
 }
 
-async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:string,issueTypeTaskId:string,issueTypeBugId:string,issueTypeTicketId:string) {
+async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:string,issueTypeTaskId:string,issueTypeBugId:string,issueTypeTicketId:string,organizationId:string) {
     let mysql = getMysqlInstance()
     let workflowId=await generateSnowId()
     await mysql.execute(generateCreateSql(workflowModel,{
         id:workflowId,
         name:"default",
         description:"",
-        reserved:1
+        reserved:1,
+        organization_id:organizationId
     }))
     let workflowNodeOpenId=await generateSnowId()
     let workflowNodeProgressId=await generateSnowId()
@@ -505,6 +541,7 @@ async function initWorkflow(issueTypeSolutionId:string,issueTypeSolutionName:str
         id:workflowSolutionId,
         reserved:1,
         name:issueTypeSolutionName,
+        organization_id:organizationId
     }))
     await mysql.execute(generateCreateSql(workflowSolutionWorkflowModel,{
         id:await generateSnowId(),

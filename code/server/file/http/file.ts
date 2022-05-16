@@ -1,5 +1,5 @@
 import { ECommon_Model_File_Type } from '../../../common/model/file';
-import * as fileApi from "../../../common/routes/file";
+import fileApi from "../../../common/routes/file";
 import { Err } from '../../../common/status/error';
 import { DComponent } from "../../common/decorate/component";
 import { DHttpApi, DHttpController, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";

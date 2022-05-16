@@ -118,4 +118,22 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
             return null;
         }
     }
+
+    static async getItemByExp<Type>(this:{new():Type},exp:{
+        [param in keyof GET<Type>["model"]]?:GET<Type>["model"][param]
+    }):Promise<Type>{
+        if(!exp) {
+            return null
+        }
+        let user = new this() as any;
+        let obj = await user.mapper.getByExp(exp);
+        if(obj) {
+            user.setItem(obj);
+            return user;
+        } else {
+            return null;
+        }
+    }
 }
+
+type GET<T>=T extends Entity<infer T1,Mapper<infer T1>>?T1:never

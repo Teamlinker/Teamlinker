@@ -187,6 +187,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             project_issue_1_id:projectIssueId,
             project_issue_2_id:projectIssueId
         },"or"))
+        
     }
 
     async getBasicInfo(projectIssueId:string) {
@@ -704,6 +705,72 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         let ret=await mysql.execute(sql)
         return ret;
     }
+
+    async clearMany(projectIssueIds:string[]) {
+        if(!projectIssueIds) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectIssueModel,{
+            id:{
+                exp:"in",
+                value:projectIssueIds
+            }
+        }))
+        await mysql.execute(generateDeleteSql(projectIssueDescriptionModel,{
+            project_issue_id:{
+                exp:"in",
+                value:projectIssueIds
+            }
+        }))
+        await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
+            project_issue_id:{
+                exp:"in",
+                value:projectIssueIds
+            }
+        }))
+        await mysql.execute(generateDeleteSql(projectIssueParentModel,{
+            parent_id:{
+                exp:"in",
+                value:projectIssueIds
+            },
+            child_id:{
+                exp:"in",
+                value:projectIssueIds
+            }
+        },"or"))
+        await mysql.execute(generateDeleteSql(projectIssueProcessModel,{
+            project_issue_id:{
+                exp:"in",
+                value:projectIssueIds
+            }
+        }))
+        await mysql.execute(generateDeleteSql(projectIssueRelatedModel,{
+            project_issue_1_id:{
+                exp:"in",
+                value:projectIssueIds
+            },
+            project_issue_2_id:{
+                exp:"in",
+                value:projectIssueIds
+            }
+        },"or"))
+    }
+
+    async getIdsByProjectIds(projectIds:string[]){
+        if(!projectIds || projectIds.length==0) {
+            return []
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(projectIssueModel,["id"],{
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        }))
+        return ret.map(item=>item.id);
+    }
+
 }
 
 export let projectIssueMapper=new ProjectIssueMapper

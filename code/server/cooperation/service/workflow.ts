@@ -16,12 +16,12 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
     constructor(){
         super(workflowMapper)
     }
-    static async list(){
-        let ret=await workflowMapper.list()
+    static async list(organizationId:string){
+        let ret=await workflowMapper.list(organizationId)
         return ret;
     }
-    static async getReservedItem () {
-        let ret=await workflowMapper.getReservedItem()
+    static async getReservedItem (organizationId:string) {
+        let ret=await workflowMapper.getReservedItem(organizationId)
         let workflow=new Workflow
         workflow.setItem(ret);
         return workflow;
@@ -117,7 +117,7 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
 
     override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
         await super.delete()
-        await workflowMapper.revoke(this.getId())
+        await workflowMapper.revoke(this.getId(),this.getItem().organization_id)
         await FieldSolutionService.clearItemsByWorkflowId(this.getId())
     }
 
@@ -142,14 +142,18 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
         return ret;
     }
 
+    static async init(organizationId:string) {
+        let workflowId=await workflowMapper.init(organizationId);
+        return workflowId;
+    }
 }
 
 export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel,typeof workflowSolutionMapper> {
     constructor(){
         super(workflowSolutionMapper)
     }
-    static async list(){
-        let ret=await workflowSolutionMapper.list()
+    static async list(organizationId:string){
+        let ret=await workflowSolutionMapper.list(organizationId)
         return ret;
     }
     static async getItemByIssueTypeSolutionId(issueSolutionId:string) {
@@ -169,8 +173,8 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
         return ret;
     }
 
-    static async getReservedItem () {
-        let ret=await workflowSolutionMapper.getReservedItem()
+    static async getReservedItem (organizationId:string) {
+        let ret=await workflowSolutionMapper.getReservedItem(organizationId)
         let obj=new WorkflowSolutionService()
         obj.setItem(ret)
         return obj;
@@ -187,7 +191,7 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
         if(existIssueTypeSolutionIds.length>0) {
             await WorkflowSolutionService.clearIssueTypeSolutions(existIssueTypeSolutionIds)
         }
-        await workflowSolutionMapper.bindIssueTypeSolutionList(this.getId(),issueTypeSolutionIds)
+        await workflowSolutionMapper.bindIssueTypeSolutionList(this.getId(),issueTypeSolutionIds,this.getItem().organization_id)
     }
     async unbindIssueTypeSolutions(issueTypeSolutionIds:string[]=null) {
         await workflowSolutionMapper.unbindIssueTypeSolution(this.getId(),issueTypeSolutionIds)
@@ -202,7 +206,7 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
             throw Err.Project.Workflow.unbindReservedWorkflowSolutionForbidden
         }
         await workflowSolutionMapper.unbindIssueTypeSolution(this.getId(),issueTypeSolutionIds)
-        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem()
+        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem(this.getItem().organization_id)
         objWorkflowReserved.bindIssueTypeSolutions(issueTypeSolutionIds)
     }
 
@@ -250,7 +254,7 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
 
     override async create(): Promise<ICommon_Model_Workflow_Solution> {
         let ret=await super.create()
-        let obj=await workflowMapper.getReservedItem()
+        let obj=await workflowMapper.getReservedItem(ret.organization_id)
         await workflowSolutionMapper.addWorkflow(this.getId(),obj.id)
         return ret
     }
@@ -324,6 +328,14 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
             return false
         }
         return true
+    }
+
+    static async clearByOrganizationId(organizationId:string){
+        await workflowSolutionMapper.clearByOrganizationId(organizationId)
+    }
+
+    static async init(issueTypeSolutionId:string,issueTypeSolutionName:string,issueTypeTaskId:string,issueTypeBugId:string,issueTypeTicketId:string,workflowId:string,organizationId:string) {
+        await workflowSolutionMapper.init(issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeBugId,issueTypeTicketId,workflowId,organizationId)
     }
 }
 

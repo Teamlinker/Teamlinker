@@ -1,14 +1,14 @@
-import * as issueTypeApi from "../../../common/routes/issueType";
+import issueTypeApi from "../../../common/routes/issueType";
 import { Err } from "../../../common/status/error";
 import { DComponent } from "../../common/decorate/component";
-import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpHeaderRequired, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
 import IssueTypeService, { IssueTypeSolutionService } from "../service/issueType";
 @DComponent
 @DHttpController(issueTypeApi)
 class IssueTypeController {
      @DHttpApi(issueTypeApi.routes.list)
-     async list():Promise<typeof issueTypeApi.routes.list.res> {
-         let ret=await IssueTypeService.list()
+     async list(@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof issueTypeApi.routes.list.res> {
+         let ret=await IssueTypeService.list(organizationId)
          return ret;
      }
      @DHttpApi(issueTypeApi.routes.info)
@@ -21,12 +21,13 @@ class IssueTypeController {
      }
 
      @DHttpApi(issueTypeApi.routes.create)
-     async create(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("icon") icon:string,@DHttpReqParam("description") description:string):Promise<typeof issueTypeApi.routes.create.res> {
+     async create(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("icon") icon:string,@DHttpReqParam("description") description:string,@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof issueTypeApi.routes.create.res> {
          let obj=new IssueTypeService()
          obj.assignItem({
              name,
              icon,
-             description
+             description,
+             organization_id:organizationId
          })
          let ret=await obj.create()
          return ret;
@@ -65,8 +66,8 @@ class IssueTypeController {
      }
 
      @DHttpApi(issueTypeApi.routes.solutionList)
-     async solutionList():Promise<typeof issueTypeApi.routes.solutionList.res> {
-         let ret=await IssueTypeSolutionService.list()
+     async solutionList(@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof issueTypeApi.routes.solutionList.res> {
+         let ret=await IssueTypeSolutionService.list(organizationId)
          return ret;
      }
      @DHttpApi(issueTypeApi.routes.solutionInfo)
@@ -76,11 +77,12 @@ class IssueTypeController {
      }
 
      @DHttpApi(issueTypeApi.routes.solutionCreate)
-     async solutionCreate(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("description") description:string):Promise<typeof issueTypeApi.routes.solutionCreate.res> {
+     async solutionCreate(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("description") description:string,@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof issueTypeApi.routes.solutionCreate.res> {
          let obj=new IssueTypeSolutionService()
          obj.assignItem({
              name,
-             description
+             description,
+             organization_id:organizationId
          })
          let ret=await obj.create()
          return ret;

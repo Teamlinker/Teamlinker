@@ -10,14 +10,50 @@ export default class IssueType extends Entity<typeof issueTypeModel,typeof issue
     constructor(){
         super(issueTypeMapper)
     }
-    static async list(){
-        let ret=await issueTypeMapper.list()
+    static async list(organizationId:string){
+        let ret=await issueTypeMapper.list(organizationId)
         return ret;
     }
     override async delete() {
         await super.delete()
         await issueTypeMapper.deleteFromSolution(this.getId());
         await WorkflowSolutionService.clearIssueType(this.getId())
+    }
+
+    static async init(organizationId:string):Promise<{
+        taskId:string,
+        bugId:string,
+        ticketId:string
+    }> {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let objTask=new IssueType;
+        objTask.assignItem({
+            name:"Task",
+            reserved:1,
+            organization_id:organizationId
+        })
+        await objTask.create();
+        let objBug=new IssueType;
+        objBug.assignItem({
+            name:"Bug",
+            reserved:1,
+            organization_id:organizationId
+        })
+        await objBug.create();
+        let objTicket=new IssueType;
+        objTicket.assignItem({
+            name:"Ticket",
+            reserved:1,
+            organization_id:organizationId
+        })
+        await objTicket.create();
+        return {
+            taskId:objTask.getId(),
+            bugId:objBug.getId(),
+            ticketId:objTicket.getId()
+        };
     }
 }
 
@@ -39,7 +75,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
     }
     override async create():Promise<ICommon_Model_Issue_Type_Solution> {
         let ret=await super.create();
-        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem()
+        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem(ret.organization_id)
         objWorkflowReserved.bindIssueTypeSolutions([this.getId()])
         return ret;
     }
@@ -55,11 +91,11 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         if(objWorkflowSolution) {
             await objWorkflowSolution.unbindIssueTypeSolutions([this.getId()]);
         }
-        await issueTypeSolutionMapper.resetProjects(this.getId());
+        await issueTypeSolutionMapper.resetProjects(this.getId(),this.getItem().organization_id);
     }
 
-    static async list(){
-        let ret=await issueTypeSolutionMapper.list()
+    static async list(organizationId:string){
+        let ret=await issueTypeSolutionMapper.list(organizationId)
         let arr:ICommon_Route_Res_IssueTypeSolution_List_Item[]=[]
         for(let obj of ret) {
             arr.push({
@@ -97,7 +133,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         await issueTypeSolutionMapper.addIssueType(issueTypeId,this.getId())
         let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueTypeSolutionId(this.getId())
         if(objWorkflowSolution) {
-            let reserved=await WorkflowService.getReservedItem()
+            let reserved=await WorkflowService.getReservedItem(this.getItem().organization_id)
             await objWorkflowSolution.assign(issueTypeId,reserved.getId(),this.getId())
         }
     }
@@ -110,8 +146,8 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         }
     }
 
-    static async getReservedItem() {
-        let obj=await issueTypeSolutionMapper.getReservedItem()
+    static async getReservedItem(organizationId:string) {
+        let obj=await issueTypeSolutionMapper.getReservedItem(organizationId)
         let ret=new IssueTypeSolutionService
         ret.setItem(obj)
         return ret;
@@ -136,7 +172,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         if(!objProject) {
             throw Err.Project.projectNotFound
         }
-        await issueTypeSolutionMapper.unbindProject(this.getId(),projectId)
+        await issueTypeSolutionMapper.unbindProject(this.getId(),projectId,this.getItem().organization_id)
     }
 
     async projectList():Promise<{
@@ -170,5 +206,40 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
             return null;
         }
         
+    }
+
+    static async clearByOrganizationId(organizationId:string) {
+        await issueTypeSolutionMapper.clearByOrganizationId(organizationId)
+    }
+
+    static async init(organizationId:string,issueTypeIds:{
+        taskId:string,
+        bugId:string,
+        ticketId:string
+    },projectId?:string):Promise<{
+        solutionId:string,
+        solutionName:string
+    }> {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let objSolution=new IssueTypeSolutionService;
+        objSolution.assignItem({
+            name:"Default",
+            description:"Default",
+            reserved:1,
+            organization_id:organizationId
+        })
+        await objSolution.create()
+        await issueTypeSolutionMapper.addIssueType(issueTypeIds.taskId,objSolution.getId());
+        await issueTypeSolutionMapper.addIssueType(issueTypeIds.bugId,objSolution.getId());
+        await issueTypeSolutionMapper.addIssueType(issueTypeIds.ticketId,objSolution.getId());
+        if(projectId) {
+            issueTypeSolutionMapper.bindProject(objSolution.getId(),projectId);
+        }
+        return {
+            solutionId:objSolution.getId(),
+            solutionName:objSolution.getItem().name
+        }
     }
 }

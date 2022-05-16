@@ -1,32 +1,35 @@
-
 import * as Koa from "koa";
 import * as koaStaticServer from "koa-static-server";
 import * as path from "path";
+import { ECommon_User_Type } from "../../../common/model/user";
 import { Permission_Base } from '../../../common/permission/permission';
-import * as fieldApi from "../../../common/routes/field";
-import * as fileApi from "../../../common/routes/file";
-import * as gatewayApi from "../../../common/routes/gateway";
-import * as issueApi from "../../../common/routes/issue";
-import * as issueTypeApi from "../../../common/routes/issueType";
-import * as projectApi from "../../../common/routes/project";
-import * as releaseApi from "../../../common/routes/release";
-import * as teamApi from "../../../common/routes/team";
+import fieldApi from "../../../common/routes/field";
+import fileApi from "../../../common/routes/file";
+import gatewayApi from "../../../common/routes/gateway";
+import issueApi from "../../../common/routes/issue";
+import issueTypeApi from "../../../common/routes/issueType";
+import organizationApi from "../../../common/routes/organization";
+import projectApi from "../../../common/routes/project";
+import releaseApi from "../../../common/routes/release";
+import teamApi from "../../../common/routes/team";
 import { ICommon_HttpApi } from "../../../common/routes/types";
-import * as userApi from "../../../common/routes/user";
-import * as workflowApi from "../../../common/routes/workflow";
+import userApi from "../../../common/routes/user";
+import workflowApi from "../../../common/routes/workflow";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
 import Application, { ECommon_Application_Mode } from "../../common/app/app";
 import { deletePermission, processPermission } from '../../common/permission/base';
+import { getOrganizationPermission } from "../../common/permission/organization";
 import { proxyRequest } from "../../common/rpc/rpc";
 import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy } from "../../common/types/http";
-import { EServer_Common_User_Type } from '../../common/types/user';
 import { generateHttpOkResponse } from "../../common/util/http";
 import "../http/gateway";
 import userRpcApi from '../rpc/user';
 import { checkIfNeedInit, handleImageFields } from "../util/util";
+import { ECommon_Organization_User_Role } from './../../../common/model/organization_user';
 import { CacheService } from './../cache/service';
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi];
+
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi];
 export default class GateWay extends Application {
     override async config(app: Koa<Koa.DefaultState, Koa.DefaultContext>) {
         let cacheService=new CacheService()
@@ -101,11 +104,15 @@ export default class GateWay extends Application {
                     let permissionDelete:object;
                     if(permission && ((Array.isArray(permission) && permission.length>0) || (typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data) && permission.data.length>0))) {
                         if(ctx.state.user) {
-                            if(ctx.state.user.type==EServer_Common_User_Type.USER) {
+                            if(ctx.state.user.type==ECommon_User_Type.USER) {
+                                let organizationRole:ECommon_Organization_User_Role=null;
+                                if(ctx.get("organizationid")) {
+                                    organizationRole=await getOrganizationPermission(ctx.get("organizationid"),ctx.state.user.userId);
+                                }
                                 let per=Array.isArray(permission)?permission:permission.data;
                                 let [isCheck,map] =await processPermission(per,Object.assign({},obj.data,{
                                     userId:ctx.state.user?ctx.state.user.userId:undefined,
-                                    isAdmin:ctx.state.user.type===EServer_Common_User_Type.ADMIN
+                                    isAdmin:ctx.state.user.type===ECommon_User_Type.ADMIN || organizationRole===ECommon_Organization_User_Role.ADMIN
                                 }))
                                 if(isCheck && typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data)) {
                                     permissionDelete=map;
@@ -133,7 +140,7 @@ export default class GateWay extends Application {
                     if(ret.data===undefined || typeof(ret.data)=="string" || typeof(ret.data)=="number" || typeof(ret.data)=="boolean" || typeof(ret.data)=="object")
                     {
                         if(typeof(ret.data)=="object") {
-                            await handleImageFields(ret.data);
+                            await handleImageFields(ret.data,ctx.get("organizationid"));
                         }
                         ctx.body = generateHttpOkResponse(ret.data);
                     } else {

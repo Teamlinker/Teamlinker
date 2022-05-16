@@ -1,5 +1,6 @@
-import { ECommon_Services } from "../types"
-import { ECommon_HttpApi_Method } from "./types"
+import { ECommon_Services } from "../types";
+import { ECommon_Application_Mode } from './../../server/common/app/app';
+import { ECommon_HttpApi_Method } from "./types";
 
 const api={
     baseUrl:"/gateway",
@@ -26,8 +27,17 @@ const api={
             }>{},
             res:{},
             ignoreValidate:true
+        },
+        deployInfo:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/deploy",
+            req:{},
+            res:<{
+                type:ECommon_Application_Mode
+            }>{},
+            ignoreValidate:true
         }
     }
 }
 
-export=api
+export default api

@@ -3,8 +3,7 @@ import { Err } from '../../../common/status/error';
 import { REDIS_USER } from "../../common/cache/keys/user";
 import { getConfigInstance } from '../../common/config/config';
 import { Entity } from "../../common/entity/entity";
-import { userModel } from './../../../common/model/user';
-import { EServer_Common_User_Type } from './../../common/types/user';
+import { ECommon_User_Type, userModel } from './../../../common/model/user';
 import { adminMapper } from './../mapper/admin';
 export default class Admin extends Entity<typeof userModel,typeof adminMapper> {
     constructor(){
@@ -29,7 +28,7 @@ export default class Admin extends Entity<typeof userModel,typeof adminMapper> {
         return new Promise(async (resolve,reject)=>{
             jwt.sign({
                 userId:this.item.id,
-                type:EServer_Common_User_Type.ADMIN
+                type:ECommon_User_Type.ADMIN
             },secret,async (err,token)=>{
                 if(err) {
                     reject(err)

@@ -9,6 +9,7 @@ export interface ICommon_Model_Project {
   photo :string,
   created_by :string ,
   description :string,
+  organization_id:string
 }
 export const Table_Project="project"
 

@@ -7,6 +7,7 @@ export interface ICommon_Model_Team {
   created_time :Date,
   modified_time :Date,
   created_by :string ,
+  organization_id:string
 }
 export const Table_Team="team"
 

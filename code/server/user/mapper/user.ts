@@ -5,10 +5,11 @@ import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
 import { exculdeColumns, generateLeftJoinSql, generateQuerySql, generateUpdateSql } from "../../common/util/sql";
+import { organizationUserModel } from './../../../common/model/organization_user';
 import { ICommon_Model_Project, projectModel, Table_Project } from './../../../common/model/project';
 import { projectMemberModel, Table_Project_Member } from './../../../common/model/project_member';
 import { Table_Team_User, teamUserModel } from './../../../common/model/team_user';
-import { ICommon_Model_User, Table_User, userModel } from './../../../common/model/user';
+import { ECommon_User_Type, ICommon_Model_User, Table_User, userModel } from './../../../common/model/user';
 class UserMapper extends Mapper<typeof userModel> {
     constructor(){
         super(userModel)
@@ -29,7 +30,7 @@ class UserMapper extends Mapper<typeof userModel> {
             throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,is_admin:0}))
+        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,role:ECommon_User_Type.USER}))
         return ret
     }
 
@@ -51,7 +52,7 @@ class UserMapper extends Mapper<typeof userModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_User} where is_admin=0${keyword?` and username like '%${keyword}%'`:""}`))[0]
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_User} where role=0${keyword?` and username like '%${keyword}%'`:""}`))[0]
         let totalPage=CommonUtil.pageTotal(count,size)
         let colums=keys<ICommon_Model_User>().map(item=>item.name);
         let ret=await mysql.execute(generateQuerySql(userModel,exculdeColumns(colums,[]),{
@@ -70,7 +71,7 @@ class UserMapper extends Mapper<typeof userModel> {
         };
     }
 
-    async teamList(page:number,size:number,userId:string,keyword?:string):Promise<{
+    async teamList(page:number,size:number,userId:string,organizationId?:string,keyword?:string):Promise<{
         count:number,
         totalPage:number,
         data:ICommon_Model_Team[]
@@ -79,7 +80,7 @@ class UserMapper extends Mapper<typeof userModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team_User} tu left join ${Table_Team} t on t.id=tu.team_id where tu.user_id='${userId}'${keyword?` and t.name like '%${keyword}%'`:""}`))[0]
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team_User} tu left join ${Table_Team} t on t.id=tu.team_id where ${organizationId?`t.organization_id='${organizationId}' and `:""} tu.user_id='${userId}'${keyword?` and t.name like '%${keyword}%'`:""}`))[0]
         let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateLeftJoinSql({
             model:teamUserModel,
@@ -98,6 +99,12 @@ class UserMapper extends Mapper<typeof userModel> {
                 model:teamUserModel,
                 value:userId
             },
+            ...(organizationId && {
+                organization_id:{
+                    model:teamModel,
+                    value:organizationId
+                }
+            }),
             ...(keyword && {
                 name:{
                     model:teamModel,
@@ -120,7 +127,7 @@ class UserMapper extends Mapper<typeof userModel> {
         };
     }
 
-    async projectList(page:number,size:number,userId:string,keyword?:string):Promise<{
+    async projectList(page:number,size:number,userId:string,organizationId?:string,keyword?:string):Promise<{
         count:number,
         totalPage:number,
         data:ICommon_Model_Project[]
@@ -129,7 +136,7 @@ class UserMapper extends Mapper<typeof userModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Member} pm left join ${Table_Project} p on p.id=pm.project_id where pm.member_id='${userId}'${keyword?` and p.name like '%${keyword}%'`:""}`))[0]
+        let count=Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Project_Member} pm left join ${Table_Project} p on p.id=pm.project_id where ${organizationId?`p.organization_id='${organizationId}' and `:""} pm.member_id='${userId}'${keyword?` and p.name like '%${keyword}%'`:""}`))[0]
         let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateLeftJoinSql({
             model:projectMemberModel,
@@ -148,6 +155,12 @@ class UserMapper extends Mapper<typeof userModel> {
                 model:projectMemberModel,
                 value:userId
             },
+            ...(organizationId && {
+                organization_id:{
+                    model:projectModel,
+                    value:organizationId
+                }
+            }),
             ...(keyword && {
                 name:{
                     model:projectModel,
@@ -169,31 +182,61 @@ class UserMapper extends Mapper<typeof userModel> {
             data:ret.map(item=>item.project)
         };
     }
-    async users(userIds:string[]){
+    async users(userIds:string[],organizationId?:string){
         if(!userIds){
             throw Err.User.userIdNotExists
         }
         let mysql=getMysqlInstance()
-        let ret=await mysql.execute(generateQuerySql(userModel,[],{
-            id:{
-                exp:"in",
-                value:userIds
-            }
-        }))
-        return ret;
+        let ret:(ICommon_Model_User & {
+            nickname?:string
+        })[]
+        if(!organizationId) {
+            ret=await mysql.execute(generateQuerySql(userModel,[],{
+                id:{
+                    exp:"in",
+                    value:userIds
+                }
+            }))
+            return ret;
+        } else {
+            let sql=generateLeftJoinSql({
+                model:organizationUserModel,
+                columns:["nickname"]
+            },{
+                model:userModel,
+                columns:keys<ICommon_Model_User>().map(item=>item.name),
+                expression:{
+                    id:{
+                        model:organizationUserModel,
+                        field:"user_id"
+                    },
+                    
+                }
+            },{
+                user_id:{
+                    model:organizationUserModel,
+                    value:{
+                        exp:"in",
+                        value:userIds
+                    }
+                }
+            })
+            ret=await mysql.execute(sql)
+            return ret
+        }
+        
+        
     }
 
     async filter(name:string,size:number)
     {
         if(!name) {
             throw Err.User.userNameNotExists
-        }
-        if(!size) {
+        } else if(!size) {
             throw Err.Common.paramError
         }
         let mysql=getMysqlInstance()
         let ret=await mysql.execute(generateQuerySql(userModel,["id","username","photo"],{
-            is_admin:0,
             active:1,
             username:{
                 exp:"%like%",

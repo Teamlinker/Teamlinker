@@ -18,14 +18,17 @@ export default class FieldType extends Entity<typeof fieldTypeModel,typeof field
         return ret;
     }
 
+    static async init() {
+        await fieldTypeMapper.init();
+    }
 }
 
 export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeof fieldSolutionMapper> {
     constructor(){
         super(fieldSolutionMapper)
     }
-    static async list(){
-        let ret=await fieldSolutionMapper.list()
+    static async list(organizationId:string){
+        let ret=await fieldSolutionMapper.list(organizationId)
         return ret;
     }
 
@@ -350,5 +353,9 @@ export class FieldSolutionService extends Entity<typeof fieldSolutionModel,typeo
         }
         let arr=await fieldSolutionMapper.getFieldTypesByFieldIds(fieldIds)
         return arr;
+    }
+
+    static async clearFieldByOrganizationId(organizationId:string) {
+        await fieldSolutionMapper.clearFieldSolutionByOrganizationId(organizationId);
     }
 }

@@ -1,4 +1,5 @@
-import * as gateApi from "../../../common/routes/gateway";
+import gateApi from "../../../common/routes/gateway";
+import Application from "../../common/app/app";
 import { DComponent } from "../../common/decorate/component";
 import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
 import { GateWayService } from './../service/http';
@@ -14,5 +15,12 @@ class GatewayController {
     @DHttpApi(gateApi.routes.editConfig)
     async editConfig(@DHttpReqParamRequired("dbUrl") dbUrl:string,@DHttpReqParam("dbPort") dbPort:number,@DHttpReqParam("dbDatabase") dbDatabase:string,@DHttpReqParam("dbUsername") dbUsername:string,@DHttpReqParam("dbPassword") dbPassword:string) {
         await GateWayService.editConfig(dbUrl,dbPort,dbDatabase,dbUsername,dbPassword);
+    }
+
+    @DHttpApi(gateApi.routes.deployInfo)
+    async deployInfo():Promise<typeof gateApi.routes.deployInfo.res> {
+        return {
+            type:Application.mode
+        }
     }
 }

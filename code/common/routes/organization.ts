@@ -1,0 +1,120 @@
+import { Permission_Types } from '../permission/permission';
+import { ICommon_Model_Organization } from './../model/organization';
+import { ECommon_Organization_User_Role, ICommon_Model_Organization_User } from './../model/organization_user';
+import { ECommon_Services } from './../types';
+import { ICommon_Route_Res_Organization_List, ICommon_Route_Res_Organization_User } from './response';
+import { ECommon_HttpApi_Method } from "./types";
+const api={
+    baseUrl:"/organization",
+    service:ECommon_Services.User,
+    routes:{
+        list:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/list",
+            req:<{
+                                
+            }>{},
+            res:<ICommon_Route_Res_Organization_List>{}
+        },
+        info:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/item",
+            req:<{
+                 organizationId:string               
+            }>{},
+            res:<ICommon_Model_Organization>{},
+        },
+        create:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/item",
+            req:<{
+                 name:string,
+                 description?:string,
+                 photo?:string             
+            }>{},
+            res:<ICommon_Model_Organization>{},
+        },
+        update:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/item",
+            req:<{
+                organizationId:string
+                 name?:string,
+                 description?:string,
+                 photo?:string,
+                 active?:number             
+            }>{},
+            res:<ICommon_Model_Organization>{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
+        remove:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/item",
+            req:<{
+                organizationId:string        
+            }>{},
+            res:{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
+        listUser:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user/list",
+            req:<{
+                organizationId:string,
+                page:number,
+                size:number,
+                keyword?:string     
+            }>{},
+            res:<ICommon_Route_Res_Organization_User>{},
+        },
+        addUser:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/user",
+            req:<{
+                organizationId:string,
+                username:string,
+                role:ECommon_Organization_User_Role,
+                nickname:string,
+                active:number,
+                title?:string,
+                job?:string,
+                email?:string,
+                phone?:string,
+                location?:string        
+            }>{},
+            res:<ICommon_Model_Organization_User>{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
+        updateUser:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/user",
+            req:<{
+                organizationId:string,
+                userId:string,
+                role?:ECommon_Organization_User_Role,
+                nickname?:string,
+                active?:number,
+                title?:string,
+                job?:string,
+                email?:string,
+                phone?:string,
+                location?:string        
+            }>{},
+            res:<ICommon_Model_Organization_User>{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
+        deleteUser:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/user",
+            req:<{
+                organizationId:string,
+                userId:string    
+            }>{},
+            res:{},
+            permission:[Permission_Types.Admin.ADMIN]
+        },
+
+    }
+}
+
+export default api

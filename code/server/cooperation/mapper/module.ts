@@ -80,5 +80,21 @@ class ModuleMapper extends Mapper<typeof projectModuleModel> {
             project_id:projectId
         }))
     }
+
+    async deleteByProjectIds(projectIds:string[]) {
+        if(!projectIds) {
+            throw Err.Project.Module.moduleNotFound
+        }
+        if(projectIds.length==0) {
+            return;
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectModuleModel,{
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        }))
+    }
 }
 export let moduleMapper=new ModuleMapper

@@ -334,6 +334,54 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
         let issueList=await mysql.execute(sql)
         return issueList
     }
+
+    async clear(projectId:string) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(projectReleaseModel,["id"],{
+            project_id:projectId
+        }))
+        if(ret.length>0) {
+            await mysql.execute(generateDeleteSql(projectReleaseModel,{
+                project_id:projectId
+            }))
+            await mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
+                project_release_id:{
+                    exp:"in",
+                    value:ret.map(item=>item.id)
+                }
+            }))
+        }
+    }
+
+    async clearByProjectIds(projectIds:string[]) {
+        if(!projectIds || projectIds.length==0) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(projectReleaseModel,["id"],{
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        }))
+        if(ret.length>0) {
+            await mysql.execute(generateDeleteSql(projectReleaseModel,{
+                project_id:{
+                    exp:"in",
+                    value:projectIds
+                }
+            }))
+            await mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
+                project_release_id:{
+                    exp:"in",
+                    value:ret.map(item=>item.id)
+                }
+            }))
+        }
+    }
     
 }
 export let releaseMapper=new ReleaseMapper

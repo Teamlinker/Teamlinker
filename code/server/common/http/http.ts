@@ -147,6 +147,43 @@ export function DHttpContext(target: Object, propertyKey: string, parameterIndex
         g_objParam[key].unshift(obj)
 }
 
+export function DHttpHeaderRequired(name:string){
+    return function(target: Object, propertyKey: string, parameterIndex: number){
+        let types=Reflect.getMetadata("design:paramtypes",target,propertyKey);
+        let type=types[parameterIndex].name
+        let key=target.constructor.name+"::"+propertyKey
+        let obj:IServer_Common_Http_Structure_HandleParam={
+            name:name,
+            index:parameterIndex,
+            type:type,
+            category:EServer_Common_Http_Structure_HandleParam_Category.Header,
+            required:true
+        }
+        if(!g_objParam[key]){
+            g_objParam[key]=[]
+        }
+        g_objParam[key].unshift(obj)
+    }
+}
+
+export function DHttpHeader(name:string){
+    return function(target: Object, propertyKey: string, parameterIndex: number){
+        let types=Reflect.getMetadata("design:paramtypes",target,propertyKey);
+        let type=types[parameterIndex].name
+        let key=target.constructor.name+"::"+propertyKey
+        let obj:IServer_Common_Http_Structure_HandleParam={
+            name:name,
+            index:parameterIndex,
+            type:type,
+            category:EServer_Common_Http_Structure_HandleParam_Category.Header
+        }
+        if(!g_objParam[key]){
+            g_objParam[key]=[]
+        }
+        g_objParam[key].unshift(obj)
+    }
+}
+
 export function DHttpContent(target: Object, propertyKey: string, parameterIndex: number){
     let types=Reflect.getMetadata("design:paramtypes",target,propertyKey);
         let type=types[parameterIndex].name
@@ -224,6 +261,16 @@ export async function handleHttpCall(obj:IServer_Common_Http_Structure,ctx:IServ
         {
             let objFile:IServer_Common_Http_Req_File=ctx.data[name]
             arr.push(objFile)
+        }
+        else if(obj.category==EServer_Common_Http_Structure_HandleParam_Category.Header)
+        {
+            let header=ctx.headers[name]
+            if(header===null || header===undefined) {
+                if(obj.required) {
+                    throw Err.Http.requireHeader
+                }
+            }
+            arr.push(header)
         }
         else if(obj.category==EServer_Common_Http_Structure_HandleParam_Category.Content)
         {

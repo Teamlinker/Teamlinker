@@ -9,6 +9,7 @@ import { generateSnowId } from '../../common/util/sql';
 import ProjectService from "../service/project";
 import { ICommon_Model_Project_Issue, projectIssueModel } from './../../../common/model/project_issue';
 import { ICommon_Model_Project_Issue_Field_Value } from './../../../common/model/project_issue_field_value';
+import { commentMapper } from './../mapper/comment';
 import { projectIssueMapper } from './../mapper/issue';
 import { FieldSolutionService } from './field';
 import ProjectModuleService from './module';
@@ -242,6 +243,7 @@ export default class ProjectIssue extends Entity<typeof projectIssueModel,typeof
     override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
         await super.delete()
         await projectIssueMapper.clear(this.getId())
+        await commentMapper.clear(this.getId());
     }
 
     async getBasicInfo() {
@@ -385,6 +387,15 @@ export default class ProjectIssue extends Entity<typeof projectIssueModel,typeof
         }
         let ret=await projectIssueMapper.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,tagId)
         return ret;
+    }
+
+    static async clearByProjectIds(projectIds:string[]) {
+        let ret=await projectIssueMapper.getIdsByProjectIds(projectIds);
+        if(ret.length>0) {
+            await projectIssueMapper.clearMany(ret);
+            await commentMapper.clearByProjectIssueIds(ret)
+        }
+        
     }
     
 }

@@ -1,16 +1,16 @@
 import { ECommon_Model_Workflow_Node_Status } from "../../../common/model/workflow_node";
-import * as workflowApi from "../../../common/routes/workflow";
+import workflowApi from "../../../common/routes/workflow";
 import { Err } from "../../../common/status/error";
 import { DComponent } from "../../common/decorate/component";
-import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
+import { DHttpApi, DHttpController, DHttpHeaderRequired, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
 import WorkflowService, { WorkflowActionService } from "../service/workflow";
 import { WorkflowNodeService, WorkflowSolutionService } from './../service/workflow';
 @DComponent
 @DHttpController(workflowApi)
 class WorkflowController {
     @DHttpApi(workflowApi.routes.list)
-    async list(): Promise<typeof workflowApi.routes.list.res> {
-        let ret = await WorkflowService.list()
+    async list(@DHttpHeaderRequired("organizationid") organizationId:string): Promise<typeof workflowApi.routes.list.res> {
+        let ret = await WorkflowService.list(organizationId)
         return ret;
     }
     @DHttpApi(workflowApi.routes.info)
@@ -24,11 +24,12 @@ class WorkflowController {
     }
 
     @DHttpApi(workflowApi.routes.create)
-    async create(@DHttpReqParamRequired("name") name: string, @DHttpReqParam("description") description: string): Promise<typeof workflowApi.routes.create.res> {
+    async create(@DHttpReqParamRequired("name") name: string, @DHttpReqParam("description") description: string,@DHttpHeaderRequired("organizationid") organizationId:string): Promise<typeof workflowApi.routes.create.res> {
         let obj = new WorkflowService()
         obj.assignItem({
             name,
-            description
+            description,
+            organization_id:organizationId
         })
         let ret = await obj.create()
         return ret;
@@ -164,8 +165,8 @@ class WorkflowController {
     }
 
     @DHttpApi(workflowApi.routes.solutionList)
-     async solutionList():Promise<typeof workflowApi.routes.solutionList.res> {
-         let ret=await WorkflowSolutionService.list()
+     async solutionList(@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof workflowApi.routes.solutionList.res> {
+         let ret=await WorkflowSolutionService.list(organizationId)
          return ret;
      }
      @DHttpApi(workflowApi.routes.solutionInfo)
@@ -187,11 +188,12 @@ class WorkflowController {
         return
      }
      @DHttpApi(workflowApi.routes.solutionCreate)
-     async solutionCreate(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("description") description:string):Promise<typeof workflowApi.routes.solutionCreate.res> {
+     async solutionCreate(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("description") description:string,@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof workflowApi.routes.solutionCreate.res> {
         let obj=new WorkflowSolutionService()
         obj.assignItem({
             name:name,
-            description:description
+            description:description,
+            organization_id:organizationId
         })
         let ret=await obj.create();
         return ret;
