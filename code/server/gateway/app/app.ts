@@ -33,7 +33,7 @@ var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,work
 export default class GateWay extends Application {
     override async config(app: Koa<Koa.DefaultState, Koa.DefaultContext>) {
         let cacheService=new CacheService()
-        cacheService.start()
+        await cacheService.start()
         await checkIfNeedInit()
         let apiMap=<{
             [param:string]:{

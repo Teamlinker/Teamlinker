@@ -4,6 +4,7 @@ import { getConfigInstance } from '../../common/config/config';
 import IServer_Common_RPC_User, { IServer_Common_RPC_User_CheckSession } from "../../common/rpc/api/user";
 import { DRPCRecieve } from "../../common/rpc/rpc";
 import AdminService from "../service/admin";
+import TeamService from "../service/team";
 import UserService from "../service/user";
 import { OrganizationService } from './../service/organization';
 import rpcFileApi from "./file";
@@ -120,6 +121,18 @@ class RpcUserApi implements IServer_Common_RPC_User {
     async initOrganization(adminIds: string[], userIds: string[]): Promise<string> {
         let ret=await OrganizationService.init(adminIds,userIds)
         return ret;
+    }
+
+    @DRPCRecieve
+    async initTeam(userId: string, groupRoleUserId: string, organizationId: string) {
+        let team=new TeamService;
+        team.assignItem({
+            name:"test_group",
+            created_by:userId,
+            organization_id:organizationId
+        })
+        await team.create()
+        await team.addMemeber(userId,groupRoleUserId);
     }
 }
 export default new RpcUserApi;

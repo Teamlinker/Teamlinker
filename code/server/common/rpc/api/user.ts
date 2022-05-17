@@ -15,6 +15,7 @@ export default interface IServer_Common_RPC_User {
     initAdmin?():Promise<string[]>
     initUser?():Promise<string[]>
     initOrganization?(adminIds:string[],userIds:string[]):Promise<string>
+    initTeam?(userId:string,groupRoleUserId:string,organizationId:string)
 }
 
 export type IUserSession=IServer_Common_RPC_User_CheckSession

@@ -97,4 +97,10 @@ export default class CommonUtil {
             return false;
         }
     }
+
+    static async sleep(ms:number) {
+        return new Promise((resolve)=>{
+            setTimeout(resolve,ms)
+        })
+    }
 }

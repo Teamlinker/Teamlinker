@@ -36,7 +36,9 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
             await projectMapper.addMember(this.getId(),this.getItem().created_by,ECommon_Model_Project_Member_Type.USER,role.id)
         }
         let issueTypeSolution=await IssueTypeSolutionService.getReservedItem(ret.organization_id)
-        await issueTypeSolution.bindProject(this.getId())
+        if(issueTypeSolution) {
+            await issueTypeSolution.bindProject(this.getId())
+        }
         return ret;
     }
 

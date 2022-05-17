@@ -1,5 +1,8 @@
+import { ECommon_Services } from "../../../common/types";
 import { REDIS_GATEWAY } from "../../common/cache/keys/gateway";
+import { getRedisInstance } from "../../common/cache/redis";
 import { getConfigInstance } from '../../common/config/config';
+import CommonUtil from "../../common/util/common";
 
 export class CacheService {
     private timer:NodeJS.Timeout
@@ -12,11 +15,17 @@ export class CacheService {
     constructor(){
         this.config=getConfigInstance();
     }
-    start(){
-        this.handle()
+    async start(){
+        let redis=getRedisInstance()
+        await redis.flush();
+        await this.handle()
     }
     private async handle(){
         let ret=await this.config.getInstances()
+        while(Object.keys(ret).length<Object.keys(ECommon_Services).length) {
+            await CommonUtil.sleep(100)
+            ret=await this.config.getInstances()
+        }
         this.instanceMap={}
         for(let key in ret) {
             let obj=ret[key]

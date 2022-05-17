@@ -76,7 +76,9 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
     override async create():Promise<ICommon_Model_Issue_Type_Solution> {
         let ret=await super.create();
         let objWorkflowReserved=await WorkflowSolutionService.getReservedItem(ret.organization_id)
-        objWorkflowReserved.bindIssueTypeSolutions([this.getId()])
+        if(objWorkflowReserved) {
+            objWorkflowReserved.bindIssueTypeSolutions([this.getId()])
+        }
         return ret;
     }
 
@@ -148,6 +150,9 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
 
     static async getReservedItem(organizationId:string) {
         let obj=await issueTypeSolutionMapper.getReservedItem(organizationId)
+        if(!obj) {
+            return null;
+        }
         let ret=new IssueTypeSolutionService
         ret.setItem(obj)
         return ret;

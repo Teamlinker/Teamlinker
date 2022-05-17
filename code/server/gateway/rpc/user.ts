@@ -10,5 +10,24 @@ class RpcUserApi implements IServer_Common_RPC_User {
     async getUsersInfo(userIds: string[],organizationId:string): Promise<{ id: string; username: string; photo?: string;nickname?:string }[]> {
         return null;
     }
+
+    @DRPCSend(ECommon_Services.User)
+    async initAdmin(): Promise<string[]> {
+        return null
+    }
+
+    @DRPCSend(ECommon_Services.User)
+    async initUser(): Promise<string[]> {
+        return null
+    }
+
+    @DRPCSend(ECommon_Services.User)
+    async initOrganization(adminIds: string[], userIds: string[]): Promise<string> {
+        return null;
+    }
+    @DRPCSend(ECommon_Services.User)
+    async initTeam(userId: string, groupRoleUserId: string, organizationId: string) {
+        return null;
+    }
 }
 export default new RpcUserApi

@@ -175,6 +175,9 @@ export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel
 
     static async getReservedItem (organizationId:string) {
         let ret=await workflowSolutionMapper.getReservedItem(organizationId)
+        if(!ret) {
+            return null;
+        }
         let obj=new WorkflowSolutionService()
         obj.setItem(ret)
         return obj;

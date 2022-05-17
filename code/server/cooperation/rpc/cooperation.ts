@@ -1,4 +1,3 @@
-import { ECommon_Model_Project_Member_Type } from "../../../common/model/project_member";
 import { Err } from "../../../common/status/error";
 import IServer_Common_RPC_Cooperation from "../../common/rpc/api/cooperation";
 import { DRPCRecieve } from "../../common/rpc/rpc";
@@ -55,7 +54,6 @@ class RpcCooperationApi implements IServer_Common_RPC_Cooperation {
             created_by:userId
         })
         await objProject.create()
-        objProject.addMember(userId,ECommon_Model_Project_Member_Type.USER,projectRoleUserId)
         return objProject.getId();
     }
 
