@@ -1,8 +1,10 @@
+import got from 'got';
 import { ECommon_Services } from "../../../common/types";
 import { REDIS_GATEWAY } from "../../common/cache/keys/gateway";
 import { getRedisInstance } from "../../common/cache/redis";
 import { getConfigInstance } from '../../common/config/config';
 import CommonUtil from "../../common/util/common";
+import { IServer_Common_Nacos_Instance, IServer_Common_Nacos_Instance_List } from './../../common/types/nacos';
 
 export class CacheService {
     private timer:NodeJS.Timeout
@@ -22,7 +24,7 @@ export class CacheService {
     }
     private async handle(){
         let ret=await this.config.getInstances()
-        while(Object.keys(ret).length<Object.keys(ECommon_Services).length) {
+        while(!await this.checkHealth(ret)) {
             await CommonUtil.sleep(100)
             ret=await this.config.getInstances()
         }
@@ -43,6 +45,39 @@ export class CacheService {
         {
             clearTimeout(this.timer)
             this.timer=null
+        }
+    }
+    private async checkHealth(instances:IServer_Common_Nacos_Instance_List):Promise<boolean> {
+        if(Object.keys(instances).length<Object.keys(ECommon_Services).length) {
+            return false
+        } else {
+            let arr:IServer_Common_Nacos_Instance[]=[]
+            for(let instanceName in instances) {
+                if(instanceName.toLowerCase()!="gateway") {
+                    let arrInstance=instances[instanceName]
+                    if(arrInstance.length==0) {
+                        return false;
+                    } else {
+                        arr.push(arrInstance[0])
+                    }
+                }
+            }
+            let arrPromise=[]
+            for(let obj of arr) {
+                arrPromise.push(got(`http://${obj.ip}:${obj.port}/healthcheck`))
+            }
+            try {
+                let ret=await Promise.all(arrPromise)
+                for(let obj of ret) {
+                    if(obj.body!="ok") {
+                        return false;
+                    }
+                }
+                return true;
+            } catch (err) {
+                return false;
+            }
+            
         }
     }
 }

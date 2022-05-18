@@ -451,6 +451,7 @@ async function handleSocketError(serviceName:string,socket:ioClient.Socket|sio.S
                 }
             }
         }
+        socket.removeAllListeners();
     })
     socket.on("connect_error", () => {
         if (g_Socket[serviceName]) {
@@ -461,6 +462,7 @@ async function handleSocketError(serviceName:string,socket:ioClient.Socket|sio.S
                 }
             }
         }
+        socket.removeAllListeners();
     })
     socket.on("error", () => {
         socket.disconnect()
@@ -472,5 +474,6 @@ async function handleSocketError(serviceName:string,socket:ioClient.Socket|sio.S
                 }
             }
         }
+        socket.removeAllListeners();
     })
 }

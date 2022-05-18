@@ -141,6 +141,13 @@ export default abstract class Application{
             ctx.set("Access-Control-Expose-Headers", "connection,content-length,date,x-powered-by,content-encoding,server,etag,accept-ranges,allow,content-language,set-cookie,doclever-request");
             await next();
         })
+        this.app.use(async (ctx,next)=>{
+            if(ctx.path.startsWith("/healthcheck")) {
+                ctx.body="ok"
+            } else {
+                await next()
+            }
+        })
         this.app.use(async (ctx, next) => {
             if (ctx.headers['content-type'] && ctx.headers['content-type'].split(';')[0] === 'multipart/form-data') {
                 const maxLength = 1024 * 1024 * 5;
