@@ -7,11 +7,11 @@ export function login(data) {
     })
 }
 
-export function logout(params) {
+export function logout(data) {
   return axios({
     url: '/user/logout',
     method: 'post',
-    params
+    data
   })
 }
 

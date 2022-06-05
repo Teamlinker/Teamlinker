@@ -18,7 +18,8 @@ import { debounce } from 'lodash'
  * @return {*}
  */
 
-const routesWithLayout = formartRoutes(setupLayouts(routes),filterRoutes(routes)) //需要过滤的使用layouts的页面集合
+const routesWithLayout = setupLayouts(routes) //需要过滤的使用layouts的页面集合
+console.log(routesWithLayout,'routesWithLayout')
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 const router = createRouter({

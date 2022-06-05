@@ -1,0 +1,45 @@
+<template>
+  <div>
+    <div class="detail">
+      <div class="name">
+        组织名称：{{orgDetail.name}}
+      </div>
+    </div>
+  </div>
+</template>
+<script lang="ts">
+import { defineComponent,ref} from 'vue'
+import axios from '@/plugins/axios'
+import {useRoute} from 'vue-router'
+export default defineComponent({
+  setup() {
+    const orgDetail= ref([])
+    const route = useRoute()
+    const id = route.query.id
+    const type = route.query.type
+    const params = {
+        organizationid:id
+    }
+    const getOrgDetail = () => {
+      axios.get('organization/item',{ params: params }).then((res: any) => {
+         orgDetail.value = res.data
+      })
+    }
+    getOrgDetail()
+    return {
+      orgDetail
+    }
+  }
+})
+</script>
+<route lang="yaml">
+  meta:
+    level: 1
+    name: '组织列表'
+    layout: org
+</route>
+<style lang="scss" scoped>
+.detail{
+    padding:20px 30px;
+}
+</style>

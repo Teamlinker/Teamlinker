@@ -70,8 +70,9 @@ const actions = {
     try {
         const response = await logout();
         sessionStorage.removeItem("token"); 
+        sessionStorage.removeItem("orgId");
         sessionStorage.removeItem("userInfo");
-        router.replace("/login");
+        router.push("/login");
       return Promise.resolve(response);
     } catch (e) {
       return Promise.reject(e);

@@ -60,7 +60,7 @@ import { useStore } from "@/store";
 import { useRoute, useRouter } from "vue-router";
 import { message } from 'ant-design-vue'
 import { UserOutlined, LockOutlined } from "@ant-design/icons-vue";
-
+import axios from "@/plugins/axios"
 export default {
   name: "login",
   components: {
@@ -96,17 +96,44 @@ export default {
       username: [{ required: true, validator: validateUserName, trigger: "change" }],
       password: [{ validator: validatePass, trigger: "change" }],
     };
-    
-    const handleFinish = async (values) => {
-      
+   //获取平台
+   const getGateway = async ()=>{
+     return new Promise(resolve => {
+      axios.get('gateway/deploy').then(res=>{
+       resolve(res)
+     })
+    })
+    }
+    //获取组织
+    const getOrg = async ()=>{
+      return new Promise(resolve => {
+      axios.get('organization/list').then(res=>{
+       resolve(res)
+     })
+    })
+    }
+    const handleFinish =  async (values) => {
+        const res = await getGateway()
+        const type = res.data.type
         await store.dispatch('user/login', values)
-        const toPath = decodeURIComponent(route.query.redirect || '/')
         message.success('登录成功！')
-        router.replace(toPath).then((_) => {
-          if (route.name == 'login') {
-            router.replace('/')
+        if(type===1){
+          // const toPath = decodeURIComponent(route.query.redirect || '/')
+          router.replace('/organization/list')
+          
+        }else{
+          const res2 = await getOrg()
+          const data = res2.data
+          let orgId =''
+          if(data.create[0]){
+            orgId = data.create[0]
+          }else{
+            orgId = data.join[0]? data.join[0].id : ''
           }
-        })
+          sessionStorage.setItem('orgId',orgId)
+          router.replace('/')
+        }
+       
     };
     const handleFinishFailed = (errors) => {
       console.log(errors);
