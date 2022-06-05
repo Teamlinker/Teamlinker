@@ -10,6 +10,7 @@
     "user": "ttsc -p ./user",
     "cooperation": "ttsc -p ./cooperation",
     "file": "ttsc -p ./file",
+    "auth": "ttsc -p ./auth",
     "build": "node ./build.js"
   },
   "pkg": {
