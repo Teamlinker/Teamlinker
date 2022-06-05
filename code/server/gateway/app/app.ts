@@ -18,12 +18,11 @@ import workflowApi from "../../../common/routes/workflow";
 import { Err } from "../../../common/status/error";
 import { ECommon_Services } from "../../../common/types";
 import Application, { ECommon_Application_Mode } from "../../common/app/app";
-import { deletePermission, processPermission } from '../../common/permission/base';
-import { getOrganizationPermission } from "../../common/permission/organization";
 import { proxyRequest } from "../../common/rpc/rpc";
 import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy } from "../../common/types/http";
 import { generateHttpOkResponse } from "../../common/util/http";
 import "../http/gateway";
+import authRpcApi from '../rpc/auth';
 import userRpcApi from '../rpc/user';
 import { checkIfNeedInit, handleImageFields } from "../util/util";
 import { ECommon_Organization_User_Role } from './../../../common/model/organization_user';
@@ -43,7 +42,8 @@ export default class GateWay extends Application {
                     permission:Permission_Base[]|{
                         data:Permission_Base[],
                         delete:boolean
-                    }
+                    },
+                    onlyAdmin:boolean
                 }
             }
         }>{}
@@ -58,7 +58,8 @@ export default class GateWay extends Application {
                 apiMap[baseUrl][objApi.method+" "+objApi.path]={
                     service:obj.service,
                     ignoreValidate:!!objApi.ignoreValidate,
-                    permission:objApi.permission??[]
+                    permission:objApi.permission??[],
+                    onlyAdmin:!!objApi.onlyAdmin
                 };
             }
         }
@@ -73,6 +74,7 @@ export default class GateWay extends Application {
                     let microServer = apiMap[baseUrl][method + " " + apiPath].service
                     let ignoreValidate = apiMap[baseUrl][method + " " + apiPath].ignoreValidate
                     let permission=apiMap[baseUrl][method + " " + apiPath].permission
+                    let onlyAdmin=apiMap[baseUrl][method + " " + apiPath].onlyAdmin
                     if(!ignoreValidate) {
                         let authorization = ctx.get("Authorization")
                         if(!authorization) {
@@ -107,18 +109,23 @@ export default class GateWay extends Application {
                             if(ctx.state.user.type==ECommon_User_Type.USER) {
                                 let organizationRole:ECommon_Organization_User_Role=null;
                                 if(ctx.get("organizationid")) {
-                                    organizationRole=await getOrganizationPermission(ctx.get("organizationid"),ctx.state.user.userId);
+                                    organizationRole=await authRpcApi.getOrganizationPermission(ctx.get("organizationid"),ctx.state.user.userId);
                                 }
                                 let per=Array.isArray(permission)?permission:permission.data;
-                                let [isCheck,map] =await processPermission(per,Object.assign({},obj.data,{
-                                    userId:ctx.state.user?ctx.state.user.userId:undefined,
-                                    isAdmin:ctx.state.user.type===ECommon_User_Type.ADMIN || organizationRole===ECommon_Organization_User_Role.ADMIN
-                                }))
-                                if(isCheck && typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data)) {
-                                    permissionDelete=map;
-                                }
-                                if(!isCheck) {
-                                    throw Err.User.accessDenied
+                                let isOrganizationAdmin = organizationRole===ECommon_Organization_User_Role.ADMIN
+                                if(!isOrganizationAdmin) {
+                                    if(onlyAdmin) {
+                                        throw Err.User.accessDenied
+                                    }
+                                    let [isCheck,map] =await authRpcApi.processPermission(per,Object.assign({},obj.data,{
+                                        userId:ctx.state.user?ctx.state.user.userId:undefined
+                                    }))
+                                    if(isCheck && typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data)) {
+                                        permissionDelete=map;
+                                    }
+                                    if(!isCheck) {
+                                        throw Err.User.accessDenied
+                                    }
                                 }
                             }
                         } else {
@@ -147,7 +154,7 @@ export default class GateWay extends Application {
                         ctx.body = ret.data;
                     }
                     if(permissionDelete) {
-                        deletePermission(permissionDelete)
+                        authRpcApi.deletePermission(permissionDelete)
                     }
                     await next()
                 } else {

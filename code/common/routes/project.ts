@@ -1,6 +1,6 @@
 import { ICommon_Model_Issue_Type } from '../model/issue_type';
 import { ECommon_Model_Project_Member_Type } from '../model/project_member';
-import { ICommon_Model_Project_Role } from '../model/project_role';
+import { ICommon_Model_Role } from '../model/role';
 import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Project } from './../model/project';
 import { ICommon_Model_Project_Module } from './../model/project_module';
@@ -213,7 +213,7 @@ const api={
             req:<{
                 projectId:string           
             }>{},
-            res:<ICommon_Model_Project_Role[]>{},
+            res:<Pick<ICommon_Model_Role,"id"|"name"|"description">[]>{},
             permission:[Permission_Types.Project.READ]
         },
         issueTypelist:{

@@ -1,11 +1,11 @@
 import Redlock, { Lock } from "redlock";
 import { Permission_Base } from "../../../common/permission/permission";
-import { getRedisInstance } from "../cache/redis";
-import { getMysqlInstance } from "../db/mysql";
-import { getComponent } from "../decorate/component";
-import { generateLeftJoinSql } from "../util/sql";
-import { permissionModel } from './../../../common/model/permission';
-import { rolelPermissionModel } from './../../../common/model/role_permission';
+import { getRedisInstance } from "../../common/cache/redis";
+import { getMysqlInstance } from "../../common/db/mysql";
+import { getComponent } from "../../common/decorate/component";
+import { generateLeftJoinSql } from "../../common/util/sql";
+import { permissionModel } from '../../../common/model/permission';
+import { rolelPermissionModel } from '../../../common/model/role_permission';
 var g_Permission=new WeakMap<Permission_Base,PermissionBase>()
 
 export abstract class PermissionBase<T=any> {

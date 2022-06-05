@@ -1,4 +1,3 @@
-import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Issue_Type } from './../model/issue_type';
 import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solution';
 import { ECommon_Services } from './../types';
@@ -15,7 +14,7 @@ const api={
                            
             }>{},
             res:<ICommon_Model_Issue_Type[]>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         info:{
             method:ECommon_HttpApi_Method.GET,
@@ -24,7 +23,7 @@ const api={
                 issueTypeId:string           
             }>{},
             res:<ICommon_Model_Issue_Type>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         create:{
             method:ECommon_HttpApi_Method.POST,
@@ -35,7 +34,7 @@ const api={
                 description?:string       
             }>{},
             res:<ICommon_Model_Issue_Type>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         update:{
             method:ECommon_HttpApi_Method.PUT,
@@ -47,7 +46,7 @@ const api={
                 description?:string           
             }>{},
             res:<ICommon_Model_Issue_Type>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         delete:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -56,7 +55,7 @@ const api={
                 issueTypeId:string           
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionList:{
             method:ECommon_HttpApi_Method.GET,
@@ -65,7 +64,7 @@ const api={
                            
             }>{},
             res:<ICommon_Route_Res_IssueTypeSolution_List_Item[]>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionInfo:{
             method:ECommon_HttpApi_Method.GET,
@@ -74,7 +73,7 @@ const api={
                 issueTypeSolutionId:string           
             }>{},
             res:<ICommon_Route_Res_IssueTypeSolution_List_Item>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionCreate:{
             method:ECommon_HttpApi_Method.POST,
@@ -84,7 +83,7 @@ const api={
                 description?:string       
             }>{},
             res:<ICommon_Model_Issue_Type_Solution>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionUpdate:{
             method:ECommon_HttpApi_Method.PUT,
@@ -95,7 +94,7 @@ const api={
                 description?:string           
             }>{},
             res:<ICommon_Model_Issue_Type_Solution>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionDelete:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -104,7 +103,7 @@ const api={
                 issueTypeSolutionId:string           
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionAddIssueType:{
             method:ECommon_HttpApi_Method.POST,
@@ -114,7 +113,7 @@ const api={
                 issueTypeId:string    
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionRemoveIssueType:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -124,7 +123,7 @@ const api={
                 issueTypeId:string    
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionCopy:{
             method:ECommon_HttpApi_Method.POST,
@@ -133,7 +132,7 @@ const api={
                 issueTypeSolutionId:string 
             }>{},
             res:<ICommon_Model_Issue_Type_Solution>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionBindProject:{
             method:ECommon_HttpApi_Method.POST,
@@ -143,7 +142,7 @@ const api={
                 projectId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionUnbindProject:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -153,7 +152,7 @@ const api={
                 projectId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionProjectList:{
             method:ECommon_HttpApi_Method.GET,
@@ -167,7 +166,7 @@ const api={
                 photo:string,
                 description:string
             }[]>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
     }
 }

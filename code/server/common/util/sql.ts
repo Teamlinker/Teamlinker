@@ -99,6 +99,8 @@ function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{
                 arrExpr.push(`${key}=${val}`)
             } else if (typeof(value)=="object" && (value instanceof Date)){
                 arrExpr.push(`${key}=${value.getTime()}`)
+            } else if(value===null) {
+                arrExpr.push(`isnull(${key})`)
             } else if (isEXPRVALUEEXP(value)) {
                 handleExp(key,value,arrExpr)
             }else {
@@ -131,6 +133,8 @@ function generateLeftJoinExp(objExpr?:{
                     arrExpr.push(`${value.model.table}.${key}=${val}`)
                 } else if (typeof(value.value)=="object" && (value.value instanceof Date)){
                     arrExpr.push(`${value.model.table}.${key}=${value.value.getTime()}`)
+                } else if(value.value===null) {
+                    arrExpr.push(`isnull(${value.model.table}.${key})`)
                 } else if (isEXPRVALUEEXP(value.value)) {
                     handleExp(key,value.value,arrExpr,value.model.table)
                 }else {

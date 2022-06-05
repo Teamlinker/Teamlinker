@@ -1,16 +1,17 @@
-import { ECommon_Model_Project_Member_Type, projectMemberModel } from '../../../common/model/project_member';
+import { commentModel } from '../../../common/model/comment';
+import { projectIssueModel } from '../../../common/model/project_issue';
+import { projectLabelModel } from '../../../common/model/project_label';
+import { ECommon_Model_Project_Member_Type } from '../../../common/model/project_member';
+import { projectModuleModel } from '../../../common/model/project_module';
+import { projectReleaseModel } from '../../../common/model/project_release';
 import { Permission_Types } from '../../../common/permission/permission';
-import { REDIS_GATEWAY } from '../cache/keys/gateway';
-import { getRedisInstance } from '../cache/redis';
-import { getMysqlInstance } from '../db/mysql';
-import { DComponent, getComponent } from '../decorate/component';
-import { generateLeftJoinSql, generateQuerySql } from '../util/sql';
-import StringUtil from '../util/string';
-import { commentModel } from './../../../common/model/comment';
-import { projectIssueModel } from './../../../common/model/project_issue';
-import { projectLabelModel } from './../../../common/model/project_label';
-import { projectModuleModel } from './../../../common/model/project_module';
-import { projectReleaseModel } from './../../../common/model/project_release';
+import { REDIS_GATEWAY } from '../../common/cache/keys/gateway';
+import { getRedisInstance } from '../../common/cache/redis';
+import { getMysqlInstance } from '../../common/db/mysql';
+import { DComponent, getComponent } from '../../common/decorate/component';
+import { generateLeftJoinSql, generateQuerySql } from '../../common/util/sql';
+import StringUtil from '../../common/util/string';
+import { roleMemberModel } from './../../../common/model/role_member';
 import { DPermission, PermissionBase } from './base';
 import { PermissionTeam } from './team';
 
@@ -140,9 +141,9 @@ abstract class PermissionProject extends PermissionBase<IPermission_Project> {
             }
             exist = await redis.exists(keys[0])
             if (!exist) {
-                let ret = await mysql.execute(generateQuerySql(projectMemberModel, ["member_id", "role_id"], {
-                    project_id: projectId,
-                    type: ECommon_Model_Project_Member_Type.USER
+                let ret = await mysql.execute(generateQuerySql(roleMemberModel, ["member_id", "role_id"], {
+                    item_id: projectId,
+                    member_type: ECommon_Model_Project_Member_Type.USER
                 }))
                 let map = {}
                 for (let obj of ret) {
@@ -159,9 +160,9 @@ abstract class PermissionProject extends PermissionBase<IPermission_Project> {
             }
             exist = await redis.exists(keys[1])
             if (!exist) {
-                let ret = await mysql.execute(generateQuerySql(projectMemberModel, ["member_id", "role_id"], {
-                    project_id: projectId,
-                    type: ECommon_Model_Project_Member_Type.TEAM
+                let ret = await mysql.execute(generateQuerySql(roleMemberModel, ["member_id", "role_id"], {
+                    item_id: projectId,
+                    member_type: ECommon_Model_Project_Member_Type.TEAM
                 }))
                 let map = {}
                 for (let obj of ret) {

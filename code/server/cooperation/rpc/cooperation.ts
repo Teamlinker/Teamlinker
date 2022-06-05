@@ -1,5 +1,5 @@
 import { Err } from "../../../common/status/error";
-import IServer_Common_RPC_Cooperation from "../../common/rpc/api/cooperation";
+import { IServer_Common_RPC_Cooperation } from "../../common/rpc/api/cooperation";
 import { DRPCRecieve } from "../../common/rpc/rpc";
 import { FieldSolutionService } from "../service/field";
 import ProjectService from "../service/project";

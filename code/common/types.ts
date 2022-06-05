@@ -2,5 +2,6 @@ export enum ECommon_Services {
     GateWay="gateway",
     User="user",
     Cooperation="cooperation",
-    File="file"
+    File="file",
+    AUTH="auth"
 }

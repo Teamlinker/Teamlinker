@@ -130,6 +130,7 @@ export class Rpc{
                         objRes.data=ret
                         callback(objRes)
                     } catch (err) {
+                        console.error(err)
                         objRes.code=err.code
                         objRes.msg=err.msg;
                         callback(objRes)

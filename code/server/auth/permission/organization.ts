@@ -1,8 +1,8 @@
 import { organizationUserModel } from '../../../common/model/organization_user';
-import { REDIS_GATEWAY } from '../cache/keys/gateway';
-import { getMysqlInstance } from '../db/mysql';
-import { generateQuerySql } from '../util/sql';
-import { ECommon_Organization_User_Role } from './../../../common/model/organization_user';
+import { REDIS_GATEWAY } from '../../common/cache/keys/gateway';
+import { getMysqlInstance } from '../../common/db/mysql';
+import { generateQuerySql } from '../../common/util/sql';
+import { ECommon_Organization_User_Role } from '../../../common/model/organization_user';
 export async function getOrganizationPermission(organizationId:string,userId:string):Promise<ECommon_Organization_User_Role> {
     if(!organizationId) {
         return null;
@@ -19,6 +19,7 @@ export async function getOrganizationPermission(organizationId:string,userId:str
             user_id:userId
         }))
         if(obj) {
+            await objRedis.set(String(obj.role),3600);
             return obj.role
         } else {
             return null;

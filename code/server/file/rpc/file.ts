@@ -1,4 +1,4 @@
-import IServer_Common_RPC_File from "../../common/rpc/api/file";
+import {IServer_Common_RPC_File} from "../../common/rpc/api/file";
 import { DRPCRecieve } from "../../common/rpc/rpc";
 import FileService from "../service/file";
 class RpcFileApi implements IServer_Common_RPC_File {

@@ -16,7 +16,8 @@ export interface ICommon_Http_Route {
     permission?:Permission_Base[]|{
         data:Permission_Base[],
         delete:boolean
-    }
+    },
+    onlyAdmin?:boolean
 }
 
 export interface ICommon_HttpApi {

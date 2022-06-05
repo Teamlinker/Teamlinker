@@ -1,3 +1,14 @@
+export function getAllPermissions(obj):Permission_Base[] {
+    let arr:Permission_Base[] =[]
+    let keys = Object.keys(obj)
+    for (let key of keys) {
+        let val = obj[key]
+        if (val instanceof Permission_Base) {
+            arr.push(val)
+        }
+    }
+    return arr;
+}
 
 export abstract class Permission_Base {
     constructor(private readonly name:string,public readonly value=name){}
@@ -19,7 +30,4 @@ export namespace Permission_Types {
         static readonly CREATE =new Team("CREATE","create team")
         static readonly MEMBER =new Team("MEMBER","modify team member")
     }
-    export class Admin extends Permission_Base {
-        static readonly ADMIN =new Team("ADMIN","admin")
-    } 
 }

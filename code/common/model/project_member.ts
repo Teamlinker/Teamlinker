@@ -1,7 +1,6 @@
 import { BaseModel } from "./base"
 export interface ICommon_Model_Project_Member {
     id :string,
-  role_id :string ,
   created_time :Date,
   modified_time :Date,
   project_id :string ,

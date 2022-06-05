@@ -18,7 +18,7 @@
   "include": [
     "./**/*",
     "../../common/**/*"
- ],
+, "../auth/permission" ],
   "exclude": [
     "node_modules"
   ]

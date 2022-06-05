@@ -1,4 +1,3 @@
-import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Organization } from './../model/organization';
 import { ECommon_Organization_User_Role, ICommon_Model_Organization_User } from './../model/organization_user';
 import { ECommon_Services } from './../types';
@@ -45,7 +44,7 @@ const api={
                  active?:number             
             }>{},
             res:<ICommon_Model_Organization>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         remove:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -54,7 +53,7 @@ const api={
                 organizationId:string        
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         listUser:{
             method:ECommon_HttpApi_Method.GET,
@@ -83,7 +82,7 @@ const api={
                 location?:string        
             }>{},
             res:<ICommon_Model_Organization_User>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         updateUser:{
             method:ECommon_HttpApi_Method.PUT,
@@ -101,7 +100,7 @@ const api={
                 location?:string        
             }>{},
             res:<ICommon_Model_Organization_User>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         deleteUser:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -111,7 +110,7 @@ const api={
                 userId:string    
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
 
     }

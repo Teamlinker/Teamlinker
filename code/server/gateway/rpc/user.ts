@@ -1,5 +1,5 @@
 import { ECommon_Services } from '../../../common/types';
-import IServer_Common_RPC_User, { IServer_Common_RPC_User_CheckSession } from "../../common/rpc/api/user";
+import {IServer_Common_RPC_User, IServer_Common_RPC_User_CheckSession } from "../../common/rpc/api/user";
 import { DRPCSend } from "../../common/rpc/rpc";
 class RpcUserApi implements IServer_Common_RPC_User {
     @DRPCSend(ECommon_Services.User)
