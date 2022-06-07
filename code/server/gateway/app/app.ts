@@ -26,6 +26,7 @@ import authRpcApi from '../rpc/auth';
 import userRpcApi from '../rpc/user';
 import { checkIfNeedInit, handleImageFields } from "../util/util";
 import { ECommon_Organization_User_Role } from './../../../common/model/organization_user';
+import { ECommon_Application_Deploy } from './../../../common/types';
 import { CacheService } from './../cache/service';
 
 var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi];
@@ -43,7 +44,8 @@ export default class GateWay extends Application {
                         data:Permission_Base[],
                         delete:boolean
                     },
-                    onlyAdmin:boolean
+                    onlyAdmin:boolean,
+                    onlyOn?: ECommon_Application_Deploy
                 }
             }
         }>{}
@@ -59,7 +61,8 @@ export default class GateWay extends Application {
                     service:obj.service,
                     ignoreValidate:!!objApi.ignoreValidate,
                     permission:objApi.permission??[],
-                    onlyAdmin:!!objApi.onlyAdmin
+                    onlyAdmin:!!objApi.onlyAdmin,
+                    onlyOn: objApi.onlyOn
                 };
             }
         }
@@ -75,6 +78,12 @@ export default class GateWay extends Application {
                     let ignoreValidate = apiMap[baseUrl][method + " " + apiPath].ignoreValidate
                     let permission=apiMap[baseUrl][method + " " + apiPath].permission
                     let onlyAdmin=apiMap[baseUrl][method + " " + apiPath].onlyAdmin
+                    let onlyOn = apiMap[baseUrl][method + " " + apiPath].onlyOn
+                    if(onlyOn === ECommon_Application_Deploy.OFFLINE && Application.mode===ECommon_Application_Mode.MICRO) {
+                        throw Err.Common.requestForbidden
+                    } else if(onlyOn===ECommon_Application_Deploy.PLATFORM && (Application.mode===ECommon_Application_Mode.DOCKER || Application.mode===ECommon_Application_Mode.SINGLE)) {
+                        throw Err.Common.requestForbidden
+                    }
                     if(!ignoreValidate) {
                         let authorization = ctx.get("Authorization")
                         if(!authorization) {

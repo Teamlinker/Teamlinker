@@ -20,6 +20,10 @@ export namespace Err {
             code:5,
             msg:"mysql not config"
         },
+        requestForbidden:{
+            code:6,
+            msg:"request forbidden"
+        }
     }
     export let User = {
         userNotFound:{

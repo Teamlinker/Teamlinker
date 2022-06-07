@@ -5,3 +5,8 @@ export enum ECommon_Services {
     File="file",
     AUTH="auth"
 }
+
+export enum ECommon_Application_Deploy {
+    PLATFORM,
+    OFFLINE
+}
