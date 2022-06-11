@@ -27,6 +27,11 @@ service.interceptors.request.use(
     // ['X-Token'] is a custom headers key
     // please modify it according to the actual situation
    config.headers['Authorization'] = getToken()
+
+   // TODO organizationid 动态加载
+   config.headers['organizationid'] = localStorage.getItem('organizationid')
+
+   
    if(config.type!=='upload'){
     config.data = qs.stringify(config.data)
    }
@@ -53,6 +58,7 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
+    debugger
     const res = response.data
     if (response.headers.token) {
       setToken(response.headers.token)

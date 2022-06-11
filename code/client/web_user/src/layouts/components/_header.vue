@@ -98,6 +98,9 @@
               <a-menu-item key="logout" @click="onMenu">
                 <Icon :icon="LogoutOutlinedIcon" />退出登录
               </a-menu-item>
+              <a-menu-item key="logout" @click="onAdmin">
+                <Icon :icon="LogoutOutlinedIcon" />管理后台
+              </a-menu-item>
               <a-menu-item key="logout" @click="onPerPage">
                 <Icon :icon="HomeOutlined" />个人主页
               </a-menu-item>
@@ -107,7 +110,10 @@
       </div>
     </div>
     <a-modal v-model:visible="visible" @ok="handleOk">
-      <create-issue ref="issueRef" @hideIssueModal="hideIssueModal"></create-issue>
+      <create-issue
+        ref="issueRef"
+        @hideIssueModal="hideIssueModal"
+      ></create-issue>
     </a-modal>
   </div>
 </template>
@@ -192,7 +198,11 @@ export default defineComponent({
       LogoutOutlinedIcon: "LogoutOutlined",
       FullscreenOutlinedIcon: "FullscreenOutlined",
       value: "",
-      options: [{ value: "搜索示例1" }, { value: "搜索示例2" }, { value: "搜索示例3" }],
+      options: [
+        { value: "搜索示例1" },
+        { value: "搜索示例2" },
+        { value: "搜索示例3" },
+      ],
       filterOption: filterOption,
       searchInputClass: "search-input",
       inputSearch: "",
@@ -213,6 +223,12 @@ export default defineComponent({
       } else {
         message.info(msg || "登出失败");
       }
+    };
+    const onAdmin = async () => {
+      let token = sessionStorage.getItem("token");
+      let orgId = sessionStorage.getItem("orgId");
+      let url = `http://localhost:9528/#/login?token=${token}&orgId=${orgId}`;
+      window.open(url, "_blank");
     };
     const getTeamList = () => {
       const params = {
@@ -257,6 +273,7 @@ export default defineComponent({
       hideIssueModal,
       handleOk,
       issueRef,
+      onAdmin,
     };
   },
 });

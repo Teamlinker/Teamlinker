@@ -61,7 +61,7 @@
 
 <script>
 import { validUsername } from "@/utils/validate";
-
+import { setToken, getToken } from "@/utils/auth";
 export default {
   name: "Login",
   data() {
@@ -104,6 +104,14 @@ export default {
       },
       immediate: true,
     },
+  },
+  mounted() {
+    let token = this.$route.query.token;
+    let orgId = this.$route.query.orgId;
+    localStorage.setItem("organizationid", orgId);
+    debugger
+    setToken(token);
+    console.log(token,orgId)
   },
   methods: {
     showPwd() {

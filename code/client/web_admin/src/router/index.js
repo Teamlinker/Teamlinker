@@ -198,6 +198,13 @@ export const constantRoutes = [
         hidden: true,
         meta: { title: "Edit Field", icon: "table" },
       },
+
+      {
+        path: "organizationList",
+        name: "Form",
+        component: () => import("@/views/table/organization"),
+        meta: { title: "组织管理", icon: "table" },
+      },
     ],
   },
 
