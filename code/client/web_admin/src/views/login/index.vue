@@ -109,9 +109,8 @@ export default {
     let token = this.$route.query.token;
     let orgId = this.$route.query.orgId;
     localStorage.setItem("organizationid", orgId);
-    debugger
     setToken(token);
-    console.log(token,orgId)
+    window.location.reload();
   },
   methods: {
     showPwd() {

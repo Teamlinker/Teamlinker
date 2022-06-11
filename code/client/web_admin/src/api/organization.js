@@ -8,6 +8,14 @@ export function getList(params) {
     params
   })
 }
+//获取详情
+export function getDetail(params) {
+  return request({
+    url: '/api/organization/item',
+    method: 'get',
+    params
+  })
+}
 //创建组织
 export function createTemp(data) {
   return request({
