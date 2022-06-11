@@ -1,7 +1,7 @@
 import * as jwt from "jsonwebtoken";
 import { REDIS_USER } from "../../common/cache/keys/user";
 import { getConfigInstance } from '../../common/config/config';
-import IServer_Common_RPC_User, { IServer_Common_RPC_User_CheckSession } from "../../common/rpc/api/user";
+import {IServer_Common_RPC_User,  IServer_Common_RPC_User_CheckSession } from "../../common/rpc/api/user";
 import { DRPCRecieve } from "../../common/rpc/rpc";
 import AdminService from "../service/admin";
 import TeamService from "../service/team";

@@ -1,5 +1,5 @@
 import { ICommon_Model_User } from './../model/user';
-import { ECommon_Services } from './../types';
+import { ECommon_Application_Deploy, ECommon_Services } from './../types';
 import { ICommon_Route_Res_User_List, ICommon_Route_Res_User_Profile, ICommon_Route_Res_User_ProjectList, ICommon_Route_Res_User_TeamList } from './response';
 import { ECommon_HttpApi_Method } from "./types";
 const api={
@@ -58,6 +58,17 @@ const api={
             path:"/item",
             req:<Partial<Omit<ICommon_Model_User,"id" | "password" | "created_time" | "modified_time">> & {userId?:string}>{},
             res:<Omit<ICommon_Model_User,"password">>{},
+        },
+        register:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/register",
+            req:<{
+                username:string,
+                password:string
+            }>{},
+            res:<Omit<ICommon_Model_User,"password">>{},
+            ignoreValidate:true,
+            onlyOn: ECommon_Application_Deploy.PLATFORM
         },
         create:{//创建用户
             method:ECommon_HttpApi_Method.POST,

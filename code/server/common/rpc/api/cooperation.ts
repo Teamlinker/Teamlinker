@@ -1,4 +1,4 @@
-export default interface IServer_Common_RPC_Cooperation {
+export interface IServer_Common_RPC_Cooperation {
     clearProject?(organizationId:string)
     clearField?(organizationId:string)
     clearWorkflow?(organizationId:string)

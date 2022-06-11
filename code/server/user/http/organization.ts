@@ -18,7 +18,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.info)
-    async info(@DHttpReqParamRequired("organizationid") organizationId:string) :Promise<typeof organizationApi.routes.info.res>{
+    async info(@DHttpReqParamRequired("organizationId") organizationId:string) :Promise<typeof organizationApi.routes.info.res>{
         let obj=await OrganizationService.getItemById(organizationId)
         if(!obj) {
             throw Err.Organization.organizationNotFound
@@ -40,7 +40,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.update)
-    async update(@DHttpReqParamRequired("organizationid") organizationId:string,
+    async update(@DHttpReqParamRequired("organizationId") organizationId:string,
     @DHttpReqParam("name")  name:string,
     @DHttpReqParam("description")   description:string,
     @DHttpReqParam("photo") photo:string,
@@ -60,7 +60,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.remove)
-    async remove(@DHttpReqParamRequired("organizationid") organizationId:string) :Promise<typeof organizationApi.routes.remove.res>{
+    async remove(@DHttpReqParamRequired("organizationId") organizationId:string) :Promise<typeof organizationApi.routes.remove.res>{
         let obj=await OrganizationService.getItemById(organizationId)
         if(!obj) {
             throw Err.Organization.organizationNotFound
@@ -70,7 +70,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.listUser)
-    async listUser(@DHttpReqParamRequired("organizationid") organizationId:string,
+    async listUser(@DHttpReqParamRequired("organizationId") organizationId:string,
     @DHttpReqParamRequired("page") page:number,
     @DHttpReqParamRequired("size") size:number,
     @DHttpReqParam("keyword") keyword:string) :Promise<typeof organizationApi.routes.listUser.res>{
@@ -83,7 +83,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.addUser)
-    async addUser(@DHttpReqParamRequired("organizationid") organizationId:string,
+    async addUser(@DHttpReqParamRequired("organizationId") organizationId:string,
     @DHttpReqParamRequired("username") username:string,
     @DHttpReqParamRequired("role") role:ECommon_Organization_User_Role,
     @DHttpReqParamRequired("nickname") nickname:string,
@@ -122,7 +122,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.updateUser)
-    async updateUser(@DHttpReqParamRequired("organizationid") organizationId:string,
+    async updateUser(@DHttpReqParamRequired("organizationId") organizationId:string,
     @DHttpReqParamRequired("userId") userId:string,
     @DHttpReqParam("role") role:ECommon_Organization_User_Role,
     @DHttpReqParam("nickname") nickname:string,
@@ -159,7 +159,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.deleteUser)
-    async deleteUser(@DHttpReqParamRequired("organizationid") organizationId:string,
+    async deleteUser(@DHttpReqParamRequired("organizationId") organizationId:string,
     @DHttpReqParamRequired("userId") userId:string) :Promise<typeof organizationApi.routes.deleteUser.res>{
         let obj=await OrganizationService.getItemById(organizationId)
         if(!obj) {

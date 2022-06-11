@@ -1,12 +1,11 @@
 import { ICommon_Model_Team, teamModel } from '../../../common/model/team';
-import { ICommon_Model_Team_Role, teamRoleModel } from '../../../common/model/team_role';
 import { teamUserModel } from '../../../common/model/team_user';
 import { userModel } from '../../../common/model/user';
 import { Err } from "../../../common/status/error";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { Mapper } from '../../common/entity/mapper';
 import CommonUtil from '../../common/util/common';
-import { generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
+import { generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
 import { Table_Team } from './../../../common/model/team';
 class TeamMapper extends Mapper<typeof teamModel> {
     constructor(){
@@ -28,39 +27,17 @@ class TeamMapper extends Mapper<typeof teamModel> {
         }
     }
 
-    async getRoles(teamId:string):Promise<ICommon_Model_Team_Role[]> {
-        if(!teamId) {
-            throw  Err.Team.teamNotFound
-        }
-        var mysql=getMysqlInstance();
-        let ret=await mysql.execute(generateQuerySql(teamRoleModel,null,{
-            team_id:{
-                type:"or",
-                values:[
-                    {
-                        exp:"is null"
-                    },
-                    {
-                        value:teamId,
-                        exp:"="
-                    }
-                ]
-            }
-        }))
-        return ret
-    }
 
     async members(teamId:string):Promise<{
         id:string,
         name:string,
-        photo:string,
-        role:Omit<ICommon_Model_Team_Role,"team_id">
+        photo:string
     }[]> {
         if(!teamId) {
             throw  Err.Team.teamNotFound
         }
         var mysql=getMysqlInstance();
-        let sql=generateLeftJoin2Sql({
+        let sql=generateLeftJoinSql({
             model:teamUserModel
         },{
             model:userModel,
@@ -76,16 +53,6 @@ class TeamMapper extends Mapper<typeof teamModel> {
                 newFields:["name"]
             }
         },{
-            model:teamRoleModel,
-            columns:["id","name","description"],
-            aggregation:"role",
-            expression:{
-                id:{
-                    model:teamUserModel,
-                    field:"role_id"
-                }
-            }
-        },{
             team_id:{
                 value:teamId,
                 model:teamUserModel
@@ -95,13 +62,11 @@ class TeamMapper extends Mapper<typeof teamModel> {
         return ret;
     }
 
-    async addMember(teamId:string,userId:string,roleId:string) {
+    async addMember(teamId:string,userId:string) {
         if(!teamId) {
             throw  Err.Team.teamNotFound
         } else if(!userId) {
             throw Err.User.userIdNotExists
-        } else if(!roleId) {
-            throw Err.Role.roleNotFound
         }
         let mysql=getMysqlInstance()
         let existsMemeber=await mysql.executeOne(generateQuerySql(teamUserModel,[],{
@@ -111,16 +76,9 @@ class TeamMapper extends Mapper<typeof teamModel> {
         if(existsMemeber) {
             throw Err.Team.teamMemberExists
         }
-        let existsRole=await mysql.executeOne(generateQuerySql(teamRoleModel,[],{
-            id:roleId
-        }))
-        if(!existsRole) {
-            throw Err.Role.roleNotExists
-        }
         await mysql.execute(generateCreateSql(teamUserModel,{
             user_id:userId,
             team_id:teamId,
-            role_id:roleId,
             id:await generateSnowId()
         }))
     }
@@ -135,36 +93,6 @@ class TeamMapper extends Mapper<typeof teamModel> {
         await mysql.execute(generateDeleteSql(teamUserModel,{
             team_id:teamId,
             user_id:userId
-        }))
-    }
-
-    async changeRole(teamId:string,userId:string,roleId:string) {
-        if(!teamId) {
-            throw  Err.Team.teamNotFound
-        } else if(!userId) {
-            throw Err.User.userIdNotExists
-        } else if(!roleId) {
-            throw Err.Role.roleNotFound
-        }
-        let mysql=getMysqlInstance()
-        let existsMemeber=await mysql.executeOne(generateQuerySql(teamUserModel,[],{
-            user_id:userId,
-            team_id:teamId
-        }))
-        if(!existsMemeber) {
-            throw Err.Team.teamMemeberNotExists
-        }
-        let existsRole=await mysql.executeOne(generateQuerySql(teamRoleModel,[],{
-            id:roleId
-        }))
-        if(!existsRole) {
-            throw Err.Role.roleNotExists
-        }
-        await mysql.execute(generateUpdateSql(teamUserModel,{
-            role_id:roleId
-        },{
-            user_id:userId,
-            team_id:teamId
         }))
     }
 

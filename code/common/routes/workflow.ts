@@ -1,5 +1,4 @@
 import { ECommon_Model_Workflow_Node_Status } from '../model/workflow_node';
-import { Permission_Types } from '../permission/permission';
 import { ICommon_Model_Workflow } from './../model/workflow';
 import { ICommon_Model_Workflow_Action } from './../model/workflow_action';
 import { ICommon_Model_Workflow_Node } from './../model/workflow_node';
@@ -18,7 +17,7 @@ const api={
                            
             }>{},
             res:<ICommon_Model_Workflow[]>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         info:{
             method:ECommon_HttpApi_Method.GET,
@@ -27,7 +26,7 @@ const api={
                 workflowId:string          
             }>{},
             res:<ICommon_Route_Res_Workflow_Info>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         create:{
             method:ECommon_HttpApi_Method.POST,
@@ -37,7 +36,7 @@ const api={
                 description? :string,
             }>{},
             res:<ICommon_Model_Workflow>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         edit:{
             method:ECommon_HttpApi_Method.PUT,
@@ -48,7 +47,7 @@ const api={
                 description? :string,
             }>{},
             res:<ICommon_Model_Workflow>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         delete:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -57,7 +56,7 @@ const api={
                 workflowId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         copy:{
             method:ECommon_HttpApi_Method.POST,
@@ -66,7 +65,7 @@ const api={
                 workflowId:string
             }>{},
             res:<ICommon_Model_Workflow>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         addNode:{
             method:ECommon_HttpApi_Method.POST,
@@ -80,7 +79,7 @@ const api={
                 y:number
             }>{},
             res:<ICommon_Model_Workflow_Node>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         editNode:{
             method:ECommon_HttpApi_Method.PUT,
@@ -94,7 +93,7 @@ const api={
                 y:number
             }>{},
             res:<ICommon_Model_Workflow_Node>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         deleteNode:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -103,7 +102,7 @@ const api={
                 workflowNodeId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         addAction:{
             method:ECommon_HttpApi_Method.POST,
@@ -116,7 +115,7 @@ const api={
                 destNodeId:string,
             }>{},
             res:<ICommon_Model_Workflow_Action>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         editAction:{
             method:ECommon_HttpApi_Method.PUT,
@@ -129,7 +128,7 @@ const api={
                 destNodeId:string,
             }>{},
             res:<ICommon_Model_Workflow_Action>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         deleteAction:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -138,7 +137,7 @@ const api={
                 workflowActionId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionList:{
             method:ECommon_HttpApi_Method.GET,
@@ -147,7 +146,7 @@ const api={
                            
             }>{},
             res:<ICommon_Model_Workflow_Solution[]>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionInfo:{
             method:ECommon_HttpApi_Method.GET,
@@ -156,7 +155,7 @@ const api={
                 workflowSolutionId:string              
             }>{},
             res:<ICommon_Route_Res_WorkflowSolution_Info>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionAssign:{
             method:ECommon_HttpApi_Method.PUT,
@@ -168,7 +167,7 @@ const api={
                 issueTypeSolutionId:string         
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionCreate:{
             method:ECommon_HttpApi_Method.POST,
@@ -178,7 +177,7 @@ const api={
                  description?:string        
             }>{},
             res:<ICommon_Model_Workflow_Solution>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionUpdate:{
             method:ECommon_HttpApi_Method.PUT,
@@ -189,7 +188,7 @@ const api={
                 description?:string         
             }>{},
             res:<ICommon_Model_Workflow_Solution>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionDelete:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -198,7 +197,7 @@ const api={
                 workflowSolutionId:string      
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionBind:{
             method:ECommon_HttpApi_Method.PUT,
@@ -208,7 +207,7 @@ const api={
                 issueTypeSolutionId:string         
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionReset:{
             method:ECommon_HttpApi_Method.PUT,
@@ -218,7 +217,7 @@ const api={
                 issueTypeSolutionId:string         
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionCopy:{
             method:ECommon_HttpApi_Method.POST,
@@ -227,7 +226,7 @@ const api={
                 workflowSolutionId:string 
             }>{},
             res:<ICommon_Model_Workflow_Solution>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionListWorkflow:{
             method:ECommon_HttpApi_Method.GET,
@@ -236,7 +235,7 @@ const api={
                 workflowSolutionId:string,
             }>{},
             res:<ICommon_Model_Workflow[]>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionAddWorkflow:{
             method:ECommon_HttpApi_Method.POST,
@@ -246,7 +245,7 @@ const api={
                 workflowId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         solutionRemoveWorkflow:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -256,7 +255,7 @@ const api={
                 workflowId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
         getBindWorkflowSolution:{
             method:ECommon_HttpApi_Method.GET,
@@ -265,7 +264,7 @@ const api={
                 issueTypeSolutionId:string,
             }>{},
             res:<ICommon_Model_Workflow_Solution>{},
-            permission:[Permission_Types.Admin.ADMIN]
+            onlyAdmin:true
         },
     }
 }

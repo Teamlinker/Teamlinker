@@ -17,7 +17,7 @@
   },
   "include": [
     "./**/*"
- ],
+, "../auth/util/obtp.ts" ],
   "exclude": [
     "node_modules"
   ]

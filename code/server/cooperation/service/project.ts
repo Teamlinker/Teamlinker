@@ -1,10 +1,12 @@
-import { ICommon_Model_Project_Role } from "../../../common/model/project_role";
+import { ECommon_Model_Role_Type } from "../../../common/model/role";
+import { ECommon_Model_Role_Memeber_Type } from "../../../common/model/role_member";
 import { ICommon_Route_Res_Project_List } from "../../../common/routes/response";
 import { Err } from "../../../common/status/error";
 import { Entity } from "../../common/entity/entity";
 import { EServer_Common_Event_Types } from "../../common/event/types";
 import { moduleMapper } from "../mapper/module";
 import { projectMapper } from '../mapper/project';
+import rpcAuthApi from "../rpc/auth";
 import ProjectIssueService from "../service/issue";
 import { ICommon_Model_Project, projectModel } from './../../../common/model/project';
 import { ECommon_Model_Project_Member_Type } from './../../../common/model/project_member';
@@ -23,7 +25,7 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         await moduleMapper.deleteByProjectId(this.item.id)
         await tagMapper.deleteByProjectId(this.item.id)
         await projectMapper.clearMember(this.item.id);
-        await projectMapper.clearRole(this.item.id);
+        await rpcAuthApi.clearRoleByItemId(this.item.id);
         await ProjectIssueService.clearByProjectIds([this.item.id]);
         await releaseMapper.clear(this.item.id);
         await issueTypeSolutionMapper.clearProjects([this.item.id]);
@@ -31,9 +33,10 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
 
     override async create(): Promise<ICommon_Model_Project> {
         let ret=await super.create();
-        let role=await projectMapper.getRoleByName("admin","")
+        let role=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.PROJECT)
         if(role) {
-            await projectMapper.addMember(this.getId(),this.getItem().created_by,ECommon_Model_Project_Member_Type.USER,role.id)
+            await projectMapper.addMember(this.getId(),this.getItem().created_by,ECommon_Model_Project_Member_Type.USER)
+            await rpcAuthApi.addRole(this.getId(),this.getItem().created_by,role,ECommon_Model_Role_Memeber_Type.Project,ECommon_Model_Project_Member_Type.USER)
         }
         let issueTypeSolution=await IssueTypeSolutionService.getReservedItem(ret.organization_id)
         if(issueTypeSolution) {
@@ -44,19 +47,30 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
 
     async listMember(page:number,size:number){
         let ret=await projectMapper.listMember(this.item.id,page,size);
+        let arr=await rpcAuthApi.getRolesByMemberIds(ret.data.map(item=>{
+            return {
+                itemId:this.getId(),
+                memberId:item.id
+            }
+        }))
+        for(let i=0;i<ret.data.length;i++) {
+            ret.data[i].role=arr[i]
+        }
         return ret;
     }
 
     async addMember(memberId:string,type:ECommon_Model_Project_Member_Type,roleId:string) {
-        await projectMapper.addMember(this.item.id,memberId,type,roleId)
+        await projectMapper.addMember(this.item.id,memberId,type)
+        await rpcAuthApi.addRole(this.getId(),memberId,roleId,ECommon_Model_Role_Memeber_Type.Project,type)
     }
 
     async removeMember(memberId:string){
         await projectMapper.removeMember(this.item.id,memberId)
+        await rpcAuthApi.removeRole(this.getId(),memberId)
     }
 
     async editMember(memberId:string,roleId:string){
-        await projectMapper.changeRole(this.item.id,memberId,roleId)
+        await rpcAuthApi.changeRole(this.item.id,memberId,roleId)
     }
 
     static async list(organizationId:string,page:number,size:number,keyword?:string,userId?:string):Promise<ICommon_Route_Res_Project_List>{
@@ -69,11 +83,11 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         }
     }
 
-    async getRoles():Promise<ICommon_Model_Project_Role[]>{
+    async getRoles(){
         if(!this.item || !this.item.id) {
             throw  Err.Project.projectNotFound;
         }
-        let ret=await projectMapper.getRoles(this.item.id);
+        let ret=await rpcAuthApi.getRolesByItemId(this.item.id,ECommon_Model_Role_Type.PROJECT);
         return ret;
     }
 
@@ -171,7 +185,7 @@ export default class Project extends Entity<typeof projectModel,typeof projectMa
         await moduleMapper.deleteByProjectIds(projectIds)
         await tagMapper.deleteByProjectIds(projectIds)
         await projectMapper.clearMemberByProjectIds(projectIds);
-        await projectMapper.clearRoleByProjectIds(projectIds);
+        await rpcAuthApi.clearRoleByItemIds(projectIds);
         await ProjectIssueService.clearByProjectIds(projectIds);
         await releaseMapper.clearByProjectIds(projectIds);
         await issueTypeSolutionMapper.clearProjects(projectIds);

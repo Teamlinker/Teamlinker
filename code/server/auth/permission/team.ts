@@ -1,10 +1,10 @@
-import { teamUserModel } from "../../../common/model/team_user";
 import { Permission_Types } from "../../../common/permission/permission";
-import { getRedisInstance } from "../cache/redis";
-import { getMysqlInstance } from "../db/mysql";
-import { DComponent } from '../decorate/component';
-import { generateQuerySql } from "../util/sql";
-import StringUtil from "../util/string";
+import { getRedisInstance } from "../../common/cache/redis";
+import { getMysqlInstance } from "../../common/db/mysql";
+import { DComponent } from '../../common/decorate/component';
+import { generateQuerySql } from "../../common/util/sql";
+import StringUtil from "../../common/util/string";
+import { roleMemberModel } from './../../../common/model/role_member';
 import { DPermission, PermissionBase } from "./base";
 
 export type IPermission_Team =string[]
@@ -34,12 +34,12 @@ export class PermissionTeam extends PermissionBase<IPermission_Team> {
             let permissionsSet=new Set<string>();
             let exist=await redis.exists(keys[0])
             if(!exist) {
-                let ret=await mysql.execute(generateQuerySql(teamUserModel,["user_id","role_id"],{
-                    team_id:teamId
+                let ret=await mysql.execute(generateQuerySql(roleMemberModel,["member_id","role_id"],{
+                    item_id:teamId
                 }))
                 let map={}
                 for(let obj of ret) {
-                    map[obj.user_id]=obj.role_id
+                    map[obj.member_id]=obj.role_id
                 }
                 await redis.hSet(keys[0],map)
             }

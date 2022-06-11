@@ -20,6 +20,10 @@ export namespace Err {
             code:5,
             msg:"mysql not config"
         },
+        requestForbidden:{
+            code:6,
+            msg:"request forbidden"
+        }
     }
     export let User = {
         userNotFound:{
@@ -369,6 +373,17 @@ export namespace Err {
         nicknameEmpty:{
             code:8005,
             msg:"nickname empty"
+        }
+    }
+
+    export let Auth = {
+        roleNotFound:{
+            code:9000,
+            msg:"role not found"
+        },
+        roleAlreadyExists: {
+            code:9001,
+            msg:"role already exists"
         }
     }
 }

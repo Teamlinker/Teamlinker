@@ -19,6 +19,22 @@ class UserController {
         return obj
     }
 
+    @DHttpApi(userApi.routes.register)
+    async register(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string):Promise<typeof userApi.routes.create.res>{
+        let user=await UserService.getItemByName(username)
+        if(user) {
+            throw Err.User.userExists
+        }
+        user=new UserService
+        user.assignItem({
+            username:username,
+            password:password
+        })
+        let obj=await user.create()
+        delete obj.password
+        return obj
+    }
+
     @DHttpApi(userApi.routes.login)
     async login(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.login.res> {
         let user=await UserService.getItemByName(username)

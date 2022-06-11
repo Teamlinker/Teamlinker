@@ -5,12 +5,12 @@ import { Table_Project } from '../../../common/model/project';
 import { Table_Project_Issue } from "../../../common/model/project_issue";
 import { Table_Workflow } from "../../../common/model/workflow";
 import { Table_Workflow_Solution_Workflow_Issue_Type } from "../../../common/model/workflow_solution_workflow_issue_type";
-import { Permission_Base, Permission_Types } from '../../../common/permission/permission';
 import Application, { ECommon_Application_Mode } from '../../common/app/app';
 import { getConfigInstance } from '../../common/config/config';
 import { getMysqlInstance } from "../../common/db/mysql";
 import CommonUtil from "../../common/util/common";
-import { generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
+import { generateQuerySql, generateUpdateSql } from '../../common/util/sql';
+import rpcAuthApi from '../rpc/auth';
 import rpcCooperationApi from "../rpc/cooperation";
 import rpcFileApi from '../rpc/file';
 import rpcUserApi from '../rpc/user';
@@ -36,10 +36,10 @@ import { Table_Project_Label_Issue } from './../../../common/model/project_label
 import { Table_Project_Member } from './../../../common/model/project_member';
 import { Table_Project_Module } from './../../../common/model/project_module';
 import { Table_Project_Module_Issue } from './../../../common/model/project_module_issue';
-import { Table_Project_Role } from './../../../common/model/project_role';
+import { Table_Role } from './../../../common/model/role';
+import { Table_Role_Member } from './../../../common/model/role_member';
 import { Table_Role_Permission } from './../../../common/model/role_permission';
 import { Table_Team } from './../../../common/model/team';
-import { Table_Team_Role } from './../../../common/model/team_role';
 import { Table_Team_User } from './../../../common/model/team_user';
 import { Table_User } from './../../../common/model/user';
 import { Table_Version, versionModel } from './../../../common/model/version';
@@ -48,7 +48,6 @@ import { Table_Workflow_Node } from './../../../common/model/workflow_node';
 import { Table_Workflow_Solution } from './../../../common/model/workflow_solution';
 import { Table_Workflow_Solution_Issue_Type_Solution } from './../../../common/model/workflow_solution_issue_type_solution';
 import { Table_Workflow_Solution_Workflow } from './../../../common/model/workflow_solution_workflow';
-import { OBTPConfig } from './obtp';
 
 export async function handleImageFields(data:object,organizationId:string){
     let arrImage=<{
@@ -113,12 +112,12 @@ async function resetSystem(){
         let mysql=getMysqlInstance()
         await mysql.execute(`delete from ${Table_Version}`) 
         await mysql.execute(`delete from ${Table_Permission}`) 
-        await mysql.execute(`delete from ${Table_Project_Role}`) 
+        await mysql.execute(`delete from ${Table_Role}`) 
         await mysql.execute(`delete from ${Table_Role_Permission}`) 
+        await mysql.execute(`delete from ${Table_Role_Member}`) 
         await mysql.execute(`delete from ${Table_User}`) 
         await mysql.execute(`delete from ${Table_Project}`) 
         await mysql.execute(`delete from ${Table_Project_Member}`) 
-        await mysql.execute(`delete from ${Table_Team_Role}`)
         await mysql.execute(`delete from ${Table_Team}`)  
         await mysql.execute(`delete from ${Table_Team_User}`)
         await mysql.execute(`delete from ${Table_Issue_Type}`)
@@ -256,8 +255,8 @@ export async function initSystem() {
         let userIds=await rpcUserApi.initUser()
         let organizationId=await rpcUserApi.initOrganization(adminIds,userIds);
         await initVersion()
-        let objPermission=await initPermission()
-        let {projectRoleUserId,groupRoleUserId}=await initRole(objPermission);
+        let objPermission=await rpcAuthApi.initPermission();
+        let {projectRoleUserId,groupRoleUserId}=await rpcAuthApi.initRole(objPermission);
         await rpcUserApi.initTeam(userIds[0],groupRoleUserId,organizationId);
         let projectId=await rpcCooperationApi.initProject(userIds[0],projectRoleUserId,organizationId)
         await rpcCooperationApi.initIssueTypeWorkflowAndSolution(organizationId,projectId)
@@ -271,70 +270,3 @@ async function initVersion() {
     await mysql.execute(`insert into ${Table_Version} (version) values ('${getConfigInstance().version}')`)
 }
 
-async function initPermission():Promise<{
-    [param:number]:string
-}> {
-    let mysql=getMysqlInstance()
-    let objPermission=<{
-        [param:number]:string
-    }>{}
-    for(let key in Permission_Types) {
-        let value=Permission_Types[key]
-        let type=key
-        let keys=Object.keys(value)
-        for(let key of keys) {
-            let val=value[key]
-            if(val instanceof Permission_Base) {
-                let name=val.toString()
-                let value=val.value
-                let id=await generateSnowId()
-                await mysql.execute(`insert into ${Table_Permission} (id,name,type,value) values ('${id}','${name}','${type}','${value}')`)
-                objPermission[value]=id
-            }
-        }
-    }
-    return objPermission
-}
-
-async function initRole(objPermission:{
-    [param:number]:string
-}):Promise<{
-    projectRoleUserId:string,
-    groupRoleUserId:string
-}> {
-    let mysql = getMysqlInstance()
-    let objProjectRole = OBTPConfig.Role.Project_Role, projectRoleUserId;
-    for (let key in objProjectRole) {
-        let obj = objProjectRole[key]
-        let projectRoleId = await generateSnowId()
-        if (obj.name == "user") {
-            projectRoleUserId = projectRoleId
-        }
-        let name = obj.name
-        let description = obj.description
-        await mysql.execute(`insert into ${Table_Project_Role} (id,name,description) values ('${projectRoleId}','${name}','${description}')`)
-        for (let o of obj.permission) {
-            let id = await generateSnowId()
-            await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${projectRoleId}','${objPermission[o.value]}')`)
-        }
-    }
-    let objGroupRole = OBTPConfig.Role.Team_Role, groupRoleUserId;
-    for (let key in objGroupRole) {
-        let obj = objGroupRole[key]
-        let groupRoleId = await generateSnowId()
-        if (obj.name == "user") {
-            groupRoleUserId = groupRoleId
-        }
-        let name = obj.name
-        let description = obj.description
-        await mysql.execute(`insert into ${Table_Team_Role} (id,name,description) values ('${groupRoleId}','${name}','${description}')`)
-        for (let o of obj.permission) {
-            let id = await generateSnowId()
-            await mysql.execute(`insert into ${Table_Role_Permission} (id,role_id,permission_id) values ('${id}','${groupRoleId}','${objPermission[o.value]}')`)
-        }
-    }
-    return {
-        projectRoleUserId,
-        groupRoleUserId
-    }
-}

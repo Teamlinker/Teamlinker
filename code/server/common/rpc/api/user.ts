@@ -4,7 +4,7 @@ export interface IServer_Common_RPC_User_CheckSession {
     userId:string,
     type:ECommon_User_Type
 }
-export default interface IServer_Common_RPC_User {
+export interface IServer_Common_RPC_User {
     checkSession?(token:string):Promise<IServer_Common_RPC_User_CheckSession>
     getUsersInfo?(userIds:string[],organizationId:string):Promise<{
         id:string,

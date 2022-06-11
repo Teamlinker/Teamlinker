@@ -1,5 +1,5 @@
+import { ICommon_Model_Role } from '../model/role';
 import { ICommon_Model_Team } from '../model/team';
-import { ICommon_Model_Team_Role } from '../model/team_role';
 import { Permission_Types } from '../permission/permission';
 import { ECommon_Services } from '../types';
 import { ICommon_Route_Res_Team_List } from './response';
@@ -56,7 +56,7 @@ const api={
                 id:string,
                 name:string,
                 photo:string,
-                role:Omit<ICommon_Model_Team_Role,"team_id">
+                role:Pick<ICommon_Model_Role,"id"|"name"|"description">
             }[]>{},
             permission:[Permission_Types.Team.READ]
         },
@@ -107,7 +107,7 @@ const api={
             req:<{
                 teamId:string           
             }>{},
-            res:<ICommon_Model_Team_Role[]>{},
+            res:<Pick<ICommon_Model_Role,"id"|"name"|"description">[]>{},
             permission:[Permission_Types.Team.READ]
         },
         list:{
