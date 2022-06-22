@@ -88,7 +88,7 @@ export default defineComponent({
     getOrgList()
     const router = useRouter()
     const getDetail = (item: any) => {
-      router.push('/organization/detail?id=' + item.id+'&type='+item.type)
+      router.push('/')
     }
     const create = () => {
       visible.value = true
