@@ -117,7 +117,7 @@ export default {
         const type = res.data.type
         await store.dispatch('user/login', values)
         message.success('登录成功！')
-        if(type===1){
+        if(type===0){
           // const toPath = decodeURIComponent(route.query.redirect || '/')
           router.replace('/organization/list')
           
