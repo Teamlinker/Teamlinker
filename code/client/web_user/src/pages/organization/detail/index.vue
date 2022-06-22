@@ -18,7 +18,7 @@ export default defineComponent({
     const id = route.query.id
     const type = route.query.type
     const params = {
-        organizationid:id
+        organizationId:id
     }
     const getOrgDetail = () => {
       axios.get('organization/item',{ params: params }).then((res: any) => {
