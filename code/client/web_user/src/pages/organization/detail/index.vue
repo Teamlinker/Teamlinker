@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="detail">
-      <div class="name">
+      <div class="name" @click="goIndex">
         组织名称：{{orgDetail.name}}
       </div>
     </div>
@@ -10,7 +10,7 @@
 <script lang="ts">
 import { defineComponent,ref} from 'vue'
 import axios from '@/plugins/axios'
-import {useRoute} from 'vue-router'
+import {useRoute,useRouter} from 'vue-router'
 export default defineComponent({
   setup() {
     const orgDetail= ref([])
@@ -25,9 +25,14 @@ export default defineComponent({
          orgDetail.value = res.data
       })
     }
+    const router = useRouter()
+    const goIndex = ()=>{
+      router.push('/')
+    }
     getOrgDetail()
     return {
-      orgDetail
+      orgDetail,
+      goIndex
     }
   }
 })
