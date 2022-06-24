@@ -108,9 +108,13 @@ export default {
   mounted() {
     let token = this.$route.query.token;
     let orgId = this.$route.query.orgId;
-    localStorage.setItem("organizationid", orgId);
-    setToken(token);
-    window.location.reload();
+    if(token && orgId){
+      localStorage.setItem("organizationid", orgId);
+      setToken(token);
+      // window.location.reload();
+      this.$router.push({ path: "/dashboard" || "/" });
+    }
+
   },
   methods: {
     showPwd() {
@@ -130,6 +134,7 @@ export default {
           this.$store
             .dispatch("user/login", this.loginForm)
             .then(() => {
+              console.log(this.redirect)
               this.$router.push({ path: this.redirect || "/" });
               this.loading = false;
             })
