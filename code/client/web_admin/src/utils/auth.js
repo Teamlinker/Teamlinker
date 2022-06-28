@@ -16,6 +16,7 @@ export function getToken() {
 
 export function setToken(token) {
   const tokenT = 'Bearer ' + token
+  console.log('auth.js',tokenT)
   return Cookies.set(TokenKey, tokenT)
 }
 

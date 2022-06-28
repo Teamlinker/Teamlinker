@@ -523,6 +523,8 @@ import {
 } from "@/api/project";
 import { getList as getAllMemberList } from "@/api/user";
 import { uploadFile, downFile } from "@/api/file";
+
+import { setToken, getToken } from "@/utils/auth";
 export default {
   data() {
     return {
@@ -625,6 +627,7 @@ export default {
     };
   },
   created() {
+    console.log(getToken());
     this.fetchData();
   },
   methods: {
