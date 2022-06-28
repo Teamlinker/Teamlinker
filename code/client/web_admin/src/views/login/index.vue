@@ -113,9 +113,7 @@ export default {
       console.log('login------',token)
       setToken(token);
       // window.location.reload();
-      setTimeout(()=>{
-              this.$router.push({ path: "/dashboard" || "/" });
-      },1000)
+     this.$router.push({ path: "/dashboard" || "/" });
 
     }
 
