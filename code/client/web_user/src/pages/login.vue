@@ -142,7 +142,7 @@ export default {
       formRef.value.resetFields();
     };
     const onRegister = () => {
-      alert('跳转到注册页')
+     router.push('/register')
     }
     return {
       formState,
