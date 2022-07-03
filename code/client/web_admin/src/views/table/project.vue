@@ -627,7 +627,6 @@ export default {
     };
   },
   created() {
-    console.log(getToken());
     this.fetchData();
   },
   methods: {

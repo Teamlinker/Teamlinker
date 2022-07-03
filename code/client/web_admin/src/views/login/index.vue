@@ -110,7 +110,6 @@ export default {
     let orgId = this.$route.query.orgId;
     if(token && orgId){
       localStorage.setItem("organizationid", orgId);
-      console.log('login------',token)
       setToken(token);
       // window.location.reload();
      this.$router.push({ path: "/dashboard" || "/" });
