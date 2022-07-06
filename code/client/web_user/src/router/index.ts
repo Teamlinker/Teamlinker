@@ -27,7 +27,7 @@ const router = createRouter({
     routes: routesWithLayout
 })
 
-const allowList = ['login', 'icons', 'error', 'error-404'] // no redirect whitelist
+const allowList = ['login','register', 'icons', 'error', 'error-404'] // no redirect whitelist
 
 // 是否需要从后端获取菜单
 

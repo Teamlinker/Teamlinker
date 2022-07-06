@@ -229,7 +229,7 @@ export default defineComponent({
       let orgId = sessionStorage.getItem("orgId");
       let url = `http://175.27.166.37/admin.html#/login?token=${token}&orgId=${orgId}`;
       // let url = `http://localhost:9528/#/login?token=${token}&orgId=${orgId}`;
-      window.open(url, "_self");
+      window.open(url, "_blank");
     };
     const getTeamList = () => {
       const params = {
