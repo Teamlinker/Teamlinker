@@ -67,6 +67,7 @@ class RpcAuthApi implements IServer_Common_RPC_Auth {
                     role_id:objProjectRoleService.getId(),
                     permission_id:objPermission[o.value]
                 })
+                await objRolePermission.create()
             }
         }
         let objGroupRole = RoleDefault.Team_Role, groupRoleUserId;
@@ -90,6 +91,7 @@ class RpcAuthApi implements IServer_Common_RPC_Auth {
                     role_id:objTeamRole.getId(),
                     permission_id:objPermission[o.value]
                 })
+                await obj.create();
             }
         }
         return {

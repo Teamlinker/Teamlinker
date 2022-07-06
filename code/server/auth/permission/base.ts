@@ -1,12 +1,12 @@
 import Redlock, { Lock } from "redlock";
+import { permissionModel } from '../../../common/model/permission';
+import { rolelPermissionModel } from '../../../common/model/role_permission';
 import { Permission_Base } from "../../../common/permission/permission";
 import { getRedisInstance } from "../../common/cache/redis";
 import { getMysqlInstance } from "../../common/db/mysql";
 import { getComponent } from "../../common/decorate/component";
 import { generateLeftJoinSql } from "../../common/util/sql";
-import { permissionModel } from '../../../common/model/permission';
-import { rolelPermissionModel } from '../../../common/model/role_permission';
-var g_Permission=new WeakMap<Permission_Base,PermissionBase>()
+var g_Permission=new Map<string,PermissionBase>()
 
 export abstract class PermissionBase<T=any> {
     static Lock:InstanceType<typeof Redlock>
@@ -104,7 +104,7 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
     try {
         let keyMap={}
         for(let obj of arrPermission) {
-            let objPermission=g_Permission.get(obj)
+            let objPermission=g_Permission.get(obj.value)
             if(objPermission.keys) {
                 if(objPermission.fieldName && !objContent[objPermission.fieldName]) {
                     let field=await objPermission.translateToField(objContent)
@@ -150,6 +150,6 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
 export function DPermission (key:Permission_Base) {
     return function (constructor: Function){
         let obj=getComponent(constructor.name) as PermissionBase
-        g_Permission.set(key,obj);
+        g_Permission.set(key.value,obj);
     }
 }
