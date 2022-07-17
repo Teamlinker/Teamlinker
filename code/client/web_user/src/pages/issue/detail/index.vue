@@ -6,8 +6,8 @@
     </div>
     <div style="display: flex">
       <div class="left">
-        <div style="margin-bottom: 20px">Description</div>
-        <div v-if="!isDescInput" @click="addDesc">
+        <div style="margin-bottom: 20px;font-weight:bold;">Description</div>
+        <div v-if="!isDescInput" @click="addDesc('isDescInput')" class="add-desc">
           {{ descriptionInfo ? descriptionInfo : "Add a description" }}
         </div>
         <div v-if="isDescInput">
@@ -17,6 +17,35 @@
               >save</a-button
             >
             <a-button @click="cancel">cancel</a-button>
+          </div>
+        </div>
+        <div style="font-weight:bold;">comments</div>
+        <div class="comment-list">
+          <div class="comment-item" v-for="item in commentList" :key="item.id">
+            <div>{{item.content}}</div>
+            <div class="comment-operate">
+              <span @click="editComment(item)">Edit</span>
+             <a-popconfirm
+               title="Are you sure delete this comment?"
+               ok-text="Yes"
+               cancel-text="No"
+               @confirm="deleteComment(item)"
+              >
+             <a href="#">Delete</a>
+            </a-popconfirm>
+            </div>
+          </div>
+        </div>
+        <div  @click="addDesc('isCommentInput')" class="add-comment">
+           Add a  comment
+        </div>
+        <div v-if="isCommentInput">
+          <a-textarea v-model:value="commentValue" :rows="4" />
+          <div class="desc-btn">
+            <a-button type="primary" style="margin-right: 20px" @click="saveComment"
+              >save</a-button
+            >
+            <a-button @click="cancelComment">cancel</a-button>
           </div>
         </div>
       </div>
@@ -128,6 +157,7 @@ import { notification } from "ant-design-vue";
 import CreateField from "./createField.vue";
 import { validateSearch } from "ant-design-vue/lib/vc-mentions/src/util";
 import { SmileOutlined, DownOutlined } from "@ant-design/icons-vue";
+import { message } from 'ant-design-vue'
 export default defineComponent({
   components: {
     CreateField,
@@ -137,6 +167,12 @@ export default defineComponent({
     const state: any = reactive({
       baseInfo: { issueType: {}, name: "" },
       descriptionInfo: "",
+      isCommentInput:"",
+      commentList:[],
+      commentValue:'',
+      commentId:'',
+      saveCommentType:'',
+      isCommentInput:false,
       descValue: "",
       isDescInput: false,
       memberList: [],
@@ -179,6 +215,14 @@ export default defineComponent({
           state.memberList = res.data.data;
         });
     };
+    const getCommentList = ()=>{
+      const params = {
+        projectIssueId:state.projectIssueId
+      }
+      axios.get("/issue/item/comment/list",{params:params}).then((res:any)=>{
+        state.commentList = res.data
+      })
+    }
     const getBaseInfo = () => {
       axios.get("/issue/item/basic", { params: query }).then((res: any) => {
         state.baseInfo = res.data;
@@ -200,8 +244,12 @@ export default defineComponent({
     getBaseInfo();
     getDescInfo();
     getMemberList();
-    const addDesc = () => {
-      state.isDescInput = true;
+    getCommentList();
+    const addDesc = (type) => {
+      state[type] = true;
+      if(type==='isCommentInput')
+      state.saveCommentType = 'add'
+      state.commentValue = ''
       state.descValue = state.descriptionInfo;
     };
     const cancel = () => {
@@ -217,6 +265,49 @@ export default defineComponent({
         getDescInfo();
       });
     };
+    const cancelComment = () => {
+      state.isCommentInput = false;
+    };
+    const saveComment = ()=>{
+       if(!state.commentValue){
+         message.warn('请输入评论内容')
+         return false
+       }
+       const params = {
+        projectIssueId: query.projectIssueId,
+        content: state.commentValue,
+      };
+      if(state.saveCommentType==='add'){
+        axios.post("/issue/item/comment", params).then(() => {
+        state.isCommentInput = false;
+        getCommentList();
+      });
+      }else{
+        params.commentId = state.commentId
+        axios.put("/issue/item/comment", params).then(() => {
+        state.isCommentInput = false;
+        getCommentList();
+      });
+      }
+      
+    }
+    const editComment = (item)=>{
+      state.isCommentInput = true
+      state.commentValue = item.content
+      state.commentId = item.id
+      state.saveCommentType = 'edit'
+    }
+    const deleteComment = (item)=>{
+      const params = {
+        commentId:item.id
+      }
+       axios.delete("/issue/item/comment", {params:params}).then((res: any) => {
+        if (res.code == "0") {
+          message.success('操作成功')
+          getCommentList()
+        }
+      });
+    }
     const openNotificationWithIcon = (type: string) => {
       notification[type]({
         message: "success",
@@ -286,6 +377,10 @@ export default defineComponent({
       addDesc,
       cancel,
       save,
+      cancelComment,
+      saveComment,
+      editComment,
+      deleteComment,
       ...toRefs(state),
       handleAssignerChange,
       handleReporterChange,
@@ -322,6 +417,23 @@ export default defineComponent({
   padding-left: 40px;
   .desc-btn {
     margin-top: 20px;
+  }
+  .add-desc{
+    cursor:pointer;
+  }
+  .add-comment{
+    cursor:pointer;
+  }
+  .comment-list{
+    .comment-item{
+      margin-bottom:20px;
+      .comment-operate{
+        span{
+          margin-right:20px;
+          cursor:pointer;
+        }
+      }
+    }
   }
 }
 .right {
