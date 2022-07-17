@@ -174,9 +174,9 @@ export default class GateWay extends Application {
             }
         })
         app.use(koaStaticServer({
-            rootDir:Application.teamlinkerPath,
-            rootPath:"/file",
-            last:false
+            rootDir: Application.teamlinkerPath,
+            rootPath: "/file",
+            last: false
         }))
         if(Application.mode!=ECommon_Application_Mode.MICRO) {
             app.use(koaStaticServer({
