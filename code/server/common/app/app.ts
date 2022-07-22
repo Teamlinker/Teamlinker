@@ -42,7 +42,7 @@ export default abstract class Application{
     public static serviceName:string;
     public static teamlinkerPath:string=(os.platform()=="darwin" || os.platform()=="win32")?path.resolve(os.homedir(),"teamlinker-files"):"/opt/teamlinker-files"
     public static configPath:string=path.join(this.teamlinkerPath,"teamlinker.config.json")
-    
+
     public static privateConfig:{
         "redis":{
             "url":string,
@@ -71,9 +71,10 @@ export default abstract class Application{
     Application(){
 
     }
-    async start(serviceName?:string,callback?:(app:typeof this)=>void) {
+    async start(serviceName?:string,callback?:(app:Application)=>void) {
         let argv=yargs.argv
-        if(argv["reset"]) {
+        if(argv["reset"])
+        {
             Application.needReset=true
         }
         if(argv["debug"]) {
@@ -192,6 +193,6 @@ export default abstract class Application{
     async initRoute() {
         this.app.use(internalRouter.routes());
     }
-    abstract config(app:typeof this.app);
+    abstract config(app:InstanceType<typeof Koa>);
 
 }
