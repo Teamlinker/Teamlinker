@@ -29,6 +29,10 @@ import 'virtual:windi.css'
 // axios封装request
 import axios from './plugins/axios.js'
 
+
+import formCreate from "@form-create/ant-design-vue";
+
+
 const app = createApp(App);
 
 /**
@@ -41,3 +45,5 @@ const app = createApp(App);
  */
 app.config.globalProperties.$axios = axios;
 app.use(router).use(store).use(Antd).use(Vue3DraggableResizable).mount('#app')
+
+app.use(formCreate)
