@@ -205,6 +205,12 @@ export const constantRoutes = [
         component: () => import("@/views/table/organization"),
         meta: { title: "组织管理", icon: "table" },
       },
+      {
+        path: "test",
+        name: "Form",
+        component: () => import("@/views/table/test"),
+        meta: { title: "test", icon: "table" },
+      },
     ],
   },
 
