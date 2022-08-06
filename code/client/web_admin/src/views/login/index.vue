@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <el-form
+    <!-- <el-form
       ref="loginForm"
       :model="loginForm"
       class="login-form"
@@ -55,7 +55,7 @@
         @click.native.prevent="handleLogin"
         >Login</el-button
       >
-    </el-form>
+    </el-form> -->
   </div>
 </template>
 
