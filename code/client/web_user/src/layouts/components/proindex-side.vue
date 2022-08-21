@@ -30,6 +30,7 @@ export default defineComponent({
     menuList.value = [
       { url: "/board", name: "Board" },
       { url: "/issue/list", name: "issue", activeUrl: "/issue/detail" },
+      { url: "/release", name: "release" },
       { url: "/project/edit", name: "Settings" },
     ];
     path.value = route.path;
