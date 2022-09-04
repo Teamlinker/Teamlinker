@@ -311,6 +311,56 @@
   "resolved" "https://registry.nlark.com/@ctrl/tinycolor/download/@ctrl/tinycolor-3.4.0.tgz"
   "version" "3.4.0"
 
+"@form-create/ant-design-vue@^3.1.12":
+  "integrity" "sha512-OFZiPJ+xSN/EXuB4BtnT8lFHyD4t0FFzWwUwVLVAQPnGaBomsHvqZxE6gqMqo0NFmWoTnLOq48APe77wpvjU5A=="
+  "resolved" "https://registry.npmmirror.com/@form-create/ant-design-vue/-/ant-design-vue-3.1.12.tgz"
+  "version" "3.1.12"
+  dependencies:
+    "@form-create/component-antdv-frame" "^3.1.12"
+    "@form-create/component-antdv-group" "^3.1.12"
+    "@form-create/component-antdv-upload" "^3.1.12"
+    "@form-create/component-subform" "^3.1.5"
+    "@form-create/core" "^3.1.12"
+    "@form-create/utils" "^3.1.12"
+
+"@form-create/component-antdv-frame@^3.1.12":
+  "integrity" "sha512-g6vvW8OJoQRgGYciEHiG/W3XulBX678yWinOQ8R35754iKA+CEpIRygm3GZZhnDJxB3+YiGz/hjLLwVcjDwoHg=="
+  "resolved" "https://registry.npmmirror.com/@form-create/component-antdv-frame/-/component-antdv-frame-3.1.12.tgz"
+  "version" "3.1.12"
+  dependencies:
+    "@form-create/utils" "^3.1.12"
+
+"@form-create/component-antdv-group@^3.1.12":
+  "integrity" "sha512-K/a+FUcVhEBbCRbAMPEaFZC0GW706RsJpbwl3FFXqJTWObuzU155VzjmDVNAV5mGoYT83R+miGbe1V0XlniI5Q=="
+  "resolved" "https://registry.npmmirror.com/@form-create/component-antdv-group/-/component-antdv-group-3.1.12.tgz"
+  "version" "3.1.12"
+  dependencies:
+    "@form-create/utils" "^3.1.12"
+
+"@form-create/component-antdv-upload@^3.1.12":
+  "integrity" "sha512-dhvzx9P153HNAFl96P8pYecyjC+elfXA27nZ6RB6E/ORCdvdXl0E+/sV8S3jA46U2iHVnj50GgGi7W5f3w+bVQ=="
+  "resolved" "https://registry.npmmirror.com/@form-create/component-antdv-upload/-/component-antdv-upload-3.1.12.tgz"
+  "version" "3.1.12"
+  dependencies:
+    "@form-create/utils" "^3.1.12"
+
+"@form-create/component-subform@^3.1.5":
+  "integrity" "sha512-JHNEFGuwpnjGvCJ0I0GCqPL5al0qXoN4ymnRBpm+oL+6MMo5bz1kUyoqMX1MutuC96gHTqpeqc67hssi8g2mIw=="
+  "resolved" "https://registry.npmmirror.com/@form-create/component-subform/-/component-subform-3.1.5.tgz"
+  "version" "3.1.5"
+
+"@form-create/core@^3.1.12":
+  "integrity" "sha512-wsHvC9c1Umr2Yt+8RUK5uaB2+wBJv1AtIC5CsK3Rs/u+0D1z7SXjOMKxoaL7zCjMT8dgoi4hivJazwN3deRUwA=="
+  "resolved" "https://registry.npmmirror.com/@form-create/core/-/core-3.1.12.tgz"
+  "version" "3.1.12"
+  dependencies:
+    "@form-create/utils" "^3.1.12"
+
+"@form-create/utils@^3.1.12":
+  "integrity" "sha512-XcW9HJZIXrYa17m83Rq0up3fRot2zYPpLqD7ZT7MsrHREbNmagEbL9d1W7yCfJC7DZuA4FUUXMQiLb7N6LThxQ=="
+  "resolved" "https://registry.npmmirror.com/@form-create/utils/-/utils-3.1.12.tgz"
+  "version" "3.1.12"
+
 "@iconify/json-tools@^1.0.10":
   "integrity" "sha1-2acFDbvouynWhNSz+URu0tC+o8w="
   "resolved" "https://registry.npm.taobao.org/@iconify/json-tools/download/@iconify/json-tools-1.0.10.tgz"
@@ -865,11 +915,6 @@
   "resolved" "https://registry.npmmirror.com/dayjs/-/dayjs-1.11.4.tgz"
   "version" "1.11.4"
 
-"de-indent@^1.0.2":
-  "integrity" "sha1-sgOOhG3DO6pXlhKNCAS0VbjB4h0="
-  "resolved" "https://registry.npmjs.org/de-indent/-/de-indent-1.0.2.tgz"
-  "version" "1.0.2"
-
 "debug@^4.1.0", "debug@^4.3.2":
   "integrity" "sha512-/zxw5+vh1Tfv+4Qn7a5nsbcJKPaSvCDhojn6FEl9vupwK2VCSDtEiEtqr8DFtzYFOdz63LBkxec7DYuc2jon6Q=="
   "resolved" "https://registry.npmmirror.com/debug/download/debug-4.3.3.tgz"
@@ -1118,6 +1163,11 @@
   "resolved" "https://registry.npm.taobao.org/foreach/download/foreach-2.0.5.tgz"
   "version" "2.0.5"
 
+"form-create@^1.6.6":
+  "integrity" "sha512-p20W5EsVtXz7B21Ax7pPyoGml4IR/EbBNrgqzo/fVIxKlUOqfvJDLhK0vVojU7WkzfCF9eQPvX/6qVNkKFC20A=="
+  "resolved" "https://registry.npmmirror.com/form-create/-/form-create-1.6.6.tgz"
+  "version" "1.6.6"
+
 "fs-extra@^10.0.0":
   "integrity" "sha1-n/YbZV3eU/s0qC34S7IUzoAuF8E="
   "resolved" "https://registry.nlark.com/fs-extra/download/fs-extra-10.0.0.tgz"
@@ -1236,11 +1286,6 @@
   "integrity" "sha1-gdAbtd6OpKIUrV1urRtSNGCwtFo="
   "resolved" "https://registry.npm.taobao.org/hash-sum/download/hash-sum-2.0.0.tgz"
   "version" "2.0.0"
-
-"he@^1.1.0":
-  "integrity" "sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw=="
-  "resolved" "https://registry.npmjs.org/he/-/he-1.2.0.tgz"
-  "version" "1.2.0"
 
 "header-case@^2.0.4":
   "integrity" "sha1-WkLmO1UXc0nPQFvrjXdayruSwGM="
@@ -2113,14 +2158,6 @@
   dependencies:
     "@vue/devtools-api" "^6.0.0-beta.18"
 
-"vue-template-compiler@^2.6.12":
-  "integrity" "sha512-ODQS1SyMbjKoO1JBJZojSw6FE4qnh9rIpUZn2EUT86FKizx9uH5z6uXiIrm4/Nb/gwxTi/o17ZDEGWAXHvtC7g=="
-  "resolved" "https://registry.npmjs.org/vue-template-compiler/-/vue-template-compiler-2.6.14.tgz"
-  "version" "2.6.14"
-  dependencies:
-    "de-indent" "^1.0.2"
-    "he" "^1.1.0"
-
 "vue-template-es2015-compiler@^1.9.1":
   "integrity" "sha1-HuO8mhbsv1EYvjNLsV+cRvgvWCU="
   "resolved" "https://registry.npm.taobao.org/vue-template-es2015-compiler/download/vue-template-es2015-compiler-1.9.1.tgz"
@@ -2133,7 +2170,7 @@
   dependencies:
     "is-plain-object" "3.0.1"
 
-"vue@^3.0.0", "vue@^3.0.2", "vue@^3.0.5", "vue@>=3.0.3", "vue@>=3.1.0", "vue@2 || 3", "vue@3.2.8":
+"vue@^2.5.2", "vue@^3.0.0", "vue@^3.0.2", "vue@^3.0.5", "vue@>=3.0.3", "vue@>=3.1.0", "vue@2 || 3", "vue@3.2.8":
   "integrity" "sha1-kSTkwx68nFkrK58pPfXJqIp46UQ="
   "resolved" "https://registry.npmmirror.com/vue/download/vue-3.2.8.tgz"
   "version" "3.2.8"

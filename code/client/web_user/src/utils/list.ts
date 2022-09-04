@@ -48,12 +48,16 @@ export default function getTableFunc() {
   let searchQuery = ()=>{
     initData(1)
   }
+  let setParams = (projectId:any)=>{
+    stateData.queryParams= {...stateData.queryParams,projectId}
+  }
   return {
     stateData,
     handleTableChange,
     initData,
     setUrl,
     searchQuery,
+    setParams,
     url
   }
 }
