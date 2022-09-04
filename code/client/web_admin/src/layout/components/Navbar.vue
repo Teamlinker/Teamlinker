@@ -18,6 +18,9 @@
           <router-link to="/">
             <el-dropdown-item> 首页 </el-dropdown-item>
           </router-link>
+          <el-dropdown-item divided @click.native="toWeb">
+            <span style="display: block">返回WEB端</span>
+          </el-dropdown-item>
           <el-dropdown-item divided @click.native="logout">
             <span style="display: block">退出</span>
           </el-dropdown-item>
@@ -47,6 +50,16 @@ export default {
     async logout() {
       await this.$store.dispatch("user/logout");
       this.$router.push(`/login?redirect=${this.$route.fullPath}`);
+    },
+    toWeb() {
+      let env = process.env.NODE_ENV;
+      let url = `http://175.27.166.37/#/login`;
+      if (env == "development") {
+        url = `http://localhost:8081/#/login`;
+      } else {
+         url = `http://175.27.166.37/#/login`;
+      }
+      window.open(url, "_blank");
     },
   },
 };
