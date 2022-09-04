@@ -28,7 +28,7 @@
       :pagination="pagination"
     >
       <template #name="{ record }">
-        <a @click="onGoSet(record.id)">{{ record.name }}</a>
+        <a @click="onDetail(record.id)">{{ record.name }}</a>
       </template>
       <template #photo="{ record }">
         <img
@@ -148,8 +148,8 @@ export default defineComponent({
     } = getTableFunc()
     const router = useRouter()
     const releaseId = ref('')
-    const onGoSet = (id: string) => {
-      router.push('/project/edit?projectId=' + id)
+    const onDetail= (id: string) => {
+      router.push('/release/detail?projectReleaseId=' + id+'&projectId='+projectId.value)
     }
     const delRelease = (id: string) => {
       axios
@@ -351,7 +351,7 @@ export default defineComponent({
       wrapperCol: {
         span: 16
       },
-      onGoSet,
+      onDetail,
       delRelease,
       handleTableChange,
       setUrl,

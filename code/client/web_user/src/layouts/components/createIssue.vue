@@ -77,7 +77,17 @@
         <a-input v-model:value="formState.name" />
       </a-form-item>
       <a-form-item label="Priority" name="priority">
-        <a-input v-model:value="formState.priority" :min="0" />
+              <a-select
+              v-model:value="formState.priority"
+              show-search
+              placeholder="select priority"
+              allowClear
+              :filter-option="filterRoleOption"
+            >
+              <a-select-option :value="item" v-for="item in priorityList" :key="item">{{
+                item
+              }}</a-select-option>
+            </a-select>
       </a-form-item>
     </a-form>
   </div>
@@ -107,6 +117,9 @@ export default defineComponent({
       priority: undefined,
       values:[]
     })
+    const priorityList = [
+      'small','media','high'
+    ]
     const projectList = ref([])
     const issueTypeList = ref([])
     const memberList = ref([])
@@ -209,6 +222,7 @@ export default defineComponent({
       wrapperCol: {
         span: 14
       },
+      priorityList,
       projectList,
       issueTypeList,
       memberList,
