@@ -1,76 +1,23 @@
-import Redlock, { Lock } from "redlock";
-import { permissionModel } from '../../../common/model/permission';
-import { rolelPermissionModel } from '../../../common/model/role_permission';
-import { Permission_Base } from "../../../common/permission/permission";
-import { getRedisInstance } from "../../common/cache/redis";
-import { getMysqlInstance } from "../../common/db/mysql";
-import { getComponent } from "../../common/decorate/component";
-import { generateLeftJoinSql } from "../../common/util/sql";
-var g_Permission=new Map<string,PermissionBase>()
+import Redlock, {Lock} from "redlock";
+import {Permission_Base, Permission_Types} from "../../../common/permission/permission";
+import {getRedisInstance} from "../../common/cache/redis";
+import {getComponent} from "../../common/decorate/component";
+import type {PermissionOrganization} from "./organization";
 
-export abstract class PermissionBase<T=any> {
+export abstract class PermissionBase {
     static Lock:InstanceType<typeof Redlock>
     lock:Lock;
     abstract fieldName:string;
-    abstract keys:string[];
-    abstract check(obj:T):boolean
     abstract translateToField(param:{
         userId?:string,
         isAdmin?:boolean,
         [param:string]:any
     }):Promise<string>
-    abstract buildKey(param:{
-        userId?:string,
-        isAdmin?:boolean,
-        [param:string]:any
-    }):string[]
-    async clear() {
-        for(let obj of this.keys) {
-            await getRedisInstance().del(obj);
-        }
-    }
     abstract generatorValue(param:{
         userId?:string,
         isAdmin?:boolean,
         [param:string]:any
-    },keys:string[]):Promise<T>
-    async getRolePermissionList(roleId:string):Promise<string[]> {
-        if(!roleId) {
-            return null;
-        }
-        let redis=getRedisInstance()
-        let exists=await redis.exists(`permission:role:${roleId}`)
-        let list:string[]
-        if(!exists) {
-            let mysql=getMysqlInstance()
-            let sql=generateLeftJoinSql({
-                model:rolelPermissionModel
-            },{
-                model:permissionModel,
-                columns:["value"],
-                expression:{
-                    id:{
-                        model:rolelPermissionModel,
-                        field:"permission_id"
-                    }
-                }
-            },{
-                role_id:{
-                    model:rolelPermissionModel,
-                    value:roleId
-                }
-            })
-            let ret=await mysql.execute(sql)
-            let arr=ret.map(item=>item.value)
-            if(arr.length>0) {
-                await redis.sSet(`permission:role:${roleId}`,arr,24*3600)
-            }
-            list=arr;
-        } else {
-            list=await redis.sGet(`permission:role:${roleId}`)
-        }
-        return list;
-    } 
+    }):Promise<number>
     async tryLock(keys:string[]){
         if(!PermissionBase.Lock) {
             PermissionBase.Lock=new Redlock([getRedisInstance().getIORedis()],{
@@ -86,6 +33,7 @@ export abstract class PermissionBase<T=any> {
     async unlock() {
         if(this.lock) {
             await this.lock.release();
+            this.lock=null;
         }
     }
 }
@@ -100,56 +48,51 @@ export async function deletePermission(objKey:object) {
     }
 }
 
-export async function processPermission (arrPermission:Permission_Base[],objContent:any):Promise<[boolean,object]> {
+export async function processPermission (arrPermission:Permission_Base[],objContent:any):Promise<boolean> {
     try {
-        let keyMap={}
+        let permissionMap:{
+            [keys:string]:number
+        }={}
+        let organizationId:string=objContent["organizationId"];
+        let objOrganization=getComponent<PermissionOrganization>("PermissionOrganization");
+        let value = await objOrganization.generatorValue(Object.assign({},objContent,{organizationId}))
+        if(value===Permission_Types.Organization.ADMIN.value) {
+            return true;
+        }
+        permissionMap["PermissionOrganization"]=value
         for(let obj of arrPermission) {
-            let objPermission=g_Permission.get(obj.value)
-            if(objPermission.keys) {
+            let permissionName="Permission"+obj.constructor.name
+            let value=permissionMap[permissionName];
+            if(value===undefined) {
+                let objPermission=getComponent<PermissionBase>(permissionName)
                 if(objPermission.fieldName && !objContent[objPermission.fieldName]) {
                     let field=await objPermission.translateToField(objContent)
                     if(field===undefined || field===null) {
-                        return [false,null]
+                        return false;
                     }
                     objContent=Object.assign({},objContent,{[objPermission.fieldName]:field})
                 }
-                let keys=objPermission.buildKey(objContent)
-                if(!keys) {
-                    return [false,null]
-                }
-                let key=keys.join("|")
-                let value=keyMap[key];
-                if(value===undefined) {
-                    value = await objPermission.generatorValue(objContent,keys)
-                    if (value === null) {
-                        return [false,null]
+                value = await objPermission.generatorValue(objContent)
+                permissionMap[permissionName] = value;
+                if (value === null || value===undefined) {
+                    return false
+                } else {
+                    let isCheck = (value & obj.value) && value>=obj.value
+                    if (!isCheck) {
+                        return false
                     }
-                    keyMap[key] = value;
-                } else if(value===null) {
-                    return [false,null]
-                }
-                let isCheck = await objPermission.check(value);
-                if (!isCheck) {
-                    return [false,null];
                 }
             } else {
-                let isCheck = await objPermission.check(objContent);
+                let isCheck = (value & obj.value) && value>=obj.value
                 if (!isCheck) {
-                    return [false,null];
+                    return false
                 }
             }
         }
-        return [true,keyMap]
+        return true
     } catch (err) {
         console.error(err)
-        return [false,null]
+        return false
     }
     
-}
-
-export function DPermission (key:Permission_Base) {
-    return function (constructor: Function){
-        let obj=getComponent(constructor.name) as PermissionBase
-        g_Permission.set(key.value,obj);
-    }
 }

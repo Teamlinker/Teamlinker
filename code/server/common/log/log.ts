@@ -1,9 +1,10 @@
 import * as log from "log4js"
 import * as os from "os"
 import * as path from "path"
+
 export class Log {
     constructor() {
-        let filePath=path.resolve(os.homedir(),`teamlinker-log/${process.env.nacosNamespace}`,`teamlinker-${process.env.nacosName}.log`)
+        let filePath=path.resolve(os.homedir(),`teamlinker-log/teamlinker.log`)
         var config={
             appenders:{
                 console:{
@@ -22,14 +23,14 @@ export class Log {
                     appenders:["console","file"],
                     level:"all"
                 },
-                [process.env.nacosName]:{
+                teamlinker:{
                     appenders:["console","file"],
                     level:"all"
                 }
             }
         }
         log.configure(config)
-        let logger=log.getLogger(process.env.nacosName);
+        let logger=log.getLogger("teamlinker");
         console.info=console.log=logger.info.bind(logger)
         console.warn=logger.warn.bind(logger)
         console.error=logger.error.bind(logger)    

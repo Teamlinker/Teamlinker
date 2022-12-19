@@ -1,78 +1,24 @@
-import { ECommon_Model_Role_Type, roleModel } from '../../../common/model/role';
-import { rolelPermissionModel } from '../../../common/model/role_permission';
-import { Err } from '../../../common/status/error';
-import { getMysqlInstance } from '../../common/db/mysql';
-import { Mapper } from "../../common/entity/mapper";
-import { generateDeleteSql, generateQuerySql } from '../../common/util/sql';
-import { projectModel } from './../../../common/model/project';
-import { roleMemberModel } from './../../../common/model/role_member';
-import { teamModel } from './../../../common/model/team';
+import {
+    ECommon_Model_Role_Reserved,
+    ECommon_Model_Role_Type,
+    ICommon_Model_Role,
+    roleModel
+} from '../../../common/model/role';
+import {Err} from '../../../common/status/error';
+import {getMysqlInstance} from '../../common/db/mysql';
+import {Mapper} from "../../common/entity/mapper";
+import {generateDeleteSql, generateQuerySql} from '../../common/util/sql';
+import {projectModel} from './../../../common/model/project';
+import {roleMemberModel} from './../../../common/model/role_member';
+import {teamModel} from './../../../common/model/team';
+import {organizationModel} from "../../../common/model/organization";
 
+let g_roleAdmin:{
+    [name:string]:ICommon_Model_Role
+}={}
 class RoleMapper extends Mapper<typeof roleModel> {
     constructor(){
         super(roleModel)
-    }
-
-    async getRolesByItemId(itemId: string,type:ECommon_Model_Role_Type): Promise<{ id: string; name: string; description: string; }[]> {
-        let ret:{
-            id: string; name: string; description: string; 
-        }[]=[];
-        let mysql=getMysqlInstance()
-        let arr=await mysql.execute(generateQuerySql(roleModel,[],{
-            item_id:itemId
-        }))
-        for(let obj of arr) {
-            ret.push({
-                id:obj.id,
-                name:obj.name,
-                description:obj.description
-            })
-        }
-        let organizationId;
-        if(type==ECommon_Model_Role_Type.PROJECT) {
-            let objProject=await mysql.executeOne(generateQuerySql(projectModel,["organization_id"],{
-                id:itemId
-            }))
-            if(!objProject) {
-                throw Err.Project.projectNotFound
-            }
-            organizationId=objProject.organization_id
-        } else if(type==ECommon_Model_Role_Type.TEAM) {
-            let objTeam=await mysql.executeOne(generateQuerySql(teamModel,["organization_id"],{
-                id:itemId
-            }))
-            if(!objTeam) {
-                throw Err.Team.teamNotFound
-            }
-            organizationId=objTeam.organization_id
-        }
-        if(organizationId) {
-            let arr=await mysql.execute(generateQuerySql(roleModel,[],{
-                item_id:null,
-                organization_id:organizationId,
-                type:type
-            }))
-            for(let obj of arr) {
-                ret.push({
-                    id:obj.id,
-                    name:obj.name,
-                    description:obj.description
-                })
-            }
-        }
-        arr=await mysql.execute(generateQuerySql(roleModel,[],{
-            item_id:null,
-            organization_id:null,
-            type:type
-        }))
-        for(let obj of arr) {
-            ret.push({
-                id:obj.id,
-                name:obj.name,
-                description:obj.description
-            })
-        }
-        return ret;
     }
 
     async clearRoleByItemId(itemId:string) {
@@ -86,12 +32,6 @@ class RoleMapper extends Mapper<typeof roleModel> {
             }))
             await mysql.execute(generateDeleteSql(roleModel,{
                 item_id:itemId
-            }))
-            await mysql.execute(generateDeleteSql(rolelPermissionModel,{
-                role_id:{
-                    exp:"in",
-                    value:ret.map(item=>item.id)
-                }
             }))
         }
     }
@@ -120,13 +60,114 @@ class RoleMapper extends Mapper<typeof roleModel> {
                     value:itemIds
                 }
             }))
-            await mysql.execute(generateDeleteSql(rolelPermissionModel,{
-                role_id:{
-                    exp:"in",
-                    value:ret.map(item=>item.id)
+        }
+    }
+
+    async getAdminRole(type:ECommon_Model_Role_Type) {
+        let mysql=getMysqlInstance()
+        if(type===ECommon_Model_Role_Type.ORGANIZATION) {
+            if(!g_roleAdmin["organization"]) {
+                let obj=await mysql.executeOne(generateQuerySql(roleModel,null,{
+                    reserved:ECommon_Model_Role_Reserved.ADMIN,
+                    type:ECommon_Model_Role_Type.ORGANIZATION
+                }))
+                g_roleAdmin["organization"]=obj
+            }
+            return g_roleAdmin["organization"]
+        } else if(type===ECommon_Model_Role_Type.TEAM) {
+            if(!g_roleAdmin["team"]) {
+                let obj=await mysql.executeOne(generateQuerySql(roleModel,null,{
+                    reserved:ECommon_Model_Role_Reserved.ADMIN,
+                    type:ECommon_Model_Role_Type.TEAM
+                }))
+                g_roleAdmin["team"]=obj
+            }
+            return g_roleAdmin["team"]
+        } else if(type===ECommon_Model_Role_Type.PROJECT) {
+            if(!g_roleAdmin["project"]) {
+                let obj=await mysql.executeOne(generateQuerySql(roleModel,null,{
+                    reserved:ECommon_Model_Role_Reserved.ADMIN,
+                    type:ECommon_Model_Role_Type.PROJECT
+                }))
+                g_roleAdmin["project"]=obj
+            }
+            return g_roleAdmin["project"]
+        }
+    }
+    
+
+    async getUserRoles(itemId:string,type:ECommon_Model_Role_Type) {
+        let mysql=getMysqlInstance()
+        let organizationId:string
+        let objOrganization=await mysql.executeOne(generateQuerySql(organizationModel,["id"],{
+            id:itemId
+        }))
+        if(objOrganization) {
+            organizationId=objOrganization.id
+            let arr=await mysql.execute(generateQuerySql(roleModel,null,{
+                item_id:null,
+                organization_id:organizationId,
+                type:type,
+                reserved:ECommon_Model_Role_Reserved.NORMAL
+            }))
+            return arr.map(item=>{
+                return {
+                    ...item,
+                    global:true
+                }
+            })
+        } else {
+            if(type===ECommon_Model_Role_Type.PROJECT) {
+                let obj=await mysql.executeOne(generateQuerySql(projectModel,["organization_id"],{
+                    id:itemId
+                }))
+                if(obj) {
+                    organizationId=obj.organization_id
+                }
+            } else if (type === ECommon_Model_Role_Type.TEAM) {
+                let obj=await mysql.executeOne(generateQuerySql(teamModel,["organization_id"],{
+                    id:itemId
+                }))
+                if(obj) {
+                    organizationId=obj.organization_id
+                }
+            }
+            if(!organizationId) {
+                throw Err.Organization.organizationNotFound
+            }
+            let [objSelf,objExtend]=await Promise.all([
+                mysql.execute(generateQuerySql(roleModel,null,{
+                    item_id:itemId,
+                    reserved:ECommon_Model_Role_Reserved.NORMAL
+                })),
+                mysql.execute(generateQuerySql(roleModel,null,{
+                    item_id:null,
+                    organization_id:organizationId,
+                    type:type,
+                    reserved:ECommon_Model_Role_Reserved.NORMAL
+                })),
+            ]);
+            return objSelf.map(item=>{
+                return {
+                    ...item,
+                    global:false
+                }
+            }).concat(objExtend.map(item=>{
+                return {
+                    ...item,
+                    global:true
                 }
             }))
         }
+
+    }
+
+    async getRoleByValue(value:number):Promise<ICommon_Model_Role> {
+        let mysql=getMysqlInstance()
+        let obj=await mysql.executeOne(generateQuerySql(roleModel,null,{
+            value:value
+        }))
+        return obj;
     }
 }
 

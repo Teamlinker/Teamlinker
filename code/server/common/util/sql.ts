@@ -1,6 +1,6 @@
 import * as intFormat from "biguint-format";
 import * as FlakeId from 'flake-idgen';
-import { BaseModel } from '../../../common/model/base';
+import {BaseModel} from '../../../common/model/base';
 
 const uid = new FlakeId(); 
 
@@ -8,8 +8,11 @@ type EXPR={
     [key:string]:EXPRVALUE
 }
 type EXPRVALUEEXP ={
-    value?:string|number|boolean|string[]|[number,number]|string|Date,
-    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="
+    value?:string|number|boolean|string[]|[number,number]|string|Date|{
+        model:BaseModel,
+        field:string
+    },
+    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"
 }
 type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
     type:"and"|"or",
@@ -86,6 +89,12 @@ function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[],table?:string)
         arrExpr.push(`${table?(table+"."):""}${key} like '${value.value}%'`)
     } else if(value.exp=="%like%") {
         arrExpr.push(`${table?(table+"."):""}${key} like '%${value.value}%'`)
+    } else if(value.exp=="ref") {
+        let val= value.value as {
+            model:BaseModel,
+            field:string
+        }
+        arrExpr.push(`${table?(table+"."):""}${key} = ${val.model.table}.${val.field}`)
     }
 }
 
@@ -179,6 +188,9 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
     let keys="",values=""
     for(let key in obj) {
         let value=obj[key]
+        if(typeof(value)=="string") {
+            value=(value as string).replace(/'/g,"\\'");
+        }
         keys+=(value!==null && value!==undefined)?(key+","):""
         values+=(value!==null && value!==undefined)?("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'"+","):""
     }
@@ -213,6 +225,9 @@ export function generateBatchCreateSql<T extends BaseModel>(model:T,arr:{
         let arrValue:string[]=[]
         for(let key of arrKey) {
             let value=item[key]
+            if(typeof(value)=="string") {
+                value=(value as string).replace(/'/g,"\\'");
+            }
             arrValue.push((value!==undefined)?(value===null?"null":("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'")):"default")
         }
         arrValues.push("("+arrValue.join(",")+")")
@@ -242,7 +257,7 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
     }
     let expr=generateExp(objExpr,exprMode);
     return {
-        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}${order?` order by ${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}${order?` order by ${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:model.model
     }
 }
@@ -277,6 +292,9 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
         } else if(value==="") {
             val=null
         } else {
+            if(typeof(value)=="string") {
+                value=(value as string).replace(/'/g,"\\'")
+            }
             val="'"+value+"'"
         }
         arrVal.push(`${key}=${val}`)
@@ -361,22 +379,25 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
     let expr=generateLeftJoinExp(objExpr,exprMode);
     let table=mainModel.model.table
     let joinTable=joinModel.model.table
-    let key=Object.keys(joinModel.expression)[0]
-    let value=joinModel.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
+    let arrExpression=[]
+    for(let key in joinModel.expression) {
+        let value=joinModel.expression[key]
+        arrExpression.push(`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression=arrExpression.join(" and ")
     let rename=mainModel.rename
     let renameJoin=joinModel.rename
     let aggregation={}
     let column=""
     if(mainModel.columns && mainModel.columns.length>0) {
         let str=mainModel.columns.map((item)=>{
-            return `${table}.${item} _${table}__${(rename && rename.fields.includes(item as any))?rename.newFields[rename.fields.indexOf(item as any)]:item}`
+            return `${table}.${item.toString()} _${table}__${(rename && rename.fields.includes(item as any))?rename.newFields[rename.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=str;
     }
     if(joinModel.columns && joinModel.columns.length>0) {
         let str=joinModel.columns.map((item)=>{
-            return `${joinTable}.${item} _${joinTable}__${(renameJoin && renameJoin.fields.includes(item as any))?renameJoin.newFields[renameJoin.fields.indexOf(item as any)]:item}`
+            return `${joinTable}.${item.toString()} _${joinTable}__${(renameJoin && renameJoin.fields.includes(item as any))?renameJoin.newFields[renameJoin.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=","+str;
     }
@@ -388,7 +409,7 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
     aggregation[table]=mainModel.aggregation??""
     aggregation[joinTable]=joinModel.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -475,12 +496,18 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     let table=mainModel.model.table
     let joinTable=joinModel.model.table
     let joinTable2=joinModel2.model.table
-    let key=Object.keys(joinModel.expression)[0]
-    let value=joinModel.expression[key]
-    let key2=Object.keys(joinModel2.expression)[0]
-    let value2=joinModel2.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
-    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field}`
+    let arrExpression=[]
+    for(let key in joinModel.expression) {
+        let value=joinModel.expression[key]
+        arrExpression.push(`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression=arrExpression.join(" and ")
+    let arrExpression2=[]
+    for(let key in joinModel2.expression) {
+        let value=joinModel2.expression[key]
+        arrExpression2.push(`${joinTable2}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression2=arrExpression2.join(" and ")
     let rename=mainModel.rename
     let renameJoin=joinModel.rename
     let renameJoin2=joinModel2.rename
@@ -488,19 +515,19 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     let column=""
     if(mainModel.columns && mainModel.columns.length>0) {
         let str=mainModel.columns.map((item)=>{
-            return `${table}.${item} _${table}__${(rename && rename.fields.includes(item as any))?rename.newFields[rename.fields.indexOf(item as any)]:item}`
+            return `${table}.${item.toString()} _${table}__${(rename && rename.fields.includes(item as any))?rename.newFields[rename.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=str;
     }
     if(joinModel.columns && joinModel.columns.length>0) {
         let str=joinModel.columns.map((item)=>{
-            return `${joinTable}.${item} _${joinTable}__${(renameJoin && renameJoin.fields.includes(item as any))?renameJoin.newFields[renameJoin.fields.indexOf(item as any)]:item}`
+            return `${joinTable}.${item.toString()} _${joinTable}__${(renameJoin && renameJoin.fields.includes(item as any))?renameJoin.newFields[renameJoin.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=","+str;
     }
     if(joinModel2.columns && joinModel2.columns.length>0) {
         let str=joinModel2.columns.map((item)=>{
-            return `${joinTable2}.${item} _${joinTable2}__${(renameJoin2 && renameJoin2.fields.includes(item as any))?renameJoin2.newFields[renameJoin2.fields.indexOf(item as any)]:item}`
+            return `${joinTable2}.${item.toString()} _${joinTable2}__${(renameJoin2 && renameJoin2.fields.includes(item as any))?renameJoin2.newFields[renameJoin2.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=","+str;
     }
@@ -513,7 +540,7 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     aggregation[joinTable]=joinModel.aggregation??""
     aggregation[joinTable2]=joinModel2.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -619,15 +646,24 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     let joinTable=joinModel.model.table
     let joinTable2=joinModel2.model.table
     let joinTable3=joinModel3.model.table
-    let key=Object.keys(joinModel.expression)[0]
-    let value=joinModel.expression[key]
-    let key2=Object.keys(joinModel2.expression)[0]
-    let value2=joinModel2.expression[key]
-    let key3=Object.keys(joinModel3.expression)[0]
-    let value3=joinModel3.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
-    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field}`
-    let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.field}`
+    let arrExpression=[]
+    for(let key in joinModel.expression) {
+        let value=joinModel.expression[key]
+        arrExpression.push(`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression=arrExpression.join(" and ")
+    let arrExpression2=[]
+    for(let key in joinModel2.expression) {
+        let value=joinModel2.expression[key]
+        arrExpression2.push(`${joinTable2}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression2=arrExpression2.join(" and ")
+    let arrExpression3=[]
+    for(let key in joinModel3.expression) {
+        let value=joinModel3.expression[key]
+        arrExpression3.push(`${joinTable3}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression3=arrExpression3.join(" and ")
     let rename=mainModel.rename
     let renameJoin=joinModel.rename
     let renameJoin2=joinModel2.rename
@@ -636,25 +672,25 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     let column=""
     if(mainModel.columns && mainModel.columns.length>0) {
         let str=mainModel.columns.map((item)=>{
-            return `${table}.${item} _${table}__${(rename && rename.fields.includes(item as any))?rename.newFields[rename.fields.indexOf(item as any)]:item}`
+            return `${table}.${item.toString()} _${table}__${(rename && rename.fields.includes(item as any))?rename.newFields[rename.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=str;
     }
     if(joinModel.columns && joinModel.columns.length>0) {
         let str=joinModel.columns.map((item)=>{
-            return `${joinTable}.${item} _${joinTable}__${(renameJoin && renameJoin.fields.includes(item as any))?renameJoin.newFields[renameJoin.fields.indexOf(item as any)]:item}`
+            return `${joinTable}.${item.toString()} _${joinTable}__${(renameJoin && renameJoin.fields.includes(item as any))?renameJoin.newFields[renameJoin.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=","+str;
     }
     if(joinModel2.columns && joinModel2.columns.length>0) {
         let str=joinModel2.columns.map((item)=>{
-            return `${joinTable2}.${item} _${joinTable2}__${(renameJoin2 && renameJoin2.fields.includes(item as any))?renameJoin2.newFields[renameJoin2.fields.indexOf(item as any)]:item}`
+            return `${joinTable2}.${item.toString()} _${joinTable2}__${(renameJoin2 && renameJoin2.fields.includes(item as any))?renameJoin2.newFields[renameJoin2.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=","+str;
     }
     if(joinModel3.columns && joinModel3.columns.length>0) {
         let str=joinModel3.columns.map((item)=>{
-            return `${joinTable3}.${item} _${joinTable3}__${(renameJoin3 && renameJoin3.fields.includes(item as any))?renameJoin3.newFields[renameJoin3.fields.indexOf(item as any)]:item}`
+            return `${joinTable3}.${item.toString()} _${joinTable3}__${(renameJoin3 && renameJoin3.fields.includes(item as any))?renameJoin3.newFields[renameJoin3.fields.indexOf(item as any)]:item.toString()}`
         }).join(",")
         column+=","+str;
     }
@@ -668,7 +704,7 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     aggregation[joinTable2]=joinModel2.aggregation??""
     aggregation[joinTable3]=joinModel3.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -711,7 +747,7 @@ export function generateMaxSql<T extends BaseModel,K1 extends keyof T["model"]>(
         [key in Extract<keyof T["model"],K1>]:T["model"][key]
     }
 } {
-    let column=`max(${columnMax}) ${columnMax}`
+    let column=`max(${columnMax.toString()}) ${columnMax.toString()}`
     let expr=generateExp(objExpr,exprMode);
     return {
         value:`select ${column} from ${model.table}${expr?(" where "+expr):""}`,
@@ -727,7 +763,7 @@ export function generateMinSql<T extends BaseModel,K1 extends keyof T["model"]>(
         [key in Extract<keyof T["model"],K1>]:T["model"][key]
     }
 } {
-    let column=`min(${columnMin}) ${columnMin}`
+    let column=`min(${columnMin.toString()}) ${columnMin.toString()}`
     let expr=generateExp(objExpr,exprMode);
     return {
         value:`select ${column} from ${model.table}${expr?(" where "+expr):""}`,
@@ -893,7 +929,7 @@ export function generateGroupSql<T extends BaseModel,K1 extends keyof T["model"]
     let expr=generateExp(objExpr,exprMode);
     let havingExpr=generateHavingExp(having,havingMode);
     return {
-        value:`select ${column} from ${model.table}${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.field} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:model.model
     }
 }
@@ -957,7 +993,7 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
     let joinTable=joinModel.model.table
     let key=Object.keys(joinModel.expression)[0]
     let value=joinModel.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`
     let aggregation={}
     let column=""
     let havingExpr=generateLeftJoinHavingExp(having,havingMode);
@@ -997,7 +1033,7 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
     aggregation[table]=mainModel.aggregation??""
     aggregation[joinTable]=joinModel.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field}`:(order.model.table+"."+order.field)} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -1084,8 +1120,8 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
     let value=joinModel.expression[key]
     let key2=Object.keys(joinModel2.expression)[0]
     let value2=joinModel2.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
-    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field}`
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`
+    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field.toString()}`
     let havingExpr=generateLeftJoinHavingExp(having,havingMode);
     let aggregation={}
     let column=""
@@ -1140,7 +1176,7 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
     aggregation[joinTable]=joinModel.aggregation??""
     aggregation[joinTable2]=joinModel2.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field}`:(order.model.table+"."+order.field)} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -1249,9 +1285,9 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
     let value2=joinModel2.expression[key]
     let key3=Object.keys(joinModel3.expression)[0]
     let value3=joinModel3.expression[key]
-    let expression=`${joinTable}.${key}=${value.model.table}.${value.field}`
-    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field}`
-    let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.field}`
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`
+    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field.toString()}`
+    let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.field.toString()}`
     let havingExpr=generateLeftJoinHavingExp(having,havingMode);
     let aggregation={}
     let column=""
@@ -1321,7 +1357,7 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
     aggregation[joinTable2]=joinModel2.aggregation??""
     aggregation[joinTable3]=joinModel3.aggregation??""
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field}`:(order.model.table+"."+order.field)} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }

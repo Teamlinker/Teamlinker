@@ -1,26 +1,29 @@
-import { ECommon_User_Type } from "../../../common/model/user";
 import teamApi from "../../../common/routes/team";
-import { Err } from '../../../common/status/error';
-import { DComponent } from "../../common/decorate/component";
-import { EServer_Common_Event_Types } from "../../common/event/types";
-import { DHttpApi, DHttpController, DHttpHeaderRequired, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
-import { IUserSession } from '../../common/rpc/api/user';
+import {Err} from '../../../common/status/error';
+import {DComponent} from "../../common/decorate/component";
+import {EServer_Common_Event_Types} from "../../common/event/types";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import TeamService from "../service/team";
-import { OrganizationService } from './../service/organization';
+import {OrganizationService} from './../service/organization';
+import {IUserSession} from "../types/config";
+import rpcAuthApi from "../../auth/rpc/auth";
+
 @DComponent
 @DHttpController(teamApi)
 class TeamController {
     @DHttpApi(teamApi.routes.create)
-    async create(@DHttpReqParamRequired("name") name:string,@DHttpUser user:IUserSession,@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof teamApi.routes.create.res>{
-        let organization = OrganizationService.getItemById(organizationId)
+    async create(@DHttpReqParamRequired("name") name:string,@DHttpUser user:IUserSession,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string):Promise<typeof teamApi.routes.create.res>{
+        let organization = OrganizationService.getItemById(user.organizationInfo.organizationId)
         if(!organization) {
             throw Err.Organization.organizationNotFound
         }
         let team=new TeamService
         team.assignItem({
             name,
-            created_by:user.type==ECommon_User_Type.USER?user.userId:null,
-            organization_id:organizationId
+            created_by:user.organizationInfo.organizationUserId,
+            organization_id:user.organizationInfo.organizationId,
+            description,
+            photo
         });
         let obj=await team.create()
         return obj
@@ -36,13 +39,15 @@ class TeamController {
     }
 
     @DHttpApi(teamApi.routes.update)
-    async update(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("name") name:string):Promise<typeof teamApi.routes.create.res> {
+    async update(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParam("name") name:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string):Promise<typeof teamApi.routes.create.res> {
         let team = await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
         }
         team.assignItem({
-            name
+            name,
+            description,
+            photo
         })
         let ret=await team.update()
         return ret
@@ -58,73 +63,119 @@ class TeamController {
     }
     
     @DHttpApi(teamApi.routes.roles)
-    async roles(@DHttpReqParamRequired("teamId") teamId:string) :Promise<typeof teamApi.routes.roles.res> {
-        let team=await TeamService.getItemById(teamId)
-        if(!team) {
-            throw Err.Team.teamNotFound
+    async roles(@DHttpReqParam("teamId") teamId:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.roles.res> {
+        if(teamId) {
+            let team=await TeamService.getItemById(teamId)
+            if(!team) {
+                throw Err.Team.teamNotFound
+            }
+            let ret=await team.getRoles()
+            return ret;
+        } else {
+            let ret=await TeamService.getGlobalRoles(user.organizationInfo.organizationId);
+            return ret;
         }
-        let ret=await team.getRoles()
-        return ret;
+
     }
 
     @DHttpApi(teamApi.routes.members)
-    async members(@DHttpReqParamRequired("teamId") teamId:string) :Promise<typeof teamApi.routes.members.res> {
+    async members(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("page") page:number, @DHttpReqParamRequired("size") size:number, @DHttpReqParam("keyword") keyword:string) :Promise<typeof teamApi.routes.members.res> {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
         }
-        let ret=await team.members()
+        let ret=await team.members(page,size,keyword)
         return ret;
     }
 
     @DHttpApi(teamApi.routes.addMember)
-    async addMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("userId") userId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.addMember.res> {
+    async addMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.addMember.res> {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
         }
-        await team.addMemeber(userId,roleId)
-        return;
+        let ret=await team.addMember(organizationUserId,roleId)
+        return ret;
     }
 
     @DHttpApi(teamApi.routes.removeMember)
-    async removeMemeber(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("userId") userId:string) :Promise<typeof teamApi.routes.removeMember.res> {
+    async removeMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string) :Promise<typeof teamApi.routes.removeMember.res> {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
         }
-        await team.removeMemeber(userId)
+        await team.removeMember(organizationUserId)
         return;
     }
 
     @DHttpApi(teamApi.routes.changeRole)
-    async changeRole(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("userId") userId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.changeRole.res> {
+    async changeRole(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.changeRole.res> {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
         }
-        await team.changeRole(userId,roleId)
-        return;
+        let ret=await team.changeRole(organizationUserId,roleId)
+        return ret;
     }
 
     @DHttpApi(teamApi.routes.list)
-    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpHeaderRequired("organizationid") organizationId:string) :Promise<typeof teamApi.routes.list.res>{
-        let organization = OrganizationService.getItemById(organizationId)
+    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.list.res>{
+        let organization = OrganizationService.getItemById(user.organizationInfo.organizationId)
         if(!organization) {
             throw Err.Organization.organizationNotFound
         }
-        let list=await TeamService.list(organizationId ,page,size,keyword)
+        let list=await TeamService.list(user.organizationInfo.organizationId ,page,size,keyword)
         return list
     }
 
     @DHttpApi(teamApi.routes.filterTeam)
-    async filterTeam(@DHttpReqParamRequired("name") name:string,@DHttpHeaderRequired("organizationid") organizationId:string) :Promise<typeof teamApi.routes.filterTeam.res>{
-        let organization = OrganizationService.getItemById(organizationId)
+    async filterTeam(@DHttpReqParamRequired("name") name:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.filterTeam.res>{
+        let organization = OrganizationService.getItemById(user.organizationInfo.organizationId)
         if(!organization) {
             throw Err.Organization.organizationNotFound
         }
-        let ret=await TeamService.filter(organizationId,name,10);
+        let ret=await TeamService.filter(user.organizationInfo.organizationId,name,10);
         return ret;
+    }
+
+    @DHttpApi(teamApi.routes.addRole)
+    async addRole(@DHttpReqParam("teamId") teamId:string,
+                  @DHttpReqParamRequired("name") name :string,
+                  @DHttpReqParamRequired("value") value:number,
+                  @DHttpReqParam("description") description:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.addRole.res>{
+        if(teamId) {
+            let obj=await TeamService.getItemById(teamId)
+            if(!obj) {
+                throw Err.Team.teamNotFound
+            }
+            let ret=await obj.createRole(name,description,value);
+            return ret;
+        } else {
+            let obj=await TeamService.createGlobalRole(user.organizationInfo.organizationId,name,description,value)
+            return obj;
+        }
+
+    }
+
+    @DHttpApi(teamApi.routes.editRole)
+    async editRole(@DHttpReqParamRequired("roleId") roleId:string,
+                   @DHttpReqParam("name") name :string,
+                   @DHttpReqParam("value") value:number,
+                   @DHttpReqParam("description") description:string,
+                   @DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.editRole.res>{
+        let ret=await rpcAuthApi.updateRole({
+            id:roleId,
+            name,
+            description,
+            value:value
+        });
+        return ret;
+    }
+
+    @DHttpApi(teamApi.routes.removeRole)
+    async removeRole(@DHttpReqParamRequired("roleId") roleId:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.removeRole.res>{
+        await rpcAuthApi.removeRole(roleId);
+        return;
     }
 
 }

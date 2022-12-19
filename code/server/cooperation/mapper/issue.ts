@@ -1,24 +1,37 @@
-import { ICommon_Model_Project, projectModel } from "../../../common/model/project";
-import { ICommon_Model_Project_Issue, projectIssueModel } from "../../../common/model/project_issue";
-import { ICommon_Model_Project_Lable, projectLabelModel } from "../../../common/model/project_label";
-import { ICommon_Model_Project_Module, projectModuleModel } from "../../../common/model/project_module";
-import { workflowNodeModel } from "../../../common/model/workflow_node";
-import { ICommon_Route_Res_Project_filter } from "../../../common/routes/response";
-import { Err } from "../../../common/status/error";
-import { keys } from "../../../common/transform";
-import { getMysqlInstance } from '../../common/db/mysql';
-import { Mapper } from "../../common/entity/mapper";
-import { generateBatchCreateSql, generateCreateSql, generateDeleteSql, generateLeftJoin2Sql, generateLeftJoin3Sql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from '../../common/util/sql';
-import { fieldSolutionWorkflowNodeFieldTypeModel } from './../../../common/model/field_solution_workflow_node_field_type';
-import { ICommon_Model_Issue_Type, issueTypeModel } from './../../../common/model/issue_type';
-import { projectIssueDescriptionModel } from './../../../common/model/project_issue_description';
-import { ICommon_Model_Project_Issue_Field_Value, projectIssueFieldValueModel } from './../../../common/model/project_issue_field_value';
-import { projectIssueParentModel } from './../../../common/model/project_issue_parent';
-import { projectIssueProcessModel } from './../../../common/model/project_issue_process';
-import { projectIssueRelatedModel } from './../../../common/model/project_issue_related';
-import { projectLabelIssueModel } from './../../../common/model/project_label_issue';
-import { projectModuleIssueModel } from './../../../common/model/project_module_issue';
-import { ICommon_Model_Workflow_Node } from './../../../common/model/workflow_node';
+import {ICommon_Model_Project, projectModel} from "../../../common/model/project";
+import {ICommon_Model_Project_Issue, projectIssueModel} from "../../../common/model/project_issue";
+import {ICommon_Model_Project_Label, projectLabelModel} from "../../../common/model/project_label";
+import {ICommon_Model_Project_Module, projectModuleModel} from "../../../common/model/project_module";
+import {workflowNodeModel} from "../../../common/model/workflow_node";
+import {ICommon_Route_Res_Project_filter} from "../../../common/routes/response";
+import {Err} from "../../../common/status/error";
+import {keys} from "../../../common/transform";
+import {getMysqlInstance} from '../../common/db/mysql';
+import {Mapper} from "../../common/entity/mapper";
+import {
+    generateBatchCreateSql,
+    generateCreateSql,
+    generateDeleteSql,
+    generateLeftJoin2Sql,
+    generateLeftJoin3Sql,
+    generateLeftJoinSql,
+    generateQuerySql,
+    generateSnowId,
+    generateUpdateSql
+} from '../../common/util/sql';
+import {workflowNodeFieldTypeModel} from '../../../common/model/workflow_node_field_type';
+import {ICommon_Model_Issue_Type, issueTypeModel} from './../../../common/model/issue_type';
+import {projectIssueDescriptionModel} from './../../../common/model/project_issue_description';
+import {
+    ICommon_Model_Project_Issue_Field_Value,
+    projectIssueFieldValueModel
+} from './../../../common/model/project_issue_field_value';
+import {projectIssueParentModel} from './../../../common/model/project_issue_parent';
+import {projectIssueProcessModel} from './../../../common/model/project_issue_process';
+import {projectIssueRelatedModel} from './../../../common/model/project_issue_related';
+import {projectLabelIssueModel} from './../../../common/model/project_label_issue';
+import {projectModuleIssueModel} from './../../../common/model/project_module_issue';
+import {ICommon_Model_Workflow_Node} from './../../../common/model/workflow_node';
 
 class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
@@ -38,15 +51,12 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }
         let mysql=getMysqlInstance()
         await mysql.execute(generateUpdateSql(projectIssueFieldValueModel,value,{
-            field_id:value.field_id,
+            workflow_node_field_type_id:value.workflow_node_field_type_id,
             project_issue_id:value.project_issue_id
         }))
     }
 
-    async handleProcess(projectIssueId:string,workflowNodeId:string,bindInfo?:{
-        workflowSolutionId:string,
-        fieldSolutionId:string
-    }) {
+    async handleProcess(projectIssueId:string,workflowNodeId:string) {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         } else if(!workflowNodeId) {
@@ -60,40 +70,36 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             await mysql.execute(generateCreateSql(projectIssueProcessModel,{
                 id:await generateSnowId(),
                 project_issue_id:projectIssueId,
-                process:[workflowNodeId]
+                workflow_node_process:[workflowNodeId]
             }))
-        } else if(!obj.process) {
+        } else if(!obj.workflow_node_process) {
             await mysql.execute(generateUpdateSql(projectIssueProcessModel,{
-                process:[workflowNodeId]
+                workflow_node_process:[workflowNodeId]
             },{
                 project_issue_id:projectIssueId
             }))
         } else {
-            let process=obj.process;
+            let process=obj.workflow_node_process;
             if(process.includes(workflowNodeId)) {
                 let index=process.indexOf(workflowNodeId)
                 let arrDelete=process.splice(index+1)
-                if(bindInfo.workflowSolutionId && bindInfo.fieldSolutionId) {
-                    for(let nodeId of arrDelete) {
-                        let arr=await mysql.execute(generateQuerySql(fieldSolutionWorkflowNodeFieldTypeModel,["id"],{
-                            field_solution_id:bindInfo.fieldSolutionId,
-                            workflow_node_id:nodeId,
-                            workflow_solution_id:bindInfo.workflowSolutionId
-                        }))
-                        await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
-                            field_id:{
-                                exp:"in",
-                                value:arr.map(item=>item.id)
-                            },
-                            project_issue_id:projectIssueId
-                        }))
-                    }
+                for(let nodeId of arrDelete) {
+                    let arr=await mysql.execute(generateQuerySql(workflowNodeFieldTypeModel,["id"],{
+                        workflow_node_id:nodeId,
+                    }))
+                    await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
+                        workflow_node_field_type_id:{
+                            exp:"in",
+                            value:arr.map(item=>item.id)
+                        },
+                        project_issue_id:projectIssueId
+                    }))
                 }
             } else {
                 process=process.concat(workflowNodeId)
             }
             await mysql.execute(generateUpdateSql(projectIssueProcessModel,{
-                process:process
+                workflow_node_process:process
             },{
                 project_issue_id:projectIssueId
             }))
@@ -108,10 +114,10 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         let obj=await mysql.executeOne(generateQuerySql(projectIssueProcessModel,[],{
             project_issue_id:projectIssueId
         }))
-        if(!obj || !obj.process) {
+        if(!obj || !obj.workflow_node_process) {
             return null
         }
-        return obj.process
+        return obj.workflow_node_process
     }
 
     async getFieldValues(projectIssueId:string) {
@@ -281,7 +287,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             await mysql.execute(generateCreateSql(projectIssueProcessModel,{
                 id:await generateSnowId(),
                 project_issue_id:newProjectIssueId,
-                process:process.process
+                workflow_node_process:process.workflow_node_process
             }))
         }
         let projectLabelIssues=await mysql.execute(generateQuerySql(projectLabelIssueModel,[],{
@@ -483,7 +489,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             model:projectLabelIssueModel
         },{
             model:projectLabelModel,
-            columns:keys<ICommon_Model_Project_Lable>().map(item=>item.name),
+            columns:keys<ICommon_Model_Project_Label>().map(item=>item.name),
             expression:{
                 id:{
                     model:projectLabelIssueModel,
@@ -530,7 +536,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         } else if(!projectLabelId) {
-            throw Err.Project.Tag.tagNotfound
+            throw Err.Project.Label.labelNotfound
         }
         let mysql=getMysqlInstance()
         let obj=await mysql.executeOne(generateQuerySql(projectLabelIssueModel,[],{
@@ -538,7 +544,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             project_label_id:projectLabelId
         }))
         if(obj) {
-            throw Err.Project.Tag.tagIssueExists
+            throw Err.Project.Label.labelIssueExists
         }
         await mysql.execute(generateCreateSql(projectLabelIssueModel,{
             id:await generateSnowId(),
@@ -551,7 +557,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         } else if(!projectLabelId) {
-            throw Err.Project.Tag.tagNotfound
+            throw Err.Project.Label.labelNotfound
         }
         let mysql=getMysqlInstance()
         await mysql.execute(generateDeleteSql(projectLabelIssueModel,{

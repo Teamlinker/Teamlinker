@@ -1,52 +1,58 @@
-import { Err } from "../../../common/status/error";
-import { Entity } from "../../common/entity/entity";
-import ProjectService from "../service/project";
-import { issueTypeModel } from './../../../common/model/issue_type';
-import { ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel } from './../../../common/model/issue_type_solution';
-import { ICommon_Route_Res_IssueTypeSolution_List_Item } from './../../../common/routes/response';
-import { issueTypeMapper, issueTypeSolutionMapper } from './../mapper/issueType';
-import WorkflowService, { WorkflowSolutionService } from './workflow';
-export default class IssueType extends Entity<typeof issueTypeModel,typeof issueTypeMapper> {
+import {Err} from "../../../common/status/error";
+import {Entity} from "../../common/entity/entity";
+import {ProjectService} from "../service/project";
+import {issueTypeModel} from './../../../common/model/issue_type';
+import {issueTypeSolutionModel} from './../../../common/model/issue_type_solution';
+import {ICommon_Route_Res_IssueTypeSolution_List_Item} from './../../../common/routes/response';
+import {issueTypeMapper, issueTypeSolutionMapper} from './../mapper/issueType';
+import {WorkflowService} from "./workflow";
+
+export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issueTypeMapper> {
     constructor(){
         super(issueTypeMapper)
     }
-    static async list(organizationId:string){
-        let ret=await issueTypeMapper.list(organizationId)
+    static async list(issueTypeSolutionId:string){
+        let ret=await issueTypeMapper.list(issueTypeSolutionId)
         return ret;
     }
     override async delete() {
         await super.delete()
-        await issueTypeMapper.deleteFromSolution(this.getId());
-        await WorkflowSolutionService.clearIssueType(this.getId())
+        await WorkflowService.delete(this.getId());
     }
 
-    static async init(organizationId:string):Promise<{
+    override async copy(deletedFields?: (keyof typeof issueTypeModel["model"])[], updatedFields?: { [name in keyof typeof issueTypeModel["model"]]?: typeof issueTypeModel["model"][name] }): Promise<this> {
+        let obj=await super.copy(deletedFields, updatedFields);
+        await WorkflowService.copy(this.getId(),obj.getId());
+        return obj;
+    }
+
+    static async init(issueTypeSolutionId:string):Promise<{
         taskId:string,
         bugId:string,
         ticketId:string
     }> {
-        if(!organizationId) {
-            throw Err.Organization.organizationNotFound
+        if(!issueTypeSolutionId) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
         }
-        let objTask=new IssueType;
+        let objTask=new IssueTypeService();
         objTask.assignItem({
             name:"Task",
             reserved:1,
-            organization_id:organizationId
+            issue_type_solution_id:issueTypeSolutionId
         })
         await objTask.create();
-        let objBug=new IssueType;
+        let objBug=new IssueTypeService;
         objBug.assignItem({
             name:"Bug",
             reserved:1,
-            organization_id:organizationId
+            issue_type_solution_id:issueTypeSolutionId
         })
         await objBug.create();
-        let objTicket=new IssueType;
+        let objTicket=new IssueTypeService;
         objTicket.assignItem({
             name:"Ticket",
             reserved:1,
-            organization_id:organizationId
+            issue_type_solution_id:issueTypeSolutionId
         })
         await objTicket.create();
         return {
@@ -61,39 +67,31 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
     constructor(){
         super(issueTypeSolutionMapper)
     }
-    override async copy():Promise<this> {
-        let arr=await issueTypeSolutionMapper.getIssueTypesBySolutionId(this.getId());
-        let obj=await super.copy()
-        for(let o of arr) {
-            await issueTypeSolutionMapper.addIssueType(o.id,obj.getId());
-        }
-        let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueTypeSolutionId(this.getId())
-        if(objWorkflowSolution) {
-            await objWorkflowSolution.bindIssueTypeSolutions([obj.getId()])
-        }
-        return obj;
-    }
-    override async create():Promise<ICommon_Model_Issue_Type_Solution> {
-        let ret=await super.create();
-        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem(ret.organization_id)
-        if(objWorkflowReserved) {
-            objWorkflowReserved.bindIssueTypeSolutions([this.getId()])
-        }
-        return ret;
-    }
 
-    override async update():Promise<ICommon_Model_Issue_Type_Solution> {
-        let ret=await super.update();
-        return ret;
+    override async copy(deletedFields?: (keyof typeof issueTypeSolutionModel["model"])[], updatedFields?: { [name in keyof typeof issueTypeSolutionModel["model"]]?: typeof issueTypeSolutionModel["model"][name] }): Promise<this> {
+        let obj=await super.copy(deletedFields, updatedFields);
+        let list=await this.issueTypeList();
+        let arr=[]
+        for(let o of list) {
+            let objIssueType=await IssueTypeService.getItemById(o.id);
+            arr.push(objIssueType.copy(null,{
+                issue_type_solution_id:obj.getId()
+            }))
+        }
+        await Promise.all(arr)
+        return obj;
     }
 
     override async delete() {
         await super.delete()
-        let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueTypeSolutionId(this.getId())
-        if(objWorkflowSolution) {
-            await objWorkflowSolution.unbindIssueTypeSolutions([this.getId()]);
-        }
         await issueTypeSolutionMapper.resetProjects(this.getId(),this.getItem().organization_id);
+        let list=await this.issueTypeList();
+        let arr=[];
+        for(let obj of list) {
+            let o=await IssueTypeService.getItemById(obj.id);
+            arr.push(o.delete())
+        }
+        await Promise.all(arr)
     }
 
     static async list(organizationId:string){
@@ -108,7 +106,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
                     name:item.name,
                     description:item.description
                 }}),
-                issueTypeList:await issueTypeSolutionMapper.getIssueTypesBySolutionId(obj.id)
+                issueTypeList:await issueTypeMapper.list(obj.id)
             })
         }
         return arr;
@@ -121,32 +119,11 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         }
         return {
             ...ret.getItem(),
-            issueTypeList:await issueTypeSolutionMapper.getIssueTypesBySolutionId(id),
+            issueTypeList:await issueTypeMapper.list(id),
             projectList:await issueTypeSolutionMapper.projectList(id)
         }
     }
 
-    async issueTypeList() {
-        let ret=await issueTypeSolutionMapper.getIssueTypesBySolutionId(this.getId())
-        return ret;
-    }
-
-    async addIssueType(issueTypeId:string) {
-        await issueTypeSolutionMapper.addIssueType(issueTypeId,this.getId())
-        let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueTypeSolutionId(this.getId())
-        if(objWorkflowSolution) {
-            let reserved=await WorkflowService.getReservedItem(this.getItem().organization_id)
-            await objWorkflowSolution.assign(issueTypeId,reserved.getId(),this.getId())
-        }
-    }
-
-    async removeIssueType(issueTypeId:string) {
-        await issueTypeSolutionMapper.removeIssueType(issueTypeId,this.getId())
-        let objWorkflowSolution=await WorkflowSolutionService.getItemByIssueTypeSolutionId(this.getId())
-        if(objWorkflowSolution) {
-            await objWorkflowSolution.deleteIssueType(issueTypeId,this.getId())
-        }
-    }
 
     static async getReservedItem(organizationId:string) {
         let obj=await issueTypeSolutionMapper.getReservedItem(organizationId)
@@ -213,15 +190,17 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         
     }
 
-    static async clearByOrganizationId(organizationId:string) {
-        await issueTypeSolutionMapper.clearByOrganizationId(organizationId)
+    static async clearByOrganizationId(organizationId:string):Promise<string[]> {
+        let ret=await issueTypeSolutionMapper.clearByOrganizationId(organizationId)
+        return ret;
     }
 
-    static async init(organizationId:string,issueTypeIds:{
-        taskId:string,
-        bugId:string,
-        ticketId:string
-    },projectId?:string):Promise<{
+    static async getIssueTypesByOrganizationId(organizationId:string):Promise<string[]> {
+        let ret=await issueTypeSolutionMapper.clearByOrganizationId(organizationId)
+        return ret;
+    }
+
+    static async init(organizationId:string):Promise<{
         solutionId:string,
         solutionName:string
     }> {
@@ -236,15 +215,17 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
             organization_id:organizationId
         })
         await objSolution.create()
-        await issueTypeSolutionMapper.addIssueType(issueTypeIds.taskId,objSolution.getId());
-        await issueTypeSolutionMapper.addIssueType(issueTypeIds.bugId,objSolution.getId());
-        await issueTypeSolutionMapper.addIssueType(issueTypeIds.ticketId,objSolution.getId());
-        if(projectId) {
-            issueTypeSolutionMapper.bindProject(objSolution.getId(),projectId);
-        }
+        await IssueTypeService.init(objSolution.getId());
         return {
             solutionId:objSolution.getId(),
             solutionName:objSolution.getItem().name
         }
     }
+
+    async issueTypeList() {
+        let ret=await issueTypeMapper.list(this.getId());
+        return ret;
+    }
+
+
 }

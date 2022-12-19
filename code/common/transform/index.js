@@ -1,1 +1,2 @@
-Object.defineProperty(exports, "__esModule", { value: true });
+"use strict";
+exports.__esModule = true;

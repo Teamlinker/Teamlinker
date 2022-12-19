@@ -23,6 +23,10 @@ export namespace Err {
         requestForbidden:{
             code:6,
             msg:"request forbidden"
+        },
+        admin:{
+            code:7,
+            msg:"user is admin"
         }
     }
     export let User = {
@@ -90,16 +94,16 @@ export namespace Err {
             code:3004,
             msg:"project id not match"
         },
-        Tag:{
-            tagSizeEmpty:{
+        Label:{
+            labelSizeEmpty:{
                 code:3100,
                 msg:"tag size empty"
             },
-            tagNotfound:{
+            labelNotfound:{
                 code:3101,
                 msg:"tag not found"
             },
-            tagIssueExists:{
+            labelIssueExists:{
                 code:3102,
                 msg:"tag issue exists"
             }
@@ -312,7 +316,7 @@ export namespace Err {
             code:4002,
             msg:"team member exists"
         },
-        teamMemeberNotExists:{
+        teamMemberNotExists:{
             code:4003,
             msg:"team member not exists"
         }
@@ -325,6 +329,14 @@ export namespace Err {
         roleNotExists:{
             code:5001,
             msg:"role not exists"
+        },
+        roleMemberEmpty:{
+            code:5002,
+            msg:"role member empty"
+        },
+        roleMemberExists:{
+            code:5003,
+            msg:"role member exists"
         }
     }
     export let File ={
@@ -373,6 +385,18 @@ export namespace Err {
         nicknameEmpty:{
             code:8005,
             msg:"nickname empty"
+        },
+        notInOrganization:{
+            code:8002,
+            msg:"not in organization"
+        },
+        memberTagNotFound:{
+            code:8003,
+            msg:"member tag not found"
+        },
+        memberTagAlreadyExists:{
+            code:8004,
+            msg:"member tag already exists"
         }
     }
 

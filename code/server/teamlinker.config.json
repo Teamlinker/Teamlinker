@@ -6,32 +6,13 @@
         "password":""
     },
     "mysql":{
-        "url":"175.27.166.37",
+        "url":"localhost",
         "port":3306,
         "database":"teamlinker_dev",
         "username":"root",
-        "password":"sxsxsxsxsxSX1!"
+        "password":"sxsxsxSX1"
     },
-    "services":{
-        "gateway":{
-            "port":13000,
-            "rpcServer":false
-        },
-        "user":{
-            "port":13001,
-            "rpcServer":true,
-            "global": {
-                "jwt": "teamlinker"
-            }
-        },
-        "cooperation":{
-            "port":13002,
-            "rpcServer":true
-        },
-        "file":{
-            "port":13003,
-            "rpcServer":true
-        }
-    },
+    "port":14000,
+    "jwt": "teamlinker",
     "version":"1.0.0"
 }

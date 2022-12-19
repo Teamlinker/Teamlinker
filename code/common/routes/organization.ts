@@ -1,8 +1,17 @@
-import { ICommon_Model_Organization } from './../model/organization';
-import { ECommon_Organization_User_Role, ICommon_Model_Organization_User } from './../model/organization_user';
-import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_Organization_List, ICommon_Route_Res_Organization_User } from './response';
-import { ECommon_HttpApi_Method } from "./types";
+import {Permission_Types} from '../permission/permission';
+import {ICommon_Model_Organization} from './../model/organization';
+import {ECommon_Services} from './../types';
+import {
+    ICommon_Route_Res_Member_Tag_Member,
+    ICommon_Route_Res_Organization_List,
+    ICommon_Route_Res_Organization_User_Item,
+    ICommon_Route_Res_Organization_User_List,
+    ICommon_Route_Res_Role_Item,
+    ICommon_Route_Res_Role_List
+} from './response';
+import {ECommon_HttpApi_Method} from "./types";
+import {ICommon_Model_Member_Tag} from "../model/member_tag";
+
 const api={
     baseUrl:"/organization",
     service:ECommon_Services.User,
@@ -22,6 +31,7 @@ const api={
                  organizationId:string               
             }>{},
             res:<ICommon_Model_Organization>{},
+            permission:[Permission_Types.Organization.READ]
         },
         create:{
             method:ECommon_HttpApi_Method.POST,
@@ -44,7 +54,7 @@ const api={
                  active?:number             
             }>{},
             res:<ICommon_Model_Organization>{},
-            onlyAdmin:true
+            permission:[Permission_Types.Organization.EDIT]
         },
         remove:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -53,7 +63,7 @@ const api={
                 organizationId:string        
             }>{},
             res:{},
-            onlyAdmin:true
+            permission:[Permission_Types.Organization.ADMIN]
         },
         listUser:{
             method:ECommon_HttpApi_Method.GET,
@@ -64,55 +74,174 @@ const api={
                 size:number,
                 keyword?:string     
             }>{},
-            res:<ICommon_Route_Res_Organization_User>{},
+            res:<ICommon_Route_Res_Organization_User_List>{},
+            permission:[Permission_Types.Organization.READ]
         },
         addUser:{
             method:ECommon_HttpApi_Method.POST,
             path:"/user",
             req:<{
                 organizationId:string,
-                username:string,
-                role:ECommon_Organization_User_Role,
+                userName:string,
+                roleId:string,
                 nickname:string,
                 active:number,
                 title?:string,
                 job?:string,
                 email?:string,
                 phone?:string,
-                location?:string        
+                location?:string,
+                remark?:string
             }>{},
-            res:<ICommon_Model_Organization_User>{},
-            onlyAdmin:true
+            res:<ICommon_Route_Res_Organization_User_Item>{},
+            permission:[Permission_Types.Organization.ADMIN]
         },
         updateUser:{
             method:ECommon_HttpApi_Method.PUT,
             path:"/user",
             req:<{
-                organizationId:string,
-                userId:string,
-                role?:ECommon_Organization_User_Role,
+                organizationUserId:string,
+                roleId?:string,
                 nickname?:string,
                 active?:number,
                 title?:string,
                 job?:string,
                 email?:string,
                 phone?:string,
-                location?:string        
+                location?:string,
+                remark?:string
             }>{},
-            res:<ICommon_Model_Organization_User>{},
-            onlyAdmin:true
+            res:<ICommon_Route_Res_Organization_User_Item>{},
+            permission:[Permission_Types.Organization.ADMIN]
         },
         deleteUser:{
             method:ECommon_HttpApi_Method.DELETE,
             path:"/user",
             req:<{
-                organizationId:string,
-                userId:string    
+                organizationUserId:string,
             }>{},
             res:{},
-            onlyAdmin:true
+            permission:[Permission_Types.Organization.ADMIN]
         },
+        enter:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/enter",
+            req:<{
+                organizationId:string,
+            }>{},
+            res:{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        listRole:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/rolelist",
+            req:<{
+                organizationId:string,
+            }>{},
+            res:<ICommon_Route_Res_Role_List>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        addRole:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/role",
+            req:<{
+                organizationId:string,
+                name :string,
+                description?:string,
+                value:number
+            }>{},
+            res:<ICommon_Route_Res_Role_Item>{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        editRole:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/role",
+            req:<{
+                roleId:string,
+                name?:string,
+                description?:string,
+                value?:number
+            }>{},
+            res:<ICommon_Route_Res_Role_Item>{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        removeRole:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/role",
+            req:<{
+                roleId:string,
+            }>{},
+            res:{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        listTag:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/tag/list",
+            req:<{
 
+            }>{},
+            res:<ICommon_Model_Member_Tag[]>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        listTagMember:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/tag/member/list",
+            req:<{
+                memberTagId:string
+            }>{},
+            res:<ICommon_Route_Res_Member_Tag_Member[]>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        addTag:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/tag",
+            req:<{
+                name:string,
+                description?:string
+            }>{},
+            res:<ICommon_Model_Member_Tag>{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        editTag:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/tag",
+            req:<{
+                memberTagId:string
+                name?:string,
+                description?:string
+            }>{},
+            res:<ICommon_Model_Member_Tag>{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        removeTag:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/tag",
+            req:<{
+                memberTagId:string
+            }>{},
+            res:{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        addTagMember:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/tag/member",
+            req:<{
+                memberTagId:string,
+                memberId:string
+            }>{},
+            res:<ICommon_Route_Res_Member_Tag_Member>{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        removeTagMember:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/tag/member",
+            req:<{
+                memberTagId:string,
+                memberId:string
+            }>{},
+            res:<ICommon_Route_Res_Member_Tag_Member>{},
+            permission:[Permission_Types.Organization.ADMIN]
+        }
     }
 }
 

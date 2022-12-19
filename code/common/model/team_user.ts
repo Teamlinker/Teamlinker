@@ -1,7 +1,7 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
 
 export interface ICommon_Model_Team_User {
-    user_id :string,
+    organization_user_id :string,
   team_id :string,
   id :string ,
 }

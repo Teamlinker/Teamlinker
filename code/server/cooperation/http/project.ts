@@ -1,10 +1,11 @@
-import { ECommon_Model_Project_Member_Type } from "../../../common/model/project_member";
-import { ECommon_User_Type } from "../../../common/model/user";
+import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
+import {ECommon_User_Type} from "../../../common/model/user";
 import projectApi from "../../../common/routes/project";
-import { Err } from "../../../common/status/error";
-import { DHttpApi, DHttpController, DHttpHeaderRequired, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
-import { IUserSession } from "../../common/rpc/api/user";
-import ProjectService from "../service/project";
+import {Err} from "../../../common/status/error";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
+import {ProjectService} from "../service/project";
+import {IUserSession} from "../../user/types/config";
+import rpcAuthApi from "../../auth/rpc/auth";
 
 @DHttpController(projectApi)
 class ProjectController {
@@ -18,15 +19,15 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.create)
-    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession,@DHttpHeaderRequired("organizationid") organizationId:string):Promise<typeof projectApi.routes.create.res>{
+    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession):Promise<typeof projectApi.routes.create.res>{
         let obj=new ProjectService()
         obj.assignItem({
             keyword:keyword,
             name:name,
-            created_by:user.userId,
+            created_by:user.organizationInfo.organizationUserId,
             description:description,
             photo:photo,
-            organization_id:organizationId
+            organization_id:user.organizationInfo.organizationId
         })
         let ret=await obj.create()
         return ret
@@ -58,69 +59,59 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.listMember)
-    async listMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number):Promise<typeof projectApi.routes.listMember.res>{
+    async listMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberType") memberType:ECommon_Model_Organization_Member_Type,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("key") key:string):Promise<typeof projectApi.routes.listMember.res>{
         let obj=await ProjectService.getItemById(projectId);
         if(!obj) {
             throw Err.Project.projectNotFound
         }
-        let ret=await obj.listMember(page,size)
+        let ret=await obj.listMember(memberType,page,size,key);
         return ret;
     }
 
     @DHttpApi(projectApi.routes.addMember)
-    async addMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string,@DHttpReqParamRequired("type") type:ECommon_Model_Project_Member_Type,@DHttpReqParamRequired("roleId") roleId:string):Promise<typeof projectApi.routes.addMember.res>{
+    async addMember(@DHttpReqParamRequired("projectId") projectId:string, @DHttpReqParam("memberId") memberId:string, @DHttpReqParamRequired("type") type:ECommon_Model_Organization_Member_Type, @DHttpReqParamRequired("roleId") roleId:string):Promise<typeof projectApi.routes.addMember.res>{
         let obj=await ProjectService.getItemById(projectId);
         if(!obj) {
             throw Err.Project.projectNotFound
         }
-        await obj.addMember(memberId,type,roleId)
-        return
+        let ret=await obj.addMember(memberId,type,roleId)
+        return ret;
     }
 
     @DHttpApi(projectApi.routes.editMember)
-    async editMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string,@DHttpReqParamRequired("roleId") roleId:string):Promise<typeof projectApi.routes.editMember.res>{
+    async editMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string,@DHttpReqParam("type") type:ECommon_Model_Organization_Member_Type,@DHttpReqParamRequired("roleId") roleId:string):Promise<typeof projectApi.routes.editMember.res>{
         let obj=await ProjectService.getItemById(projectId);
         if(!obj) {
             throw Err.Project.projectNotFound
         }
-        await obj.editMember(memberId,roleId);
-        return
+        let ret=await obj.editMember(memberId,type,roleId);
+        return ret;
     }
 
     @DHttpApi(projectApi.routes.removeMember)
-    async removeMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string):Promise<typeof projectApi.routes.removeMember.res>{
+    async removeMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string,@DHttpReqParam("type") type:ECommon_Model_Organization_Member_Type):Promise<typeof projectApi.routes.removeMember.res>{
         let obj=await ProjectService.getItemById(projectId);
         if(!obj) {
             throw Err.Project.projectNotFound
         }
-        await obj.removeMember(memberId)
+        await obj.removeMember(memberId,type)
         return
     }
 
     @DHttpApi(projectApi.routes.list)
-    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession,@DHttpHeaderRequired("organizationid") organizationId:string) :Promise<typeof projectApi.routes.list.res>{
+    async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("organizationUserId") organizationUserId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof projectApi.routes.list.res>{
         let user=""
-        if(userInfo.type==ECommon_User_Type.ADMIN && userId) {
-            user=userId
+        if(userInfo.type==ECommon_User_Type.ADMIN && organizationUserId) {
+            user=organizationUserId
         } else if(userInfo.type==ECommon_User_Type.USER) {
-            user=userInfo.userId
+            user=userInfo.organizationInfo.organizationUserId
         }
-        let list=await ProjectService.list(organizationId,page,size,keyword,user)
+        let list=await ProjectService.list(userInfo.organizationInfo.organizationId,page,size,keyword,user)
         return list
     }
 
-    @DHttpApi(projectApi.routes.roles)
-    async roles(@DHttpReqParamRequired("projectId") projectId:string) :Promise<typeof projectApi.routes.roles.res> {
-        let project=await ProjectService.getItemById(projectId)
-        if(!project) {
-            throw Err.Project.projectNotFound
-        }
-        let ret=await project.getRoles()
-        return ret;
-    }
-
-    @DHttpApi(projectApi.routes.issueTypelist)
-    async issueTypelist(@DHttpReqParamRequired("projectId") projectId:string) :Promise<typeof projectApi.routes.issueTypelist.res> {
+    @DHttpApi(projectApi.routes.issueTypeList)
+    async issueTypeList(@DHttpReqParamRequired("projectId") projectId:string) :Promise<typeof projectApi.routes.issueTypeList.res> {
         let project=await ProjectService.getItemById(projectId)
         if(!project) {
             throw Err.Project.projectNotFound
@@ -135,14 +126,61 @@ class ProjectController {
         return ret;
     }
 
-    @DHttpApi(projectApi.routes.listUser)
-    async listUser(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParam("keyword") keyword:string) :Promise<typeof projectApi.routes.listUser.res> {
-        let project=await ProjectService.getItemById(projectId)
-        if(!project) {
-            throw Err.Project.projectNotFound
+
+    @DHttpApi(projectApi.routes.listRole)
+    async listRole(@DHttpReqParam("projectId") projectId:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.listRole.res>{
+        if(projectId) {
+            let obj=await ProjectService.getItemById(projectId)
+            if(!obj) {
+                throw Err.Project.projectNotFound
+            }
+            let ret=await obj.listRole();
+            return ret;
+        } else {
+            let ret=await ProjectService.listGlobalRole(user.organizationInfo.organizationId);
+            return ret;
         }
-        let ret=await project.listUser(keyword);
+
+    }
+
+    @DHttpApi(projectApi.routes.addRole)
+    async addRole(@DHttpReqParam("projectId") projectId:string,
+                  @DHttpReqParamRequired("name") name :string,
+                  @DHttpReqParamRequired("value") value:number,
+                  @DHttpReqParam("description") description:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.addRole.res>{
+        if(projectId) {
+            let obj=await ProjectService.getItemById(projectId)
+            if(!obj) {
+                throw Err.Project.projectNotFound
+            }
+            let ret=await obj.createRole(name,description,value);
+            return ret;
+        } else {
+            let ret=await ProjectService.createGlobalRole(user.organizationInfo.organizationId,name,description,value)
+            return ret;
+        }
+
+    }
+
+    @DHttpApi(projectApi.routes.editRole)
+    async editRole(@DHttpReqParamRequired("roleId") roleId:string,
+                   @DHttpReqParam("name") name :string,
+                   @DHttpReqParam("value") value:number,
+                   @DHttpReqParam("description") description:string,
+                   @DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.editRole.res>{
+        let ret=await rpcAuthApi.updateRole({
+            id:roleId,
+            name,
+            description,
+            value:value
+        });
         return ret;
+    }
+
+    @DHttpApi(projectApi.routes.removeRole)
+    async removeRole(@DHttpReqParamRequired("roleId") roleId:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.removeRole.res>{
+        await rpcAuthApi.removeRole(roleId);
+        return;
     }
 
 }

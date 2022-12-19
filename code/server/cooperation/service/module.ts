@@ -1,7 +1,8 @@
-import { Entity } from "../../common/entity/entity";
-import { moduleMapper } from '../mapper/module';
-import { projectModuleModel } from './../../../common/model/project_module';
-export default class ProjectModule extends Entity<typeof projectModuleModel,typeof moduleMapper> {
+import {Entity} from "../../common/entity/entity";
+import {moduleMapper} from '../mapper/module';
+import {projectModuleModel} from './../../../common/model/project_module';
+
+export class ProjectModuleService extends Entity<typeof projectModuleModel,typeof moduleMapper> {
     constructor(){
         super(moduleMapper)
     }

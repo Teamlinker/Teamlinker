@@ -1,7 +1,9 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
+
 export enum ECommon_Model_Project_Release_Status {
   UNRELEASE,
-  RELEASE
+  RELEASE,
+  ARCHIVE
 }
 export interface ICommon_Model_Project_Release {
     id :string ,

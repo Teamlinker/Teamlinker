@@ -3,10 +3,5 @@ export enum ECommon_Services {
     User="user",
     Cooperation="cooperation",
     File="file",
-    AUTH="auth"
-}
-
-export enum ECommon_Application_Deploy {
-    PLATFORM,
-    OFFLINE
+    AUTH="auth",
 }

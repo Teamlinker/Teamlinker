@@ -1,8 +1,15 @@
 import "reflect-metadata";
-import { Err } from '../../../common/status/error';
-import { EServer_Common_Http_Structure_HandleParam_Category, IServer_Common_Http_Proxy, IServer_Common_Http_Req_File, IServer_Common_Http_Structure, IServer_Common_Http_Structure_HandleParam } from "../types/http";
-import { ICommon_HttpApi, ICommon_Http_Route } from './../../../common/routes/types';
+import {Err} from '../../../common/status/error';
+import {
+    EServer_Common_Http_Structure_HandleParam_Category,
+    IServer_Common_Http_Proxy,
+    IServer_Common_Http_Req_File,
+    IServer_Common_Http_Structure,
+    IServer_Common_Http_Structure_HandleParam
+} from "../types/http";
+import {ICommon_Http_Route, ICommon_HttpApi} from './../../../common/routes/types';
 import HttpContext from "./context";
+
 var g_objRoute:{
     [param:string]:IServer_Common_Http_Structure
 }={}
@@ -296,6 +303,7 @@ export async function handleHttpCall(obj:IServer_Common_Http_Structure,ctx:IServ
             objRet.headers["set-cookie"]=JSON.stringify(cookies)
         }
     } catch(err) {
+        console.error(err);
         objRet.status=500;
         objRet.data=err
     }

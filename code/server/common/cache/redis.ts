@@ -1,5 +1,6 @@
-import * as IORedis from "ioredis";
-import { IServer_Common_Config_Redis } from './../types/config';
+import IORedis from "ioredis";
+import {IServer_Common_Config_Redis} from './../types/config';
+
 var g_redis:InstanceType<typeof Redis>;
 export function getRedisInstance(){
     return g_redis
@@ -101,17 +102,28 @@ export class Redis {
         }
         if(typeof value=="object")
         {
-            await this.redis.set(key,JSON.stringify(value),"EX",ttl)
+            if(ttl==-1) {
+                await this.redis.set(key,JSON.stringify(value))
+                await this.redis.persist(key);
+            } else {
+                await this.redis.set(key,JSON.stringify(value),"EX",ttl)
+            }
         }
         else
         {
-            await this.redis.set(key,String(value),"EX",ttl)
+            if(ttl==-1) {
+                await this.redis.set(key,String(value))
+                await this.redis.persist(key);
+            } else {
+                await this.redis.set(key,String(value),"EX",ttl)
+            }
+
         }
     }
     async scan(key:string):Promise<string[]> {
         let index=0,values=<string[]>[]
         do {
-            let ret=await this.redis.scan(index,"match",key);
+            let ret=await this.redis.scan(index,"MATCH",key);
             index=Number(ret[0])
             values=values.concat(ret[1]);
         } while(index!=0)
@@ -162,7 +174,7 @@ export class Redis {
         return null;
     }
     async hSet(key:string,obj:{
-        [param:string]:IORedis.ValueType
+        [param:string]:any
     },ttl:number=-1){
         if(Object.keys(obj).length>0) {
             await this.redis.hset(key,obj)
@@ -184,5 +196,9 @@ export class Redis {
             return ret;
         }
         return null;
+    }
+    async hExists(key:string,field:string):Promise<boolean> {
+        let ret=await this.redis.hexists(key,field)
+        return !!ret;
     }
 }

@@ -1,231 +1,104 @@
-import { commentModel } from '../../../common/model/comment';
-import { projectIssueModel } from '../../../common/model/project_issue';
-import { projectLabelModel } from '../../../common/model/project_label';
-import { ECommon_Model_Project_Member_Type } from '../../../common/model/project_member';
-import { projectModuleModel } from '../../../common/model/project_module';
-import { projectReleaseModel } from '../../../common/model/project_release';
-import { Permission_Types } from '../../../common/permission/permission';
-import { REDIS_GATEWAY } from '../../common/cache/keys/gateway';
-import { getRedisInstance } from '../../common/cache/redis';
-import { getMysqlInstance } from '../../common/db/mysql';
-import { DComponent, getComponent } from '../../common/decorate/component';
-import { generateLeftJoinSql, generateQuerySql } from '../../common/util/sql';
-import StringUtil from '../../common/util/string';
-import { roleMemberModel } from './../../../common/model/role_member';
-import { DPermission, PermissionBase } from './base';
-import { PermissionTeam } from './team';
+import {REDIS_AUTH} from '../../common/cache/keys/auth';
+import {DComponent} from '../../common/decorate/component';
+import {PermissionBase} from './base';
+import {ECommon_Model_Role_Reserved} from "../../../common/model/role";
+import {Err} from "../../../common/status/error";
+import {Permission_Types} from "../../../common/permission/permission";
 
-export type IPermission_Project =string[]
-
-abstract class PermissionProject extends PermissionBase<IPermission_Project> {
+@DComponent
+class PermissionProject extends PermissionBase {
     fieldName="projectId"
-    keys=["permission:project:{0}:user","permission:project:{0}:team","permission:user:{0}:project:{1}"]
     async translateToField({commentId,projectIssueId,tagId,moduleId,projectReleaseId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,tagId:string,moduleId:string,projectReleaseId:string }): Promise<string> {
-        let mysql=getMysqlInstance()
         let projectId:string
         if(commentId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectIssueComment(commentId)
-            let exists=await objRedis.exists()
-            if(exists) {
-                projectId=await objRedis.get()
-            } else {
-                let sql=generateLeftJoinSql({
-                    model:commentModel
-                },{
-                    model:projectIssueModel,
-                    columns:["project_id"],
-                    expression:{
-                        id:{
-                            model:commentModel,
-                            field:"type_id"
-                        }
-                    }
-                },{
-                    id:{
-                        model:commentModel,
-                        value:commentId
-                    }
-                })
-                let ret=await mysql.executeOne(sql)
-                if(ret) {
-                    projectId=ret.project_id
-                    await objRedis.set(projectId)
-                }
-            }
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssueComment(commentId);
+            projectId=await obj.getValue();
             return projectId;
         } else if(projectIssueId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectIssue(projectIssueId)
-            let exists=await objRedis.exists()
-            if(exists) {
-                projectId=await objRedis.get()
-            } else {
-                let ret=await mysql.executeOne(generateQuerySql(projectIssueModel,["project_id"],{
-                    id:projectIssueId
-                }))
-                if(ret) {
-                    projectId=ret.project_id
-                    await objRedis.set(projectId)
-                }
-            } 
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssue(projectIssueId);
+            projectId=await obj.getValue();
             return projectId;
         } else if(tagId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromLabel(tagId)
-            let exists=await objRedis.exists()
-            if(exists) {
-                projectId=await objRedis.get()
-            } else {
-                let ret=await mysql.executeOne(generateQuerySql(projectLabelModel,["project_id"],{
-                    id:tagId
-                }))
-                if(ret) {
-                    projectId=ret.project_id
-                    await objRedis.set(projectId)
-                }
-            } 
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromLabel(tagId);
+            projectId=await obj.getValue();
             return projectId;
         } else if(moduleId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectModule(moduleId)
-            let exists=await objRedis.exists()
-            if(exists) {
-                projectId=await objRedis.get()
-            } else {
-                let ret=await mysql.executeOne(generateQuerySql(projectModuleModel,["project_id"],{
-                    id:moduleId
-                }))
-                if(ret) {
-                    projectId=ret.project_id
-                    await objRedis.set(projectId)
-                }
-            } 
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectModule(moduleId);
+            projectId=await obj.getValue();
             return projectId;
         } else if(projectReleaseId) {
-            let objRedis=REDIS_GATEWAY.Permission.projectIdFromProjectRelease(projectReleaseId)
-            let exists=await objRedis.exists()
-            if(exists) {
-                projectId=await objRedis.get()
-            } else {
-                let ret=await mysql.executeOne(generateQuerySql(projectReleaseModel,["project_id"],{
-                    id:projectReleaseId
-                }))
-                if(ret) {
-                    projectId=ret.project_id
-                    await objRedis.set(projectId)
-                }
-            } 
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssue(projectReleaseId);
+            projectId=await obj.getValue();
             return projectId;
         } 
     }
-    buildKey({userId,projectId}: { [param: string]: any; userId: string; isAdmin: boolean;project:string }) {
-        if(StringUtil.isEmpty(projectId)) {
-            return null;
-        }
-        return this.keys.map((key,index)=>{
-            if(index==0 || index==1) {
-                return StringUtil.format(key,projectId)
-            } else {
-                return StringUtil.format(key,userId,projectId)
-            }
-        })
-    }
-    async generatorValue({userId,projectId}: { [param: string]: any; userId?: string; isAdmin?: boolean;project:string }, keys: string[]): Promise<IPermission_Project> {
+
+    async generatorValue({organizationUserId,projectId}: { [param: string]: any; organizationUserId?: string; isAdmin?: boolean;project:string }):Promise<number> {
+        let objProjectTourist=new REDIS_AUTH.Permission.Project.ProjectTourist(projectId);
+        let objProjectOrganizationUsers=new REDIS_AUTH.Permission.Project.ProjectOrganizationUsers(projectId);
+        let objProjectTeams=new REDIS_AUTH.Permission.Project.ProjectTeams(projectId);
+        await this.tryLock([objProjectOrganizationUsers.getKey().replace(/\:/g,""),objProjectTeams.getKey().replace(/\:/g,"")]);
+        let permissionsSet = new Set<number>();
+        let isAdmin:boolean=false;
         try {
-            await this.tryLock(keys.map(item=>item.replace(/\:/g,"")));
-            let redis = getRedisInstance()
-            let mysql = getMysqlInstance()
-            let permissionsSet = new Set<string>();
-            let exist = await redis.exists(keys[2])
-            if (exist) {
-                let arr = await redis.sGet(keys[2])
-                await this.unlock()
-                return arr;
-            }
-            exist = await redis.exists(keys[0])
-            if (!exist) {
-                let ret = await mysql.execute(generateQuerySql(roleMemberModel, ["member_id", "role_id"], {
-                    item_id: projectId,
-                    member_type: ECommon_Model_Project_Member_Type.USER
-                }))
-                let map = {}
-                for (let obj of ret) {
-                    map[obj.member_id] = obj.role_id
-                }
-                await redis.hSet(keys[0], map)
-            }
-            let roleId = await redis.hGet(keys[0], userId)
-            if (roleId) {
-                let role = await this.getRolePermissionList(roleId)
-                for (let o of role) {
-                    permissionsSet.add(o)
-                }
-            }
-            exist = await redis.exists(keys[1])
-            if (!exist) {
-                let ret = await mysql.execute(generateQuerySql(roleMemberModel, ["member_id", "role_id"], {
-                    item_id: projectId,
-                    member_type: ECommon_Model_Project_Member_Type.TEAM
-                }))
-                let map = {}
-                for (let obj of ret) {
-                    map[obj.member_id] = obj.role_id
-                }
-                await redis.hSet(keys[1], map)
-            }
-            let teamPermission = getComponent<PermissionTeam>(PermissionTeam.name)
-            let relationship = await redis.hGetAll(keys[1])
-            for (let teamId in relationship) {
-                let keys = await teamPermission.buildKey({ teamId })
-                let obj = await teamPermission.generatorValue({ teamId, userId }, keys)
-                if (obj && obj.length > 0) {
-                    for (let o of obj) {
-                        permissionsSet.add(o)
+            await Promise.all([(async ()=>{
+                let roleId = await objProjectTourist.getValue();
+                if(roleId) {
+                    let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(roleId);
+                    let value=await objRole.getValue();
+                    if(value) {
+                        permissionsSet.add(Number(value.value))
+                        if(value.reserved===ECommon_Model_Role_Reserved.ADMIN) {
+                            throw Err.Common.admin;
+                        }
                     }
                 }
-            }
-            let arr = Array.from(permissionsSet)
-            await redis.sSet(keys[2], arr, 3600 * 24)
-            await this.unlock()
-            return arr;
+            })(),(async ()=>{
+                let roleId = await objProjectOrganizationUsers.getValue(organizationUserId)
+                if(roleId) {
+                    let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(roleId);
+                    let value=await objRole.getValue();
+                    if(value) {
+                        permissionsSet.add(Number(value.value))
+                        if(value.reserved===ECommon_Model_Role_Reserved.ADMIN) {
+                            throw Err.Common.admin;
+                        }
+                    }
+                }
+            })(),(async ()=>{
+                let teams=await objProjectTeams.getValue();
+                let arrPromise=[];
+                for(let teamId in teams) {
+                    arrPromise.push((async ()=>{
+                        let objTeam=new REDIS_AUTH.Permission.Team.OrganizationUsers(teamId);
+                        let roleId=await objTeam.getValue(organizationUserId)
+                        if(roleId) {
+                            let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(teams[teamId])
+                            let value=await objRole.getValue();
+                            if(value) {
+                                permissionsSet.add(Number(value.value))
+                                if(value.reserved===ECommon_Model_Role_Reserved.ADMIN) {
+                                    throw Err.Common.admin;
+                                }
+                            }
+                        }
+                    })())
+                }
+                await Promise.all([arrPromise]);
+            })()])
         } catch (err) {
-            console.error("generatorValue error:" + err)
-            await this.unlock()
-        };
-        
+            if(err.code===Err.Common.admin.code) {
+                isAdmin=true
+            } else {
+                await this.unlock()
+                throw err;
+            }
+        }
+        await this.unlock()
+        return isAdmin?Permission_Types.Project.ADMIN.value:Array.from(permissionsSet).reduce((previousValue, currentValue, currentIndex, array)=>{
+            return previousValue | currentValue;
+        })
     }
 
 }
 
-@DPermission(Permission_Types.Project.READ)
-@DComponent
-export class PermissionProjectRead extends PermissionProject {
-    check(obj:IPermission_Project):boolean {
-        return obj.includes(Permission_Types.Project.READ.value);
-    }
-    
-} 
-
-@DPermission(Permission_Types.Project.EDIT)
-@DComponent
-export class PermissionProjectEdit extends PermissionProject {
-    check(obj:IPermission_Project):boolean {
-        return obj.includes(Permission_Types.Project.EDIT.value);
-    }
-    
-} 
-
-@DPermission(Permission_Types.Project.CREATE)
-@DComponent
-export class PermissionProjectCreate extends PermissionProject {
-    check(obj:IPermission_Project):boolean {
-        return obj.includes(Permission_Types.Project.CREATE.value);
-    }
-    
-} 
-
-@DPermission(Permission_Types.Project.DELETE)
-@DComponent
-export class PermissionProjectDelete extends PermissionProject {
-    check(obj:IPermission_Project):boolean {
-        return obj.includes(Permission_Types.Project.DELETE.value);
-    }
-    
-} 

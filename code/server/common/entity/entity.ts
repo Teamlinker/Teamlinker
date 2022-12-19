@@ -1,8 +1,9 @@
-import { BaseModel } from '../../../common/model/base';
-import { Err } from '../../../common/status/error';
-import { EServer_Common_Event_Types } from '../event/types';
-import { emitServiceEvent } from '../rpc/rpc';
-import { Mapper } from './mapper';
+import {BaseModel} from '../../../common/model/base';
+import {Err} from '../../../common/status/error';
+import {EServer_Common_Event_Types} from '../event/types';
+import {Mapper} from './mapper';
+import {emitServiceEvent} from "../event/event";
+
 let imagefields=[
     "photo",
     "image",
@@ -73,10 +74,10 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         await this.loadItem();
         return this.item;
     }
-    async delete(eventPulish?:EServer_Common_Event_Types.Types){
+    async delete(eventPublish?:EServer_Common_Event_Types.Types){
         await this.mapper.delete(this.item.id);
-        if(eventPulish) {
-            emitServiceEvent(eventPulish,this.item.id);
+        if(eventPublish) {
+            emitServiceEvent(eventPublish,this.item.id);
         }
         imagefields.forEach(item=>{
             if(this.item[item]) {
@@ -86,13 +87,15 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         
     }
 
-    async copy(deletedFields?:(keyof T["model"])[]) {
+    async copy(deletedFields?:(keyof T["model"])[],updatedFields?:{
+        [name in keyof T["model"]]?:T["model"][name]
+    }) {
         if(!this.item || !this.item.id) {
             throw  Err.Common.itemNotFound;
         }
         const Cls = this.constructor as new (value: M) => this;
         let obj=new Cls(this.mapper)
-        let data=await this.mapper.copy(this.item.id,deletedFields as string[])
+        let data=await this.mapper.copy(this.item.id,deletedFields as string[],updatedFields)
         obj.setItem(data)
         return obj;
     }

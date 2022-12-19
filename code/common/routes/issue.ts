@@ -1,12 +1,18 @@
-import { ICommon_Model_Comment } from "../model/comment";
-import { ICommon_Model_Workflow_Action } from "../model/workflow_action";
-import { Permission_Types } from "../permission/permission";
-import { ECommon_Services } from "../types";
-import { ICommon_Model_Project_Issue } from './../model/project_issue';
-import { ICommon_Model_Project_Lable } from './../model/project_label';
-import { ICommon_Model_Project_Module } from './../model/project_module';
-import { ICommon_Route_Req_ProjectIssue_Field, ICommon_Route_Res_FieldSolution_ListWorkflowNodeField, ICommon_Route_Res_ProjectIssue_BasicInfo, ICommon_Route_Res_ProjectIssue_fieldsInfo, ICommon_Route_Res_Project_filter } from "./response";
-import { ECommon_HttpApi_Method } from "./types";
+import {ICommon_Model_Comment} from "../model/comment";
+import {ICommon_Model_Workflow_Action} from "../model/workflow_action";
+import {Permission_Types} from "../permission/permission";
+import {ECommon_Services} from "../types";
+import {ICommon_Model_Project_Issue} from './../model/project_issue';
+import {ICommon_Model_Project_Label} from './../model/project_label';
+import {ICommon_Model_Project_Module} from './../model/project_module';
+import {
+    ICommon_Route_Req_ProjectIssue_Field,
+    ICommon_Route_Res_Project_filter,
+    ICommon_Route_Res_ProjectIssue_BasicInfo,
+    ICommon_Route_Res_ProjectIssue_fieldsInfo,
+    ICommon_Route_Res_Workflow_Node_Field
+} from "./response";
+import {ECommon_HttpApi_Method} from "./types";
 
 const api={
     baseUrl:"/issue",
@@ -19,7 +25,7 @@ const api={
                 projectId :string,
                 issueTypeId:string
             }>{},
-            res:<ICommon_Route_Res_FieldSolution_ListWorkflowNodeField[]>{},
+            res:<ICommon_Route_Res_Workflow_Node_Field[]>{},
             permission:[Permission_Types.Project.READ]
         },
         create:{
@@ -35,7 +41,7 @@ const api={
                 values?:ICommon_Route_Req_ProjectIssue_Field[]
             }>{},
             res:<ICommon_Model_Project_Issue>{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         getNextNodeFields:{
             method:ECommon_HttpApi_Method.GET,
@@ -44,7 +50,7 @@ const api={
                 projectIssueId :string,
                 workflowActionId:string
             }>{},
-            res:<ICommon_Route_Res_FieldSolution_ListWorkflowNodeField[]>{},
+            res:<ICommon_Route_Res_Workflow_Node_Field[]>{},
             permission:[Permission_Types.Project.READ]
         },
         confirmNextNode:{
@@ -56,7 +62,7 @@ const api={
                 value?:ICommon_Route_Req_ProjectIssue_Field[]
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         editExtraField:{
             method:ECommon_HttpApi_Method.PUT,
@@ -66,7 +72,7 @@ const api={
                 value:ICommon_Route_Req_ProjectIssue_Field
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         editBasicField:{
             method:ECommon_HttpApi_Method.PUT,
@@ -79,7 +85,7 @@ const api={
                 reporterId? :string 
             }>{},
             res:<ICommon_Model_Project_Issue>{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         editDescription:{
             method:ECommon_HttpApi_Method.PUT,
@@ -89,7 +95,7 @@ const api={
                 description:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         remove:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -98,7 +104,7 @@ const api={
                 projectIssueId :string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         basicInfo:{
             method:ECommon_HttpApi_Method.GET,
@@ -154,7 +160,7 @@ const api={
                 content:string
             }>{},
             res:<ICommon_Model_Comment>{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         commentEdit:{
             method:ECommon_HttpApi_Method.PUT,
@@ -164,7 +170,7 @@ const api={
                 content:string
             }>{},
             res:<ICommon_Model_Comment>{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         commentRemove:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -173,7 +179,7 @@ const api={
                 commentId :string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         copy:{
             method:ECommon_HttpApi_Method.POST,
@@ -182,7 +188,7 @@ const api={
                 projectIssueId :string
             }>{},
             res:<ICommon_Model_Project_Issue>{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         addChildIssue:{
             method:ECommon_HttpApi_Method.POST,
@@ -192,7 +198,7 @@ const api={
                 projectIssueChildId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         removeChildIssue:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -202,7 +208,7 @@ const api={
                 projectIssueChildId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         addParentIssue:{
             method:ECommon_HttpApi_Method.POST,
@@ -212,7 +218,7 @@ const api={
                 projectIssueParentId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         removeParentIssue:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -222,7 +228,7 @@ const api={
                 projectIssueParentId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         addRelatedIssue:{
             method:ECommon_HttpApi_Method.POST,
@@ -232,7 +238,7 @@ const api={
                 projectIssueRelatedId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         removeRelatedIssue:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -242,7 +248,7 @@ const api={
                 projectIssueRelatedId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         otherInfoList:{
             method:ECommon_HttpApi_Method.GET,
@@ -254,30 +260,30 @@ const api={
                 parent:ICommon_Model_Project_Issue,
                 children:ICommon_Model_Project_Issue[],
                 relateds:ICommon_Model_Project_Issue[],
-                labels:ICommon_Model_Project_Lable[],
+                labels:ICommon_Model_Project_Label[],
                 modules:ICommon_Model_Project_Module[]
             }>{},
             permission:[Permission_Types.Project.READ]
         },
-        bindTag:{
+        bindLabel:{
             method:ECommon_HttpApi_Method.POST,
             path:"/item/tag/bind",
             req:<{
                 projectIssueId :string,
-                tagId:string
+                labelId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
-        unbindTag:{
+        unbindLabel:{
             method:ECommon_HttpApi_Method.DELETE,
             path:"/item/tag/bind",
             req:<{
                 projectIssueId :string,
-                tagId:string
+                labelId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         bindModule:{
             method:ECommon_HttpApi_Method.POST,
@@ -287,7 +293,7 @@ const api={
                 moduleId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         unbindModule:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -297,7 +303,7 @@ const api={
                 moduleId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Project.EDIT]
         },
         filter:{
             method:ECommon_HttpApi_Method.GET,

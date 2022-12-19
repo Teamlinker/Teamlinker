@@ -1,14 +1,14 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
 
 export interface ICommon_Model_Issue_Type {
     id:string,
     name:string,
     icon:string,
     description:string,
-    reserved:number,
     created_time:Date,
     modified_time:Date,
-    organization_id:string
+    issue_type_solution_id:string,
+    reserved:number
 }
 export const Table_Issue_Type="issue_type"
 

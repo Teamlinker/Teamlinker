@@ -1,13 +1,10 @@
-import { Err } from "../../../common/status/error";
-import { IServer_Common_RPC_Cooperation } from "../../common/rpc/api/cooperation";
-import { DRPCRecieve } from "../../common/rpc/rpc";
-import { FieldSolutionService } from "../service/field";
-import ProjectService from "../service/project";
-import FieldTypeService from './../service/field';
-import IssueTypeService, { IssueTypeSolutionService } from './../service/issueType';
-import WorkflowService, { WorkflowSolutionService } from './../service/workflow';
-class RpcCooperationApi implements IServer_Common_RPC_Cooperation {
-    @DRPCRecieve
+import {Err} from "../../../common/status/error";
+import {WorkflowNodeFieldTypeService} from "../service/field";
+import {ProjectService} from "../service/project";
+import {IssueTypeSolutionService} from './../service/issueType';
+
+class RpcCooperationApi  {
+    
     async clearProject(organizationId:string) {
         if(!organizationId) {
             throw Err.Organization.organizationNotFound;
@@ -15,51 +12,35 @@ class RpcCooperationApi implements IServer_Common_RPC_Cooperation {
         let ret=await ProjectService.getProjectListByOrganizationId(organizationId)
         await ProjectService.clearProjects(ret.map(item=>item.id));
     }
-    @DRPCRecieve
-    async clearField(organizationId:string){
-        if(!organizationId) {
-            throw Err.Organization.organizationNotFound;
-        }
-        await FieldSolutionService.clearFieldByOrganizationId(organizationId);
-    }
-    @DRPCRecieve
-    async clearWorkflow(organizationId:string) {
-        if(!organizationId) {
-            throw Err.Organization.organizationNotFound;
-        }
-        await WorkflowSolutionService.clearByOrganizationId(organizationId);
-    }
-    @DRPCRecieve
+    
     async clearIssueType(organizationId:string) {
         if(!organizationId) {
             throw Err.Organization.organizationNotFound;
         }
-        await IssueTypeSolutionService.clearByOrganizationId(organizationId);
+        let arrIssueTypeId=await IssueTypeSolutionService.getIssueTypesByOrganizationId(organizationId)
+        let arr=[]
+        for(let id of arrIssueTypeId) {
+            let obj=await WorkflowNodeFieldTypeService.getItemById(id);
+            arr.push(obj.delete());
+        }
+        await Promise.all(arr)
     }
-    @DRPCRecieve
-    async initIssueTypeWorkflowAndSolution(organizationId: string,projectId?:string) {
-        let objIssueType=await IssueTypeService.init(organizationId);
-        let objIssueTypeSolution=await IssueTypeSolutionService.init(organizationId,objIssueType)
-        let workflowId = await WorkflowService.init(organizationId)
-        await WorkflowSolutionService.init(objIssueTypeSolution.solutionId,objIssueTypeSolution.solutionName,objIssueType.taskId,objIssueType.bugId,objIssueType.ticketId,workflowId,organizationId);
+    
+    async initIssueTypeSolution(organizationId: string) {
+        let objIssueTypeSolution=await IssueTypeSolutionService.init(organizationId)
     }
 
-    @DRPCRecieve
-    async initProject(userId: string, projectRoleUserId: string, organizationId: string):Promise<string> {
+    
+    async initProject(organizationUserID: string, organizationId: string):Promise<string> {
         let objProject=new ProjectService
         objProject.assignItem({
             name:"test",
             keyword:"test",
             organization_id:organizationId,
-            created_by:userId
+            created_by:organizationUserID
         })
         await objProject.create()
         return objProject.getId();
-    }
-
-    @DRPCRecieve
-    async initField() {
-        await FieldTypeService.init()
     }
     
 }

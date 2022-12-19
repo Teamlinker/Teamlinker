@@ -1,4 +1,4 @@
-import { IServer_Common_RPC_User_CheckSession } from "../rpc/api/user";
+import {IServer_Common_RPC_User_CheckSession} from "../../user/types/config";
 
 export enum EServer_Common_Http_Structure_HandleParam_Category {
     Content,

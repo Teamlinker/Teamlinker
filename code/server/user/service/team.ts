@@ -1,71 +1,102 @@
-import { ECommon_Model_Project_Member_Type } from '../../../common/model/project_member';
-import { ECommon_Model_Role_Memeber_Type } from '../../../common/model/role_member';
-import { ICommon_Route_Res_Team_List } from '../../../common/routes/response';
-import { Err } from '../../../common/status/error';
-import { Entity } from "../../common/entity/entity";
-import { teamMapper } from '../mapper/team';
-import rpcAuthApi from "../rpc/auth";
-import rpcFileApi from "../rpc/file";
-import { ECommon_Model_Role_Type, ICommon_Model_Role } from './../../../common/model/role';
-import { teamModel } from './../../../common/model/team';
+import {ECommon_Model_Organization_Member_Type} from '../../../common/model/organization';
+import {ICommon_Route_Res_Organization_User_List, ICommon_Route_Res_Team_List} from '../../../common/routes/response';
+import {Err} from '../../../common/status/error';
+import {Entity} from "../../common/entity/entity";
+import {teamMapper} from '../mapper/team';
+import rpcAuthApi from "../../auth/rpc/auth";
+import rpcFileApi from "../../file/rpc/file";
+import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from './../../../common/model/role';
+import {teamModel} from './../../../common/model/team';
+import {EServer_Common_Event_Types} from "../../common/event/types";
+import {OrganizationService} from "./organization";
+
 export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
     constructor(){
         super(teamMapper)
     }
 
-    async getRoles():Promise<Pick<ICommon_Model_Role,"id"|"name"|"description">[]>{
-        if(!this.item || !this.item.id) {
-            throw  Err.Team.teamNotFound;
-        }
-        let ret=await rpcAuthApi.getRolesByItemId(this.item.id,ECommon_Model_Role_Type.TEAM);
+    override async create(): Promise<typeof teamModel["model"]> {
+        let ret=super.create();
+        let roleId=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.TEAM)
+        await this.addMember(this.getItem().created_by,roleId);
         return ret;
     }
 
-    async members():Promise<{
-        id:string,
-        name:string,
-        photo:string,
-        role:Pick<ICommon_Model_Role,"id"|"name"|"description">
-    }[]>{
+    async getRoles(){
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
         }
-        let arrMemeber=await teamMapper.members(this.item.id);
-        let arrRole=await rpcAuthApi.getRolesByMemeberIds(arrMemeber.map(obj=>{
+        let ret=await rpcAuthApi.listRole(this.getId(),ECommon_Model_Role_Type.TEAM);
+        return ret;
+    }
+
+    static async getGlobalRoles(organizationId:string) {
+        let ret=await rpcAuthApi.listRole(organizationId,ECommon_Model_Role_Type.TEAM);
+        return ret;
+    }
+
+    async members(page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Organization_User_List>{
+        if(!this.item || !this.item.id) {
+            throw  Err.Team.teamNotFound;
+        }
+        let objMember=await teamMapper.members(this.item.id,page,size,keyword);
+        let arrRole=await rpcAuthApi.getRolesByMemberIds(objMember.data.map(obj=>{
             return {
                 itemId:this.item.id,
-                memberId:obj.id
+                memberId:obj.user.id
             }
         }))
-        return arrMemeber.map((item,index) => {
-            return {
-                ...item,
-                role:arrRole[index]
-            }
-        });
+        return {
+            count:objMember.count,
+            totalPage:objMember.totalPage,
+            data:objMember.data.map((obj,index)=>{
+                return {
+                    ...obj,
+                    role:arrRole[index].role
+                }
+            })
+        }
     }
 
-    async addMemeber(userId:string,roleId:string){
+    async addMember(memberId:string, roleId:string){
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
         }
-        await teamMapper.addMember(this.item.id,userId)
-        await rpcAuthApi.addRole(this.item.id,userId,roleId,ECommon_Model_Role_Memeber_Type.Team,ECommon_Model_Project_Member_Type.USER);
+        await teamMapper.addMember(this.item.id,memberId)
+        let objOrganization=await OrganizationService.getItemById(this.item.organization_id);
+        if(!objOrganization) {
+            throw Err.Organization.organizationNotFound
+        }
+        let member=await objOrganization.memberInfo(memberId);
+        let role = await rpcAuthApi.addRoleMember(this.item.id,roleId,ECommon_Model_Organization_Member_Type.USER,memberId);
+        return {
+            ...member,
+            role
+        }
     }
 
-    async removeMemeber(userId:string) {
+    async removeMember(organizationUserId:string) {
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
         }
-        await teamMapper.removeMember(this.item.id,userId)
-        await rpcAuthApi.removeRole(this.item.id,userId);
+        await teamMapper.removeMember(this.item.id,organizationUserId)
+        await rpcAuthApi.removeRoleMember(this.item.id,ECommon_Model_Organization_Member_Type.USER,organizationUserId);
     }
 
-    async changeRole(userId:string,roleId:string){
+    async changeRole(organizationUserId:string,roleId:string){
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
         }
-        await rpcAuthApi.changeRole(this.item.id,userId,roleId)
+        let objOrganization=await OrganizationService.getItemById(this.item.organization_id);
+        if(!objOrganization) {
+            throw Err.Organization.organizationNotFound
+        }
+        let member=await objOrganization.memberInfo(organizationUserId);
+        let role=await rpcAuthApi.changeRoleMember(this.item.id,roleId,ECommon_Model_Organization_Member_Type.USER,organizationUserId)
+        return {
+            ...member,
+            role
+        }
     }
 
     static async list(organizationId:string,page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_Team_List>{
@@ -102,6 +133,53 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
                 photo:obj.photo?(await rpcFileApi.getPath(obj.photo)):obj.photo
             })
         }
+        return ret;
+    }
+
+    override async delete(eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
+        await super.delete(eventPublish);
+        await teamMapper.clearMember(this.getId());
+    }
+
+    async createRole(name :string,
+                     description:string,
+                     value:number){
+        let ret=await rpcAuthApi.createRole({
+            name,
+            description,
+            item_id:this.getId(),
+            organization_id:this.getId(),
+            type:ECommon_Model_Role_Type.TEAM,
+            reserved:ECommon_Model_Role_Reserved.NORMAL,
+            value:value
+        });
+        return ret;
+    }
+
+    static async createGlobalRole(organizationId:string,name :string, description:string, value:number) {
+        let ret=await rpcAuthApi.createRole({
+            name,
+            description,
+            organization_id:organizationId,
+            type:ECommon_Model_Role_Type.TEAM,
+            reserved:ECommon_Model_Role_Reserved.NORMAL,
+            value
+        })
+        return ret;
+    }
+
+    async editRole(roleId:string,name:string,description:string,value:number){
+        let ret=await rpcAuthApi.updateRole({
+            id:roleId,
+            name,
+            description,
+            value:value
+        });
+        return ret;
+    }
+
+    async removeRole(roleId:string){
+        let ret=await rpcAuthApi.removeRole(roleId);
         return ret;
     }
 

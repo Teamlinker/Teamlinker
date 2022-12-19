@@ -1,5 +1,4 @@
-import { Permission_Base } from "../permission/permission";
-import { ECommon_Application_Deploy } from './../types';
+import {Permission_Base} from "../permission/permission";
 
 export enum ECommon_HttpApi_Method {
     GET="GET",
@@ -14,12 +13,11 @@ export interface ICommon_Http_Route {
     req:any,
     res:any,
     ignoreValidate?:boolean,
-    permission?:Permission_Base[]|{
-        data:Permission_Base[],
-        delete:boolean
-    },
-    onlyAdmin?:boolean,
-    onlyOn?: ECommon_Application_Deploy
+    permission?:Permission_Base[],
+}
+
+export interface ICommon_Http_Route_List {
+    [name:string]:ICommon_Http_Route
 }
 
 export interface ICommon_HttpApi {

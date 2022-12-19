@@ -1,39 +1,39 @@
-import { ICommon_Model_Project, projectModel } from "../../../common/model/project";
-import { workflowSolutionIssueTypeSolutionModel } from "../../../common/model/workflow_solution_issue_type_solution";
-import { workflowSolutionWorkflowIssueTypeModel } from "../../../common/model/workflow_solution_workflow_issue_type";
-import { Err } from "../../../common/status/error";
-import { keys } from "../../../common/transform";
-import { getMysqlInstance } from "../../common/db/mysql";
-import { Mapper } from "../../common/entity/mapper";
-import { generateCreateSql, generateDeleteSql, generateLeftJoinSql, generateQuerySql, generateSnowId, generateUpdateSql } from "../../common/util/sql";
-import { ICommon_Model_Issue_Type, issueTypeModel } from './../../../common/model/issue_type';
-import { ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel } from './../../../common/model/issue_type_solution';
-import { issueTypeSolutionIssueTypeModel } from './../../../common/model/issue_type_solution_issue_type';
-import { projectIssueTypeSolutionModel } from './../../../common/model/project_issue_type_solution';
+import {ICommon_Model_Project, projectModel} from "../../../common/model/project";
+import {Err} from "../../../common/status/error";
+import {keys} from "../../../common/transform";
+import {getMysqlInstance} from "../../common/db/mysql";
+import {Mapper} from "../../common/entity/mapper";
+import {
+    generateCreateSql,
+    generateDeleteSql,
+    generateLeftJoinSql,
+    generateQuerySql,
+    generateSnowId,
+    generateUpdateSql
+} from "../../common/util/sql";
+import {ICommon_Model_Issue_Type, issueTypeModel} from './../../../common/model/issue_type';
+import {ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel} from './../../../common/model/issue_type_solution';
+import {projectIssueTypeSolutionModel} from './../../../common/model/project_issue_type_solution';
+
 class IssueTypeMapper extends Mapper<typeof issueTypeModel> {
     constructor() {
         super(issueTypeModel)
     }
-    async list(organizationId:string):Promise<ICommon_Model_Issue_Type[]>
+    async list(issueTypeSolutionId:string):Promise<ICommon_Model_Issue_Type[]>
     {
-        if(!organizationId) {
-            throw Err.Organization.organizationNotFound
+        if(!issueTypeSolutionId) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
         }
         let mysql=getMysqlInstance()
         let ret=await mysql.execute(generateQuerySql(issueTypeModel,[],{
-            organization_id:organizationId
+            issue_type_solution_id:issueTypeSolutionId
         },null,{
             field:"name",
             type:"asc"
         }))
         return ret;
     }
-    async deleteFromSolution(issueTypeId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(issueTypeSolutionIssueTypeModel,{
-            issue_type_id:issueTypeId
-        }))
-    }
+
 }
 export let issueTypeMapper=new IssueTypeMapper
 
@@ -54,67 +54,6 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
             type:"asc"
         }))
         return ret;
-    }
-
-    async getIssueTypesBySolutionId(issueTypeSolutionId:string):Promise<ICommon_Model_Issue_Type[]>{
-        let mysql=getMysqlInstance()
-        let fields=keys<ICommon_Model_Issue_Type>().map(item=>item.name);
-        let sql=generateLeftJoinSql({
-            model:issueTypeSolutionIssueTypeModel
-        },{
-            model:issueTypeModel,
-            columns:fields,
-            expression:{
-                id:{
-                    model:issueTypeSolutionIssueTypeModel,
-                    field:"issue_type_id"
-                }
-            }
-        },{
-            issue_type_solution_id:{
-                model:issueTypeSolutionIssueTypeModel,
-                value:issueTypeSolutionId
-            }
-        })
-        let ret=await mysql.execute(sql)
-        return ret;
-    }
-
-    async addIssueType(issueTypeId:string,issueTypeSolutionId:string) {
-        if(!issueTypeId) {
-            throw Err.Project.Issue.issueTypeNotFound
-        } else if (!issueTypeSolutionId) {
-            throw Err.Project.Issue.issueTypeSolutionNotFound
-        }
-        let mysql=getMysqlInstance()
-        let ret=await mysql.executeOne(generateQuerySql(issueTypeSolutionIssueTypeModel,[],{
-            issue_type_id:issueTypeId,
-            issue_type_solution_id:issueTypeSolutionId
-        }))
-        if(ret) {
-            throw Err.Project.Issue.issueTypeSolutionExists
-        }
-        await mysql.execute(generateCreateSql(issueTypeSolutionIssueTypeModel,{
-            id:await generateSnowId(),
-            issue_type_id:issueTypeId,
-            issue_type_solution_id:issueTypeSolutionId
-        }))
-    }
-
-    async removeIssueType(issueTypeId:string,issueTypeSolutionId:string) {
-        if(!issueTypeId) {
-            throw Err.Project.Issue.issueTypeNotFound
-        } else if (!issueTypeSolutionId) {
-            throw Err.Project.Issue.issueTypeSolutionNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(issueTypeSolutionIssueTypeModel,{
-            issue_type_id:issueTypeId,
-            issue_type_solution_id:issueTypeSolutionId
-        }))
-        await mysql.execute(generateDeleteSql(workflowSolutionWorkflowIssueTypeModel,{
-            issue_type_id:issueTypeId
-        }))
     }
 
     async getReservedItem(organizationId:string) {
@@ -247,7 +186,7 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
         return ret;
     }
 
-    async clearByOrganizationId(organizationId:string) {
+    async clearByOrganizationId(organizationId:string):Promise<string[]> {
         if(!organizationId){
             throw Err.Organization.organizationNotFound
         }
@@ -260,19 +199,7 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
             await mysql.execute(generateDeleteSql(issueTypeSolutionModel,{
                 organization_id:organizationId
             }))
-            await mysql.execute(generateDeleteSql(issueTypeSolutionIssueTypeModel,{
-                issue_type_solution_id:{
-                    exp:"in",
-                    value:ids
-                }
-            }))
             await mysql.execute(generateDeleteSql(projectIssueTypeSolutionModel,{
-                issue_type_solution_id:{
-                    exp:"in",
-                    value:ids
-                }
-            }))
-            await mysql.execute(generateDeleteSql(workflowSolutionIssueTypeSolutionModel,{
                 issue_type_solution_id:{
                     exp:"in",
                     value:ids
@@ -280,26 +207,42 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
             }))
         }
         let issueTypeList=await mysql.execute(generateQuerySql(issueTypeModel,["id"],{
-            organization_id:organizationId
+            issue_type_solution_id:{
+                exp:"in",
+                value:issueTypeSolutionList.map(item=>item.id)
+            }
         }))
         if(issueTypeList.length>0) {
             let ids=issueTypeList.map(item=>item.id);
             await mysql.execute(generateDeleteSql(issueTypeModel,{
-                organization_id:organizationId
-            }))
-            await mysql.execute(generateDeleteSql(issueTypeSolutionIssueTypeModel,{
-                issue_type_id:{
-                    exp:"in",
-                    value:ids
-                }
-            }))
-            await mysql.execute(generateDeleteSql(workflowSolutionWorkflowIssueTypeModel,{
-                issue_type_id:{
+                issue_type_solution_id:{
                     exp:"in",
                     value:ids
                 }
             }))
         }
+        return issueTypeList.map(item=>item.id);
+    }
+
+    async getIssueTypesByOrganizationId(organizationId:string):Promise<string[]> {
+        if(!organizationId){
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql=getMysqlInstance()
+        let issueTypeSolutionList=await mysql.execute(generateQuerySql(issueTypeSolutionModel,["id"],{
+            organization_id:organizationId
+        }))
+        if(issueTypeSolutionList.length>0) {
+            let issueTypeList=await mysql.execute(generateQuerySql(issueTypeModel,["id"],{
+                issue_type_solution_id:{
+                    exp:"in",
+                    value:issueTypeSolutionList.map(item=>item.id)
+                }
+            }))
+            return issueTypeList.map(item=>item.id);
+        }
+
+        return []
     }
 }
 export let issueTypeSolutionMapper=new IssueTypeSolutionMapper

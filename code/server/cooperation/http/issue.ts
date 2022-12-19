@@ -1,13 +1,14 @@
-import { ECommon_Model_Comment_Type } from "../../../common/model/comment";
+import {ECommon_Model_Comment_Type} from "../../../common/model/comment";
 import projectIssueApi from "../../../common/routes/issue";
-import { ICommon_Route_Req_ProjectIssue_Field } from "../../../common/routes/response";
-import { Err } from "../../../common/status/error";
-import { DComponent } from "../../common/decorate/component";
-import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
-import ProjectIssueService from "../service/issue";
-import ProjectService from "../service/project";
-import { IUserSession } from './../../common/rpc/api/user';
-import { CommentService } from './../service/comment';
+import {ICommon_Route_Req_ProjectIssue_Field} from "../../../common/routes/response";
+import {Err} from "../../../common/status/error";
+import {DComponent} from "../../common/decorate/component";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
+import {ProjectIssueService} from "../service/issue";
+import {ProjectService} from "../service/project";
+import {CommentService} from './../service/comment';
+import {IUserSession} from "../../user/types/config";
+
 @DComponent
 @DHttpController(projectIssueApi)
 class IssueController {
@@ -39,7 +40,7 @@ class IssueController {
               priority,
               assigner_id:assignerId,
               reporter_id:reporterId,
-              created_by:user.userId
+              created_by:user.organizationInfo.organizationUserId
          })
          let obj=await projectIssue.create()
          projectIssue.assignItem(obj,true);
@@ -176,7 +177,7 @@ class IssueController {
               type:ECommon_Model_Comment_Type.PROJECT,
               type_id:projectIssueId,
               content:content,
-              created_by:user.userId
+              created_by:user.organizationInfo.organizationUserId
          })
          let ret=await comment.create()
          return ret;
@@ -274,22 +275,22 @@ class IssueController {
           let ret=await projectIssue.otherInfoList()
           return ret;
      }
-     @DHttpApi(projectIssueApi.routes.bindTag)
-     async bindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("tagId") tagId :string):Promise<typeof projectIssueApi.routes.bindTag.res> {
+     @DHttpApi(projectIssueApi.routes.bindLabel)
+     async bindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("labelId") labelId :string):Promise<typeof projectIssueApi.routes.bindLabel.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          await projectIssue.bindTag(tagId)
+          await projectIssue.bindLabel(labelId)
           return
      }
-     @DHttpApi(projectIssueApi.routes.unbindTag)
-     async unbindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("tagId") tagId :string):Promise<typeof projectIssueApi.routes.unbindTag.res> {
+     @DHttpApi(projectIssueApi.routes.unbindLabel)
+     async unbindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("labelId") labelId :string):Promise<typeof projectIssueApi.routes.unbindLabel.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          await projectIssue.unbindTag(tagId)
+          await projectIssue.unbindLabel(labelId)
           return
      }
      @DHttpApi(projectIssueApi.routes.bindModule)

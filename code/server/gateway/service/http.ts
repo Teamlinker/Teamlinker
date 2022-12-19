@@ -1,8 +1,9 @@
 import * as fs from "fs-extra";
-import Application, { ECommon_Application_Mode } from "../../common/app/app";
+import Application, {ECommon_Application_Mode} from "../../common/app/app";
+
 export class GateWayService  {
     static async needConfig() {
-        if(Application.mode!=ECommon_Application_Mode.MICRO && (!Application.privateConfig.mysql || !Application.privateConfig.mysql.url)) {
+        if(Application.mode!=ECommon_Application_Mode.ONLINE && (!Application.privateConfig.mysql || !Application.privateConfig.mysql.url)) {
             return 1
         } else {
             return 0;

@@ -1,5 +1,5 @@
-import { ECommon_Services } from "../types"
-import { ECommon_HttpApi_Method } from "./types"
+import {ECommon_Services} from "../types"
+import {ECommon_HttpApi_Method} from "./types"
 
 const api={
     baseUrl:"/file",
@@ -11,7 +11,9 @@ const api={
             req:<{
                 file:string                
             }>{},
-            res:<string>{}
+            res:<{
+                id:string
+            }>{}
         },
         getPath:{
             method:ECommon_HttpApi_Method.GET,
@@ -19,7 +21,9 @@ const api={
             req:<{
                 fileId:string                
             }>{},
-            res:<string>{}
+            res:<{
+                uri:string
+            }>{}
         }
     }
 }

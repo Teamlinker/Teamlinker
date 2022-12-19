@@ -1,10 +1,11 @@
 import * as jwt from "jsonwebtoken";
-import { Err } from '../../../common/status/error';
-import { REDIS_USER } from "../../common/cache/keys/user";
-import { getConfigInstance } from '../../common/config/config';
-import { Entity } from "../../common/entity/entity";
-import { ECommon_User_Type, userModel } from './../../../common/model/user';
-import { adminMapper } from './../mapper/admin';
+import {Err} from '../../../common/status/error';
+import {REDIS_USER} from "../../common/cache/keys/user";
+import {getConfigInstance} from '../../common/config/config';
+import {Entity} from "../../common/entity/entity";
+import {ECommon_User_Type, userModel} from './../../../common/model/user';
+import {adminMapper} from './../mapper/admin';
+
 export default class Admin extends Entity<typeof userModel,typeof adminMapper> {
     constructor(){
         super(adminMapper)
@@ -21,7 +22,7 @@ export default class Admin extends Entity<typeof userModel,typeof adminMapper> {
     }
 
     async startSession():Promise<string>{
-        let secret=getConfigInstance().globalConfig.jwt;
+        let secret=getConfigInstance().jwt;
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
         }

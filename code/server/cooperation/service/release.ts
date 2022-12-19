@@ -1,9 +1,14 @@
 import * as moment from "moment";
-import { Err } from "../../../common/status/error";
-import { Entity } from "../../common/entity/entity";
-import { ECommon_Model_Project_Release_Status, ICommon_Model_Project_Release, projectReleaseModel } from './../../../common/model/project_release';
-import { releaseMapper } from './../mapper/release';
-import ProjectIssue from "./issue";
+import {Err} from "../../../common/status/error";
+import {Entity} from "../../common/entity/entity";
+import {
+    ECommon_Model_Project_Release_Status,
+    ICommon_Model_Project_Release,
+    projectReleaseModel
+} from './../../../common/model/project_release';
+import {releaseMapper} from './../mapper/release';
+import {ProjectIssueService} from "./issue";
+
 export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typeof releaseMapper> {
     constructor(){
         super(releaseMapper)
@@ -62,7 +67,7 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
     }
 
     async addIssue(projectIssueId:string) {
-        let objIssue=await ProjectIssue.getItemById(projectIssueId)
+        let objIssue=await ProjectIssueService.getItemById(projectIssueId)
         if(!objIssue) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         } else if (objIssue.getItem().project_id!=this.getItem().project_id) {
@@ -72,7 +77,7 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
     }
 
     async removeIssue(projectIssueId:string) {
-        let objIssue=await ProjectIssue.getItemById(projectIssueId)
+        let objIssue=await ProjectIssueService.getItemById(projectIssueId)
         if(!objIssue) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         } else if (objIssue.getItem().project_id!=this.getItem().project_id) {

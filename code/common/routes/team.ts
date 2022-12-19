@@ -1,9 +1,15 @@
-import { ICommon_Model_Role } from '../model/role';
-import { ICommon_Model_Team } from '../model/team';
-import { Permission_Types } from '../permission/permission';
-import { ECommon_Services } from '../types';
-import { ICommon_Route_Res_Team_List } from './response';
-import { ECommon_HttpApi_Method } from "./types";
+import {ICommon_Model_Team} from '../model/team';
+import {Permission_Types} from '../permission/permission';
+import {ECommon_Services} from '../types';
+import {
+    ICommon_Route_Res_Organization_User_Item,
+    ICommon_Route_Res_Organization_User_List,
+    ICommon_Route_Res_Role_Item,
+    ICommon_Route_Res_Role_List,
+    ICommon_Route_Res_Team_List
+} from './response';
+import {ECommon_HttpApi_Method} from "./types";
+
 const api={
     baseUrl:"/team",
     service:ECommon_Services.User,
@@ -12,9 +18,12 @@ const api={
             method:ECommon_HttpApi_Method.POST,
             path:"/item",
             req:<{
-                name:string                
+                name:string,
+                photo?:string,
+                description?:string
             }>{},
-            res:<ICommon_Model_Team>{}
+            res:<ICommon_Model_Team>{},
+            permission:[Permission_Types.Organization.CREATE_TEAM]
         },
         info:{//团队信息
             method:ECommon_HttpApi_Method.GET,
@@ -22,14 +31,17 @@ const api={
             req:<{
                 teamId:string                
             }>{},
-            res:<ICommon_Model_Team>{}
+            res:<ICommon_Model_Team>{},
+            permission:[Permission_Types.Team.READ]
         },
         update:{//更新团队信息
             method:ECommon_HttpApi_Method.PUT,
             path:"/item",
             req:<{
                 teamId:string,
-                name:string                
+                name?:string,
+                photo?:string,
+                description?:string
             }>{},
             res:<ICommon_Model_Team>{},
             permission:[Permission_Types.Team.EDIT]
@@ -41,23 +53,18 @@ const api={
                 teamId:string                
             }>{},
             res:{},
-            permission:{
-                data:[Permission_Types.Team.DELETE],
-                delete:true
-            }
+            permission:[Permission_Types.Team.DELETE]
         },
         members:{//团队成员列表
             method:ECommon_HttpApi_Method.GET,
             path:"/members",
             req:<{
-                teamId:string             
+                teamId:string,
+                keyword?:string,
+                page:number,
+                size:number
             }>{},
-            res:<{
-                id:string,
-                name:string,
-                photo:string,
-                role:Pick<ICommon_Model_Role,"id"|"name"|"description">
-            }[]>{},
+            res:<ICommon_Route_Res_Organization_User_List>{},
             permission:[Permission_Types.Team.READ]
         },
         addMember:{//添加团队成员
@@ -65,49 +72,40 @@ const api={
             path:"/add_member",
             req:<{
                 teamId:string,
-                userId:string,
+                organizationUserId:string,
                 roleId:string                
             }>{},
-            res:{},
-            permission:{
-                data:[Permission_Types.Team.EDIT],
-                delete:true
-            }
+            res:<ICommon_Route_Res_Organization_User_Item>{},
+            permission:[Permission_Types.Team.EDIT]
         },
         removeMember:{//删除团队成员
             method:ECommon_HttpApi_Method.DELETE,
             path:"/remove_member",
             req:<{
                 teamId:string,
-                userId:string                
+                organizationUserId:string
             }>{},
             res:{},
-            permission:{
-                data:[Permission_Types.Team.EDIT],
-                delete:true
-            }
+            permission:[Permission_Types.Team.EDIT]
         },
         changeRole:{//修改团队成员权限
             method:ECommon_HttpApi_Method.PUT,
-            path:"/role",
+            path:"/update_role",
             req:<{
                 teamId:string,
-                userId:string,
+                organizationUserId:string,
                 roleId:string             
             }>{},
-            res:{},
-            permission:{
-                data:[Permission_Types.Team.EDIT],
-                delete:true
-            }
+            res:<ICommon_Route_Res_Organization_User_Item>{},
+            permission:[Permission_Types.Team.EDIT]
         },
         roles:{//团队权限列表
             method:ECommon_HttpApi_Method.GET,
             path:"/roles",
             req:<{
-                teamId:string           
+                teamId?:string
             }>{},
-            res:<Pick<ICommon_Model_Role,"id"|"name"|"description">[]>{},
+            res:<ICommon_Route_Res_Role_List>{},
             permission:[Permission_Types.Team.READ]
         },
         list:{
@@ -119,6 +117,7 @@ const api={
                 size:number             
             }>{},
             res:<ICommon_Route_Res_Team_List>{},
+            permission:[Permission_Types.Organization.READ]
         },
         filterTeam:{
             method:ECommon_HttpApi_Method.GET,
@@ -131,6 +130,40 @@ const api={
                 id:string,
                 photo:string
             }[]>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        addRole:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/role",
+            req:<{
+                teamId?:string,
+                name :string,
+                description?:string,
+                value:number
+            }>{},
+            res:<ICommon_Route_Res_Role_Item>{},
+            permission:[Permission_Types.Team.ADMIN]
+        },
+        editRole:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/role",
+            req:<{
+                roleId:string,
+                name?:string,
+                description?:string,
+                value?:number
+            }>{},
+            res:<ICommon_Route_Res_Role_Item>{},
+            permission:[Permission_Types.Team.ADMIN]
+        },
+        removeRole:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/role",
+            req:<{
+                roleId:string,
+            }>{},
+            res:{},
+            permission:[Permission_Types.Team.ADMIN]
         }
     }
 }

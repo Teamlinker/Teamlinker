@@ -1,12 +1,14 @@
 import * as jwt from "jsonwebtoken";
-import { ICommon_Route_Res_User_List } from "../../../common/routes/response";
-import { Err } from '../../../common/status/error';
-import { REDIS_USER } from "../../common/cache/keys/user";
-import { getConfigInstance } from '../../common/config/config';
-import { Entity } from "../../common/entity/entity";
-import { userMapper } from '../mapper/user';
-import rpcFileApi from "../rpc/file";
-import { ECommon_User_Type, ICommon_Model_User, userModel } from './../../../common/model/user';
+import {ICommon_Route_Res_User_List} from "../../../common/routes/response";
+import {Err} from '../../../common/status/error';
+import {REDIS_USER} from "../../common/cache/keys/user";
+import {getConfigInstance} from '../../common/config/config';
+import {Entity} from "../../common/entity/entity";
+import {userMapper} from '../mapper/user';
+import rpcFileApi from "../../file/rpc/file";
+import {ECommon_User_Type, ICommon_Model_User, userModel} from './../../../common/model/user';
+import {OrganizationUserService} from "./organization";
+
 export default class User extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
         super(userMapper)
@@ -24,7 +26,7 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
     }
 
     async startSession():Promise<string>{
-        let secret=getConfigInstance().globalConfig.jwt;
+        let secret=getConfigInstance().jwt;
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
         }
@@ -41,6 +43,8 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
                     await session.set(token);
                     let sessionInfo=REDIS_USER.info(this.item.id)
                     await sessionInfo.set(this.item);
+                    let sessionOrganization=REDIS_USER.organizationInfo(this.item.id)
+                    await sessionOrganization.del();
                     resolve(token)
                 }
             })
@@ -53,6 +57,8 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
         }
         let session=REDIS_USER.token(this.item.id)
         await session.del()
+        let sessionOrganization=REDIS_USER.organizationInfo(this.item.id)
+        await sessionOrganization.del();
     }
 
     async active(active:number) {
@@ -81,13 +87,6 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
         }
     }
 
-    async projectList(page:number,size:number,keyword?:string,organizationId?:string){
-        let ret= await userMapper.projectList(page,size,this.item.id,organizationId,keyword)
-        return {
-            ...ret,
-            page:page
-        };
-    }
 
     async teamList(page:number,size:number,keyword?:string,organizationId?:string){
         let ret= await userMapper.teamList(page,size,this.item.id,organizationId,keyword)
@@ -98,24 +97,27 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
     }
 
     async profile(organizationId?:string){
+        let obj=await OrganizationUserService.getItemByExp({
+            user_id:this.getId(),
+            organization_id:organizationId
+        })
+        if(!obj) {
+            throw Err.Organization.userNotFound
+        }
         let ret={
-            info:User.userInfos(this.getId(),true,organizationId)[0],
-            project:(await this.projectList(0,10,undefined,organizationId)).data,
+            info:(await User.userInfos(obj.getId(),true))[0],
             team:(await this.teamList(0,10,undefined,organizationId)).data
         }
-        delete ret.info.password
         return ret;
     }
 
-    static async userInfos(userIds:string,isGetPhoto:boolean=true,organizationId?:string):Promise<Omit<ICommon_Model_User,"password"|"created_time"|"modified_time">[]>{
+    static async userInfos(userIds:string,isGetPhoto:boolean=true):Promise<(Omit<ICommon_Model_User,"password">)[]>{
         if(!userIds) {
-            throw Err.User.userIdNotExists
+            throw Err.User.userNotFound
         }
-        let ret=await userMapper.users(userIds.split(","),organizationId)
+        let ret=await userMapper.users(userIds.split(","))
         for(let obj of ret) {
             delete obj.password;
-            delete obj.created_time;
-            delete obj.modified_time;
             if(obj.photo && isGetPhoto) {
                 obj.photo=await rpcFileApi.getPath(obj.photo)
             }

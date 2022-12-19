@@ -1,4 +1,4 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
 
 export interface ICommon_Model_Team {
     id :string ,
@@ -7,7 +7,8 @@ export interface ICommon_Model_Team {
   created_time :Date,
   modified_time :Date,
   created_by :string ,
-  organization_id:string
+  organization_id:string,
+  description:string
 }
 export const Table_Team="team"
 

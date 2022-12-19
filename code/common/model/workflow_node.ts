@@ -1,4 +1,4 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
 
 export enum ECommon_Model_Workflow_Node_Status {
   NOTSTART,
@@ -11,7 +11,7 @@ export interface ICommon_Model_Workflow_Node {
   name :string,
   description :string,
   status :ECommon_Model_Workflow_Node_Status,
-  workflow_id :string ,
+  issue_type_id :string ,
   x:number,
   y:number
 }

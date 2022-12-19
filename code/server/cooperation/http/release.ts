@@ -1,10 +1,10 @@
-import { ECommon_Model_Project_Release_Status } from "../../../common/model/project_release";
+import {ECommon_Model_Project_Release_Status} from "../../../common/model/project_release";
 import releaseApi from "../../../common/routes/release";
-import { Err } from "../../../common/status/error";
-import { DComponent } from "../../common/decorate/component";
-import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
-import { IUserSession } from './../../common/rpc/api/user';
-import { ProjectReleaseService } from './../service/release';
+import {Err} from "../../../common/status/error";
+import {DComponent} from "../../common/decorate/component";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
+import {ProjectReleaseService} from './../service/release';
+import {IUserSession} from "../../user/types/config";
 
 @DComponent
 @DHttpController(releaseApi)
@@ -32,7 +32,7 @@ class ReleaseController {
              start_time,
              release_time,
              description,
-             created_by:user.userId
+             created_by:user.organizationInfo.organizationUserId
          })
          let ret=await obj.create()
          return ret

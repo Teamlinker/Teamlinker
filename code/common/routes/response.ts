@@ -1,22 +1,23 @@
-import { ICommon_Model_Field_Solution_Workflow_Node_Field_Type } from "../model/field_solution_workflow_node_field_type";
-import { ICommon_Model_Field_Type } from "../model/field_type";
-import { ICommon_Model_Field_Type_Config_Value } from "../model/field_type_config_value";
-import { ICommon_Model_Issue_Type } from "../model/issue_type";
-import { ICommon_Model_Organization } from "../model/organization";
-import { ICommon_Model_Project } from "../model/project";
-import { ICommon_Model_Team } from '../model/team';
-import { ICommon_Model_User } from '../model/user';
-import { ICommon_Model_Field_Solution } from './../model/field_solution';
-import { ICommon_Model_Issue_Type_Solution } from './../model/issue_type_solution';
-import { ICommon_Model_Organization_User } from './../model/organization_user';
-import { ICommon_Model_Project_Issue } from './../model/project_issue';
-import { ICommon_Model_Project_Issue_Field_Value } from './../model/project_issue_field_value';
-import { ECommon_Model_Project_Member_Type } from './../model/project_member';
-import { ICommon_Model_Project_Release } from './../model/project_release';
-import { ICommon_Model_Workflow } from './../model/workflow';
-import { ICommon_Model_Workflow_Action } from './../model/workflow_action';
-import { ICommon_Model_Workflow_Node } from './../model/workflow_node';
-import { ICommon_Model_Workflow_Solution } from './../model/workflow_solution';
+import {ICommon_Model_Workflow_Node_Field_Type} from "../model/workflow_node_field_type";
+import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../model/workflow_node_field_type_config";
+import {ICommon_Model_Issue_Type} from "../model/issue_type";
+import {ICommon_Model_Organization} from "../model/organization";
+import {ICommon_Model_Project} from "../model/project";
+import {ICommon_Model_Team} from '../model/team';
+import {ICommon_Model_User} from '../model/user';
+import {ICommon_Model_Issue_Type_Solution} from './../model/issue_type_solution';
+import {ICommon_Model_Organization_User} from './../model/organization_user';
+import {ICommon_Model_Project_Issue} from './../model/project_issue';
+import {ICommon_Model_Project_Issue_Field_Value} from './../model/project_issue_field_value';
+import {ECommon_Model_Organization_Member_Type} from './../model/organization';
+import {ICommon_Model_Project_Release} from './../model/project_release';
+import {ICommon_Model_Workflow_Action} from './../model/workflow_action';
+import {ICommon_Model_Workflow_Node} from './../model/workflow_node';
+import {ICommon_Model_Role} from "../model/role";
+import {Permission_Base} from "../permission/permission";
+import {ICommon_Model_Member_Tag} from "../model/member_tag";
+import {ICommon_Field_Type} from "../field/type";
+
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
     name:string,
@@ -24,14 +25,12 @@ export interface ICommon_Route_Res_Project_CreateModule_Data {
 }
 
 export type ICommon_Route_Res_Project_Member = {
-    id:string,
-    photo:string,
-    name:string
-    type:ECommon_Model_Project_Member_Type,
-    role:{
-        id:string,
-        name:string
-    }
+    member?:ICommon_Model_Organization_User,
+    memberType:ECommon_Model_Organization_Member_Type
+    role:ICommon_Model_Role,
+    user?:ICommon_Model_User,
+    team?:ICommon_Model_Team,
+    tag?:ICommon_Model_Member_Tag
 }
 
 export type ICommon_Route_Res_Project_ListTag = {
@@ -44,7 +43,7 @@ export type ICommon_Route_Res_Project_ListTag = {
     }[]
 }
 
-export type ICommon_Route_Res_Project_ListMemeber ={
+export type ICommon_Route_Res_Project_ListMember ={
     count:number,
     totalPage:number,
     page:number,
@@ -53,7 +52,6 @@ export type ICommon_Route_Res_Project_ListMemeber ={
 
 export type ICommon_Route_Res_User_Profile={
     info:Omit<ICommon_Model_User,"password">,
-    project:ICommon_Model_Project[],
     team:ICommon_Model_Team[]
 }
 
@@ -101,9 +99,9 @@ export interface ICommon_Route_Res_IssueTypeSolution_List_Item extends ICommon_M
 export interface ICommon_Route_Res_Workflow_Info_Node {
     node:ICommon_Model_Workflow_Node,
     fields?:{
-        field:ICommon_Model_Field_Solution_Workflow_Node_Field_Type,
-        fieldType:ICommon_Model_Field_Type,
-        values?:ICommon_Model_Field_Type_Config_Value[]
+        field:ICommon_Model_Workflow_Node_Field_Type,
+        fieldType:ICommon_Field_Type,
+        values?:ICommon_Model_Workflow_Node_Field_Type_Config[]
     }[]
     actions:ICommon_Route_Res_Workflow_Info_Action[]
 }
@@ -113,31 +111,15 @@ export interface ICommon_Route_Res_Workflow_Info_Action {
     destNode:ICommon_Route_Res_Workflow_Info_Node
 }
 
-export interface ICommon_Route_Res_Workflow_Info extends ICommon_Model_Workflow {
-    data:{
-        nodes:ICommon_Model_Workflow_Node[],
-        actions:ICommon_Model_Workflow_Action[]
-    }
+export interface ICommon_Route_Res_Workflow_Info {
+    nodes:ICommon_Model_Workflow_Node[],
+    actions:ICommon_Model_Workflow_Action[]
 }
 
-export interface ICommon_Route_Res_WorkflowSolution_Info extends ICommon_Model_Workflow_Solution {
-    data:{
-        issueTypeSolution:ICommon_Model_Issue_Type_Solution,
-        data:{
-            issueType:ICommon_Model_Issue_Type,
-            workflow:ICommon_Model_Workflow
-        }[]
-    }[]
-}
-
-export interface ICommon_Route_Res_FieldSolution_Info extends ICommon_Model_Field_Solution {
-    workflowSolutionList:ICommon_Model_Workflow_Solution[]
-}
-
-export interface ICommon_Route_Res_FieldSolution_ListWorkflowNodeField {
-    field: ICommon_Model_Field_Solution_Workflow_Node_Field_Type,
-    fieldType: ICommon_Model_Field_Type,
-    values?: ICommon_Model_Field_Type_Config_Value[]
+export interface ICommon_Route_Res_Workflow_Node_Field {
+    field: ICommon_Model_Workflow_Node_Field_Type,
+    fieldType: ICommon_Field_Type,
+    values?: ICommon_Model_Workflow_Node_Field_Type_Config[]
 }
 
 
@@ -153,7 +135,7 @@ export interface ICommon_Route_Res_ProjectIssue_BasicInfo extends Omit<ICommon_M
     project:ICommon_Model_Project
 }
 
-export type ICommon_Route_Res_ProjectIssue_fieldsInfo = ICommon_Route_Res_FieldSolution_ListWorkflowNodeField & ICommon_Model_Project_Issue_Field_Value
+export type ICommon_Route_Res_ProjectIssue_fieldsInfo = ICommon_Route_Res_Workflow_Node_Field & ICommon_Model_Project_Issue_Field_Value
 
 
 export interface ICommon_Route_Res_recentProjectList_Item {
@@ -212,19 +194,35 @@ export interface ICommon_Route_Res_Project_User_Item {
     username:string
 }
 
-export interface ICommon_Route_Res_Organization_User {
+export interface ICommon_Route_Res_Organization_User_Item {
+    organizationUser:ICommon_Model_Organization_User
+    user:ICommon_Model_User,
+    role:ICommon_Model_Role
+}
+
+export interface ICommon_Route_Res_Organization_User_List {
     count:number,
     totalPage:number,
-    data:(Omit<ICommon_Model_Organization_User,"user_id"> & {
-        user_id:{
-            id:string,
-            username:string,
-            photo:string
-        }
-    })[]
+    data:ICommon_Route_Res_Organization_User_Item[]
 }
 
 export interface ICommon_Route_Res_Organization_List {
     create:ICommon_Model_Organization[],
     join:ICommon_Model_Organization[]
+}
+
+export type ICommon_Route_Res_Role_Item = ICommon_Model_Role & {
+    permissions:Permission_Base[]
+    global?:boolean
+}
+
+export interface ICommon_Route_Res_Role_List {
+    admin:ICommon_Model_Role,
+    users:ICommon_Route_Res_Role_Item[]
+}
+
+export interface ICommon_Route_Res_Member_Tag_Member {
+    user:ICommon_Model_User,
+    organizationUser:ICommon_Model_Organization_User,
+    tag:ICommon_Model_Member_Tag
 }

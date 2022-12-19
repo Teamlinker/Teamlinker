@@ -1,8 +1,8 @@
 import * as Koa from "koa";
 import * as koaStaticServer from "koa-static-server";
 import * as path from "path";
-import { ECommon_User_Type } from "../../../common/model/user";
-import { Permission_Base } from '../../../common/permission/permission';
+import {ECommon_User_Type} from "../../../common/model/user";
+import {Permission_Base} from '../../../common/permission/permission';
 import fieldApi from "../../../common/routes/field";
 import fileApi from "../../../common/routes/file";
 import gatewayApi from "../../../common/routes/gateway";
@@ -12,40 +12,37 @@ import organizationApi from "../../../common/routes/organization";
 import projectApi from "../../../common/routes/project";
 import releaseApi from "../../../common/routes/release";
 import teamApi from "../../../common/routes/team";
-import { ICommon_HttpApi } from "../../../common/routes/types";
+import {ICommon_HttpApi} from "../../../common/routes/types";
 import userApi from "../../../common/routes/user";
 import workflowApi from "../../../common/routes/workflow";
-import { Err } from "../../../common/status/error";
-import { ECommon_Services } from "../../../common/types";
-import Application, { ECommon_Application_Mode } from "../../common/app/app";
-import { proxyRequest } from "../../common/rpc/rpc";
-import { EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy } from "../../common/types/http";
-import { generateHttpOkResponse } from "../../common/util/http";
+import {Err} from "../../../common/status/error";
+import Application, {ECommon_Application_Mode} from "../../common/app/app";
+import {EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy} from "../../common/types/http";
+import {generateHttpErrorResponse, generateHttpOkResponse} from "../../common/util/http";
 import "../http/gateway";
-import authRpcApi from '../rpc/auth';
-import userRpcApi from '../rpc/user';
-import { checkIfNeedInit, handleImageFields } from "../util/util";
-import { ECommon_Organization_User_Role } from './../../../common/model/organization_user';
-import { ECommon_Application_Deploy } from './../../../common/types';
-import { CacheService } from './../cache/service';
+import {checkIfNeedInit, handleImageFields} from "../util/util";
+import {proxyRequest} from "./http";
+import "../../user/app/app"
+import "../../cooperation/app/app"
+import {config as configFile} from "../../file/app/app"
+import authRpcApi from "../../auth/rpc/auth"
+import userRpcApi from "../../user/rpc/user"
+import {getRedisInstance} from "../../common/cache/redis";
 
 var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi];
 export default class GateWay extends Application {
     override async config(app: Koa<Koa.DefaultState, Koa.DefaultContext>) {
-        let cacheService=new CacheService()
-        await cacheService.start()
+        let redis=getRedisInstance();
+        await redis.flush();
+        await configFile();
         await checkIfNeedInit()
         let apiMap=<{
             [param:string]:{
                 [parem:string]:{
+                    permissionModule:string,
                     service:string,
                     ignoreValidate:boolean,
-                    permission:Permission_Base[]|{
-                        data:Permission_Base[],
-                        delete:boolean
-                    },
-                    onlyAdmin:boolean,
-                    onlyOn?: ECommon_Application_Deploy
+                    permission:Permission_Base[],
                 }
             }
         }>{}
@@ -58,11 +55,10 @@ export default class GateWay extends Application {
             for(let key in obj.routes) {
                 let objApi=obj.routes[key];
                 apiMap[baseUrl][objApi.method+" "+objApi.path]={
+                    permissionModule:baseUrl,
                     service:obj.service,
                     ignoreValidate:!!objApi.ignoreValidate,
                     permission:objApi.permission??[],
-                    onlyAdmin:!!objApi.onlyAdmin,
-                    onlyOn: objApi.onlyOn
                 };
             }
         }
@@ -74,16 +70,9 @@ export default class GateWay extends Application {
                 let baseUrl = path.substring(1, path.indexOf("/", 1))
                 let apiPath = path.substring(1 + baseUrl.length)
                 if (apiMap[baseUrl] && apiMap[baseUrl][method + " " + apiPath]) {
-                    let microServer = apiMap[baseUrl][method + " " + apiPath].service
+                    let permissionModule = apiMap[baseUrl][method + " " + apiPath].permissionModule
                     let ignoreValidate = apiMap[baseUrl][method + " " + apiPath].ignoreValidate
                     let permission=apiMap[baseUrl][method + " " + apiPath].permission
-                    let onlyAdmin=apiMap[baseUrl][method + " " + apiPath].onlyAdmin
-                    let onlyOn = apiMap[baseUrl][method + " " + apiPath].onlyOn
-                    if(onlyOn === ECommon_Application_Deploy.OFFLINE && Application.mode===ECommon_Application_Mode.MICRO) {
-                        throw Err.Common.requestForbidden
-                    } else if(onlyOn===ECommon_Application_Deploy.PLATFORM && (Application.mode===ECommon_Application_Mode.DOCKER || Application.mode===ECommon_Application_Mode.SINGLE)) {
-                        throw Err.Common.requestForbidden
-                    }
                     if(!ignoreValidate) {
                         let authorization = ctx.get("Authorization")
                         if(!authorization) {
@@ -112,36 +101,30 @@ export default class GateWay extends Application {
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }
-                    let permissionDelete:object;
-                    if(permission && ((Array.isArray(permission) && permission.length>0) || (typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data) && permission.data.length>0))) {
-                        if(ctx.state.user) {
-                            if(ctx.state.user.type==ECommon_User_Type.USER) {
-                                let organizationRole:ECommon_Organization_User_Role=null;
-                                if(ctx.get("organizationid")) {
-                                    organizationRole=await authRpcApi.getOrganizationPermission(ctx.get("organizationid"),ctx.state.user.userId);
-                                }
-                                let per=Array.isArray(permission)?permission:permission.data;
-                                let isOrganizationAdmin = organizationRole===ECommon_Organization_User_Role.ADMIN
-                                if(!isOrganizationAdmin) {
-                                    if(onlyAdmin) {
-                                        throw Err.User.accessDenied
-                                    }
-                                    let [isCheck,map] =await authRpcApi.processPermission(per,Object.assign({},obj.data,{
-                                        userId:ctx.state.user?ctx.state.user.userId:undefined
-                                    }))
-                                    if(isCheck && typeof(permission)=="object" && !Array.isArray(permission) && Array.isArray(permission.data)) {
-                                        permissionDelete=map;
-                                    }
-                                    if(!isCheck) {
-                                        throw Err.User.accessDenied
-                                    }
+                    if(permission && Array.isArray(permission) && permission.length>0) {
+                        if(obj.data["organizationId"]) {
+                            obj.user.organizationInfo={
+                                organizationId:obj.data["organizationId"]
+                            }
+                        } else {
+                            obj.user.organizationInfo=await userRpcApi.checkOrganizationInfo(obj.user.userId);
+                        }
+                        if(obj.user) {
+                            if(obj.user.type==ECommon_User_Type.USER) {
+                                let isCheck =await authRpcApi.processPermission(permission,Object.assign({},obj.data,{
+                                    userId:obj.user?obj.user.userId:undefined,
+                                    organizationId:obj.user.organizationInfo.organizationId,
+                                    organizationUserId:obj.user.organizationInfo.organizationUserId
+                                }))
+                                if(!isCheck) {
+                                    throw Err.User.accessDenied
                                 }
                             }
                         } else {
                             throw Err.User.accessDenied
                         }
                     }
-                    let ret = await proxyRequest(obj, microServer as ECommon_Services)
+                    let ret = await proxyRequest(obj)
                     ctx.response.status = ret.status;
                     for (let key in ret.headers) {
                         if (key == "set-cookie") {
@@ -155,15 +138,16 @@ export default class GateWay extends Application {
                     }
                     if(ret.data===undefined || typeof(ret.data)=="string" || typeof(ret.data)=="number" || typeof(ret.data)=="boolean" || typeof(ret.data)=="object")
                     {
-                        if(typeof(ret.data)=="object") {
-                            await handleImageFields(ret.data,ctx.get("organizationid"));
+                        if(ret.status==500) {
+                            ctx.body = generateHttpErrorResponse(ret.data);
+                        } else {
+                            if(typeof(ret.data)=="object" && obj.user) {
+                                await handleImageFields(ret.data);
+                            }
+                            ctx.body = generateHttpOkResponse(ret.data);
                         }
-                        ctx.body = generateHttpOkResponse(ret.data);
                     } else {
                         ctx.body = ret.data;
-                    }
-                    if(permissionDelete) {
-                        authRpcApi.deletePermission(permissionDelete)
                     }
                     await next()
                 } else {
@@ -178,7 +162,7 @@ export default class GateWay extends Application {
             rootPath: "/file",
             last: false
         }))
-        if(Application.mode!=ECommon_Application_Mode.MICRO) {
+        if(Application.mode!=ECommon_Application_Mode.ONLINE) {
             app.use(koaStaticServer({
                 rootDir:Application.debug?path.resolve(__dirname,"../../../client/dist"):path.join(__dirname,"../../../../../../client/dist"),
                 rootPath:"/",

@@ -1,7 +1,7 @@
-import { BaseModel } from "../../../common/model/base";
-import { Err } from "../../../common/status/error";
-import { getMysqlInstance } from "../db/mysql";
-import { generateCreateSql, generateDeleteSql, generateQuerySql, generateSnowId, generateUpdateSql } from "../util/sql";
+import {BaseModel} from "../../../common/model/base";
+import {Err} from "../../../common/status/error";
+import {getMysqlInstance} from "../db/mysql";
+import {generateCreateSql, generateDeleteSql, generateQuerySql, generateSnowId, generateUpdateSql} from "../util/sql";
 
 export abstract class Mapper<T extends BaseModel> {
     private model:T
@@ -64,7 +64,9 @@ export abstract class Mapper<T extends BaseModel> {
         var mysql=getMysqlInstance();
         await mysql.execute(generateDeleteSql(this.model,{id}))
     }
-    async copy(id:string,deletedFields?:string[]):Promise<T["model"]> {
+    async copy(id:string,deletedFields?:string[],updatedFields?:{
+        [name in keyof T["model"]]?:T["model"][name]
+    }):Promise<T["model"]> {
         if(!id) {
             throw Err.Common.itemNotFound
         }
@@ -84,6 +86,11 @@ export abstract class Mapper<T extends BaseModel> {
         }
         if(ret.name) {
             (ret as any).name+="(copy)"
+        }
+        if(updatedFields) {
+            for(let name in updatedFields) {
+                ret[name]=updatedFields[name];
+            }
         }
         await this.create(ret);
         let obj=await this.getById(ret.id)

@@ -1,12 +1,21 @@
-import { ICommon_Model_Issue_Type } from '../model/issue_type';
-import { ECommon_Model_Project_Member_Type } from '../model/project_member';
-import { ICommon_Model_Role } from '../model/role';
-import { Permission_Types } from '../permission/permission';
-import { ICommon_Model_Project } from './../model/project';
-import { ICommon_Model_Project_Module } from './../model/project_module';
-import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_Project_CreateModule_Data, ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_ListMemeber, ICommon_Route_Res_Project_ListTag, ICommon_Route_Res_Project_User_Item, ICommon_Route_Res_recentProjectList_Item } from './response';
-import { ECommon_HttpApi_Method } from "./types";
+import {ICommon_Model_Issue_Type} from '../model/issue_type';
+import {ECommon_Model_Organization_Member_Type} from '../model/organization';
+import {Permission_Types} from '../permission/permission';
+import {ICommon_Model_Project} from './../model/project';
+import {ICommon_Model_Project_Module} from './../model/project_module';
+import {ECommon_Services} from './../types';
+import {
+    ICommon_Route_Res_Project_CreateModule_Data,
+    ICommon_Route_Res_Project_List,
+    ICommon_Route_Res_Project_ListMember,
+    ICommon_Route_Res_Project_ListTag,
+    ICommon_Route_Res_recentProjectList_Item,
+    ICommon_Route_Res_Role_Item,
+    ICommon_Route_Res_Role_List
+} from './response';
+import {ECommon_HttpApi_Method} from "./types";
+import {ICommon_Model_Role} from "../model/role";
+
 const api={
     baseUrl:"/project",
     service:ECommon_Services.Cooperation,
@@ -29,7 +38,8 @@ const api={
                 photo? :string,
                 description? :string,                
             }>{},
-            res:<ICommon_Model_Project>{}
+            res:<ICommon_Model_Project>{},
+            permission:[Permission_Types.Organization.CREATE_PROJECT]
         },
         edit:{//编辑项目
             method:ECommon_HttpApi_Method.PUT,
@@ -42,7 +52,7 @@ const api={
                 projectId:string         
             }>{},
             res:<ICommon_Model_Project>{},
-            permission:[Permission_Types.Project.EDIT]
+            permission:[Permission_Types.Project.ADMIN]
         },
         remove:{//删除项目
             method:ECommon_HttpApi_Method.DELETE,
@@ -51,12 +61,9 @@ const api={
                 projectId:string         
             }>{},
             res:{},
-            permission:{
-                data:[Permission_Types.Project.EDIT],
-                delete:true
-            }
+            permission:[Permission_Types.Project.ADMIN]
         },
-        listTag:{//tag列表
+        listLabel:{//tag列表
             method:ECommon_HttpApi_Method.GET,
             path:"/tag/list",
             req:<{
@@ -68,7 +75,7 @@ const api={
             res:<ICommon_Route_Res_Project_ListTag>{},
             permission:[Permission_Types.Project.READ]
         },
-        createTag:{//创建tag
+        createLabel:{//创建tag
             method:ECommon_HttpApi_Method.POST,
             path:"/tag/item",
             req:<{
@@ -81,7 +88,7 @@ const api={
             }>{},
             permission:[Permission_Types.Project.EDIT]
         },
-        editTag:{//编辑tag
+        editLabel:{//编辑tag
             method:ECommon_HttpApi_Method.PUT,
             path:"/tag/item",
             req:<{
@@ -94,7 +101,7 @@ const api={
             }>{},
             permission:[Permission_Types.Project.EDIT]
         },
-        removeTag:{//删除tag
+        removeLabel:{//删除tag
             method:ECommon_HttpApi_Method.DELETE,
             path:"/tag/item",
             req:<{
@@ -148,10 +155,12 @@ const api={
             path:"/member/list",
             req:<{
                 projectId:string,
-                page:number,
-                size:number
+                memberType:ECommon_Model_Organization_Member_Type,
+                page?:number,
+                size?:number,
+                key:string
             }>{},
-            res:<ICommon_Route_Res_Project_ListMemeber>{},
+            res:<ICommon_Route_Res_Project_ListMember>{},
             permission:[Permission_Types.Project.READ]
         },
         addMember:{//添加成员（用户，团队）
@@ -159,42 +168,35 @@ const api={
             path:"/member/item",
             req:<{
                 projectId:string,
-                memberId:string,
-                type:ECommon_Model_Project_Member_Type,
+                memberId?:string,
+                type:ECommon_Model_Organization_Member_Type,
                 roleId:string
             }>{},
-            res:{},
-            permission:{
-                data:[Permission_Types.Project.EDIT],
-                delete:true
-            }
+            res:<ICommon_Model_Role>{},
+            permission:[Permission_Types.Project.ADMIN]
         },
         editMember:{//编辑成员
             method:ECommon_HttpApi_Method.PUT,
             path:"/member/item",
             req:<{
                 projectId:string,
-                memberId:string,
+                memberId?:string,
+                type:ECommon_Model_Organization_Member_Type,
                 roleId:string
             }>{},
-            res:{},
-            permission:{
-                data:[Permission_Types.Project.EDIT],
-                delete:true
-            }
+            res:<ICommon_Model_Role>{},
+            permission:[Permission_Types.Project.ADMIN]
         },
         removeMember:{//删除成员
             method:ECommon_HttpApi_Method.DELETE,
             path:"/member/item",
             req:<{
                 projectId:string,
-                memberId:string,
+                memberId?:string,
+                type:ECommon_Model_Organization_Member_Type,
             }>{},
             res:{},
-            permission:{
-                data:[Permission_Types.Project.EDIT],
-                delete:true
-            }
+            permission:[Permission_Types.Project.ADMIN]
         },
         list:{
             method:ECommon_HttpApi_Method.GET,
@@ -203,20 +205,12 @@ const api={
                 keyword?:string,
                 page:number,
                 size:number,
-                userId?:string             
+                organizationUserId?:string
             }>{},
             res:<ICommon_Route_Res_Project_List>{},
+            permission:[Permission_Types.Organization.READ]
         },
-        roles:{
-            method:ECommon_HttpApi_Method.GET,
-            path:"/roles",
-            req:<{
-                projectId:string           
-            }>{},
-            res:<Pick<ICommon_Model_Role,"id"|"name"|"description">[]>{},
-            permission:[Permission_Types.Project.READ]
-        },
-        issueTypelist:{
+        issueTypeList:{
             method:ECommon_HttpApi_Method.GET,
             path:"/issuetype/list",
             req:<{
@@ -231,17 +225,50 @@ const api={
             req:<{
                        
             }>{},
-            res:<ICommon_Route_Res_recentProjectList_Item[]>{}
+            res:<ICommon_Route_Res_recentProjectList_Item[]>{},
+            permission:[Permission_Types.Organization.READ]
         },
-        listUser:{
+        listRole:{
             method:ECommon_HttpApi_Method.GET,
-            path:"/user/list",
+            path:"/rolelist",
             req:<{
-                projectId:string,
-                keyword?:string
+                projectId?:string,
             }>{},
-            res:<ICommon_Route_Res_Project_User_Item[]>{},
+            res:<ICommon_Route_Res_Role_List>{},
             permission:[Permission_Types.Project.READ]
+        },
+        addRole:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/role",
+            req:<{
+                projectId?:string,
+                name :string,
+                description?:string,
+                value:number
+            }>{},
+            res:<ICommon_Route_Res_Role_Item>{},
+            permission:[Permission_Types.Project.ADMIN]
+        },
+        editRole:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/role",
+            req:<{
+                roleId:string,
+                name?:string,
+                description?:string,
+                value?:number
+            }>{},
+            res:<ICommon_Route_Res_Role_Item>{},
+            permission:[Permission_Types.Project.ADMIN]
+        },
+        removeRole:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/role",
+            req:<{
+                roleId:string,
+            }>{},
+            res:{},
+            permission:[Permission_Types.Project.ADMIN]
         }
     }
 }

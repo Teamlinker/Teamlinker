@@ -1,7 +1,13 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
+
 export enum ECommon_Model_Role_Type {
   PROJECT,
-  TEAM
+  TEAM,
+  ORGANIZATION
+}
+export enum ECommon_Model_Role_Reserved {
+  NORMAL,
+  ADMIN
 }
 export interface ICommon_Model_Role {
     id :string,
@@ -12,6 +18,8 @@ export interface ICommon_Model_Role {
   item_id:string,
   organization_id:string,
   type:ECommon_Model_Role_Type
+  value:number,
+  reserved:ECommon_Model_Role_Reserved
 }
 export const Table_Role="role"
 

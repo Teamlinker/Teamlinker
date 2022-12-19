@@ -1,4 +1,4 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
 
 export interface ICommon_Model_Workflow_Action {
     id :string ,
@@ -6,7 +6,7 @@ export interface ICommon_Model_Workflow_Action {
   description :string,
   source_node_id :string ,
   dest_node_id :string ,
-  workflow_id :string,
+  issue_type_id :string,
 }
 export const Table_Workflow_Action="workflow_action"
 

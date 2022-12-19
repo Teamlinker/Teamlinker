@@ -1,100 +1,27 @@
-import { Permission_Types } from "../../../common/permission/permission";
-import { getRedisInstance } from "../../common/cache/redis";
-import { getMysqlInstance } from "../../common/db/mysql";
-import { DComponent } from '../../common/decorate/component';
-import { generateQuerySql } from "../../common/util/sql";
-import StringUtil from "../../common/util/string";
-import { roleMemberModel } from './../../../common/model/role_member';
-import { DPermission, PermissionBase } from "./base";
+import {DComponent} from '../../common/decorate/component';
+import {PermissionBase} from "./base";
+import {REDIS_AUTH} from "../../common/cache/keys/auth";
 
-export type IPermission_Team =string[]
 @DComponent
-export class PermissionTeam extends PermissionBase<IPermission_Team> {
+export class PermissionTeam extends PermissionBase {
     translateToField(param: { [param: string]: any; userId?: string; isAdmin?: boolean; }): Promise<string> {
         throw new Error("Method not implemented.");
     }
     fieldName: string="teamId"
-    check(obj: IPermission_Team): boolean {
-        throw new Error("Method not implemented.");
-    }
-    keys=["permission:team:{0}:user"]
-    buildKey({teamId}: { [param: string]: any; userId?: string; isAdmin?: boolean;teamId:string }) {
-        if(StringUtil.isEmpty(teamId)) {
-            return null;
-        }
-        return this.keys.map(key=>{
-            return StringUtil.format(key,teamId)
-        });
-    }
-    async generatorValue({userId,teamId}: { [param: string]: any; userId?: string; isAdmin?: boolean;teamId:string },keys:string[]): Promise<IPermission_Team> {
-        try {
-            await this.tryLock(keys.map(item=>item.replace(/\:/g,"")));
-            let redis=getRedisInstance()
-            let mysql=getMysqlInstance()
-            let permissionsSet=new Set<string>();
-            let exist=await redis.exists(keys[0])
-            if(!exist) {
-                let ret=await mysql.execute(generateQuerySql(roleMemberModel,["member_id","role_id"],{
-                    item_id:teamId
-                }))
-                let map={}
-                for(let obj of ret) {
-                    map[obj.member_id]=obj.role_id
-                }
-                await redis.hSet(keys[0],map)
+    async generatorValue({organizationUserId,teamId}: { [param: string]: any; organizationUserId?: string; isAdmin?: boolean;teamId:string }): Promise<number> {
+        let ret:number
+        let objTeamUsers=new REDIS_AUTH.Permission.Team.OrganizationUsers(teamId);
+        await this.tryLock([objTeamUsers.getKey().replace(/\:/g,"")]);
+        let roleId=await objTeamUsers.getValue(organizationUserId);
+        if(roleId) {
+            let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(roleId)
+            let value=await objRole.getValue();
+            if(value) {
+                ret=Number(value.value)
             }
-            let roleId=await redis.hGet(keys[0],userId)
-            if(roleId) {
-                let role=await this.getRolePermissionList(roleId)
-                for(let o of role) {
-                    permissionsSet.add(o)
-                }
-            }
-            await this.unlock()
-            return Array.from(permissionsSet)
-        } catch(err) {
-            console.error("generatorValue error:" + err)
-            await this.unlock()
         }
+        await this.unlock()
+        return ret
     }
 }
 
-@DPermission(Permission_Types.Team.CREATE)
-@DComponent
-export class PermissionTeamCreate extends PermissionTeam {
-    override check(obj:IPermission_Team):boolean {
-        return obj.includes(Permission_Types.Team.CREATE.value);
-    }
-} 
-
-@DPermission(Permission_Types.Team.READ)
-@DComponent
-export class PermissionTeamRead extends PermissionTeam {
-    override check(obj:IPermission_Team):boolean {
-        return obj.includes(Permission_Types.Team.READ.value);
-    }
-} 
-
-@DPermission(Permission_Types.Team.EDIT)
-@DComponent
-export class PermissionTeamEdit extends PermissionTeam {
-    override check(obj:IPermission_Team):boolean {
-        return obj.includes(Permission_Types.Team.EDIT.value);
-    }
-} 
-
-@DPermission(Permission_Types.Team.DELETE)
-@DComponent
-export class PermissionTeamDelete extends PermissionTeam {
-    override check(obj:IPermission_Team):boolean {
-        return obj.includes(Permission_Types.Team.DELETE.value);
-    }
-} 
-
-@DPermission(Permission_Types.Team.MEMBER)
-@DComponent
-export class PermissionTeamMemeber extends PermissionTeam {
-    override check(obj:IPermission_Team):boolean {
-        return obj.includes(Permission_Types.Team.MEMBER.value);
-    }
-} 

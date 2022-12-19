@@ -1,51 +1,32 @@
-import { ICommon_Model_Field_Solution_Workflow_Node_Field_Type } from "../../../common/model/field_solution_workflow_node_field_type";
-import { ICommon_Model_Field_Type } from "../../../common/model/field_type";
-import { ICommon_Model_Field_Type_Config_Value } from "../../../common/model/field_type_config_value";
-import { ICommon_Model_Workflow, workflowModel } from "../../../common/model/workflow";
-import { workflowActionModel } from "../../../common/model/workflow_action";
-import { ICommon_Model_Workflow_Solution, workflowSolutionModel } from "../../../common/model/workflow_solution";
-import { ICommon_Route_Res_Workflow_Info, ICommon_Route_Res_Workflow_Info_Action, ICommon_Route_Res_Workflow_Info_Node } from "../../../common/routes/response";
-import { Err } from "../../../common/status/error";
-import { Entity } from "../../common/entity/entity";
-import { EServer_Common_Event_Types } from "../../common/event/types";
-import { ECommon_Model_Workflow_Node_Status, ICommon_Model_Workflow_Node, workflowNodeModel } from './../../../common/model/workflow_node';
-import { ICommon_Route_Res_WorkflowSolution_Info } from './../../../common/routes/response';
-import { workflowActionMapper, workflowMapper, workflowNodeMapper, workflowSolutionMapper } from './../mapper/workflow';
-import { FieldSolutionService } from './field';
-export default class Workflow extends Entity<typeof workflowModel,typeof workflowMapper> {
-    constructor(){
-        super(workflowMapper)
-    }
-    static async list(organizationId:string){
-        let ret=await workflowMapper.list(organizationId)
-        return ret;
-    }
-    static async getReservedItem (organizationId:string) {
-        let ret=await workflowMapper.getReservedItem(organizationId)
-        let workflow=new Workflow
-        workflow.setItem(ret);
-        return workflow;
-    }
+import {ICommon_Model_Workflow_Node_Field_Type} from "../../../common/model/workflow_node_field_type";
+import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../../../common/model/workflow_node_field_type_config";
+import {workflowActionModel} from "../../../common/model/workflow_action";
+import {
+    ICommon_Route_Res_Workflow_Info,
+    ICommon_Route_Res_Workflow_Info_Action,
+    ICommon_Route_Res_Workflow_Info_Node
+} from "../../../common/routes/response";
+import {Err} from "../../../common/status/error";
+import {Entity} from "../../common/entity/entity";
+import {EServer_Common_Event_Types} from "../../common/event/types";
+import {
+    ECommon_Model_Workflow_Node_Status,
+    ICommon_Model_Workflow_Node,
+    workflowNodeModel
+} from './../../../common/model/workflow_node';
+import {workflowActionMapper, workflowMapper, workflowNodeMapper} from './../mapper/workflow';
+import {WorkflowNodeFieldTypeService} from './field';
+import {ICommon_Field_Type} from "../../../common/field/type";
 
-    override async create(): Promise<ICommon_Model_Workflow> {
-        let obj=await super.create()
-        let workflowNode=new WorkflowNodeService
-        workflowNode.assignItem({
-            name:"Open",
-            workflow_id:obj.id,
-            status:ECommon_Model_Workflow_Node_Status.NOTSTART
-        })
-        await workflowNode.create()
-        return obj;
-    }
+export class WorkflowService  {
 
-    async accessNodesAndActions(fieldsCallback:(nodeId:string)=>Promise<{
-        field:ICommon_Model_Field_Solution_Workflow_Node_Field_Type,
-        fieldType:ICommon_Model_Field_Type,
-        values?:ICommon_Model_Field_Type_Config_Value[]
+    static async accessNodesAndActions(issueTypeId:string,fieldsCallback:(nodeId:string)=>Promise<{
+        field:ICommon_Model_Workflow_Node_Field_Type,
+        fieldType:ICommon_Field_Type,
+        values?:ICommon_Model_Workflow_Node_Field_Type_Config[]
     }[]>=null):Promise<ICommon_Route_Res_Workflow_Info_Node> {
-        let nodeList=await workflowMapper.nodeList(this.getId());
-        let actionList=await workflowMapper.actionList(this.getId());
+        let nodeList=await workflowMapper.nodeList(issueTypeId);
+        let actionList=await workflowMapper.actionList(issueTypeId);
         let arrNodeId:string[]=[];
         async function _exec(node:ICommon_Route_Res_Workflow_Info_Node):Promise<ICommon_Route_Res_Workflow_Info_Node> {
             if(node==null) {
@@ -102,43 +83,38 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
         return ret;
     }
 
-    async info():Promise<ICommon_Route_Res_Workflow_Info> {
+    static async info(issueTypeId:string):Promise<ICommon_Route_Res_Workflow_Info> {
         let obj:ICommon_Route_Res_Workflow_Info={
-            ...this.getItem(),
-            data: {
-                nodes:[],
-                actions:[]
-            }
+            nodes:[],
+            actions:[]
         };
-        obj.data.nodes=await workflowMapper.nodeList(this.getId());
-        obj.data.actions=await workflowMapper.actionList(this.getId());
+        obj.nodes=await workflowMapper.nodeList(issueTypeId);
+        obj.actions=await workflowMapper.actionList(issueTypeId);
         return obj;
     }
 
-    override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
-        await super.delete()
-        await workflowMapper.revoke(this.getId(),this.getItem().organization_id)
-        await FieldSolutionService.clearItemsByWorkflowId(this.getId())
+    static async copy(issueTypeId:string,newIssueTypeId:string) {
+        let {workflowNodes,newWorkflowNodes}=await workflowMapper.copyItem(issueTypeId,newIssueTypeId);
+        let arr=[];
+        for(let i=0;i<workflowNodes.length;i++) {
+            arr.push(WorkflowNodeFieldTypeService.workflowFieldsCopy(workflowNodes[i],newWorkflowNodes[i]));
+        }
+        await Promise.all(arr);
+
     }
 
-    override async copy(deletedFields?: (keyof ICommon_Model_Workflow)[]): Promise<this> {
-        let objNew=await super.copy()
-        await workflowMapper.copyItem(this.getId(),objNew.getId());
-        return objNew
-    }
-
-    async checkNode(workflowNodeId:string) {
-        let ret=await workflowMapper.checkNode(this.getId(),workflowNodeId)
+    static async checkNode(issueTypeId:string,workflowNodeId:string) {
+        let ret=await workflowMapper.checkNode(issueTypeId,workflowNodeId)
         return ret;
     }
 
-    async checkAction(workflowActionId:string) {
-        let ret=await workflowMapper.checkAction(this.getId(),workflowActionId)
+    static async checkAction(issueTypeId:string,workflowActionId:string) {
+        let ret=await workflowMapper.checkAction(issueTypeId,workflowActionId)
         return ret;
     }
 
-    async getFirstNode(){
-        let ret=await workflowNodeMapper.getOpenNode(this.getId())
+    static async getFirstNode(issueTypeId:string){
+        let ret=await workflowNodeMapper.getOpenNode(issueTypeId)
         return ret;
     }
 
@@ -146,201 +122,23 @@ export default class Workflow extends Entity<typeof workflowModel,typeof workflo
         let workflowId=await workflowMapper.init(organizationId);
         return workflowId;
     }
+
+    static async delete(issueTypeId:string) {
+        let objInfo=await this.info(issueTypeId);
+        let arr=[];
+        for(let obj of objInfo.actions) {
+            let o=await WorkflowActionService.getItemById(obj.id);
+            arr.push(o.delete())
+        }
+        for(let obj of objInfo.nodes) {
+            let o=await WorkflowNodeService.getItemById(obj.id);
+            arr.push(o.delete())
+        }
+        await Promise.all(arr);
+    }
 }
 
-export class WorkflowSolutionService extends Entity<typeof workflowSolutionModel,typeof workflowSolutionMapper> {
-    constructor(){
-        super(workflowSolutionMapper)
-    }
-    static async list(organizationId:string){
-        let ret=await workflowSolutionMapper.list(organizationId)
-        return ret;
-    }
-    static async getItemByIssueTypeSolutionId(issueSolutionId:string) {
-        let obj=await workflowSolutionMapper.getItemByIssueTypeSolutionId(issueSolutionId)
-        if(obj) {
-            let objService=new WorkflowSolutionService()
-            objService.setItem(obj)
-            return objService;
-        } else {
-            return null
-        }
-        
-    }
 
-    static async getItemListByWorkflowId(workflowId:string) {
-        let ret=await workflowSolutionMapper.getItemsByWorkflowId(workflowId)
-        return ret;
-    }
-
-    static async getReservedItem (organizationId:string) {
-        let ret=await workflowSolutionMapper.getReservedItem(organizationId)
-        if(!ret) {
-            return null;
-        }
-        let obj=new WorkflowSolutionService()
-        obj.setItem(ret)
-        return obj;
-    }
-
-    async bindIssueTypeSolutions(issueTypeSolutionIds:string[]) {
-        let existIssueTypeSolutionIds=[];
-        for(let issueTypeSolutionId of issueTypeSolutionIds) {
-            let arr=await workflowSolutionMapper.getItemsByIssueTypeSolutionId(issueTypeSolutionId)
-            if(arr && arr.length>0) {
-                existIssueTypeSolutionIds.push(issueTypeSolutionId)
-            }
-        }
-        if(existIssueTypeSolutionIds.length>0) {
-            await WorkflowSolutionService.clearIssueTypeSolutions(existIssueTypeSolutionIds)
-        }
-        await workflowSolutionMapper.bindIssueTypeSolutionList(this.getId(),issueTypeSolutionIds,this.getItem().organization_id)
-    }
-    async unbindIssueTypeSolutions(issueTypeSolutionIds:string[]=null) {
-        await workflowSolutionMapper.unbindIssueTypeSolution(this.getId(),issueTypeSolutionIds)
-    }
-
-    static async clearIssueTypeSolutions(issueTypeSolutionIds:string[]) {
-        await workflowSolutionMapper.clearIssueTypeSolution(issueTypeSolutionIds)
-    }
-
-    async resetIssueTypeSolutions(issueTypeSolutionIds:string[]=null) {
-        if(this.getItem().reserved) {
-            throw Err.Project.Workflow.unbindReservedWorkflowSolutionForbidden
-        }
-        await workflowSolutionMapper.unbindIssueTypeSolution(this.getId(),issueTypeSolutionIds)
-        let objWorkflowReserved=await WorkflowSolutionService.getReservedItem(this.getItem().organization_id)
-        objWorkflowReserved.bindIssueTypeSolutions(issueTypeSolutionIds)
-    }
-
-    async getIssueTypeAndWorkflowList() {
-        let arr:ICommon_Route_Res_WorkflowSolution_Info["data"]=[]
-        let objIssueTypeSolutionList=await workflowSolutionMapper.getIssueTypeSolutionList(this.getId())
-        for(let obj of objIssueTypeSolutionList) {
-            arr.push({
-                issueTypeSolution:obj,
-                data:await workflowSolutionMapper.workflowIssueTypeList(this.getId(),obj.id)
-            })
-        }
-        return arr;
-    }
-    async info():Promise<ICommon_Route_Res_WorkflowSolution_Info> {
-        let info:ICommon_Route_Res_WorkflowSolution_Info={
-            ...this.getItem(),
-            data:[]
-        }
-        let objIssueTypeSolutionList=await workflowSolutionMapper.getIssueTypeSolutionList(this.getId())
-        for(let obj of objIssueTypeSolutionList) {
-            info.data.push({
-                issueTypeSolution:obj,
-                data:await workflowSolutionMapper.workflowIssueTypeList(this.getId(),obj.id)
-            })
-        }
-        return info;
-    }
-    async assign(issueTypeId:string,workflowId:string,issueTypeSolutionId:string) {
-        let workflow=await Workflow.getItemById(workflowId)
-        if(!workflow) {
-            throw Err.Project.Workflow.workflowNotFound
-        }
-        let isIn=await this.checkWorkflow(workflowId)
-        if(!isIn) {
-            throw Err.Project.Workflow.workflowNotInWorkflowSolution
-        }
-        await workflowSolutionMapper.assign(this.getId(),workflowId,issueTypeId,issueTypeSolutionId);
-    }
-
-    async getWorkflowByIssueTypeId(issueTypeId:string,issueTypeSolutionId:string) {
-        let ret=await workflowSolutionMapper.getWorkflowByIssueTypeId(this.getId(),issueTypeId,issueTypeSolutionId);
-        return ret;
-    }
-
-    override async create(): Promise<ICommon_Model_Workflow_Solution> {
-        let ret=await super.create()
-        let obj=await workflowMapper.getReservedItem(ret.organization_id)
-        await workflowSolutionMapper.addWorkflow(this.getId(),obj.id)
-        return ret
-    }
-
-    override async copy(): Promise<this> {
-        let workflowList=await this.listWorkflow()
-        let obj=await super.copy()
-        for(let o of workflowList) {
-            await workflowSolutionMapper.addWorkflow(obj.getId(),o.id);
-        }
-        return obj;
-    }
-
-    async listWorkflow() {
-        let ret=await workflowSolutionMapper.listWorkflow(this.getId())
-        return ret;
-    }
-
-    async checkWorkflow(workflowId:string) {
-        let isIn=await workflowSolutionMapper.checkWorkflow(this.getId(),workflowId)
-        return isIn
-    }
-
-    async addWorkflow(workflowId:string) {
-        let isIn=await this.checkWorkflow(workflowId)
-        if(isIn) {
-            throw Err.Project.Workflow.workflowAlreadyInWorkflowSolution
-        }
-        await workflowSolutionMapper.addWorkflow(this.getId(),workflowId)
-    }
-
-    async removeWorkflow(workflowId:string) {
-        await workflowSolutionMapper.removeWorkflow(this.getId(),workflowId)
-        await FieldSolutionService.clearItemsByWorkflowIdAndWorkflowSolutionId(workflowId,this.getId())
-    }
-
-    override async delete() {
-        await super.delete();
-        await workflowSolutionMapper.deleteItemsByWorkflowSolutionId(this.getId());
-        await workflowSolutionMapper.unbindIssueTypeSolution(this.getId())
-        await FieldSolutionService.clearItemsByWorkflowSolutionId(this.getId())
-    }
-
-    async deleteIssueType(issueTypeId:string,issueTypeSolutionId:string) {
-        await workflowSolutionMapper.deleteIssueType(this.getId(),issueTypeId,issueTypeSolutionId)
-    }
-    static async clearIssueType(issueTypeId:string) {
-        await workflowSolutionMapper.clearIssueType(issueTypeId);
-    }
-
-    async checkWorkFlowAndNodeRelation(workflowId:string,workflowNodeId:string) {
-        if(!workflowNodeId) {
-            throw Err.Project.Workflow.workflowNodeNotFound
-        } else if(!workflowId) {
-            throw Err.Project.Workflow.workflowNotFound
-        }
-        let workflowNode=await WorkflowNodeService.getItemById(workflowNodeId)
-        if(!workflowNode) {
-            return false
-        }
-        let workflow=await Workflow.getItemById(workflowId)
-        if(!workflow) {
-            return false
-        }
-        let isIn=await workflow.checkNode(workflowNodeId)
-        if(!isIn) {
-            return false
-        }
-        isIn=await this.checkWorkflow(workflowId)
-        if(!isIn) {
-            return false
-        }
-        return true
-    }
-
-    static async clearByOrganizationId(organizationId:string){
-        await workflowSolutionMapper.clearByOrganizationId(organizationId)
-    }
-
-    static async init(issueTypeSolutionId:string,issueTypeSolutionName:string,issueTypeTaskId:string,issueTypeBugId:string,issueTypeTicketId:string,workflowId:string,organizationId:string) {
-        await workflowSolutionMapper.init(issueTypeSolutionId,issueTypeSolutionName,issueTypeTaskId,issueTypeBugId,issueTypeTicketId,workflowId,organizationId)
-    }
-}
 
 export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof workflowNodeMapper> {
     constructor() {
@@ -348,7 +146,7 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
     }
     override async create(): Promise<ICommon_Model_Workflow_Node> {
         if(this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART || this.getItem().status===undefined) {
-            let obj=await workflowNodeMapper.getOpenNode(this.getItem().workflow_id)
+            let obj=await workflowNodeMapper.getOpenNode(this.getItem().issue_type_id)
             if(obj) {
                 throw Err.Project.Workflow.workflowOpenNodeDuplicate
             }
@@ -359,7 +157,7 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
 
     override async update(): Promise<ICommon_Model_Workflow_Node> {
         if(this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART) {
-            let obj=await workflowNodeMapper.getOpenNode(this.getItem().workflow_id)
+            let obj=await workflowNodeMapper.getOpenNode(this.getItem().issue_type_id)
             if(obj && obj.id!=this.getId()) {
                 throw Err.Project.Workflow.workflowOpenNodeDuplicate
             }
@@ -370,7 +168,7 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
 
     override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
         await super.delete()
-        await FieldSolutionService.clearItemsByWorkflowNodeId(this.getId())
+        await WorkflowNodeFieldTypeService.clearItemsByWorkflowNodeId(this.getId())
     }
 
     async getActionList() {

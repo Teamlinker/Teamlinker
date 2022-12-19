@@ -1,4 +1,4 @@
-import { EServer_Common_Event_Types } from "./types"
+import {EServer_Common_Event_Types} from "./types"
 
 var g_events=<{
     [param:string]: ((...args: any[]) =>any)[]
@@ -17,5 +17,16 @@ export function DEventListener(eventName: EServer_Common_Event_Types.Types) {
             g_events[eventName]=[]
         }
         g_events[eventName].push(handle);
+    }
+}
+
+export async function emitServiceEvent(event: EServer_Common_Event_Types.Types, obj: any) {
+    let objFunc = getEventsFunc()
+    for (let key in objFunc) {
+        if (key == event) {
+            for (let func of objFunc[key]) {
+                func(obj)
+            }
+        }
     }
 }

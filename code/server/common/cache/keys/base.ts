@@ -1,6 +1,5 @@
+import {getRedisInstance, Redis} from "../redis";
 
-import IORedis = require("ioredis");
-import { getRedisInstance, Redis } from "../redis";
 abstract class RedisBaseKey<T> {
     protected redis:InstanceType<typeof Redis>=getRedisInstance()
     protected type:T
@@ -94,8 +93,40 @@ export class RedisHashKey extends RedisBaseKey<string> {
         return ret
     }
     async set(value:{
-        [param:string]:IORedis.ValueType
+        [param:string]:any
     },ttl?:number){
         await this.redis.hSet(this.name,value,ttl??this.ttl);
+    }
+    async getAll():Promise<object> {
+        let ret=await this.redis.hGetAll(this.name)
+        return ret;
+    }
+    async check(field:string):Promise<boolean> {
+        let ret=await this.redis.hExists(this.name,field);
+        return ret;
+    }
+}
+
+export abstract class BaseRedisCache<T> {
+    abstract key:string
+    abstract objRedis;
+    getKey() {
+        return this.objRedis.getKey();
+    }
+    abstract getValue(...argv:any):Promise<T>
+    async del() {
+        await this.objRedis.del();
+    }
+}
+
+export abstract class BaseRedisStringCache<T> extends BaseRedisCache<T> {
+    objRedis:RedisStringKey<T>;
+}
+
+export abstract class BaseRedisHashCache<T> extends BaseRedisCache<T> {
+    objRedis:RedisHashKey;
+    async check(id:string) {
+        let ret=await this.objRedis.check(id);
+        return ret;
     }
 }

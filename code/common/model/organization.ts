@@ -1,5 +1,11 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
 
+export enum ECommon_Model_Organization_Member_Type {
+    USER,
+    TEAM,
+    MEMBERTAG,
+    DEFAULT
+}
 export interface ICommon_Model_Organization {
     id:string,
     name:string,
@@ -8,7 +14,7 @@ export interface ICommon_Model_Organization {
     created_time:Date,
     modified_time:Date,
     active:number,
-    user_id:string,
+    created_by_pure:string,
 }
 export const Table_Organization="organization"
 

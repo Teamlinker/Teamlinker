@@ -1,0 +1,140 @@
+<template>
+  <div ref="root">
+    <a-button @click="onAdd" type="primary" style="margin-bottom: 10px">Add</a-button>
+    <a-table :columns="columns" :data="data" :pagination="false">
+      <template #description="{record}">
+        {{record.description}}
+      </template>
+      <template #permission="{record}">
+        <a-space wrap>
+          <a-tag v-for="item in record.permissions.map(item=>item.name)">{{item}}</a-tag>
+        </a-space>
+      </template>
+      <template #reserved="{record}">
+        <icon-check v-if="record.reserved" style="color: green"></icon-check>
+        <icon-close v-else style="color: red"></icon-close>
+      </template>
+      <template #operation="{record}">
+        <template v-if="!record.reserved">
+          <a-space wrap>
+            <a-button type="primary" size="small" @click="onEdit(record)">manage</a-button>
+            <a-button status="danger" size="small" @click="onDelete(record)">delete</a-button>
+          </a-space>
+        </template>
+      </template>
+    </a-table>
+  </div>
+</template>
+
+<script setup lang="ts">
+import {getCurrentInstance, markRaw, onBeforeMount, ref} from "vue";
+import {apiOrganization} from "../../../../common/request/request";
+import {Dialog} from "../../../../common/component/dialog/dialog";
+import EditOrganizationRole from "./editOrganizationRole.vue";
+import {Permission_Base, Permission_Types} from "../../../../../../../common/permission/permission";
+import {Message} from "@arco-design/web-vue";
+
+type Item={
+  id:string,
+  name:string,
+  reserved:number,
+  description:string,
+  permissions:Permission_Base[]
+}
+const columns=[
+  {
+    title:"name",
+    dataIndex:"name"
+  },
+  {
+    title:"description",
+    slotName:"description"
+  },
+  {
+    title:"permission",
+    slotName:"permission"
+  },
+  {
+    title:"reserved",
+    slotName: "reserved"
+  },
+  {
+    title:"operation",
+    slotName: "operation"
+  }
+]
+const data=ref<Item[]>([])
+const root=ref(null)
+const appContext=getCurrentInstance().appContext
+const onAdd=async ()=>{
+  let ret=await Dialog.open(root.value,appContext,"Add Role",markRaw(EditOrganizationRole),{
+    type:"add"
+  })
+  if(ret) {
+    init()
+  }
+}
+const onEdit=async (item:Item) =>{
+  let ret=await Dialog.open(root.value,appContext,"Edit Role",markRaw(EditOrganizationRole),{
+    type:"edit",
+    item:{
+      name:item.name,
+      id:item.id,
+      description:item.description,
+      permissions:item.permissions
+    }
+  })
+  if(ret) {
+    init()
+  }
+}
+const onDelete=async (item:Item)=>{
+  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this role?")
+  if(ret) {
+    let res=await apiOrganization.removeRole({
+      roleId:item.id
+    })
+    if(res?.code==0) {
+      Message.success("remove success")
+      init()
+    } else {
+      Message.error(res.msg);
+    }
+  }
+}
+const init=async ()=>{
+  let ret=await apiOrganization.listRole({
+    organizationId:sessionStorage.getItem("organizationId")
+  })
+  if(ret?.code==0) {
+    let value=ret.data;
+    let arr:Item[]=[]
+    arr.push({
+      name:value.admin.name,
+      id:value.admin.id,
+      reserved:value.admin.reserved,
+      description:value.admin.description,
+      permissions:[{
+        name:Permission_Types.Organization.ADMIN.name,
+        description:Permission_Types.Organization.ADMIN.description,
+        value:Permission_Types.Organization.ADMIN.value
+      }]
+    })
+    for(let obj of value.users) {
+      arr.push({
+        name:obj.name,
+        id:obj.id,
+        reserved:obj.reserved,
+        description:obj.description,
+        permissions:obj.permissions as Permission_Base[]
+      })
+    }
+    data.value=arr
+  }
+}
+onBeforeMount(init)
+</script>
+
+<style scoped>
+
+</style>

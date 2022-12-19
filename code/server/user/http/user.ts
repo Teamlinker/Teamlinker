@@ -1,35 +1,29 @@
-import { ECommon_User_Type } from "../../../common/model/user";
+import {ECommon_User_Type} from "../../../common/model/user";
 import userApi from "../../../common/routes/user";
-import { Err } from "../../../common/status/error";
-import { DComponent } from '../../common/decorate/component';
-import { EServer_Common_Event_Types } from '../../common/event/types';
+import {Err} from "../../../common/status/error";
+import {DComponent} from '../../common/decorate/component';
+import {EServer_Common_Event_Types} from '../../common/event/types';
 import HttpContext from "../../common/http/context";
-import { DHttpApi, DHttpContent, DHttpContext, DHttpController, DHttpHeader, DHttpReqParam, DHttpReqParamRequired, DHttpUser } from "../../common/http/http";
+import {
+    DHttpApi,
+    DHttpContent,
+    DHttpContext,
+    DHttpController,
+    DHttpReqParam,
+    DHttpReqParamRequired,
+    DHttpUser
+} from "../../common/http/http";
 import UserService from "../service/user";
-import { IUserSession } from './../../common/rpc/api/user';
+import {IUserSession} from "../types/config";
+
 @DComponent
 @DHttpController(userApi)
 class UserController {
     @DHttpApi(userApi.routes.create)
     async create(@DHttpContent content:typeof userApi.routes.create.req,@DHttpUser userInfo:IUserSession):Promise<typeof userApi.routes.create.res>{
         let user=new UserService()
+        delete content.role;
         user.assignItem(content);
-        let obj=await user.create()
-        delete obj.password
-        return obj
-    }
-
-    @DHttpApi(userApi.routes.register)
-    async register(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string):Promise<typeof userApi.routes.create.res>{
-        let user=await UserService.getItemByName(username)
-        if(user) {
-            throw Err.User.userExists
-        }
-        user=new UserService
-        user.assignItem({
-            username:username,
-            password:password
-        })
         let obj=await user.create()
         delete obj.password
         return obj
@@ -89,6 +83,7 @@ class UserController {
         }
         delete (<any>content).password
         delete (<any>content).userId
+        delete (<any>content).role
         user.assignItem(content)
         let obj=await user.update();
         delete obj.password
@@ -133,7 +128,7 @@ class UserController {
     }
 
     @DHttpApi(userApi.routes.teamList)
-    async teamList(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession,@DHttpHeader("organizationid") organizationId:string) :Promise<typeof userApi.routes.teamList.res>{
+    async teamList(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof userApi.routes.teamList.res>{
         let user=await UserService.getItemById(userInfo.type==ECommon_User_Type.USER?userInfo.userId:userId)
         if(!user) {
             throw Err.User.userNotFound
@@ -142,29 +137,19 @@ class UserController {
         return ret;
     }
 
-    @DHttpApi(userApi.routes.projectList)
-    async projectList(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession,@DHttpHeader("organizationid") organizationId:string) :Promise<typeof userApi.routes.projectList.res>{
-        let user=await UserService.getItemById(userInfo.type==ECommon_User_Type.USER?userInfo.userId:userId)
-        if(!user) {
-            throw Err.User.userNotFound
-        }
-        let ret=await user.projectList(page,size,keyword)
-        return ret;
-    }
-
     @DHttpApi(userApi.routes.profile)
-    async profile(@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession,@DHttpHeader("organizationid") organizationId:string) :Promise<typeof userApi.routes.profile.res>{
+    async profile(@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof userApi.routes.profile.res>{
         let user=await UserService.getItemById(userId??userInfo.userId)
         if(!user) {
             throw Err.User.userNotFound
         }
-        let ret=await user.profile(organizationId)
+        let ret=await user.profile(userInfo.organizationInfo.organizationId)
         return ret;
     }
 
     @DHttpApi(userApi.routes.infos)
-    async infos(@DHttpReqParam("userIds") userIds:string,@DHttpHeader("organizationid") organizationId:string) :Promise<typeof userApi.routes.infos.res>{
-        let ret=await UserService.userInfos(userIds,true,organizationId)
+    async infos(@DHttpReqParam("userIds") userIds:string,@DHttpUser user:IUserSession) :Promise<typeof userApi.routes.infos.res>{
+        let ret=await UserService.userInfos(userIds,true)
         return ret;
     }
 
