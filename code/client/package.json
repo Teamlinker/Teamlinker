@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@logicflow/core": "^1.1.31",
+    "moment": "^2.29.4",
     "pinia": "^2.0.28",
     "uuid": "^9.0.0",
     "vue": "^3.2.45",
@@ -21,6 +23,7 @@
     "@vitejs/plugin-vue": "^4.0.0",
     "rollup-plugin-typescript2": "^0.34.1",
     "tslib": "^2.4.1",
+    "ttypescript": "^1.5.15",
     "typescript": "^4.6.4",
     "vite": "^4.0.0",
     "vite-plugin-typescript": "^1.0.4",

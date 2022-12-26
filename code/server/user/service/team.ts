@@ -10,7 +10,7 @@ import {teamModel} from './../../../common/model/team';
 import {EServer_Common_Event_Types} from "../../common/event/types";
 import {OrganizationService} from "./organization";
 
-export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
+export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     constructor(){
         super(teamMapper)
     }
@@ -43,7 +43,7 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
         let arrRole=await rpcAuthApi.getRolesByMemberIds(objMember.data.map(obj=>{
             return {
                 itemId:this.item.id,
-                memberId:obj.user.id
+                memberId:obj.organizationUser.id
             }
         }))
         return {
@@ -138,7 +138,7 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
 
     override async delete(eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
         await super.delete(eventPublish);
-        await teamMapper.clearMember(this.getId());
+        await teamMapper.clearMemberByItemId(this.getId());
     }
 
     async createRole(name :string,
@@ -183,4 +183,8 @@ export default class Team extends Entity<typeof teamModel,typeof teamMapper> {
         return ret;
     }
 
+    static async clearMember(organizationUserId:string) {
+        await teamMapper.clearMemberByMemberId(organizationUserId);
+        await rpcAuthApi.clearMember(organizationUserId)
+    }
 }

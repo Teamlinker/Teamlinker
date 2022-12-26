@@ -321,10 +321,10 @@ class IssueController {
      @DHttpReqParam("reporterId") reporterId :string,
      @DHttpReqParam("status") status :number,
      @DHttpReqParam("moduleId") moduleId :string,
-     @DHttpReqParam("tagId") tagId :string,
+     @DHttpReqParam("labelId") labelId :string,
      @DHttpReqParamRequired("page") page :number,
      @DHttpReqParamRequired("size") size :number):Promise<typeof projectIssueApi.routes.filter.res> {
-          let ret=await ProjectIssueService.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,tagId)
+          let ret=await ProjectIssueService.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
           return ret;
      }
 

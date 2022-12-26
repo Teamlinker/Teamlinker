@@ -8,7 +8,7 @@ import {Permission_Types} from "../../../common/permission/permission";
 @DComponent
 class PermissionProject extends PermissionBase {
     fieldName="projectId"
-    async translateToField({commentId,projectIssueId,tagId,moduleId,projectReleaseId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,tagId:string,moduleId:string,projectReleaseId:string }): Promise<string> {
+    async translateToField({commentId,projectIssueId,labelId,moduleId,projectReleaseId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,labelId:string,moduleId:string,projectReleaseId:string }): Promise<string> {
         let projectId:string
         if(commentId) {
             let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssueComment(commentId);
@@ -18,8 +18,8 @@ class PermissionProject extends PermissionBase {
             let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssue(projectIssueId);
             projectId=await obj.getValue();
             return projectId;
-        } else if(tagId) {
-            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromLabel(tagId);
+        } else if(labelId) {
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromLabel(labelId);
             projectId=await obj.getValue();
             return projectId;
         } else if(moduleId) {

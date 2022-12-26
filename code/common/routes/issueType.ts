@@ -1,7 +1,10 @@
 import {ICommon_Model_Issue_Type} from './../model/issue_type';
 import {ICommon_Model_Issue_Type_Solution} from './../model/issue_type_solution';
 import {ECommon_Services} from './../types';
-import {ICommon_Route_Res_IssueTypeSolution_List_Item} from './response';
+import {
+    ICommon_Route_Res_IssueTypeSolution_List_Item,
+    ICommon_Route_Res_IssueTypeSolution_Project_List
+} from './response';
 import {ECommon_HttpApi_Method} from "./types";
 import {Permission_Types} from "../permission/permission";
 
@@ -16,7 +19,7 @@ const api={
                 issueTypeSolutionId:string
             }>{},
             res:<ICommon_Model_Issue_Type[]>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.READ]
         },
         info:{
             method:ECommon_HttpApi_Method.GET,
@@ -25,7 +28,7 @@ const api={
                 issueTypeId:string           
             }>{},
             res:<ICommon_Model_Issue_Type>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.READ]
         },
         create:{
             method:ECommon_HttpApi_Method.POST,
@@ -37,7 +40,7 @@ const api={
                 description?:string       
             }>{},
             res:<ICommon_Model_Issue_Type>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         update:{
             method:ECommon_HttpApi_Method.PUT,
@@ -49,7 +52,7 @@ const api={
                 description?:string           
             }>{},
             res:<ICommon_Model_Issue_Type>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         delete:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -58,7 +61,7 @@ const api={
                 issueTypeId:string           
             }>{},
             res:{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         solutionList:{
             method:ECommon_HttpApi_Method.GET,
@@ -67,7 +70,7 @@ const api={
                            
             }>{},
             res:<ICommon_Route_Res_IssueTypeSolution_List_Item[]>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.READ]
         },
         solutionInfo:{
             method:ECommon_HttpApi_Method.GET,
@@ -76,7 +79,7 @@ const api={
                 issueTypeSolutionId:string           
             }>{},
             res:<ICommon_Route_Res_IssueTypeSolution_List_Item>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.READ]
         },
         solutionCreate:{
             method:ECommon_HttpApi_Method.POST,
@@ -86,7 +89,7 @@ const api={
                 description?:string       
             }>{},
             res:<ICommon_Model_Issue_Type_Solution>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         solutionUpdate:{
             method:ECommon_HttpApi_Method.PUT,
@@ -97,7 +100,7 @@ const api={
                 description?:string           
             }>{},
             res:<ICommon_Model_Issue_Type_Solution>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         solutionDelete:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -106,7 +109,7 @@ const api={
                 issueTypeSolutionId:string           
             }>{},
             res:{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         solutionBindProject:{
             method:ECommon_HttpApi_Method.POST,
@@ -116,7 +119,7 @@ const api={
                 projectId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         solutionUnbindProject:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -126,41 +129,41 @@ const api={
                 projectId:string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         solutionProjectList:{
             method:ECommon_HttpApi_Method.GET,
             path:"/solution/project",
             req:<{
-                issueTypeSolutionId:string 
+                issueTypeSolutionId:string,
+                page:number,
+                size:number,
+                keyword?:string
             }>{},
-            res:<{
-                id:string,
-                name:string,
-                photo:string,
-                description:string
-            }[]>{},
-            permission:[Permission_Types.Project.ADMIN]
+            res:<ICommon_Route_Res_IssueTypeSolution_Project_List>{},
+            permission:[Permission_Types.Organization.READ]
         },
         copy:{
             method:ECommon_HttpApi_Method.POST,
             path:"/copy",
             req:<{
                 issueTypeId:string,
-                newIssueTypeSolutionId:string
+                newIssueTypeSolutionId:string,
+                name:string
             }>{},
             res:<ICommon_Model_Issue_Type>{},
-            permission:[Permission_Types.Project.ADMIN]
+            permission:[Permission_Types.Organization.ADMIN]
         },
         copySolution:{
             method:ECommon_HttpApi_Method.POST,
             path:"/solution/copy",
             req:<{
-                issueTypeSolutionId:string
+                issueTypeSolutionId:string,
+                name:string
             }>{},
             res:<ICommon_Model_Issue_Type_Solution>{},
-            permission:[Permission_Types.Project.ADMIN]
-        }
+            permission:[Permission_Types.Organization.ADMIN]
+        },
     }
 }
 export default api

@@ -2,9 +2,10 @@ import {ECommon_Model_Workflow_Node_Status} from "../../../common/model/workflow
 import workflowApi from "../../../common/routes/workflow";
 import {Err} from "../../../common/status/error";
 import {DComponent} from "../../common/decorate/component";
-import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired} from "../../common/http/http";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import {WorkflowActionService, WorkflowService} from "../service/workflow";
 import {WorkflowNodeService} from './../service/workflow';
+import {IUserSession} from "../../user/types/config";
 
 @DComponent
 @DHttpController(workflowApi)
@@ -103,9 +104,10 @@ class WorkflowController {
         return;
     }
 
-    @DHttpApi(workflowApi.routes.copy)
-    async copy(@DHttpReqParamRequired("issueTypeId") issueTypeId: string,@DHttpReqParamRequired("newIssueTypeId") newIssueTypeId: string): Promise<typeof workflowApi.routes.deleteAction.res> {
-        await WorkflowService.copy(issueTypeId,newIssueTypeId)
-        return;
+    @DHttpApi(workflowApi.routes.listAllNode)
+    async listAllNode(@DHttpUser user:IUserSession): Promise<typeof workflowApi.routes.listAllNode.res> {
+        let ret=await WorkflowNodeService.listAllNode(user.organizationInfo.organizationId)
+        return ret;
     }
+
 }

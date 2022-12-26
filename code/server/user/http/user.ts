@@ -13,7 +13,7 @@ import {
     DHttpReqParamRequired,
     DHttpUser
 } from "../../common/http/http";
-import UserService from "../service/user";
+import {UserService} from "../service/user";
 import {IUserSession} from "../types/config";
 
 @DComponent

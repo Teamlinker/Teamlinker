@@ -46,7 +46,12 @@ class TeamMapper extends Mapper<typeof teamModel> {
             throw  Err.Team.teamNotFound
         }
         let mysql=getMysqlInstance();
-        let count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team_User} tu  left join ${Table_User} u on u.id=tu.user_id left join ${Table_Team} t on t.id=tu.team_id left join ${Table_Organization_User} ou on ou.organization_id=t.organization_id and ou.user_id=tu.user_id where tu.team_id=${teamId}${keyword?` and (u.username like '%${keyword}%' or ou.nickname like '%${keyword}%')`:""}`))[0])
+        let count:number
+        if(keyword) {
+            count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team_User} tu left join ${Table_Team} t on t.id=tu.team_id left join ${Table_Organization_User} ou on ou.id=tu.organization_user_id left join ${Table_User} u on u.id=ou.user_id where tu.team_id=${teamId}${keyword?` and (u.username like '%${keyword}%' or ou.nickname like '%${keyword}%')`:""}`))[0])
+        } else {
+            count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team_User} where team_id='${teamId}'`))[0])
+        }
         let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateLeftJoin3Sql({
             model:teamUserModel,
@@ -157,7 +162,7 @@ class TeamMapper extends Mapper<typeof teamModel> {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team}${keyword?` where organization_id='${organizationId}' name like '%${keyword}%'`:""}`))[0])
+        let count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team}${keyword?` where organization_id='${organizationId}' and name like '%${keyword}%'`:""}`))[0])
         let totalPage=CommonUtil.pageTotal(count,size)
         let ret=await mysql.execute(generateQuerySql(teamModel,[],{
             organization_id:organizationId,
@@ -201,7 +206,7 @@ class TeamMapper extends Mapper<typeof teamModel> {
         return ret;
     }
 
-    async clearMember(teamId:string) {
+    async clearMemberByItemId(teamId:string) {
         if(!teamId) {
             throw  Err.Team.teamNotFound
         }
@@ -211,6 +216,25 @@ class TeamMapper extends Mapper<typeof teamModel> {
         }))
     }
 
+    async clearMemberByMemberId(memberId:string) {
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(teamUserModel,{
+            organization_user_id:memberId
+        }))
+    }
+
+    async checkMember(teamId:string,memberId:string) {
+        let mysql=getMysqlInstance()
+        let ret=await mysql.executeOne(generateQuerySql(teamUserModel,["id"],{
+            team_id:teamId,
+            organization_user_id:memberId
+        }))
+        if(ret) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 export let teamMapper=new TeamMapper()

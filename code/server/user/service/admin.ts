@@ -6,14 +6,14 @@ import {Entity} from "../../common/entity/entity";
 import {ECommon_User_Type, userModel} from './../../../common/model/user';
 import {adminMapper} from './../mapper/admin';
 
-export default class Admin extends Entity<typeof userModel,typeof adminMapper> {
+export class AdminService extends Entity<typeof userModel,typeof adminMapper> {
     constructor(){
         super(adminMapper)
     }
-    static async getItemByName(name:string):Promise<InstanceType<typeof Admin>>{
+    static async getItemByName(name:string):Promise<InstanceType<typeof AdminService>>{
         let obj = await adminMapper.getUserByName(name);
         if(obj) {
-            let user = new Admin;
+            let user = new AdminService;
             user.setItem(obj);
             return user;
         } else {

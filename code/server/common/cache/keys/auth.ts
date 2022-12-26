@@ -293,8 +293,8 @@ export namespace REDIS_AUTH {
             }
         }
         export namespace Organization {
-            export class Users extends BaseRedisHashCache<string>{
-                key="permission:organization:{0}:users"
+            export class OrganizationUsers extends BaseRedisHashCache<string>{
+                key="permission:organization:{0}:organizationUsers"
                 override objRedis:RedisHashKey;
                 constructor(private organizationId:string) {
                     super();

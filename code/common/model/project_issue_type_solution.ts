@@ -1,15 +1,15 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
 
-export interface ICommon_Model_Project_Issue_Solution {
+export interface ICommon_Model_Project_Issue_Type_Solution {
     id :string,
     project_id :string,
     issue_type_solution_id:string
 }
-export const Table_Project_Issue_Solution="project_issue_type_solution"
+export const Table_Project_Issue_Type_Solution="project_issue_type_solution"
 
 class ProjectIssueTypeSolutionModel extends BaseModel {
-    table=Table_Project_Issue_Solution
-    model=<ICommon_Model_Project_Issue_Solution>{}
+    table=Table_Project_Issue_Type_Solution
+    model=<ICommon_Model_Project_Issue_Type_Solution>{}
   }
   
 export let projectIssueTypeSolutionModel=new ProjectIssueTypeSolutionModel

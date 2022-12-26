@@ -2,6 +2,7 @@ import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
 import {projectLabelModel} from './../../../common/model/project_label';
 import {labelMapper} from '../mapper/label';
+import {EServer_Common_Event_Types} from "../../common/event/types";
 
 export class ProjectLabelService extends Entity<typeof projectLabelModel,typeof labelMapper> {
     constructor(){
@@ -13,5 +14,10 @@ export class ProjectLabelService extends Entity<typeof projectLabelModel,typeof 
         }
         let ret=await labelMapper.listLabel(this.item.project_id,page,size,keyword)
         return ret
+    }
+
+    override async delete(eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
+        await super.delete(eventPublish);
+        await labelMapper.clearByLabelId(this.getId());
     }
 }

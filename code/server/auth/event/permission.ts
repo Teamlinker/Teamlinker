@@ -8,19 +8,19 @@ import {REDIS_AUTH} from "../../common/cache/keys/auth";
 class PermissionClear {
     @DEventListener(EServer_Common_Event_Types.Auth.ORGANIZATION_USER_ADD)
     async organizationUserAdd(organizationId:string,user:string) {
-        let obj=new REDIS_AUTH.Permission.Organization.Users(organizationId);
+        let obj=new REDIS_AUTH.Permission.Organization.OrganizationUsers(organizationId);
         await obj.del()
     }
 
     @DEventListener(EServer_Common_Event_Types.Auth.ORGANIZATION_USER_EDIT)
     async organizationUserEdit(organizationId:string,user:string) {
-        let obj=new REDIS_AUTH.Permission.Organization.Users(organizationId);
+        let obj=new REDIS_AUTH.Permission.Organization.OrganizationUsers(organizationId);
         await obj.del()
     }
 
     @DEventListener(EServer_Common_Event_Types.Auth.ORGANIZATION_USER_DELETE)
     async organizationUserDelete(organizationId:string,user:string) {
-        let obj=new REDIS_AUTH.Permission.Organization.Users(organizationId);
+        let obj=new REDIS_AUTH.Permission.Organization.OrganizationUsers(organizationId);
         await obj.del()
     }
 

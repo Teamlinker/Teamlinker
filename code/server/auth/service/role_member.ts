@@ -13,8 +13,8 @@ export class RoleMemberService extends Entity<typeof roleMemberModel,typeof role
         return ret;
     }
 
-    static async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number){
-        let ret=await roleMemberMapper.listRoleMember(itemId,roleType,memberType,page,size);
+    static async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number,key?:string){
+        let ret=await roleMemberMapper.listRoleMember(itemId,roleType,memberType,page,size,key);
         return ret;
     }
 
@@ -25,6 +25,10 @@ export class RoleMemberService extends Entity<typeof roleMemberModel,typeof role
     static async checkRoleMember(roleId:string):Promise<boolean> {
         let ret=await roleMemberMapper.checkRoleMember(roleId);
         return ret;
+    }
+
+    static async clearMember(memberId:string) {
+        await roleMemberMapper.clearMember(memberId)
     }
 
 }

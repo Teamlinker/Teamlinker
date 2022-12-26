@@ -4,7 +4,8 @@ import {DComponent} from "../../common/decorate/component";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired} from "../../common/http/http";
 import {FieldTypeService} from "../service/field";
 import {WorkflowNodeFieldTypeService} from './../service/field';
-import {ECommon_Field_Type} from "../../../common/field/type";
+import {ECommon_Field_Type, Field_Types} from "../../../common/field/type";
+import {ECommon_Model_Workflow_Node_Field_Type_Label_Type} from "../../../common/model/workflow_node_field_type";
 
 @DComponent
 @DHttpController(fieldApi)
@@ -41,10 +42,11 @@ class FieldController {
     async addWorkflowNodeField(@DHttpReqParamRequired("workflowNodeId") workflowNodeId:string,
     @DHttpReqParamRequired("fieldTypeId") fieldTypeId:ECommon_Field_Type,
     @DHttpReqParamRequired("optional") optional:number,
-    @DHttpReqParam("defaultValue") defaultValue:string,
+    @DHttpReqParam("defaultStringValue") defaultStringValue:string,
+    @DHttpReqParam("defaultNumberValue") defaultNumberValue:number,
     @DHttpReqParamRequired("name") name:string,
     @DHttpReqParam("description") description:string): Promise<typeof fieldApi.routes.addWorkflowNodeField.res> {
-        let ret=await WorkflowNodeFieldTypeService.addWorkflowNodeField(workflowNodeId,fieldTypeId,name,optional,defaultValue,description)
+        let ret=await WorkflowNodeFieldTypeService.addWorkflowNodeField(workflowNodeId,fieldTypeId,name,optional,defaultStringValue,defaultNumberValue,description)
         return ret;
     }
 
@@ -62,18 +64,28 @@ class FieldController {
     @DHttpApi(fieldApi.routes.editWorkflowNodeField)
     async editWorkflowNodeField(@DHttpReqParamRequired("workflowNodeFieldTypeId") workflowNodeFieldTypeId:string,
     @DHttpReqParam("optional") optional:number,
-    @DHttpReqParam("defaultValue") defaultValue:string,
+    @DHttpReqParam("defaultStringValue") defaultStringValue:string,
+    @DHttpReqParam("defaultNumberValue") defaultNumberValue:number,
     @DHttpReqParam("name") name:string,
-    @DHttpReqParam("description") description:string): Promise<typeof fieldApi.routes.editWorkflowNodeField.res> {
+    @DHttpReqParam("description") description:string,
+    @DHttpReqParam("labelType") labelType:ECommon_Model_Workflow_Node_Field_Type_Label_Type): Promise<typeof fieldApi.routes.editWorkflowNodeField.res> {
         let obj=await WorkflowNodeFieldTypeService.getItemById(workflowNodeFieldTypeId)
         if(!obj) {
             throw Err.Project.Field.fieldSolutionNotFound
         }
+        if(labelType!==null && labelType!==undefined) {
+            let objFieldType=Field_Types[obj.getItem().field_type_id]
+            if(objFieldType.type!=ECommon_Field_Type.LABEL && objFieldType.type!=ECommon_Field_Type.MULTILABEL) {
+                throw Err.Project.Field.fieldTypeNotMatch
+            }
+        }
         obj.assignItem({
             name,
             optional,
-            default_value:defaultValue,
-            description
+            default_string_value:defaultStringValue,
+            default_number_value:defaultNumberValue,
+            description,
+            label_type:labelType
         })
         let ret=await obj.update()
         return ret;
@@ -113,7 +125,6 @@ class FieldController {
     async addWorkflowNodeFieldConfig(@DHttpReqParamRequired("workflowNodeFieldTypeId") workflowNodeFieldTypeId:string,
     @DHttpReqParamRequired("data") data:{
         value :string,
-        name :string,
         selected :number
     }[]): Promise<typeof fieldApi.routes.editWorkflowNodeFieldConfig.res> {
         let obj=await WorkflowNodeFieldTypeService.getItemById(workflowNodeFieldTypeId)
@@ -128,6 +139,12 @@ class FieldController {
     async workflowFieldsCopy(@DHttpReqParamRequired("workflowNodeId") workflowNodeId:string,
     @DHttpReqParamRequired("newWorkflowNodeId") newWorkflowNodeId:string): Promise<typeof fieldApi.routes.workflowFieldsCopy.res> {
         await WorkflowNodeFieldTypeService.workflowFieldsCopy(workflowNodeId,newWorkflowNodeId)
+        return
+    }
+
+    @DHttpApi(fieldApi.routes.setWorkflowNodeFieldsWeight)
+    async setWorkflowNodeFieldsWeight(@DHttpReqParamRequired("workflowNodeFieldTypeIds") workflowNodeFieldTypeIds:string): Promise<typeof fieldApi.routes.setWorkflowNodeFieldsWeight.res> {
+        await WorkflowNodeFieldTypeService.setWorkflowNodeFieldsWeight(workflowNodeFieldTypeIds)
         return
     }
 

@@ -23,7 +23,7 @@ import {Table_Project_Issue_Field_Value} from './../../../common/model/project_i
 import {Table_Project_Issue_Parent} from './../../../common/model/project_issue_parent';
 import {Table_Project_Issue_Process} from './../../../common/model/project_issue_process';
 import {Table_Project_Issue_Related} from './../../../common/model/project_issue_related';
-import {Table_Project_Issue_Solution} from './../../../common/model/project_issue_type_solution';
+import {Table_Project_Issue_Type_Solution} from './../../../common/model/project_issue_type_solution';
 import {Table_Project_Label} from './../../../common/model/project_label';
 import {Table_Project_Label_Issue} from './../../../common/model/project_label_issue';
 import {Table_Project_Module} from './../../../common/model/project_module';
@@ -121,37 +121,40 @@ export async function handleImageFields(data:object){
 async function resetSystem(){
     try {
         let mysql=getMysqlInstance()
-        await mysql.execute(`delete from ${Table_Version}`) 
-        await mysql.execute(`delete from ${Table_Role}`)
-        await mysql.execute(`delete from ${Table_Role_Member}`)
-        await mysql.execute(`delete from ${Table_User}`) 
-        await mysql.execute(`delete from ${Table_Project}`) 
-        await mysql.execute(`delete from ${Table_Team}`)
-        await mysql.execute(`delete from ${Table_Team_User}`)
-        await mysql.execute(`delete from ${Table_Issue_Type}`)
-        await mysql.execute(`delete from ${Table_Issue_Type_Solution}`)
-        await mysql.execute(`delete from ${Table_Workflow_Node}`)
-        await mysql.execute(`delete from ${Table_Workflow_Action}`)
-        await mysql.execute(`delete from ${Table_Project_Module}`)
-        await mysql.execute(`delete from ${Table_Project_Label}`)
-        await mysql.execute(`delete from ${Table_Workflow_Node_Field_Type}`)
-        await mysql.execute(`delete from ${Table_Workflow_Node_Field_Type_Config}`)
-        await mysql.execute(`delete from ${Table_Project_Issue}`)
-        await mysql.execute(`delete from ${Table_Project_Issue_Description}`)
-        await mysql.execute(`delete from ${Table_Project_Issue_Field_Value}`)
-        await mysql.execute(`delete from ${Table_Project_Issue_Parent}`)
-        await mysql.execute(`delete from ${Table_Project_Issue_Process}`)
-        await mysql.execute(`delete from ${Table_Project_Issue_Related}`)
-        await mysql.execute(`delete from ${Table_Project_Issue_Solution}`)
-        await mysql.execute(`delete from ${Table_Project_Module_Issue}`)
-        await mysql.execute(`delete from ${Table_Project_Label_Issue}`)
-        await mysql.execute(`delete from ${Table_Organization}`)
-        await mysql.execute(`delete from ${Table_Organization_User}`)
-        await mysql.execute(`delete from ${Table_Comment}`)
-        await mysql.execute(`delete from ${Table_File}`)
-        await mysql.execute(`delete from ${Table_Workflow_Node_Field_Type}`)
-        await mysql.execute(`delete from ${Table_Workflow_Node_Field_Type_Config}`)
-        await mysql.execute(`delete from ${Table_Member_Tag}`)
+        await Promise.all([
+             mysql.execute(`delete from ${Table_Version}`),
+             mysql.execute(`delete from ${Table_Role}`),
+             mysql.execute(`delete from ${Table_Role_Member}`),
+             mysql.execute(`delete from ${Table_User}`),
+             mysql.execute(`delete from ${Table_Project}`),
+             mysql.execute(`delete from ${Table_Team}`),
+             mysql.execute(`delete from ${Table_Team_User}`),
+             mysql.execute(`delete from ${Table_Issue_Type}`),
+             mysql.execute(`delete from ${Table_Issue_Type_Solution}`),
+             mysql.execute(`delete from ${Table_Workflow_Node}`),
+             mysql.execute(`delete from ${Table_Workflow_Action}`),
+             mysql.execute(`delete from ${Table_Project_Module}`),
+             mysql.execute(`delete from ${Table_Project_Label}`),
+             mysql.execute(`delete from ${Table_Workflow_Node_Field_Type}`),
+             mysql.execute(`delete from ${Table_Workflow_Node_Field_Type_Config}`),
+             mysql.execute(`delete from ${Table_Project_Issue}`),
+             mysql.execute(`delete from ${Table_Project_Issue_Description}`),
+             mysql.execute(`delete from ${Table_Project_Issue_Field_Value}`),
+             mysql.execute(`delete from ${Table_Project_Issue_Parent}`),
+             mysql.execute(`delete from ${Table_Project_Issue_Process}`),
+             mysql.execute(`delete from ${Table_Project_Issue_Related}`),
+             mysql.execute(`delete from ${Table_Project_Issue_Type_Solution}`),
+             mysql.execute(`delete from ${Table_Project_Module_Issue}`),
+             mysql.execute(`delete from ${Table_Project_Label_Issue}`),
+             mysql.execute(`delete from ${Table_Organization}`),
+             mysql.execute(`delete from ${Table_Organization_User}`),
+             mysql.execute(`delete from ${Table_Comment}`),
+             mysql.execute(`delete from ${Table_File}`),
+             mysql.execute(`delete from ${Table_Workflow_Node_Field_Type}`),
+             mysql.execute(`delete from ${Table_Workflow_Node_Field_Type_Config}`),
+             mysql.execute(`delete from ${Table_Member_Tag}`)
+        ])
+
     } catch (err) {
         console.log("db reset error:",err);
     }
@@ -255,14 +258,18 @@ export async function initSystem() {
     let mysql=getMysqlInstance()
     let ret=await mysql.execute<any[]>(`select * from ${Table_Version}`)
     if(ret===null || ret.length==0){
-        let adminIds=await rpcUserApi.initAdmin();
-        let userIds=await rpcUserApi.initUser()
-        await initVersion()
-        let {projectRoleUserId,groupRoleUserId}=await rpcAuthApi.initRole();
+        let [adminIds,userIds,_,__]=await Promise.all([
+            rpcUserApi.initAdmin(),
+            rpcUserApi.initUser(),
+            initVersion(),
+            rpcAuthApi.initRole()
+        ])
         let organizationId=await rpcUserApi.initOrganization(adminIds,userIds);
         let organizationUserId=await rpcUserApi.getOrganizationUserId(organizationId,userIds[0])
-        await rpcUserApi.initTeam(organizationUserId,organizationId);
-        await rpcCooperationApi.initProject(organizationUserId,organizationId)
+        await Promise.all([
+            rpcUserApi.initTeam(organizationUserId,organizationId),
+            rpcCooperationApi.initProject(organizationUserId,organizationId)
+        ])
     }
     console.log("init finish")
 }

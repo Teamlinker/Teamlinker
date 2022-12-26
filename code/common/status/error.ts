@@ -387,15 +387,15 @@ export namespace Err {
             msg:"nickname empty"
         },
         notInOrganization:{
-            code:8002,
+            code:8006,
             msg:"not in organization"
         },
         memberTagNotFound:{
-            code:8003,
+            code:8007,
             msg:"member tag not found"
         },
         memberTagAlreadyExists:{
-            code:8004,
+            code:8008,
             msg:"member tag already exists"
         }
     }

@@ -3,8 +3,8 @@ import {Err} from '../../../common/status/error';
 import {DComponent} from "../../common/decorate/component";
 import {EServer_Common_Event_Types} from "../../common/event/types";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
-import TeamService from "../service/team";
-import {OrganizationService} from './../service/organization';
+import {TeamService} from "../service/team";
+import {OrganizationService, OrganizationUserService} from './../service/organization';
 import {IUserSession} from "../types/config";
 import rpcAuthApi from "../../auth/rpc/auth";
 
@@ -104,6 +104,16 @@ class TeamController {
         if(!team) {
             throw Err.Team.teamNotFound
         }
+        let [arr,objOrganization]=await Promise.all([
+            OrganizationUserService.organizationUserInfos(organizationUserId),
+            OrganizationService.getItemById(team.getItem().organization_id)
+        ])
+        if(!arr || arr.length==0) {
+            throw Err.Organization.userNotFound
+        }
+        if(objOrganization.getItem().created_by_pure===arr[0].id) {
+            throw Err.Organization.ownerDeleteForbidden
+        }
         await team.removeMember(organizationUserId)
         return;
     }
@@ -113,6 +123,16 @@ class TeamController {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
+        }
+        let [arr,objOrganization]=await Promise.all([
+            OrganizationUserService.organizationUserInfos(organizationUserId),
+            OrganizationService.getItemById(team.getItem().organization_id)
+        ])
+        if(!arr || arr.length==0) {
+            throw Err.Organization.userNotFound
+        }
+        if(objOrganization.getItem().created_by_pure===arr[0].id) {
+            throw Err.Organization.ownerDeleteForbidden
         }
         let ret=await team.changeRole(organizationUserId,roleId)
         return ret;

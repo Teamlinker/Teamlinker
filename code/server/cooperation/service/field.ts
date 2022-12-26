@@ -5,6 +5,7 @@ import {EServer_Common_Event_Types} from "../../common/event/types";
 import {workflowNodeFieldTypeModel} from '../../../common/model/workflow_node_field_type';
 import {workflowNodeFieldTypeMapper} from './../mapper/field';
 import {ECommon_Field_Type, Field_Types} from "../../../common/field/type";
+import {ProjectIssueService} from "./issue";
 
 export  class FieldTypeService {
 
@@ -29,16 +30,17 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
     override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
         await super.delete()
         await workflowNodeFieldTypeMapper.deleteWorkflowNodeField(this.getId());
+        await ProjectIssueService.clearIssueValueByFieldTypeId(this.getId());
     }
 
 
-    static async addWorkflowNodeField(workflowNodeId:string,fieldTypeId:ECommon_Field_Type,name:string,optional:number,defaultValue?:string,description?:string) {
+    static async addWorkflowNodeField(workflowNodeId:string,fieldTypeId:ECommon_Field_Type,name:string,optional:number,defaultStringValue?:string,defaultNumberValue?:number,description?:string) {
         if(!workflowNodeId) {
             throw Err.Project.Workflow.workflowNodeNotFound
-        } else if(!fieldTypeId) {
+        } else if(fieldTypeId===undefined || fieldTypeId===null) {
             throw Err.Project.Field.fieldTypeNotFound
         }
-        let ret=await workflowNodeFieldTypeMapper.addWorkflowNodeField(workflowNodeId,fieldTypeId,name,optional,defaultValue,description);
+        let ret=await workflowNodeFieldTypeMapper.addWorkflowNodeField(workflowNodeId,fieldTypeId,name,optional,defaultStringValue,defaultNumberValue,description);
         return ret;
     }
 
@@ -53,7 +55,7 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
         } else if(objFieldType.type!=ECommon_Field_Type.LABEL && objFieldType.type!=ECommon_Field_Type.MULTILABEL) {
             throw Err.Project.Field.fieldTypeNotMatch
         }
-        await workflowNodeFieldTypeMapper.editWorkflowNodeFieldLableType(obj.id,labelType);
+        await workflowNodeFieldTypeMapper.editWorkflowNodeFieldLabelType(obj.id,labelType);
     }
 
     static async listWorkflowNodeField(workflowNodeId:string) {
@@ -76,7 +78,7 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
         if(!workflowNodeId) {
             throw Err.Project.Workflow.workflowNodeNotFound
         }
-        await workflowNodeFieldTypeMapper.clearItemsByWorkflowNodeId(workflowNodeId)
+        await workflowNodeFieldTypeMapper.clearFieldByWorkflowNodeId(workflowNodeId)
     }
 
     async moveWorkflowNodeField(weight:number) {
@@ -107,16 +109,21 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
             throw Err.Project.Field.fieldTypeNotMatch
         }
         await workflowNodeFieldTypeMapper.deleteConfigByFieldId(this.getId())
-        let arr:ICommon_Model_Workflow_Node_Field_Type_Config[]=[];
-        let i=0
-        for(let obj of data) {
-            let ret=await workflowNodeFieldTypeMapper.addWorkflowNodeFieldConfig(this.getId(),obj.value,obj.selected,i++)
-            arr.push(ret)
+        let arr:ICommon_Model_Workflow_Node_Field_Type_Config[]=new Array(data.length);
+        let i=0,arrPromise=[]
+        for(let i=0;i<data.length;i++) {
+            let obj=data[i];
+            arrPromise.push((async ()=>{
+                let ret=await workflowNodeFieldTypeMapper.addWorkflowNodeFieldConfig(this.getId(),obj.value,obj.selected,i)
+                arr[i]=ret;
+            })())
         }
+        await Promise.all(arrPromise);
         return arr;
     }
 
     static async workflowFieldsCopy(workflowNodeId:string,newWorkflowNodeId:string) {
+        await workflowNodeFieldTypeMapper.clearFieldByWorkflowNodeId(newWorkflowNodeId)
         await workflowNodeFieldTypeMapper.workflowFieldsCopy(workflowNodeId,newWorkflowNodeId)
     }
 
@@ -130,5 +137,9 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
 
     static async clearFieldByWorkflowNodeId(workflowNodeId:string) {
         await workflowNodeFieldTypeMapper.clearFieldByWorkflowNodeId(workflowNodeId);
+    }
+
+    static async setWorkflowNodeFieldsWeight(workflowNodeFieldTypeIds:string) {
+        await workflowNodeFieldTypeMapper.setWorkflowNodeFieldsWeight(workflowNodeFieldTypeIds)
     }
 }

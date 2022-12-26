@@ -92,9 +92,19 @@ export type ICommon_Route_Res_Team_List = {
 }
 
 export interface ICommon_Route_Res_IssueTypeSolution_List_Item extends ICommon_Model_Issue_Type_Solution {
-    issueTypeList:ICommon_Model_Issue_Type[],
-    projectList:Pick<ICommon_Model_Project,"name"|"photo"|"id"|"description">[]
+    issueTypeList:ICommon_Model_Issue_Type[]
 }
+
+export type ICommon_Route_Res_IssueTypeSolution_Project_List = {
+    count:number,
+    totalPage:number,
+    page:number,
+    data:ICommon_Model_Project[]
+}
+
+export type ICommon_Route_Res_IssueTypeSolution_IssueType_List = (ICommon_Model_Issue_Type_Solution & {
+    issueTypeList:ICommon_Model_Issue_Type[]
+})[]
 
 export interface ICommon_Route_Res_Workflow_Info_Node {
     node:ICommon_Model_Workflow_Node,
@@ -197,7 +207,8 @@ export interface ICommon_Route_Res_Project_User_Item {
 export interface ICommon_Route_Res_Organization_User_Item {
     organizationUser:ICommon_Model_Organization_User
     user:ICommon_Model_User,
-    role:ICommon_Model_Role
+    role:ICommon_Model_Role,
+    tag?:ICommon_Model_Member_Tag[]
 }
 
 export interface ICommon_Route_Res_Organization_User_List {
@@ -225,4 +236,17 @@ export interface ICommon_Route_Res_Member_Tag_Member {
     user:ICommon_Model_User,
     organizationUser:ICommon_Model_Organization_User,
     tag:ICommon_Model_Member_Tag
+}
+
+export type ICommon_Route_Res_Workflow_Node_List_Item =  {
+    id:string,
+    name:string,
+    data:{
+        id:string,
+        name:string,
+        data:{
+            id:string,
+            name:string
+        }[]
+    }[]
 }

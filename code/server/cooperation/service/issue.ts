@@ -341,7 +341,13 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     }
 
     async otherInfoList() {
-        let arr=await Promise.all([projectIssueMapper.parentIssue(this.getId()),projectIssueMapper.childIssueList(this.getId()),projectIssueMapper.relatedIssueList(this.getId()),projectIssueMapper.issueLabelList(this.getId()),projectIssueMapper.issueModuleList(this.getId())])
+        let arr=await Promise.all([
+            projectIssueMapper.parentIssue(this.getId()),
+            projectIssueMapper.childIssueList(this.getId()),
+            projectIssueMapper.relatedIssueList(this.getId()),
+            projectIssueMapper.issueLabelList(this.getId()),
+            projectIssueMapper.issueModuleList(this.getId())
+        ])
         return {
             parent:arr[0],
             children:arr[1],
@@ -351,20 +357,20 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         }
     }
 
-    async bindLabel(tagId :string) {
-        let obj=await ProjectLabelService.getItemById(tagId)
+    async bindLabel(labelId :string) {
+        let obj=await ProjectLabelService.getItemById(labelId)
         if(!obj) {
             throw Err.Project.Label.labelNotfound
         }
-        await projectIssueMapper.bindIssueLabel(this.getId(),tagId)
+        await projectIssueMapper.bindIssueLabel(this.getId(),labelId)
     }
 
-    async unbindLabel(tagId :string) {
-        let obj=await ProjectLabelService.getItemById(tagId)
+    async unbindLabel(labelId :string) {
+        let obj=await ProjectLabelService.getItemById(labelId)
         if(!obj) {
             throw Err.Project.Label.labelNotfound
         }
-        await projectIssueMapper.unbindIssueLabel(this.getId(),tagId)
+        await projectIssueMapper.unbindIssueLabel(this.getId(),labelId)
     }
 
     async bindModule(moduleId :string) {
@@ -383,12 +389,12 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         await projectIssueMapper.unbindIssueModule(this.getId(),moduleId)
     }
 
-    static async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,tagId? :string) {
+    static async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string) {
         let project=await ProjectService.getItemById(projectId)
         if(!project) {
             throw Err.Project.projectNotFound
         }
-        let ret=await projectIssueMapper.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,tagId)
+        let ret=await projectIssueMapper.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
         return ret;
     }
 
@@ -399,6 +405,10 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
             await commentMapper.clearByProjectIssueIds(ret)
         }
         
+    }
+
+    static async clearIssueValueByFieldTypeId(workflowFieldTypeId:string) {
+        await projectIssueMapper.clearIssueValueByFieldTypeId(workflowFieldTypeId)
     }
     
 }

@@ -3,7 +3,7 @@ import {Err} from "../../../common/status/error";
 import {DComponent} from "../../common/decorate/component";
 import HttpContext from "../../common/http/context";
 import {DHttpApi, DHttpContext, DHttpController, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
-import AdminService from "../service/admin";
+import {AdminService} from "../service/admin";
 import {IUserSession} from "../types/config";
 
 @DComponent

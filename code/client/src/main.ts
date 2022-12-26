@@ -9,6 +9,7 @@ import {createPinia} from "pinia";
 import Login from "./business/controller/login/login.vue";
 import Desktop from "./business/controller/desktop/desktop.vue";
 import {createRouter, createWebHashHistory} from "vue-router";
+import "@logicflow/core/dist/style/index.css";
 
 const routes=[
     {

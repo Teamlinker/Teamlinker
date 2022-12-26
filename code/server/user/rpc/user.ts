@@ -2,13 +2,12 @@ import * as jwt from "jsonwebtoken";
 import {JwtPayload} from "jsonwebtoken";
 import {REDIS_USER} from "../../common/cache/keys/user";
 import {getConfigInstance} from '../../common/config/config';
-import AdminService from "../service/admin";
-import TeamService from "../service/team";
-import UserService from "../service/user";
+import {AdminService} from "../service/admin";
+import {TeamService} from "../service/team";
+import {UserService} from "../service/user";
 import {OrganizationService, OrganizationUserService} from './../service/organization';
 import rpcFileApi from "../../file/rpc/file";
 import {IServer_Common_RPC_User_CheckSession} from "../types/config";
-import {Err} from "../../../common/status/error";
 
 class RpcUserApi {
     
@@ -172,7 +171,7 @@ class RpcUserApi {
         let objRedis=REDIS_USER.organizationInfo(userId);
         let exists=await objRedis.exists();
         if(!exists) {
-            throw Err.Organization.notInOrganization
+            return null
         }
         let value=await  objRedis.get();
         return value

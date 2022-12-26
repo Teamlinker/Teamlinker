@@ -600,7 +600,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }))
     }
 
-    async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,tagId? :string):Promise<ICommon_Route_Res_Project_filter[]> {
+    async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string):Promise<ICommon_Route_Res_Project_filter[]> {
         if(!projectId) {
             throw Err.Project.projectNotFound
         }
@@ -614,9 +614,9 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 setId.add(obj)
             }
         }
-        if(tagId) {
+        if(labelId) {
             let arrLabelIssueId=(await mysql.execute(generateQuerySql(projectLabelIssueModel,["id"],{
-                project_label_id:tagId
+                project_label_id:labelId
             }))).map(item=>item.id)
             for(let obj of arrLabelIssueId) {
                 setId.add(obj)
@@ -694,7 +694,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     value:status
                 }
             }),
-            ...(((tagId || moduleId) && setId.size>0) && {
+            ...(((labelId || moduleId) && setId.size>0) && {
                 id:{
                     model:projectIssueModel,
                     value:{
@@ -773,8 +773,19 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 exp:"in",
                 value:projectIds
             }
+        },"and",{
+            field:"project_id",
+            type:"field",
+            value:projectIds
         }))
         return ret.map(item=>item.id);
+    }
+
+    async clearIssueValueByFieldTypeId(workflowFieldTypeId:string) {
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
+            workflow_node_field_type_id:workflowFieldTypeId
+        }))
     }
 
 }

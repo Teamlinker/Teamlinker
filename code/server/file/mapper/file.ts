@@ -1,8 +1,9 @@
-import { Err } from '../../../common/status/error';
-import { getMysqlInstance } from '../../common/db/mysql';
-import { Mapper } from '../../common/entity/mapper';
-import { generateQuerySql } from '../../common/util/sql';
-import { fileModel } from './../../../common/model/file';
+import {Err} from '../../../common/status/error';
+import {getMysqlInstance} from '../../common/db/mysql';
+import {Mapper} from '../../common/entity/mapper';
+import {generateQuerySql} from '../../common/util/sql';
+import {fileModel} from './../../../common/model/file';
+
 class FileMapper extends Mapper<typeof fileModel> {
     constructor(){
         super(fileModel)
@@ -26,6 +27,10 @@ class FileMapper extends Mapper<typeof fileModel> {
                 exp:"in",
                 value:ids
             }
+        },"and",{
+            field:"id",
+            type:"field",
+            value:ids
         }))
         return ret;
     }

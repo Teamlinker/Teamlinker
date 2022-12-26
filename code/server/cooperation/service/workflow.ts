@@ -4,7 +4,8 @@ import {workflowActionModel} from "../../../common/model/workflow_action";
 import {
     ICommon_Route_Res_Workflow_Info,
     ICommon_Route_Res_Workflow_Info_Action,
-    ICommon_Route_Res_Workflow_Info_Node
+    ICommon_Route_Res_Workflow_Info_Node,
+    ICommon_Route_Res_Workflow_Node_List_Item
 } from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
@@ -17,6 +18,7 @@ import {
 import {workflowActionMapper, workflowMapper, workflowNodeMapper} from './../mapper/workflow';
 import {WorkflowNodeFieldTypeService} from './field';
 import {ICommon_Field_Type} from "../../../common/field/type";
+import {IssueTypeSolutionService} from "./issueType";
 
 export class WorkflowService  {
 
@@ -88,8 +90,9 @@ export class WorkflowService  {
             nodes:[],
             actions:[]
         };
-        obj.nodes=await workflowMapper.nodeList(issueTypeId);
-        obj.actions=await workflowMapper.actionList(issueTypeId);
+        let [nodes,actions]=await Promise.all([workflowMapper.nodeList(issueTypeId),workflowMapper.actionList(issueTypeId)])
+        obj.nodes=nodes;
+        obj.actions=actions;
         return obj;
     }
 
@@ -100,7 +103,6 @@ export class WorkflowService  {
             arr.push(WorkflowNodeFieldTypeService.workflowFieldsCopy(workflowNodes[i],newWorkflowNodes[i]));
         }
         await Promise.all(arr);
-
     }
 
     static async checkNode(issueTypeId:string,workflowNodeId:string) {
@@ -118,8 +120,8 @@ export class WorkflowService  {
         return ret;
     }
 
-    static async init(organizationId:string) {
-        let workflowId=await workflowMapper.init(organizationId);
+    static async init(issueTypeId:string) {
+        let workflowId=await workflowMapper.init(issueTypeId);
         return workflowId;
     }
 
@@ -173,6 +175,38 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
 
     async getActionList() {
         let ret=await workflowNodeMapper.getActionList(this.getId())
+        return ret;
+    }
+
+    static async listAllNode(organizationId:string) {
+        let arr=await IssueTypeSolutionService.list(organizationId)
+        let ret:ICommon_Route_Res_Workflow_Node_List_Item[]=[]
+        let arrPromise=[]
+        for (let obj of arr) {
+            let o={
+                name:obj.name,
+                id:obj.id,
+                data:[]
+            }
+            ret.push(o);
+            for(let obj1 of obj.issueTypeList) {
+                let o1={
+                    name:obj1.name,
+                    id:obj1.id,
+                    data:[]
+                }
+                o.data.push(o1)
+                arrPromise.push(workflowMapper.nodeList(o1.id).then(list=>{
+                    o1.data=list.map(item=>{
+                        return {
+                            id:item.id,
+                            name:item.name
+                        }
+                    })
+                }))
+            }
+        }
+        await Promise.all(arrPromise);
         return ret;
     }
 }

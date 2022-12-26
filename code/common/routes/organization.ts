@@ -82,7 +82,7 @@ const api={
             path:"/user",
             req:<{
                 organizationId:string,
-                userName:string,
+                username:string,
                 roleId:string,
                 nickname:string,
                 active:number,
@@ -240,6 +240,16 @@ const api={
                 memberId:string
             }>{},
             res:<ICommon_Route_Res_Member_Tag_Member>{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        setTagMember:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/tag/member",
+            req:<{
+                memberTagIds:string,
+                memberId:string
+            }>{},
+            res:{},
             permission:[Permission_Types.Organization.ADMIN]
         }
     }

@@ -5,13 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "common": "ttsc -p ./common",
-    "gateway": "ttsc -p ./gateway",
-    "user": "ttsc -p ./user",
-    "cooperation": "ttsc -p ./cooperation",
-    "file": "ttsc -p ./file",
-    "auth": "ttsc -p ./auth",
-    "build": "node ./build.js"
+    "server": "ttsc -p ./gateway"
   },
   "pkg": {
     "scripts": [
@@ -71,7 +65,7 @@
     "@types/yargs": "^17.0.13",
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.9.1",
-    "ttypescript": "^1.5.12",
+    "ttypescript": "^1.5.15",
     "typescript": "^4.6.4",
     "vite": "^3.2.4",
     "vite-node": "^0.25.3"

@@ -16,6 +16,7 @@ import {ICommon_Model_User} from "../../../common/model/user";
 import {Err} from "../../../common/status/error";
 import {memberTagModel} from "../../../common/model/member_tag";
 import rpcFileApi from "../../file/rpc/file";
+import {TeamService} from "./team";
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -35,11 +36,11 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             user_id:ret.created_by_pure,
             nickname:"Admin"
         })
+        await service.create()
         await Promise.all([
-            service.create(),
             (async ()=>{
                 let adminRole=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.ORGANIZATION);
-                await rpcAuthApi.addRoleMember(ret.id,adminRole,ECommon_Model_Organization_Member_Type.USER,ret.created_by_pure)
+                await rpcAuthApi.addRoleMember(ret.id,adminRole,ECommon_Model_Organization_Member_Type.USER,service.getId())
             })(),
             rpcCooperationApi.initIssueTypeSolution(ret.id),
             (async ()=>{
@@ -158,10 +159,12 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             }
         })
         let retRoles=await rpcAuthApi.getRolesByMemberIds(users);
+        let retTags=await memberTagMapper.getTagsByOrganizationUserIds(users.map(item=>item.memberId))
         let ret=arr.data.map((item,index)=>{
             return {
                 ...item,
-                role:retRoles[index].role
+                role:retRoles[index].role,
+                tag:retTags[index]
             }
         })
         return {
@@ -219,7 +222,9 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         }
         await Promise.all([
             objUser.delete(),
-            rpcAuthApi.removeRoleMember(this.getId(),ECommon_Model_Organization_Member_Type.USER,objUser.getId())
+            rpcAuthApi.clearMember(organizationUserId),
+            TeamService.clearMember(organizationUserId),
+            MemberTagService.clearMember(organizationUserId)
         ])
     }
 
@@ -259,7 +264,7 @@ export class MemberTagService extends Entity<typeof memberTagModel,typeof member
 
     override async delete(eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
         await super.delete(eventPublish);
-        await memberTagMapper.clearMember(this.getId());
+        await memberTagMapper.clearMemberByTagId(this.getId());
         await rpcAuthApi.clearRoleByItemId(this.getId());
     }
 
@@ -275,6 +280,27 @@ export class MemberTagService extends Entity<typeof memberTagModel,typeof member
 
     async removeTagMember(organizationUserId:string) {
         await memberTagMapper.removeTagMember(this.getId(),organizationUserId);
+    }
+
+    static async setTagMember(memberTagIds:string,organizationUserId:string) {
+        let arrMemberId=!memberTagIds?[]:memberTagIds.split(",")
+        let arr=await memberTagMapper.getTagsByOrganizationUserId(organizationUserId);
+        let arrCurrent=arr.map(item=>item.id);
+        let arrAdd:string[]=[],arrRemove:string[]=[]
+        arrAdd=arrMemberId.filter(item=>!arrCurrent.includes(item))
+        arrRemove= arrCurrent.filter(item=>!arrMemberId.includes(item))
+        let arrPromise=[]
+        for(let id of arrAdd) {
+            arrPromise.push(memberTagMapper.addTagMember(id,organizationUserId))
+        }
+        for(let id of arrRemove) {
+            arrPromise.push(memberTagMapper.removeTagMember(id,organizationUserId))
+        }
+        await Promise.all(arrPromise);
+    }
+
+    static async clearMember(organizationUserId:string) {
+        await memberTagMapper.clearMemberByMemberId(organizationUserId)
     }
 
 }

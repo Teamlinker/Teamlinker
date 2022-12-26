@@ -1,0 +1,116 @@
+<template>
+  <div ref="root">
+    <a-space>
+      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button placeholder="please type label name"></a-input-search>
+      <a-button type="primary" @click="onAdd">Add</a-button>
+    </a-space>
+    <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
+      <template #name="{record}">
+        {{record.name}}
+      </template>
+      <template #operation="{record}">
+        <a-space wrap>
+          <a-button @click="onEdit(record)" size="small">Edit</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
+        </a-space>
+      </template>
+    </a-table>
+  </div>
+</template>
+
+<script setup lang="ts">
+import {getCurrentInstance, markRaw, reactive, ref} from "vue";
+import {apiProject} from "../../../../common/request/request";
+import {Message} from "@arco-design/web-vue";
+import {Dialog} from "../../../../common/component/dialog/dialog";
+import EditLabel from "./editLabel.vue";
+
+const props=defineProps<{
+  projectId:string
+}>()
+
+const columns=[
+  {
+    title:"name",
+    slotName:"name"
+  },
+  {
+    title:"operation",
+    slotName: "operation"
+  }
+]
+let data=ref<{
+  id:string,
+  name:string
+}[]>([])
+const root=ref(null)
+const appContext=getCurrentInstance().appContext
+const pagination=reactive({
+  total:0,
+  current:1,
+  pageSize:10
+})
+const keyword=ref("");
+const search=async (page:number)=>{
+  let res=await apiProject.listLabel({
+    projectId:props.projectId,
+    size:pagination.pageSize,
+    page:page-1,
+    keyword:keyword.value
+  })
+  if(res?.code==0) {
+    data.value=res.data.data
+    pagination.total=res.data.count;
+    pagination.current=page
+  } else {
+    Message.error(res.msg)
+  }
+}
+const onPageChange=(page:number)=>{
+  search(page)
+}
+const onSearch=()=>{
+  search(1)
+}
+const onAdd=async ()=>{
+  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditLabel),{
+    type:"add",
+    projectId:props.projectId
+  })
+  if(ret) {
+    search(pagination.current)
+  }
+}
+const onEdit=async (item:{
+  id:string,
+  name:string
+})=>{
+  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditLabel),{
+    type:"edit",
+    item:item,
+    projectId:props.projectId
+  })
+  if(ret) {
+    search(pagination.current)
+  }
+}
+const onDelete=async (item:{
+  id:string,
+  name:string
+})=>{
+  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this label from this project?")
+  if(ret) {
+    let res=await apiProject.removeLabel({
+      labelId:item.id
+    })
+    if(res?.code==0) {
+      Message.success("remove success")
+      search(pagination.current)
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

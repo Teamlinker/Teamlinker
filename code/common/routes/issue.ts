@@ -318,7 +318,7 @@ const api={
                 reporterId?:string
                 status?:number,
                 moduleId?:string,
-                tagId?:string,
+                labelId?:string,
                 page:number,
                 size:number
             }>{},

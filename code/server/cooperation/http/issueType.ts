@@ -1,14 +1,7 @@
 import issueTypeApi from "../../../common/routes/issueType";
 import {Err} from "../../../common/status/error";
 import {DComponent} from "../../common/decorate/component";
-import {
-    DHttpApi,
-    DHttpController,
-    DHttpHeaderRequired,
-    DHttpReqParam,
-    DHttpReqParamRequired,
-    DHttpUser
-} from "../../common/http/http";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import {IssueTypeService, IssueTypeSolutionService} from "../service/issueType";
 import {IUserSession} from "../../user/types/config";
 
@@ -16,7 +9,7 @@ import {IUserSession} from "../../user/types/config";
 @DHttpController(issueTypeApi)
 class IssueTypeController {
      @DHttpApi(issueTypeApi.routes.list)
-     async list(@DHttpHeaderRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.list.res> {
+     async list(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.list.res> {
          let ret=await IssueTypeService.list(issueTypeSolutionId)
          return ret;
      }
@@ -30,7 +23,7 @@ class IssueTypeController {
      }
 
      @DHttpApi(issueTypeApi.routes.create)
-     async create(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("icon") icon:string,@DHttpReqParam("description") description:string,@DHttpHeaderRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.create.res> {
+     async create(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("icon") icon:string,@DHttpReqParam("description") description:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.create.res> {
          let obj=new IssueTypeService()
          obj.assignItem({
              name,
@@ -146,17 +139,17 @@ class IssueTypeController {
      }
 
      @DHttpApi(issueTypeApi.routes.solutionProjectList)
-     async solutionProjectList(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.solutionProjectList.res> {
+     async solutionProjectList(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string):Promise<typeof issueTypeApi.routes.solutionProjectList.res> {
         let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
         if(!obj) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
         }
-        let ret=await obj.projectList()
+        let ret=await obj.projectList(page,size,keyword)
         return ret
      }
 
     @DHttpApi(issueTypeApi.routes.copy)
-    async copy(@DHttpReqParamRequired("issueTypeId") issueTypeId:string,@DHttpReqParamRequired("newIssueTypeSolutionId") newIssueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.copy.res> {
+    async copy(@DHttpReqParamRequired("issueTypeId") issueTypeId:string,@DHttpReqParamRequired("newIssueTypeSolutionId") newIssueTypeSolutionId:string,@DHttpReqParamRequired("name") name:string):Promise<typeof issueTypeApi.routes.copy.res> {
         let obj=await IssueTypeService.getItemById(issueTypeId);
         if(!obj) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
@@ -164,11 +157,15 @@ class IssueTypeController {
         let ret=await obj.copy(null,{
             issue_type_solution_id:newIssueTypeSolutionId
         })
+        ret.assignItem({
+            name:name
+        })
+        await ret.update();
         return ret.getItem();
     }
 
     @DHttpApi(issueTypeApi.routes.copySolution)
-    async copySolution(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.copySolution.res> {
+    async copySolution(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("name") name:string):Promise<typeof issueTypeApi.routes.copySolution.res> {
         let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
         if(!obj) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
@@ -176,7 +173,12 @@ class IssueTypeController {
         let ret=await obj.copy(null,{
             organization_id:obj.getItem().organization_id
         })
+        ret.assignItem({
+            name:name
+        })
+        await ret.update();
         return ret.getItem();
     }
+
      
 }

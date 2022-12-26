@@ -89,7 +89,7 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.removeMember)
-    async removeMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string,@DHttpReqParam("type") type:ECommon_Model_Organization_Member_Type):Promise<typeof projectApi.routes.removeMember.res>{
+    async removeMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParam("memberId") memberId:string,@DHttpReqParamRequired("type") type:ECommon_Model_Organization_Member_Type):Promise<typeof projectApi.routes.removeMember.res>{
         let obj=await ProjectService.getItemById(projectId);
         if(!obj) {
             throw Err.Project.projectNotFound

@@ -9,15 +9,15 @@ import rpcFileApi from "../../file/rpc/file";
 import {ECommon_User_Type, ICommon_Model_User, userModel} from './../../../common/model/user';
 import {OrganizationUserService} from "./organization";
 
-export default class User extends Entity<typeof userModel,typeof userMapper> {
+export class UserService extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
         super(userMapper)
     }
 
-    static async getItemByName(name:string):Promise<InstanceType<typeof User>>{
+    static async getItemByName(name:string):Promise<InstanceType<typeof UserService>>{
         let obj = await userMapper.getUserByName(name);
         if(obj) {
-            let user = new User;
+            let user = new UserService;
             user.setItem(obj);
             return user;
         } else {
@@ -105,7 +105,7 @@ export default class User extends Entity<typeof userModel,typeof userMapper> {
             throw Err.Organization.userNotFound
         }
         let ret={
-            info:(await User.userInfos(obj.getId(),true))[0],
+            info:(await UserService.userInfos(obj.getId(),true))[0],
             team:(await this.teamList(0,10,undefined,organizationId)).data
         }
         return ret;

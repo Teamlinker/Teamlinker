@@ -57,7 +57,7 @@ export class Dialog {
             }
         })
     }
-    static confirm(el:HTMLElement,appContext: AppContext,content:string) {
+    static confirm(el:HTMLElement,appContext: AppContext,content:string):Promise<boolean> {
         return new Promise((resolve,reject)=>{
             let ele=document.createElement("div")
             let destroyFunc=renderComponent(ele,DialogView,appContext,{
@@ -75,6 +75,32 @@ export class Dialog {
                 destroyFunc();
                 ele.parentNode.removeChild(ele);
                 resolve(false)
+            }
+        })
+    }
+
+    static input(el:HTMLElement,appContext: AppContext,title:string):Promise<string> {
+        return new Promise((resolve,reject)=>{
+            let ele=document.createElement("div")
+            let input={
+                text:ref("")
+            }
+            let destroyFunc=renderComponent(ele,DialogView,appContext,{
+                onOk,
+                onClose,
+                title:title,
+                input
+            });
+            el.appendChild(ele);
+            async function onOk(){
+                destroyFunc();
+                ele.parentNode.removeChild(ele);
+                resolve(input.text.value)
+            }
+            function onClose(){
+                destroyFunc();
+                ele.parentNode.removeChild(ele);
+                resolve("")
             }
         })
     }

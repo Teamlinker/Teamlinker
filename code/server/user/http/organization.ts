@@ -2,7 +2,7 @@ import organizationApi from "../../../common/routes/organization";
 import {Err} from "../../../common/status/error";
 import {DComponent} from "../../common/decorate/component";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
-import UserService from "../service/user";
+import {UserService} from "../service/user";
 import {MemberTagService, OrganizationService, OrganizationUserService} from './../service/organization';
 import {IUserSession} from "../types/config";
 import rpcAuthApi from "../../auth/rpc/auth"
@@ -84,7 +84,7 @@ class OrganizationController {
 
     @DHttpApi(organizationApi.routes.addUser)
     async addUser(@DHttpReqParamRequired("organizationId") organizationId:string,
-    @DHttpReqParamRequired("userName") userName:string,
+    @DHttpReqParamRequired("username") username:string,
     @DHttpReqParamRequired("roleId") roleId:string,
     @DHttpReqParamRequired("nickname") nickname:string,
     @DHttpReqParamRequired("active") active:number,
@@ -94,13 +94,13 @@ class OrganizationController {
     @DHttpReqParam("phone") phone:string,
     @DHttpReqParam("remark") remark:string,
     @DHttpReqParam("location") location:string) :Promise<typeof organizationApi.routes.addUser.res>{
-        let user=await UserService.getItemByName(userName).then(user=>{
+        let user=await UserService.getItemByName(username).then(user=>{
                 if(!user) {
                     throw Err.User.userNotFound;
                 }
                 return user;
         })
-        let [organization,organizationUser,objRole]=await Promise.all([
+        let [organization,_,objRole]=await Promise.all([
             OrganizationService.getItemById(organizationId).then(obj=>{
                 if(!obj) {
                     throw Err.Organization.organizationNotFound
@@ -114,7 +114,6 @@ class OrganizationController {
                 if(obj) {
                     throw Err.Organization.userAlreadyExists
                 }
-                return obj
             }),
             rpcAuthApi.getRoleServiceById(roleId).then(objRole=>{
                 if(!objRole) {
@@ -123,13 +122,6 @@ class OrganizationController {
                 return objRole;
             })
         ])
-        let objRoleMember=await rpcAuthApi.getRoleMemberService({
-            item_id:organizationId,
-            member_id:organizationUser.getId()
-        })
-        if(objRoleMember) {
-            throw Err.Organization.userAlreadyExists
-        }
         let retUser=await organization.addUser(roleId,user.getId(),nickname,active,title,job,email,phone,location,remark);
         return {
             organizationUser:retUser,
@@ -187,7 +179,10 @@ class OrganizationController {
                 return objRole;
             }):null
         ])
-        let retUser=await organization.updateUser(roleId,user.getId(),nickname,active,title,job,email,phone,location,remark)
+        if(roleId && organization.getItem().created_by_pure==user.getItem().id) {
+            throw Err.Common.requestForbidden
+        }
+        let retUser=await organization.updateUser(roleId,objOrganizationUser.getId(),nickname,active,title,job,email,phone,location,remark)
         return {
             organizationUser:retUser,
             user:user.getItem(),
@@ -347,7 +342,11 @@ class OrganizationController {
         return;
     }
 
-
+    @DHttpApi(organizationApi.routes.setTagMember)
+    async setTagMember(@DHttpReqParamRequired("memberTagIds") memberTagIds:string,@DHttpReqParamRequired("memberId") memberId:string) :Promise<typeof organizationApi.routes.setTagMember.res>{
+        await MemberTagService.setTagMember(memberTagIds,memberId)
+        return;
+    }
 
 
 

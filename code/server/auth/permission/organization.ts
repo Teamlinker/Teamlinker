@@ -8,14 +8,14 @@ export class PermissionOrganization extends PermissionBase {
     async translateToField({userId}: { [param: string]: any; userId?: string; isAdmin?: boolean; }): Promise<string>
     {
         let ret=await userRpcApi.checkOrganizationInfo(userId);
-        return ret.organizationId;
+        return ret?.organizationId;
     }
     fieldName: string="organizationId"
-    async generatorValue({userId,organizationId}: { [param: string]: any; userId?: string; isAdmin?: boolean; }): Promise<number> {
+    async generatorValue({organizationUserId,organizationId}: { [param: string]: any; organizationUserId?: string; isAdmin?: boolean; }): Promise<number> {
         let ret:number;
-        let objTeamUsers=new REDIS_AUTH.Permission.Organization.Users(organizationId);
-        await this.tryLock([objTeamUsers.getKey().replace(/\:/g,"")]);
-        let roleId=await objTeamUsers.getValue(userId);
+        let objOrganizationUsers=new REDIS_AUTH.Permission.Organization.OrganizationUsers(organizationId);
+        await this.tryLock([objOrganizationUsers.getKey().replace(/\:/g,"")]);
+        let roleId=await objOrganizationUsers.getValue(organizationUserId);
         if(roleId) {
             let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(roleId)
             let value=await objRole.getValue()

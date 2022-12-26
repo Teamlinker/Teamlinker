@@ -56,7 +56,8 @@ const api={
                 workflowNodeId: string,
                 fieldTypeId: ECommon_Field_Type,
                 optional: number,
-                defaultValue?: string,
+                defaultStringValue?: string,
+                defaultNumberValue?:number,
                 name: string,
                 description?: string,
             }>{},
@@ -79,9 +80,11 @@ const api={
             req: <{
                 workflowNodeFieldTypeId:string,
                 optional?: number,
-                defaultValue?: string,
+                defaultStringValue?: string,
+                defaultNumberValue?:number,
                 name?: string,
-                description?: string
+                description?: string,
+                labelType:ECommon_Model_Workflow_Node_Field_Type_Label_Type
             }>{},
             res: <ICommon_Model_Workflow_Node_Field_Type>{},
             permission:[Permission_Types.Organization.ADMIN]
@@ -129,10 +132,19 @@ const api={
         },
         workflowFieldsCopy:{
             method:ECommon_HttpApi_Method.POST,
-            path:"/workflow/copy",
+            path:"/copy",
             req:<{
                 workflowNodeId:string,
                 newWorkflowNodeId:string
+            }>{},
+            res:{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        setWorkflowNodeFieldsWeight:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/weight",
+            req:<{
+                workflowNodeFieldTypeIds:string,
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]

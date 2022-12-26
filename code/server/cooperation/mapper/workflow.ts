@@ -36,9 +36,11 @@ class WorkflowMapper  {
         newWorkflowNodes:string[]
     }> {
         let mysql=getMysqlInstance()
-        let nodeList=await this.nodeList(issueTypeId)
-        let actionList=await this.actionList(issueTypeId)
-        let newIds:string[]=[]
+        let [nodeList,actionList]=await Promise.all([
+            this.nodeList(issueTypeId),
+            this.actionList(issueTypeId)
+        ])
+        let newIds:string[]=[],oldIds=nodeList.map(item=>item.id);
         for(let obj of nodeList) {
             let oldId=obj.id;
             obj.id=await generateSnowId()
@@ -56,10 +58,12 @@ class WorkflowMapper  {
             obj.id=await generateSnowId()
             obj.issue_type_id=newIssueTypeId
         }
-        await mysql.execute(generateBatchCreateSql(workflowNodeModel,nodeList))
-        await mysql.execute(generateBatchCreateSql(workflowActionModel,actionList))
+        await Promise.all([
+            mysql.execute(generateBatchCreateSql(workflowNodeModel,nodeList)),
+            mysql.execute(generateBatchCreateSql(workflowActionModel,actionList))
+        ])
         return {
-            workflowNodes:nodeList.map(obj=>obj.id),
+            workflowNodes:oldIds,
             newWorkflowNodes:newIds
         }
     }
@@ -101,86 +105,90 @@ class WorkflowMapper  {
         let workflowNodeProgressId = await generateSnowId()
         let workflowNodeClosedId = await generateSnowId()
         let workflowNodeResolvedId = await generateSnowId()
-        await mysql.execute(generateCreateSql(workflowNodeModel, {
-            id: workflowNodeOpenId,
-            name: "open",
-            status: ECommon_Model_Workflow_Node_Status.NOTSTART,
-            issue_type_id: issueTypeId,
-            x: 50,
-            y: 45
-        }))
-        await mysql.execute(generateCreateSql(workflowNodeModel, {
-            id: workflowNodeProgressId,
-            name: "in progress",
-            status: ECommon_Model_Workflow_Node_Status.INPROGRESS,
-            issue_type_id: issueTypeId,
-            x: 281,
-            y: 177
-        }))
-        await mysql.execute(generateCreateSql(workflowNodeModel, {
-            id: workflowNodeClosedId,
-            name: "closed",
-            status: ECommon_Model_Workflow_Node_Status.DONE,
-            issue_type_id: issueTypeId,
-            x: 59,
-            y: 502
-        }))
-        await mysql.execute(generateCreateSql(workflowNodeModel, {
-            id: workflowNodeResolvedId,
-            name: "resolved",
-            status: ECommon_Model_Workflow_Node_Status.DONE,
-            issue_type_id: issueTypeId,
-            x: 507,
-            y: 503
-        }))
+        await Promise.all([
+            mysql.execute(generateCreateSql(workflowNodeModel, {
+                id: workflowNodeOpenId,
+                name: "open",
+                status: ECommon_Model_Workflow_Node_Status.NOTSTART,
+                issue_type_id: issueTypeId,
+                x: 50,
+                y: 45
+            })),
+            mysql.execute(generateCreateSql(workflowNodeModel, {
+                id: workflowNodeProgressId,
+                name: "in progress",
+                status: ECommon_Model_Workflow_Node_Status.INPROGRESS,
+                issue_type_id: issueTypeId,
+                x: 281,
+                y: 177
+            })),
+            mysql.execute(generateCreateSql(workflowNodeModel, {
+                id: workflowNodeClosedId,
+                name: "closed",
+                status: ECommon_Model_Workflow_Node_Status.DONE,
+                issue_type_id: issueTypeId,
+                x: 59,
+                y: 502
+            })),
+            mysql.execute(generateCreateSql(workflowNodeModel, {
+                id: workflowNodeResolvedId,
+                name: "resolved",
+                status: ECommon_Model_Workflow_Node_Status.DONE,
+                issue_type_id: issueTypeId,
+                x: 507,
+                y: 503
+            }))
+        ])
         let actionOpenToProgressId = await generateSnowId()
         let actionProgressToOpenId = await generateSnowId()
         let actionOpenToClosedId = await generateSnowId()
         let actionClosedToOpenId = await generateSnowId()
         let actionProgressToResolvedId = await generateSnowId()
         let actionResolvedToProgressId = await generateSnowId()
-        await mysql.execute(generateCreateSql(workflowActionModel, {
-            id: actionOpenToProgressId,
-            name: "open to progress",
-            issue_type_id: issueTypeId,
-            source_node_id: workflowNodeOpenId,
-            dest_node_id: workflowNodeProgressId
-        }))
-        await mysql.execute(generateCreateSql(workflowActionModel, {
-            id: actionProgressToOpenId,
-            name: "progress to open",
-            issue_type_id: issueTypeId,
-            source_node_id: workflowNodeProgressId,
-            dest_node_id: workflowNodeOpenId
-        }))
-        await mysql.execute(generateCreateSql(workflowActionModel, {
-            id: actionOpenToClosedId,
-            name: "open to close",
-            issue_type_id: issueTypeId,
-            source_node_id: workflowNodeOpenId,
-            dest_node_id: workflowNodeClosedId
-        }))
-        await mysql.execute(generateCreateSql(workflowActionModel, {
-            id: actionClosedToOpenId,
-            name: "closed to open",
-            issue_type_id: issueTypeId,
-            source_node_id: workflowNodeClosedId,
-            dest_node_id: workflowNodeOpenId
-        }))
-        await mysql.execute(generateCreateSql(workflowActionModel, {
-            id: actionProgressToResolvedId,
-            name: "progress to resolved",
-            issue_type_id: issueTypeId,
-            source_node_id: workflowNodeProgressId,
-            dest_node_id: workflowNodeResolvedId
-        }))
-        await mysql.execute(generateCreateSql(workflowActionModel, {
-            id: actionResolvedToProgressId,
-            name: "resolved to progress",
-            issue_type_id: issueTypeId,
-            source_node_id: workflowNodeResolvedId,
-            dest_node_id: workflowNodeProgressId
-        }))
+        await Promise.all([
+            mysql.execute(generateCreateSql(workflowActionModel, {
+                id: actionOpenToProgressId,
+                name: "open to progress",
+                issue_type_id: issueTypeId,
+                source_node_id: workflowNodeOpenId,
+                dest_node_id: workflowNodeProgressId
+            })),
+            mysql.execute(generateCreateSql(workflowActionModel, {
+                id: actionProgressToOpenId,
+                name: "progress to open",
+                issue_type_id: issueTypeId,
+                source_node_id: workflowNodeProgressId,
+                dest_node_id: workflowNodeOpenId
+            })),
+            mysql.execute(generateCreateSql(workflowActionModel, {
+                id: actionOpenToClosedId,
+                name: "open to close",
+                issue_type_id: issueTypeId,
+                source_node_id: workflowNodeOpenId,
+                dest_node_id: workflowNodeClosedId
+            })),
+            mysql.execute(generateCreateSql(workflowActionModel, {
+                id: actionClosedToOpenId,
+                name: "closed to open",
+                issue_type_id: issueTypeId,
+                source_node_id: workflowNodeClosedId,
+                dest_node_id: workflowNodeOpenId
+            })),
+            mysql.execute(generateCreateSql(workflowActionModel, {
+                id: actionProgressToResolvedId,
+                name: "progress to resolved",
+                issue_type_id: issueTypeId,
+                source_node_id: workflowNodeProgressId,
+                dest_node_id: workflowNodeResolvedId
+            })),
+            mysql.execute(generateCreateSql(workflowActionModel, {
+                id: actionResolvedToProgressId,
+                name: "resolved to progress",
+                issue_type_id: issueTypeId,
+                source_node_id: workflowNodeResolvedId,
+                dest_node_id: workflowNodeProgressId
+            }))
+        ])
     }
 
 }

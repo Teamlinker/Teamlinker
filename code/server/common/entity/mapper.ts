@@ -66,7 +66,7 @@ export abstract class Mapper<T extends BaseModel> {
     }
     async copy(id:string,deletedFields?:string[],updatedFields?:{
         [name in keyof T["model"]]?:T["model"][name]
-    }):Promise<T["model"]> {
+    },newName?:string):Promise<T["model"]> {
         if(!id) {
             throw Err.Common.itemNotFound
         }
@@ -84,13 +84,13 @@ export abstract class Mapper<T extends BaseModel> {
                 delete ret[obj]
             }
         }
-        if(ret.name) {
-            (ret as any).name+="(copy)"
-        }
         if(updatedFields) {
             for(let name in updatedFields) {
                 ret[name]=updatedFields[name];
             }
+        }
+        if(newName && ret.name) {
+            (<any>ret).name=newName
         }
         await this.create(ret);
         let obj=await this.getById(ret.id)

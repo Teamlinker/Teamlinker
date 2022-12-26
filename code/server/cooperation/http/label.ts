@@ -26,20 +26,20 @@ class TagController {
           return ret;
      }
      @DHttpApi(projectApi.routes.editLabel)
-     async editTag(@DHttpReqParamRequired("tagId") tagId:string,@DHttpReqParamRequired("name") name:string):Promise<typeof projectApi.routes.editLabel.res>{
+     async editTag(@DHttpReqParamRequired("labelId") labelId:string,@DHttpReqParamRequired("name") name:string):Promise<typeof projectApi.routes.editLabel.res>{
           let tag=new ProjectLabelService()
           tag.assignItem({
-               id:tagId,
+               id:labelId,
                name:name
           })
           let ret= await tag.update();
           return ret;
      }
      @DHttpApi(projectApi.routes.removeLabel)
-     async removeTag(@DHttpReqParamRequired("tagId") tagId:string):Promise<typeof projectApi.routes.removeLabel.res>{
+     async removeTag(@DHttpReqParamRequired("labelId") labelId:string):Promise<typeof projectApi.routes.removeLabel.res>{
           let tag=new ProjectLabelService()
           tag.assignItem({
-               id:tagId
+               id:labelId
           })
           await tag.delete();
           return

@@ -92,7 +92,7 @@ const api={
             method:ECommon_HttpApi_Method.PUT,
             path:"/tag/item",
             req:<{
-                tagId:string,
+                labelId:string,
                 name:string     
             }>{},
             res:<{
@@ -105,7 +105,7 @@ const api={
             method:ECommon_HttpApi_Method.DELETE,
             path:"/tag/item",
             req:<{
-                tagId:string 
+                labelId:string
             }>{},
             res:{},
             permission:[Permission_Types.Project.EDIT]

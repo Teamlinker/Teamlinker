@@ -5,6 +5,7 @@ import {Mapper} from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
 import {generateDeleteSql, generateQuerySql} from '../../common/util/sql';
 import {projectLabelModel, Table_Project_Label} from './../../../common/model/project_label';
+import {projectLabelIssueModel} from "../../../common/model/project_label_issue";
 
 class LabelMapper extends Mapper<typeof projectLabelModel> {
     constructor() {
@@ -40,28 +41,64 @@ class LabelMapper extends Mapper<typeof projectLabelModel> {
     }
     async deleteByProjectId(projectId:string) {
         if(!projectId) {
+            throw Err.Project.Label.labelNotfound
+        }
+        let mysql=getMysqlInstance()
+        let arr=await mysql.execute(generateQuerySql(projectLabelModel,["id"],{
+            project_id:projectId
+        }))
+        if(arr.length>0) {
+            await mysql.execute(generateDeleteSql(projectLabelModel,{
+                project_id:projectId
+            }))
+            await mysql.executeOne(generateDeleteSql(projectLabelIssueModel,{
+                project_label_id:{
+                    exp:"in",
+                    value:arr.map(item=>item.id)
+                }
+            }))
+        }
+    }
+
+    async clearByLabelId(labelId:string) {
+        if(!labelId) {
             throw Err.Project.Module.moduleNotFound
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectLabelModel,{
-            project_id:projectId
+        await mysql.execute(generateDeleteSql(projectLabelIssueModel,{
+            project_label_id:labelId
         }))
     }
 
     async deleteByProjectIds(projectIds:string[]) {
         if(!projectIds) {
-            throw Err.Project.Module.moduleNotFound
+            throw Err.Project.Label.labelNotfound
         }
         if(projectIds.length==0) {
             return;
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectLabelModel,{
+        let arr=await mysql.execute(generateQuerySql(projectLabelModel,["id"],{
             project_id:{
                 exp:"in",
                 value:projectIds
             }
         }))
+        if(arr.length>0) {
+            await mysql.execute(generateDeleteSql(projectLabelModel,{
+                project_id:{
+                    exp:"in",
+                    value:projectIds
+                }
+            }))
+            await mysql.executeOne(generateDeleteSql(projectLabelIssueModel,{
+                project_label_id:{
+                    exp:"in",
+                    value:arr.map(item=>item.id)
+                }
+            }))
+        }
+
     }
 }
 export let labelMapper=new LabelMapper

@@ -58,7 +58,15 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
             aggregation:"role"
         },query,"or")
         let arr=await mysql.execute(sql);
-        return arr;
+        let ret:typeof arr=[]
+        for(let item of items) {
+            for(let obj of arr) {
+                if(item.memberId==obj.member_id && item.itemId==obj.item_id) {
+                    ret.push(obj)
+                }
+            }
+        }
+        return ret;
     }
 
     async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number,key?:string):Promise<{

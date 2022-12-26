@@ -227,6 +227,11 @@ class OrganizationUserMapper extends Mapper<typeof organizationUserModel> {
                     value:organizationUserIds
                 }
             }
+        },"and",{
+            field:"id",
+            model:organizationUserModel,
+            type:"field",
+            value:organizationUserIds
         })
         ret=await mysql.execute(sql)
         return ret
@@ -254,7 +259,7 @@ class MemberTagMapper extends Mapper<typeof memberTagModel> {
         return ret;
     }
 
-    async clearMember(memberTagId:string) {
+    async clearMemberByTagId(memberTagId:string) {
         let mysql=getMysqlInstance()
         await mysql.execute(generateDeleteSql(memberTagMemberModel,{
             member_tag_id:memberTagId
@@ -378,6 +383,78 @@ class MemberTagMapper extends Mapper<typeof memberTagModel> {
         await mysql.execute(generateDeleteSql(memberTagMemberModel,{
             member_tag_id:memberTagId,
             organization_user_id:organizationUserId
+        }))
+    }
+
+    async getTagsByOrganizationUserId(organizationUserId:string) {
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:memberTagMemberModel
+        },{
+            model:memberTagModel,
+            columns:keys<ICommon_Model_Member_Tag>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:memberTagMemberModel,
+                    field:"member_tag_id"
+                }
+            }
+        },{
+            organization_user_id:{
+                model:memberTagMemberModel,
+                value:organizationUserId
+            }
+        })
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
+
+    async getTagsByOrganizationUserIds(organizationUserIds:string[]) {
+        if(organizationUserIds.length==0) {
+            return []
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:memberTagMemberModel,
+            columns:["organization_user_id"],
+            aggregation:"organizationUser"
+        },{
+            model:memberTagModel,
+            columns:keys<ICommon_Model_Member_Tag>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:memberTagMemberModel,
+                    field:"member_tag_id"
+                }
+            },
+            aggregation:"tag"
+        },{
+            organization_user_id:{
+                model:memberTagMemberModel,
+                value:{
+                    exp:"in",
+                    value:organizationUserIds
+                }
+            }
+        })
+        let arr=await mysql.execute(sql)
+        let ret:ICommon_Model_Member_Tag[][]=[]
+        for(let organizationUserId of organizationUserIds) {
+            let arrTemp:ICommon_Model_Member_Tag[]=[]
+            for(let obj of arr) {
+                if(obj.organizationUser.organization_user_id==organizationUserId) {
+                    arrTemp.push(obj.tag)
+                }
+            }
+            ret.push(arrTemp)
+        }
+        return ret;
+    }
+
+    async clearMemberByMemberId(memberId:string) {
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(memberTagMemberModel,{
+            organization_user_id:memberId
         }))
     }
 

@@ -102,15 +102,17 @@ export default class GateWay extends Application {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }
                     if(permission && Array.isArray(permission) && permission.length>0) {
-                        if(obj.data["organizationId"]) {
-                            obj.user.organizationInfo={
-                                organizationId:obj.data["organizationId"]
-                            }
-                        } else {
-                            obj.user.organizationInfo=await userRpcApi.checkOrganizationInfo(obj.user.userId);
-                        }
                         if(obj.user) {
                             if(obj.user.type==ECommon_User_Type.USER) {
+                                obj.user.organizationInfo=await userRpcApi.checkOrganizationInfo(obj.user.userId);
+                                if(!obj.user.organizationInfo) {
+                                    if(obj.data["organizationId"]) {
+                                        obj.user.organizationInfo={
+                                            organizationId:obj.data["organizationId"],
+                                            organizationUserId:await userRpcApi.getOrganizationUserId(obj.data["organizationId"],obj.user.userId)
+                                        }
+                                    }
+                                }
                                 let isCheck =await authRpcApi.processPermission(permission,Object.assign({},obj.data,{
                                     userId:obj.user?obj.user.userId:undefined,
                                     organizationId:obj.user.organizationInfo.organizationId,

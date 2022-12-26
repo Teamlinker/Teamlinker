@@ -1,0 +1,72 @@
+<template>
+  <a-form ref="eleForm" style="width: 80%" :model="form">
+    <a-form-item field="name" label="name" required>
+      <a-input v-model="form.name" v-if="type=='add'"></a-input>
+      <template v-else>{{form.name}}</template>
+    </a-form-item>
+    <a-form-item field="keyword" label="keyword" required>
+      <a-input v-model="form.keyword" v-if="type=='add'"></a-input>
+      <template v-else>{{form.keyword}}</template>
+    </a-form-item>
+    <a-form-item field="description" label="description">
+      <a-textarea v-model="form.description" allow-clear></a-textarea>
+    </a-form-item>
+    <a-form-item label="logo">
+      <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="type=='edit'?item.photo:''" @upload="onUpload"></Upload>
+    </a-form-item>
+  </a-form>
+</template>
+
+<script setup lang="ts">
+import {ICommon_Model_Project} from "../../../../../../../common/model/project";
+import Upload from "../../../../common/component/upload.vue";
+import {getCurrentInstance, reactive, ref} from "vue";
+import {onDialogOk} from "../../../../common/component/dialog/dialog";
+import {apiProject} from "../../../../common/request/request";
+import {Message} from "@arco-design/web-vue";
+
+const props=defineProps<{
+  type:"edit"|"add",
+  item?:ICommon_Model_Project
+}>()
+const form=reactive({
+  name:props.type=="edit"?props.item.name:"",
+  keyword:props.type=="edit"?props.item.keyword:"",
+  description:props.type=="edit"?props.item.description:"",
+})
+const uploadUriId=ref("")
+const onUpload=(id:string)=> {
+  uploadUriId.value=id
+}
+const eleForm=ref(null);
+const appContext=getCurrentInstance().appContext;
+onDialogOk(async ()=>{
+  let isError=await eleForm.value.validate()
+  if(isError) {
+    return false;
+  }
+  let res=await (props.type=="edit"?apiProject.edit({
+    projectId:props.item.id,
+    ...form,
+    ...(uploadUriId.value && {
+      photo:uploadUriId.value
+    })
+  }):apiProject.create({
+    ...form,
+    ...(uploadUriId.value && {
+      photo:uploadUriId.value
+    })
+  }))
+  if(res?.code==0){
+    Message.success("operation success");
+    return true;
+  } else {
+    Message.error(res.msg);
+    return false
+  }
+})
+</script>
+
+<style scoped>
+
+</style>

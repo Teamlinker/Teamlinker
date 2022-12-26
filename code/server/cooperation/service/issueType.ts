@@ -11,10 +11,18 @@ export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issue
     constructor(){
         super(issueTypeMapper)
     }
+
+    override async create(): Promise<typeof issueTypeModel["model"]> {
+        let obj=await super.create();
+        await WorkflowService.init(obj.id);
+        return obj
+    }
+
     static async list(issueTypeSolutionId:string){
         let ret=await issueTypeMapper.list(issueTypeSolutionId)
         return ret;
     }
+
     override async delete() {
         await super.delete()
         await WorkflowService.delete(this.getId());
@@ -24,42 +32,6 @@ export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issue
         let obj=await super.copy(deletedFields, updatedFields);
         await WorkflowService.copy(this.getId(),obj.getId());
         return obj;
-    }
-
-    static async init(issueTypeSolutionId:string):Promise<{
-        taskId:string,
-        bugId:string,
-        ticketId:string
-    }> {
-        if(!issueTypeSolutionId) {
-            throw Err.Project.Issue.issueTypeSolutionNotFound
-        }
-        let objTask=new IssueTypeService();
-        objTask.assignItem({
-            name:"Task",
-            reserved:1,
-            issue_type_solution_id:issueTypeSolutionId
-        })
-        await objTask.create();
-        let objBug=new IssueTypeService;
-        objBug.assignItem({
-            name:"Bug",
-            reserved:1,
-            issue_type_solution_id:issueTypeSolutionId
-        })
-        await objBug.create();
-        let objTicket=new IssueTypeService;
-        objTicket.assignItem({
-            name:"Ticket",
-            reserved:1,
-            issue_type_solution_id:issueTypeSolutionId
-        })
-        await objTicket.create();
-        return {
-            taskId:objTask.getId(),
-            bugId:objBug.getId(),
-            ticketId:objTicket.getId()
-        };
     }
 }
 
@@ -88,8 +60,10 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         let list=await this.issueTypeList();
         let arr=[];
         for(let obj of list) {
-            let o=await IssueTypeService.getItemById(obj.id);
-            arr.push(o.delete())
+            arr.push((async ()=>{
+                let o=await IssueTypeService.getItemById(obj.id);
+                await o.delete()
+            })())
         }
         await Promise.all(arr)
     }
@@ -97,18 +71,15 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
     static async list(organizationId:string){
         let ret=await issueTypeSolutionMapper.list(organizationId)
         let arr:ICommon_Route_Res_IssueTypeSolution_List_Item[]=[]
+        let arrPromise=[]
         for(let obj of ret) {
-            arr.push({
-                ...obj,
-                projectList:(await issueTypeSolutionMapper.projectList(obj.id)).map(item=>{ return {
-                    id:item.id,
-                    photo:item.photo,
-                    name:item.name,
-                    description:item.description
-                }}),
-                issueTypeList:await issueTypeMapper.list(obj.id)
-            })
+            arrPromise.push((async ()=>{
+                let item={...obj} as ICommon_Route_Res_IssueTypeSolution_List_Item
+                arr.push(item)
+                item.issueTypeList=await issueTypeMapper.list(obj.id)
+            })())
         }
+        await Promise.all(arrPromise);
         return arr;
     }
 
@@ -119,8 +90,7 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         }
         return {
             ...ret.getItem(),
-            issueTypeList:await issueTypeMapper.list(id),
-            projectList:await issueTypeSolutionMapper.projectList(id)
+            issueTypeList:await issueTypeMapper.list(id)
         }
     }
 
@@ -157,21 +127,9 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         await issueTypeSolutionMapper.unbindProject(this.getId(),projectId,this.getItem().organization_id)
     }
 
-    async projectList():Promise<{
-        id:string,
-        name:string,
-        photo:string,
-        description:string
-    }[]> {
-        let ret=await issueTypeSolutionMapper.projectList(this.getId())
-        return ret.map(item=>{
-            return {
-                id:item.id,
-                name:item.name,
-                photo:item.photo,
-                description:item.description
-            }
-        });
+    async projectList(page:number,size:number,keyword?:string) {
+        let ret=await issueTypeSolutionMapper.projectList(this.getId(),page,size,keyword)
+        return ret
     }
 
     static async getObjByProjectId(projectId:string) {
@@ -215,7 +173,25 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
             organization_id:organizationId
         })
         await objSolution.create()
-        await IssueTypeService.init(objSolution.getId());
+        let objTask=new IssueTypeService();
+        objTask.assignItem({
+            name:"Task",
+            reserved:1,
+            issue_type_solution_id:objSolution.getId()
+        })
+        let objBug=new IssueTypeService;
+        objBug.assignItem({
+            name:"Bug",
+            reserved:1,
+            issue_type_solution_id:objSolution.getId()
+        })
+        let objTicket=new IssueTypeService;
+        objTicket.assignItem({
+            name:"Ticket",
+            reserved:1,
+            issue_type_solution_id:objSolution.getId()
+        })
+        await Promise.all([objTask.create(),objBug.create(),objTicket.create()])
         return {
             solutionId:objSolution.getId(),
             solutionName:objSolution.getItem().name

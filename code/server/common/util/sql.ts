@@ -242,7 +242,8 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
     [param in keyof T["model"]]?:EXPRVALUE
 },exprMode?:"and"|"or",order?:{
     field:keyof T["model"],
-    type:"asc"|"desc"
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
 },limit?:number,size?:number):{
     value:string,
     type:{
@@ -256,8 +257,31 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
         column="*"
     }
     let expr=generateExp(objExpr,exprMode);
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.field.toString()} ${order.type}`
+        }
+    }
     return {
-        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}${order?` order by ${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""}${orderStr?orderStr:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:model.model
     }
 }
@@ -356,7 +380,8 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
 },exprMode?:"and"|"or",order?:{
     field:keyof (T1["model"] & T2["model"]),
     model:T1|T2
-    type:"asc"|"desc"
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
 },limit?:number,size?:number):{
     value:string,
     type:(F1 extends null ? Rename<{
@@ -408,8 +433,31 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
     }
     aggregation[table]=mainModel.aggregation??""
     aggregation[joinTable]=joinModel.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.model.table}.${order.field.toString()} ${order.type}`
+        }
+    }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""}${orderStr??""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -466,7 +514,8 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
 },exprMode?:"and"|"or",order?:{
     field:keyof(T1["model"] & T2["model"] & T3["model"]),
     model:T1 | T2 | T3,
-    type:"asc"|"desc"
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
 },limit?:number,size?:number):{
     value:string,
     type:(F1 extends null ? Rename<{
@@ -539,8 +588,31 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
     aggregation[table]=mainModel.aggregation??""
     aggregation[joinTable]=joinModel.aggregation??""
     aggregation[joinTable2]=joinModel2.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.model.table}.${order.field.toString()} ${order.type}`
+        }
+    }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}${orderStr??""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -609,7 +681,8 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
 },exprMode?:"and"|"or",order?:{
     field:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"]),
     model:T1 | T2 | T3 | T4,
-    type:"asc"|"desc"
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
 },limit?:number,size?:number):{
     value:string,
     type:(F1 extends null ? Rename<{
@@ -703,8 +776,31 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     aggregation[joinTable]=joinModel.aggregation??""
     aggregation[joinTable2]=joinModel2.aggregation??""
     aggregation[joinTable3]=joinModel3.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.model.table}.${order.field.toString()} ${order.type}`
+        }
+    }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}${order?` order by ${order.model.table}.${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}${orderStr??""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }

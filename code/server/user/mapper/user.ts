@@ -142,6 +142,10 @@ class UserMapper extends Mapper<typeof userModel> {
                 exp:"in",
                 value:userIds
             }
+        },"and",{
+            field:"id",
+            type:"field",
+            value:userIds
         }))
         return arr;
     }

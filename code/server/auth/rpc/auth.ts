@@ -143,7 +143,7 @@ class RpcAuthApi {
     }
 
     async clearMember(memberId:string) {
-
+        await RoleMemberService.clearMember(memberId)
     }
     
     async removeRoleMember(itemId: string, memberType:ECommon_Model_Organization_Member_Type,memberId?: string) {
@@ -191,7 +191,7 @@ class RpcAuthApi {
         totalPage:number,
         count:number
     }> {
-        let ret=await RoleMemberService.listRoleMember(itemId,roleType,memberType,page,size);
+        let ret=await RoleMemberService.listRoleMember(itemId,roleType,memberType,page,size,key);
         return ret;
     }
 
