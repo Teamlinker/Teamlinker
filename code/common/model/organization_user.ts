@@ -9,7 +9,7 @@ export interface ICommon_Model_Organization_User {
     created_time: Date,
     modified_time: Date,
     location: string,
-    title: string,
+    department: string,
     active: number,
     job: string,
     nickname: string,

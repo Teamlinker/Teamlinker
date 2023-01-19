@@ -44,6 +44,9 @@ class IconManager extends Base {
             }
         }
     }
+    clear() {
+        this.iconList.splice(0,this.iconList.length)
+    }
 }
 
 export const iconManager=new IconManager();

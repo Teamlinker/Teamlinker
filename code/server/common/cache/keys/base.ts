@@ -82,6 +82,10 @@ export class RedisSetKey extends RedisBaseKey<string[]> {
     async set(value:string[],ttl?:number){
         await this.redis.sSet(this.name,value,ttl??this.ttl);
     }
+    async check(field:string):Promise<boolean> {
+        let ret=await this.redis.sExists(this.name,field);
+        return ret;
+    }
 }
 
 export class RedisHashKey extends RedisBaseKey<string> {
@@ -125,6 +129,14 @@ export abstract class BaseRedisStringCache<T> extends BaseRedisCache<T> {
 
 export abstract class BaseRedisHashCache<T> extends BaseRedisCache<T> {
     objRedis:RedisHashKey;
+    async check(id:string) {
+        let ret=await this.objRedis.check(id);
+        return ret;
+    }
+}
+
+export abstract class BaseRedisSetCache<T> extends BaseRedisCache<T> {
+    objRedis:RedisSetKey;
     async check(id:string) {
         let ret=await this.objRedis.check(id);
         return ret;

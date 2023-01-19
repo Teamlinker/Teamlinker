@@ -9,24 +9,24 @@ export class WindowManager extends Base{
         if(!isMulti) {
             if(arr.length==0) {
                 this.windowList.push(window)
-                this.setFocus(window.id)
+                this.show(window.id)
                 if(window.onOpen) {
                     window.onOpen(window);
                 }
             } else {
                 if(window.type==ETeamOS_Window_Type.SIMPLE) {
-                    this.setFocus(arr[0].id)
+                    this.show(arr[0].id)
                 } else {
-                    let index=0,size=this.windowList[0].nodes.length;
-                    for(let i=1;i<this.windowList.length;i++) {
-                        if(this.windowList[i].nodes.length<size) {
-                            size=this.windowList[i].nodes.length;
+                    let index=0,size=arr.length
+                    for(let i=1;i<arr.length;i++) {
+                        if(arr[i].nodes.length<size) {
+                            size=arr[i].nodes.length;
                             index=i;
                         }
                     }
-                    this.windowList[index].nodes.push(...window.nodes)
-                    this.windowList[index].activeKey=window.nodes[0].id;
-                    this.setFocus(this.windowList[index].id)
+                    arr[index].nodes.push(...window.nodes)
+                    arr[index].activeKey=window.nodes[0].id;
+                    this.show(arr[index].id)
                     if(window.onOpen) {
                         window.onOpen(window);
                     }
@@ -34,7 +34,7 @@ export class WindowManager extends Base{
             }
         } else {
             this.windowList.push(window)
-            this.setFocus(window.id)
+            this.show(window.id)
             if(window.onOpen) {
                 window.onOpen(window);
             }
@@ -130,6 +130,9 @@ export class WindowManager extends Base{
             }
         }
         return arr;
+    }
+    clear() {
+        this.windowList.splice(0,this.windowList.length)
     }
 }
 

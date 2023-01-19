@@ -69,7 +69,7 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
         return ret;
     }
 
-    async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number,key?:string):Promise<{
+    async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number,key?:string,roleId?:string):Promise<{
         data:{
             member?:ICommon_Model_Organization_User,
             memberType:ECommon_Model_Organization_Member_Type
@@ -149,11 +149,7 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
             }
         } else if(memberType===ECommon_Model_Organization_Member_Type.USER){
             let count:number;
-            if(key) {
-                count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} rm left join ${Table_Organization_User} ou on ou.id=rm.member_id where rm.item_id=${itemId} and rm.member_type=${ECommon_Model_Organization_Member_Type.USER} and ou.nickname like '%${key}%'`))[0])
-            } else {
-                count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} where item_id=${itemId} and member_type=${ECommon_Model_Organization_Member_Type.USER}`))[0])
-            }
+            count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} rm left join ${Table_Organization_User} ou on ou.id=rm.member_id where rm.item_id=${itemId} and rm.member_type=${ECommon_Model_Organization_Member_Type.USER}${key?` and ou.nickname like '%${key}%'`:""}${roleId?` and rm.role_id=${roleId}`:""}`))[0])
             let totalPage=CommonUtil.pageTotal(count,size)
             let sql=generateLeftJoin3Sql({
                 model:roleMemberModel,
@@ -209,6 +205,12 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
                             value:key
                         }
                     }
+                }),
+                ...(roleId && {
+                    role_id:{
+                        model:roleMemberModel,
+                        value:roleId
+                    }
                 })
             },"and",{
                 model:organizationUserModel,
@@ -222,11 +224,7 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
             ret.data=arr;
         } else if(memberType===ECommon_Model_Organization_Member_Type.TEAM){
             let count:number
-            if(key) {
-                count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} rm left join ${Table_Team} ou on ou.id=rm.member_id where rm.item_id=${itemId} and rm.member_type=${ECommon_Model_Organization_Member_Type.TEAM} and ou.name like '%${key}%'`))[0])
-            } else {
-                count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} where item_id=${itemId} and member_type=${ECommon_Model_Organization_Member_Type.TEAM}`))[0])
-            }
+            count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} rm left join ${Table_Team} t on t.id=rm.member_id where rm.item_id=${itemId} and rm.member_type=${ECommon_Model_Organization_Member_Type.TEAM}${key?` and t.name like '%${key}%'`:""}${roleId?` and rm.role_id=${roleId}`:""}`))[0])
             let totalPage=CommonUtil.pageTotal(count,size)
             let sql=generateLeftJoin2Sql({
                 model:roleMemberModel,
@@ -272,6 +270,12 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
                             value: key
                         }
                     }
+                }),
+                ...(roleId && {
+                    role_id:{
+                        model:roleMemberModel,
+                        value:roleId
+                    }
                 })
             },"and",{
                 model:teamModel,
@@ -285,11 +289,7 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
             ret.data=arr;
         } else if(memberType===ECommon_Model_Organization_Member_Type.MEMBERTAG){
             let count:number;
-            if(key) {
-                count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} rm left join ${Table_Member_Tag} ou on ou.id=rm.member_id where rm.item_id=${itemId} and rm.member_type=${ECommon_Model_Organization_Member_Type.MEMBERTAG} and ou.name like '%${key}%'`))[0])
-            } else {
-                count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} where item_id=${itemId} and member_type=${ECommon_Model_Organization_Member_Type.MEMBERTAG}`))[0])
-            }
+            count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Role_Member} rm left join ${Table_Member_Tag} mt on mt.id=rm.member_id where rm.item_id=${itemId} and rm.member_type=${ECommon_Model_Organization_Member_Type.MEMBERTAG}${key?` and mt.name like '%${key}%'`:""}${roleId?` and rm.role_id=${roleId}`:""}`))[0])
             let totalPage=CommonUtil.pageTotal(count,size)
             let sql=generateLeftJoin2Sql({
                 model:roleMemberModel,
@@ -334,6 +334,12 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
                             exp: "%like%",
                             value: key
                         }
+                    }
+                }),
+                ...(roleId && {
+                    role_id:{
+                        model:roleMemberModel,
+                        value:roleId
                     }
                 })
             },"and",{

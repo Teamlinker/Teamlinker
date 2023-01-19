@@ -27,6 +27,11 @@ class Desktop extends Base{
         b:0
     });
     private menuValue=ref("")
+    private avatar=ref("")
+    private avatarOptions=ref<{
+       name:string,
+       clickFunc:any
+    }[]>([])
     onMenuClick:(value:string)=>void
     setLogo(logo:string) {
         this.logo.value=logo
@@ -67,6 +72,32 @@ class Desktop extends Base{
         if(eventType=="menuClick") {
             this.onMenuClick=func
         }
+    }
+    getAvatar() {
+        return this.avatar
+    }
+    setAvatar(uri:string) {
+        this.avatar.value=uri;
+    }
+    getAvatarOptions() {
+        return this.avatarOptions
+    }
+    setAvatarOptions(options:{
+       name:string,
+       clickFunc:any
+    }[]) {
+        this.avatarOptions.value=options;
+    }
+    clear() {
+        this.backgroundImage.value = ""
+        this.logo.value = ""
+        this.menu.splice(0, this.menu.length)
+        this.baseColor.r = 0;
+        this.baseColor.g = 0;
+        this.baseColor.b = 0;
+        this.menuValue.value = ""
+        this.avatar.value = ""
+        this.avatarOptions.value = []
     }
 }
 

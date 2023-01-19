@@ -7,23 +7,28 @@ import {iconSetting} from "../icon/setting";
 import {iconCalendar} from "../icon/calendar";
 import {iconMeeting} from "../icon/meeting";
 import {iconProject} from "../icon/project";
-import {iconTeam} from "../icon/team";
+import {iconPeople} from "../icon/people";
 import {iconWiki} from "../icon/wiki";
 import {iconIM} from "../icon/im";
+import {ICommon_Model_User} from "../../../../../../common/model/user";
+import {iconTeam} from "../icon/team";
 
 export const useDesktopStore=defineStore("desktop",{
     state:()=>({
         organizationInfo:null as DCSType<ICommon_Model_Organization>,
         organizationList:null as DCSType<ICommon_Route_Res_Organization_List>,
+        organizationPermission:0,
         appList:[
             iconSetting,
             iconCalendar,
             iconMeeting,
             iconProject,
-            iconTeam,
+            iconPeople,
             iconWiki,
-            iconIM
-        ] as Icon[]
+            iconIM,
+            iconTeam
+        ] as Icon[],
+        userInfo:{} as DCSType<Omit<ICommon_Model_User,"password">>
     }),
     actions:{
         async getOrganizationList() {
@@ -37,13 +42,25 @@ export const useDesktopStore=defineStore("desktop",{
                 organizationId
             });
             if(retEnter?.code==0) {
-                let retOrganization=await apiOrganization.info({
-                    organizationId
-                })
-                if(retOrganization?.code==0) {
-                    this.organizationInfo=retOrganization.data
-                    sessionStorage.setItem("organizationId",retOrganization.data.id);
-                }
+                await Promise.all([
+                    (async ()=>{
+                        let retOrganization=await apiOrganization.info({
+                            organizationId
+                        })
+                        if(retOrganization?.code==0) {
+                            this.organizationInfo=retOrganization.data
+                            sessionStorage.setItem("organizationId",retOrganization.data.id);
+                        }
+                    })(),
+                    (async ()=>{
+                        let ret=await apiOrganization.getPermission({
+                            organizationId
+                        })
+                        if(ret?.code==0) {
+                            this.organizationPermission=ret.data.value
+                        }
+                    })()
+                ])
             }
         },
         async isAuth():Promise<boolean> {
@@ -54,7 +71,19 @@ export const useDesktopStore=defineStore("desktop",{
             if(!ret || ret.code!=0) {
                 return false
             } else {
+                sessionStorage.setItem("userId",ret.data.id);
+                this.userInfo=ret.data;
                 return true
+            }
+        },
+        async logout() {
+            let res=await apiUser.logout()
+            if(res?.code==0) {
+                sessionStorage.clear();
+                this.$reset();
+                return true
+            } else {
+                return false
             }
         },
         async $update() {
@@ -65,6 +94,9 @@ export const useDesktopStore=defineStore("desktop",{
             if(retOrganization?.code==0) {
                 this.organizationInfo=retOrganization.data
             }
+        },
+        async $refreshUser() {
+            await this.isAuth();
         }
     }
 })

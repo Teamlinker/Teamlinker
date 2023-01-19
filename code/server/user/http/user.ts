@@ -15,6 +15,7 @@ import {
 } from "../../common/http/http";
 import {UserService} from "../service/user";
 import {IUserSession} from "../types/config";
+import {OrganizationUserService} from "../service/organization";
 
 @DComponent
 @DHttpController(userApi)
@@ -128,12 +129,19 @@ class UserController {
     }
 
     @DHttpApi(userApi.routes.teamList)
-    async teamList(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof userApi.routes.teamList.res>{
-        let user=await UserService.getItemById(userInfo.type==ECommon_User_Type.USER?userInfo.userId:userId)
+    async teamList(@DHttpReqParam("userId") userId:string,@DHttpReqParam("keyword") keyword:string,@DHttpUser userInfo:IUserSession) :Promise<typeof userApi.routes.teamList.res>{
+        let user=await UserService.getItemById(userId??userInfo.userId)
         if(!user) {
             throw Err.User.userNotFound
         }
-        let ret=await user.teamList(page,size,keyword)
+        let organizationUser=await OrganizationUserService.getItemByExp({
+            organization_id:userInfo.organizationInfo.organizationId,
+            user_id:user.getId()
+        })
+        if(!organizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        let ret=await user.teamList(organizationUser.getId(),userInfo.organizationInfo.organizationId,keyword)
         return ret;
     }
 
@@ -143,7 +151,14 @@ class UserController {
         if(!user) {
             throw Err.User.userNotFound
         }
-        let ret=await user.profile(userInfo.organizationInfo.organizationId)
+        let organizationUser=await OrganizationUserService.getItemByExp({
+            organization_id:userInfo.organizationInfo.organizationId,
+            user_id:user.getId()
+        })
+        if(!organizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        let ret=await user.profile(organizationUser.getId(),userInfo.organizationInfo.organizationId)
         return ret;
     }
 

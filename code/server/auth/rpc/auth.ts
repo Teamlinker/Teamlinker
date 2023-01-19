@@ -1,7 +1,7 @@
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import {Permission_Base} from "../../../common/permission/permission";
 import {Err} from "../../../common/status/error";
-import {deletePermission, processPermission} from "../permission/base";
+import {processPermission} from "../permission/base";
 import {RoleDefault} from "../role/role";
 import {RoleService} from "../service/role";
 import {RoleMemberService} from "../service/role_member";
@@ -14,6 +14,7 @@ import {ICommon_Model_User} from "../../../common/model/user";
 import {ICommon_Model_Team} from "../../../common/model/team";
 import {ICommon_Model_Member_Tag} from "../../../common/model/member_tag";
 import {roleMapper} from "../mapper/role";
+import {REDIS_AUTH} from "../../common/cache/keys/auth";
 
 class RpcAuthApi {
     async initRole(): Promise<{ projectRoleUserId: string; groupRoleUserId: string; }> {
@@ -21,32 +22,40 @@ class RpcAuthApi {
             [param: number]: string
         }>{}
         let objProjectRole = RoleDefault.Project_Role, projectRoleUserId;
+        let arr=[];
         for (let key in objProjectRole) {
             let obj = objProjectRole[key]
             let objProjectRoleService=new RoleService
             objProjectRoleService.assignItem(obj)
-            let ret=await objProjectRoleService.create();
-            if(obj.reserved==ECommon_Model_Role_Reserved.NORMAL) {
-                projectRoleUserId=ret.id
-            }
+            arr.push((async ()=>{
+                let ret=await objProjectRoleService.create();
+                if(obj.reserved==ECommon_Model_Role_Reserved.NORMAL) {
+                    projectRoleUserId=ret.id
+                }
+            })())
+
         }
         let objGroupRole = RoleDefault.Team_Role, groupRoleUserId;
         for (let key in objGroupRole) {
             let obj = objGroupRole[key]
             let objTeamRole=new RoleService
             objTeamRole.assignItem(obj)
-            let ret=await objTeamRole.create()
-            if(obj.reserved==ECommon_Model_Role_Reserved.NORMAL) {
-                groupRoleUserId=ret.id
-            }
+            arr.push((async ()=>{
+                let ret=await objTeamRole.create()
+                if(obj.reserved==ECommon_Model_Role_Reserved.NORMAL) {
+                    groupRoleUserId=ret.id
+                }
+            })())
+
         }
         let objOrganizationRole = RoleDefault.Organization_Role;
         for (let key in objOrganizationRole) {
             let obj = objOrganizationRole[key]
             let objOrganization=new RoleService
             objOrganization.assignItem(obj)
-            let ret=await objOrganization.create()
+            arr.push(objOrganization.create())
         }
+        await Promise.all(arr);
         return {
             projectRoleUserId,
             groupRoleUserId
@@ -57,11 +66,6 @@ class RpcAuthApi {
     async processPermission(permissions: Permission_Base[], obj: any): Promise<boolean> {
         let isCheck=await processPermission(permissions,obj);
         return isCheck
-    }
-
-    
-    async deletePermission(permissionDelete: any) {
-        deletePermission(permissionDelete)
     }
 
     
@@ -167,6 +171,19 @@ class RpcAuthApi {
 
     }
 
+    async getPermissionByMemberId(itemId:string,memberId:string,roleType:ECommon_Model_Role_Type):Promise<number> {
+        if(roleType===ECommon_Model_Role_Type.TEAM || roleType===ECommon_Model_Role_Type.ORGANIZATION) {
+            let arr=await this.getRolesByMemberIds([{
+                itemId:itemId,
+                memberId:memberId
+            }])
+            return arr[0]?.role?.value
+        } else if(roleType===ECommon_Model_Role_Type.PROJECT) {
+            let obj=REDIS_AUTH.Permission.Project.calPermission(itemId);
+            let ret=await obj.get()
+            return ret;
+        }
+    }
     
     async getRolesByMemberIds(items: { itemId: string; memberId: string; }[]): Promise<{
         item_id:string,
@@ -178,7 +195,7 @@ class RpcAuthApi {
         return ret;
     }
 
-    async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number,key?:string):Promise<{
+    async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number,key?:string,roleId?:string):Promise<{
         data:{
             member?:ICommon_Model_Organization_User,
             memberType:ECommon_Model_Organization_Member_Type
@@ -191,7 +208,7 @@ class RpcAuthApi {
         totalPage:number,
         count:number
     }> {
-        let ret=await RoleMemberService.listRoleMember(itemId,roleType,memberType,page,size,key);
+        let ret=await RoleMemberService.listRoleMember(itemId,roleType,memberType,page,size,key,roleId);
         return ret;
     }
 

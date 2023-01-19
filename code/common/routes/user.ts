@@ -2,6 +2,7 @@ import {ICommon_Model_User} from './../model/user';
 import {ECommon_Services} from './../types';
 import {ICommon_Route_Res_User_List, ICommon_Route_Res_User_Profile, ICommon_Route_Res_User_TeamList} from './response';
 import {ECommon_HttpApi_Method} from "./types";
+import {Permission_Types} from "../permission/permission";
 
 const api={
     baseUrl:"/user",
@@ -121,11 +122,10 @@ const api={
             path:"/team_list",
             req:<{
                 userId?:string,
-                keyword?:string,
-                page:number,
-                size:number             
+                keyword?:string
             }>{},
             res:<ICommon_Route_Res_User_TeamList>{},
+            permission:[Permission_Types.Organization.READ]
         },
         profile:{
             method:ECommon_HttpApi_Method.GET,

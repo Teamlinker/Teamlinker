@@ -13,8 +13,8 @@ export class RoleMemberService extends Entity<typeof roleMemberModel,typeof role
         return ret;
     }
 
-    static async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number,key?:string){
-        let ret=await roleMemberMapper.listRoleMember(itemId,roleType,memberType,page,size,key);
+    static async listRoleMember(itemId:string,roleType:ECommon_Model_Role_Type,memberType:ECommon_Model_Organization_Member_Type,page?:number,size?:number,key?:string,roleId?:string){
+        let ret=await roleMemberMapper.listRoleMember(itemId,roleType,memberType,page,size,key,roleId);
         return ret;
     }
 

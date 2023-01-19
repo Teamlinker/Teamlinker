@@ -1,4 +1,4 @@
-import {Icon} from "../../../../teamOS/icon/icon";
+import {Icon, iconGroupMap} from "../../../../teamOS/icon/icon";
 import {v4} from "uuid"
 import {ETeamOS_Window_Type, Window} from "../../../../teamOS/window/window";
 import Setting from "../../app/setting/setting.vue";
@@ -6,7 +6,7 @@ import {Message} from "@arco-design/web-vue";
 import {windowManager} from "../../../../teamOS/window/windowManager";
 import {markRaw} from "vue";
 
-export const iconWiki=new Icon("wiki","file-text")
+export const iconWiki=new Icon("wiki",iconGroupMap["wiki"])
 iconWiki.addEventListener("dbClick",item => {
     if(!sessionStorage.getItem("organizationId")) {
         Message.error("you must choose organization")

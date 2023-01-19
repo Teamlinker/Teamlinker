@@ -7,6 +7,17 @@ export interface ITeamOS_Icon_Event {
     "contextmenu":((item:Icon)=>ITeamOS_Menu[]) | ((item:Icon)=>Promise<ITeamOS_Menu[]>)
 }
 
+export const iconGroupMap={
+    calendar:"calendar",
+    im:"message",
+    meeting:"video",
+    people:"user",
+    project:"project",
+    setting:"setting",
+    team:"team",
+    wiki:"file-text"
+}
+
 export class Icon extends Base{
     static height=80;
     static width=60;

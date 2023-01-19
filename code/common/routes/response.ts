@@ -52,7 +52,7 @@ export type ICommon_Route_Res_Project_ListMember ={
 
 export type ICommon_Route_Res_User_Profile={
     info:Omit<ICommon_Model_User,"password">,
-    team:ICommon_Model_Team[]
+    team:ICommon_Route_Res_User_TeamList
 }
 
 export type ICommon_Route_Res_User_List = {
@@ -63,10 +63,8 @@ export type ICommon_Route_Res_User_List = {
 }
 
 export type ICommon_Route_Res_User_TeamList = {
-    count:number,
-    totalPage:number,
-    page:number,
-    data:ICommon_Model_Team[]
+    manage:ICommon_Model_Team[],
+    join:ICommon_Model_Team[]
 }
 
 export type ICommon_Route_Res_User_ProjectList = {
@@ -220,6 +218,12 @@ export interface ICommon_Route_Res_Organization_User_List {
 export interface ICommon_Route_Res_Organization_List {
     create:ICommon_Model_Organization[],
     join:ICommon_Model_Organization[]
+}
+
+export interface ICommon_Route_Res_Organization_User_Profile {
+    teamList:ICommon_Model_Team[],
+    organizationUser:ICommon_Model_Organization_User,
+    user:ICommon_Model_User
 }
 
 export type ICommon_Route_Res_Role_Item = ICommon_Model_Role & {

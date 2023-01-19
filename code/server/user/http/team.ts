@@ -7,6 +7,7 @@ import {TeamService} from "../service/team";
 import {OrganizationService, OrganizationUserService} from './../service/organization';
 import {IUserSession} from "../types/config";
 import rpcAuthApi from "../../auth/rpc/auth";
+import {ECommon_Model_Role_Type} from "../../../common/model/role";
 
 @DComponent
 @DHttpController(teamApi)
@@ -88,6 +89,16 @@ class TeamController {
         return ret;
     }
 
+    @DHttpApi(teamApi.routes.listUser)
+    async listUser(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("page") page:number, @DHttpReqParamRequired("size") size:number, @DHttpReqParam("keyword") keyword:string,@DHttpReqParam("roleId") roleId:string) :Promise<typeof teamApi.routes.listUser.res> {
+        let team=await TeamService.getItemById(teamId)
+        if(!team) {
+            throw Err.Team.teamNotFound
+        }
+        let ret=await team.listUser(page,size,keyword,roleId)
+        return ret;
+    }
+
     @DHttpApi(teamApi.routes.addMember)
     async addMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.addMember.res> {
         let team=await TeamService.getItemById(teamId)
@@ -103,16 +114,12 @@ class TeamController {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
+        } else if(team.getItem().created_by==organizationUserId) {
+            throw Err.Team.removeForbidden
         }
-        let [arr,objOrganization]=await Promise.all([
-            OrganizationUserService.organizationUserInfos(organizationUserId),
-            OrganizationService.getItemById(team.getItem().organization_id)
-        ])
+        let arr=await OrganizationUserService.organizationUserInfos(organizationUserId)
         if(!arr || arr.length==0) {
             throw Err.Organization.userNotFound
-        }
-        if(objOrganization.getItem().created_by_pure===arr[0].id) {
-            throw Err.Organization.ownerDeleteForbidden
         }
         await team.removeMember(organizationUserId)
         return;
@@ -196,6 +203,14 @@ class TeamController {
     async removeRole(@DHttpReqParamRequired("roleId") roleId:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.removeRole.res>{
         await rpcAuthApi.removeRole(roleId);
         return;
+    }
+
+    @DHttpApi(teamApi.routes.getPermission)
+    async getPermission(@DHttpReqParamRequired("teamId") teamId:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.getPermission.res>{
+        let value=await rpcAuthApi.getPermissionByMemberId(teamId,user.organizationInfo.organizationUserId,ECommon_Model_Role_Type.TEAM);
+        return {
+            value
+        };
     }
 
 }

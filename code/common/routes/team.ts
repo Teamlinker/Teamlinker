@@ -67,6 +67,19 @@ const api={
             res:<ICommon_Route_Res_Organization_User_List>{},
             permission:[Permission_Types.Team.READ]
         },
+        listUser:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user/list",
+            req:<{
+                teamId:string,
+                roleId?:string,
+                keyword?:string,
+                page:number,
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_Organization_User_List>{},
+            permission:[Permission_Types.Team.READ]
+        },
         addMember:{//添加团队成员
             method:ECommon_HttpApi_Method.POST,
             path:"/add_member",
@@ -164,6 +177,17 @@ const api={
             }>{},
             res:{},
             permission:[Permission_Types.Team.ADMIN]
+        },
+        getPermission:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/permission",
+            req:<{
+                teamId:string,
+            }>{},
+            res:<{
+                value:number
+            }>{},
+            permission:[Permission_Types.Team.READ]
         }
     }
 }

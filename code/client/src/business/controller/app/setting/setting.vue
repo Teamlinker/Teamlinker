@@ -3,36 +3,106 @@
     <a-layout-sider :resize-directions="['right']">
       <a-menu style="width: 100%" @menu-item-click="onSubMenuClick">
         <a-sub-menu key="organization">
+          <template #icon>
+            <sicon size="" color="" name="Ant" type="apartment"></sicon>
+          </template>
           <template #title>Organization</template>
-          <a-menu-item key="organizationEdit">Edit</a-menu-item>
+          <a-menu-item key="organizationEdit">
+            <template #icon>
+              <sicon size="" color="" name="Ant" type="edit"></sicon>
+            </template>
+            Edit
+          </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="userTeam">
+          <template #icon>
+            <sicon size="" color="" name="Ant" type="team"></sicon>
+          </template>
           <template #title>User & Team</template>
-          <a-menu-item key="userManage">User Manage</a-menu-item>
-          <a-menu-item key="teamManage">Team Manage</a-menu-item>
-          <a-menu-item key="tagManage">Tag Manage</a-menu-item>
+          <a-menu-item key="userManage">
+            <template #icon>
+              <sicon size="" color="" name="Ant" type="edit"></sicon>
+            </template>
+            User Manage
+          </a-menu-item>
+          <a-menu-item key="teamManage">
+            <template #icon>
+              <sicon size="" color="" name="Ant" type="edit"></sicon>
+            </template>
+            Team Manage
+          </a-menu-item>
+          <a-menu-item key="tagManage">
+            <template #icon>
+              <sicon size="" color="" name="Ant" type="edit"></sicon>
+            </template>
+            Tag Manage
+          </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="role">
+          <template #icon>
+            <sicon size="" color="" name="Ant" type="index"></sicon>
+          </template>
           <template #title>Role</template>
-          <a-menu-item key="organizationRole">Organization</a-menu-item>
+          <a-menu-item key="organizationRole">
+            <template #icon>
+              <sicon size="" color="" name="Ant" type="edit"></sicon>
+            </template>
+            Organization
+          </a-menu-item>
           <a-sub-menu key="roleProject">
             <template #title>Project</template>
-            <a-menu-item key="projectGlobalRole">Global</a-menu-item>
-            <a-menu-item key="projectSpecificRole">Specific</a-menu-item>
+            <a-menu-item key="projectGlobalRole">
+              <template #icon>
+                <sicon size="" color="" name="Ant" type="edit"></sicon>
+              </template>
+              Global
+            </a-menu-item>
+            <a-menu-item key="projectSpecificRole">
+              <template #icon>
+                <sicon size="" color="" name="Ant" type="edit"></sicon>
+              </template>
+              Specific
+            </a-menu-item>
           </a-sub-menu>
           <a-sub-menu key="roleTeam">
             <template #title>Team</template>
-            <a-menu-item key="teamGlobalRole">Global</a-menu-item>
-            <a-menu-item key="teamSpecificRole">Specific</a-menu-item>
+            <a-menu-item key="teamGlobalRole">
+              <template #icon>
+                <sicon size="" color="" name="Ant" type="edit"></sicon>
+              </template>
+              Global
+            </a-menu-item>
+            <a-menu-item key="teamSpecificRole">
+              <template #icon>
+                <sicon size="" color="" name="Ant" type="edit"></sicon>
+              </template>
+              Specific
+            </a-menu-item>
           </a-sub-menu>
         </a-sub-menu>
         <a-sub-menu key="project">
+          <template #icon>
+            <sicon size="" color="" name="Ant" type="project"></sicon>
+          </template>
           <template #title>Project</template>
-          <a-menu-item key="projectManage">Manage</a-menu-item>
+          <a-menu-item key="projectManage">
+            <template #icon>
+              <sicon size="" color="" name="Ant" type="edit"></sicon>
+            </template>
+            Manage
+          </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="issueSolution">
+          <template #icon>
+            <sicon size="" color="" name="Ant" type="solution"></sicon>
+          </template>
           <template #title>Issue Solution</template>
-          <a-menu-item key="issueSolution">Manage</a-menu-item>
+          <a-menu-item key="issueSolution">
+            <template #icon>
+              <sicon size="" color="" name="Ant" type="edit"></sicon>
+            </template>
+            Manage
+          </a-menu-item>
         </a-sub-menu>
       </a-menu>
     </a-layout-sider>
@@ -49,7 +119,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw, ref } from "vue";
+import {computed, markRaw, ref} from "vue";
 import NavigatorContainer from "../../../../teamOS/common/component/navigator/navigatorContainer.vue";
 import IssueIndex from "./issue/issueSolutionList.vue";
 import OrganizationIndex from "./organization/index.vue";

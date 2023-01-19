@@ -1,0 +1,77 @@
+<template>
+  <a-form :model="form" style="width: 80%" @submitSuccess="onSubmit">
+    <a-form-item field="photo" label="avatar">
+      <Upload :default-uri="form.photo" types=".png,.jpg,.jpeg,.gif,.bmp,.svg" @upload="onUpload"></Upload>
+    </a-form-item>
+    <a-form-item label="username">
+      {{form.username}}
+    </a-form-item>
+    <a-form-item field="password" label="password">
+      <a-input-password v-model="form.password"></a-input-password>
+    </a-form-item>
+    <a-form-item field="repeatPassword" label="repeat password" v-if="form.password">
+      <a-input-password v-model="form.repeatPassword"></a-input-password>
+    </a-form-item>
+    <a-form-item field="sign" label="sign">
+      <a-input v-model="form.sign"></a-input>
+    </a-form-item>
+    <a-form-item>
+      <a-button html-type="submit" type="primary">Save</a-button>
+    </a-form-item>
+  </a-form>
+</template>
+
+<script setup lang="ts">
+import Upload from "../../../common/component/upload.vue";
+import {useDesktopStore} from "../../desktop/store/desktop";
+import {reactive} from "vue";
+import {apiUser} from "../../../common/request/request";
+import {Message} from "@arco-design/web-vue";
+
+const store=useDesktopStore()
+const form=reactive({
+  username:store.userInfo.username,
+  photo:store.userInfo.photo,
+  sign:store.userInfo.sign,
+  password:"",
+  repeatPassword:"",
+  uploadUriId:""
+})
+const onSubmit=async ()=>{
+  if(form.password && form.password!==form.repeatPassword) {
+    Message.error("password not match")
+    return;
+  }
+  let arrPromise=[]
+  arrPromise.push(apiUser.update({
+    userId:sessionStorage.getItem("userId"),
+    ...(form.uploadUriId && {
+      photo:form.uploadUriId
+    }),
+    sign:form.sign,
+    ...(form.password && {
+
+    })
+  }))
+  if(form.password) {
+    arrPromise.push(apiUser.resetPassword({
+      userId:sessionStorage.getItem("userId"),
+      password:form.password
+    }))
+  }
+  let [res1,res2]=await Promise.all(arrPromise)
+  if(res1?.code==0) {
+    Message.success("update success")
+    store.$refreshUser();
+  } else {
+    Message.error(res1.msg)
+  }
+}
+const onUpload=(id:string)=> {
+  form.uploadUriId=id
+}
+</script>
+
+<style scoped>
+
+</style>

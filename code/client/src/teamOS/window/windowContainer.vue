@@ -1,5 +1,5 @@
 <template>
-  <WindowItem v-for="(item,index) in windowList" :item="item" :index="index"></WindowItem>
+  <WindowItem v-for="(item,index) in windowList" :item="item" :index="index" :key="item.id"></WindowItem>
 </template>
 
 <script setup lang="ts">

@@ -6,6 +6,7 @@ import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUs
 import {ProjectService} from "../service/project";
 import {IUserSession} from "../../user/types/config";
 import rpcAuthApi from "../../auth/rpc/auth";
+import {ECommon_Model_Role_Type} from "../../../common/model/role";
 
 @DHttpController(projectApi)
 class ProjectController {
@@ -181,6 +182,14 @@ class ProjectController {
     async removeRole(@DHttpReqParamRequired("roleId") roleId:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.removeRole.res>{
         await rpcAuthApi.removeRole(roleId);
         return;
+    }
+
+    @DHttpApi(projectApi.routes.getPermission)
+    async getPermission(@DHttpReqParamRequired("projectId") projectId:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.getPermission.res>{
+        let value=await rpcAuthApi.getPermissionByMemberId(projectId,user.organizationInfo.organizationUserId,ECommon_Model_Role_Type.PROJECT);
+        return {
+            value
+        };
     }
 
 }

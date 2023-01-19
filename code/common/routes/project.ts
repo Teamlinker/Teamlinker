@@ -269,6 +269,17 @@ const api={
             }>{},
             res:{},
             permission:[Permission_Types.Project.ADMIN]
+        },
+        getPermission:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/permission",
+            req:<{
+                projectId:string,
+            }>{},
+            res:<{
+                value:number
+            }>{},
+            permission:[Permission_Types.Project.READ]
         }
     }
 }

@@ -17,6 +17,7 @@ import {Err} from "../../../common/status/error";
 import {memberTagModel} from "../../../common/model/member_tag";
 import rpcFileApi from "../../file/rpc/file";
 import {TeamService} from "./team";
+import {UserService} from "./user";
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -180,7 +181,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             organization_id:this.getId(),
             nickname,
             active,
-            title,
+            department: title,
             job,
             email,
             phone,
@@ -193,7 +194,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         return objUser
     }
 
-    async updateUser(roleId:string,organizationUserId:string,nickname?:string,active?:number,title?:string,job?:string,email?:string,phone?:string,location?:string,remark?:string) {
+    async updateUser(roleId:string,organizationUserId:string,nickname?:string,active?:number,department?:string,job?:string,email?:string,phone?:string,location?:string,remark?:string) {
         let obj=await OrganizationUserService.getItemById(organizationUserId)
         if(!obj) {
             throw Err.Organization.userNotFound
@@ -201,7 +202,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         obj.assignItem({
             nickname,
             active,
-            title,
+            department,
             job,
             email,
             phone,
@@ -210,6 +211,9 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         })
         let objUser=await obj.update();
         if(roleId) {
+            if(this.getItem().created_by_pure==obj.getItem().user_id) {
+                throw Err.Role.roleChangeForbidden
+            }
             await rpcAuthApi.changeRoleMember(this.getId(),roleId,ECommon_Model_Organization_Member_Type.USER,objUser.id )
         }
         return objUser
@@ -245,13 +249,30 @@ export class OrganizationUserService extends Entity<typeof organizationUserModel
             throw Err.Organization.userNotFound
         }
         let ret=await organizationUserMapper.users(organizationUserIds.split(","))
+        let arr=[]
         for(let obj of ret) {
             delete obj.password;
             if(obj.photo && isGetPhoto) {
-                obj.photo=await rpcFileApi.getPath(obj.photo)
+                arr.push(rpcFileApi.getPath(obj.photo).then(value => {
+                    obj.photo=value
+                }))
             }
         }
+        await Promise.all(arr);
         return ret;
+    }
+
+    async info() {
+        let user=await UserService.getItemById(this.getItem().user_id)
+        if(!user) {
+            throw Err.User.userNotFound
+        }
+        let teamList=await user.teamList(this.getId(),this.getItem().organization_id)
+        return {
+            teamList:teamList.manage.concat(teamList.join).slice(0,10),
+            organizationUser:this.getItem(),
+            user:user.getItem()
+        }
     }
 
 }

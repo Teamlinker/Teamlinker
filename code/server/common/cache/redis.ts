@@ -201,4 +201,8 @@ export class Redis {
         let ret=await this.redis.hexists(key,field)
         return !!ret;
     }
+    async sExists(key:string,field:string):Promise<boolean> {
+        let ret=await this.redis.sismember(key,field)
+        return !!ret;
+    }
 }

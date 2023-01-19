@@ -20,13 +20,12 @@ class AdminController {
         } else {
             let objFile=new FileService()
             objFile.assignItem({
-                created_by:user.organizationInfo.organizationUserId,
+                created_by_pure:user.userId,
                 size:file.size,
-                filename:file.fileName,
                 type:ECommon_Model_File_Type.LOCAL,
                 md5:file.md5
             })
-            let ret=await objFile.upload(file.data)
+            let ret=await objFile.upload(file)
             return {
                 id:ret
             }

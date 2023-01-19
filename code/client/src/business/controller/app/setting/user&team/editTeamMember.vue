@@ -106,6 +106,8 @@ const onDelete=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
     if(res?.code==0) {
       Message.success("remove success")
       search(pagination.current)
+    } else {
+      Message.error(res.msg)
     }
   }
 }

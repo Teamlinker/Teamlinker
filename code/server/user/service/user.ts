@@ -7,7 +7,9 @@ import {Entity} from "../../common/entity/entity";
 import {userMapper} from '../mapper/user';
 import rpcFileApi from "../../file/rpc/file";
 import {ECommon_User_Type, ICommon_Model_User, userModel} from './../../../common/model/user';
-import {OrganizationUserService} from "./organization";
+import rpcAuthApi from "../../auth/rpc/auth";
+import {ICommon_Model_Team} from "../../../common/model/team";
+import {ECommon_Model_Role_Reserved} from "../../../common/model/role";
 
 export class UserService extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
@@ -88,40 +90,51 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
     }
 
 
-    async teamList(page:number,size:number,keyword?:string,organizationId?:string){
-        let ret= await userMapper.teamList(page,size,this.item.id,organizationId,keyword)
+    async teamList(organizationUserId:string,organizationId:string,keyword?:string){
+        let ret= await userMapper.teamList(this.item.id,organizationId,keyword)
+        let roles=await rpcAuthApi.getRolesByMemberIds(ret.map(item=>{
+            return {
+                itemId:item.id,
+                memberId:organizationUserId
+            }
+        }))
+        let manage:ICommon_Model_Team[]=[],join:ICommon_Model_Team[]=[]
+        for(let i=0;i<roles.length;i++) {
+            if(roles[i].role.reserved===ECommon_Model_Role_Reserved.ADMIN) {
+                manage.push(ret[i])
+            } else {
+                join.push(ret[i])
+            }
+        }
         return {
-            ...ret,
-            page:page
+            manage,
+            join
         };
     }
 
-    async profile(organizationId?:string){
-        let obj=await OrganizationUserService.getItemByExp({
-            user_id:this.getId(),
-            organization_id:organizationId
-        })
-        if(!obj) {
-            throw Err.Organization.userNotFound
-        }
+    async profile(organizationUserId:string,organizationId?:string){
         let ret={
-            info:(await UserService.userInfos(obj.getId(),true))[0],
-            team:(await this.teamList(0,10,undefined,organizationId)).data
+            info:(await UserService.userInfos(this.getId(),true))[0],
+            team:(await this.teamList(organizationUserId,organizationId))
         }
         return ret;
     }
 
-    static async userInfos(userIds:string,isGetPhoto:boolean=true):Promise<(Omit<ICommon_Model_User,"password">)[]>{
+    static async userInfos(userIds:string,isGetPhoto:boolean=true,organizationId?:string):Promise<({nickname?:string} & Omit<ICommon_Model_User,"password">)[]>{
         if(!userIds) {
             throw Err.User.userNotFound
         }
-        let ret=await userMapper.users(userIds.split(","))
+        let ret=await userMapper.users(userIds.split(","),organizationId)
+        let arrPromise=[]
         for(let obj of ret) {
             delete obj.password;
             if(obj.photo && isGetPhoto) {
-                obj.photo=await rpcFileApi.getPath(obj.photo)
+                arrPromise.push(rpcFileApi.getPath(obj.photo).then(o=>{
+                    obj.photo=o;
+                }))
             }
         }
+        await Promise.all(arrPromise)
         return ret;
     }
 

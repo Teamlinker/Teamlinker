@@ -52,8 +52,8 @@
     <a-row style="height: calc(100% - 35px);background-color: white;position: relative">
       <NavigatorContainer :routes="item.nodes[0].components" :id="item.nodes[0].id" :path="item.nodes[0].path" :default="item.nodes[0].default" ref="navigator" v-if="item.type==ETeamOS_Window_Type.SIMPLE" name="root"/>
       <a-tabs type="card-gutter" :editable="true" show-add-button auto-switch :justify="true" v-else-if="item.type==ETeamOS_Window_Type.TAB" @change="change" style="width: 100%" @add="addTab" @delete="removeTab" @tabClick="change" :active-key="item.activeKey">
-        <a-tab-pane v-for="(node,index) in item.nodes" :key="node.id" :title="node.meta?.title" :tabindex="node.id" :closable="item.nodes.length>1">
-          <NavigatorContainer :id="node.id" :routes="node.components" :default="node.default" :meta="node.meta" ref="navigatorList" name="root" :path="node.path"/>
+        <a-tab-pane v-for="(node,index) in item.nodes" :key="node.id" :title="getTabTitle(node.id)" :tabindex="node.id" :closable="item.nodes.length>1">
+          <NavigatorContainer :id="node.id" :routes="node.components" :default="node.default" :meta="node.meta" ref="navigatorList" name="root" :path="node.path" @focus="onFocus(item.id)" :tabindex="index"/>
         </a-tab-pane>
       </a-tabs>
     </a-row>
@@ -68,6 +68,7 @@ import {ETeamOS_Window_Status, ETeamOS_Window_Type, Window} from "./window";
 import {vDrag} from "../common/directive/drag";
 import {vResize} from "../common/directive/resize";
 import {v4} from "uuid"
+
 vResize;
 vDrag;
 let props=defineProps<{
@@ -168,6 +169,13 @@ const removeTab=async (id:string)=>{
   }
   if(props.item.onRemoveTab) {
     props.item.onRemoveTab(props.item);
+  }
+}
+const getTabTitle=(id:string)=>{
+  for(let o of navigatorList.value) {
+    if(o.id==id) {
+      return o.navigator.getPath()[o.navigator.getIndex().value]
+    }
   }
 }
 </script>

@@ -319,6 +319,10 @@ export namespace Err {
         teamMemberNotExists:{
             code:4003,
             msg:"team member not exists"
+        },
+        removeForbidden:{
+            code:4004,
+            msg:"remove forbidden"
         }
     }
     export let Role ={
@@ -337,6 +341,10 @@ export namespace Err {
         roleMemberExists:{
             code:5003,
             msg:"role member exists"
+        },
+        roleChangeForbidden:{
+            code:5004,
+            msg:"role change forbidden"
         }
     }
     export let File ={

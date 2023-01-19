@@ -37,7 +37,8 @@ class PermissionProject extends PermissionBase {
         let objProjectTourist=new REDIS_AUTH.Permission.Project.ProjectTourist(projectId);
         let objProjectOrganizationUsers=new REDIS_AUTH.Permission.Project.ProjectOrganizationUsers(projectId);
         let objProjectTeams=new REDIS_AUTH.Permission.Project.ProjectTeams(projectId);
-        await this.tryLock([objProjectOrganizationUsers.getKey().replace(/\:/g,""),objProjectTeams.getKey().replace(/\:/g,"")]);
+        let objProjectTags=new REDIS_AUTH.Permission.Project.ProjectTags(projectId);
+        await this.tryLock([objProjectOrganizationUsers.getKey().replace(/\:/g,""),objProjectTeams.getKey().replace(/\:/g,""),objProjectTags.getKey().replace(/\:/g,"")]);
         let permissionsSet = new Set<number>();
         let isAdmin:boolean=false;
         try {
@@ -85,6 +86,26 @@ class PermissionProject extends PermissionBase {
                     })())
                 }
                 await Promise.all([arrPromise]);
+            })(),(async ()=>{
+                let tags=await objProjectTags.getValue();
+                let arrPromise=[];
+                for(let tagId in tags) {
+                    arrPromise.push((async ()=>{
+                        let objTag=new REDIS_AUTH.Permission.Tag.TagOrganizationUsers(tagId);
+                        let isExists=await objTag.getValue(organizationUserId)
+                        if(isExists) {
+                            let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(tags[tagId])
+                            let value=await objRole.getValue();
+                            if(value) {
+                                permissionsSet.add(Number(value.value))
+                                if(value.reserved===ECommon_Model_Role_Reserved.ADMIN) {
+                                    throw Err.Common.admin;
+                                }
+                            }
+                        }
+                    })())
+                }
+                await Promise.all([arrPromise]);
             })()])
         } catch (err) {
             if(err.code===Err.Common.admin.code) {
@@ -95,9 +116,12 @@ class PermissionProject extends PermissionBase {
             }
         }
         await this.unlock()
-        return isAdmin?Permission_Types.Project.ADMIN.value:Array.from(permissionsSet).reduce((previousValue, currentValue, currentIndex, array)=>{
+        let ret=isAdmin?Permission_Types.Project.ADMIN.value:Array.from(permissionsSet).reduce((previousValue, currentValue, currentIndex, array)=>{
             return previousValue | currentValue;
         })
+        let obj=REDIS_AUTH.Permission.Project.calPermission(projectId)
+        await obj.set(ret);
+        return ret;
     }
 
 }

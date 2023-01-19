@@ -20,8 +20,8 @@
       <a-form-item field="phone" label="phone">
         <a-input v-model="form.phone"></a-input>
       </a-form-item>
-      <a-form-item field="title" label="title">
-        <a-input v-model="form.title"></a-input>
+      <a-form-item field="department" label="department">
+        <a-input v-model="form.department"></a-input>
       </a-form-item>
       <a-form-item field="active" label="active">
         <a-switch v-model="form.active" :checked-value="1" :unchecked-value="0"></a-switch>
@@ -59,7 +59,7 @@ const form=reactive({
   email:props.type=="edit"?props.item.email:"",
   location:props.type=="edit"?props.item.location:"",
   phone:props.type=="edit"?props.item.phone:"",
-  title:props.type=="edit"?props.item.title:"",
+  department:props.type=="edit"?props.item.department:"",
   remark:props.type=="edit"?props.item.remark:"",
   active:props.type=="edit"?props.item.active:1,
   roleId:props.type=='edit'?props.role.id:"",

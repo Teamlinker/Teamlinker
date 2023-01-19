@@ -1,4 +1,4 @@
-import {Icon} from "../../../../teamOS/icon/icon";
+import {Icon, iconGroupMap} from "../../../../teamOS/icon/icon";
 import {v4} from "uuid"
 import {ETeamOS_Window_Type, Window} from "../../../../teamOS/window/window";
 import Setting from "../../app/setting/setting.vue";
@@ -6,7 +6,7 @@ import {Message} from "@arco-design/web-vue";
 import {windowManager} from "../../../../teamOS/window/windowManager";
 import {markRaw} from "vue";
 
-export const iconMeeting=new Icon("meeting","video")
+export const iconMeeting=new Icon("meeting",iconGroupMap["meeting"])
 iconMeeting.addEventListener("dbClick",item => {
     if(!sessionStorage.getItem("organizationId")) {
         Message.error("you must choose organization")

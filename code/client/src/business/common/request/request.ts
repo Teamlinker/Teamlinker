@@ -12,11 +12,12 @@ import user from "../../../../../common/routes/user"
 import {Ref} from "vue";
 
 export type DCSType<T>={
-    [key in keyof T]:key extends "created_by"|"modified_by"|"assigner_id"|"reporter_id"?{
+    [key in keyof T]:key extends "created_by"|"modified_by"|"assigner_id"|"reporter_id"|"created_by_pure"?{
         id:string,
         username:string,
         photo?:string,
-        nickname?:string
+        nickname?:string,
+        organizationUserId?:string
     }:key extends "created_time"|"modified_time"?string:T[key] extends object?DCSType<T[key]>:T[key]
 }
 
@@ -68,7 +69,7 @@ export function generatorApi<T extends ICommon_Http_Route_List>(api:{
                     let obj=param[key]
                     if(obj===null || obj==undefined) {
                         delete param[key]
-                    } else if(typeof(obj)=="object") {
+                    } else if(typeof(obj)=="object" && !(obj instanceof File)) {
                         param[key]=JSON.stringify(obj);
                     }
                 }

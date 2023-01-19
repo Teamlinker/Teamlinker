@@ -6,6 +6,7 @@ import {UserService} from "../service/user";
 import {MemberTagService, OrganizationService, OrganizationUserService} from './../service/organization';
 import {IUserSession} from "../types/config";
 import rpcAuthApi from "../../auth/rpc/auth"
+import {ECommon_Model_Role_Type} from "../../../common/model/role";
 
 @DComponent
 @DHttpController(organizationApi)
@@ -135,7 +136,7 @@ class OrganizationController {
     @DHttpReqParam("roleId") roleId:string,
     @DHttpReqParam("nickname") nickname:string,
     @DHttpReqParam("active") active:number,
-    @DHttpReqParam("title") title:string,
+    @DHttpReqParam("department") department:string,
     @DHttpReqParam("job") job:string,
     @DHttpReqParam("email") email:string,
     @DHttpReqParam("phone") phone:string,
@@ -182,7 +183,7 @@ class OrganizationController {
         if(roleId && organization.getItem().created_by_pure==user.getItem().id) {
             throw Err.Common.requestForbidden
         }
-        let retUser=await organization.updateUser(roleId,objOrganizationUser.getId(),nickname,active,title,job,email,phone,location,remark)
+        let retUser=await organization.updateUser(roleId,objOrganizationUser.getId(),nickname,active,department,job,email,phone,location,remark)
         return {
             organizationUser:retUser,
             user:user.getItem(),
@@ -202,6 +203,15 @@ class OrganizationController {
         }
         await objOrganization.removeUser(organizationUserId);
         return;
+    }
+
+    @DHttpApi(organizationApi.routes.user)
+    async user(@DHttpReqParamRequired("organizationUserId") organizationUserId:string) :Promise<typeof organizationApi.routes.user.res>{
+        let obj=await OrganizationUserService.getItemById(organizationUserId)
+        if(!obj) {
+            throw Err.Organization.userNotFound
+        }
+        return obj.getItem();
     }
 
     @DHttpApi(organizationApi.routes.enter)
@@ -349,9 +359,23 @@ class OrganizationController {
     }
 
 
+    @DHttpApi(organizationApi.routes.getPermission)
+    async getPermission(@DHttpReqParamRequired("organizationId") organizationId:string,@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.getPermission.res>{
+        let value=await rpcAuthApi.getPermissionByMemberId(organizationId,user.organizationInfo.organizationUserId,ECommon_Model_Role_Type.ORGANIZATION);
+        return {
+            value
+        };
+    }
 
-
-
+    @DHttpApi(organizationApi.routes.userProfile)
+    async userProfile(@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.userProfile.res>{
+        let organizationUser=await OrganizationUserService.getItemById(organizationUserId);
+        if(!organizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        let ret=await organizationUser.info()
+        return ret;
+    }
 
 
 

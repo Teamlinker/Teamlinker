@@ -1,12 +1,12 @@
-import { BaseModel } from "./base"
+import {BaseModel} from "./base"
+
 export enum ECommon_Model_File_Type {
     LOCAL
 }
 export interface ICommon_Model_File {
     id :string,
-    created_by :string,
+    created_by_pure :string,
     size: number ,
-    filename :string,
     type :ECommon_Model_File_Type,
     created_time :Date,
     path :string,

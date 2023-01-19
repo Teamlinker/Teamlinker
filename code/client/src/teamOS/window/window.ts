@@ -21,7 +21,8 @@ export interface ITeamOS_Window_Node {
     }
     default:{
         name:string,
-        props?:object
+        props?:object,
+        title?:string
     },
     meta?:{
         title?:string,

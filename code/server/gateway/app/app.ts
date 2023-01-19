@@ -144,7 +144,7 @@ export default class GateWay extends Application {
                             ctx.body = generateHttpErrorResponse(ret.data);
                         } else {
                             if(typeof(ret.data)=="object" && obj.user) {
-                                await handleImageFields(ret.data);
+                                await handleImageFields(ret.data,obj.user.organizationInfo?.organizationId);
                             }
                             ctx.body = generateHttpOkResponse(ret.data);
                         }

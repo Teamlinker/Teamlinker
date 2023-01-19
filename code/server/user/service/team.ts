@@ -58,6 +58,21 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         }
     }
 
+    async listUser(page:number,size:number,keyword?:string,roleId?:string):Promise<ICommon_Route_Res_Organization_User_List>{
+        let ret=await rpcAuthApi.listRoleMember(this.getId(),ECommon_Model_Role_Type.TEAM,ECommon_Model_Organization_Member_Type.USER,page,size,keyword,roleId);
+        return {
+            count:ret.count,
+            totalPage:ret.totalPage,
+            data:ret.data.map(item=>{
+                return {
+                    user:item.user,
+                    role:item.role,
+                    organizationUser:item.member
+                }
+            })
+        }
+    }
+
     async addMember(memberId:string, roleId:string){
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
@@ -86,6 +101,8 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     async changeRole(organizationUserId:string,roleId:string){
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
+        } else if(this.getItem().created_by==organizationUserId) {
+            throw Err.Role.roleChangeForbidden
         }
         let objOrganization=await OrganizationService.getItemById(this.item.organization_id);
         if(!objOrganization) {

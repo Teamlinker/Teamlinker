@@ -12,15 +12,27 @@ export async function config()
 {
     let job = getJobInstance();
     job.create("remove-files", {
-        minute: 30
+        minute: 54
     }, async (fireDate: Date) => {
         let mysql = getMysqlInstance()
         let ret = await mysql.execute<ICommon_Model_File>(`select * from ${Table_File} where type=${ECommon_Model_File_Type.LOCAL} and ref<=0 and created_time<(date_sub(current_timestamp(),INTERVAL 30 MINUTE))`)
         for (let obj of ret) {
-            await fs.remove(path.join(Application.teamlinkerPath, obj.path))
-            await mysql.execute(generateDeleteSql(fileModel, {
+            fs.remove(path.join(Application.teamlinkerPath, obj.path))
+            mysql.execute(generateDeleteSql(fileModel, {
                 id: obj.id
             }))
+        }
+        let items=await fs.readdir(Application.teamlinkerPath);
+        for(let item of items) {
+            if(item!="." && item!="..") {
+                let stat=await fs.stat(path.join(Application.teamlinkerPath,item))
+                if(stat.isDirectory()) {
+                    let subItems=await fs.readdir(path.join(Application.teamlinkerPath,item))
+                    if(subItems.length==0 || (subItems.length==2 && subItems.includes(".") && subItems.includes(".."))) {
+                        fs.rmdir(path.join(Application.teamlinkerPath,item))
+                    }
+                }
+            }
         }
     })
 }

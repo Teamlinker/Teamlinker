@@ -40,7 +40,7 @@ import {Table_Comment} from "../../../common/model/comment";
 import {Table_File} from "../../../common/model/file";
 import {Table_Member_Tag} from "../../../common/model/member_tag";
 
-export async function handleImageFields(data:object){
+export async function handleImageFields(data:object,organizationId?:string){
     let arrImage=<{
         object:object,
         key:string|number
@@ -108,7 +108,7 @@ export async function handleImageFields(data:object){
             let ids=arrUser.map(item=>{
                 return item.object[item.key];
             })
-            let paths=await rpcUserApi.getUsersInfo(ids)
+            let paths=await rpcUserApi.getUsersInfo(ids,organizationId)
             for(let i=0;i<arrUser.length;i++)
             {
                 arrUser[i].object[arrUser[i].key]=paths[i]

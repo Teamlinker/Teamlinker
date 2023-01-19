@@ -38,18 +38,19 @@ class RpcUserApi {
         })
     }
 
-    async getUsersInfo?(userIds:string[]):Promise<{
+    async getUsersInfo?(userIds:string[],organizationId?:string):Promise<{
         id:string,
         username:string,
         photo?:string,
     }[]> {
         let arrUser:any[]=[...userIds];
-        let arr=await UserService.userInfos(userIds.join(","),false);
+        let arr=await UserService.userInfos(userIds.join(","),false,organizationId);
         let ret=arr.map(item=>{
             return {
                 id:item.id,
                 username:item.username,
                 photo:item.photo,
+                nickname:item.nickname
             }
         })
         let arrRetId=ret.map(item=>{
@@ -75,6 +76,7 @@ class RpcUserApi {
         username:string,
         photo?:string,
         nickname?:string,
+        organizationUserId?:string
     }[]> {
         let arrUser:any[]=[...organizationUserIds];
         let arr=await OrganizationUserService.organizationUserInfos(organizationUserIds.join(","),false);
@@ -84,6 +86,7 @@ class RpcUserApi {
                 username:item.username,
                 photo:item.photo,
                 nickname:item.nickname,
+                organizationUserId:item.organizationUserId
             }
         })
         let arrRetId=arr.map(item=>{

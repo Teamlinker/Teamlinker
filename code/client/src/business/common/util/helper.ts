@@ -1,6 +1,7 @@
 import {ICommon_Route_Res_Project_Member} from "../../../../../common/routes/response";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../common/model/organization";
 import {Message} from "@arco-design/web-vue";
+import {Permission_Base} from "../../../../../common/permission/permission";
 
 export function getMemberIdFromProjectMember(item:ICommon_Route_Res_Project_Member){
     if(item.memberType==ECommon_Model_Organization_Member_Type.DEFAULT) {
@@ -47,4 +48,8 @@ export function dialogFuncGenerator({func,form}:{
             return false
         }
     }
+}
+
+export function checkPermission(permission:number,permissionChecked:Permission_Base) {
+    return (permission & permissionChecked.value) && permission>=permissionChecked.value
 }

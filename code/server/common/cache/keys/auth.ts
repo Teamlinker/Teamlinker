@@ -1,8 +1,15 @@
 import {cacheRedisType} from "../../types/cache";
 import StringUtil from "../../util/string";
-import {BaseRedisHashCache, BaseRedisStringCache, RedisHashKey, RedisStringKey} from './base';
+import {
+    BaseRedisHashCache,
+    BaseRedisSetCache,
+    BaseRedisStringCache,
+    RedisHashKey,
+    RedisSetKey,
+    RedisStringKey
+} from './base';
 import {ICommon_Model_Role, roleModel} from "../../../../common/model/role";
-import {generateLeftJoinSql, generateQuerySql} from "../../util/sql";
+import {generateLeftJoin2Sql, generateLeftJoinSql, generateQuerySql} from "../../util/sql";
 import {commentModel} from "../../../../common/model/comment";
 import {projectIssueModel} from "../../../../common/model/project_issue";
 import {getMysqlInstance} from "../../db/mysql";
@@ -12,10 +19,166 @@ import {projectReleaseModel} from "../../../../common/model/project_release";
 import {roleMemberModel} from "../../../../common/model/role_member";
 import {ECommon_Model_Organization_Member_Type} from "../../../../common/model/organization";
 import {Err} from "../../../../common/status/error";
+import {userModel} from "../../../../common/model/user";
+import {organizationUserModel} from "../../../../common/model/organization_user";
+import {memberTagMemberModel} from "../../../../common/model/member_tag_member";
 
 export namespace REDIS_AUTH {
     export namespace Permission {
         export namespace Project {
+            export function calPermission(projectId:string)
+            {
+                let key="permission:project:{0}:calPermission"
+                let obj=new RedisStringKey(StringUtil.format(key,projectId),cacheRedisType<number>().Number,60)
+                return obj
+            }
+            export class createdByPureFromProjectIssueComment extends BaseRedisStringCache<string> {
+                key="permission:projectIssueComment:{0}:createdByPure"
+                constructor(private commentId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,commentId),cacheRedisType<string>().String,1000*10);
+                }
+                override async getValue(): Promise<string> {
+                    let value:string;
+                    let mysql=getMysqlInstance()
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        value=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoin2Sql({
+                            model:commentModel
+                        },{
+                            model:organizationUserModel,
+                            expression:{
+                                id:{
+                                    model:commentModel,
+                                    field:"created_by"
+                                }
+                            }
+                        },{
+                            model:userModel,
+                            columns:["id"],
+                            expression:{
+                                id:{
+                                    model:organizationUserModel,
+                                    field:"user_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:commentModel,
+                                value:this.commentId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            value=ret.id
+                            await this.objRedis.set(value)
+                        } else {
+                            throw Err.Comment.commentNotFound
+                        }
+                    }
+                    return value;
+                }
+            }
+            export class createdByPureFromProjectIssue extends BaseRedisStringCache<string> {
+                key="permission:projectIssue:{0}:createdByPure"
+                constructor(private projectIssueId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,projectIssueId),cacheRedisType<string>().String,1000*10);
+                }
+                override async getValue(): Promise<string> {
+                    let value:string;
+                    let mysql=getMysqlInstance()
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        value=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoin2Sql({
+                            model:projectIssueModel
+                        },{
+                            model:organizationUserModel,
+                            expression:{
+                                id:{
+                                    model:projectIssueModel,
+                                    field:"created_by"
+                                }
+                            }
+                        },{
+                            model:userModel,
+                            columns:["id"],
+                            expression:{
+                                id:{
+                                    model:organizationUserModel,
+                                    field:"user_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:projectIssueModel,
+                                value:this.projectIssueId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            value=ret.id
+                            await this.objRedis.set(value)
+                        } else {
+                            throw Err.Project.ProjectIssue.projectIssueNotFound
+                        }
+                    }
+                    return value;
+                }
+            }
+            export class createdByPureFromProjectRelease extends BaseRedisStringCache<string> {
+                key="permission:projectRelease:{0}:createdByPure"
+                constructor(private projectReleaseId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,projectReleaseId),cacheRedisType<string>().String,1000*10);
+                }
+                override async getValue(): Promise<string> {
+                    let value:string;
+                    let mysql=getMysqlInstance()
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        value=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoin2Sql({
+                            model:projectReleaseModel
+                        },{
+                            model:organizationUserModel,
+                            expression:{
+                                id:{
+                                    model:projectReleaseModel,
+                                    field:"created_by"
+                                }
+                            }
+                        },{
+                            model:userModel,
+                            columns:["id"],
+                            expression:{
+                                id:{
+                                    model:organizationUserModel,
+                                    field:"user_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:projectReleaseModel,
+                                value:this.projectReleaseId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            value=ret.id
+                            await this.objRedis.set(value)
+                        } else {
+                            throw Err.Project.Release.releaseNotFound
+                        }
+                    }
+                    return value;
+                }
+            }
             export class ProjectIdFromProjectIssueComment extends BaseRedisStringCache<string> {
                 key="permission:projectIssueComment:{0}"
                 constructor(private commentId:string) {
@@ -217,6 +380,32 @@ export namespace REDIS_AUTH {
                     return relationship
                 }
             }
+            export class ProjectTags extends BaseRedisHashCache<object> {
+                key="permission:project:{0}:tag"
+                constructor(private projectId:string) {
+                    super()
+                    this.objRedis=new RedisHashKey(StringUtil.format(this.key,projectId),3600);
+                }
+                async getValue():Promise<object> {
+                    let mysql=getMysqlInstance()
+                    let exist = await this.objRedis.exists();
+                    if (!exist) {
+                        let ret = await mysql.execute(generateQuerySql(roleMemberModel, ["member_id", "role_id"], {
+                            item_id: this.projectId,
+                            member_type: ECommon_Model_Organization_Member_Type.MEMBERTAG
+                        }))
+                        let map = {}
+                        for (let obj of ret) {
+                            map[obj.member_id] = obj.role_id
+                        }
+                        map["_"]=null;
+                        await this.objRedis.set(map)
+                    }
+                    let relationship = await this.objRedis.getAll();
+                    delete relationship["_"];
+                    return relationship
+                }
+            }
             export class ProjectTourist extends BaseRedisStringCache<string> {
                 key="permission:project:{0}:default"
                 constructor(private projectId:string) {
@@ -288,6 +477,32 @@ export namespace REDIS_AUTH {
                         await this.objRedis.set(map);
                     }
                     let value=await this.objRedis.get(userId)
+                    return value;
+                }
+            }
+        }
+        export namespace Tag {
+            export class TagOrganizationUsers extends BaseRedisSetCache<boolean>{
+                key="permission:tag:{0}:organizationUsers"
+                override objRedis:RedisSetKey;
+                constructor(private tagId:string) {
+                    super();
+                    this.objRedis=new RedisSetKey(StringUtil.format(this.key,tagId),3600);
+                }
+                async getValue(userId:string):Promise<boolean> {
+                    let exist=await this.objRedis.exists()
+                    if(!exist) {
+                        let mysql=getMysqlInstance();
+                        let ret=await mysql.execute(generateQuerySql(memberTagMemberModel,null,{
+                            member_tag_id:this.tagId
+                        }))
+                        let arr=[]
+                        for(let obj of ret) {
+                            arr.push(obj.organization_user_id)
+                        }
+                        await this.objRedis.set(arr);
+                    }
+                    let value=await this.objRedis.check(userId)
                     return value;
                 }
             }

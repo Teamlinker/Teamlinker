@@ -58,6 +58,9 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
     }
 
     async editMember(memberId:string,type:ECommon_Model_Organization_Member_Type,roleId:string){
+       if(this.getItem().created_by==memberId) {
+            throw Err.Role.roleChangeForbidden
+        }
         let ret=await rpcAuthApi.changeRoleMember(this.item.id,roleId,type,memberId)
         return ret;
     }

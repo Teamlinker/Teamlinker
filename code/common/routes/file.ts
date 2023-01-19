@@ -1,6 +1,5 @@
 import {ECommon_Services} from "../types"
 import {ECommon_HttpApi_Method} from "./types"
-import {Permission_Types} from "../permission/permission";
 
 const api={
     baseUrl:"/file",
@@ -14,8 +13,7 @@ const api={
             }>{},
             res:<{
                 id:string
-            }>{},
-            permission:[Permission_Types.Organization.EDIT]
+            }>{}
         },
         getPath:{
             method:ECommon_HttpApi_Method.GET,

@@ -1,7 +1,7 @@
 <template>
   <div :style="{width:Icon.width+'px',height:Icon.height+'px',left:point.left,top:point.top,position: 'absolute'}" @focus="onFocus" @blur="onBlur" :tabindex="index" v-drag="point" v-menu="item.onContextMenu" @dblclick="item.onDBClick" @dragend="item.onMove">
     <a-row :style="{width: Icon.width+'px',height:Icon.width+'px',textAlign: 'center'}" style="justify-content: center;align-items: center">
-      <sicon name="Ant" :type="item.icon" size="40" color=""></sicon>
+      <sicon name="Ant" :type="item.icon" size="40" color="white"></sicon>
     </a-row>
     <div :style="{width: '100%',height:Icon.height-Icon.width+'px'}" style="overflow: hidden;text-overflow:ellipsis;textAlign:center;vertical-align:middle;white-space: nowrap;user-select: none;color: rgb(249,249,249)">
       {{item.name}}

@@ -1,12 +1,18 @@
-import {ICommon_Model_Team, Table_Team, teamModel} from "../../../common/model/team";
+import {ICommon_Model_Team, teamModel} from "../../../common/model/team";
 import {Err} from "../../../common/status/error";
 import {keys} from "../../../common/transform";
 import {getMysqlInstance} from "../../common/db/mysql";
 import {Mapper} from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
-import {exculdeColumns, generateLeftJoin2Sql, generateQuerySql, generateUpdateSql} from "../../common/util/sql";
+import {
+    exculdeColumns,
+    generateLeftJoin2Sql,
+    generateLeftJoinSql,
+    generateQuerySql,
+    generateUpdateSql
+} from "../../common/util/sql";
 import {organizationUserModel} from './../../../common/model/organization_user';
-import {Table_Team_User, teamUserModel} from './../../../common/model/team_user';
+import {teamUserModel} from './../../../common/model/team_user';
 import {ECommon_User_Type, ICommon_Model_User, Table_User, userModel} from './../../../common/model/user';
 
 class UserMapper extends Mapper<typeof userModel> {
@@ -70,17 +76,11 @@ class UserMapper extends Mapper<typeof userModel> {
         };
     }
 
-    async teamList(page:number,size:number,userId:string,organizationId?:string,keyword?:string):Promise<{
-        count:number,
-        totalPage:number,
-        data:ICommon_Model_Team[]
-    }>{
-        if(page===undefined || page<0 || size===undefined || size<=0 || !userId) {
+    async teamList(userId:string,organizationId:string,keyword?:string):Promise<ICommon_Model_Team[]>{
+        if(!userId) {
             throw Err.Common.paramError
         }
-        var mysql=getMysqlInstance();
-        let count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Team_User} tu left join ${Table_Team} t on t.id=tu.team_id where ${organizationId?`t.organization_id='${organizationId}' and `:""} tu.user_id='${userId}'${keyword?` and t.name like '%${keyword}%'`:""}`))[0])
-        let totalPage=CommonUtil.pageTotal(count,size)
+        let mysql=getMysqlInstance();
         let sql=generateLeftJoin2Sql({
             model:teamUserModel,
         },{
@@ -107,12 +107,10 @@ class UserMapper extends Mapper<typeof userModel> {
                 model:organizationUserModel,
                 value:userId
             },
-            ...(organizationId && {
-                organization_id:{
-                    model:teamModel,
-                    value:organizationId
-                }
-            }),
+            organization_id:{
+                model:teamModel,
+                value:organizationId
+            },
             ...(keyword && {
                 name:{
                     model:teamModel,
@@ -126,28 +124,60 @@ class UserMapper extends Mapper<typeof userModel> {
             field:"name",
             model:teamModel,
             type:"asc"
-        },page*size,size)
+        })
         let ret=await mysql.execute(sql)
-        return {
-            count:count,
-            totalPage:totalPage,
-            data:ret.map(item=>item.team)
-        };
+        return ret.map(item=>item.team)
     }
 
-    async users(userIds:string[]) {
+    async users(userIds:string[],organizationId?:string):Promise<({nickname?:string} & ICommon_Model_User)[]> {
         let mysql=getMysqlInstance()
-        let arr=await mysql.execute(generateQuerySql(userModel,null,{
-            id:{
-                exp:"in",
+        if(organizationId) {
+            let sql=generateLeftJoinSql({
+                model:organizationUserModel,
+                columns:["nickname"]
+            },{
+                model:userModel,
+                columns:keys<ICommon_Model_User>().map(item=>item.name),
+                expression:{
+                    id:{
+                        model:organizationUserModel,
+                        field:"user_id"
+                    }
+                }
+            },{
+                organization_id:{
+                    model:organizationUserModel,
+                    value:organizationId
+                },
+                user_id:{
+                    model:organizationUserModel,
+                    value:{
+                        exp:"in",
+                        value:userIds
+                    }
+                }
+            },"and",{
+                field:"user_id",
+                model:organizationUserModel,
+                type:"field",
                 value:userIds
-            }
-        },"and",{
-            field:"id",
-            type:"field",
-            value:userIds
-        }))
-        return arr;
+            })
+            let ret=await mysql.execute(sql);
+            return ret;
+        } else {
+            let arr=await mysql.execute(generateQuerySql(userModel,null,{
+                id:{
+                    exp:"in",
+                    value:userIds
+                }
+            },"and",{
+                field:"id",
+                type:"field",
+                value:userIds
+            }))
+            return arr;
+        }
+
     }
 
     async filter(name:string,size:number)

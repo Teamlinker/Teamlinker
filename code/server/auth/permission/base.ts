@@ -62,6 +62,9 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
         permissionMap["PermissionOrganization"]=value
         for(let obj of arrPermission) {
             let permissionName="Permission"+obj.constructor.name
+            if(obj===Permission_Types.Common.SELF) {
+                permissionName="PermissionSelf"
+            }
             let value=permissionMap[permissionName];
             if(value===undefined) {
                 let objPermission=getComponent<PermissionBase>(permissionName)
@@ -76,17 +79,11 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
                 permissionMap[permissionName] = value;
                 if (value === null || value===undefined) {
                     return false
-                } else {
-                    let isCheck = (value & obj.value) && value>=obj.value
-                    if (!isCheck) {
-                        return false
-                    }
                 }
-            } else {
-                let isCheck = (value & obj.value) && value>=obj.value
-                if (!isCheck) {
-                    return false
-                }
+            }
+            let isCheck = (value & obj.value) && value>=obj.value
+            if (!isCheck) {
+                return false
             }
         }
         return true

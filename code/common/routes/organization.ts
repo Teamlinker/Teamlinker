@@ -6,11 +6,13 @@ import {
     ICommon_Route_Res_Organization_List,
     ICommon_Route_Res_Organization_User_Item,
     ICommon_Route_Res_Organization_User_List,
+    ICommon_Route_Res_Organization_User_Profile,
     ICommon_Route_Res_Role_Item,
     ICommon_Route_Res_Role_List
 } from './response';
 import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Model_Member_Tag} from "../model/member_tag";
+import {ICommon_Model_Organization_User} from "../model/organization_user";
 
 const api={
     baseUrl:"/organization",
@@ -104,7 +106,7 @@ const api={
                 roleId?:string,
                 nickname?:string,
                 active?:number,
-                title?:string,
+                department?:string,
                 job?:string,
                 email?:string,
                 phone?:string,
@@ -122,6 +124,15 @@ const api={
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]
+        },
+        user:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user",
+            req:<{
+                organizationUserId:string
+            }>{},
+            res:<ICommon_Model_Organization_User>{},
+            permission:[Permission_Types.Organization.READ]
         },
         enter:{
             method:ECommon_HttpApi_Method.PUT,
@@ -251,6 +262,26 @@ const api={
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]
+        },
+        getPermission:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/permission",
+            req:<{
+                organizationId:string
+            }>{},
+            res:<{
+                value:number
+            }>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        userProfile:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user/profile",
+            req:<{
+                organizationUserId:string
+            }>{},
+            res:<ICommon_Route_Res_Organization_User_Profile>{},
+            permission:[Permission_Types.Organization.READ]
         }
     }
 }
