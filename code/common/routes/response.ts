@@ -155,6 +155,13 @@ export interface ICommon_Route_Res_recentProjectList_Item {
     done:number
 }
 
+export interface ICommon_Route_Res_userProjectList {
+    count:number,
+    totalPage:number,
+    page:number,
+    data:ICommon_Route_Res_recentProjectList_Item[]
+}
+
 export interface ICommon_Route_Res_Project_filter {
     id:string,
     name:string,

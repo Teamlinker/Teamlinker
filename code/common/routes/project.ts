@@ -11,7 +11,8 @@ import {
     ICommon_Route_Res_Project_ListTag,
     ICommon_Route_Res_recentProjectList_Item,
     ICommon_Route_Res_Role_Item,
-    ICommon_Route_Res_Role_List
+    ICommon_Route_Res_Role_List,
+    ICommon_Route_Res_userProjectList
 } from './response';
 import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Model_Role} from "../model/role";
@@ -226,6 +227,18 @@ const api={
                        
             }>{},
             res:<ICommon_Route_Res_recentProjectList_Item[]>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        userProjectList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user/list",
+            req:<{
+                keyword?:string,
+                page:number,
+                size:number,
+                type:"all"|"created"|"joined"
+            }>{},
+            res:<ICommon_Route_Res_userProjectList>{},
             permission:[Permission_Types.Organization.READ]
         },
         listRole:{

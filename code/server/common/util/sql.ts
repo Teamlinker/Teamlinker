@@ -48,7 +48,7 @@ function isEXPRVALUEEXP(value:any):value is EXPRVALUEEXP {
 }
 
 function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[],table?:string) {
-    if (value.exp == "=" || value.exp=="<=" || value.exp==">" || value.exp=="<" || value.exp=="<>" || !value.exp) {
+    if (value.exp == "=" || value.exp=="<=" || value.exp==">=" || value.exp==">" || value.exp=="<" || value.exp=="<>" || !value.exp) {
         if(!value.exp) {
             value.exp="="
         }
@@ -502,7 +502,7 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
         }
     }
 },objExpr?:{
-    [param in keyof (T1 & T2 & T3)["model"]]?:{
+    [param in ((keyof (T1 & T2 & T3)["model"])|`${"$and"|"$or"}${number}`)]?:{
         value:EXPRVALUE,
         model:T1|T2|T3
     }|{
@@ -669,7 +669,7 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
         }
     }
 },objExpr?:{
-    [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
+    [param in ((keyof (T1 & T2 & T3 & T4)["model"])|`${"$and"|"$or"}${number}`)]?:{
         value:EXPRVALUE,
         model:T1|T2|T3|T4
     }|{
@@ -993,7 +993,7 @@ export function testSql<T extends BaseModel,K1 extends keyof T["model"]=null,R e
     [param in keyof T["model"]]?:HAVINGEXP
 },havingMode?:"and"|"or",order?:{
     field:O extends false?(keyof T["model"]):RR,
-    isVitualField:O,
+    isVirtualField:O,
     type:"asc"|"desc"
 },limit?:number,size?:number):{
     value:string,
@@ -1013,8 +1013,9 @@ export function generateGroupSql<T extends BaseModel,K1 extends keyof T["model"]
     [param in keyof T["model"]]?:HAVINGEXP
 },havingMode?:"and"|"or",order?:{
     field:O extends false?(keyof T["model"]):RR,
-    isVitualField:O,
-    type:"asc"|"desc"
+    isVirtualField:O,
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
 },limit?:number,size?:number):{
     value:string,
     type:Rename<{
@@ -1024,8 +1025,31 @@ export function generateGroupSql<T extends BaseModel,K1 extends keyof T["model"]
     let column=handleColums(columns)
     let expr=generateExp(objExpr,exprMode);
     let havingExpr=generateHavingExp(having,havingMode);
+    let orderStr="";
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.field.toString()} ${order.type}`
+        }
+    }
     return {
-        value:`select ${column} from ${model.table}${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.field.toString()} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${model.table}${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:model.model
     }
 }
@@ -1051,9 +1075,14 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
         }
     }
 },groups:(keyof T1["model"])[],objExpr?:{
-    [param in keyof (T1 & T2)["model"]]?:{
+    [param in ((keyof (T1 & T2)["model"])|`${"$and"|"$or"}${number}`)]?:{
         value:EXPRVALUE,
         model:T1|T2
+    }|{
+        [param in keyof (T1 & T2)["model"]]?:{
+            value:EXPRVALUE,
+            model:T1|T2
+        }
     }
 },exprMode?:"and"|"or",having?:{
     [param in keyof T1["model"]]?:{
@@ -1063,8 +1092,9 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
 },havingMode?:"and"|"or",order?:{
     field:O extends false?(keyof(T1["model"] & T2["model"])):(RR1|RR2),
     model:T1 | T2,
-    isVitualField:O,
-    type:"asc"|"desc"
+    isVirtualField:O,
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
 },limit?:number,size?:number):{
     value:string,
     type:(F1 extends null ? Rename<{
@@ -1103,7 +1133,7 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
         }
         let str=arr.map((item)=>{
             let val=handleLeftJoinEachColumn(item,table)
-            return `${val.exp?"":table}${val.field} _${table}__${val.rename}`
+            return `${val.exp?"":(table+".")}${val.field} _${table}__${val.rename}`
         }).join(",")
         column+=str;
     }
@@ -1117,7 +1147,7 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
         }
         let str=arr.map((item)=>{
             let val=handleLeftJoinEachColumn(item,joinTable)
-            return `${val.exp?"":joinTable}${val.field} _${joinTable}__${val.rename}`
+            return `${val.exp?"":(joinTable+".")}${val.field} _${joinTable}__${val.rename}`
         }).join(",")
         column+=","+str;
     }
@@ -1128,8 +1158,31 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
     }
     aggregation[table]=mainModel.aggregation??""
     aggregation[joinTable]=joinModel.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`
+        }
+    }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -1169,9 +1222,14 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
 },groups:(keyof T1["model"])[],objExpr?:{
-    [param in keyof (T1 & T2 & T3)["model"]]?:{
+    [param in ((keyof (T1 & T2 & T3)["model"])|`${"$and"|"$or"}${number}`)]?:{
         value:EXPRVALUE,
         model:T1|T2|T3
+    }|{
+        [param in keyof (T1 & T2 & T3)["model"]]?:{
+            value:EXPRVALUE,
+            model:T1|T2|T3
+        }
     }
 },exprMode?:"and"|"or",having?:{
     [param in keyof T1["model"]]?:{
@@ -1181,8 +1239,9 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
 },havingMode?:"and"|"or",order?:{
     field:O extends false?(keyof(T1["model"] & T2["model"] & T3["model"])):(RR1|RR2|RR3),
     model:T1 | T2 | T3,
-    isVitualField:O,
-    type:"asc"|"desc"
+    isVirtualField:O,
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
 },limit?:number,size?:number):{
     value:string,
     type:(F1 extends null ? Rename<{
@@ -1215,7 +1274,7 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
     let key=Object.keys(joinModel.expression)[0]
     let value=joinModel.expression[key]
     let key2=Object.keys(joinModel2.expression)[0]
-    let value2=joinModel2.expression[key]
+    let value2=joinModel2.expression[key2]
     let expression=`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`
     let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field.toString()}`
     let havingExpr=generateLeftJoinHavingExp(having,havingMode);
@@ -1271,8 +1330,31 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
     aggregation[table]=mainModel.aggregation??""
     aggregation[joinTable]=joinModel.aggregation??""
     aggregation[joinTable2]=joinModel2.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`
+        }
+    }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -1324,10 +1406,15 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
             field:keyof (T1 & T2 & T3)["model"]
         }
     }
-},groups:(keyof T1["model"])[],objExpr?:{
-    [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
-        value:EXPRVALUE,
-        model:T1|T2|T3|T3
+},groups:(keyof T1["model"])[],objExpr?: {
+    [param in ((keyof (T1 & T2 & T3 & T4)["model"]) | `${"$and" | "$or"}${number}`)]?: {
+        value: EXPRVALUE,
+        model: T1 | T2 | T3 | T4
+    } | {
+        [param in keyof (T1 & T2 & T3 & T4)["model"]]?: {
+            value: EXPRVALUE,
+            model: T1 | T2 | T3 | T4
+        }
     }
 },exprMode?:"and"|"or",having?:{
     [param in keyof T1["model"]]?:{
@@ -1337,8 +1424,9 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
 },havingMode?:"and"|"or",order?:{
     field:O extends false?(keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"])):(RR1|RR2|RR3|RR4),
     model:T1 | T2 | T3 | T4,
-    isVitualField:O,
-    type:"asc"|"desc"
+    isVirtualField:O,
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
 },limit?:number,size?:number):{
     value:string,
     type:(F1 extends null ? Rename<{
@@ -1378,9 +1466,9 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
     let key=Object.keys(joinModel.expression)[0]
     let value=joinModel.expression[key]
     let key2=Object.keys(joinModel2.expression)[0]
-    let value2=joinModel2.expression[key]
+    let value2=joinModel2.expression[key2]
     let key3=Object.keys(joinModel3.expression)[0]
-    let value3=joinModel3.expression[key]
+    let value3=joinModel3.expression[key3]
     let expression=`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`
     let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field.toString()}`
     let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.field.toString()}`
@@ -1397,7 +1485,7 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
         }
         let str=arr.map((item)=>{
             let val=handleLeftJoinEachColumn(item,table)
-            return `${val.exp?"":table}${val.field} _${table}__${val.rename}`
+            return `${val.exp?"":(table+".")}${val.field} _${table}__${val.rename}`
         }).join(",")
         column+=str;
     }
@@ -1411,7 +1499,7 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
         }
         let str=arr.map((item)=>{
             let val=handleLeftJoinEachColumn(item,joinTable)
-            return `${val.exp?"":joinTable}${val.field} _${joinTable}__${val.rename}`
+            return `${val.exp?"":(joinTable+".")}${val.field} _${joinTable}__${val.rename}`
         }).join(",")
         column+=","+str;
     }
@@ -1425,7 +1513,7 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
         }
         let str=arr.map((item)=>{
             let val=handleLeftJoinEachColumn(item,joinTable2)
-            return `${val.exp?"":joinTable2}${val.field} _${joinTable2}__${val.rename}`
+            return `${val.exp?"":(joinTable2+".")}${val.field} _${joinTable2}__${val.rename}`
         }).join(",")
         column+=","+str;
     }
@@ -1439,7 +1527,7 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
         }
         let str=arr.map((item)=>{
             let val=handleLeftJoinEachColumn(item,joinTable3)
-            return `${val.exp?"":joinTable3}${val.field} _${joinTable3}__${val.rename}`
+            return `${val.exp?"":(joinTable3+".")}${val.field} _${joinTable3}__${val.rename}`
         }).join(",")
         column+=","+str;
     }
@@ -1452,8 +1540,31 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
     aggregation[joinTable]=joinModel.aggregation??""
     aggregation[joinTable2]=joinModel2.aggregation??""
     aggregation[joinTable3]=joinModel3.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`
+        }
+    }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.join(",")}${having?(" having "+havingExpr):""}${order?` order by ${order.isVitualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`:""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }

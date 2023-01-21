@@ -3,7 +3,7 @@ import {BaseModel} from "./base"
 export enum ECommon_Model_Project_Release_Status {
   UNRELEASE,
   RELEASE,
-  ARCHIVE
+  ARCHIVED
 }
 export interface ICommon_Model_Project_Release {
     id :string ,

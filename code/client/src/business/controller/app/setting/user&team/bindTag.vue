@@ -1,5 +1,5 @@
 <template>
-  <a-form>
+  <a-form :model="{}">
     <a-form-item label="tags">
       <a-space wrap>
         <a-tag v-for="item in tagList" bordered color="arcoblue" checkable :checked="item.checked" @check="item.checked=!item.checked">{{item.name}}</a-tag>

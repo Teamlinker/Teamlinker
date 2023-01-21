@@ -123,10 +123,16 @@ class ProjectController {
 
     @DHttpApi(projectApi.routes.recentProjectList)
     async recentProjectList(@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.recentProjectList.res> {
-        let ret=await ProjectService.recentProjectList(user.userId);
+        let ret=await ProjectService.recentProjectList(user.organizationInfo.organizationUserId);
         return ret;
     }
 
+
+    @DHttpApi(projectApi.routes.userProjectList)
+    async userProjectList(@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParamRequired("type") type:"all"|"created"|"joined",@DHttpReqParam("keyword") keyword:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.userProjectList.res> {
+        let ret=await ProjectService.userProjectList(user.organizationInfo.organizationUserId,page,size,type,keyword);
+        return ret;
+    }
 
     @DHttpApi(projectApi.routes.listRole)
     async listRole(@DHttpReqParam("projectId") projectId:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.listRole.res>{

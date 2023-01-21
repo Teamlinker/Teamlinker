@@ -35,8 +35,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
-import {apiOrganization, apiTeam, DCSType} from "../../../../common/request/request";
-import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../common/routes/response";
+import {apiTeam, DCSType} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {ICommon_Model_Team} from "../../../../../../../common/model/team";
@@ -115,11 +114,11 @@ const onEditMember=async (item:DCSType<ICommon_Model_Team>)=>{
     teamId:item.id
   },`${item.name} -> Members`);
 }
-const onDelete=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
+const onDelete=async (item:DCSType<ICommon_Model_Team>)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this user from this organization?")
   if(ret) {
-    let res=await apiOrganization.deleteUser({
-      organizationUserId:item.organizationUser.id
+    let res=await apiTeam.remove({
+      teamId:item.id
     })
     if(res?.code==0) {
       Message.success("remove success")
