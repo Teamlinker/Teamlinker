@@ -1,6 +1,7 @@
 import * as intFormat from "biguint-format";
 import * as FlakeId from 'flake-idgen';
 import {BaseModel} from '../../../common/model/base';
+import field from "../../../common/routes/field";
 
 const uid = new FlakeId(); 
 
@@ -190,6 +191,9 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
         let value=obj[key]
         if(typeof(value)=="string") {
             value=(value as string).replace(/'/g,"\\'");
+            if(value==="" && key.endsWith("_id")) {
+                value=null;
+            }
         }
         keys+=(value!==null && value!==undefined)?(key+","):""
         values+=(value!==null && value!==undefined)?("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'"+","):""
@@ -227,6 +231,9 @@ export function generateBatchCreateSql<T extends BaseModel>(model:T,arr:{
             let value=item[key]
             if(typeof(value)=="string") {
                 value=(value as string).replace(/'/g,"\\'");
+                if(value==="" && key.endsWith("_id")) {
+                    value=null;
+                }
             }
             arrValue.push((value!==undefined)?(value===null?"null":("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'")):"default")
         }
@@ -286,6 +293,83 @@ export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]
     }
 }
 
+export function generateBatchCreateOnUpdateSql<T extends BaseModel>(model:T, arrCreate:{
+    [param in keyof T["model"]]?:T["model"][param]
+}[], objUpdate:{
+    [param in keyof T["model"]]?:{
+        exp:"+"|"-",
+        value:number
+    }|T["model"][param]|{
+        type:"values",
+        field:keyof T["model"]
+    }
+}):{
+    value:string,
+    type:T["model"]
+} {
+    let arrKey:string[]=[]
+    for(let item of arrCreate) {
+        for(let key in item) {
+            if(!arrKey.includes(key)) {
+                arrKey.push(key)
+            }
+        }
+    }
+    let keys=arrKey.join(","),arrValues:string[]=[]
+    for(let item of arrCreate) {
+        let arrValue:string[]=[]
+        for(let key of arrKey) {
+            let value=item[key]
+            if(typeof(value)=="string") {
+                value=(value as string).replace(/'/g,"\\'");
+                if(value==="" && key.endsWith("_id")) {
+                    value=null;
+                }
+            }
+            arrValue.push((value!==undefined)?(value===null?"null":("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'")):"default")
+        }
+        arrValues.push("("+arrValue.join(",")+")")
+    }
+    let arrVal=[];
+    for(let key in objUpdate) {
+        let value=objUpdate[key]
+        let val;
+        if(value===null) {
+            val="null"
+        } else if(value===undefined) {
+            continue
+        } else if (typeof(value)=="number") {
+            val=String(value)
+        } else if(typeof(value)=="boolean") {
+            val=value?1:0+""
+        } else if(typeof(value)=="object" && !(value instanceof Date) && !Array.isArray(value)) {
+            if(value.exp) {
+                val=`${key}${value.exp}${value.value}`
+            } else if(value.type==="values") {
+                val=`values(${value.field})`
+            }
+        } else if(Array.isArray(value)) {
+            val="'"+JSON.stringify(value)+"'"
+        } else if(value==="") {
+            val=null
+        } else {
+            if(typeof(value)=="string") {
+                value=(value as string).replace(/'/g,"\\'")
+            }
+            if(value==="" && key.endsWith("_id")) {
+                val=null
+            } else {
+                val="'"+value+"'"
+            }
+        }
+        arrVal.push(`${key}=${val}`)
+    }
+    return {
+        value:`insert into ${model.table} (${keys}) values ${arrValues.join(",")} on duplicate key update ${arrVal.join(",")}`,
+        type:model.model
+    }
+}
+
 export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
     [param in keyof T["model"]]?:{
         exp:"+"|"-",
@@ -319,7 +403,11 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
             if(typeof(value)=="string") {
                 value=(value as string).replace(/'/g,"\\'")
             }
-            val="'"+value+"'"
+            if(value==="" && key.endsWith("_id")) {
+                val=null
+            } else {
+                val="'"+value+"'"
+            }
         }
         arrVal.push(`${key}=${val}`)
     }
@@ -835,6 +923,23 @@ export function generateCountSql<T extends BaseModel>(model:T,objExpr?:{
     }
 }
 
+export function convertCountSql(sql:{
+    value:string,
+    type:any
+}):{
+    value:string,
+    type:{
+        "count(1)":string
+    }
+} {
+    return {
+        value:sql.value.replace(/select[\s\S]+?from/,"select count(1) from").replace(/limit\s+\d+\s*\,\s*\d+/,""),
+        type:{
+            "count(1)":""
+        }
+    }
+}
+
 export function generateMaxSql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columnMax:K1,objExpr?:{
     [param in keyof T["model"]]?:EXPRVALUE
 },exprMode?:"and"|"or"):{
@@ -924,7 +1029,7 @@ function handleLeftJoinEachColumn<T,R,K>(column:T|COLUMNSVALUETYPE<R,K>,table:st
         } else if(ISCOLUMNSVALUEVALUETYPE(column.value)) {
             str+=table+"."+column.value.field+column.value.exp+(typeof(column.value.value=="string")?("'"+column.value.value+"'"):column.value.value)
         }
-        str+=") "
+        str+=column.exp=="count"?" or null)":") "
         return {
             rename:<string><unknown>column.rename,
             field:str,

@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 100%;height: 100%" ref="root">
+  <div style="width: 100%;height: 100%;" ref="root">
     <template v-for="(item,index) in list">
       <component  :is="item" v-show="index==currentIndex"></component>
     </template>
@@ -45,6 +45,7 @@ if(!parent) {
     manager.locate(JSON.parse(JSON.stringify(props.path)))
   }
   provide("navigatorManager",manager)
+  provide("navigatorRootRef",root)
 } else {
   manager=inject("navigatorManager",null) as NavigatorManager
   objNavigator.setManager(manager);

@@ -164,6 +164,15 @@ const api={
             res:<ICommon_Model_Issue_Type_Solution>{},
             permission:[Permission_Types.Organization.ADMIN]
         },
+        solutionInfoByProjectId:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/solution/byprojectid",
+            req:<{
+                projectId:string
+            }>{},
+            res:<ICommon_Model_Issue_Type_Solution>{},
+            permission:[Permission_Types.Organization.READ]
+        },
     }
 }
 export default api

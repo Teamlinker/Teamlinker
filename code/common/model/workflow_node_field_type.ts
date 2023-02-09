@@ -5,8 +5,6 @@ export enum ECommon_Model_Workflow_Node_Field_Type_Label_Type {
     USER,
     RELEASE,
     ISSUE,
-    MODULE,
-    LABEL
 }
 
 export interface ICommon_Model_Workflow_Node_Field_Type {

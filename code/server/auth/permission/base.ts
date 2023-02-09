@@ -29,6 +29,7 @@ export abstract class PermissionBase {
             })
         }
         this.lock=await PermissionBase.Lock.acquire(keys,5000)
+        await this.lock.extend(1600)
     }
     async unlock() {
         if(this.lock) {

@@ -1,4 +1,5 @@
 import {
+    ECommon_Model_Workflow_Node_Field_Type_Label_Type,
     ICommon_Model_Workflow_Node_Field_Type,
     workflowNodeFieldTypeModel
 } from '../../../common/model/workflow_node_field_type';
@@ -123,7 +124,10 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
             default_number_value:defaultNumberValue,
             optional,
             description,
-            weight
+            weight,
+            ...((fieldTypeId===ECommon_Field_Type.LABEL || fieldTypeId===ECommon_Field_Type.MULTILABEL) && {
+                label_type:ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER
+            })
         }))
         let ret=await mysql.executeOne(generateQuerySql(workflowNodeFieldTypeModel,[],{
             id:id

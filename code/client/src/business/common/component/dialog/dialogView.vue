@@ -13,7 +13,7 @@
           </div>
         </div>
       </div>
-      <div style="height: 45px;width: 100%;display: flex;justify-content: flex-end;border-top: 1px solid gainsboro;flex: 1 1 auto">
+      <div style="height: 45px;width: 100%;display: flex;justify-content: flex-end;border-top: 1px solid gainsboro;flex: 1 0 auto">
         <a-space size="medium">
           <a-button type="primary" @click="onOk" size="small" html-type="submit" :loading="props.loading?props.loading.value:false">{{(component || input)?"Ok":"Yes"}}</a-button>
           <a-button type="outline" style="margin-right: 10px" size="small" @click="onClose">{{(component || input)?"Close":"No"}}</a-button>

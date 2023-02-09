@@ -79,11 +79,11 @@ export class Dialog {
         })
     }
 
-    static input(el:HTMLElement,appContext: AppContext,title:string):Promise<string> {
+    static input(el:HTMLElement,appContext: AppContext,title:string,initialData?:string):Promise<string> {
         return new Promise((resolve,reject)=>{
             let ele=document.createElement("div")
             let input={
-                text:ref("")
+                text:ref(initialData??"")
             }
             let destroyFunc=renderComponent(ele,DialogView,appContext,{
                 onOk,

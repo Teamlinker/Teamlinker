@@ -40,16 +40,33 @@ export function dialogFuncGenerator({func,form}:{
             }
         }
         let res=await func()
-        if(res?.code==0) {
-            Message.success("operation success")
-            return res
+        if(typeof(res)=="object") {
+            if(res?.code==0) {
+                Message.success("operation success")
+                return res
+            } else {
+                Message.error(res.msg);
+                return false
+            }
         } else {
-            Message.error(res.msg);
-            return false
+            return res;
         }
     }
 }
 
 export function checkPermission(permission:number,permissionChecked:Permission_Base) {
     return (permission & permissionChecked.value) && permission>=permissionChecked.value
+}
+
+export function clone(o){
+    let k, ret= o, b;
+    if(o && ((b = (o instanceof Array)) || o instanceof Object)) {
+        ret = b ? [] : {};
+        for(k in o){
+            if(o.hasOwnProperty(k)){
+                ret[k] = arguments.callee(o[k]);
+            }
+        }
+    }
+    return ret;
 }

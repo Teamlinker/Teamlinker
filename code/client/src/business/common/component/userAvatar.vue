@@ -1,5 +1,5 @@
 <template>
-  <a-popover position="left" :content-style="{backgroundColor:'rgb(249,249,249)',padding:'0px'}" :id="'popover'+organizationUserId">
+  <a-popover position="left" :content-style="{backgroundColor:'rgb(249,249,249)',padding:'0px'}" :id="'popover'+organizationUserId" @popup-visible-change="onPopup">
     <a-space>
       <a-avatar :size="24" :image-url="photo">{{imgName}}</a-avatar>
       <span>{{name}}</span>
@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onBeforeMount, ref} from "vue";
+import {computed, ref} from "vue";
 import {ICommon_Model_Organization_User} from "../../../../../common/model/organization_user";
 import {apiOrganization, DCSType} from "../request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../event/event";
@@ -54,19 +54,21 @@ const imgName=computed(()=>{
   }
 })
 const info=ref<DCSType<ICommon_Model_Organization_User>>(null)
-onBeforeMount(async ()=>{
-  let res=await apiOrganization.user({
-    organizationUserId:props.organizationUserId
-  })
-  if(res?.code==0) {
-    info.value=res.data
-    loading.value=false
-  }
-})
 const onProfile=()=>{
   eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,props.organizationUserId);
   let ele=document.getElementById("popover"+props.organizationUserId)
   ele.parentElement.removeChild(ele);
+}
+const onPopup=async (visible:boolean)=>{
+  if(!info.value && visible) {
+    let res=await apiOrganization.user({
+      organizationUserId:props.organizationUserId
+    })
+    if(res?.code==0) {
+      info.value=res.data
+      loading.value=false
+    }
+  }
 }
 </script>
 

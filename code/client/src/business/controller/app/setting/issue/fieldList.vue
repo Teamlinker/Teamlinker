@@ -64,8 +64,6 @@
               <a-option :value="ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER" label="USER"></a-option>
               <a-option :value="ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE" label="RELEASE"></a-option>
               <a-option :value="ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE" label="ISSUE"></a-option>
-              <a-option :value="ECommon_Model_Workflow_Node_Field_Type_Label_Type.LABEL" label="LABEL"></a-option>
-              <a-option :value="ECommon_Model_Workflow_Node_Field_Type_Label_Type.MODULE" label="MODULE"></a-option>
             </a-select>
           </a-form-item>
           <a-form-item field="values" label="options" v-if="form.type==ECommon_Field_Type.SELECT || form.type==ECommon_Field_Type.MULTISELECT">

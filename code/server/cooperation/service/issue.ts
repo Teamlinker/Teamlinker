@@ -2,6 +2,7 @@ import {ICommon_Model_Workflow_Node_Field_Type} from '../../../common/model/work
 import {ICommon_Model_Workflow_Node_Field_Type_Config} from '../../../common/model/workflow_node_field_type_config';
 import {
     ICommon_Route_Req_ProjectIssue_Field,
+    ICommon_Route_Req_ProjectIssue_Field_Value,
     ICommon_Route_Res_ProjectIssue_fieldsInfo
 } from "../../../common/routes/response";
 import {Err} from '../../../common/status/error';
@@ -15,9 +16,9 @@ import {commentMapper} from './../mapper/comment';
 import {projectIssueMapper} from './../mapper/issue';
 import {WorkflowNodeFieldTypeService} from './field';
 import {ProjectModuleService} from './module';
-import {ProjectLabelService} from './label';
 import {WorkflowActionService, WorkflowNodeService} from './workflow';
 import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
+import {ProjectReleaseService} from "./release";
 
 export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof projectIssueMapper> {
     constructor(){
@@ -50,25 +51,23 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     async generateFieldValue(objFieldType:{
         fieldId:string,
         fieldType:ICommon_Field_Type
-    },obj:ICommon_Route_Req_ProjectIssue_Field):Promise<ICommon_Model_Project_Issue_Field_Value> {
+    },obj:ICommon_Route_Req_ProjectIssue_Field,fieldValueId?:string):Promise<ICommon_Model_Project_Issue_Field_Value> {
         let ret=<ICommon_Model_Project_Issue_Field_Value>{}
-        let id=await generateSnowId()
+        let id=fieldValueId??await generateSnowId()
         if(objFieldType.fieldType.type==ECommon_Field_Type.DATE || objFieldType.fieldType.type==ECommon_Field_Type.TIME || objFieldType.fieldType.type==ECommon_Field_Type.TEXT || objFieldType.fieldType.type==ECommon_Field_Type.MULTITEXT) {
-            ret=<ICommon_Model_Project_Issue_Field_Value>{
+            ret={
                 id:id,
                 project_issue_id:this.getId(),
-                field_id:obj.fieldId,
-                string_value:obj.value as string,
+                string_value:obj.value as string??"",
                 workflow_node_field_type_id:objFieldType.fieldId,
                 number_value:null,
                 ref_values:null,
                 field_config_ids:null
             }
         } else if(objFieldType.fieldType.type == ECommon_Field_Type.SWITCH) {
-            ret=<ICommon_Model_Project_Issue_Field_Value>{
+            ret={
                 id:id,
                 project_issue_id:this.getId(),
-                field_id:obj.fieldId,
                 number_value:obj.value as number,
                 workflow_node_field_type_id:objFieldType.fieldId,
                 string_value:null,
@@ -76,23 +75,21 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
                 field_config_ids:null
             }
         } else if(objFieldType.fieldType.type == ECommon_Field_Type.SELECT || objFieldType.fieldType.type == ECommon_Field_Type.MULTISELECT) {
-            ret=<ICommon_Model_Project_Issue_Field_Value>{
+            ret={
                 id:id,
                 project_issue_id:this.getId(),
-                field_id:obj.fieldId,
-                field_config_ids:obj.value as string[],
+                field_config_ids:objFieldType.fieldType.type == ECommon_Field_Type.MULTISELECT?(obj.value as string[]??[]):(obj.value?[obj.value as string]:[]),
                 workflow_node_field_type_id:objFieldType.fieldId,
                 string_value:null,
                 ref_values:null,
                 number_value:null,
             }
         } else if(objFieldType.fieldType.type == ECommon_Field_Type.LABEL || objFieldType.fieldType.type == ECommon_Field_Type.MULTILABEL) {
-            ret=<ICommon_Model_Project_Issue_Field_Value>{
+            ret={
                 id:id,
                 project_issue_id:this.getId(),
-                field_id:obj.fieldId,
-                ref_values:obj.value as string[],
-                number_value:obj.value as number,
+                ref_values:objFieldType.fieldType.type == ECommon_Field_Type.MULTILABEL?(obj.value as string[]??[]):(obj.value?[obj.value as string]:[]),
+                number_value:null,
                 workflow_node_field_type_id:objFieldType.fieldId,
                 string_value:null,
                 field_config_ids:null
@@ -101,14 +98,15 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         return ret;
     }
 
-    async updateFieldValue(value:ICommon_Route_Req_ProjectIssue_Field) {
+    async updateFieldValue(value:ICommon_Route_Req_ProjectIssue_Field_Value) {
         if(!value) {
             return
         }
         let fieldTypes=await WorkflowNodeFieldTypeService.getFieldTypesByFieldIds([value.fieldId])
         if(fieldTypes && fieldTypes.length>0) {
-            let obj=await this.generateFieldValue(fieldTypes[0],value)
-            await projectIssueMapper.updateFieldValue(obj)
+            let obj=await this.generateFieldValue(fieldTypes[0],value,value.fieldValueId)
+            let ret=await projectIssueMapper.updateFieldValue(obj)
+            return ret;
         }
     }
 
@@ -131,6 +129,10 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         let obj=await WorkflowActionService.getItemById(workflowActionId)
         if(!obj) {
             throw Err.Project.Workflow.workflowActionNotFound
+        }
+        let process=await projectIssueMapper.getProcess(this.getId())
+        if(process && process.includes(obj.getItem().dest_node_id)) {
+            return []
         }
         let ret=await this.getWorkflowNodeFields(obj.getItem().dest_node_id)
         return ret;
@@ -161,14 +163,13 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     }
     
     async fieldsInfo(){
-        let project=await ProjectService.getItemById(this.getItem().project_id)
         let process=await projectIssueMapper.getProcess(this.getId())
         if(!process) {
-            return null
+            return []
         }
         let fieldValues=await projectIssueMapper.getFieldValues(this.getId());
         if(!fieldValues || fieldValues.length==0) {
-            return null
+            return []
         }
         let objFieldsInfo=<{
             [weight:number]:{
@@ -227,7 +228,10 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         for(let obj of arr1) {
             for(let obj1 of fieldValues) {
                 if(obj1.workflow_node_field_type_id==obj.field.id) {
-                    arr2.push(Object.assign({},obj1,obj));
+                    arr2.push({
+                        nodeField:obj,
+                        issueFieldValue:obj1
+                    });
                 }
             }
         }
@@ -357,37 +361,25 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         }
     }
 
-    async bindLabel(labelId :string) {
-        let obj=await ProjectLabelService.getItemById(labelId)
-        if(!obj) {
-            throw Err.Project.Label.labelNotfound
-        }
-        await projectIssueMapper.bindIssueLabel(this.getId(),labelId)
+    async bindLabels(labelIds :string[]) {
+        await projectIssueMapper.bindIssueLabels(this.getId(),labelIds)
+        let ret=await projectIssueMapper.issueLabelList(this.getId());
+        return ret;
     }
 
-    async unbindLabel(labelId :string) {
-        let obj=await ProjectLabelService.getItemById(labelId)
-        if(!obj) {
-            throw Err.Project.Label.labelNotfound
-        }
-        await projectIssueMapper.unbindIssueLabel(this.getId(),labelId)
-    }
 
-    async bindModule(moduleId :string) {
-        let obj=await ProjectModuleService.getItemById(moduleId)
-        if(!obj) {
-            throw Err.Project.Module.moduleNotFound
+    async bindModule(moduleId? :string) {
+        if(moduleId) {
+            let obj=await ProjectModuleService.getItemById(moduleId)
+            if(!obj) {
+                throw Err.Project.Module.moduleNotFound
+            }
         }
         await projectIssueMapper.bindIssueModule(this.getId(),moduleId)
+        let ret=await projectIssueMapper.issueModuleList(this.getId())
+        return ret;
     }
 
-    async unbindModule(moduleId :string) {
-        let obj=await ProjectModuleService.getItemById(moduleId)
-        if(!obj) {
-            throw Err.Project.Module.moduleNotFound
-        }
-        await projectIssueMapper.unbindIssueModule(this.getId(),moduleId)
-    }
 
     static async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string) {
         let project=await ProjectService.getItemById(projectId)
@@ -409,6 +401,16 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
 
     static async clearIssueValueByFieldTypeId(workflowFieldTypeId:string) {
         await projectIssueMapper.clearIssueValueByFieldTypeId(workflowFieldTypeId)
+    }
+
+    async releaseList() {
+        let ret=await ProjectReleaseService.issueReleaseList(this.getId())
+        return ret;
+    }
+
+    async bindReleases(projectReleaseIds:string[]) {
+        let ret=await ProjectReleaseService.issueBindReleaseList(this.getId(),projectReleaseIds)
+        return ret;
     }
     
 }

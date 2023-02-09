@@ -2,12 +2,18 @@ import EventEmitter from "eventemitter3"
 
 export enum EClient_EVENTBUS_TYPE {
     OPEN_PEOPLE_PROFILE="open_people_profile",
-    OPEN_TEAM_PROFILE="open_team_profile"
+    OPEN_TEAM_PROFILE="open_team_profile",
+    OPEN_PROJECT_PROFILE="open_project_profile",
+    OPEN_PROJECT_ISSUE_PROFILE="open_project_issue_profile",
+    OPEN_PROJECT_RELEASE_PROFILE="open_project_release_profile"
 }
 
 interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE]:(organizationUserId:string)=>void
     [EClient_EVENTBUS_TYPE.OPEN_TEAM_PROFILE]:(teamId:string)=>void
+    [EClient_EVENTBUS_TYPE.OPEN_PROJECT_PROFILE]:(projectId:string)=>void
+    [EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE]:(projectId:string,projectIssueId:string)=>void
+    [EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE]:(projectId:string,projectReleaseId:string)=>void
 }
 
 interface IClient_EventBus_Emit_Func {

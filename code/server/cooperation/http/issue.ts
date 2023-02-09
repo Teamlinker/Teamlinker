@@ -1,6 +1,9 @@
 import {ECommon_Model_Comment_Type} from "../../../common/model/comment";
 import projectIssueApi from "../../../common/routes/issue";
-import {ICommon_Route_Req_ProjectIssue_Field} from "../../../common/routes/response";
+import {
+     ICommon_Route_Req_ProjectIssue_Field,
+     ICommon_Route_Req_ProjectIssue_Field_Value
+} from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {DComponent} from "../../common/decorate/component";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
@@ -71,13 +74,13 @@ class IssueController {
      }
      @DHttpApi(projectIssueApi.routes.editExtraField)
      async editExtraField(@DHttpReqParamRequired("projectIssueId") projectIssueId :string ,
-     @DHttpReqParam("value")     value:ICommon_Route_Req_ProjectIssue_Field):Promise<typeof projectIssueApi.routes.editExtraField.res> {
+     @DHttpReqParam("value")     value:ICommon_Route_Req_ProjectIssue_Field_Value):Promise<typeof projectIssueApi.routes.editExtraField.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          await projectIssue.updateFieldValue(value)
-          return;
+          let ret=await projectIssue.updateFieldValue(value)
+          return ret;
      }
      @DHttpApi(projectIssueApi.routes.editBasicField)
      async editBasicField(@DHttpReqParamRequired("projectIssueId") projectIssueId :string ,
@@ -100,7 +103,7 @@ class IssueController {
      }
      @DHttpApi(projectIssueApi.routes.editDescription)
      async editDescription(@DHttpReqParamRequired("projectIssueId") projectIssueId :string ,
-     @DHttpReqParamRequired("description")     description :string):Promise<typeof projectIssueApi.routes.editDescription.res> {
+     @DHttpReqParam("description")     description :string):Promise<typeof projectIssueApi.routes.editDescription.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
@@ -276,41 +279,24 @@ class IssueController {
           return ret;
      }
      @DHttpApi(projectIssueApi.routes.bindLabel)
-     async bindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("labelId") labelId :string):Promise<typeof projectIssueApi.routes.bindLabel.res> {
+     async bindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("labelIds") labelIds :string[]):Promise<typeof projectIssueApi.routes.bindLabel.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          await projectIssue.bindLabel(labelId)
-          return
-     }
-     @DHttpApi(projectIssueApi.routes.unbindLabel)
-     async unbindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("labelId") labelId :string):Promise<typeof projectIssueApi.routes.unbindLabel.res> {
-          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
-          if(!projectIssue) {
-               throw Err.Project.ProjectIssue.projectIssueNotFound
-          }
-          await projectIssue.unbindLabel(labelId)
-          return
+          let ret=await projectIssue.bindLabels(labelIds)
+          return ret;
      }
      @DHttpApi(projectIssueApi.routes.bindModule)
-     async bindModule(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("moduleId") moduleId :string):Promise<typeof projectIssueApi.routes.bindModule.res> {
+     async bindModule(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParam("moduleId") moduleId :string):Promise<typeof projectIssueApi.routes.bindModule.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          await projectIssue.bindModule(moduleId)
-          return
+          let ret=await projectIssue.bindModule(moduleId)
+          return ret;
      }
-     @DHttpApi(projectIssueApi.routes.unbindModule)
-     async unbindModule(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("moduleId") moduleId :string):Promise<typeof projectIssueApi.routes.unbindModule.res> {
-          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
-          if(!projectIssue) {
-               throw Err.Project.ProjectIssue.projectIssueNotFound
-          }
-          await projectIssue.unbindModule(moduleId)
-          return
-     }
+
      @DHttpApi(projectIssueApi.routes.filter)
      async filter(@DHttpReqParamRequired("projectId") projectId :string,
      @DHttpReqParam("createdBy") createdBy :string,
@@ -325,6 +311,26 @@ class IssueController {
      @DHttpReqParamRequired("page") page :number,
      @DHttpReqParamRequired("size") size :number):Promise<typeof projectIssueApi.routes.filter.res> {
           let ret=await ProjectIssueService.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
+          return ret;
+     }
+
+     @DHttpApi(projectIssueApi.routes.releaseList)
+     async releaseList(@DHttpReqParamRequired("projectIssueId") projectIssueId :string):Promise<typeof projectIssueApi.routes.releaseList.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          let ret=await projectIssue.releaseList()
+          return ret;
+     }
+
+     @DHttpApi(projectIssueApi.routes.bindReleases)
+     async bindReleases(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("projectReleaseIds") projectReleaseIds :string[]):Promise<typeof projectIssueApi.routes.bindReleases.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          let ret=await projectIssue.bindReleases(projectReleaseIds)
           return ret;
      }
 

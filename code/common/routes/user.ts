@@ -131,7 +131,7 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/profile",
             req:<{
-                userId?:string       
+                organizationUserId?:string
             }>{},
             res:<ICommon_Route_Res_User_Profile>{},
         },

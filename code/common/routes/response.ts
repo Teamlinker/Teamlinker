@@ -7,7 +7,7 @@ import {ICommon_Model_Team} from '../model/team';
 import {ICommon_Model_User} from '../model/user';
 import {ICommon_Model_Issue_Type_Solution} from './../model/issue_type_solution';
 import {ICommon_Model_Organization_User} from './../model/organization_user';
-import {ICommon_Model_Project_Issue} from './../model/project_issue';
+import {ECommon_Model_Project_Issue_Priority, ICommon_Model_Project_Issue} from './../model/project_issue';
 import {ICommon_Model_Project_Issue_Field_Value} from './../model/project_issue_field_value';
 import {ECommon_Model_Organization_Member_Type} from './../model/organization';
 import {ICommon_Model_Project_Release} from './../model/project_release';
@@ -52,7 +52,8 @@ export type ICommon_Route_Res_Project_ListMember ={
 
 export type ICommon_Route_Res_User_Profile={
     info:Omit<ICommon_Model_User,"password">,
-    team:ICommon_Route_Res_User_TeamList
+    team:ICommon_Route_Res_User_TeamList,
+    organizationUser:ICommon_Model_Organization_User
 }
 
 export type ICommon_Route_Res_User_List = {
@@ -133,8 +134,13 @@ export interface ICommon_Route_Res_Workflow_Node_Field {
 
 export type ICommon_Route_Req_ProjectIssue_Field={
     fieldId:string,
-    value?:string[]|number|string,
-    configIds?:string[]
+    value?:string[]|number|string
+}
+
+export type ICommon_Route_Req_ProjectIssue_Field_Value={
+    fieldId:string,
+    fieldValueId:string,
+    value?:string[]|number|string
 }
 
 export interface ICommon_Route_Res_ProjectIssue_BasicInfo extends Omit<ICommon_Model_Project_Issue,"workflow_node_id"|"issue_type_id"|"project_id"> {
@@ -143,7 +149,10 @@ export interface ICommon_Route_Res_ProjectIssue_BasicInfo extends Omit<ICommon_M
     project:ICommon_Model_Project
 }
 
-export type ICommon_Route_Res_ProjectIssue_fieldsInfo = ICommon_Route_Res_Workflow_Node_Field & ICommon_Model_Project_Issue_Field_Value
+export type ICommon_Route_Res_ProjectIssue_fieldsInfo = {
+    nodeField:ICommon_Route_Res_Workflow_Node_Field,
+    issueFieldValue:ICommon_Model_Project_Issue_Field_Value
+}
 
 
 export interface ICommon_Route_Res_recentProjectList_Item {
@@ -162,7 +171,7 @@ export interface ICommon_Route_Res_userProjectList {
     data:ICommon_Route_Res_recentProjectList_Item[]
 }
 
-export interface ICommon_Route_Res_Project_filter {
+export interface ICommon_Route_Res_Project_filter_Item {
     id:string,
     name:string,
     unique_id:number,
@@ -174,8 +183,16 @@ export interface ICommon_Route_Res_Project_filter {
     },
     assigner_id:string,
     reporter_id:string,
-    created_time:Date|string,
-    created_by:string
+    created_time:Date,
+    created_by:string,
+    priority:ECommon_Model_Project_Issue_Priority
+}
+
+export interface ICommon_Route_Res_Project_filter {
+    data:ICommon_Route_Res_Project_filter_Item[],
+    count:number,
+    totalPage:number,
+    page:number,
 }
 
 export interface ICommon_Route_Res_Release_List {
@@ -191,11 +208,13 @@ export interface ICommon_Route_Res_Release_Item extends ICommon_Model_Project_Re
     done:number
 }
 
+export type ICommon_Route_Res_Release_Info_Issue_Item = Omit<ICommon_Model_Project_Issue,"issue_type_id"|"workflow_node_id"> & {
+    issueType:ICommon_Model_Issue_Type,
+    workflowNode:ICommon_Model_Workflow_Node
+}
+
 export interface ICommon_Route_Res_Release_Info extends ICommon_Route_Res_Release_Item{
-    issueList:(Omit<ICommon_Model_Project_Issue,"issue_type_id"|"workflow_node_id"> & {
-        issueType:ICommon_Model_Issue_Type,
-        workflowNode:ICommon_Model_Workflow_Node
-    })[]
+    issueList:ICommon_Route_Res_Release_Info_Issue_Item[]
 }
 
 export interface ICommon_Route_Res_Release_IfCanRelease {

@@ -50,10 +50,10 @@
       </a-col>
     </a-row>
     <a-row style="height: calc(100% - 35px);background-color: white;position: relative">
-      <NavigatorContainer :routes="item.nodes[0].components" :id="item.nodes[0].id" :path="item.nodes[0].path" :default="item.nodes[0].default" ref="navigator" v-if="item.type==ETeamOS_Window_Type.SIMPLE" name="root"/>
+      <NavigatorContainer :routes="item.nodes[0].components" :id="item.nodes[0].id" :path="item.nodes[0].path" :default="item.nodes[0].default" ref="navigator" v-if="item.type==ETeamOS_Window_Type.SIMPLE" name="root" style="position: relative"/>
       <a-tabs type="card-gutter" :editable="true" show-add-button auto-switch :justify="true" v-else-if="item.type==ETeamOS_Window_Type.TAB" @change="change" style="width: 100%" @add="addTab" @delete="removeTab" @tabClick="change" :active-key="item.activeKey">
-        <a-tab-pane v-for="(node,index) in item.nodes" :key="node.id" :title="getTabTitle(node.id)" :tabindex="node.id" :closable="item.nodes.length>1">
-          <NavigatorContainer :id="node.id" :routes="node.components" :default="node.default" :meta="node.meta" ref="navigatorList" name="root" :path="node.path" @focus="onFocus(item.id)" :tabindex="index"/>
+        <a-tab-pane v-for="(node,index) in item.nodes" :key="node.id" :title="getTabTitle(node.id)" tabindex="-1" :closable="item.nodes.length>1">
+          <NavigatorContainer :id="node.id" :routes="node.components" :default="node.default" :meta="node.meta" ref="navigatorList" name="root" :path="node.path" @focus="onFocus(item.id)" :tabindex="index" style="position: relative"/>
         </a-tab-pane>
       </a-tabs>
     </a-row>
@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import {windowManager} from "./windowManager";
-import {onMounted, reactive, ref} from "vue";
+import {nextTick, onMounted, reactive, ref, watch} from "vue";
 import NavigatorContainer from "../common/component/navigator/navigatorContainer.vue";
 import {ETeamOS_Window_Status, ETeamOS_Window_Type, Window} from "./window";
 import {vDrag} from "../common/directive/drag";
@@ -128,7 +128,7 @@ let action=reactive({
   canBack:ref(false),
   canGo:ref(false)
 })
-onMounted(()=>{
+const handleController=()=>{
   if(props.item.type==ETeamOS_Window_Type.SIMPLE) {
     action.canBack=navigator.value.navigatorManager.canBack
     action.canGo=navigator.value.navigatorManager.canGo
@@ -140,7 +140,17 @@ onMounted(()=>{
       }
     }
   }
+}
 
+onMounted(()=>{
+  handleController()
+})
+watch(()=>props.item.nodes,()=>{
+  nextTick(()=>{
+    handleController()
+  })
+},{
+  deep:true
 })
 const addTab=async ()=>{
   if(props.item.onNewTab) {
@@ -174,7 +184,7 @@ const removeTab=async (id:string)=>{
 const getTabTitle=(id:string)=>{
   for(let o of navigatorList.value) {
     if(o.id==id) {
-      return o.navigator.getPath()[o.navigator.getIndex().value]
+      return o.navigatorManager.getCurrentNavigator().calculatePath()
     }
   }
 }

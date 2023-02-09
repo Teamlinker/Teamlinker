@@ -146,20 +146,20 @@ class UserController {
     }
 
     @DHttpApi(userApi.routes.profile)
-    async profile(@DHttpReqParam("userId") userId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof userApi.routes.profile.res>{
-        let user=await UserService.getItemById(userId??userInfo.userId)
-        if(!user) {
-            throw Err.User.userNotFound
-        }
-        let organizationUser=await OrganizationUserService.getItemByExp({
-            organization_id:userInfo.organizationInfo.organizationId,
-            user_id:user.getId()
-        })
+    async profile(@DHttpReqParam("organizationUserId") organizationUserId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof userApi.routes.profile.res>{
+        let organizationUser=await OrganizationUserService.getItemById(organizationUserId??userInfo.organizationInfo.organizationId)
         if(!organizationUser) {
             throw Err.Organization.userNotFound
         }
-        let ret=await user.profile(organizationUser.getId(),userInfo.organizationInfo.organizationId)
-        return ret;
+        let user=await UserService.getItemById(organizationUser.getItem().user_id)
+        if(!user) {
+            throw Err.User.userNotFound
+        }
+        let ret=await user.profile(organizationUser.getId(),organizationUser.getItem().organization_id)
+        return {
+            ...ret,
+            organizationUser:organizationUser.getItem()
+        };
     }
 
     @DHttpApi(userApi.routes.infos)

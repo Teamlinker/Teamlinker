@@ -323,7 +323,7 @@ const onSave=async ()=>{
   if(res?.code==0) {
     Message.success("update success")
     basic.value=res.data
-    navigator.getPath()[navigator.getIndex().value]=res.data.name
+    navigator.setCurrentPath(res.data.name)
   } else {
     Message.error(res.msg)
   }

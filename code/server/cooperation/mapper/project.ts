@@ -174,7 +174,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             throw Err.User.userIdNotExists
         }
         let mysql=getMysqlInstance();
-        let calcCount=await mysql.executeOne<number>(`select count(1) from (select rm.item_id from ${Table_Role_Member} rm left join ${Table_Project} p on p.id=rm.item_id left join ${Table_Team_User} tu on tu.team_id=rm.member_id left join ${Table_Member_Tag_Member} mtm on mtm.member_tag_id=rm.member_id  where (rm.member_id='${organizationUserId}' or rm.member_type =${ECommon_Model_Organization_Member_Type.DEFAULT} or not isnull(tu.team_id) || not isnull(mtm.member_tag_id)) and not isnull(p.id)  ${type=="all"?``:type=="created"?`and p.created_by='${organizationUserId}'`:`and p.created_by<>'${organizationUserId}'`} ${keyword?`p.name like %${keyword}%`:''} GROUP BY rm.item_id) as Z`)
+        let calcCount=await mysql.executeOne<number>(`select count(1) from (select rm.item_id from ${Table_Role_Member} rm left join ${Table_Project} p on p.id=rm.item_id left join ${Table_Team_User} tu on tu.team_id=rm.member_id left join ${Table_Member_Tag_Member} mtm on mtm.member_tag_id=rm.member_id  where (rm.member_id='${organizationUserId}' or rm.member_type =${ECommon_Model_Organization_Member_Type.DEFAULT} or not isnull(tu.team_id) || not isnull(mtm.member_tag_id)) and not isnull(p.id)  ${type=="all"?``:type=="created"?`and p.created_by='${organizationUserId}'`:`and p.created_by<>'${organizationUserId}'`} ${keyword?` and p.name like '%${keyword}%'`:''} GROUP BY rm.item_id) as Z`)
         let count=Number(Object.values(calcCount)[0]);
         let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateGroupLeftJoin3Sql({

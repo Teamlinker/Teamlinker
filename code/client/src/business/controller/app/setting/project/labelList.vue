@@ -1,5 +1,5 @@
 <template>
-  <div ref="root">
+  <div>
     <a-space>
       <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button placeholder="please type label name"></a-input-search>
       <a-button type="primary" @click="onAdd">Add</a-button>
@@ -24,6 +24,7 @@ import {apiProject} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditLabel from "./editLabel.vue";
+import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 
 const props=defineProps<{
   projectId:string
@@ -43,7 +44,7 @@ let data=ref<{
   id:string,
   name:string
 }[]>([])
-const root=ref(null)
+const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
 const pagination=reactive({
   total:0,

@@ -180,5 +180,14 @@ class IssueTypeController {
         return ret.getItem();
     }
 
-     
+    @DHttpApi(issueTypeApi.routes.solutionInfoByProjectId)
+    async solutionInfoByProjectId(@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof issueTypeApi.routes.solutionInfoByProjectId.res> {
+        let obj=await IssueTypeSolutionService.getObjByProjectId(projectId);
+        if(!obj) {
+            throw Err.Project.Issue.issueTypeSolutionNotFound
+        }
+        return obj.getItem();
+    }
+
+
 }

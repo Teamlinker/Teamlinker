@@ -100,4 +100,14 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
         }
     }
 
+    static async issueReleaseList(projectIssueId:string) {
+        let ret=await releaseMapper.issueReleaseList(projectIssueId)
+        return ret;
+    }
+
+    static async issueBindReleaseList(projectIssueId:string,projectReleaseIds:string[]) {
+        let ret=await releaseMapper.issueBindReleaseList(projectIssueId,projectReleaseIds)
+        return ret;
+    }
+
 }

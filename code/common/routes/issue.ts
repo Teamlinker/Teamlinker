@@ -7,12 +7,15 @@ import {ICommon_Model_Project_Label} from './../model/project_label';
 import {ICommon_Model_Project_Module} from './../model/project_module';
 import {
     ICommon_Route_Req_ProjectIssue_Field,
+    ICommon_Route_Req_ProjectIssue_Field_Value,
     ICommon_Route_Res_Project_filter,
     ICommon_Route_Res_ProjectIssue_BasicInfo,
     ICommon_Route_Res_ProjectIssue_fieldsInfo,
     ICommon_Route_Res_Workflow_Node_Field
 } from "./response";
 import {ECommon_HttpApi_Method} from "./types";
+import {ICommon_Model_Project_Issue_Field_Value} from "../model/project_issue_field_value";
+import {ICommon_Model_Project_Release} from "../model/project_release";
 
 const api={
     baseUrl:"/issue",
@@ -59,7 +62,7 @@ const api={
             req:<{
                 projectIssueId :string,
                 workflowActionId:string,
-                value?:ICommon_Route_Req_ProjectIssue_Field[]
+                values?:ICommon_Route_Req_ProjectIssue_Field[]
             }>{},
             res:{},
             permission:[Permission_Types.Project.EDIT]
@@ -69,9 +72,9 @@ const api={
             path:"/item/extrafield",
             req:<{
                 projectIssueId :string,
-                value:ICommon_Route_Req_ProjectIssue_Field
+                value:ICommon_Route_Req_ProjectIssue_Field_Value
             }>{},
-            res:{},
+            res:<ICommon_Model_Project_Issue_Field_Value>{},
             permission:[Permission_Types.Project.EDIT]
         },
         editBasicField:{
@@ -92,7 +95,7 @@ const api={
             path:"/item/description",
             req:<{
                 projectIssueId :string,
-                description:string
+                description?:string
             }>{},
             res:{},
             permission:[Permission_Types.Project.EDIT]
@@ -270,19 +273,9 @@ const api={
             path:"/item/tag/bind",
             req:<{
                 projectIssueId :string,
-                labelId:string
+                labelIds:string[]
             }>{},
-            res:{},
-            permission:[Permission_Types.Project.EDIT]
-        },
-        unbindLabel:{
-            method:ECommon_HttpApi_Method.DELETE,
-            path:"/item/tag/bind",
-            req:<{
-                projectIssueId :string,
-                labelId:string
-            }>{},
-            res:{},
+            res:<ICommon_Model_Project_Label[]>{},
             permission:[Permission_Types.Project.EDIT]
         },
         bindModule:{
@@ -290,19 +283,9 @@ const api={
             path:"/item/module/bind",
             req:<{
                 projectIssueId :string,
-                moduleId:string
+                moduleId?:string
             }>{},
-            res:{},
-            permission:[Permission_Types.Project.EDIT]
-        },
-        unbindModule:{
-            method:ECommon_HttpApi_Method.DELETE,
-            path:"/item/module/bind",
-            req:<{
-                projectIssueId :string,
-                moduleId:string
-            }>{},
-            res:{},
+            res:<ICommon_Model_Project_Module[]>{},
             permission:[Permission_Types.Project.EDIT]
         },
         filter:{
@@ -322,8 +305,27 @@ const api={
                 page:number,
                 size:number
             }>{},
-            res:<ICommon_Route_Res_Project_filter[]>{},
+            res:<ICommon_Route_Res_Project_filter>{},
             permission:[Permission_Types.Project.READ]
+        },
+        releaseList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/release/list",
+            req:<{
+                projectIssueId:string
+            }>{},
+            res:<ICommon_Model_Project_Release[]>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        bindReleases:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/release",
+            req:<{
+                projectIssueId:string,
+                projectReleaseIds:string[]
+            }>{},
+            res:<ICommon_Model_Project_Release[]>{},
+            permission:[Permission_Types.Project.EDIT]
         }
     }
 }

@@ -1,9 +1,14 @@
-import { ECommon_Model_Project_Release_Status } from '../model/project_release';
-import { Permission_Types } from '../permission/permission';
-import { ICommon_Model_Project_Release } from './../model/project_release';
-import { ECommon_Services } from './../types';
-import { ICommon_Route_Res_Release_IfCanRelease, ICommon_Route_Res_Release_Info, ICommon_Route_Res_Release_List } from './response';
-import { ECommon_HttpApi_Method } from "./types";
+import {ECommon_Model_Project_Release_Status} from '../model/project_release';
+import {Permission_Types} from '../permission/permission';
+import {ICommon_Model_Project_Release} from './../model/project_release';
+import {ECommon_Services} from './../types';
+import {
+    ICommon_Route_Res_Release_IfCanRelease,
+    ICommon_Route_Res_Release_Info,
+    ICommon_Route_Res_Release_List
+} from './response';
+import {ECommon_HttpApi_Method} from "./types";
+
 const api={
     baseUrl:"/release",
     service:ECommon_Services.Cooperation,
@@ -103,7 +108,7 @@ const api={
             }>{},
             res:<ICommon_Model_Project_Release>{},
             permission:[Permission_Types.Project.EDIT]
-        },
+        }
     }
 }
 export default api

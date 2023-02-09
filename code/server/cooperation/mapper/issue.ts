@@ -9,6 +9,8 @@ import {keys} from "../../../common/transform";
 import {getMysqlInstance} from '../../common/db/mysql';
 import {Mapper} from "../../common/entity/mapper";
 import {
+    convertCountSql,
+    generateBatchCreateOnUpdateSql,
     generateBatchCreateSql,
     generateCreateSql,
     generateDeleteSql,
@@ -32,6 +34,8 @@ import {projectIssueRelatedModel} from './../../../common/model/project_issue_re
 import {projectLabelIssueModel} from './../../../common/model/project_label_issue';
 import {projectModuleIssueModel} from './../../../common/model/project_module_issue';
 import {ICommon_Model_Workflow_Node} from './../../../common/model/workflow_node';
+import CommonUtil from "../../common/util/common";
+import {projectReleaseIssueModel} from "../../../common/model/project_release_issue";
 
 class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
@@ -51,9 +55,12 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }
         let mysql=getMysqlInstance()
         await mysql.execute(generateUpdateSql(projectIssueFieldValueModel,value,{
-            workflow_node_field_type_id:value.workflow_node_field_type_id,
-            project_issue_id:value.project_issue_id
+            id:value.id
         }))
+        let ret=await mysql.executeOne(generateQuerySql(projectIssueFieldValueModel,[],{
+            id:value.id
+        }))
+        return ret;
     }
 
     async handleProcess(projectIssueId:string,workflowNodeId:string) {
@@ -135,16 +142,13 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         }
-        if(!description) {
-            description=null;
-        }
         let mysql=getMysqlInstance()
         let ret=await mysql.executeOne(generateQuerySql(projectIssueDescriptionModel,["id"],{
             project_issue_id:projectIssueId
         }))
         if(ret) {
             await mysql.execute(generateUpdateSql(projectIssueDescriptionModel,{
-                content:description
+                content:description??""
             },{
                 project_issue_id:projectIssueId
             }))
@@ -176,24 +180,34 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectIssueDescriptionModel,{
-            project_issue_id:projectIssueId
-        }))
-        await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
-            project_issue_id:projectIssueId
-        }))
-        await mysql.execute(generateDeleteSql(projectIssueParentModel,{
-            parent_id:projectIssueId,
-            child_id:projectIssueId
-        },"or"))
-        await mysql.execute(generateDeleteSql(projectIssueProcessModel,{
-            project_issue_id:projectIssueId
-        }))
-        await mysql.execute(generateDeleteSql(projectIssueRelatedModel,{
-            project_issue_1_id:projectIssueId,
-            project_issue_2_id:projectIssueId
-        },"or"))
-        
+        await Promise.all([
+            mysql.execute(generateDeleteSql(projectIssueDescriptionModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectIssueParentModel,{
+                parent_id:projectIssueId,
+                child_id:projectIssueId
+            },"or")),
+            mysql.execute(generateDeleteSql(projectIssueProcessModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectIssueRelatedModel,{
+                project_issue_1_id:projectIssueId,
+                project_issue_2_id:projectIssueId
+            },"or")),
+            mysql.execute(generateDeleteSql(projectLabelIssueModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectModuleIssueModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
+                project_issue_id:projectIssueId
+            }))
+        ])
     }
 
     async getBasicInfo(projectIssueId:string) {
@@ -315,10 +329,11 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     async addChildIssue(projectParentIssueId:string,projectChildIssueId:string) {
         if(!projectParentIssueId || !projectChildIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
+        } else if(projectChildIssueId==projectParentIssueId) {
+            throw Err.Project.ProjectIssue.issueEqualForbidden
         }
         let mysql=getMysqlInstance()
         let obj=await mysql.executeOne(generateQuerySql(projectIssueParentModel,["id"],{
-            parent_id:projectParentIssueId,
             child_id:projectChildIssueId
         }))
         if(obj) {
@@ -345,6 +360,8 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     async addRelatedIssue(projectIssue1Id:string,projectIssue2Id:string) {
         if(!projectIssue1Id || !projectIssue2Id) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
+        } else if(projectIssue1Id==projectIssue2Id) {
+            throw Err.Project.ProjectIssue.issueEqualForbidden
         }
         let mysql=getMysqlInstance()
         let ret=await mysql.executeOne(generateQuerySql(projectIssueRelatedModel,[],{
@@ -528,79 +545,69 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 value:projectIssueId
             }
         })
-        let ret=await mysql.execute(sql)
-        return ret;
+        let ret=await mysql.executeOne(sql)
+        let arr:ICommon_Model_Project_Module[]=[]
+        if(ret) {
+            arr.unshift(ret);
+            while (ret.parent_module_id) {
+                ret=await mysql.executeOne(generateQuerySql(projectModuleModel,[],{
+                    id:ret.parent_module_id
+                }))
+                if(!ret) {
+                    break
+                } else {
+                    arr.unshift(ret);
+                }
+            }
+        }
+        return arr;
     }
 
-    async bindIssueLabel(projectIssueId:string,projectLabelId:string) {
+    async bindIssueLabels(projectIssueId:string, projectLabelIds:string[]) {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
-        } else if(!projectLabelId) {
+        } else if(!projectLabelIds) {
             throw Err.Project.Label.labelNotfound
         }
         let mysql=getMysqlInstance()
-        let obj=await mysql.executeOne(generateQuerySql(projectLabelIssueModel,[],{
-            project_issue_id:projectIssueId,
-            project_label_id:projectLabelId
+        await mysql.executeOne(generateDeleteSql(projectLabelIssueModel,{
+            project_issue_id:projectIssueId
         }))
-        if(obj) {
-            throw Err.Project.Label.labelIssueExists
+        if(projectLabelIds.length>0) {
+            let arr=await Promise.all(projectLabelIds.map(async item=>{
+                return {
+                    id:await generateSnowId(),
+                    project_label_id:item,
+                    project_issue_id:projectIssueId
+                }
+            }))
+            await mysql.execute(generateBatchCreateSql(projectLabelIssueModel,arr))
         }
-        await mysql.execute(generateCreateSql(projectLabelIssueModel,{
-            id:await generateSnowId(),
-            project_issue_id:projectIssueId,
-            project_label_id:projectLabelId
-        }))
-    }
-
-    async unbindIssueLabel(projectIssueId:string,projectLabelId:string) {
-        if(!projectIssueId) {
-            throw Err.Project.ProjectIssue.projectIssueNotFound
-        } else if(!projectLabelId) {
-            throw Err.Project.Label.labelNotfound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectLabelIssueModel,{
-            project_issue_id:projectIssueId,
-            project_label_id:projectLabelId
-        }))
     }
 
     async bindIssueModule(projectIssueId:string,projectModuleId:string) {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
-        } else if(!projectModuleId) {
-            throw Err.Project.Module.moduleNotFound
         }
         let mysql=getMysqlInstance()
-        let obj=await mysql.executeOne(generateQuerySql(projectModuleIssueModel,[],{
-            project_issue_id:projectIssueId,
-            project_module_id:projectModuleId
-        }))
-        if(obj) {
-            throw Err.Project.Module.moduleIssueExists
+        if(projectModuleId) {
+            await mysql.execute(generateBatchCreateOnUpdateSql(projectModuleIssueModel,[
+                {
+                    id:await generateSnowId(),
+                    project_issue_id:projectIssueId,
+                    project_module_id:projectModuleId
+                }
+            ],{
+                project_module_id:projectModuleId
+            }))
+        } else {
+            await mysql.execute(generateDeleteSql(projectModuleIssueModel,{
+                project_issue_id:projectIssueId
+            }))
         }
-        await mysql.execute(generateCreateSql(projectModuleIssueModel,{
-            id:await generateSnowId(),
-            project_issue_id:projectIssueId,
-            project_module_id:projectModuleId
-        }))
     }
 
-    async unbindIssueModule(projectIssueId:string,projectModuleId:string) {
-        if(!projectIssueId) {
-            throw Err.Project.ProjectIssue.projectIssueNotFound
-        } else if(!projectModuleId) {
-            throw Err.Project.Module.moduleNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectModuleIssueModel,{
-            project_issue_id:projectIssueId,
-            project_module_id:projectModuleId
-        }))
-    }
-
-    async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string):Promise<ICommon_Route_Res_Project_filter[]> {
+    async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string):Promise<ICommon_Route_Res_Project_filter> {
         if(!projectId) {
             throw Err.Project.projectNotFound
         }
@@ -624,7 +631,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }
         let sql=generateLeftJoin2Sql({
             model:projectIssueModel,
-            columns:["id","assigner_id","reporter_id","unique_id","name","unique_id","created_time","created_by"]
+            columns:["id","assigner_id","reporter_id","unique_id","name","unique_id","created_time","created_by","priority"]
         },{
             model:issueTypeModel,
             columns:["id","icon","name"],
@@ -657,15 +664,21 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             }),
             ...(issueTypeId && {
                 issue_type_id:{
-                    model:issueTypeModel,
+                    model:projectIssueModel,
                     value:issueTypeId
                 }
             }),
             ...(name && {
-                name:{
-                    model:projectIssueModel,
-                    value:{
-                        exp:"%like%",
+                "$or0":{
+                    name:{
+                        model:projectIssueModel,
+                        value:{
+                            exp:"%like%",
+                            value:name
+                        }
+                    },
+                    unique_id:{
+                        model:projectIssueModel,
                         value:name
                     }
                 }
@@ -702,14 +715,22 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                         value:Array.from(setId)
                     }
                 }
-            }),
+            })
         },"and",{
             model:projectIssueModel,
             field:"name",
             type:"asc"
         },page*size,size)
+        let countSql=convertCountSql(sql);
+        let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+        let totalPage=CommonUtil.pageTotal(count,size)
         let ret=await mysql.execute(sql)
-        return ret;
+        return {
+            data:ret,
+            count:count,
+            totalPage:totalPage,
+            page:page,
+        };
     }
 
     async clearMany(projectIssueIds:string[]) {

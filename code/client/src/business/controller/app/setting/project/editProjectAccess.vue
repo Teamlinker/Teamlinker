@@ -1,5 +1,5 @@
 <template>
-  <div ref="root">
+  <div>
     <a-space size="medium">
       <span>name</span>
       <a-input v-model="keyword"></a-input>
@@ -41,6 +41,7 @@ import {ICommon_Route_Res_Project_Member} from "../../../../../../../common/rout
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditProjectAccessRole from "./editProjectAccessRole.vue";
+import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 
 const props=defineProps<{
   projectId:string
@@ -60,7 +61,7 @@ const columns=[
   }
 ]
 let data=ref<DCSType<ICommon_Route_Res_Project_Member[]>>([])
-const root=ref(null)
+const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
 const pagination=reactive({
   total:0,

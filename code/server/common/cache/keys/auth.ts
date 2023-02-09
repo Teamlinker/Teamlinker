@@ -26,10 +26,10 @@ import {memberTagMemberModel} from "../../../../common/model/member_tag_member";
 export namespace REDIS_AUTH {
     export namespace Permission {
         export namespace Project {
-            export function calPermission(projectId:string)
+            export function calPermission(projectId:string,organizationUserId:string)
             {
-                let key="permission:project:{0}:calPermission"
-                let obj=new RedisStringKey(StringUtil.format(key,projectId),cacheRedisType<number>().Number,60)
+                let key="permission:project:{0}:organizationUser:{1}:calPermission"
+                let obj=new RedisStringKey(StringUtil.format(key,projectId,organizationUserId),cacheRedisType<number>().Number,60)
                 return obj
             }
             export class createdByPureFromProjectIssueComment extends BaseRedisStringCache<string> {

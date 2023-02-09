@@ -22,12 +22,12 @@ import {ICommon_Model_Project} from "../../../../../../../common/model/project";
 import Upload from "../../../../common/component/upload.vue";
 import {getCurrentInstance, reactive, ref} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
-import {apiProject} from "../../../../common/request/request";
+import {apiProject, DCSType} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 
 const props=defineProps<{
   type:"edit"|"add",
-  item?:ICommon_Model_Project
+  item?:DCSType<ICommon_Model_Project>
 }>()
 const form=reactive({
   name:props.type=="edit"?props.item.name:"",

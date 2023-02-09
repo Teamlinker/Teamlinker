@@ -278,6 +278,10 @@ export namespace Err {
             issueProjectNotMatch:{
                 code:3704,
                 msg:"issue project not match"
+            },
+            issueEqualForbidden:{
+                code:3705,
+                msg:"issue equal forbidden"
             }
         },
         Release: {

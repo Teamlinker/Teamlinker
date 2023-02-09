@@ -9,7 +9,7 @@ export class WindowManager extends Base{
         if(!isMulti) {
             if(arr.length==0) {
                 this.windowList.push(window)
-                this.show(window.id)
+                this.show(window.id,true)
                 if(window.onOpen) {
                     window.onOpen(window);
                 }
@@ -17,16 +17,23 @@ export class WindowManager extends Base{
                 if(window.type==ETeamOS_Window_Type.SIMPLE) {
                     this.show(arr[0].id)
                 } else {
-                    let index=0,size=arr.length
-                    for(let i=1;i<arr.length;i++) {
-                        if(arr[i].nodes.length<size) {
-                            size=arr[i].nodes.length;
-                            index=i;
+                    let focused=this.getFocused()
+                    if(focused.group===window.group) {
+                        focused.nodes.push(...window.nodes)
+                        focused.activeKey=window.nodes[0].id
+                        this.show(focused.id)
+                    } else {
+                        let index=0,size=arr.length
+                        for(let i=1;i<arr.length;i++) {
+                            if(arr[i].nodes.length<size) {
+                                size=arr[i].nodes.length;
+                                index=i;
+                            }
                         }
+                        arr[index].nodes.push(...window.nodes)
+                        arr[index].activeKey=window.nodes[0].id;
+                        this.show(arr[index].id)
                     }
-                    arr[index].nodes.push(...window.nodes)
-                    arr[index].activeKey=window.nodes[0].id;
-                    this.show(arr[index].id)
                     if(window.onOpen) {
                         window.onOpen(window);
                     }
@@ -34,7 +41,7 @@ export class WindowManager extends Base{
             }
         } else {
             this.windowList.push(window)
-            this.show(window.id)
+            this.show(window.id,true)
             if(window.onOpen) {
                 window.onOpen(window);
             }
@@ -110,9 +117,13 @@ export class WindowManager extends Base{
             }
         }
     }
-    show(id:string) {
+    show(id:string,isNew?:boolean) {
         let obj=this.getById(id);
         if(obj) {
+            if(isNew) {
+                obj.rect.top=`${10+Math.random()*8-4}%`
+                obj.rect.left=`${10+Math.random()*8-4}%`
+            }
             obj.status=ETeamOS_Window_Status.NORMAL
             obj.rect.width="80%"
             obj.rect.height="80%"

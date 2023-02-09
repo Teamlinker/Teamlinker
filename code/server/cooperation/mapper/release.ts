@@ -1,15 +1,33 @@
-import { ECommon_Model_Workflow_Node_Status, workflowNodeModel } from '../../../common/model/workflow_node';
-import { Err } from "../../../common/status/error";
-import { keys } from '../../../common/transform';
-import { getMysqlInstance } from "../../common/db/mysql";
-import { Mapper } from "../../common/entity/mapper";
+import {ECommon_Model_Workflow_Node_Status, workflowNodeModel} from '../../../common/model/workflow_node';
+import {Err} from "../../../common/status/error";
+import {keys} from '../../../common/transform';
+import {getMysqlInstance} from "../../common/db/mysql";
+import {Mapper} from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
-import { generateCountSql, generateCreateSql, generateDeleteSql, generateGroupLeftJoin2Sql, generateLeftJoin3Sql, generateQuerySql, generateSnowId } from '../../common/util/sql';
-import { issueTypeModel } from './../../../common/model/issue_type';
-import { projectIssueModel } from './../../../common/model/project_issue';
-import { ECommon_Model_Project_Release_Status, projectReleaseModel } from './../../../common/model/project_release';
-import { projectReleaseIssueModel } from './../../../common/model/project_release_issue';
-import { ICommon_Route_Res_Release_Info, ICommon_Route_Res_Release_Item, ICommon_Route_Res_Release_List } from './../../../common/routes/response';
+import {
+    generateCountSql,
+    generateCreateSql,
+    generateDeleteSql,
+    generateGroupLeftJoin2Sql,
+    generateLeftJoin3Sql,
+    generateLeftJoinSql,
+    generateQuerySql,
+    generateSnowId
+} from '../../common/util/sql';
+import {issueTypeModel} from './../../../common/model/issue_type';
+import {projectIssueModel} from './../../../common/model/project_issue';
+import {
+    ECommon_Model_Project_Release_Status,
+    ICommon_Model_Project_Release,
+    projectReleaseModel
+} from './../../../common/model/project_release';
+import {projectReleaseIssueModel} from './../../../common/model/project_release_issue';
+import {
+    ICommon_Route_Res_Release_Info,
+    ICommon_Route_Res_Release_Item,
+    ICommon_Route_Res_Release_List
+} from './../../../common/routes/response';
+
 class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
     constructor() {
         super(projectReleaseModel)
@@ -74,7 +92,7 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                     columns:{
                         columns:[],
                         calcColumns:[{
-                            exp:"sum",
+                            exp:"count",
                             value:{
                                 field:"status",
                                 exp:"=",
@@ -82,7 +100,7 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                             },
                             rename:"notstart"
                         },{
-                            exp:"sum",
+                            exp:"count",
                             value:{
                                 field:"status",
                                 exp:"=",
@@ -90,7 +108,7 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                             },
                             rename:"inprogress",
                         },{
-                            exp:"sum",
+                            exp:"count",
                             value:{
                                 field:"status",
                                 exp:"=",
@@ -118,9 +136,9 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                 for(let obj of arr) {
                     ret.push({
                         ...obj,
-                        notstart:objTemp[obj.id]?objTemp[obj.id].notstart:0,
-                        inprogress:objTemp[obj.id]?objTemp[obj.id].inprogress:0,
-                        done:objTemp[obj.id]?objTemp[obj.id].done:0
+                        notstart:objTemp[obj.id]?Number(objTemp[obj.id].notstart):0,
+                        inprogress:objTemp[obj.id]?Number(objTemp[obj.id].inprogress):0,
+                        done:objTemp[obj.id]?Number(objTemp[obj.id].done):0
                     })
                 }
             }
@@ -237,7 +255,11 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
         let issueList=await mysql.execute(sql1)
         return {
             ...objRelease,
-            ...(obj??{
+            ...(obj?{
+                notstart:Number(obj.notstart),
+                inprogress:Number(obj.inprogress),
+                done:Number(obj.done)
+            }:{
                 notstart:0,
                 inprogress:0,
                 done:0
@@ -382,6 +404,58 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
             }))
         }
     }
-    
+
+    async issueReleaseList(projectIssueId:string) {
+        if(!projectIssueId) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:projectReleaseIssueModel
+        },{
+            model:projectReleaseModel,
+            columns:keys<ICommon_Model_Project_Release>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:projectReleaseIssueModel,
+                    field:"project_release_id"
+                }
+            }
+        },{
+            project_issue_id:{
+                model:projectReleaseIssueModel,
+                value:projectIssueId
+            }
+        },"and",{
+            model:projectReleaseModel,
+            field:"name",
+            type:"asc"
+        })
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
+
+    async issueBindReleaseList(projectIssueId:string,projectReleaseIds:string[]) {
+        if(!projectIssueId) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
+            project_issue_id:projectIssueId
+        }))
+        if(projectReleaseIds.length>0) {
+            let arr=[]
+            for(let id of projectReleaseIds) {
+                arr.push(mysql.execute(generateCreateSql(projectReleaseIssueModel,{
+                    id:await generateSnowId(),
+                    project_issue_id:projectIssueId,
+                    project_release_id:id
+                })))
+            }
+            await Promise.all(arr);
+        }
+        let ret=await this.issueReleaseList(projectIssueId)
+        return ret;
+    }
 }
 export let releaseMapper=new ReleaseMapper

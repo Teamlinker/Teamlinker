@@ -2,19 +2,20 @@
   <div style="padding: 0px 10px" ref="root">
     <a-space>
       <a-input-search placeholder="please type team name" v-model="keyword" style="width: 300px" @search="onSearch"></a-input-search>
-      <a-button type="primary" @click="onAddTeam">Create</a-button>
+      <a-button type="primary" @click="onAddTeam" v-if="checkPermission(storeOrganization.organizationPermission,Permission_Types.Organization.CREATE_TEAM)">Create</a-button>
     </a-space>
     <a-collapse style="margin-top: 10px" :default-active-key="['manage','join']">
       <a-collapse-item :header="`Managed Team(${info.manage.length})`" key="manage">
-        <a-space wrap style="margin-top: 20px" size="large">
+        <a-space wrap style="margin-top: 20px" size="large" v-if="info.manage.length>0">
           <CardItem style="background-color: white" v-for="item in info.manage" :name="item.name" :photo="item.photo" :description="item.description" @click="onProfile(item.id)"></CardItem>
         </a-space>
+        <a-empty v-else></a-empty>
       </a-collapse-item>
       <a-collapse-item :header="`Joined Team(${info.join.length})`" key="join">
-        <a-space wrap style="margin-top: 20px" size="large">
+        <a-space wrap style="margin-top: 20px" size="large" v-if="info.join.length>0">
           <CardItem style="background-color: white" v-for="item in info.join" :name="item.name" :photo="item.photo" :description="item.description" @click="onProfile(item.id)"></CardItem>
         </a-space>
-
+        <a-empty v-else></a-empty>
       </a-collapse-item>
     </a-collapse>
   </div>
@@ -28,6 +29,9 @@ import CardItem from "../../../common/component/cardItem.vue";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import EditTeamProfile from "../setting/user&team/editTeamProfile.vue";
 import {getCurrentNavigator} from "../../../../teamOS/common/component/navigator/navigator";
+import {useDesktopStore} from "../../desktop/store/desktop";
+import {checkPermission} from "../../../common/util/helper";
+import {Permission_Types} from "../../../../../../common/permission/permission";
 
 const keyword=ref("")
 const root=ref(null);
@@ -37,6 +41,7 @@ const info=ref<DCSType<ICommon_Route_Res_User_TeamList>>({
   manage:[],
   join:[]
 })
+const storeOrganization=useDesktopStore()
 const search=async ()=>{
   let res=await apiUser.teamList({
     keyword:keyword.value

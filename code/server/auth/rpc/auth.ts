@@ -15,6 +15,7 @@ import {ICommon_Model_Team} from "../../../common/model/team";
 import {ICommon_Model_Member_Tag} from "../../../common/model/member_tag";
 import {roleMapper} from "../mapper/role";
 import {REDIS_AUTH} from "../../common/cache/keys/auth";
+import {getComponent} from "../../common/decorate/component";
 
 class RpcAuthApi {
     async initRole(): Promise<{ projectRoleUserId: string; groupRoleUserId: string; }> {
@@ -179,8 +180,15 @@ class RpcAuthApi {
             }])
             return arr[0]?.role?.value
         } else if(roleType===ECommon_Model_Role_Type.PROJECT) {
-            let obj=REDIS_AUTH.Permission.Project.calPermission(itemId);
+            let obj=REDIS_AUTH.Permission.Project.calPermission(itemId,memberId);
             let ret=await obj.get()
+            if(ret===null) {
+                let objComponent:any=getComponent("PermissionProject")
+                ret=await objComponent.generatorValue({
+                    organizationUserId: memberId,
+                    projectId:itemId
+                })
+            }
             return ret;
         }
     }

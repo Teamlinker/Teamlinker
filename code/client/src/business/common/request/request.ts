@@ -67,7 +67,7 @@ export function generatorApi<T extends ICommon_Http_Route_List>(api:{
             if(param) {
                 for(let key in param) {
                     let obj=param[key]
-                    if(obj===null || obj==undefined) {
+                    if(obj===null || obj===undefined) {
                         delete param[key]
                     } else if(typeof(obj)=="object" && !(obj instanceof File)) {
                         param[key]=JSON.stringify(obj);
