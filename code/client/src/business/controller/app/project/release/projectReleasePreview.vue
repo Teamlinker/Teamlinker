@@ -8,9 +8,18 @@
             <span style="font-weight: bold">
               {{info?.name}}
             </span>
-            <a-tag color="gray" v-if="info?.status===ECommon_Model_Workflow_Node_Status.NOTSTART">Not Start</a-tag>
-            <a-tag color="blue" v-else-if="info?.status===ECommon_Model_Workflow_Node_Status.INPROGRESS">InProgress</a-tag>
-            <a-tag color="green" v-else-if="info?.status===ECommon_Model_Workflow_Node_Status.DONE">Done</a-tag>
+            <a-tag color="gray" v-if="info?.status===ECommon_Model_Project_Release_Status.ARCHIVED">ARCHIVED</a-tag>
+            <a-tag color="blue" v-else-if="info?.status===ECommon_Model_Project_Release_Status.UNRELEASE">UNRELEASED</a-tag>
+            <a-tag color="green" v-else-if="info?.status===ECommon_Model_Project_Release_Status.RELEASE">RELEASED</a-tag>
+          </a-space>
+        </a-row>
+        <a-row style="width: 100%;margin-top: 10px">
+          <a-space>
+            <icon-calendar></icon-calendar>
+            {{info?.start_time}}
+            &nbsp;-&nbsp;
+            <icon-calendar></icon-calendar>
+            {{info?.release_time}}
           </a-space>
         </a-row>
         <a-row style="width: 100%;margin-top: 10px">
@@ -34,7 +43,7 @@ import {ref} from "vue";
 import {apiRelease, DCSType} from "../../../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {ICommon_Route_Res_Release_Info} from "../../../../../../../common/routes/response";
-import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/model/workflow_node";
+import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
 
 
 const loading=ref(true)
