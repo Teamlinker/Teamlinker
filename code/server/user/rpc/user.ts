@@ -8,6 +8,7 @@ import {UserService} from "../service/user";
 import {OrganizationService, OrganizationUserService} from './../service/organization';
 import rpcFileApi from "../../file/rpc/file";
 import {IServer_Common_RPC_User_CheckSession} from "../types/config";
+import {Err} from "../../../common/status/error";
 
 class RpcUserApi {
     
@@ -78,6 +79,9 @@ class RpcUserApi {
         nickname?:string,
         organizationUserId?:string
     }[]> {
+        if(organizationUserIds.length==0) {
+            return []
+        }
         let arrUser:any[]=[...organizationUserIds];
         let arr=await OrganizationUserService.organizationUserInfos(organizationUserIds.join(","),false);
         let ret=arr.map(item=>{
@@ -186,6 +190,29 @@ class RpcUserApi {
             user_id:userId
         })
         return ret?.getId()
+    }
+
+    async getTeamList(organizationUserId:string) {
+        let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId)
+        if(!objOrganizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        let objUser=await UserService.getItemById(objOrganizationUser.getItem().user_id)
+        if(!objUser) {
+            throw Err.User.userNotFound
+        }
+        let ret=await objUser.teamList(objOrganizationUser.getId(),objOrganizationUser.getItem().organization_id)
+        return ret;
+    }
+
+    async listTeamUser(teamId:string) {
+        let objTeam=await TeamService.getItemById(teamId)
+        if(objTeam) {
+            let ret=await objTeam.listUser(0,Number.MAX_SAFE_INTEGER)
+            return ret.data.map(item=>item.organizationUser);
+        } else {
+            return []
+        }
     }
 }
 export default new RpcUserApi;

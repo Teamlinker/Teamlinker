@@ -7,10 +7,11 @@ import {markRaw} from "vue";
 import People from "../../app/people/people.vue";
 import PeopleProfile from "../../app/people/peopleProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import {SessionStorage} from "../../../common/storage/session";
 
 export const iconPeople=new Icon("people",iconGroupMap["people"])
 iconPeople.addEventListener("dbClick", item => {
-    if(!sessionStorage.getItem("organizationId")) {
+    if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
         return;
     }

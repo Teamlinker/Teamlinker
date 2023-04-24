@@ -33,6 +33,7 @@ import {ref} from "vue";
 import {
   ECommon_Model_Workflow_Node_Field_Type_Label_Type
 } from "../../../../../../common/model/workflow_node_field_type";
+import {SessionStorage} from "../../storage/session";
 
 const props=defineProps<{
   item:DCSType<ICommon_Route_Res_Workflow_Node_Field & {
@@ -111,7 +112,7 @@ const onSearchMultiLabel=async (value:string)=>{
     }
   } else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER) {
     let res=await apiOrganization.listUser({
-      organizationId:sessionStorage.getItem("organizationId"),
+      organizationId:SessionStorage.get("organizationId"),
       size:10,
       page:0,
       keyword:value

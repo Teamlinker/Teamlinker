@@ -21,6 +21,7 @@ import {onBeforeMount, reactive, ref} from "vue";
 import Upload from "../../../../common/component/upload.vue";
 import {Message} from "@arco-design/web-vue";
 import {useDesktopStore} from "../../../desktop/store/desktop";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const storeDesktop=useDesktopStore()
 const data=reactive({
@@ -38,7 +39,7 @@ const loading=ref(false)
 
 const onSubmit=async ()=>{
   let body={
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     name:data.form.name,
     description: data.form.description,
     ...(uploadUriId.value && {
@@ -57,7 +58,7 @@ const onSubmit=async ()=>{
 
 onBeforeMount(async ()=>{
   let ret=await apiOrganization.info({
-    organizationId:sessionStorage.getItem("organizationId")
+    organizationId:SessionStorage.get("organizationId")
   })
   if(ret?.code==0) {
     data.form=ret.data

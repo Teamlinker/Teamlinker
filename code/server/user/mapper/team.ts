@@ -9,6 +9,7 @@ import {
     generateCreateSql,
     generateDeleteSql,
     generateLeftJoin3Sql,
+    generateLeftJoinSql,
     generateQuerySql,
     generateSnowId
 } from "../../common/util/sql";
@@ -234,6 +235,68 @@ class TeamMapper extends Mapper<typeof teamModel> {
         } else {
             return false;
         }
+    }
+
+    async infos(teamIds:string[]) {
+        let mysql=getMysqlInstance()
+        if(teamIds.length>0) {
+            let ret=await mysql.execute(generateQuerySql(teamModel,["id","name","photo"],{
+                id:{
+                    exp:"in",
+                    value:teamIds
+                }
+            },"and",{
+                type:"field",
+                field:"id",
+                value:teamIds
+            }))
+            return ret;
+        } else {
+            return []
+        }
+    }
+
+    async filterAvailable(organizationUserId:string,keyword:string,size:number):Promise<{
+        name:string,
+        id:string,
+        photo:string
+    }[]> {
+        if(!organizationUserId) {
+            throw Err.Organization.userNotFound
+        }
+        let mysql=getMysqlInstance();
+        let sql=generateLeftJoinSql({
+            model:teamUserModel,
+        },{
+            model:teamModel,
+            columns:["id","name","photo"],
+            expression:{
+                id:{
+                    model:teamUserModel,
+                    field:"team_id"
+                }
+            }
+        }, {
+            organization_user_id:{
+                model:teamUserModel,
+                value:organizationUserId
+            },
+            ...(keyword && {
+                name:{
+                    model:teamModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
+                    }
+                }
+            })
+        },"and",{
+            field:"name",
+            model:teamModel,
+            type:"asc"
+        },0,size)
+        let ret=await mysql.execute(sql)
+        return ret
     }
 }
 

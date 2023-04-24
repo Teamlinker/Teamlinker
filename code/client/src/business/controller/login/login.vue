@@ -20,6 +20,8 @@ import {reactive} from "vue";
 import {apiUser} from "../../common/request/request";
 import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
+import {NotificationWrapper} from "../../common/component/notification/notification";
+import {SessionStorage} from "../../common/storage/session";
 
 let form=reactive({
   username:"",
@@ -27,12 +29,13 @@ let form=reactive({
 })
 let router=useRouter();
 const onSubmit=async ()=>{
+  NotificationWrapper.init()
   let ret=await apiUser.login({
     username:form.username,
     password:form.password
   })
   if(ret.code==0) {
-    sessionStorage.removeItem("organizationId")
+    SessionStorage.remove("organizationId")
     await router.push("desktop")
   } else {
     Message.error(ret.msg);

@@ -5,10 +5,11 @@ import Setting from "../../app/setting/setting.vue";
 import {Message} from "@arco-design/web-vue";
 import {windowManager} from "../../../../teamOS/window/windowManager";
 import {markRaw} from "vue";
+import {SessionStorage} from "../../../common/storage/session";
 
 export const iconMeeting=new Icon("meeting",iconGroupMap["meeting"])
 iconMeeting.addEventListener("dbClick",item => {
-    if(!sessionStorage.getItem("organizationId")) {
+    if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
         return;
     }

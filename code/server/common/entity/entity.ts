@@ -28,6 +28,7 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         this.item=item
     }
     assignItem(item:Partial<T["model"]>,clear:boolean=false) {
+        this._item={...this.item}
         if(typeof(item)=="object") {
             if(!this.item || clear) {
                 this.item=<T>{}
@@ -36,6 +37,9 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
                 this.item[key]=item[key]
             }
         }
+    }
+    getBackItem():T["model"] {
+        return this._item
     }
     getItem():T["model"] {
         return this.item;

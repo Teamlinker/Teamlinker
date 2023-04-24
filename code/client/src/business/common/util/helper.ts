@@ -1,9 +1,9 @@
-import {ICommon_Route_Res_Project_Member} from "../../../../../common/routes/response";
+import {ICommon_Route_Res_Role_Member_Item} from "../../../../../common/routes/response";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../common/model/organization";
 import {Message} from "@arco-design/web-vue";
 import {Permission_Base} from "../../../../../common/permission/permission";
 
-export function getMemberIdFromProjectMember(item:ICommon_Route_Res_Project_Member){
+export function getMemberIdFromRoleMember(item:ICommon_Route_Res_Role_Member_Item){
     if(item.memberType==ECommon_Model_Organization_Member_Type.DEFAULT) {
         return null;
     } else if(item.memberType==ECommon_Model_Organization_Member_Type.TEAM) {
@@ -15,7 +15,7 @@ export function getMemberIdFromProjectMember(item:ICommon_Route_Res_Project_Memb
     }
 }
 
-export function getNameFromProjectMember(item:ICommon_Route_Res_Project_Member){
+export function getNameFromRoleMember(item:ICommon_Route_Res_Role_Member_Item){
     if(item.memberType==ECommon_Model_Organization_Member_Type.DEFAULT) {
         return "";
     } else if(item.memberType==ECommon_Model_Organization_Member_Type.TEAM) {

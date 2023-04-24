@@ -54,6 +54,7 @@ import moment from "moment";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditUserProfile from "./editUserProfile.vue";
 import BindTag from "./bindTag.vue";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const columns=[
   {
@@ -96,7 +97,7 @@ const pagination=reactive({
 const keyword=ref("");
 const search=async (page:number)=>{
   let res=await apiOrganization.listUser({
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     size:pagination.pageSize,
     page:page-1,
     keyword:keyword.value

@@ -3,6 +3,7 @@ import {ICommon_Model_Organization} from './../model/organization';
 import {ECommon_Services} from './../types';
 import {
     ICommon_Route_Res_Member_Tag_Member,
+    ICommon_Route_Res_Organization_FilterUserAndTeam,
     ICommon_Route_Res_Organization_List,
     ICommon_Route_Res_Organization_User_Item,
     ICommon_Route_Res_Organization_User_List,
@@ -13,6 +14,7 @@ import {
 import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Model_Member_Tag} from "../model/member_tag";
 import {ICommon_Model_Organization_User} from "../model/organization_user";
+import {ECommon_IM_Message_EntityType} from "../model/im_unread_message";
 
 const api={
     baseUrl:"/organization",
@@ -140,7 +142,9 @@ const api={
             req:<{
                 organizationId:string,
             }>{},
-            res:{},
+            res:<{
+                organizationUserId:string
+            }>{},
             permission:[Permission_Types.Organization.READ]
         },
         listRole:{
@@ -281,6 +285,35 @@ const api={
                 organizationUserId:string
             }>{},
             res:<ICommon_Route_Res_Organization_User_Profile>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        userTeamInfos:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user/userteaminfos",
+            req:<{
+                ids:{
+                    id:string,
+                    type:ECommon_IM_Message_EntityType
+                }[]
+            }>{},
+            res:<{
+                [id:string]:{
+                    id:string,
+                    name:string,
+                    photo:string,
+                    type:ECommon_IM_Message_EntityType
+                }
+            }>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        filterAvailableUserAndTeam:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/userteam/filter",
+            req:<{
+                keyword:string,
+                exceptMe:number
+            }>{},
+            res:<ICommon_Route_Res_Organization_FilterUserAndTeam>{},
             permission:[Permission_Types.Organization.READ]
         }
     }

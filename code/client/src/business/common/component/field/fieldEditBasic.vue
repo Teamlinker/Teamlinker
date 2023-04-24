@@ -222,6 +222,7 @@ import {checkPermission} from "../../util/helper";
 import {Permission_Types} from "../../../../../../common/permission/permission";
 import {ICommon_Model_Project_Release} from "../../../../../../common/model/project_release";
 import ProjectReleasePreview from "../../../controller/app/project/release/projectReleasePreview.vue";
+import {SessionStorage} from "../../storage/session";
 
 type User={
   id:string,
@@ -434,7 +435,7 @@ const onClick=async ()=>{
 }
 const onSearchAssigner=async (keyword:string)=>{
   let res=await apiOrganization.listUser({
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     keyword,
     page:0,
     size:10
@@ -445,7 +446,7 @@ const onSearchAssigner=async (keyword:string)=>{
 }
 const onSearchReporter=async (keyword:string)=>{
   let res=await apiOrganization.listUser({
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     keyword,
     page:0,
     size:10

@@ -15,6 +15,8 @@ import teamApi from "../../../common/routes/team";
 import {ICommon_HttpApi} from "../../../common/routes/types";
 import userApi from "../../../common/routes/user";
 import workflowApi from "../../../common/routes/workflow";
+import wikiApi from "../../../common/routes/wiki";
+import calendarApi from "../../../common/routes/calendar";
 import {Err} from "../../../common/status/error";
 import Application, {ECommon_Application_Mode} from "../../common/app/app";
 import {EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy} from "../../common/types/http";
@@ -25,17 +27,24 @@ import {proxyRequest} from "./http";
 import "../../user/app/app"
 import "../../cooperation/app/app"
 import {config as configFile} from "../../file/app/app"
+import "../../wiki/app/app"
+import {initCalendar} from "../../calendar/app/app"
+import {initIM} from "../../im/app/app";
 import authRpcApi from "../../auth/rpc/auth"
 import userRpcApi from "../../user/rpc/user"
 import {getRedisInstance} from "../../common/cache/redis";
 
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi,wikiApi,calendarApi];
 export default class GateWay extends Application {
     override async config(app: Koa<Koa.DefaultState, Koa.DefaultContext>) {
         let redis=getRedisInstance();
-        await redis.flush();
-        await configFile();
-        await checkIfNeedInit()
+        await Promise.all([
+            redis.flush(),
+            configFile(),
+            initCalendar(),
+            checkIfNeedInit(),
+            initIM()
+        ])
         let apiMap=<{
             [param:string]:{
                 [parem:string]:{

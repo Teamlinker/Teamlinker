@@ -30,10 +30,10 @@
 import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {Permission_Base, Permission_Types} from "../../../../../../../common/permission/permission";
 import {Dialog} from "../../../../common/component/dialog/dialog";
-import {apiProject, apiTeam} from "../../../../common/request/request";
+import {apiProject} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
-import EditProjectRole from "../../setting/role/editProjectRole.vue";
+import EditProjectRole from "../../setting/role/project/editProjectRole.vue";
 
 const props=defineProps<{
   projectId:string
@@ -105,7 +105,7 @@ const onEditRole=async (item:RoleItem) =>{
 const onDeleteRole=async (item:RoleItem)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this role?")
   if(ret) {
-    let res=await apiTeam.removeRole({
+    let res=await apiProject.removeRole({
       roleId:item.id
     })
     if(res?.code==0) {

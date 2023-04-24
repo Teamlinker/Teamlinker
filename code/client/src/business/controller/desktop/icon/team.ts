@@ -7,10 +7,11 @@ import {markRaw} from "vue";
 import Team from "../../app/team/team.vue";
 import TeamProfile from "../../app/team/teamProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import {SessionStorage} from "../../../common/storage/session";
 
 export const iconTeam=new Icon("team",iconGroupMap["team"])
 iconTeam.addEventListener("dbClick", item => {
-    if(!sessionStorage.getItem("organizationId")) {
+    if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
         return;
     }

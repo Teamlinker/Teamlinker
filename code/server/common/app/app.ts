@@ -13,6 +13,7 @@ import CommonUtil from "../util/common";
 import {generateHttpErrorResponse} from "../util/http";
 import {init} from "../util/init";
 import * as fs from "fs";
+import {SocketIO} from "../socket/socket";
 
 var pipe = function (from, to): Promise<Buffer> {
     return new Promise(function (resolve) {
@@ -55,7 +56,8 @@ export default abstract class Application{
         },
         "port":number,
         "jwt": string,
-        "version":string
+        "version":string,
+        "mq":string
     }
     Application(){
 
@@ -76,10 +78,11 @@ export default abstract class Application{
         initComponent()
         await init()
         await this.initKoa();
-        await this.config(this.app);
         let httpServer = http.createServer(this.app.callback())
         let port=getConfigInstance().serverPort
         httpServer.listen(port,async ()=>{
+            await SocketIO.start(httpServer)
+            await this.config(this.app);
             console.log(`start`);
         })
     }

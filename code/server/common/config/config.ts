@@ -21,6 +21,9 @@ class Config {
     get jwt():string {
         return  Application.privateConfig.jwt
     }
+    get mqUri():string {
+        return Application.privateConfig.mq
+    }
 }
 var g_config:InstanceType<typeof Config>
 export function getConfigInstance() {

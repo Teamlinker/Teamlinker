@@ -73,7 +73,7 @@ export async function handleImageFields(data:object,organizationId?:string){
                             object:o,
                             key:k
                         })
-                    }else {
+                    } else {
                         _clone(o[k])
                     }
                 }

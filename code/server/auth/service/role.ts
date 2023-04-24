@@ -44,6 +44,9 @@ export class RoleService extends Entity<typeof roleModel,typeof roleMapper> {
             } else if(obj.type===ECommon_Model_Role_Type.TEAM) {
                 arr=getAllPermissions(Permission_Types.Team);
                 admin=Permission_Types.Team.ADMIN
+            } else if(obj.type===ECommon_Model_Role_Type.WIKI) {
+                arr=getAllPermissions(Permission_Types.Wiki);
+                admin=Permission_Types.Wiki.ADMIN
             }
             for(let o of arr) {
                 if((value & o.value) && value>=o.value) {
@@ -74,6 +77,9 @@ export class RoleService extends Entity<typeof roleModel,typeof roleMapper> {
         } else if(this.getItem().type===ECommon_Model_Role_Type.TEAM) {
             arr=getAllPermissions(Permission_Types.Team);
             admin=Permission_Types.Team.ADMIN
+        } else if(this.getItem().type===ECommon_Model_Role_Type.WIKI) {
+            arr=getAllPermissions(Permission_Types.Wiki);
+            admin=Permission_Types.Wiki.ADMIN
         }
         let value=Number(this.getItem().value)
         let ret:Permission_Base[]=[]

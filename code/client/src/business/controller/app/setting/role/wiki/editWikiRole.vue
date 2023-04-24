@@ -18,14 +18,19 @@
 
 <script setup lang="ts">
 
-import {onDialogOk} from "../../../../common/component/dialog/dialog";
-import {getAllPermissions, Permission_Base, Permission_Types} from "../../../../../../../common/permission/permission";
+import {onDialogOk} from "../../../../../common/component/dialog/dialog";
+import {
+  getAllPermissions,
+  Permission_Base,
+  Permission_Types
+} from "../../../../../../../../common/permission/permission";
 import {reactive, ref} from "vue";
-import {apiOrganization} from "../../../../common/request/request";
+import {apiWiki} from "../../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 
 const eleForm=ref(null)
 const props=defineProps<{
+  wikiId?:string
   type:"edit"|"add"
   item?:{
     id:string
@@ -37,7 +42,7 @@ const props=defineProps<{
 const form=reactive(props.type=="edit"?{
   name:props.item.name,
   description:props.item.description,
-  permissions:getAllPermissions(Permission_Types.Organization).filter(item=>{
+  permissions:getAllPermissions(Permission_Types.Wiki).filter(item=>{
     if(item.name!=="ADMIN") {
       return true;
     }
@@ -50,7 +55,7 @@ const form=reactive(props.type=="edit"?{
 }:{
   name:"",
   description:"",
-  permissions:getAllPermissions(Permission_Types.Organization).filter(item=>{
+  permissions:getAllPermissions(Permission_Types.Wiki).filter(item=>{
     if(item.name!=="ADMIN") {
       return true;
     }
@@ -73,13 +78,15 @@ onDialogOk(async ()=>{
   }).reduce((previousValue, currentValue, currentIndex, array)=>{
     return previousValue | currentValue.value
   },0)
-  let res=await (props.type=="edit"?apiOrganization.editRole({
+  let res=await (props.type=="edit"?apiWiki.editRole({
     roleId:props.item.id,
     name:form.name,
     description:form.description,
     value:value
-  }):apiOrganization.addRole({
-    organizationId:sessionStorage.getItem("organizationId"),
+  }):apiWiki.addRole({
+    ...(props.wikiId && {
+      wikiId:props.wikiId
+    }),
     name:form.name,
     description:form.description,
     value:value

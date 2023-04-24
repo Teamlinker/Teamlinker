@@ -22,6 +22,8 @@ import {Err} from "../../../../common/status/error";
 import {userModel} from "../../../../common/model/user";
 import {organizationUserModel} from "../../../../common/model/organization_user";
 import {memberTagMemberModel} from "../../../../common/model/member_tag_member";
+import {wikiModel} from "../../../../common/model/wiki";
+import {wikiItemModel} from "../../../../common/model/wiki_item";
 
 export namespace REDIS_AUTH {
     export namespace Permission {
@@ -418,6 +420,159 @@ export namespace REDIS_AUTH {
                     if (!exist) {
                         let ret = await mysql.executeOne(generateQuerySql(roleMemberModel, ["item_id", "role_id"], {
                             item_id: this.projectId,
+                            member_type:ECommon_Model_Organization_Member_Type.DEFAULT
+                        }))
+                        if(ret) {
+                            await this.objRedis.set(ret.role_id);
+                        }
+                    }
+                    let value = await this.objRedis.get();
+                    return value
+                }
+            }
+        }
+        export namespace Wiki {
+            export function calPermission(wikiId:string,organizationUserId:string)
+            {
+                let key="permission:wiki:{0}:organizationUser:{1}:calPermission"
+                let obj=new RedisStringKey(StringUtil.format(key,wikiId,organizationUserId),cacheRedisType<number>().Number,60)
+                return obj
+            }
+            export class WikiIdFromWikiItem extends BaseRedisStringCache<string> {
+                key="permission:wikiItem:{0}"
+                constructor(private wikiItemId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,wikiItemId),cacheRedisType<string>().String,1000*10);
+                }
+                override async getValue(): Promise<string> {
+                    let value:string;
+                    let mysql=getMysqlInstance()
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        value=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoinSql({
+                            model:wikiItemModel
+                        },{
+                            model:wikiModel,
+                            columns:["id"],
+                            expression:{
+                                id:{
+                                    model:wikiItemModel,
+                                    field:"wiki_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:wikiItemModel,
+                                value:this.wikiItemId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            value=ret.id
+                            await this.objRedis.set(value)
+                        } else {
+                            throw Err.Wiki.wikiNotFound
+                        }
+                    }
+                    return value;
+                }
+            }
+            export class WikiOrganizationUsers extends BaseRedisHashCache<string> {
+                key="permission:wiki:{0}:organizationUser"
+                constructor(private wikiId:string) {
+                    super()
+                    this.objRedis=new RedisHashKey(StringUtil.format(this.key,wikiId),3600);
+                }
+                async getValue(userId:string):Promise<string> {
+                    let mysql=getMysqlInstance()
+                    let exist = await this.objRedis.exists();
+                    if (!exist) {
+                        let ret = await mysql.execute(generateQuerySql(roleMemberModel, ["member_id", "role_id"], {
+                            item_id: this.wikiId,
+                            member_type: ECommon_Model_Organization_Member_Type.USER
+                        }))
+                        let map = {}
+                        for (let obj of ret) {
+                            map[obj.member_id] = obj.role_id
+                        }
+                        map["_"]=null;
+                        await this.objRedis.set(map);
+                    }
+                    let roleId = await this.objRedis.get(userId)
+                    if (roleId) {
+                        let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(roleId);
+                        let role = await objRole.getValue();
+                        return role.id
+                    }
+                    return null;
+                }
+            }
+            export class WikiTeams extends BaseRedisHashCache<object> {
+                key="permission:wiki:{0}:team"
+                constructor(private wikiId:string) {
+                    super()
+                    this.objRedis=new RedisHashKey(StringUtil.format(this.key,wikiId),3600);
+                }
+                async getValue():Promise<object> {
+                    let mysql=getMysqlInstance()
+                    let exist = await this.objRedis.exists();
+                    if (!exist) {
+                        let ret = await mysql.execute(generateQuerySql(roleMemberModel, ["member_id", "role_id"], {
+                            item_id: this.wikiId,
+                            member_type: ECommon_Model_Organization_Member_Type.TEAM
+                        }))
+                        let map = {}
+                        for (let obj of ret) {
+                            map[obj.member_id] = obj.role_id
+                        }
+                        map["_"]=null;
+                        await this.objRedis.set(map)
+                    }
+                    let relationship = await this.objRedis.getAll();
+                    delete relationship["_"];
+                    return relationship
+                }
+            }
+            export class WikiTags extends BaseRedisHashCache<object> {
+                key="permission:project:{0}:tag"
+                constructor(private wikiId:string) {
+                    super()
+                    this.objRedis=new RedisHashKey(StringUtil.format(this.key,wikiId),3600);
+                }
+                async getValue():Promise<object> {
+                    let mysql=getMysqlInstance()
+                    let exist = await this.objRedis.exists();
+                    if (!exist) {
+                        let ret = await mysql.execute(generateQuerySql(roleMemberModel, ["member_id", "role_id"], {
+                            item_id: this.wikiId,
+                            member_type: ECommon_Model_Organization_Member_Type.MEMBERTAG
+                        }))
+                        let map = {}
+                        for (let obj of ret) {
+                            map[obj.member_id] = obj.role_id
+                        }
+                        map["_"]=null;
+                        await this.objRedis.set(map)
+                    }
+                    let relationship = await this.objRedis.getAll();
+                    delete relationship["_"];
+                    return relationship
+                }
+            }
+            export class WikiTourist extends BaseRedisStringCache<string> {
+                key="permission:wiki:{0}:default"
+                constructor(private wikiId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,wikiId),cacheRedisType<string>().String,3600);
+                }
+                async getValue():Promise<string> {
+                    let mysql=getMysqlInstance()
+                    let exist = await this.objRedis.exists();
+                    if (!exist) {
+                        let ret = await mysql.executeOne(generateQuerySql(roleMemberModel, ["item_id", "role_id"], {
+                            item_id: this.wikiId,
                             member_type:ECommon_Model_Organization_Member_Type.DEFAULT
                         }))
                         if(ret) {

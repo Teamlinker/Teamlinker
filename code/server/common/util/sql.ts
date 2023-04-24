@@ -1,7 +1,7 @@
 import * as intFormat from "biguint-format";
 import * as FlakeId from 'flake-idgen';
 import {BaseModel} from '../../../common/model/base';
-import field from "../../../common/routes/field";
+import * as moment from "moment";
 
 const uid = new FlakeId(); 
 
@@ -13,7 +13,7 @@ type EXPRVALUEEXP ={
         model:BaseModel,
         field:string
     },
-    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"
+    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"|"not in"
 }
 type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
     type:"and"|"or",
@@ -96,6 +96,14 @@ function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[],table?:string)
             field:string
         }
         arrExpr.push(`${table?(table+"."):""}${key} = ${val.model.table}.${val.field}`)
+    } else if(value.exp=="not in") {
+        if(typeof(value.value)=="string") {
+            arrExpr.push(`${table?(table+"."):""}${key} not in (${value.value})`)
+        } else {
+            arrExpr.push(`${table?(table+"."):""}${key} not in (${(<string[] | number[]>value.value).map((item)=>{
+                return typeof(item)=="number"?item:("'"+item+"'")
+            }).join(",")})`)
+        }
     }
 }
 
@@ -194,6 +202,8 @@ export function generateCreateSql<T extends BaseModel>(model:T,obj:{
             if(value==="" && key.endsWith("_id")) {
                 value=null;
             }
+        } else if(value as any instanceof Date) {
+            value=moment(value as Date).format("YYYY-MM-DD HH:mm:ss")
         }
         keys+=(value!==null && value!==undefined)?(key+","):""
         values+=(value!==null && value!==undefined)?("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'"+","):""
@@ -234,6 +244,8 @@ export function generateBatchCreateSql<T extends BaseModel>(model:T,arr:{
                 if(value==="" && key.endsWith("_id")) {
                     value=null;
                 }
+            } else if(value as any instanceof Date) {
+                value=moment(value as Date).format("YYYY-MM-DD HH:mm:ss")
             }
             arrValue.push((value!==undefined)?(value===null?"null":("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'")):"default")
         }
@@ -325,6 +337,8 @@ export function generateBatchCreateOnUpdateSql<T extends BaseModel>(model:T, arr
                 if(value==="" && key.endsWith("_id")) {
                     value=null;
                 }
+            } else if(value as any instanceof Date) {
+                value=moment(value as Date).format("YYYY-MM-DD HH:mm:ss")
             }
             arrValue.push((value!==undefined)?(value===null?"null":("'"+(Array.isArray(value)?JSON.stringify(value):value)+"'")):"default")
         }
@@ -350,6 +364,8 @@ export function generateBatchCreateOnUpdateSql<T extends BaseModel>(model:T, arr
             }
         } else if(Array.isArray(value)) {
             val="'"+JSON.stringify(value)+"'"
+        } else if(value instanceof Date) {
+            val=moment(value as Date).format("YYYY-MM-DD HH:mm:ss")
         } else if(value==="") {
             val=null
         } else {
@@ -397,6 +413,8 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
             val=`${key}${value.exp}${value.value}`
         } else if(Array.isArray(value)) {
             val="'"+JSON.stringify(value)+"'"
+        } else if(value instanceof Date) {
+            val="'"+ moment(value as Date).format("YYYY-MM-DD HH:mm:ss")+"'"
         } else if(value==="") {
             val=null
         } else {
@@ -428,6 +446,89 @@ export function generateDeleteSql<T extends BaseModel>(model:T,objExpr?:{
     return {
         value:`delete from ${model.table}${expr?(" where "+expr):""}`,
         type:model.model
+    }
+}
+
+export function generateDeleteInnerJoinSql<T1 extends BaseModel, T2 extends BaseModel>(mainModel: T1, joinModel: {
+    model: T2,
+    expression: {
+        [key in keyof T2["model"]]?: {
+            model: T1,
+            field: keyof T1["model"]
+        }
+    }
+}, objExpr?: {
+    [param in ((keyof (T1 & T2)["model"]) | `${"$and" | "$or"}${number}`)]?: {
+    value: EXPRVALUE,
+    model: T1 | T2
+} | {
+    [param in keyof (T1 & T2)["model"]]?: {
+        value: EXPRVALUE,
+        model: T1 | T2
+    }
+}
+}, exprMode?: "and" | "or") {
+    let expr = generateLeftJoinExp(objExpr, exprMode);
+    let table = mainModel.table
+    let joinTable = joinModel.model.table
+    let arrExpression = []
+    for (let key in joinModel.expression) {
+        let value = joinModel.expression[key]
+        arrExpression.push(`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression = arrExpression.join(" and ")
+    return {
+        value: `delete ${table},${joinTable} from ${table} inner join ${joinTable} on ${expression} ${expr?(" where "+expr):""}`,
+        type: null,
+    }
+}
+
+export function generateDeleteInnerJoin2Sql<T1 extends BaseModel, T2 extends BaseModel,T3 extends BaseModel>(mainModel: T1, joinModel: {
+    model: T2,
+    expression: {
+        [key in keyof T2["model"]]?:{
+            model:T1|T3,
+            field:keyof (T1 & T3)["model"]
+        }
+    }
+}, joinModel2: {
+    model:T3,
+    expression:{
+        [key in keyof T3["model"]]?:{
+            model:T1|T2,
+            field:keyof (T1 & T2)["model"]
+        }
+    }
+},objExpr?: {
+    [param in ((keyof (T1 & T2 & T3)["model"])|`${"$and"|"$or"}${number}`)]?:{
+    value:EXPRVALUE,
+    model:T1|T2|T3
+}|{
+    [param in keyof (T1 & T2 & T3)["model"]]?:{
+        value:EXPRVALUE,
+        model:T1|T2|T3
+    }
+}
+}, exprMode?: "and" | "or") {
+    let expr = generateLeftJoinExp(objExpr, exprMode);
+    let table = mainModel.table
+    let joinTable = joinModel.model.table
+    let arrExpression = []
+    for (let key in joinModel.expression) {
+        let value = joinModel.expression[key]
+        arrExpression.push(`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression = arrExpression.join(" and ")
+    let joinTable2 = joinModel2.model.table
+    let arrExpression2 = []
+    for (let key in joinModel2.expression) {
+        let value = joinModel2.expression[key]
+        arrExpression2.push(`${joinTable2}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression2 = arrExpression2.join(" and ")
+    return {
+        value: `delete ${table},${joinTable},${joinTable2} from ${table} inner join ${joinTable} on ${expression} inner join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}`,
+        type: null,
     }
 }
 
@@ -1150,7 +1251,7 @@ export function generateGroupSql<T extends BaseModel,K1 extends keyof T["model"]
                 orderStr=` order by field(${order.field.toString()},${arrValue.join(",")})`
             }
         } else {
-            orderStr=` order by ${order.field.toString()} ${order.type}`
+            orderStr=` order by any_value(${order.field.toString()}) ${order.type}`
         }
     }
     return {
@@ -1283,7 +1384,7 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
                 orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
             }
         } else {
-            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`
+            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:("any_value("+order.model.table+"."+order.field.toString()+")")} ${order.type}`
         }
     }
     return {
@@ -1455,7 +1556,7 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
                 orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
             }
         } else {
-            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`
+            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:("any_value("+order.model.table+"."+order.field.toString()+")")} ${order.type}`
         }
     }
     return {
@@ -1475,8 +1576,8 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
 },joinModel:{
     model:T2,
     columns?:{
-        columns:K1[],
-        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+        columns:K2[],
+        calcColumns:COLUMNSVALUETYPE<R2,RR2>[]
     },
     aggregation?:F2,
     expression:{
@@ -1488,8 +1589,8 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
 },joinModel2:{
     model:T3,
     columns?:{
-        columns:K1[],
-        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+        columns:K3[],
+        calcColumns:COLUMNSVALUETYPE<R3,RR3>[]
     },
     aggregation?:F3,
     expression:{
@@ -1501,8 +1602,8 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
 },joinModel3:{
     model:T4,
     columns?:{
-        columns:K1[],
-        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+        columns:K4[],
+        calcColumns:COLUMNSVALUETYPE<R4,RR4>[]
     },
     aggregation?:F4,
     expression:{
@@ -1665,7 +1766,7 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
                 orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
             }
         } else {
-            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:(order.model.table+"."+order.field.toString())} ${order.type}`
+            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:("any_value("+order.model.table+"."+order.field.toString()+")")} ${order.type}`
         }
     }
     return {

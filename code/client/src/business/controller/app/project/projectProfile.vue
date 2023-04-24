@@ -7,8 +7,8 @@
         <a-menu-item key="setting" v-if="checkPermission(permission,Permission_Types.Project.ADMIN)">Setting</a-menu-item>
       </a-menu>
     </a-layout-sider>
-    <a-layout-content style="flex-direction: column;display: flex;padding: 10px">
-      <div style="width: 100%;display: flex;flex: 1 1 auto;">
+    <a-layout-content style="flex-direction: column;display: flex;padding: 10px;">
+      <div style="width: 100%;display: flex;flex: 1 1 auto;" :style="{overflowY:type=='issueProfile'?'hidden':'auto'}">
         <NavigatorContainer :routes="objComponent" ref="eleNavigator"></NavigatorContainer>
       </div>
     </a-layout-content>

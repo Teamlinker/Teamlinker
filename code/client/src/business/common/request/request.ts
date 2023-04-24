@@ -9,7 +9,10 @@ import release from "../../../../../common/routes/release"
 import team from "../../../../../common/routes/team"
 import workflow from "../../../../../common/routes/workflow"
 import user from "../../../../../common/routes/user"
+import wiki from "../../../../../common/routes/wiki"
+import calendar from "../../../../../common/routes/calendar"
 import {Ref} from "vue";
+import {SessionStorage} from "../storage/session";
 
 export type DCSType<T>={
     [key in keyof T]:key extends "created_by"|"modified_by"|"assigner_id"|"reporter_id"|"created_by_pure"?{
@@ -18,7 +21,7 @@ export type DCSType<T>={
         photo?:string,
         nickname?:string,
         organizationUserId?:string
-    }:key extends "created_time"|"modified_time"?string:T[key] extends object?DCSType<T[key]>:T[key]
+    }:key extends "created_time"|"modified_time"|"start_time"|"end_time"?string:T[key] extends object?DCSType<T[key]>:T[key]
 }
 
 let g_funcError:()=>void
@@ -99,7 +102,7 @@ export function generatorApi<T extends ICommon_Http_Route_List>(api:{
                 }
             }
             try {
-                if(!route.ignoreValidate && !sessionStorage.getItem("userToken")) {
+                if(!route.ignoreValidate && !SessionStorage.get("userToken")) {
                     if(g_authError) {
                         g_authError();
                     }
@@ -116,7 +119,7 @@ export function generatorApi<T extends ICommon_Http_Route_List>(api:{
                     redirect:"follow",
                     headers:{
                         ...(!route.ignoreValidate && {
-                            "Authorization":"Bearer "+sessionStorage.getItem("userToken")
+                            "Authorization":"Bearer "+SessionStorage.get("userToken")
                         }),
                     },
                     ...(objBody && {
@@ -124,7 +127,7 @@ export function generatorApi<T extends ICommon_Http_Route_List>(api:{
                     })
                 })
                 if(response.headers.get("token")) {
-                    sessionStorage.setItem("userToken",response.headers.get("token"))
+                    SessionStorage.set("userToken",response.headers.get("token"))
                 }
                 if(!response.ok) {
                     if(g_responseError) {
@@ -161,5 +164,7 @@ export const apiOrganization=generatorApi(organization)
 export const apiRelease=generatorApi(release)
 export const apiIssue=generatorApi(issue)
 export const apiIssueType=generatorApi(issueType)
+export const apiWiki=generatorApi(wiki)
+export const apiCalendar=generatorApi(calendar)
 
 

@@ -166,7 +166,6 @@ class ProjectController {
             let ret=await ProjectService.createGlobalRole(user.organizationInfo.organizationId,name,description,value)
             return ret;
         }
-
     }
 
     @DHttpApi(projectApi.routes.editRole)

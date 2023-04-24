@@ -15,12 +15,13 @@
 </template>
 
 <script setup lang="ts">
-import { Message } from "@arco-design/web-vue";
-import { onBeforeMount, reactive, ref } from "vue";
-import { ICommon_Model_Role } from "../../../../../../../common/model/role";
-import { ICommon_Route_Res_Organization_User_Item } from "../../../../../../../common/routes/response";
-import { onDialogOk } from "../../../../common/component/dialog/dialog";
-import { apiOrganization, apiTeam, DCSType } from "../../../../common/request/request";
+import {Message} from "@arco-design/web-vue";
+import {onBeforeMount, reactive, ref} from "vue";
+import {ICommon_Model_Role} from "../../../../../../../common/model/role";
+import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../common/routes/response";
+import {onDialogOk} from "../../../../common/component/dialog/dialog";
+import {apiOrganization, apiTeam, DCSType} from "../../../../common/request/request";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const props=defineProps<{
   type:"edit"|"add"
@@ -39,7 +40,7 @@ const userList=ref<{
 }[]>([])
 const onSearch=async (value:string)=>{
   let res=await apiOrganization.listUser({
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     page:0,
     size:20,
     keyword:value

@@ -7,6 +7,8 @@ import {MemberTagService, OrganizationService, OrganizationUserService} from './
 import {IUserSession} from "../types/config";
 import rpcAuthApi from "../../auth/rpc/auth"
 import {ECommon_Model_Role_Type} from "../../../common/model/role";
+import {ECommon_IM_Message_EntityType} from "../../../common/model/im_unread_message";
+import {TeamService} from "../service/team";
 
 @DComponent
 @DHttpController(organizationApi)
@@ -220,8 +222,10 @@ class OrganizationController {
         if(!obj) {
             throw Err.Organization.organizationNotFound
         }
-        await obj.enter(user.userId);
-        return;
+        let organizationUserId=await obj.enter(user.userId);
+        return {
+            organizationUserId
+        };
     }
 
     @DHttpApi(organizationApi.routes.listRole)
@@ -377,9 +381,55 @@ class OrganizationController {
         return ret;
     }
 
+    @DHttpApi(organizationApi.routes.userTeamInfos)
+    async userTeamInfos(@DHttpReqParamRequired("ids") ids:{
+        id:string,
+        type:ECommon_IM_Message_EntityType
+    }[]) :Promise<typeof organizationApi.routes.userTeamInfos.res>{
+        let userIds=ids.filter(item=>{
+            return item.type===ECommon_IM_Message_EntityType.USER
+        }).map(item=>item.id)
+        let teamIds=ids.filter((item=>{
+            return item.type===ECommon_IM_Message_EntityType.TEAM
+        })).map(item=>item.id)
+        let ret:typeof organizationApi.routes.userTeamInfos.res={}
+        let [userList,teamList]=await Promise.all([
+            OrganizationUserService.organizationUserInfos(userIds.join(",")),
+            TeamService.infos(teamIds)
+        ])
+        userList.forEach(item=>{
+            ret[item.id]={
+                id:item.organizationUserId,
+                name:item.nickname,
+                photo:item.photo,
+                type:ECommon_IM_Message_EntityType.USER
+            }
+        })
+        teamList.forEach(item=>{
+            ret[item.id]={
+                id:item.id,
+                name:item.name,
+                photo:item.photo,
+                type:ECommon_IM_Message_EntityType.TEAM
+            }
+        })
+        return ret
+    }
 
-
-
+    @DHttpApi(organizationApi.routes.filterAvailableUserAndTeam)
+    async filterUserAndTeam(@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParamRequired("exceptMe") exceptMe:number,@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.filterAvailableUserAndTeam.res>{
+        let organizationUser=await OrganizationUserService.getItemById(user.organizationInfo.organizationUserId);
+        if(!organizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        let ret=await organizationUser.filterAvailableUserAndTeam(keyword)
+        if(exceptMe) {
+            ret.users=ret.users.filter(item=>{
+                return item.id!=user.organizationInfo.organizationUserId
+            })
+        }
+        return ret;
+    }
 
 
 }

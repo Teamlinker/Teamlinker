@@ -3,7 +3,8 @@ import {BaseModel} from "./base"
 export enum ECommon_Model_Role_Type {
   PROJECT,
   TEAM,
-  ORGANIZATION
+  ORGANIZATION,
+  WIKI
 }
 export enum ECommon_Model_Role_Reserved {
   NORMAL,

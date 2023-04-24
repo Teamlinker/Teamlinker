@@ -4,4 +4,6 @@ export enum ECommon_Services {
     Cooperation="cooperation",
     File="file",
     AUTH="auth",
+    Wiki="wiki",
+    Calendar="calendar"
 }

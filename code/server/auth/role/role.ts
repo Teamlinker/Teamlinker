@@ -2,6 +2,7 @@ import {Permission_Types} from "../../../common/permission/permission";
 import "../permission/project";
 import "../permission/team";
 import "../permission/organization";
+import "../permission/wiki";
 import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../common/model/role";
 
 
@@ -63,6 +64,26 @@ export namespace RoleDefault {
             item_id:null,
             organization_id:null,
             type:ECommon_Model_Role_Type.ORGANIZATION,
+            reserved:ECommon_Model_Role_Reserved.NORMAL
+        }
+    }
+    export const Wiki_Role={
+        admin:{
+            name:"admin",
+            value:Permission_Types.Wiki.ADMIN.value,
+            description:"wiki admin",
+            item_id:null,
+            organization_id:null,
+            type:ECommon_Model_Role_Type.WIKI,
+            reserved:ECommon_Model_Role_Reserved.ADMIN
+        },
+        default:{
+            name:"default",
+            value:Permission_Types.Wiki.READ.value,
+            description:"wiki default",
+            item_id:null,
+            organization_id:null,
+            type:ECommon_Model_Role_Type.WIKI,
             reserved:ECommon_Model_Role_Reserved.NORMAL
         }
     }

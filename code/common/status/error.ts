@@ -1,5 +1,5 @@
 export namespace Err {
-    export let Common = {
+    export const Common = {
         paramError:{
             code:1,
             msg:"param error"
@@ -29,7 +29,7 @@ export namespace Err {
             msg:"user is admin"
         }
     }
-    export let User = {
+    export const User = {
         userNotFound:{
             code:1000,
             msg:"user not found"
@@ -59,7 +59,7 @@ export namespace Err {
             msg:"access denied"
         }
     }
-    export let Http = {
+    export const Http = {
         overFileSize:{
             code:2000,
             msg:"over file size"
@@ -73,7 +73,7 @@ export namespace Err {
             msg:"require header"
         }
     }
-    export let Project = {
+    export const Project = {
         userIdNotExists:{
             code:3000,
             msg:"project id not exists"
@@ -307,7 +307,7 @@ export namespace Err {
             }
         }
     }
-    export let Team = {
+    export const Team = {
         teamNotFound:{
             code:4000,
             msg:"team not found"
@@ -329,7 +329,7 @@ export namespace Err {
             msg:"remove forbidden"
         }
     }
-    export let Role ={
+    export const Role ={
         roleNotFound:{
             code:5000,
             msg:"role not found"
@@ -351,7 +351,7 @@ export namespace Err {
             msg:"role change forbidden"
         }
     }
-    export let File ={
+    export const File ={
         fileNotFound:{
             code:6000,
             msg:"file not found"
@@ -362,7 +362,7 @@ export namespace Err {
         }
     }
 
-    export let Comment ={
+    export const Comment ={
         commentNotFound:{
             code:7000,
             msg:"comment not found"
@@ -373,7 +373,7 @@ export namespace Err {
         }
     }
 
-    export let Organization = {
+    export const Organization = {
         ownerNotFound:{
             code:8000,
             msg:"owner not found"
@@ -412,7 +412,7 @@ export namespace Err {
         }
     }
 
-    export let Auth = {
+    export const Auth = {
         roleNotFound:{
             code:9000,
             msg:"role not found"
@@ -420,6 +420,55 @@ export namespace Err {
         roleAlreadyExists: {
             code:9001,
             msg:"role already exists"
+        }
+    }
+
+    export const Wiki ={
+        wikiNotFound:{
+            code:10000,
+            msg:"wiki not found"
+        },
+        wikiItemNotFound:{
+            code:10001,
+            msg:"wiki item not found"
+        }
+    }
+
+    export const Calendar ={
+        calendarNotFound:{
+            code:11000,
+            msg:"calendar not found"
+        },
+        calendarEventNotFound:{
+            code:11001,
+            msg:"calendar event not found"
+        },
+        removeForbidden: {
+            code:11002,
+            msg:"calendar remove forbidden"
+        },
+        defaultCalendarDuplicate:{
+            code:11003,
+            msg:"default calendar duplicate"
+        },
+        settingNotFound:{
+            code:11004,
+            msg:"setting not found"
+        },
+        settingAlreadyExists:{
+            code:11005,
+            msg:"setting already exists"
+        }
+    }
+    
+    export const IM ={
+        userNotFound:{
+            code:12000,
+            msg:"user not found"
+        },
+        teamNotFound:{
+            code:12001,
+            msg:"team not found"
         }
     }
 }

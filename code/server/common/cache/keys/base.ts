@@ -109,6 +109,10 @@ export class RedisHashKey extends RedisBaseKey<string> {
         let ret=await this.redis.hExists(this.name,field);
         return ret;
     }
+    async getKeys() {
+        let ret=await this.redis.hGetAllKey(this.name)
+        return ret;
+    }
 }
 
 export abstract class BaseRedisCache<T> {
@@ -131,6 +135,10 @@ export abstract class BaseRedisHashCache<T> extends BaseRedisCache<T> {
     objRedis:RedisHashKey;
     async check(id:string) {
         let ret=await this.objRedis.check(id);
+        return ret;
+    }
+    async keys() {
+        let ret=await this.objRedis.getKeys()
         return ret;
     }
 }

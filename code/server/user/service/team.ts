@@ -9,6 +9,8 @@ import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from './../../../c
 import {teamModel} from './../../../common/model/team';
 import {EServer_Common_Event_Types} from "../../common/event/types";
 import {OrganizationService} from "./organization";
+import {emitServiceEvent} from "../../common/event/event";
+import Auth = EServer_Common_Event_Types.Auth;
 
 export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     constructor(){
@@ -84,6 +86,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         }
         let member=await objOrganization.memberInfo(memberId);
         let role = await rpcAuthApi.addRoleMember(this.item.id,roleId,ECommon_Model_Organization_Member_Type.USER,memberId);
+        emitServiceEvent(Auth.TEAM_USER_ADD,this.item.id, memberId)
         return {
             ...member,
             role
@@ -96,6 +99,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         }
         await teamMapper.removeMember(this.item.id,organizationUserId)
         await rpcAuthApi.removeRoleMember(this.item.id,ECommon_Model_Organization_Member_Type.USER,organizationUserId);
+        emitServiceEvent(Auth.TEAM_USER_DELETE,this.item.id,organizationUserId)
     }
 
     async changeRole(organizationUserId:string,roleId:string){
@@ -110,6 +114,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         }
         let member=await objOrganization.memberInfo(organizationUserId);
         let role=await rpcAuthApi.changeRoleMember(this.item.id,roleId,ECommon_Model_Organization_Member_Type.USER,organizationUserId)
+        emitServiceEvent(Auth.TEAM_USER_EDIT,this.item.id,organizationUserId)
         return {
             ...member,
             role
@@ -150,6 +155,21 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
                 photo:obj.photo?(await rpcFileApi.getPath(obj.photo)):obj.photo
             })
         }
+        return ret;
+    }
+
+    static async filterAvailable(organizationUserId:string,name:string,size:number):Promise<{
+        name:string,
+        id:string,
+        photo:string
+    }[]>{
+        if(!name) {
+            throw Err.Team.teamNotFound
+        }
+        if(!size) {
+            throw Err.Common.paramError
+        }
+        let ret=await teamMapper.filterAvailable(organizationUserId,name,size)
         return ret;
     }
 
@@ -203,5 +223,10 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     static async clearMember(organizationUserId:string) {
         await teamMapper.clearMemberByMemberId(organizationUserId);
         await rpcAuthApi.clearMember(organizationUserId)
+    }
+
+    static async infos(teamIds:string[]) {
+        let ret=await teamMapper.infos(teamIds)
+        return ret;
     }
 }

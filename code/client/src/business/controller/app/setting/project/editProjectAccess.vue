@@ -37,7 +37,7 @@
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../../common/model/organization.js";
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
 import {apiProject, DCSType} from "../../../../common/request/request";
-import {ICommon_Route_Res_Project_Member} from "../../../../../../../common/routes/response";
+import {ICommon_Route_Res_Role_Member_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditProjectAccessRole from "./editProjectAccessRole.vue";
@@ -60,7 +60,7 @@ const columns=[
     slotName: "operation"
   }
 ]
-let data=ref<DCSType<ICommon_Route_Res_Project_Member[]>>([])
+let data=ref<DCSType<ICommon_Route_Res_Role_Member_Item[]>>([])
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
 const pagination=reactive({
@@ -101,7 +101,7 @@ const onAdd=async ()=>{
     search(pagination.current)
   }
 }
-const onEditRole=async (item:DCSType<ICommon_Route_Res_Project_Member>)=>{
+const onEditRole=async (item:DCSType<ICommon_Route_Res_Role_Member_Item>)=>{
   let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditProjectAccessRole),{
     type:"edit",
     item:item,
@@ -111,7 +111,7 @@ const onEditRole=async (item:DCSType<ICommon_Route_Res_Project_Member>)=>{
     search(pagination.current)
   }
 }
-const onDelete=async (item:DCSType<ICommon_Route_Res_Project_Member>)=>{
+const onDelete=async (item:DCSType<ICommon_Route_Res_Role_Member_Item>)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this user from this organization?")
   let memberId:string;
   if(item.memberType==ECommon_Model_Organization_Member_Type.USER)

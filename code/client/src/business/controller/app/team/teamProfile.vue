@@ -105,7 +105,7 @@ import {Dialog} from "../../../common/component/dialog/dialog";
 import CardItem from "../../../common/component/cardItem.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import EditTeamMemberRole from "../setting/user&team/editTeamMemberRole.vue";
-import EditTeamRole from "../setting/role/editTeamRole.vue";
+import EditTeamRole from "../setting/role/team/editTeamRole.vue";
 import {checkPermission} from "../../../common/util/helper";
 
 const props=defineProps<{

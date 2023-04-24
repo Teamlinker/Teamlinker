@@ -187,6 +187,48 @@ class OrganizationMapper extends Mapper<typeof organizationModel> {
             data:ret
         };
     }
+
+    async filterUser(organizationId:string,size:number,keyword:string) {
+        if(size===undefined || size<=0 || !organizationId) {
+            throw Err.Common.paramError
+        }
+        let mysql=getMysqlInstance();
+        let sql=generateLeftJoinSql({
+            model:organizationUserModel,
+            columns:keys<ICommon_Model_Organization_User>().map(item=>item.name),
+            aggregation:"organizationUser"
+        },{
+            model:userModel,
+            columns:keys<ICommon_Model_User>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:organizationUserModel,
+                    field:"user_id"
+                }
+            },
+            aggregation:"user"
+        },{
+            organization_id:{
+                model:organizationUserModel,
+                value:organizationId
+            },
+            ...(keyword && {
+                nickname:{
+                    model:organizationUserModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
+                    }
+                }
+            })
+        },"and",{
+            field:"nickname",
+            model:organizationUserModel,
+            type:"asc"
+        },0,size)
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
 }
 
 export let organizationMapper=new OrganizationMapper()

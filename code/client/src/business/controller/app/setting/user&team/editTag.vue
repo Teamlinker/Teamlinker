@@ -15,6 +15,7 @@ import {reactive} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {apiOrganization} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const props=defineProps<{
   type:"edit"|"add"
@@ -23,7 +24,7 @@ const props=defineProps<{
 let form=reactive<ICommon_Model_Member_Tag>(props.type=="edit"?JSON.parse(JSON.stringify(props.item)):{
   name:"",
   description:"",
-  organization_id:sessionStorage.getItem("organizationId")
+  organization_id:SessionStorage.get("organizationId")
 })
 onDialogOk(async ()=>{
   let ret=await (props.type=="edit"?apiOrganization.editTag({

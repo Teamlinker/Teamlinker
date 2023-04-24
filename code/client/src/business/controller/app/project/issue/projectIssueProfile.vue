@@ -144,7 +144,7 @@
         </template>
       </a-comment>
     </a-layout-content>
-    <a-layout-sider :resize-directions="['left']" :width="200">
+    <a-layout-sider :resize-directions="['left']" :width="200" style="overflow-y: auto">
       <a-collapse :default-active-key="['detail']" style="margin: 5px 5px 0px 5px" id="issueProfileDetail">
         <a-collapse-item key="detail" header="Detail">
           <a-form layout="vertical" :model="{}">

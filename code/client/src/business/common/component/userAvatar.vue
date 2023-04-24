@@ -1,8 +1,13 @@
 <template>
   <a-popover position="left" :content-style="{backgroundColor:'rgb(249,249,249)',padding:'0px'}" :id="'popover'+organizationUserId" @popup-visible-change="onPopup">
-    <a-space>
+    <a-space @mouseenter="showCloseable=true" @mouseleave="showCloseable=false" size="small" :style="{border:(closeable!==undefined && showCloseable)?'1px lightgray solid':0}">
       <a-avatar :size="24" :image-url="photo">{{imgName}}</a-avatar>
       <span>{{name}}</span>
+      <a-button type="text" size="mini" v-if="closeable!==undefined && showCloseable" @click="emit('close',organizationUserId)">
+        <template #icon>
+          <icon-delete style="color:red;"></icon-delete>
+        </template>
+      </a-button>
     </a-space>
     <template #content>
       <a-list :bordered="false" :loading="loading" size="small">
@@ -42,8 +47,13 @@ const loading=ref(true)
 const props=defineProps<{
   name:string,
   photo?:string,
-  organizationUserId:string
+  organizationUserId:string,
+  closeable?:boolean
 }>()
+const emit=defineEmits<{
+  (e:"close",organizationUserId:string):void
+}>()
+const showCloseable=ref(false)
 const root=ref(null);
 const imgName=computed(()=>{
   if(props.name.includes(" ")) {

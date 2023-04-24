@@ -26,6 +26,11 @@ export default defineConfig({
               target: 'http://localhost:14000/file', // 后端服务实际地址
               changeOrigin: true, //开启代理
               rewrite: (path) => path.replace(/^\/file/, '')
+          },
+          "/socket.io":{
+              target:"http://localhost:14000",
+              ws:true,
+              changeOrigin: true
           }
       }
   },

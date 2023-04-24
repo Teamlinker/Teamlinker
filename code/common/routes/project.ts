@@ -7,11 +7,11 @@ import {ECommon_Services} from './../types';
 import {
     ICommon_Route_Res_Project_CreateModule_Data,
     ICommon_Route_Res_Project_List,
-    ICommon_Route_Res_Project_ListMember,
     ICommon_Route_Res_Project_ListTag,
     ICommon_Route_Res_recentProjectList_Item,
     ICommon_Route_Res_Role_Item,
     ICommon_Route_Res_Role_List,
+    ICommon_Route_Res_Role_ListMember,
     ICommon_Route_Res_userProjectList
 } from './response';
 import {ECommon_HttpApi_Method} from "./types";
@@ -161,7 +161,7 @@ const api={
                 size?:number,
                 key:string
             }>{},
-            res:<ICommon_Route_Res_Project_ListMember>{},
+            res:<ICommon_Route_Res_Role_ListMember>{},
             permission:[Permission_Types.Project.READ]
         },
         addMember:{//添加成员（用户，团队）

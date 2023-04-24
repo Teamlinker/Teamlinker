@@ -18,15 +18,19 @@
 
 <script setup lang="ts">
 
-import {onDialogOk} from "../../../../common/component/dialog/dialog";
-import {getAllPermissions, Permission_Base, Permission_Types} from "../../../../../../../common/permission/permission";
+import {onDialogOk} from "../../../../../common/component/dialog/dialog";
+import {
+  getAllPermissions,
+  Permission_Base,
+  Permission_Types
+} from "../../../../../../../../common/permission/permission";
 import {reactive, ref} from "vue";
-import {apiProject} from "../../../../common/request/request";
+import {apiTeam} from "../../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 
 const eleForm=ref(null)
 const props=defineProps<{
-  projectId?:string
+  teamId?:string
   type:"edit"|"add"
   item?:{
     id:string
@@ -38,7 +42,7 @@ const props=defineProps<{
 const form=reactive(props.type=="edit"?{
   name:props.item.name,
   description:props.item.description,
-  permissions:getAllPermissions(Permission_Types.Project).filter(item=>{
+  permissions:getAllPermissions(Permission_Types.Team).filter(item=>{
     if(item.name!=="ADMIN") {
       return true;
     }
@@ -51,7 +55,7 @@ const form=reactive(props.type=="edit"?{
 }:{
   name:"",
   description:"",
-  permissions:getAllPermissions(Permission_Types.Project).filter(item=>{
+  permissions:getAllPermissions(Permission_Types.Team).filter(item=>{
     if(item.name!=="ADMIN") {
       return true;
     }
@@ -74,14 +78,14 @@ onDialogOk(async ()=>{
   }).reduce((previousValue, currentValue, currentIndex, array)=>{
     return previousValue | currentValue.value
   },0)
-  let res=await (props.type=="edit"?apiProject.editRole({
+  let res=await (props.type=="edit"?apiTeam.editRole({
     roleId:props.item.id,
     name:form.name,
     description:form.description,
     value:value
-  }):apiProject.addRole({
-    ...(props.projectId && {
-      projectId:props.projectId
+  }):apiTeam.addRole({
+    ...(props.teamId && {
+      teamId:props.teamId
     }),
     name:form.name,
     description:form.description,

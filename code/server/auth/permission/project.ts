@@ -33,7 +33,7 @@ class PermissionProject extends PermissionBase {
         } 
     }
 
-    async generatorValue({organizationUserId,projectId}: { [param: string]: any; organizationUserId?: string; isAdmin?: boolean;project:string }):Promise<number> {
+    async generatorValue({organizationUserId,projectId}: { [param: string]: any; organizationUserId?: string; isAdmin?: boolean;projectId:string }):Promise<number> {
         let objProjectTourist=new REDIS_AUTH.Permission.Project.ProjectTourist(projectId);
         let objProjectOrganizationUsers=new REDIS_AUTH.Permission.Project.ProjectOrganizationUsers(projectId);
         let objProjectTeams=new REDIS_AUTH.Permission.Project.ProjectTeams(projectId);

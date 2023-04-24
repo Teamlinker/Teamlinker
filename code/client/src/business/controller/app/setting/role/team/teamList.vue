@@ -1,6 +1,6 @@
 <template>
   <div ref="root">
-    <a-input-search style="width: 300px;margin-bottom: 10px" placeholder="please type project name" @search="search" search-button></a-input-search>
+    <a-input-search style="width: 300px;margin-bottom: 10px" placeholder="please type team name" @search="search" search-button></a-input-search>
     <a-table :columns="columns" :data="data" @pageChange="onPageChange" :pagination="pagination">
       <template #operation="{record}">
         <a-button type="primary" size="small" @click="onEdit(record)">manage role</a-button>
@@ -11,9 +11,9 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {ICommon_Model_Project} from "../../../../../../../common/model/project";
-import {apiProject, DCSType} from "../../../../common/request/request";
-import {getCurrentNavigator} from "../../../../../teamOS/common/component/navigator/navigator";
+import {apiTeam, DCSType} from "../../../../../common/request/request";
+import {getCurrentNavigator} from "../../../../../../teamOS/common/component/navigator/navigator";
+import {ICommon_Model_Team} from "../../../../../../../../common/model/team";
 
 const columns=[
   {
@@ -33,7 +33,7 @@ const columns=[
     slotName: "operation"
   }
 ]
-let data=ref<DCSType<ICommon_Model_Project[]>>([])
+let data=ref<DCSType<ICommon_Model_Team[]>>([])
 const root=ref(null)
 const pagination=reactive({
   total:0,
@@ -43,7 +43,7 @@ const pagination=reactive({
 const keyword=ref("");
 const search=async (key:string)=>{
   keyword.value=key;
-  let ret=await apiProject.list({
+  let ret=await apiTeam.list({
     ...(key && {
       keyword:key
     }),
@@ -57,13 +57,13 @@ const search=async (key:string)=>{
   }
 }
 let navigator=getCurrentNavigator();
-const onEdit=async (item:ICommon_Model_Project)=>{
-  navigator.push("projectGlobalRole",{
-    projectId:item.id
-  },"Project Role")
+const onEdit=async (item:ICommon_Model_Team)=>{
+  navigator.push("teamGlobalRole",{
+    teamId:item.id
+  },"Team Role")
 }
 const onPageChange=async (page:number)=>{
-  let ret=await apiProject.list({
+  let ret=await apiTeam.list({
     ...(keyword.value && {
       keyword:keyword.value
     }),

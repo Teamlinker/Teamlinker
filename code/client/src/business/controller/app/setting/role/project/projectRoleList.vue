@@ -28,12 +28,15 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, ref} from "vue";
-import {apiOrganization} from "../../../../common/request/request";
-import {Dialog} from "../../../../common/component/dialog/dialog";
-import EditOrganizationRole from "./editOrganizationRole.vue";
-import {Permission_Base, Permission_Types} from "../../../../../../../common/permission/permission";
+import {apiProject} from "../../../../../common/request/request";
+import {Dialog} from "../../../../../common/component/dialog/dialog";
+import {Permission_Base, Permission_Types} from "../../../../../../../../common/permission/permission";
 import {Message} from "@arco-design/web-vue";
+import EditProjectRole from "./editProjectRole.vue";
 
+const props=defineProps<{
+  projectId?:string
+}>()
 type Item={
   id:string,
   name:string,
@@ -67,15 +70,18 @@ const data=ref<Item[]>([])
 const root=ref(null)
 const appContext=getCurrentInstance().appContext
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add Role",markRaw(EditOrganizationRole),{
-    type:"add"
+  let ret=await Dialog.open(root.value,appContext,"Add Role",markRaw(EditProjectRole),{
+    type:"add",
+    ...(props.projectId && {
+      projectId:props.projectId
+    })
   })
   if(ret) {
     init()
   }
 }
 const onEdit=async (item:Item) =>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Role",markRaw(EditOrganizationRole),{
+  let ret=await Dialog.open(root.value,appContext,"Edit Role",markRaw(EditProjectRole),{
     type:"edit",
     item:{
       name:item.name,
@@ -91,7 +97,7 @@ const onEdit=async (item:Item) =>{
 const onDelete=async (item:Item)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this role?")
   if(ret) {
-    let res=await apiOrganization.removeRole({
+    let res=await apiProject.removeRole({
       roleId:item.id
     })
     if(res?.code==0) {
@@ -103,8 +109,10 @@ const onDelete=async (item:Item)=>{
   }
 }
 const init=async ()=>{
-  let ret=await apiOrganization.listRole({
-    organizationId:sessionStorage.getItem("organizationId")
+  let ret=await apiProject.listRole({
+    ...(props.projectId && {
+      projectId:props.projectId
+    })
   })
   if(ret?.code==0) {
     let value=ret.data;
@@ -115,11 +123,18 @@ const init=async ()=>{
       reserved:value.admin.reserved,
       description:value.admin.description,
       permissions:[{
-        name:Permission_Types.Organization.ADMIN.name,
-        description:Permission_Types.Organization.ADMIN.description,
-        value:Permission_Types.Organization.ADMIN.value
+        name:Permission_Types.Project.ADMIN.name,
+        description:Permission_Types.Project.ADMIN.description,
+        value:Permission_Types.Project.ADMIN.value
       }]
     })
+    if(props.projectId) {
+      value.users=value.users.filter(item=>{
+        if(!item.global) {
+          return true
+        }
+      })
+    }
     for(let obj of value.users) {
       arr.push({
         name:obj.name,

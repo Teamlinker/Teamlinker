@@ -27,6 +27,7 @@ import {useDesktopStore} from "../../desktop/store/desktop";
 import {reactive} from "vue";
 import {apiUser} from "../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
+import {SessionStorage} from "../../../common/storage/session";
 
 const store=useDesktopStore()
 const form=reactive({
@@ -44,7 +45,7 @@ const onSubmit=async ()=>{
   }
   let arrPromise=[]
   arrPromise.push(apiUser.update({
-    userId:sessionStorage.getItem("userId"),
+    userId:SessionStorage.get("userId"),
     ...(form.uploadUriId && {
       photo:form.uploadUriId
     }),
@@ -55,7 +56,7 @@ const onSubmit=async ()=>{
   }))
   if(form.password) {
     arrPromise.push(apiUser.resetPassword({
-      userId:sessionStorage.getItem("userId"),
+      userId:SessionStorage.get("userId"),
       password:form.password
     }))
   }

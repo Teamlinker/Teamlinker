@@ -237,16 +237,18 @@ export class Navigator extends Base{
     setCurrentPath(title:string) {
         this.path[this.index.value]=title
     }
-    pop() {
-        if(this.index.value>0) {
+    pop(isRoot=false) {
+        if(this.index.value>0 || isRoot) {
             this.router.splice(this.index.value);
             this.path.splice(this.index.value)
             this.index.value=this.router.length-1
             this.manager.setCurrentNavigator(this);
             let objNew=this.router[this.index.value]
-            let func=this.nodeShowFunc.get(objNew.type["__name"]);
-            if(func) {
-                func(ETeamOS_Navigator_Action.POP)
+            if(objNew) {
+                let func=this.nodeShowFunc.get(objNew.type["__name"]);
+                if(func) {
+                    func(ETeamOS_Navigator_Action.POP)
+                }
             }
         } else {
             if(this.parent) {

@@ -107,6 +107,7 @@ import FieldPriority from "../../../../common/component/field/fieldPriority.vue"
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
 import ProjectIssueProfile from "./projectIssueProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
@@ -198,7 +199,7 @@ const onSearchLabel=async (value:string)=>{
 }
 const onSearchAssigner=async (value:string)=> {
   let res = await apiOrganization.listUser({
-    organizationId: sessionStorage.getItem("organizationId"),
+    organizationId: SessionStorage.get("organizationId"),
     page: 0,
     size: 20,
     keyword: value
@@ -209,7 +210,7 @@ const onSearchAssigner=async (value:string)=> {
 }
 const onSearchReporter=async (value:string)=> {
   let res = await apiOrganization.listUser({
-    organizationId: sessionStorage.getItem("organizationId"),
+    organizationId: SessionStorage.get("organizationId"),
     page: 0,
     size: 20,
     keyword: value

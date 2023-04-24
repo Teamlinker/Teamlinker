@@ -22,6 +22,7 @@ import {Err} from "../../../common/status/error";
 import {ICommon_Model_User, userModel} from "../../../common/model/user";
 import CommonUtil from "../../common/util/common";
 import {ICommon_Model_Member_Tag, memberTagModel, Table_Member_Tag} from "../../../common/model/member_tag";
+import {wikiModel} from "../../../common/model/wiki";
 
 class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
     constructor(){
@@ -101,6 +102,13 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
             }
         } else if(roleType===ECommon_Model_Role_Type.ORGANIZATION) {
             organizationId=itemId
+        } else if (roleType === ECommon_Model_Role_Type.WIKI) {
+            let obj=await mysql.executeOne(generateQuerySql(wikiModel,["organization_id"],{
+                id:itemId
+            }))
+            if(obj) {
+                organizationId=obj.organization_id
+            }
         }
         if(!organizationId) {
             throw Err.Organization.organizationNotFound

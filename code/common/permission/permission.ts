@@ -24,6 +24,7 @@ export namespace Permission_Types {
         static readonly CREATE_TEAM =new Organization("create team","create team",2**29)
         static readonly READ =new Organization("read organization","read organization",2**28)
         static readonly EDIT =new Organization("edit organization","edit organization",2**27)
+        static readonly CREATE_WIKI =new Organization("create wiki","create wiki",2**26)
     }
     export class Common extends Permission_Base {
         static readonly SELF=new Common("SELF","self",2**2)
@@ -41,5 +42,9 @@ export namespace Permission_Types {
         static readonly EDIT =new Team("EDIT","edit team",2**14)
         static readonly DELETE =new Team("DELETE","delete team",2**13)
     }
-
+    export class Wiki extends Permission_Base {
+        static readonly ADMIN =new Wiki("ADMIN","admin",(2**(19-15)-1<<16))
+        static readonly READ =new Wiki("READ","read wiki",2**19)
+        static readonly EDIT =new Wiki("EDIT","edit wiki",2**18)
+    }
 }

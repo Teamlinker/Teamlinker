@@ -20,12 +20,12 @@ export function DEventListener(eventName: EServer_Common_Event_Types.Types) {
     }
 }
 
-export async function emitServiceEvent(event: EServer_Common_Event_Types.Types, obj: any) {
+export function emitServiceEvent(event: EServer_Common_Event_Types.Types, ...obj: any) {
     let objFunc = getEventsFunc()
     for (let key in objFunc) {
         if (key == event) {
             for (let func of objFunc[key]) {
-                func(obj)
+                func(...obj)
             }
         }
     }

@@ -79,6 +79,21 @@
               Specific
             </a-menu-item>
           </a-sub-menu>
+          <a-sub-menu key="roleWiki">
+            <template #title>Wiki</template>
+            <a-menu-item key="wikiGlobalRole">
+              <template #icon>
+                <sicon size="" color="" name="Ant" type="edit"></sicon>
+              </template>
+              Global
+            </a-menu-item>
+            <a-menu-item key="wikiSpecificRole">
+              <template #icon>
+                <sicon size="" color="" name="Ant" type="edit"></sicon>
+              </template>
+              Specific
+            </a-menu-item>
+          </a-sub-menu>
         </a-sub-menu>
         <a-sub-menu key="project">
           <template #icon>
@@ -98,6 +113,18 @@
           </template>
           <template #title>Issue Solution</template>
           <a-menu-item key="issueSolution">
+            <template #icon>
+              <sicon size="" color="" name="Ant" type="edit"></sicon>
+            </template>
+            Manage
+          </a-menu-item>
+        </a-sub-menu>
+        <a-sub-menu key="wiki">
+          <template #icon>
+            <sicon size="" color="" name="Ant" type="file"></sicon>
+          </template>
+          <template #title>Wiki</template>
+          <a-menu-item key="wikiManage">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
@@ -124,14 +151,17 @@ import NavigatorContainer from "../../../../teamOS/common/component/navigator/na
 import IssueIndex from "./issue/issueSolutionList.vue";
 import OrganizationIndex from "./organization/index.vue";
 import ProjectIndex from "./project/index.vue";
-import RoleOrganizationIndex from "./role/organizationRoleList.vue";
-import RoleProjectList from "./role/projectList.vue";
-import RoleGlobalProjectIndex from "./role/projectRoleList.vue";
-import RoleTeamList from "./role/teamList.vue";
-import RoleTeamGlobalIndex from "./role/teamRoleList.vue";
+import WikiIndex from "./wiki/index.vue";
+import RoleOrganizationIndex from "./role/organization/organizationRoleList.vue";
+import RoleProjectList from "./role/project/projectList.vue";
+import RoleGlobalProjectIndex from "./role/project/projectRoleList.vue";
+import RoleTeamList from "./role/team/teamList.vue";
+import RoleTeamGlobalIndex from "./role/team/teamRoleList.vue";
 import TagIndex from "./user&team/tag.vue";
 import TeamIndex from "./user&team/team.vue";
 import UserIndex from "./user&team/user.vue";
+import RoleWikiList from "./role/wiki/wikiList.vue";
+import RoleGlobalWikiIndex from "./role/wiki/wikiRoleList.vue";
 
 let objComponent={
   issueSolution:markRaw(IssueIndex),
@@ -145,6 +175,9 @@ let objComponent={
   projectGlobalRole:markRaw(RoleGlobalProjectIndex),
   teamGlobalRole:markRaw(RoleTeamGlobalIndex),
   teamSpecificRole:markRaw(RoleTeamList),
+  wikiSpecificRole: markRaw(RoleWikiList),
+  wikiGlobalRole:markRaw(RoleGlobalWikiIndex),
+  wikiManage:markRaw(WikiIndex),
 }
 let type=ref("")
 let objCrumb={
@@ -158,7 +191,10 @@ let objCrumb={
   projectGlobalRole:"Global Project Role",
   projectSpecificRole:"Project List",
   teamGlobalRole:"Team Role",
-  teamSpecificRole:"Team List"
+  teamSpecificRole:"Team List",
+  wikiGlobalRole:"Global Wiki Role",
+  wikiSpecificRole:"Wiki List",
+  wikiManage:"Wiki",
 }
 const eleNavigator=ref<InstanceType<typeof NavigatorContainer>>(null)
 let pathList=computed(()=>{

@@ -18,6 +18,7 @@ import {apiOrganization, DCSType} from "../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {getCurrentNavigator} from "../../../../teamOS/common/component/navigator/navigator";
 import {ICommon_Model_Organization_User} from "../../../../../../common/model/organization_user";
+import {SessionStorage} from "../../../common/storage/session";
 
 let userList=ref<DCSType<ICommon_Route_Res_Organization_User_Item[]>>([])
 const keyword=ref("")
@@ -31,7 +32,7 @@ onBeforeMount(async ()=>{
 })
 const search=async (page:number)=>{
   let res=await apiOrganization.listUser({
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     size:pagination.pageSize,
     page:page-1,
     keyword:keyword.value

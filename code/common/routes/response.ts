@@ -17,6 +17,9 @@ import {ICommon_Model_Role} from "../model/role";
 import {Permission_Base} from "../permission/permission";
 import {ICommon_Model_Member_Tag} from "../model/member_tag";
 import {ICommon_Field_Type} from "../field/type";
+import {ICommon_Model_Wiki} from "../model/wiki";
+import {ICommon_Model_Calendar_Event} from "../model/calendar_event";
+import {ECommon_Calendar_Color} from "../model/calendar";
 
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -24,7 +27,7 @@ export interface ICommon_Route_Res_Project_CreateModule_Data {
     data:ICommon_Route_Res_Project_CreateModule_Data[]
 }
 
-export type ICommon_Route_Res_Project_Member = {
+export type ICommon_Route_Res_Role_Member_Item = {
     member?:ICommon_Model_Organization_User,
     memberType:ECommon_Model_Organization_Member_Type
     role:ICommon_Model_Role,
@@ -43,11 +46,11 @@ export type ICommon_Route_Res_Project_ListTag = {
     }[]
 }
 
-export type ICommon_Route_Res_Project_ListMember ={
+export type ICommon_Route_Res_Role_ListMember ={
     count:number,
     totalPage:number,
     page:number,
-    data:ICommon_Route_Res_Project_Member[]
+    data:ICommon_Route_Res_Role_Member_Item[]
 }
 
 export type ICommon_Route_Res_User_Profile={
@@ -171,6 +174,13 @@ export interface ICommon_Route_Res_userProjectList {
     data:ICommon_Route_Res_recentProjectList_Item[]
 }
 
+export interface ICommon_Route_Res_userWikiList {
+    count:number,
+    totalPage:number,
+    page:number,
+    data:ICommon_Model_Wiki[]
+}
+
 export interface ICommon_Route_Res_Project_filter_Item {
     id:string,
     name:string,
@@ -278,5 +288,51 @@ export type ICommon_Route_Res_Workflow_Node_List_Item =  {
             id:string,
             name:string
         }[]
+    }[]
+}
+
+export type ICommon_Route_Res_Wiki_Info_Item={
+    id:string,
+    name:string,
+    data?:ICommon_Route_Res_Wiki_Info_Item[]
+}
+
+export type ICommon_Route_Res_Wiki_Info=ICommon_Model_Wiki & {
+    data?:ICommon_Route_Res_Wiki_Info_Item[]
+}
+
+export type ICommon_Route_Res_Calendar_ListEvent_Item = {
+    id:string,
+    name:string,
+    color:ECommon_Calendar_Color,
+    start_time:Date,
+    end_time:Date,
+    calendar:{
+        id:string,
+        name:string
+    },
+    all_day:number,
+    reminder_minutes:number
+}
+
+export type ICommon_Route_Res_Calendar_Event_Info = ICommon_Model_Calendar_Event & {
+    guestList:{
+        userId:string,
+        organizationUserId:string,
+        nickname:string,
+        photo?:string
+    }[]
+}
+
+export type ICommon_Route_Res_Organization_FilterUserAndTeam = {
+    users:{
+        id:string,
+            name:string,
+            photo:string
+    }[],
+        teams:{
+        id:string,
+            name:string,
+            photo:string
     }[]
 }

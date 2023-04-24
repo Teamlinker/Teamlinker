@@ -23,6 +23,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@socket.io/admin-ui": "^0.5.1",
+    "@socket.io/redis-adapter": "^8.1.0",
+    "@socket.io/redis-emitter": "^5.1.0",
+    "amqplib": "^0.10.3",
     "biguint-format": "^1.0.2",
     "flake-idgen": "^1.4.0",
     "fs-extra": "^10.1.0",
@@ -45,12 +49,13 @@
     "node-schedule": "^2.1.0",
     "redlock": "^5.0.0-beta.2",
     "shelljs": "^0.8.5",
-    "socket.io": "^4.5.3",
-    "socket.io-client": "^4.5.3",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1",
     "uuid": "^9.0.0",
     "yargs": "^17.6.2"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.1",
     "@types/flake-idgen": "^0.1.31",
     "@types/fs-extra": "^9.0.13",
     "@types/ioredis": "^5.0.0",

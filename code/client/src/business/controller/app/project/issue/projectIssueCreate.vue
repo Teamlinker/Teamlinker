@@ -58,6 +58,7 @@ import {
 import FieldInput from "../../../../common/component/field/fieldInput.vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const props=defineProps<{
   projectId:string
@@ -87,7 +88,7 @@ const getIssueTypeList=async ()=>{
 }
 const onSearchAssigner=async (keyword:string)=>{
   let res=await apiOrganization.listUser({
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     size:10,
     page:0,
     keyword
@@ -98,7 +99,7 @@ const onSearchAssigner=async (keyword:string)=>{
 }
 const onSearchReporter=async (keyword:string)=>{
   let res=await apiOrganization.listUser({
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     size:10,
     page:0,
     keyword

@@ -56,6 +56,13 @@ class RpcAuthApi {
             objOrganization.assignItem(obj)
             arr.push(objOrganization.create())
         }
+        let objWikiRole = RoleDefault.Wiki_Role;
+        for (let key in objWikiRole) {
+            let obj = objWikiRole[key]
+            let objWiki=new RoleService
+            objWiki.assignItem(obj)
+            arr.push(objWiki.create())
+        }
         await Promise.all(arr);
         return {
             projectRoleUserId,
@@ -187,6 +194,17 @@ class RpcAuthApi {
                 ret=await objComponent.generatorValue({
                     organizationUserId: memberId,
                     projectId:itemId
+                })
+            }
+            return ret;
+        } else if(roleType===ECommon_Model_Role_Type.WIKI) {
+            let obj=REDIS_AUTH.Permission.Wiki.calPermission(itemId,memberId);
+            let ret=await obj.get()
+            if(ret===null) {
+                let objComponent:any=getComponent("PermissionWiki")
+                ret=await objComponent.generatorValue({
+                    organizationUserId: memberId,
+                    wikiId:itemId
                 })
             }
             return ret;

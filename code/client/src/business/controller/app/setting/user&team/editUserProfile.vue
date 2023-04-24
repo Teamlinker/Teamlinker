@@ -45,6 +45,7 @@ import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {apiOrganization} from "../../../../common/request/request";
 import {ICommon_Model_Role} from "../../../../../../../common/model/role";
 import {Message} from "@arco-design/web-vue";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const props=defineProps<{
   type:"edit"|"add",
@@ -71,7 +72,7 @@ const roles=ref<{
 }[]>([])
 onBeforeMount(async ()=>{
   let res=await apiOrganization.listRole({
-    organizationId:sessionStorage.getItem("organizationId")
+    organizationId:SessionStorage.get("organizationId")
   })
   if(res?.code==0) {
     roles.value=[res.data.admin,...res.data.users].map(item=>{
@@ -88,7 +89,7 @@ onDialogOk(async ()=>{
     return false;
   }
   let res=await (props.type=="add"?apiOrganization.addUser({
-    organizationId:sessionStorage.getItem("organizationId"),
+    organizationId:SessionStorage.get("organizationId"),
     ...form,
   }):apiOrganization.updateUser({
     organizationUserId:props.item.id,

@@ -12,6 +12,7 @@ import {projectModel} from './../../../common/model/project';
 import {roleMemberModel} from './../../../common/model/role_member';
 import {teamModel} from './../../../common/model/team';
 import {organizationModel} from "../../../common/model/organization";
+import {wikiModel} from "../../../common/model/wiki";
 
 let g_roleAdmin:{
     [name:string]:ICommon_Model_Role
@@ -92,6 +93,15 @@ class RoleMapper extends Mapper<typeof roleModel> {
                 g_roleAdmin["project"]=obj
             }
             return g_roleAdmin["project"]
+        } else if(type===ECommon_Model_Role_Type.WIKI) {
+            if(!g_roleAdmin["project"]) {
+                let obj=await mysql.executeOne(generateQuerySql(roleModel,null,{
+                    reserved:ECommon_Model_Role_Reserved.ADMIN,
+                    type:ECommon_Model_Role_Type.WIKI
+                }))
+                g_roleAdmin["project"]=obj
+            }
+            return g_roleAdmin["project"]
         }
     }
     
@@ -126,6 +136,13 @@ class RoleMapper extends Mapper<typeof roleModel> {
                 }
             } else if (type === ECommon_Model_Role_Type.TEAM) {
                 let obj=await mysql.executeOne(generateQuerySql(teamModel,["organization_id"],{
+                    id:itemId
+                }))
+                if(obj) {
+                    organizationId=obj.organization_id
+                }
+            } else if (type === ECommon_Model_Role_Type.WIKI) {
+                let obj=await mysql.executeOne(generateQuerySql(wikiModel,["organization_id"],{
                     id:itemId
                 }))
                 if(obj) {

@@ -28,14 +28,14 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, ref} from "vue";
-import {apiProject} from "../../../../common/request/request";
-import {Dialog} from "../../../../common/component/dialog/dialog";
-import {Permission_Base, Permission_Types} from "../../../../../../../common/permission/permission";
+import {apiTeam} from "../../../../../common/request/request";
+import {Dialog} from "../../../../../common/component/dialog/dialog";
+import {Permission_Base, Permission_Types} from "../../../../../../../../common/permission/permission";
 import {Message} from "@arco-design/web-vue";
-import EditProjectRole from "./editProjectRole.vue";
+import EditTeamRole from "./editTeamRole.vue";
 
 const props=defineProps<{
-  projectId?:string
+  teamId?:string
 }>()
 type Item={
   id:string,
@@ -70,10 +70,10 @@ const data=ref<Item[]>([])
 const root=ref(null)
 const appContext=getCurrentInstance().appContext
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add Role",markRaw(EditProjectRole),{
+  let ret=await Dialog.open(root.value,appContext,"Add Role",markRaw(EditTeamRole),{
     type:"add",
-    ...(props.projectId && {
-      projectId:props.projectId
+    ...(props.teamId && {
+      teamId:props.teamId
     })
   })
   if(ret) {
@@ -81,7 +81,7 @@ const onAdd=async ()=>{
   }
 }
 const onEdit=async (item:Item) =>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Role",markRaw(EditProjectRole),{
+  let ret=await Dialog.open(root.value,appContext,"Edit Role",markRaw(EditTeamRole),{
     type:"edit",
     item:{
       name:item.name,
@@ -97,7 +97,7 @@ const onEdit=async (item:Item) =>{
 const onDelete=async (item:Item)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this role?")
   if(ret) {
-    let res=await apiProject.removeRole({
+    let res=await apiTeam.removeRole({
       roleId:item.id
     })
     if(res?.code==0) {
@@ -109,9 +109,9 @@ const onDelete=async (item:Item)=>{
   }
 }
 const init=async ()=>{
-  let ret=await apiProject.listRole({
-    ...(props.projectId && {
-      projectId:props.projectId
+  let ret=await apiTeam.roles({
+    ...(props.teamId && {
+      teamId:props.teamId
     })
   })
   if(ret?.code==0) {
@@ -123,12 +123,12 @@ const init=async ()=>{
       reserved:value.admin.reserved,
       description:value.admin.description,
       permissions:[{
-        name:Permission_Types.Project.ADMIN.name,
-        description:Permission_Types.Project.ADMIN.description,
-        value:Permission_Types.Project.ADMIN.value
+        name:Permission_Types.Team.ADMIN.name,
+        description:Permission_Types.Team.ADMIN.description,
+        value:Permission_Types.Team.ADMIN.value
       }]
     })
-    if(props.projectId) {
+    if(props.teamId) {
       value.users=value.users.filter(item=>{
         if(!item.global) {
           return true

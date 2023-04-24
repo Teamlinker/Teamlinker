@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["node"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noImplicitUseStrict":true,

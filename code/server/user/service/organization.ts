@@ -16,8 +16,10 @@ import {ICommon_Model_User} from "../../../common/model/user";
 import {Err} from "../../../common/status/error";
 import {memberTagModel} from "../../../common/model/member_tag";
 import rpcFileApi from "../../file/rpc/file";
+import rpcCalendarApi from "../../calendar/rpc/calendar";
 import {TeamService} from "./team";
 import {UserService} from "./user";
+import {ECommon_Calendar_Color} from "../../../common/model/calendar";
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -61,6 +63,12 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
                 defaultTeamRole.organization_id=ret.id
                 delete defaultTeamRole.id
                 await rpcAuthApi.createRole(defaultTeamRole)
+            })(),
+            (async ()=>{
+                let defaultWikiRole=await rpcAuthApi.getSystemDefaultRole(ECommon_Model_Role_Type.WIKI);
+                defaultWikiRole.organization_id=ret.id
+                delete defaultWikiRole.id
+                await rpcAuthApi.createRole(defaultWikiRole)
             })(),
         ])
         return ret;
@@ -107,6 +115,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             organizationId:this.getId(),
             organizationUserId:objOrganizationUser.getId()
         },-1);
+        return objOrganizationUser.getId()
     }
 
     async listRole(){
@@ -191,6 +200,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         })
         let objUser=await newUser.create();
         await rpcAuthApi.addRoleMember(this.getId(),roleId,ECommon_Model_Organization_Member_Type.USER,objUser.id )
+        await rpcCalendarApi.addCalendar(objUser.id,"default",ECommon_Calendar_Color.BLUE, 1)
         return objUser
     }
 
@@ -228,7 +238,8 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             objUser.delete(),
             rpcAuthApi.clearMember(organizationUserId),
             TeamService.clearMember(organizationUserId),
-            MemberTagService.clearMember(organizationUserId)
+            MemberTagService.clearMember(organizationUserId),
+            rpcCalendarApi.clearCalendar(organizationUserId)
         ])
     }
 
@@ -236,6 +247,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         let ret=await memberTagMapper.listTag(this.getId());
         return ret;
     }
+
 
 
 }
@@ -246,7 +258,7 @@ export class OrganizationUserService extends Entity<typeof organizationUserModel
     }
     static async organizationUserInfos(organizationUserIds:string,isGetPhoto:boolean=true):Promise<(Omit<ICommon_Model_User,"password"> & {nickname:string,organizationUserId:string})[]>{
         if(!organizationUserIds) {
-            throw Err.Organization.userNotFound
+            return []
         }
         let ret=await organizationUserMapper.users(organizationUserIds.split(","))
         let arr=[]
@@ -272,6 +284,23 @@ export class OrganizationUserService extends Entity<typeof organizationUserModel
             teamList:teamList.manage.concat(teamList.join).slice(0,10),
             organizationUser:this.getItem(),
             user:user.getItem()
+        }
+    }
+
+    async filterAvailableUserAndTeam(keyword:string) {
+        let [userList,teamList]=await Promise.all([
+            organizationMapper.filterUser(this.getItem().organization_id,10,keyword),
+            TeamService.filterAvailable(this.getId(),keyword,10)
+        ])
+        return {
+            users:userList.map(item=>{
+                return {
+                    id:item.organizationUser.id,
+                    name:item.organizationUser.nickname,
+                    photo:item.user.photo
+                }
+            }),
+            teams:teamList
         }
     }
 

@@ -34,6 +34,7 @@ import {
 import {injectProjectInfo} from "../../util/symbol";
 import ProjectIssuePreview from "../../../controller/app/project/issue/projectIssuePreview.vue";
 import ProjectReleasePreview from "../../../controller/app/project/release/projectReleasePreview.vue";
+import {SessionStorage} from "../../storage/session";
 
 const props=defineProps<{
   value:string[],
@@ -104,7 +105,7 @@ watchEffect(()=>{
 const onSearch=async (keyword:string)=>{
   if(props.type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER) {
     let res=await apiOrganization.listUser({
-      organizationId:sessionStorage.getItem("organizationId"),
+      organizationId:SessionStorage.get("organizationId"),
       keyword:keyword,
       page:0,
       size:10

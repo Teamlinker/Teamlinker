@@ -15,6 +15,7 @@ import {Dialog} from "../../common/component/dialog/dialog";
 import {ETeamOS_Window_Type, Window} from "../../../teamOS/window/window";
 import {v4} from "uuid";
 import Account from "../app/account/account.vue";
+import {SessionStorage} from "../../common/storage/session";
 
 let desktop=getDesktopInstance().desktop;
 desktop.setBackgroundImage(img)
@@ -30,8 +31,8 @@ onBeforeMount(async ()=>{
     return
   }
   await store.getOrganizationList()
-  if(sessionStorage.getItem("organizationId")) {
-    await store.enterOrganization(sessionStorage.getItem("organizationId"))
+  if(SessionStorage.get("organizationId")) {
+    await store.enterOrganization(SessionStorage.get("organizationId"))
   }
   desktop.addEventListener("menuClick",async value => {
     await store.enterOrganization(value);
@@ -104,8 +105,8 @@ const watchStop=watchEffect(()=>{
     if(store.userInfo?.photo) {
       desktop.setAvatar(store.userInfo.photo)
     }
-    if(sessionStorage.getItem("organizationId")) {
-      desktop.setMenu(arr,sessionStorage.getItem("organizationId"))
+    if(SessionStorage.get("organizationId")) {
+      desktop.setMenu(arr,SessionStorage.get("organizationId"))
     } else {
       desktop.setMenu(arr)
     }

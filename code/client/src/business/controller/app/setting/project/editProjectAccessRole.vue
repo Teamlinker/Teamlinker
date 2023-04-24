@@ -12,7 +12,7 @@
       <a-select @search="onSearch" v-model="form.memberId" allow-search v-if="type=='add'">
         <a-option v-for="item in userList" :value="item.value" :label="item.label"></a-option>
       </a-select>
-      <template v-else>{{getNameFromProjectMember(item)}}</template>
+      <template v-else>{{ getNameFromRoleMember(item) }}</template>
     </a-form-item>
     <a-form-item field="roleId" label="role" required>
       <a-select v-model="form.roleId">
@@ -23,24 +23,25 @@
 </template>
 
 <script setup lang="ts">
-import {ICommon_Route_Res_Project_Member} from "../../../../../../../common/routes/response";
+import {ICommon_Route_Res_Role_Member_Item} from "../../../../../../../common/routes/response";
 import {onBeforeMount, reactive, ref} from "vue";
 import {ICommon_Model_Role} from "../../../../../../../common/model/role";
 import {apiOrganization, apiProject, apiTeam, DCSType} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {Message} from "@arco-design/web-vue";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../../common/model/organization";
-import {getMemberIdFromProjectMember, getNameFromProjectMember} from "../../../../common/util/helper";
+import {getMemberIdFromRoleMember, getNameFromRoleMember} from "../../../../common/util/helper";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const props=defineProps<{
   type:"edit"|"add"
   projectId:string,
-  item?:ICommon_Route_Res_Project_Member
+  item?:ICommon_Route_Res_Role_Member_Item
 }>()
 const eleForm=ref(null)
 const form=reactive({
   type:props.type=="edit"?props.item.memberType:ECommon_Model_Organization_Member_Type.DEFAULT,
-  memberId:props.type=="edit"?getMemberIdFromProjectMember(props.item):"",
+  memberId:props.type=="edit"?getMemberIdFromRoleMember(props.item):"",
   roleId:props.type=="edit"?props.item.role.id:""
 })
 const roleList=ref<DCSType<ICommon_Model_Role[]>>([])
@@ -51,7 +52,7 @@ const userList=ref<{
 const onSearch=async (value:string)=>{
   if(form.type==ECommon_Model_Organization_Member_Type.USER) {
     let res=await apiOrganization.listUser({
-      organizationId:sessionStorage.getItem("organizationId"),
+      organizationId:SessionStorage.get("organizationId"),
       page:0,
       size:20,
       keyword:value

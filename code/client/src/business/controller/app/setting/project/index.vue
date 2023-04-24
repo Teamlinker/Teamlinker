@@ -43,6 +43,7 @@ import EditProjectProfile from "./editProjectProfile.vue";
 import EditProjectAccess from "./editProjectAccess.vue";
 import LabelList from "./labelList.vue";
 import ModuleList from "./moduleList.vue";
+import {SessionStorage} from "../../../../common/storage/session";
 
 const columns=[
   {
@@ -77,7 +78,7 @@ navigator.register("labelList",markRaw(LabelList));
 navigator.register("moduleList",markRaw(ModuleList));
 const search=async (page:number)=>{
   let res=await apiProject.list({
-    organizationUserId:sessionStorage.getItem("organizationId"),
+    organizationUserId:SessionStorage.get("organizationId"),
     size:pagination.pageSize,
     page:page-1,
     keyword:keyword.value
