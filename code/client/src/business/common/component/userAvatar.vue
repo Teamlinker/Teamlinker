@@ -1,20 +1,33 @@
 <template>
-  <a-popover position="left" :content-style="{backgroundColor:'rgb(249,249,249)',padding:'0px'}" :id="'popover'+organizationUserId" @popup-visible-change="onPopup">
-    <a-space @mouseenter="showCloseable=true" @mouseleave="showCloseable=false" size="small" :style="{border:(closeable!==undefined && showCloseable)?'1px lightgray solid':0}">
+  <a-popover position="left" :content-style="{backgroundColor:'rgb(249,249,249)',padding:'0px'}" :id="'popover'+organizationUserId" @popup-visible-change="onPopup" :trigger="trigger??'hover'">
+    <a-space @mouseenter="showCloseable=true" @mouseleave="showCloseable=false" size="small" :style="{border:(closeable===true && showCloseable)?'1px lightgray solid':0}">
       <a-avatar :size="24" :image-url="photo">{{imgName}}</a-avatar>
-      <span>{{name}}</span>
-      <a-button type="text" size="mini" v-if="closeable!==undefined && showCloseable" @click="emit('close',organizationUserId)">
-        <template #icon>
-          <icon-delete style="color:red;"></icon-delete>
-        </template>
-      </a-button>
+      <template v-if="!onlyPhoto">
+        <span>{{name}}</span>
+        <a-button type="text" size="mini" v-if="closeable===true && showCloseable" @click="emit('close',organizationUserId)">
+          <template #icon>
+            <icon-delete style="color:red;"></icon-delete>
+          </template>
+        </a-button>
+      </template>
     </a-space>
     <template #content>
       <a-list :bordered="false" :loading="loading" size="small">
         <a-list-item>
-          <a-list-item-meta :title="name">
+          <a-list-item-meta>
+            <template #title>
+              <a-space size="mini">
+                {{name}}
+                <span style="height: 12px;width: 12px;background-color: #03ad03;border-radius: 6px;" v-if="status===ECommon_User_Online_Status.ONLINE"></span>
+                <icon-stop :stroke-width="5" style="color: darkred" v-else-if="status===ECommon_User_Online_Status.BUSY"></icon-stop>
+                <icon-video-camera :stroke-width="5" style="color: red" v-else-if="status===ECommon_User_Online_Status.MEETING"></icon-video-camera>
+                <span style="height: 12px;width: 12px;background-color: gray;border-radius: 6px" v-else-if="status===ECommon_User_Online_Status.OFFLINE"></span>
+              </a-space>
+            </template>
             <template #avatar>
-              <a-avatar :image-url="photo" :size="64">{{imgName}}</a-avatar>
+              <a-avatar :image-url="photo" :size="64" :trigger-icon-style="{right:'-9px',bottom:'-9px',backgroundColor:'transparent'}">
+                {{imgName}}
+              </a-avatar>
             </template>
             <template #description v-if="info">
               <a-space v-if="info.job">
@@ -29,7 +42,18 @@
             </template>
           </a-list-item-meta>
           <template #actions>
-            <a-button type="outline" size="small" style="margin-left: 20px" @click="onProfile">Profile</a-button>
+            <template v-if="organizationUserId===myOrganizationUserId">
+              <a-button type="outline" size="small" style="margin-left: 20px" @click="onProfile">Profile</a-button>
+            </template>
+            <a-row v-else style="flex-direction: column">
+              <a-button type="outline" size="mini" style="margin-left: 20px" @click="onProfile">Profile</a-button>
+              <a-button type="outline" size="mini" style="margin-left: 20px;margin-top: 10px" @click="onMessage">
+                <template #icon>
+                  <icon-message></icon-message>
+                </template>
+                Message
+              </a-button>
+            </a-row>
           </template>
         </a-list-item>
       </a-list>
@@ -42,19 +66,26 @@ import {computed, ref} from "vue";
 import {ICommon_Model_Organization_User} from "../../../../../common/model/organization_user";
 import {apiOrganization, DCSType} from "../request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../event/event";
+import {SessionStorage} from "../storage/session";
+import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
+import {ECommon_User_Online_Status} from "../../../../../common/types";
 
 const loading=ref(true)
 const props=defineProps<{
   name:string,
   photo?:string,
   organizationUserId:string,
-  closeable?:boolean
+  closeable?:boolean,
+  onlyPhoto?:boolean,
+  trigger?:'hover' | 'click' | 'focus' | 'contextMenu'
 }>()
 const emit=defineEmits<{
   (e:"close",organizationUserId:string):void
 }>()
+const myOrganizationUserId=SessionStorage.get("organizationUserId")
 const showCloseable=ref(false)
 const root=ref(null);
+const status=ref(ECommon_User_Online_Status.OFFLINE)
 const imgName=computed(()=>{
   if(props.name.includes(" ")) {
     let arr=props.name.split(" ")
@@ -71,14 +102,28 @@ const onProfile=()=>{
 }
 const onPopup=async (visible:boolean)=>{
   if(!info.value && visible) {
-    let res=await apiOrganization.user({
-      organizationUserId:props.organizationUserId
-    })
-    if(res?.code==0) {
-      info.value=res.data
+    Promise.all([
+      apiOrganization.user({
+        organizationUserId:props.organizationUserId
+      }).then(res => {
+        if(res?.code==0) {
+          info.value=res.data
+        }
+      }),
+      apiOrganization.getUserStatus({
+        organizationUserId:props.organizationUserId
+      }).then(res => {
+        if(res?.code==0) {
+          status.value=res.data.status
+        }
+      })
+    ]).then(value => {
       loading.value=false
-    }
+    })
   }
+}
+const onMessage=()=>{
+  eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,props.organizationUserId,ECommon_IM_Message_EntityType.USER)
 }
 </script>
 

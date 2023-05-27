@@ -1,5 +1,6 @@
 import * as fs from "fs-extra";
-import Application, {ECommon_Application_Mode} from "../../common/app/app";
+import Application from "../../common/app/app";
+import {ECommon_Application_Mode} from "../../../common/types";
 
 export class GateWayService  {
     static async needConfig() {

@@ -3,7 +3,8 @@ import {h} from "vue";
 
 export enum NotificationType {
     CALENDAR="calendar",
-    IM="im"
+    IM="im",
+    MEETING="meeting"
 }
 export type NotificationCallbackFunc=(type:NotificationType,data:any)=>void
 export class NotificationWrapper {

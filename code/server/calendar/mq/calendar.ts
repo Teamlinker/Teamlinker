@@ -22,9 +22,9 @@ class CalendarMq extends BaseMq {
                 "x-delayed-type":"direct"
             }
         })
+        await this.consumer.assertQueue(queue,{durable:true})
         await this.publisher.bindQueue(queue, exchange, queue)
         await this.publisher.purgeQueue(queue)
-        await this.consumer.assertQueue(queue,{durable:true})
         this.consumer.consume(queue,async msg => {
             if(msg) {
                 let emit=getSocketEmitterInstance()

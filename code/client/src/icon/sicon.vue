@@ -5,8 +5,8 @@
 
 <script lang="ts" setup>
 
-import { onMounted, ref } from 'vue';
-import { Ant, AntJson, AntName } from './Ant';
+import {onMounted, ref} from 'vue';
+import {Ant, AntJson, AntName} from './Ant';
 
 const val = {
     [AntName]: AntJson,
@@ -29,7 +29,7 @@ const props = defineProps<{
 
 const iconRef = ref<HTMLDivElement>({} as any)
 const str = {
-    svg: ['<svg style="width: 1em;height: 1em;vertical-align: middle;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">', '</svg>'],
+    svg: [`<svg style="width: 1em;height: 1em;vertical-align: middle;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg">`, '</svg>'],
     getPath: (param: { d: string, fill?: string }) => {
         return `<path d="${param.d}" fill="${param.fill ?? 'currentColor'}" />`
     }
@@ -47,6 +47,9 @@ onMounted(() => {
         res = `${str.svg[0]}<path d="${obj}" fill="currentColor" />${str.svg[1]}`
     } else {
         res = str.svg[0]
+        if(obj.viewBox) {
+            res=res.replace("0 0 1024 1024",obj.viewBox)
+        }
         let objt: { d: string[]; fill: { [key: string]: number[] }; } = obj
         const getFill = (fill: { [key: string]: number[] }, index: number) => {
             const fillkeys = Object.keys(fill)

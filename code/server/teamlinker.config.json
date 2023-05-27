@@ -15,5 +15,11 @@
     "port":14000,
     "jwt": "teamlinker",
     "version":"1.0.0",
-    "mq": "amqp://127.0.0.1"
+    "mq": "amqp://127.0.0.1",
+    "mail":{
+        "host": "smtp.exmail.qq.com",
+        "port": 465,
+        "user":"notify@team-linker.com",
+        "pass":"gjH9WwP9JEF42QBu"
+    }
 }

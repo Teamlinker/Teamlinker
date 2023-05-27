@@ -9,6 +9,8 @@ import rpcAuthApi from "../../auth/rpc/auth"
 import {ECommon_Model_Role_Type} from "../../../common/model/role";
 import {ECommon_IM_Message_EntityType} from "../../../common/model/im_unread_message";
 import {TeamService} from "../service/team";
+import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../common/types";
+import Application from "../../common/app/app";
 
 @DComponent
 @DHttpController(organizationApi)
@@ -31,15 +33,19 @@ class OrganizationController {
 
     @DHttpApi(organizationApi.routes.create)
     async create(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("description") description:string,@DHttpReqParam("photo") photo:string,@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.create.res>{
-        let service=new OrganizationService()
-        service.assignItem({
-            name,
-            description,
-            photo,
-            created_by_pure:user.userId
-        })
-        let obj=await service.create()
-        return obj;
+        if(Application.mode===ECommon_Application_Mode.ONLINE) {
+            let service=new OrganizationService()
+            service.assignItem({
+                name,
+                description,
+                photo,
+                created_by_pure:user.userId
+            })
+            let obj=await service.create()
+            return obj;
+        } else {
+            throw Err.Common.interfaceForbidden
+        }
     }
 
     @DHttpApi(organizationApi.routes.update)
@@ -222,7 +228,7 @@ class OrganizationController {
         if(!obj) {
             throw Err.Organization.organizationNotFound
         }
-        let organizationUserId=await obj.enter(user.userId);
+        let organizationUserId=await obj.enter(user.userId,user.organizationInfo?.organizationUserId);
         return {
             organizationUserId
         };
@@ -394,7 +400,7 @@ class OrganizationController {
         })).map(item=>item.id)
         let ret:typeof organizationApi.routes.userTeamInfos.res={}
         let [userList,teamList]=await Promise.all([
-            OrganizationUserService.organizationUserInfos(userIds.join(",")),
+            OrganizationUserService.organizationUserInfos(userIds.join(","),true,true),
             TeamService.infos(teamIds)
         ])
         userList.forEach(item=>{
@@ -402,7 +408,8 @@ class OrganizationController {
                 id:item.organizationUserId,
                 name:item.nickname,
                 photo:item.photo,
-                type:ECommon_IM_Message_EntityType.USER
+                type:ECommon_IM_Message_EntityType.USER,
+                status:item.status
             }
         })
         teamList.forEach(item=>{
@@ -430,6 +437,131 @@ class OrganizationController {
         }
         return ret;
     }
+    @DHttpApi(organizationApi.routes.changeUserStatus)
+    async changeUserStatus(@DHttpReqParam("status") status:ECommon_User_Online_Status.ONLINE|ECommon_User_Online_Status.BUSY,@DHttpUser userInfo:IUserSession) :Promise<typeof organizationApi.routes.changeUserStatus.res>{
+        let user=await OrganizationUserService.getItemById(userInfo.organizationInfo.organizationUserId)
+        if(!user) {
+            throw Err.Organization.userNotFound
+        }
+        await user.changeOnlineStatus(status)
+        return;
+    }
 
+    @DHttpApi(organizationApi.routes.getUserStatus)
+    async getUserStatus(@DHttpReqParam("organizationUserId") organizationUserId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof organizationApi.routes.getUserStatus.res>{
+        if(userInfo.organizationInfo?.organizationUserId || organizationUserId) {
+            let user=await OrganizationUserService.getItemById(organizationUserId || userInfo.organizationInfo.organizationUserId)
+            if(!user) {
+                throw Err.Organization.userNotFound
+            }
+            let ret=await user.getOnlineStatus()
+            return {
+                status:ret
+            };
+        } else {
+            return {
+                status:ECommon_User_Online_Status.OFFLINE
+            }
+        }
 
+    }
+
+    @DHttpApi(organizationApi.routes.getUserStatusList)
+    async getUserStatusList(@DHttpReqParam("organizationUserIds") organizationUserIds:string[],@DHttpUser userInfo:IUserSession) :Promise<typeof organizationApi.routes.getUserStatusList.res>{
+        let ret=await OrganizationUserService.getOnlineStatusList(organizationUserIds)
+        let obj:{
+            [id:string]:ECommon_User_Online_Status
+        }={}
+        organizationUserIds.forEach((value, index) => {
+            obj[value]=ret[index]
+        })
+        return obj;
+    }
+
+    @DHttpApi(organizationApi.routes.createUser)
+    async createUser(@DHttpReqParamRequired("organizationId") organizationId:string,                                 @DHttpReqParamRequired("password") password:string,
+                  @DHttpReqParamRequired("username") username:string,
+                  @DHttpReqParamRequired("roleId") roleId:string,
+                  @DHttpReqParamRequired("nickname") nickname:string,
+                  @DHttpReqParamRequired("active") active:number,
+                  @DHttpReqParam("title") title:string,
+                  @DHttpReqParam("job") job:string,
+                  @DHttpReqParam("email") email:string,
+                  @DHttpReqParam("phone") phone:string,
+                  @DHttpReqParam("remark") remark:string,
+                  @DHttpReqParam("location") location:string) :Promise<typeof organizationApi.routes.createUser.res>{
+        if(Application.mode!==ECommon_Application_Mode.OFFLINE) {
+            throw Err.Common.interfaceForbidden
+        }
+        let user=await UserService.getItemByName(username)
+        if(user) {
+            throw Err.User.userExists
+        } else {
+            user=new UserService()
+            user.assignItem({
+                username,
+                password
+            })
+            await user.create()
+        }
+        let [organization,_,objRole]=await Promise.all([
+            OrganizationService.getItemById(organizationId).then(obj=>{
+                if(!obj) {
+                    throw Err.Organization.organizationNotFound
+                }
+                return obj
+            }),
+            OrganizationUserService.getItemByExp({
+                organization_id:organizationId,
+                user_id:user.getId()
+            }).then(obj=>{
+                if(obj) {
+                    throw Err.Organization.userAlreadyExists
+                }
+            }),
+            rpcAuthApi.getRoleServiceById(roleId).then(objRole=>{
+                if(!objRole) {
+                    throw Err.Role.roleNotFound
+                }
+                return objRole;
+            })
+        ])
+        let retUser=await organization.addUser(roleId,user.getId(),nickname,active,title,job,email,phone,location,remark);
+        return {
+            organizationUser:retUser,
+            user:user.getItem(),
+            role:objRole.getItem()
+        };
+    }
+
+    @DHttpApi(organizationApi.routes.resetUserPassword)
+    async resetUserPassword(@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpReqParamRequired("password") password:string) :Promise<typeof organizationApi.routes.resetUserPassword.res>{
+        if(Application.mode!==ECommon_Application_Mode.OFFLINE) {
+            throw Err.Common.interfaceForbidden
+        }
+        let obj=await OrganizationUserService.getItemById(organizationUserId)
+        if(!obj) {
+            throw Err.Organization.userNotFound
+        }
+        let user=await UserService.getItemById(obj.getItem().user_id)
+        user.assignItem({
+            password
+        })
+        await user.update()
+        return
+    }
+
+    @DHttpApi(organizationApi.routes.deleteUserForOffline)
+    async deleteUserForOffline(@DHttpReqParamRequired("organizationUserId") organizationUserId:string) :Promise<typeof organizationApi.routes.deleteUserForOffline.res>{
+        if(Application.mode!==ECommon_Application_Mode.OFFLINE) {
+            throw Err.Common.interfaceForbidden
+        }
+        let obj=await OrganizationUserService.getItemById(organizationUserId)
+        if(!obj) {
+            throw Err.Organization.userNotFound
+        }
+        let user=await UserService.getItemById(obj.getItem().user_id)
+        await user.delete("userDelete")
+        return
+    }
 }

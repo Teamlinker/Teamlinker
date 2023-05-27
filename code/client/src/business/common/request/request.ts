@@ -11,6 +11,8 @@ import workflow from "../../../../../common/routes/workflow"
 import user from "../../../../../common/routes/user"
 import wiki from "../../../../../common/routes/wiki"
 import calendar from "../../../../../common/routes/calendar"
+import meeting from "../../../../../common/routes/meeting"
+import gateway from "../../../../../common/routes/gateway"
 import {Ref} from "vue";
 import {SessionStorage} from "../storage/session";
 
@@ -166,5 +168,7 @@ export const apiIssue=generatorApi(issue)
 export const apiIssueType=generatorApi(issueType)
 export const apiWiki=generatorApi(wiki)
 export const apiCalendar=generatorApi(calendar)
+export const apiMeeting=generatorApi(meeting)
+export const apiGateway=generatorApi(gateway)
 
 

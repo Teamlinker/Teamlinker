@@ -37,6 +37,17 @@ export abstract class Mapper<T extends BaseModel> {
         let ret=await mysql.executeOne(generateQuerySql(this.model,[],exp))
         return ret
     }
+
+    async getItemsByExp(exp:{
+        [param in keyof T["model"]]:T["model"][param]
+    }):Promise<T["model"][]> {
+        if(!exp) {
+            throw  Err.Common.itemNotFound
+        }
+        var mysql=getMysqlInstance();
+        let ret=await mysql.execute(generateQuerySql(this.model,[],exp))
+        return ret
+    }
     async updateConfig(info:T["model"]){}
     async update(data:T["model"]):Promise<void> {
         let info:T["model"]={}

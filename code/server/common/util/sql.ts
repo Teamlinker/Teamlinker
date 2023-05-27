@@ -2,11 +2,15 @@ import * as intFormat from "biguint-format";
 import * as FlakeId from 'flake-idgen';
 import {BaseModel} from '../../../common/model/base';
 import * as moment from "moment";
+import CommonUtil from "./common";
+import Mysql from "../db/mysql";
 
 const uid = new FlakeId(); 
 
 type EXPR={
-    [key:string]:EXPRVALUE
+    [key:string]:EXPRVALUE|{
+        [key:string]:EXPRVALUE
+    }
 }
 type EXPRVALUEEXP ={
     value?:string|number|boolean|string[]|[number,number]|string|Date|{
@@ -111,23 +115,51 @@ function generateExp(objExpr?:EXPR,exprMode?:"and"|"or"):string{
     let expr="",arrExpr=[]
     if(objExpr) {
         for(let key in objExpr) {
-            let value=objExpr[key]
-            if(typeof(value)!="object") {
-                let val=typeof(value)=="number"?value:typeof(value)=="boolean"?(value?1:0):("'"+value+"'")
-                arrExpr.push(`${key}=${val}`)
-            } else if (typeof(value)=="object" && (value instanceof Date)){
-                arrExpr.push(`${key}=${value.getTime()}`)
-            } else if(value===null) {
-                arrExpr.push(`isnull(${key})`)
-            } else if (isEXPRVALUEEXP(value)) {
-                handleExp(key,value,arrExpr)
-            }else {
-                let arr=[];
-                for(let obj of value.values) {
-                    handleExp(key,obj,arr)
+            if(key.startsWith("$")) {
+                let value=objExpr[key] as {
+                    [param:string]:EXPRVALUE
                 }
-                arrExpr.push(`(${arr.join(` ${value.type?value.type:"and"} `)})`)
+                let arr=[]
+                for(let k in value){
+                    let v=value[k];
+                    if(typeof(v)!="object") {
+                        let val=typeof(v)=="number"?v:typeof(v)=="boolean"?(v?1:0):("'"+v+"'")
+                        arr.push(`${k}=${val}`)
+                    } else if (typeof(v)=="object" && (v instanceof Date)){
+                        arr.push(`${k}=${v.getTime()}`)
+                    } else if(v===null) {
+                        arr.push(`isnull(${k})`)
+                    } else if (isEXPRVALUEEXP(v)) {
+                        handleExp(k,v,arr)
+                    }else {
+                        let arr1=[];
+                        for(let obj of v.values) {
+                            handleExp(k,obj,arr1)
+                        }
+                        arr.push(`(${arr1.join(` ${v.type?v.type:"and"} `)})`)
+                    }
+                }
+                arrExpr.push(`(${arr.join(` ${key.startsWith("$and")?"and":"or"} `)})`)
+            } else {
+                let value=objExpr[key] as EXPRVALUE
+                if(typeof(value)!="object") {
+                    let val=typeof(value)=="number"?value:typeof(value)=="boolean"?(value?1:0):("'"+value+"'")
+                    arrExpr.push(`${key}=${val}`)
+                } else if (typeof(value)=="object" && (value instanceof Date)){
+                    arrExpr.push(`${key}=${value.getTime()}`)
+                } else if(value===null) {
+                    arrExpr.push(`isnull(${key})`)
+                } else if (isEXPRVALUEEXP(value)) {
+                    handleExp(key,value,arrExpr)
+                }else {
+                    let arr=[];
+                    for(let obj of value.values) {
+                        handleExp(key,obj,arr)
+                    }
+                    arrExpr.push(`(${arr.join(` ${value.type?value.type:"and"} `)})`)
+                }
             }
+
         }
         expr=arrExpr.join(` ${exprMode?exprMode:"and"} `)
     }
@@ -1041,6 +1073,19 @@ export function convertCountSql(sql:{
     }
 }
 
+export async function generatePageAndCount(mysql:Mysql,sql:{
+    value:string,
+    type:any
+},size:number) {
+    let countSql=convertCountSql(sql);
+    let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+    let totalPage=CommonUtil.pageTotal(count,size)
+    return {
+        count,
+        totalPage
+    }
+}
+
 export function generateMaxSql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columnMax:K1,objExpr?:{
     [param in keyof T["model"]]?:EXPRVALUE
 },exprMode?:"and"|"or"):{
@@ -1188,26 +1233,6 @@ function generateLeftJoinHavingExp<T extends BaseModel>(obj:{
     }
     let ret=arr.join(` ${objMode?objMode:"and"} `)
     return ret;
-}
-
-export function testSql<T extends BaseModel,K1 extends keyof T["model"]=null,R extends keyof T["model"]=null,RR extends string=null,O extends boolean=false>(model:T,groups:(keyof T["model"])[],columns:{
-    columns:K1[],
-    calcColumns:COLUMNSVALUETYPE<R,RR>[]
-},objExpr?:{
-    [param in keyof T["model"]]?:EXPRVALUE
-},exprMode?:"and"|"or",having?:{
-    [param in keyof T["model"]]?:HAVINGEXP
-},havingMode?:"and"|"or",order?:{
-    field:O extends false?(keyof T["model"]):RR,
-    isVirtualField:O,
-    type:"asc"|"desc"
-},limit?:number,size?:number):{
-    value:string,
-    type:Rename<{
-        [key in K1|R]:T["model"][key]
-    },R,RR>
-} {
-    return null
 }
 
 export function generateGroupSql<T extends BaseModel,K1 extends keyof T["model"],R extends keyof T["model"],RR extends string=null,O extends boolean=false>(model:T,groups:(keyof T["model"])[],columns:{

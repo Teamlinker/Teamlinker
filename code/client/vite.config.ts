@@ -1,5 +1,7 @@
 import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
+import * as fs from "fs";
+import * as path from "path";
 // https://vitejs.dev/config/
 
 export default defineConfig({
@@ -11,6 +13,11 @@ export default defineConfig({
     // })
   ],
   server:{
+      host:"0.0.0.0",
+      https:{
+          key:fs.readFileSync(path.join(__dirname,'./certs/key.pem')),
+          cert: fs.readFileSync(path.join(__dirname,'./certs/cert.pem'))
+      },
       port: 3000,
       hmr:true,
       open: false, //自动打开

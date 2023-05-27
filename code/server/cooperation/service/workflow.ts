@@ -9,7 +9,6 @@ import {
 } from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
-import {EServer_Common_Event_Types} from "../../common/event/types";
 import {
     ECommon_Model_Workflow_Node_Status,
     ICommon_Model_Workflow_Node,
@@ -19,6 +18,7 @@ import {workflowActionMapper, workflowMapper, workflowNodeMapper} from './../map
 import {WorkflowNodeFieldTypeService} from './field';
 import {ICommon_Field_Type} from "../../../common/field/type";
 import {IssueTypeSolutionService} from "./issueType";
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export class WorkflowService  {
 
@@ -168,7 +168,7 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
         return ret;
     }
 
-    override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
+    override async delete(eventPulish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete()
         await WorkflowNodeFieldTypeService.clearItemsByWorkflowNodeId(this.getId())
     }

@@ -2,7 +2,6 @@ import {ECommon_User_Type} from "../../../common/model/user";
 import userApi from "../../../common/routes/user";
 import {Err} from "../../../common/status/error";
 import {DComponent} from '../../common/decorate/component';
-import {EServer_Common_Event_Types} from '../../common/event/types';
 import HttpContext from "../../common/http/context";
 import {
     DHttpApi,
@@ -16,6 +15,8 @@ import {
 import {UserService} from "../service/user";
 import {IUserSession} from "../types/config";
 import {OrganizationUserService} from "../service/organization";
+import Application from "../../common/app/app";
+import {ECommon_Application_Mode} from "../../../common/types";
 
 @DComponent
 @DHttpController(userApi)
@@ -62,6 +63,12 @@ class UserController {
         if(!user) {
             throw Err.User.userNotFound
         }
+        if(userInfo.organizationInfo?.organizationUserId) {
+            let obj=await OrganizationUserService.getItemById(userInfo.organizationInfo?.organizationUserId)
+            if(obj) {
+                await obj.clearStatus()
+            }
+        }
         await user.stopSession()
     }
 
@@ -97,7 +104,7 @@ class UserController {
         if(!user) {
             throw Err.User.userNotFound
         }
-        await user.delete(EServer_Common_Event_Types.User.DELETE)
+        await user.delete("userDelete")
     }
 
     @DHttpApi(userApi.routes.active)
@@ -173,4 +180,64 @@ class UserController {
         let ret=await UserService.filter(name,10);
         return ret;
     }
+
+    @DHttpApi(userApi.routes.register)
+    async register(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string):Promise<typeof userApi.routes.register.res> {
+        if(Application.mode===ECommon_Application_Mode.ONLINE) {
+            await UserService.register(username,password)
+            return
+        } else {
+            throw Err.Common.interfaceForbidden
+        }
+    }
+
+    @DHttpApi(userApi.routes.confirmRegister)
+    async confirmRegister(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("code") code:string):Promise<typeof userApi.routes.confirmRegister.res> {
+        if(Application.mode===ECommon_Application_Mode.ONLINE) {
+            await UserService.conformRegister(username,code)
+            return
+        } else {
+            throw Err.Common.interfaceForbidden
+        }
+    }
+
+    @DHttpApi(userApi.routes.resendCode)
+    async resendCode(@DHttpReqParamRequired("username") username:string):Promise<typeof userApi.routes.resendCode.res> {
+        if(Application.mode===ECommon_Application_Mode.ONLINE) {
+            await UserService.resendCode(username)
+            return
+        } else {
+            throw Err.Common.interfaceForbidden
+        }
+    }
+
+    @DHttpApi(userApi.routes.resetCode)
+    async resetCode(@DHttpReqParamRequired("username") username:string):Promise<typeof userApi.routes.resetCode.res> {
+        if(Application.mode===ECommon_Application_Mode.ONLINE) {
+            let obj=await UserService.getItemByName(username)
+            if(!obj) {
+                throw Err.User.userNotFound
+            }
+            await obj.resetCode()
+            return
+        } else {
+            throw Err.Common.interfaceForbidden
+        }
+    }
+
+    @DHttpApi(userApi.routes.reset)
+    async reset(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpReqParamRequired("code") code:string):Promise<typeof userApi.routes.reset.res> {
+        if(Application.mode===ECommon_Application_Mode.ONLINE) {
+            let obj=await UserService.getItemByName(username)
+            if(!obj) {
+                throw Err.User.userNotFound
+            }
+            await obj.reset(password,code)
+            return 
+        } else {
+            throw Err.Common.interfaceForbidden
+        }
+    }
+
+
 }

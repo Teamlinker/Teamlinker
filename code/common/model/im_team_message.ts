@@ -9,6 +9,7 @@ export interface ICommon_Model_IM_Team_Message {
     created_time:Date,
     content:string,
     content_type:ECommon_IM_Message_ContentType
+    file_id:string
 }
 export const Table_IM_Team_Message="im_team_message"
 

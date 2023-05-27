@@ -7,7 +7,6 @@ import {
 } from "../../../common/routes/response";
 import {Err} from '../../../common/status/error';
 import {Entity} from "../../common/entity/entity";
-import {EServer_Common_Event_Types} from '../../common/event/types';
 import {generateSnowId} from '../../common/util/sql';
 import {ProjectService} from "../service/project";
 import {ICommon_Model_Project_Issue, projectIssueModel} from './../../../common/model/project_issue';
@@ -19,6 +18,7 @@ import {ProjectModuleService} from './module';
 import {WorkflowActionService, WorkflowNodeService} from './workflow';
 import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
 import {ProjectReleaseService} from "./release";
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof projectIssueMapper> {
     constructor(){
@@ -247,7 +247,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         return ret;
     }
 
-    override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
+    override async delete(eventPulish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete()
         await projectIssueMapper.clear(this.getId())
         await commentMapper.clear(this.getId());

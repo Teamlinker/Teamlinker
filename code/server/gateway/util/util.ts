@@ -3,7 +3,7 @@ import * as Importer from "mysql2-import";
 import * as path from "path";
 import {Table_Project} from '../../../common/model/project';
 import {Table_Project_Issue} from "../../../common/model/project_issue";
-import Application, {ECommon_Application_Mode} from '../../common/app/app';
+import Application from '../../common/app/app';
 import {getConfigInstance} from '../../common/config/config';
 import {getMysqlInstance} from "../../common/db/mysql";
 import CommonUtil from "../../common/util/common";
@@ -39,6 +39,8 @@ import {Table_Workflow_Node} from './../../../common/model/workflow_node';
 import {Table_Comment} from "../../../common/model/comment";
 import {Table_File} from "../../../common/model/file";
 import {Table_Member_Tag} from "../../../common/model/member_tag";
+import {Table_Meeting_Room} from "../../../common/model/meeting_room";
+import {ECommon_Application_Mode} from "../../../common/types";
 
 export async function handleImageFields(data:object,organizationId?:string){
     let arrImage=<{
@@ -152,7 +154,8 @@ async function resetSystem(){
              mysql.execute(`delete from ${Table_File}`),
              mysql.execute(`delete from ${Table_Workflow_Node_Field_Type}`),
              mysql.execute(`delete from ${Table_Workflow_Node_Field_Type_Config}`),
-             mysql.execute(`delete from ${Table_Member_Tag}`)
+             mysql.execute(`delete from ${Table_Member_Tag}`),
+             mysql.execute(`delete from ${Table_Meeting_Room}`)
         ])
 
     } catch (err) {

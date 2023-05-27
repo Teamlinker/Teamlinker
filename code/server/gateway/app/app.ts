@@ -17,8 +17,9 @@ import userApi from "../../../common/routes/user";
 import workflowApi from "../../../common/routes/workflow";
 import wikiApi from "../../../common/routes/wiki";
 import calendarApi from "../../../common/routes/calendar";
+import meetingApi from "../../../common/routes/meeting";
 import {Err} from "../../../common/status/error";
-import Application, {ECommon_Application_Mode} from "../../common/app/app";
+import Application from "../../common/app/app";
 import {EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy} from "../../common/types/http";
 import {generateHttpErrorResponse, generateHttpOkResponse} from "../../common/util/http";
 import "../http/gateway";
@@ -28,13 +29,16 @@ import "../../user/app/app"
 import "../../cooperation/app/app"
 import {config as configFile} from "../../file/app/app"
 import "../../wiki/app/app"
+import "../../meeting/app/app"
 import {initCalendar} from "../../calendar/app/app"
 import {initIM} from "../../im/app/app";
+import {initMeeting} from "../../meeting/app/app";
 import authRpcApi from "../../auth/rpc/auth"
 import userRpcApi from "../../user/rpc/user"
 import {getRedisInstance} from "../../common/cache/redis";
+import {ECommon_Application_Mode} from "../../../common/types";
 
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi,wikiApi,calendarApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi,wikiApi,calendarApi,meetingApi];
 export default class GateWay extends Application {
     override async config(app: Koa<Koa.DefaultState, Koa.DefaultContext>) {
         let redis=getRedisInstance();
@@ -43,7 +47,8 @@ export default class GateWay extends Application {
             configFile(),
             initCalendar(),
             checkIfNeedInit(),
-            initIM()
+            initIM(),
+            initMeeting()
         ])
         let apiMap=<{
             [param:string]:{
@@ -79,7 +84,6 @@ export default class GateWay extends Application {
                 let baseUrl = path.substring(1, path.indexOf("/", 1))
                 let apiPath = path.substring(1 + baseUrl.length)
                 if (apiMap[baseUrl] && apiMap[baseUrl][method + " " + apiPath]) {
-                    let permissionModule = apiMap[baseUrl][method + " " + apiPath].permissionModule
                     let ignoreValidate = apiMap[baseUrl][method + " " + apiPath].ignoreValidate
                     let permission=apiMap[baseUrl][method + " " + apiPath].permission
                     if(!ignoreValidate) {
@@ -159,6 +163,9 @@ export default class GateWay extends Application {
                         }
                     } else {
                         ctx.body = ret.data;
+                    }
+                    if(!ignoreValidate) {
+                        userRpcApi.keepAlive(obj.user.userId)
                     }
                     await next()
                 } else {

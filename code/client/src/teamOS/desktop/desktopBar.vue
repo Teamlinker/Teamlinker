@@ -1,12 +1,7 @@
 <template>
   <a-row>
-    <a-col flex="80px" style="height: 100%;text-align: center;">
-      <a-dropdown trigger="hover">
-        <a-avatar :size="32" :image-url="avatar" style="margin-top: 4px">T</a-avatar>
-        <template #content>
-          <a-doption v-for="item in avatarOptions" @click="item.clickFunc">{{item.name}}</a-doption>
-        </template>
-      </a-dropdown>
+    <a-col flex="80px" style="height: 100%;justify-content: center;align-items: center;display: flex">
+      <slot name="topLeft"></slot>
     </a-col>
     <a-col flex="auto" style="height: 100%;padding-left: 30px">
       <a-row style="height: 100%" align="center" justify="start" :wrap="false">
@@ -19,18 +14,7 @@
       </a-row>
     </a-col>
     <a-col flex="250px" style="height: 100%;" id="teamOS-Desktop-Menu">
-      <a-row style="height: 100%;" align="center">
-        <a-col flex="80px" style="align-items: center;display: flex">
-          <img :src="logo" style="height: 36px;width:80px;object-fit: cover;object-position: 50% 50%;" v-if="logo"/>
-        </a-col>
-        <a-col flex="170px">
-          <a-select style="max-width: 170px;color: white" placeholder="organization" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue">
-            <a-optgroup v-for="(item,index) in menu" :label="item.group">
-              <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
-            </a-optgroup>
-          </a-select>
-        </a-col>
-      </a-row>
+	    <slot name="topRight"></slot>
     </a-col>
   </a-row>
 </template>
@@ -42,18 +26,8 @@ import {ETeamOS_Window_Status} from "../window/window.js";
 import Sicon from "../../icon/sicon.vue";
 import {iconGroupMap} from "../icon/icon";
 
-const logo=desktop.getLogo();
-const avatar=desktop.getAvatar();
-const avatarOptions=desktop.getAvatarOptions()
-const menu=desktop.getMenu();
 const list=windowManager.getList();
 const color=desktop.getBaseColor();
-const menuValue=desktop.getMenuValue()
-const onMenuClick=(value:string)=>{
-  if(desktop.onMenuClick) {
-    desktop.onMenuClick(value)
-  }
-}
 </script>
 
 <style scoped>

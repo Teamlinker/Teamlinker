@@ -1,5 +1,71 @@
 <template>
-  <TeamOS/>
+  <TeamOS>
+    <template #topLeft>
+      <a-dropdown trigger="hover">
+        <a-avatar :size="36" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
+          T
+          <template #trigger-icon>
+            <div style="height: 100%;width: 100%;background-color: #03ad03;border-radius: 6px" v-if="store.status===ECommon_User_Online_Status.ONLINE"></div>
+            <icon-stop :stroke-width="5" style="color: darkred" v-else-if="store.status===ECommon_User_Online_Status.BUSY"></icon-stop>
+            <icon-video-camera :stroke-width="5" style="color: red" v-else-if="store.status===ECommon_User_Online_Status.MEETING"></icon-video-camera>
+            <div style="height: 100%;width: 100%;background-color: gray;border-radius: 6px" v-else-if="store.status===ECommon_User_Online_Status.OFFLINE"></div>
+          </template>
+        </a-avatar>
+        <template #content>
+          <a-dsubmenu trigger="hover" :disabled="store.status===ECommon_User_Online_Status.MEETING">
+            Status
+            <template #content>
+              <a-doption @click="onChangeStatus(ECommon_User_Online_Status.ONLINE)">
+                <template #icon v-if="store.status===ECommon_User_Online_Status.ONLINE">
+                  <icon-check></icon-check>
+                </template>
+                online
+              </a-doption>
+              <a-doption @click="onChangeStatus(ECommon_User_Online_Status.BUSY)">
+                <template #icon v-if="store.status===ECommon_User_Online_Status.BUSY">
+                  <icon-check></icon-check>
+                </template>
+                busy
+              </a-doption>
+            </template>
+          </a-dsubmenu>
+          <a-doption @click="onAccount">Account</a-doption>
+          <a-doption @click="onLogout">Logout</a-doption>
+        </template>
+      </a-dropdown>
+    </template>
+	  <template #topRight>
+		  <a-row style="height: 100%;" align="center">
+			  <a-col flex="80px" style="align-items: center;display: flex">
+				  <img :src="store.organizationInfo.photo" style="height: 36px;width:80px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
+			  </a-col>
+			  <a-col flex="170px">
+				  <a-select style="max-width: 170px;color: white" placeholder="organization" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
+					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
+						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
+					  </a-optgroup>
+					  <template #footer v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
+						  <a-row style="width: 100%;height: 30px;display: flex;justify-content: center;align-items: center">
+							  <a-button type="text" style="width: 100%;color: black" @click="onCreate">
+								  Create
+							  </a-button>
+						  </a-row>
+					  </template>
+				  </a-select>
+				  <a-button type="primary" status="success" style="float: right;margin-right: 5px" @click="onCreate" v-else>
+					  Create Organization
+				  </a-button>
+			  </a-col>
+		  </a-row>
+	  </template>
+  </TeamOS>
+	<a-skeleton :animation="true" v-if="loading" style="position: absolute;left: 0;top: 0;height: 100%;width: 100%;background-color: white;z-index: 10000">
+		<a-space direction="vertical" :style="{width:'100%'}" size="large">
+			<a-skeleton-line :rows="3" />
+			<a-skeleton-shape />
+			<a-skeleton-shape />
+		</a-space>
+	</a-skeleton>
 </template>
 
 <script setup lang="ts">
@@ -7,7 +73,7 @@
 import TeamOS from "../../../teamOS/index.vue";
 import img from "../../../assert/back.png"
 import {getDesktopInstance} from "../../../teamOS/teamOS";
-import {getCurrentInstance, markRaw, nextTick, onBeforeMount, watchEffect} from "vue";
+import {getCurrentInstance, markRaw, nextTick, onBeforeMount, onBeforeUnmount, ref, watchEffect} from "vue";
 import {useDesktopStore} from "./store/desktop";
 import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
@@ -16,64 +82,23 @@ import {ETeamOS_Window_Type, Window} from "../../../teamOS/window/window";
 import {v4} from "uuid";
 import Account from "../app/account/account.vue";
 import {SessionStorage} from "../../common/storage/session";
+import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../../../common/types";
+import {apiOrganization} from "../../common/request/request";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../../common/event/event";
+import {ITeamOS_Desktop_Menu} from "../../../teamOS/desktop/desktop";
+import CreateOrganization from "./createOrganization.vue";
 
 let desktop=getDesktopInstance().desktop;
+const menu=ref<ITeamOS_Desktop_Menu[]>([])
+const menuValue=ref("")
 desktop.setBackgroundImage(img)
 const store=useDesktopStore()
 const router=useRouter();
 let iconManager=getDesktopInstance().iconManager
 let windowManager=getDesktopInstance().windowManager
 const appContext=getCurrentInstance().appContext
-onBeforeMount(async ()=>{
-  let isAuth=await store.isAuth();
-  if(!isAuth) {
-    await router.replace("login");
-    return
-  }
-  await store.getOrganizationList()
-  if(SessionStorage.get("organizationId")) {
-    await store.enterOrganization(SessionStorage.get("organizationId"))
-  }
-  desktop.addEventListener("menuClick",async value => {
-    await store.enterOrganization(value);
-  })
-  desktop.setAvatarOptions([{
-    name:"Account",
-    clickFunc:()=>{
-      const win=new Window("account",ETeamOS_Window_Type.SIMPLE, "account",true,[
-        {
-          id:v4(),
-          meta:{
-            title:"account"
-          },
-          components:{
-            account:markRaw(Account)
-          },
-          default:{
-            name:"account"
-          }
-        }
-      ],"account");
-      windowManager.open(win);
-    }
-  },{
-    name:"Logout",
-    clickFunc:async ()=>{
-      let ret=await Dialog.confirm(document.body,appContext,"Do you want to log out?")
-      if(ret) {
-        let res=await store.logout();
-        if(res) {
-          Message.success("logout success")
-          watchStop();
-          desktop.clear()
-          iconManager.clear()
-          windowManager.clear();
-          await router.replace("login");
-        }
-      }
-    }
-  }])
-})
+const loading=ref(true)
+let avatar=ref("")
 const watchStop=watchEffect(()=>{
   if(store.organizationList) {
     let arr=[]
@@ -99,16 +124,13 @@ const watchStop=watchEffect(()=>{
         })
       })
     }
-    if(store.organizationInfo?.photo) {
-      desktop.setLogo(store.organizationInfo.photo)
-    }
     if(store.userInfo?.photo) {
-      desktop.setAvatar(store.userInfo.photo)
+      avatar.value=store.userInfo?.photo
     }
     if(SessionStorage.get("organizationId")) {
-      desktop.setMenu(arr,SessionStorage.get("organizationId"))
+      setMenu(arr,SessionStorage.get("organizationId"))
     } else {
-      desktop.setMenu(arr)
+      setMenu(arr)
     }
   }
   iconManager.setList(store.appList)
@@ -116,6 +138,91 @@ const watchStop=watchEffect(()=>{
     iconManager.sort()
   })
 
+})
+
+const setMenu=(menu1:ITeamOS_Desktop_Menu[],defaultValue?:string) => {
+	if(menu.value.length>0) {
+		menu.value.splice(0)
+	}
+	menu.value.push(...menu1);
+	if(defaultValue) {
+		menuValue.value=defaultValue
+	}
+}
+
+const onAccount=()=>{
+  const win=new Window("account",ETeamOS_Window_Type.SIMPLE, "account",true,[
+    {
+      id:v4(),
+      meta:{
+        title:"account"
+      },
+      components:{
+        account:markRaw(Account)
+      },
+      default:{
+        name:"account"
+      }
+    }
+  ],"account");
+  windowManager.open(win);
+}
+
+const onLogout=async ()=>{
+  let ret=await Dialog.confirm(document.body,appContext,"Do you want to log out?")
+  if(ret) {
+    let res=await store.logout();
+    if(res) {
+      Message.success("logout success")
+      watchStop();
+      desktop.clear()
+      iconManager.clear()
+      windowManager.clear();
+      await router.replace("login");
+    }
+  }
+}
+
+const onChangeStatus=(status:ECommon_User_Online_Status.BUSY|ECommon_User_Online_Status.ONLINE)=> {
+  apiOrganization.changeUserStatus({
+    status:status
+  })
+}
+
+const onHandleStatus=(organizationUserId:string,status:ECommon_User_Online_Status)=> {
+  if(organizationUserId===SessionStorage.get("organizationUserId")) {
+    store.status=status
+  }
+}
+
+const onMenuClick=async (value)=>{
+	windowManager.clear()
+	await store.enterOrganization(value);
+}
+
+const onCreate=async ()=>{
+	let ret=await Dialog.open(document.body,appContext,"Create Organization",markRaw(CreateOrganization))
+	if(ret) {
+		store.$update()
+	}
+}
+
+onBeforeMount(async ()=>{
+  let isAuth=await store.isAuth();
+  if(!isAuth) {
+    await router.replace("login");
+    return
+  }
+  await store.getOrganizationList()
+  if(SessionStorage.get("organizationId")) {
+    await store.initOrganization(SessionStorage.get("organizationId"))
+  }
+  eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
+	loading.value=false
+})
+
+onBeforeUnmount(()=>{
+  eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
 })
 </script>
 

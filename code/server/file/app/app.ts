@@ -6,6 +6,7 @@ import {generateDeleteSql} from "../../common/util/sql";
 import "../event/file";
 import "../http/file";
 import {ECommon_Model_File_Type, fileModel, ICommon_Model_File, Table_File} from './../../../common/model/file';
+import {REDIS_FILE} from "../../common/cache/keys/file";
 import path = require("path");
 
 export async function config()
@@ -21,6 +22,8 @@ export async function config()
             mysql.execute(generateDeleteSql(fileModel, {
                 id: obj.id
             }))
+            let objCache=REDIS_FILE.filePath(obj.id)
+            objCache.del()
         }
         let items=await fs.readdir(Application.teamlinkerPath);
         for(let item of items) {

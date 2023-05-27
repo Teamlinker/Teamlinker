@@ -1,6 +1,7 @@
 <template>
   <div id="teamOS" :style="{backgroundImage:'url('+backImag+')'}">
     <DesktopBar style="height: 40px;background: rgba(255,255,255,0.3);">
+      <template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope"/></template>
     </DesktopBar>
     <IconContainer style="height: calc(100% - 40px)">
       <WindowContainer></WindowContainer>

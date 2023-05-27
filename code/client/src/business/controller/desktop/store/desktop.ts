@@ -16,9 +16,9 @@ import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {NotificationType, NotificationWrapper} from "../../../common/component/notification/notification";
 import {SessionStorage} from "../../../common/storage/session";
-import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
-import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
-import {ECommon_IM_Message_ContentType} from "../../../../../../common/model/im_user_message";
+import {handleIMEvent} from "../../app/im/event";
+import {ECommon_User_Online_Status} from "../../../../../../common/types";
+import {handleMeetingEvent} from "../../app/meeting/event";
 
 export const useDesktopStore=defineStore("desktop",{
     state:()=>({
@@ -35,7 +35,9 @@ export const useDesktopStore=defineStore("desktop",{
             iconIM,
             iconTeam
         ] as Icon[],
-        userInfo:{} as DCSType<Omit<ICommon_Model_User,"password">>
+        userInfo:{} as DCSType<Omit<ICommon_Model_User,"password">>,
+        status:ECommon_User_Online_Status.OFFLINE,
+        heartbeatInterval:null
     }),
     actions:{
         async getOrganizationList() {
@@ -44,52 +46,61 @@ export const useDesktopStore=defineStore("desktop",{
                 this.organizationList=ret.data;
             }
         },
+        async requestStatus() {
+            let ret=await apiOrganization.getUserStatus({})
+            if(ret?.code==0) {
+                this.status=ret.data.status
+            }
+        },
         async enterOrganization  (organizationId:string){
             let retEnter=await apiOrganization.enter({
                 organizationId
             });
             if(retEnter?.code==0) {
-                let myOrganizationUserId=retEnter.data.organizationUserId
                 SessionStorage.set("organizationUserId",retEnter.data.organizationUserId)
-                SocketIOClient.getSocket(ECommon_Socket_Type.CALENDAR)?.close()
-                await Promise.all([
-                    (async ()=>{
-                        let retOrganization=await apiOrganization.info({
-                            organizationId
-                        })
-                        if(retOrganization?.code==0) {
-                            this.organizationInfo=retOrganization.data
-                            SessionStorage.set("organizationId",retOrganization.data.id);
-                        }
-                    })(),
-                    (async ()=>{
-                        let ret=await apiOrganization.getPermission({
-                            organizationId
-                        })
-                        if(ret?.code==0) {
-                            this.organizationPermission=ret.data.value
-                        }
-                    })()
-                ])
-                let objSocketCalendar=SocketIOClient.create(ECommon_Socket_Type.CALENDAR)
-                objSocketCalendar.getSocket().on("calendar_event_reminder",(id, name, start_time) => {
-                    NotificationWrapper.show("Calendar Event Reminder",`${name} will start in ${Math.floor((start_time-Date.now())/1000/60)} minutes`,NotificationType.CALENDAR,null,null,60000)
-                })
-                SocketIOClient.getSocket(ECommon_Socket_Type.IM)?.close()
-                let objSocketIM=SocketIOClient.create(ECommon_Socket_Type.IM)
-                objSocketIM.getSocket().on("im_user_relay_text_message",(fromOrganizationUserId, toOrganizationUserId, content,date) => {
-                    if(myOrganizationUserId!==fromOrganizationUserId) {
-                        NotificationWrapper.show("IM User Message",content.substring(0,20),NotificationType.IM,null,null,3000)
-                    }
-                    eventBus.emit(EClient_EVENTBUS_TYPE.RECEIVE_IM_MESSAGE,ECommon_IM_Message_EntityType.USER,fromOrganizationUserId,content,ECommon_IM_Message_ContentType.TEXT,date,toOrganizationUserId)
-                })
-                objSocketIM.getSocket().on("im_team_relay_text_message",(organizationUserId, teamId, content,date) => {
-                    if(myOrganizationUserId!==organizationUserId) {
-                        NotificationWrapper.show("IM Team Message",content.substring(0,20),NotificationType.IM,null,null,3000)
-                    }
-                    eventBus.emit(EClient_EVENTBUS_TYPE.RECEIVE_IM_MESSAGE,ECommon_IM_Message_EntityType.TEAM,organizationUserId,content,ECommon_IM_Message_ContentType.TEXT,date,null,teamId)
-                })
+                await this.initOrganization(organizationId)
             }
+        },
+        async initOrganization(organizationId:string) {
+            SocketIOClient.getSocket(ECommon_Socket_Type.CALENDAR)?.close()
+            await Promise.all([
+                this.requestStatus(),
+                (async ()=>{
+                    let retOrganization=await apiOrganization.info({
+                        organizationId
+                    })
+                    if(retOrganization?.code==0) {
+                        this.organizationInfo=retOrganization.data
+                        SessionStorage.set("organizationId",retOrganization.data.id);
+                    }
+                })(),
+                (async ()=>{
+                    let ret=await apiOrganization.getPermission({
+                        organizationId
+                    })
+                    if(ret?.code==0) {
+                        this.organizationPermission=ret.data.value
+                    }
+                })()
+            ])
+            let objSocketCalendar=SocketIOClient.create(ECommon_Socket_Type.CALENDAR)
+            objSocketCalendar.getSocket().on("calendar_event_reminder",(id, name, start_time) => {
+                if(this.status===ECommon_User_Online_Status.ONLINE) {
+                    NotificationWrapper.show("Calendar Event Reminder",`${name} will start in ${Math.floor((start_time-Date.now())/1000/60)} minutes`,NotificationType.CALENDAR,null,null,60000)
+                }
+            })
+            SocketIOClient.getSocket(ECommon_Socket_Type.IM)?.close()
+            let objSocketIM=SocketIOClient.create(ECommon_Socket_Type.IM)
+            handleIMEvent(objSocketIM.getSocket(),this.status)
+            if(this.heartbeatInterval) {
+                clearInterval(this.heartbeatInterval)
+            }
+            this.heartbeatInterval=setInterval(()=>{
+                objSocketIM.getSocket().emit("im_heartbeat")
+            },1000*60*20)
+            SocketIOClient.getSocket(ECommon_Socket_Type.MEETING)?.close()
+            let objSocketMeeting=SocketIOClient.create(ECommon_Socket_Type.MEETING)
+            handleMeetingEvent(objSocketMeeting.getSocket())
         },
         async isAuth():Promise<boolean> {
             if(!SessionStorage.get("userToken")) {
@@ -108,6 +119,9 @@ export const useDesktopStore=defineStore("desktop",{
             let res=await apiUser.logout()
             if(res?.code==0) {
                 SessionStorage.clear();
+                SocketIOClient.clear()
+                clearInterval(this.heartbeatInterval)
+                this.heartbeatInterval=null;
                 this.$reset();
                 return true
             } else {

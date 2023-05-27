@@ -3,11 +3,11 @@ import {wikiModel} from "../../../common/model/wiki";
 import {wikiItemMapper, wikiMapper} from "../mapper/wiki";
 import {wikiItemModel} from "../../../common/model/wiki_item";
 import {ICommon_Route_Res_userWikiList} from "../../../common/routes/response";
-import {EServer_Common_Event_Types} from "../../common/event/types";
 import rpcAuthApi from "../../auth/rpc/auth";
 import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../common/model/role";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import {Err} from "../../../common/status/error";
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export class WikiService extends Entity<typeof wikiModel,typeof wikiMapper> {
     constructor() {
@@ -33,7 +33,7 @@ export class WikiService extends Entity<typeof wikiModel,typeof wikiMapper> {
         }
     }
 
-    override async delete(eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await wikiMapper.clearWiki(this.getId());
     }
@@ -135,7 +135,7 @@ export class WikiItemService extends Entity<typeof wikiItemModel,typeof wikiItem
         super(wikiItemMapper)
     }
 
-    async remove(isChildren:boolean,eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
+    async remove(isChildren:boolean,eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await wikiItemMapper.clearWikiItem(this.getId(),this.getItem().parent_id,this.getItem().wiki_id,this.getItem().weight,isChildren);
     }

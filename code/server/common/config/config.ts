@@ -1,5 +1,5 @@
 import Application from "../app/app";
-import {IServer_Common_Config_Mysql, IServer_Common_Config_Redis} from "../types/config";
+import {IServer_Common_Config_Mail, IServer_Common_Config_Mysql, IServer_Common_Config_Redis} from "../types/config";
 
 class Config {
     constructor() {
@@ -23,6 +23,9 @@ class Config {
     }
     get mqUri():string {
         return Application.privateConfig.mq
+    }
+    get mailInfo():IServer_Common_Config_Mail {
+        return Application.privateConfig.mail
     }
 }
 var g_config:InstanceType<typeof Config>

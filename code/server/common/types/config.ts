@@ -17,6 +17,13 @@ export interface IServer_Common_Config_Mysql {
     password:string
 }
 
+export interface IServer_Common_Config_Mail {
+    "host": string,
+    "port": number,
+    "user":string,
+    "pass":string
+}
+
 export interface IServer_Common_Config {
     services:{
         [name:string]:any

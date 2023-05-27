@@ -2,7 +2,6 @@ import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../com
 import {ICommon_Route_Res_Project_List} from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
-import {EServer_Common_Event_Types} from "../../common/event/types";
 import {moduleMapper} from "../mapper/module";
 import {projectMapper} from '../mapper/project';
 import rpcAuthApi from "../../auth/rpc/auth";
@@ -15,13 +14,14 @@ import {labelMapper} from '../mapper/label';
 import {WorkflowNodeFieldTypeService} from './field';
 import {IssueTypeSolutionService} from './issueType';
 import {WorkflowService} from './workflow';
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export class ProjectService extends Entity<typeof projectModel,typeof projectMapper> {
     constructor(){
         super(projectMapper)
     }
-    override async delete(type?:EServer_Common_Event_Types.Types) {
-        await super.delete(EServer_Common_Event_Types.Project.DELETE)
+    override async delete(type?:keyof IServer_Common_Event_Types) {
+        await super.delete("projectDelete")
         await moduleMapper.deleteByProjectId(this.item.id)
         await labelMapper.deleteByProjectId(this.item.id)
         await rpcAuthApi.clearRoleByItemId(this.item.id);

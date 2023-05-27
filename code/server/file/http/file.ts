@@ -6,6 +6,7 @@ import {DHttpApi, DHttpController, DHttpReqParamRequired, DHttpUser} from "../..
 import {IServer_Common_Http_Req_File} from "../../common/types/http";
 import FileService from "../service/file";
 import {IUserSession} from "../../user/types/config";
+import {REDIS_FILE} from "../../common/cache/keys/file";
 
 @DComponent
 @DHttpController(fileApi)
@@ -33,12 +34,20 @@ class AdminController {
     }
     @DHttpApi(fileApi.routes.getPath)
     async getPath(@DHttpReqParamRequired("fileId") fileId:string):Promise<typeof fileApi.routes.getPath.res> {
-        let obj=await FileService.getItemById(fileId)
-        if(!obj) {
-            throw Err.File.fileNotFound
+        let path:string
+        let objCache=REDIS_FILE.filePath(fileId)
+        path=await objCache.get()
+        if(!path) {
+            let obj=await FileService.getItemById(fileId)
+            if(!obj) {
+                throw Err.File.fileNotFound
+            } else {
+                path=obj.getItem().path
+            }
+            await objCache.set(path)
         }
         return {
-            uri:"/file"+obj.getItem().path
+            uri:"/file"+path
         }
     }
 }

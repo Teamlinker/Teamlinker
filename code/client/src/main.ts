@@ -1,4 +1,4 @@
-import {createApp} from 'vue'
+import {createApp, ref} from 'vue'
 import './style.css'
 import App from './App.vue'
 import '@arco-design/web-vue/dist/arco.css';
@@ -7,10 +7,16 @@ import sicon from "./icon/sicon.vue"
 import ArcoVueIcon from '@arco-design/web-vue/es/icon';
 import {createPinia} from "pinia";
 import Login from "./business/controller/login/login.vue";
-import Desktop from "./business/controller/desktop/desktop.vue";
 import {createRouter, createWebHashHistory} from "vue-router";
 import "@logicflow/core/dist/style/index.css";
+import Index from "./business/controller/index/index.vue";
+import {apiGateway} from "./business/common/request/request";
+import Register from "./business/controller/login/register.vue";
+import RegisterCode from "./business/controller/login/registerCode.vue";
+import Reset from "./business/controller/login/reset.vue";
+import ResetCode from "./business/controller/login/resetCode.vue";
 
+const Desktop =()=>import("./business/controller/desktop/desktop.vue")
 const routes=[
     {
         name:"login",
@@ -21,6 +27,33 @@ const routes=[
         name:"desktop",
         path:"/desktop",
         component:Desktop
+    },
+    {
+        name:"index",
+        path:"/",
+        component: Index
+    },
+    {
+        name:"register",
+        path:"/register",
+        component: Register
+    },
+    {
+        name:"registerCode",
+        path:"/registerCode",
+        component: RegisterCode,
+        props:route=>({username:route.query.username})
+    },
+    {
+        name:"reset",
+        path:"/reset",
+        component: Reset
+    },
+    {
+        name:"resetCode",
+        path:"/resetCode",
+        component: ResetCode,
+        props:route=>({username:route.query.username})
     }
 ]
 const router=createRouter({
@@ -28,6 +61,7 @@ const router=createRouter({
     routes
 });
 let app=createApp(App)
+app.config.globalProperties.$deployMode=ref()
 Message._context=app._context
 app.use(ArcoVue)
 app.use(ArcoVueIcon)
@@ -35,3 +69,8 @@ app.use(createPinia())
 app.use(router);
 app.component("sicon",sicon)
 app.mount('#app')
+apiGateway.deployInfo().then(value => {
+    if(value?.code==0) {
+        app.config.globalProperties.$deployMode.value=value.data.type
+    }
+})

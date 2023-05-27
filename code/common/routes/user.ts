@@ -68,7 +68,7 @@ const api={
                 username:string,
                 password:string
             }>{},
-            res:<Omit<ICommon_Model_User,"password">>{},
+            res:{},
             ignoreValidate:true
         },
         create:{//创建用户
@@ -154,7 +154,46 @@ const api={
                 id:string,
                 photo:string
             }[]>{},
-        }
+        },
+        confirmRegister:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/register/confirm",
+            req:<{
+                username:string,
+                code:string
+            }>{},
+            res:{},
+            ignoreValidate:true
+        },
+        resendCode:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/register/code",
+            req:<{
+                username:string
+            }>{},
+            res:{},
+            ignoreValidate:true
+        },
+        resetCode:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/reset/code",
+            req:<{
+                username:string
+            }>{},
+            res:{},
+            ignoreValidate:true
+        },
+        reset:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/reset",
+            req:<{
+                username:string,
+                password:string,
+                code:string
+            }>{},
+            res:{},
+            ignoreValidate:true
+        },
     }
 }
 

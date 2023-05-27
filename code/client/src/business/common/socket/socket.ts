@@ -13,6 +13,12 @@ export class SocketIOClient {
     static getSocket(name:ECommon_Socket_Type) {
         return this.map.get(name)
     }
+    static clear() {
+        for(let obj of this.map.values()) {
+            obj.close()
+        }
+        this.map.clear()
+    }
     constructor(name:ECommon_Socket_Type) {
         this.name=name
         this.socket=io("/"+name,{
@@ -20,9 +26,6 @@ export class SocketIOClient {
                 userId:SessionStorage.get("userId"),
                 token:SessionStorage.get("userToken")
             }
-        })
-        this.socket.on("connect_error", err => {
-            SocketIOClient.map.delete(this.name)
         })
         this.socket.on("disconnect", reason => {
             SocketIOClient.map.delete(this.name)

@@ -2,9 +2,9 @@
     <div style="width: 100%;height: 100%;display: flex;flex-direction: column" ref="root">
         <div style="flex: 0 0 36px;display: flex;align-items: center;justify-content: space-between;padding:0 10px;border-bottom: 1px solid lightgray">
             <div style="height: 24px;display: flex;align-items: center">
-                <div style="height: 24px;width:24px;border-radius: 100%;overflow: hidden;margin-right: 10px">
-                    <img :src="info.photo" style="height: 100%">
-                </div>
+                <a-avatar :size="24" :image-url="info.photo">
+                    {{calculateShortName(info.name)}}
+                </a-avatar>&nbsp;
                 {{ info.name }}
             </div>
             <div v-if="type===ECommon_IM_Message_EntityType.TEAM">
@@ -29,7 +29,9 @@
                             <div style="height: 30px;display: flex">
                                 <div style="flex:0 0 30px;display: flex;justify-content: center;align-items: center">
                                     <div style="height: 24px;width:24px;border-radius: 100%;overflow: hidden;margin-right: 10px">
-                                        <img :src="item.photo" style="height: 100%;cursor: pointer" @click="onClickPhoto($event,item)">
+                                        <a-avatar :image-url="item.photo" :size="24" style="cursor: pointer" @click="onClickPhoto($event,item)">
+                                            {{calculateShortName(item.name)}}
+                                        </a-avatar>
                                     </div>
                                 </div>
                                 <div style="flex: 1 1 auto;display: flex;align-items: center;">
@@ -42,7 +44,10 @@
                                 </div>
                                 <div style="flex: 1 1 auto;display: flex;align-items: center;">
                                     <div style="background-color: #e5e3e3;padding: 5px;border-radius: 5px">
-                                        {{item.content}}
+                                        <template v-if="item.type===ECommon_IM_Message_ContentType.TEXT">
+                                            {{item.content}}
+                                        </template>
+                                        <ImageMessage :file-id="item.content" v-else-if="item.type===ECommon_IM_Message_ContentType.IMAGE" style="max-width: 100%" @complete="onImageComplete"></ImageMessage>
                                     </div>
                                 </div>
                             </div>
@@ -50,21 +55,24 @@
                     </div>
                 </template>
                 <template #second>
-                    <div style="height: 100%;box-sizing: border-box;display: flex">
-                        <a-textarea style="height: 100%;border: 0;background-color: transparent;flex: 1 1 auto" v-model="content">
-
-                        </a-textarea>
-                        <a-button type="primary" style="margin-top: 2px;height: auto;flex: 0 0 60px;border-radius: 5px" tabindex="-1" @click="onSend">
-                            <template #icon>
-                                <icon-send style="color: white;font-size: x-large"></icon-send>
-                            </template>
-                        </a-button>
+                    <div style="height: 100%;box-sizing: border-box;display: flex;flex-direction: column">
+                        <div style="flex:0 0 30px;padding: 2px;box-sizing: border-box;background-color: rgb(249,249,249);">
+                            <Image @update-start="loading=true" @update-end="onUpdateImage" @update-error="loading=false" ref="imageRef"></Image>
+                        </div>
+                        <a-spin :loading="loading" style="flex: 1 1 auto;display: flex;margin-top: 2px;height: auto;">
+                            <a-textarea style="flex:1 1 auto;border: 0;background-color: transparent;" v-model="content" @paste="onPaste"></a-textarea>
+                            <a-button type="primary" style="margin-top: 2px;height: auto;flex: 0 0 60px;border-radius: 5px" tabindex="-1" @click="onSend">
+                                <template #icon>
+                                    <icon-send style="color: white;font-size: x-large"></icon-send>
+                                </template>
+                            </a-button>
+                        </a-spin>
                     </div>
                 </template>
             </a-split>
         </div>
         <a-drawer v-model:visible="isInfoVisible" :popup-container="root" unmountOnClose :header="false" :footer="false">
-            <slot name="info" :info="info">
+            <slot name="info" :info="info" v-if="isInfoVisible">
 
             </slot>
         </a-drawer>
@@ -76,8 +84,11 @@ import {IClient_Chat_Message_Item} from "./type";
 import {nextTick, ref, watch} from "vue";
 import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
 import {ECommon_IM_Message_ContentType} from "../../../../../../common/model/im_user_message";
-import moment from "moment";
 import {SessionStorage} from "../../storage/session";
+import Image from "./operation/image.vue"
+import moment from "moment";
+import ImageMessage from "./messageType/imageMessage.vue";
+import {calculateShortName} from "../../util/helper";
 
 const root=ref()
 const emit=defineEmits<{
@@ -98,11 +109,14 @@ const props = defineProps<{
         id: string
     }
 }>()
+const loading=ref(false)
 const contentRef=ref<HTMLDivElement>()
 const content=ref("")
 const isInfoVisible=ref(false)
 const messageList = ref<IClient_Chat_Message_Item[]>([])
 const organizationUserId=SessionStorage.get("organizationUserId")
+const imageRef=ref<InstanceType<typeof Image>>()
+let isWheel=false
 let preId=""
 watch(() => props.data, () => {
     messageList.value = JSON.parse(JSON.stringify(props.data))
@@ -123,7 +137,12 @@ watch(() => props.data, () => {
     deep:true,
     immediate: true
 })
+watch(()=>props.info,()=>{
+    isWheel=false
+    isInfoVisible.value=false
+})
 const onWheel=(event:WheelEvent)=>{
+    isWheel=true;
     let ele=event.currentTarget as HTMLDivElement
     if(event.deltaY<0 && ele.scrollTop<=0) {
        emit("updateMore",messageList.value[0],props.type,props.info)
@@ -142,6 +161,30 @@ const onSend=()=>{
 const scrollToBottom=()=>{
     contentRef.value.scrollTop=contentRef.value.scrollHeight
 }
+
+const onUpdateImage=(fileId:string)=>{
+    loading.value=false
+    emit("send",fileId,ECommon_IM_Message_ContentType.IMAGE,props.type,props.type===ECommon_IM_Message_EntityType.USER?props.info.id:null,props.type===ECommon_IM_Message_EntityType.TEAM?props.info.id:null)
+}
+const onPaste=async (event:ClipboardEvent)=>{
+    let items=event.clipboardData.items
+    for(let i=0;i<items.length;i++) {
+        let obj=items[i]
+        if(obj.type.includes("image")) {
+            let file=obj.getAsFile()
+            event.stopPropagation()
+            event.preventDefault()
+            imageRef.value.handleUpload(file)
+        }
+    }
+}
+
+const onImageComplete=()=>{
+    if(!isWheel) {
+        contentRef.value.scrollTop=contentRef.value.scrollHeight
+    }
+}
+
 defineExpose({
     scrollToBottom
 })

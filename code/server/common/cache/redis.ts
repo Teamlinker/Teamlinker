@@ -181,6 +181,11 @@ export class Redis {
             await this.setTTL(key,ttl);
         }
     }
+
+    async hDel(key:string,...fields:string[]){
+        await this.redis.hdel(key,...fields)
+    }
+
     async hGetAll(key:string) :Promise<object>{
         let exist=await this.exists(key)
         if(exist) {

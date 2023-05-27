@@ -1,11 +1,11 @@
 import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../../../common/model/workflow_node_field_type_config";
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
-import {EServer_Common_Event_Types} from "../../common/event/types";
 import {workflowNodeFieldTypeModel} from '../../../common/model/workflow_node_field_type';
 import {workflowNodeFieldTypeMapper} from './../mapper/field';
 import {ECommon_Field_Type, Field_Types} from "../../../common/field/type";
 import {ProjectIssueService} from "./issue";
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export  class FieldTypeService {
 
@@ -27,7 +27,7 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
         super(workflowNodeFieldTypeMapper)
     }
 
-    override async delete(eventPulish?: EServer_Common_Event_Types.Types): Promise<void> {
+    override async delete(eventPulish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete()
         await workflowNodeFieldTypeMapper.deleteWorkflowNodeField(this.getId());
         await ProjectIssueService.clearIssueValueByFieldTypeId(this.getId());

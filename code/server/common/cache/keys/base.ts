@@ -101,6 +101,9 @@ export class RedisHashKey extends RedisBaseKey<string> {
     },ttl?:number){
         await this.redis.hSet(this.name,value,ttl??this.ttl);
     }
+    async delField(...fields:string[]) {
+        await this.redis.hDel(this.name,...fields)
+    }
     async getAll():Promise<object> {
         let ret=await this.redis.hGetAll(this.name)
         return ret;

@@ -11,6 +11,7 @@ import {
 } from "../../../common/socket/types";
 import {instrument} from "@socket.io/admin-ui";
 import userRpcApi from "../../user/rpc/user";
+import {REDIS_USER} from "../cache/keys/user";
 
 let g_emitter:Emitter<ICommon_Socket_ServerToClientEvents>
 export function getSocketEmitterInstance() {
@@ -65,11 +66,13 @@ export class SocketIO {
             } else {
                 socket.data.organizationUserId=objOrganization.organizationUserId
                 socket.data.userId=objHandshake.userId
+                socket.data.organizationId=objOrganization.organizationId
                 next()
             }
         })
-        io.on("connection",(socket)=>{
+        io.on("connection",async (socket)=>{
             socket.join(socket.data.organizationUserId)
+            socket.join(socket.data.organizationId)
             if(callback) {
                 callback(socket)
             }

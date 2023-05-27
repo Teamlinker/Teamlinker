@@ -1,6 +1,7 @@
 import EventEmitter from "eventemitter3"
 import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
 import {ECommon_IM_Message_ContentType} from "../../../../../common/model/im_user_message";
+import {ECommon_User_Online_Status} from "../../../../../common/types";
 
 export enum EClient_EVENTBUS_TYPE {
     OPEN_PEOPLE_PROFILE="open_people_profile",
@@ -11,7 +12,11 @@ export enum EClient_EVENTBUS_TYPE {
     OPEN_WIKI_PROFILE="open_wiki_profile",
     OPEN_WIKI_ITEM="open_wiki_item",
     UPDATE_USER_INFO="update_user_info",
-    RECEIVE_IM_MESSAGE="receive_im_message"
+    RECEIVE_IM_MESSAGE="receive_im_message",
+    OPEN_IM_CHAT="open_im_chat",
+    UPDATE_ORGANIZATION_USER_STATUS="update_organization_user_status",
+    OPEN_MEETING="open_meeting",
+    LEAVE_MEETING="leave_meeting"
 }
 
 interface IClient_EventBus_Func {
@@ -29,6 +34,10 @@ interface IClient_EventBus_Func {
         type:ECommon_IM_Message_EntityType
     })=>void
     [EClient_EVENTBUS_TYPE.RECEIVE_IM_MESSAGE]:(chatType:ECommon_IM_Message_EntityType,fromOrganizationUserId:string,content:string,contentType:ECommon_IM_Message_ContentType,date:Date,toOrganizationUserId?:string,teamId?:string)=>void
+    [EClient_EVENTBUS_TYPE.OPEN_IM_CHAT]:(id:string,chatType:ECommon_IM_Message_EntityType)=>void
+    [EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS]:(organizationUserId:string,status:ECommon_User_Online_Status)=>void
+    [EClient_EVENTBUS_TYPE.OPEN_MEETING]:(meetingId:string,password:string)=>void
+    [EClient_EVENTBUS_TYPE.LEAVE_MEETING]:()=>void
 }
 
 interface IClient_EventBus_Emit_Func {

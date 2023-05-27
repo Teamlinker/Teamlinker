@@ -56,7 +56,7 @@ class RpcCalendarApi {
         let obj=await CalendarSettingService.getItemByExp({
             organization_user_id:organizationUserId
         })
-        if(obj) {
+        if(!obj) {
             throw Err.Calendar.settingNotFound
         }
         await obj.delete()

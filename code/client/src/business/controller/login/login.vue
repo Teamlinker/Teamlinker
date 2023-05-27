@@ -1,7 +1,9 @@
 <template>
 <a-row align="center" justify="center" style="height: 100%">
   <a-form :model="form" style="width: 600px" @submit="onSubmit">
-    <h3 style="text-align: center;margin-bottom: 50px">Teamlinker</h3>
+    <router-link :to="{name:'index'}" style="text-decoration: none;">
+	    <h3 style="text-align: center;margin-bottom: 50px">Teamlinker</h3>
+    </router-link>
     <a-form-item field="username" label="username" required>
       <a-input v-model="form.username" placeholder="please enter username"></a-input>
     </a-form-item>
@@ -9,7 +11,13 @@
       <a-input v-model="form.password" type="password" placeholder="please enter password"></a-input>
     </a-form-item>
     <a-form-item>
-      <a-button html-type="submit">Submit</a-button>
+	    <a-row style="justify-content: space-between;width: 100%">
+		    <a-button html-type="submit" type="primary">Submit</a-button>
+		    <a-space v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
+			    <a-button html-type="button" type="primary" status="success"  @click="onRegister">Register</a-button>
+			    <a-button html-type="button" type="primary" status="warning"  @click="onReset">Reset</a-button>
+		    </a-space>
+	    </a-row>
     </a-form-item>
   </a-form>
 </a-row>
@@ -22,6 +30,8 @@ import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
 import {NotificationWrapper} from "../../common/component/notification/notification";
 import {SessionStorage} from "../../common/storage/session";
+import md5 from "blueimp-md5"
+import {ECommon_Application_Mode} from "../../../../../common/types";
 
 let form=reactive({
   username:"",
@@ -32,7 +42,7 @@ const onSubmit=async ()=>{
   NotificationWrapper.init()
   let ret=await apiUser.login({
     username:form.username,
-    password:form.password
+    password:md5(form.password)
   })
   if(ret.code==0) {
     SessionStorage.remove("organizationId")
@@ -40,6 +50,14 @@ const onSubmit=async ()=>{
   } else {
     Message.error(ret.msg);
   }
+}
+
+const onRegister=async()=>{
+	await router.push("register")
+}
+
+const onReset=async ()=>{
+	await router.push("reset")
 }
 </script>
 

@@ -24,6 +24,7 @@ import {organizationUserModel} from "../../../../common/model/organization_user"
 import {memberTagMemberModel} from "../../../../common/model/member_tag_member";
 import {wikiModel} from "../../../../common/model/wiki";
 import {wikiItemModel} from "../../../../common/model/wiki_item";
+import {meetingRoomModel} from "../../../../common/model/meeting_room";
 
 export namespace REDIS_AUTH {
     export namespace Permission {
@@ -689,6 +690,56 @@ export namespace REDIS_AUTH {
                 }
             }
         }
-
+        export namespace Meeting {
+            export class createdByPureFromMeetingRoom extends BaseRedisStringCache<string> {
+                key="permission:meeting:room:{0}:createdByPure"
+                constructor(private meetingRoomId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,meetingRoomId),cacheRedisType<string>().String,1000*10);
+                }
+                override async getValue(): Promise<string> {
+                    let value:string;
+                    let mysql=getMysqlInstance()
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        value=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoin2Sql({
+                            model:meetingRoomModel
+                        },{
+                            model:organizationUserModel,
+                            expression:{
+                                id:{
+                                    model:meetingRoomModel,
+                                    field:"created_by"
+                                }
+                            }
+                        },{
+                            model:userModel,
+                            columns:["id"],
+                            expression:{
+                                id:{
+                                    model:organizationUserModel,
+                                    field:"user_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:meetingRoomModel,
+                                value:this.meetingRoomId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            value=ret.id
+                            await this.objRedis.set(value)
+                        } else {
+                            throw Err.Meeting.roomNotFound
+                        }
+                    }
+                    return value;
+                }
+            }
+        }
     }
 }

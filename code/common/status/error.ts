@@ -27,6 +27,10 @@ export namespace Err {
         admin:{
             code:7,
             msg:"user is admin"
+        },
+        interfaceForbidden:{
+            code:8,
+            msg:"interface is forbidden"
         }
     }
     export const User = {
@@ -57,6 +61,26 @@ export namespace Err {
         accessDenied:{
             code:1006,
             msg:"access denied"
+        },
+        notInMeeting:{
+            code:1007,
+            msg:"not in meeting"
+        },
+        userNameNotMail:{
+            code:1008,
+            msg:"username is not email"
+        },
+        userCacheExpired:{
+            code:1009,
+            msg:"user cache expire"
+        },
+        codeNotMatch:{
+            code:1010,
+            msg:"code not match"
+        },
+        timeTooShort:{
+            code:1011,
+            msg:"time interval is too short"
         }
     }
     export const Http = {
@@ -469,6 +493,37 @@ export namespace Err {
         teamNotFound:{
             code:12001,
             msg:"team not found"
+        }
+    }
+
+    export const Meeting={
+        roomNotFound:{
+            code:13000,
+            msg:"room not found"
+        },
+        roomStillActive:{
+            code:13001,
+            msg:"room still active"
+        },
+        privateRoomDeleteForbidden:{
+            code:13002,
+            msg:"private room delete forbidden"
+        },
+        endTimeLarger:{
+            code:13003,
+            msg:"start time less than end time"
+        },
+        startTimeLess:{
+            code:13004,
+            msg:"start time less than current time one hour"
+        },
+        passwordWrong:{
+            code:13005,
+            msg:"password wrong"
+        },
+        notInMeeting:{
+            code:13006,
+            msg:"not in meeting"
         }
     }
 }

@@ -1,6 +1,6 @@
 import {Permission_Types} from '../permission/permission';
 import {ICommon_Model_Organization} from './../model/organization';
-import {ECommon_Services} from './../types';
+import {ECommon_Services, ECommon_User_Online_Status} from './../types';
 import {
     ICommon_Route_Res_Member_Tag_Member,
     ICommon_Route_Res_Organization_FilterUserAndTeam,
@@ -301,7 +301,8 @@ const api={
                     id:string,
                     name:string,
                     photo:string,
-                    type:ECommon_IM_Message_EntityType
+                    type:ECommon_IM_Message_EntityType,
+                    status?:ECommon_User_Online_Status
                 }
             }>{},
             permission:[Permission_Types.Organization.READ]
@@ -315,6 +316,76 @@ const api={
             }>{},
             res:<ICommon_Route_Res_Organization_FilterUserAndTeam>{},
             permission:[Permission_Types.Organization.READ]
+        },
+        changeUserStatus:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/user/status",
+            req:<{
+                status:ECommon_User_Online_Status.ONLINE|ECommon_User_Online_Status.BUSY
+            }>{},
+            res:{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        getUserStatus:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user/status",
+            req:<{
+                organizationUserId?:string
+            }>{},
+            res:<{
+                status:ECommon_User_Online_Status
+            }>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        getUserStatusList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/user/statuslist",
+            req:<{
+                organizationUserIds:string[]
+            }>{},
+            res:<{
+                [organizationUserIds:string]:ECommon_User_Online_Status
+            }>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        createUser:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/user/offline/new",
+            req:<{
+                organizationId:string,
+                password:string,
+                username:string,
+                roleId:string,
+                nickname:string,
+                active:number,
+                title?:string,
+                job?:string,
+                email?:string,
+                phone?:string,
+                location?:string,
+                remark?:string
+            }>{},
+            res:<ICommon_Route_Res_Organization_User_Item>{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        resetUserPassword:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/user/offline/password",
+            req:<{
+                organizationUserId:string,
+                password:string
+            }>{},
+            res:{},
+            permission:[Permission_Types.Organization.ADMIN]
+        },
+        deleteUserForOffline:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/user/offline",
+            req:<{
+                organizationUserId:string
+            }>{},
+            res:{},
+            permission:[Permission_Types.Organization.ADMIN]
         }
     }
 }

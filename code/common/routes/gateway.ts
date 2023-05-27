@@ -1,6 +1,5 @@
-import { ECommon_Services } from "../types";
-import { ECommon_Application_Mode } from './../../server/common/app/app';
-import { ECommon_HttpApi_Method } from "./types";
+import {ECommon_Application_Mode, ECommon_Services} from "../types";
+import {ECommon_HttpApi_Method} from "./types";
 
 const api={
     baseUrl:"/gateway",

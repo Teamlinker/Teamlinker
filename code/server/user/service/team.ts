@@ -7,10 +7,9 @@ import rpcAuthApi from "../../auth/rpc/auth";
 import rpcFileApi from "../../file/rpc/file";
 import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from './../../../common/model/role';
 import {teamModel} from './../../../common/model/team';
-import {EServer_Common_Event_Types} from "../../common/event/types";
 import {OrganizationService} from "./organization";
 import {emitServiceEvent} from "../../common/event/event";
-import Auth = EServer_Common_Event_Types.Auth;
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     constructor(){
@@ -86,7 +85,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         }
         let member=await objOrganization.memberInfo(memberId);
         let role = await rpcAuthApi.addRoleMember(this.item.id,roleId,ECommon_Model_Organization_Member_Type.USER,memberId);
-        emitServiceEvent(Auth.TEAM_USER_ADD,this.item.id, memberId)
+        emitServiceEvent("teamUserAdd",this.item.id, memberId)
         return {
             ...member,
             role
@@ -99,7 +98,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         }
         await teamMapper.removeMember(this.item.id,organizationUserId)
         await rpcAuthApi.removeRoleMember(this.item.id,ECommon_Model_Organization_Member_Type.USER,organizationUserId);
-        emitServiceEvent(Auth.TEAM_USER_DELETE,this.item.id,organizationUserId)
+        emitServiceEvent("teamUserDelete",this.item.id,organizationUserId)
     }
 
     async changeRole(organizationUserId:string,roleId:string){
@@ -114,7 +113,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         }
         let member=await objOrganization.memberInfo(organizationUserId);
         let role=await rpcAuthApi.changeRoleMember(this.item.id,roleId,ECommon_Model_Organization_Member_Type.USER,organizationUserId)
-        emitServiceEvent(Auth.TEAM_USER_EDIT,this.item.id,organizationUserId)
+        emitServiceEvent("teamUserEdit",this.item.id,organizationUserId)
         return {
             ...member,
             role
@@ -173,7 +172,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         return ret;
     }
 
-    override async delete(eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await teamMapper.clearMemberByItemId(this.getId());
     }

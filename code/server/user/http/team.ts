@@ -1,7 +1,6 @@
 import teamApi from "../../../common/routes/team";
 import {Err} from '../../../common/status/error';
 import {DComponent} from "../../common/decorate/component";
-import {EServer_Common_Event_Types} from "../../common/event/types";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import {TeamService} from "../service/team";
 import {OrganizationService, OrganizationUserService} from './../service/organization';
@@ -60,7 +59,7 @@ class TeamController {
         if(!team) {
             throw Err.Team.teamNotFound
         }
-        await team.delete(EServer_Common_Event_Types.Team.DELETE)
+        await team.delete("teamDelete")
     }
     
     @DHttpApi(teamApi.routes.roles)

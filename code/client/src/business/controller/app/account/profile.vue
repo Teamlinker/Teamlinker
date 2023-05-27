@@ -28,6 +28,7 @@ import {reactive} from "vue";
 import {apiUser} from "../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {SessionStorage} from "../../../common/storage/session";
+import md5 from "blueimp-md5";
 
 const store=useDesktopStore()
 const form=reactive({
@@ -57,7 +58,7 @@ const onSubmit=async ()=>{
   if(form.password) {
     arrPromise.push(apiUser.resetPassword({
       userId:SessionStorage.get("userId"),
-      password:form.password
+      password:md5(form.password)
     }))
   }
   let [res1,res2]=await Promise.all(arrPromise)

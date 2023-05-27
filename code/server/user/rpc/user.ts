@@ -9,6 +9,9 @@ import {OrganizationService, OrganizationUserService} from './../service/organiz
 import rpcFileApi from "../../file/rpc/file";
 import {IServer_Common_RPC_User_CheckSession} from "../types/config";
 import {Err} from "../../../common/status/error";
+import {ECommon_User_Online_Status} from "../../../common/types";
+import CommonUtil from "../../common/util/common";
+
 
 class RpcUserApi {
     
@@ -116,19 +119,19 @@ class RpcUserApi {
         let obj1=new AdminService
         obj1.assignItem({
             username:"teamlinker",
-            password:"teamlinker"
+            password:CommonUtil.md5("teamlinker")
         })
         await obj1.create()
         let obj2=new AdminService
         obj2.assignItem({
             username:"wgq_admin",
-            password:"123456"
+            password:CommonUtil.md5("123456")
         })
         await obj2.create()
         let obj3=new AdminService
         obj3.assignItem({
             username:"hxx_admin",
-            password:"123456"
+            password:CommonUtil.md5("123456")
         })
         await obj3.create()
         return [obj1.getId(),obj2.getId(),obj3.getId()]
@@ -139,19 +142,19 @@ class RpcUserApi {
         let obj1=new UserService
         obj1.assignItem({
             username:"sx",
-            password:"sx"
+            password:CommonUtil.md5("sx")
         })
         await obj1.create()
         let obj2=new UserService
         obj2.assignItem({
             username:"wgq",
-            password:"wgq"
+            password:CommonUtil.md5("wgq")
         })
         await obj2.create()
         let obj3=new UserService
         obj3.assignItem({
             username:"hxx",
-            password:"hxx"
+            password:CommonUtil.md5("hxx")
         })
         await obj3.create()
         return [obj1.getId(),obj2.getId(),obj3.getId()]
@@ -192,6 +195,11 @@ class RpcUserApi {
         return ret?.getId()
     }
 
+    async getOrganizationUserName(organizationUserId:string) {
+        let ret=await OrganizationUserService.getItemById(organizationUserId)
+        return ret?.getItem()?.nickname
+    }
+
     async getTeamList(organizationUserId:string) {
         let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId)
         if(!objOrganizationUser) {
@@ -213,6 +221,48 @@ class RpcUserApi {
         } else {
             return []
         }
+    }
+
+    async keepAlive(userId:string) {
+        let objUser=await UserService.getItemById(userId)
+        if(!objUser) {
+            throw Err.User.userNotFound
+        }
+        await objUser.keepAlive()
+    }
+
+    async changeOnlineStatus(organizationUserId:string,status:ECommon_User_Online_Status) {
+        let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId)
+        if(!objOrganizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        let preStatus=await objOrganizationUser.changeOnlineStatus(status)
+        return preStatus
+    }
+
+    async endMeetingStatus(organizationUserId:string) {
+        let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId)
+        if(!objOrganizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        await objOrganizationUser.endMeetingStatus()
+    }
+
+    async startMeetingStatus(organizationUserId:string,meetingId:string) {
+        let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId)
+        if(!objOrganizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        await objOrganizationUser.startMeetingStatus(meetingId)
+    }
+
+    async getMeetingId(organizationUserId:string) {
+        let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId)
+        if(!objOrganizationUser) {
+            throw Err.Organization.userNotFound
+        }
+        let ret=await objOrganizationUser.getMeetingId()
+        return ret;
     }
 }
 export default new RpcUserApi;

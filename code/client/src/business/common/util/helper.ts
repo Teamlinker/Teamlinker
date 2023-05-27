@@ -70,3 +70,22 @@ export function clone(o){
     }
     return ret;
 }
+
+export function calculateShortName(name:string) {
+    if(name.includes(" ")) {
+        let arr=name.split(" ")
+        return arr[0][0].toUpperCase()+arr[1][0].toUpperCase()
+    } else {
+        return name[0].toUpperCase()
+    }
+}
+
+export function compressImage (img:CanvasImageSource, width, height, ratio) {
+    let canvas = document.createElement('canvas')
+    canvas.width = width;
+    canvas.height = height;
+    let ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, width, height);
+    let img64 = canvas.toDataURL("image/jpeg", ratio);
+    return img64;
+}

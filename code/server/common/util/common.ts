@@ -104,4 +104,18 @@ export default class CommonUtil {
             setTimeout(resolve,ms)
         })
     }
+
+    static generateRandomNumbers(len:number) {
+        let result="";
+        for(let i=0;i<6;i++){
+            let intValue=Math.floor(Math.random()*10);
+            result=result+intValue;
+        }
+        return result
+    }
+
+    static md5(password:string) {
+        let md5 = crypto.createHash('md5');
+        return md5.update(password).digest('hex');
+    }
 }

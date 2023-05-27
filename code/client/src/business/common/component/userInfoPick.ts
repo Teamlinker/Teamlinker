@@ -1,16 +1,24 @@
 import {apiOrganization} from "../request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../event/event";
 import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
+import {ECommon_User_Online_Status} from "../../../../../common/types";
 
 class UserTeamInfoPick {
     private map = new Map<string, {
         id: string,
         name: string,
         photo: string,
-        type:ECommon_IM_Message_EntityType
+        type:ECommon_IM_Message_EntityType,
+        status?:ECommon_User_Online_Status
     }>()
     private pendingSet = new Set<string>()
-
+    constructor () {
+        eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS, (organizationUserId, status) => {
+            if(this.map.has(organizationUserId)) {
+                this.map.get(organizationUserId).status=status
+            }
+        })
+    }
     getInfos(ids: {
         id:string,
         type:ECommon_IM_Message_EntityType
@@ -19,7 +27,8 @@ class UserTeamInfoPick {
             id: string,
             name: string,
             photo: string,
-            type:ECommon_IM_Message_EntityType
+            type:ECommon_IM_Message_EntityType,
+            status?:ECommon_User_Online_Status
         }
     } {
         let arr: ReturnType<UserTeamInfoPick["getInfos"]> = {}

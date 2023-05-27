@@ -23,7 +23,7 @@ class IMUserMessageMapper extends Mapper<typeof iMUserMessageModel> {
         let ret=await mysql.execute(generateQuerySql(iMUserMessageModel,null,{
             created_time:{
                 exp:"<",
-                value:lastTime?moment(lastTime).format("YYYY-MM-DD HH:mm:ss:SSS"):moment().format("YYYY-MM-DD HH:mm:ss:SSS")
+                value:lastTime?moment(lastTime).format("YYYY-MM-DD HH:mm:ss.SSS"):moment().format("YYYY-MM-DD HH:mm:ss.SSS")
             },
             from_organization_user_id:{
                 exp:"in",
@@ -56,7 +56,7 @@ class IMTeamMessageMapper extends Mapper<typeof iMTeamMessageModel> {
         let ret=await mysql.execute(generateQuerySql(iMTeamMessageModel,null,{
             created_time:{
                 exp:"<",
-                value:lastTime?moment(lastTime).format("YYYY-MM-DD HH:mm:ss:SSS"):moment().format("YYYY-MM-DD HH:mm:ss:SSS")
+                value:lastTime?moment(lastTime).format("YYYY-MM-DD HH:mm:ss.SSS"):moment().format("YYYY-MM-DD HH:mm:ss.SSS")
             },
             team_id:teamId
         },"and",{

@@ -11,6 +11,7 @@ export interface ICommon_Model_IM_User_Message {
     created_time:Date,
     content:string,
     content_type:ECommon_IM_Message_ContentType
+    file_id:string
 }
 export const Table_IM_User_Message="im_user_message"
 

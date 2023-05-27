@@ -11,7 +11,6 @@ export class ProjectModuleService extends Entity<typeof projectModuleModel,typeo
         return ret
     }
     override async delete(){
-        await super.loadItem()
         await super.delete()
         moduleMapper.deleteChildren(this.item.id,this.item.project_id);
     }

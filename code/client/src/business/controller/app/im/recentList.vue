@@ -1,10 +1,28 @@
 <template>
   <a-menu v-model:selected-keys="selectedKeys">
-    <a-menu-item v-for="item in recentList" :key="item.id">
+    <a-menu-item v-for="(item,index) in recentList" :key="item.id">
       <template #icon>
-        <a-avatar :image-url="item.photo" :size="24"></a-avatar>
+        <a-avatar :image-url="item.photo" :size="24" :trigger-icon-style="{height:'10px',width:'10px',lineHeight:'10px',right:'-2px',bottom:'-2px',...(item.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
+          {{calculateShortName(item.name)}}
+          <template #trigger-icon v-if="item.type===ECommon_IM_Message_EntityType.USER">
+            <div style="height: 100%;width: 100%;background-color: #03ad03;border-radius: 6px" v-if="item.status===ECommon_User_Online_Status.ONLINE"></div>
+            <icon-stop :stroke-width="5" style="color: darkred" v-else-if="item.status===ECommon_User_Online_Status.BUSY"></icon-stop>
+            <icon-video-camera :stroke-width="5" style="color: red" v-else-if="item.status===ECommon_User_Online_Status.MEETING"></icon-video-camera>
+            <div style="height: 100%;width: 100%;background-color: gray;border-radius: 6px" v-else-if="item.status===ECommon_User_Online_Status.OFFLINE"></div>
+          </template>
+        </a-avatar>
       </template>
-      {{item.name}}
+      <a-dropdown trigger="contextMenu" alignPoint >
+        <div>
+          <a-badge :count="item.count!==undefined?item.count:0" dot :offset="[6,-2]">
+            {{item.name}}
+          </a-badge>
+        </div>
+        <template #content>
+          <a-doption @click="onProfile(item)">Profile</a-doption>
+          <a-doption @click="onClose(item,index)">Close</a-doption>
+        </template>
+      </a-dropdown>
     </a-menu-item>
   </a-menu>
 </template>
@@ -17,16 +35,25 @@ import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
 import {userTeamInfoPick} from "../../../common/component/userInfoPick";
 import {SessionStorage} from "../../../common/storage/session";
+import {calculateShortName} from "../../../common/util/helper";
+import {ECommon_User_Online_Status} from "../../../../../../common/types";
 
 const emit=defineEmits<{
   (e:"select",item:RecentItem):void
+}>()
+const props=defineProps<{
+  initData?:{
+    id:string,
+    type:ECommon_IM_Message_EntityType
+  }
 }>()
 export type RecentItem = {
   id: string,
   name: string,
   photo: string,
   count?:number,
-  type:ECommon_IM_Message_EntityType
+  type:ECommon_IM_Message_EntityType,
+  status?:ECommon_User_Online_Status
 }
 const selectedKeys=ref<string[]>([])
 const recentList = ref<RecentItem[]>([])
@@ -55,7 +82,7 @@ watch(selectedKeys,()=>{
 const socket=SocketIOClient.get(ECommon_Socket_Type.IM)
 const getRecentList = async () => {
   let localList = SessionStorage.get("imRecentList")??[];
-  let unReadList=await socket.getSocket().emitWithAck("im_unread_messages")
+  let unReadList=await socket.getSocket().emitWithAck("im_unread_message_list")
   let obj = userTeamInfoPick.getInfos([...localList,...unReadList.map(item=>{
     return {
       id:item.entity_id,
@@ -66,7 +93,7 @@ const getRecentList = async () => {
     return {
       id:item.entity_id,
       type:item.entity_type,
-      count:item.count
+      count:item.count,
     }
   }),...localList.filter(item=>{
     return !unReadList.map(item=>item.entity_id).includes(item.id)
@@ -81,25 +108,33 @@ const getRecentList = async () => {
       name:obj[item.id]?obj[item.id].name:"unknown",
       photo:obj[item.id]?obj[item.id].photo:"",
       type:item.type,
-      count:item.count
+      count:item.count,
+      status:obj[item.id]!==undefined?obj[item.id].status:ECommon_User_Online_Status.OFFLINE
     }
   })
+  if(props.initData) {
+    addRecentItem(props.initData.id,props.initData.type,true)
+  }
 }
 const handleUserInfo = (id: string, info: {
     id: string,
     name: string,
-    photo: string
+    photo: string,
+    status?:ECommon_User_Online_Status
 }) => {
   for(let obj of recentList.value) {
     if(obj.id==id) {
       obj.name=info.name;
       obj.photo=info.photo
+      if(info.status!==undefined) {
+        obj.status=info.status
+      }
       break
     }
   }
 }
-const addRecentItem=(id:string,type:ECommon_IM_Message_EntityType)=>{
-  let index=-1
+const addRecentItem=(id:string,type:ECommon_IM_Message_EntityType,selected:boolean):RecentItem=>{
+  let index=-1,item:RecentItem
   for(let i=0;i<recentList.value.length;i++) {
     if(recentList.value[i].id===id) {
       index=i;
@@ -107,9 +142,9 @@ const addRecentItem=(id:string,type:ECommon_IM_Message_EntityType)=>{
     }
   }
   if(index>-1) {
-    let obj=recentList.value[index]
+    item=recentList.value[index]
     recentList.value.splice(index,1)
-    recentList.value.unshift(obj)
+    recentList.value.unshift(item)
   } else {
     let obj=userTeamInfoPick.getInfos([
       {
@@ -117,42 +152,70 @@ const addRecentItem=(id:string,type:ECommon_IM_Message_EntityType)=>{
         type
       }
     ])
-    recentList.value.unshift({
+    item={
       id:id,
       type:type,
       name:obj[id]?obj[id].name:"unknown",
       photo:obj[id]?obj[id].photo:"",
-      count:0
-    })
+      count:0,
+      status:obj[id]!==undefined?obj[id].status:ECommon_User_Online_Status.OFFLINE
+    }
+    recentList.value.unshift(item)
   }
-  selectedKeys.value=[id]
+  if(selected && !selectedKeys.value.includes(id)) {
+    selectedKeys.value=[id]
+  }
+  return item
 }
-const updateRecentItem=(id:string) =>{
-  let item:RecentItem,index
+
+const checkRecentItem=(id:string)=> {
+  let item:RecentItem
   for(let i=0;i<recentList.value.length;i++) {
     let obj=recentList.value[i]
     if(obj.id==id) {
       item=obj;
-      index=i
       break
     }
   }
-  if(item) {
-    recentList.value.splice(index,1)
-    recentList.value.unshift(item)
+  return item
+}
+
+const onProfile=(item:RecentItem)=>{
+  if(item.type===ECommon_IM_Message_EntityType.USER) {
+    eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,item.id);
+  } else if(item.type===ECommon_IM_Message_EntityType.TEAM) {
+    eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_TEAM_PROFILE,item.id);
   }
 }
+
+const onClose=(item:RecentItem,index:number)=>{
+  recentList.value.splice(index,1)
+  if(selectedKeys.value.includes(item.id)) {
+    selectedKeys.value=[]
+  }
+}
+
+const handleStatus=(organizationUserId:string,status:ECommon_User_Online_Status)=>{
+  for(let obj of recentList.value) {
+    if(obj.id===organizationUserId) {
+      obj.status=status
+      break
+    }
+  }
+}
+
 onBeforeMount(() => {
   eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_USER_INFO, handleUserInfo)
+  eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS, handleStatus)
   getRecentList()
-
 })
 onBeforeUnmount(() => {
   eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_USER_INFO, handleUserInfo)
+  eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS, handleStatus)
 })
 defineExpose({
   addRecentItem,
-  updateRecentItem
+  checkRecentItem
 })
 </script>
 

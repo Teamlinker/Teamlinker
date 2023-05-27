@@ -2,7 +2,8 @@
   <div ref="root">
     <a-space>
       <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button placeholder="please type username or nickname"></a-input-search>
-      <a-button type="primary" @click="onInvite">Invite</a-button>
+      <a-button type="primary" @click="onInvite" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">Invite</a-button>
+	    <a-button type="primary" @click="onCreate" v-else>Create</a-button>
     </a-space>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #username="{record}">
@@ -36,6 +37,7 @@
             <template #content>
               <a-doption @click="onEditProfile(record)">Profile & Role</a-doption>
               <a-doption @click="onEditTag(record)">Tag</a-doption>
+	            <a-doption v-if="$deployMode.value===ECommon_Application_Mode.OFFLINE" @click="onResetPassword(record)">Reset Password</a-doption>
             </template>
           </a-dropdown-button>
           <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
@@ -50,11 +52,13 @@ import {getCurrentInstance, markRaw, reactive, ref} from "vue";
 import {apiOrganization, DCSType} from "../../../../common/request/request";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
-import moment from "moment";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditUserProfile from "./editUserProfile.vue";
 import BindTag from "./bindTag.vue";
 import {SessionStorage} from "../../../../common/storage/session";
+import {ECommon_Application_Mode} from "../../../../../../../common/types";
+import CreateUserProfileOffline from "./createUserProfileOffline.vue";
+import moment from "moment";
 
 const columns=[
   {
@@ -147,14 +151,36 @@ const onEditTag=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>
 const onDelete=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this user from this organization?")
   if(ret) {
-    let res=await apiOrganization.deleteUser({
+    let res=await (appContext.config.globalProperties.$deployMode.value===ECommon_Application_Mode.ONLINE?apiOrganization.deleteUser({
       organizationUserId:item.organizationUser.id
-    })
+    }):apiOrganization.deleteUserForOffline({
+	    organizationUserId:item.organizationUser.id
+    }))
     if(res?.code==0) {
       Message.success("remove success")
       search(pagination.current)
     }
   }
+}
+
+const onCreate=async ()=>{
+	let ret=await Dialog.open(root.value,appContext,"Create",markRaw(CreateUserProfileOffline))
+	if(ret) {
+		search(pagination.current)
+	}
+}
+
+const onResetPassword=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
+	let ret=await Dialog.input(root.value,appContext,"type new password")
+	if(ret) {
+		let res=await apiOrganization.resetUserPassword({
+			organizationUserId:item.organizationUser.id,
+			password:ret
+		})
+		if(res?.code==0) {
+			Message.info("reset success")
+		}
+	}
 }
 </script>
 

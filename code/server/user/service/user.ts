@@ -10,10 +10,76 @@ import {ECommon_User_Type, ICommon_Model_User, userModel} from './../../../commo
 import rpcAuthApi from "../../auth/rpc/auth";
 import {ICommon_Model_Team} from "../../../common/model/team";
 import {ECommon_Model_Role_Reserved} from "../../../common/model/role";
+import {OrganizationUserService} from "./organization";
+import CommonUtil from "../../common/util/common";
+import {getMailInstance} from "../../common/mail/mail";
+
 
 export class UserService extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
         super(userMapper)
+    }
+
+    static async register(username:string,password:string) {
+        let obj=await userMapper.getUserByName(username)
+        if(obj) {
+            throw Err.User.userExists
+        } else if(!username.includes("@")) {
+            throw Err.User.userNameNotMail
+        }
+        let objRedis=REDIS_USER.registerCacheInfo(username)
+        let code=CommonUtil.generateRandomNumbers(6)
+        await objRedis.set({
+            code:code,
+            username,
+            password,
+            sendTime:Date.now()
+        })
+        let mail=getMailInstance()
+        mail.send(username,"Teamlinker Verification Code",code)
+    }
+
+    static async resendCode(username:string) {
+        let objRedis=REDIS_USER.registerCacheInfo(username)
+        let exist=await objRedis.exists()
+        if(!exist) {
+            throw Err.User.userCacheExpired
+        }
+        let content=await objRedis.get()
+        if(Date.now()-content.sendTime<60*1000) {
+            throw Err.User.timeTooShort
+        }
+        let code=CommonUtil.generateRandomNumbers(6)
+        content.code=code
+        content.sendTime=Date.now()
+        await objRedis.set(content)
+        let mail=getMailInstance()
+        mail.send(username,"Teamlinker Verification Code",code)
+    }
+
+    static async conformRegister(username:string,code:string) {
+        let obj=await userMapper.getUserByName(username)
+        if(obj) {
+            throw Err.User.userExists
+        } else if(!username.includes("@")) {
+            throw Err.User.userNameNotMail
+        }
+        let objRedis=REDIS_USER.registerCacheInfo(username)
+        let exist=await objRedis.exists()
+        if(!exist) {
+            throw Err.User.userCacheExpired
+        }
+        let content=await objRedis.get()
+        if(content.code!==code) {
+            throw Err.User.codeNotMatch
+        }
+        let objUser=new UserService()
+        objUser.assignItem({
+            username,
+            password:content.password
+        })
+        await objUser.create()
+        objRedis.del()
     }
 
     static async getItemByName(name:string):Promise<InstanceType<typeof UserService>>{
@@ -25,6 +91,48 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         } else {
             return null;
         }
+    }
+
+    async resetCode() {
+        let objRedis=await REDIS_USER.resetCode(this.getId())
+        let mail=getMailInstance()
+        let exist=await objRedis.exists()
+        if(!exist) {
+            let code=CommonUtil.generateRandomNumbers(6)
+            await objRedis.set({
+                userId:this.getId(),
+                sendTime:Date.now(),
+                code:code
+            })
+            mail.send(this.getItem().username,"Teamlinker Verification Code",code)
+        } else {
+            let content=await objRedis.get()
+            if(Date.now()-content.sendTime<1000*60) {
+                throw Err.User.timeTooShort
+            } else {
+                let code=CommonUtil.generateRandomNumbers(6)
+                content.sendTime=Date.now()
+                content.code=code
+                await objRedis.set(content)
+                mail.send(this.getItem().username,"Teamlinker Verification Code",code)
+            }
+        }
+    }
+
+    async reset(password:string,code:string) {
+        let objRedis=await REDIS_USER.resetCode(this.getId())
+        let exist=await objRedis.exists()
+        if(!exist) {
+            throw Err.User.userCacheExpired
+        }
+        let content=await objRedis.get()
+        if(content.code!==code) {
+            throw Err.User.codeNotMatch
+        }
+        this.assignItem({
+            password
+        })
+        await this.update()
     }
 
     async startSession():Promise<string>{
@@ -53,6 +161,14 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         })
     }
 
+    async keepAlive() {
+        let obj=REDIS_USER.token(this.getId())
+        let exist=await obj.exists()
+        if(exist) {
+            await obj.setTTL(3600)
+        }
+    }
+
     async stopSession() {
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
@@ -60,7 +176,14 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         let session=REDIS_USER.token(this.item.id)
         await session.del()
         let sessionOrganization=REDIS_USER.organizationInfo(this.item.id)
-        await sessionOrganization.del();
+        let info=await sessionOrganization.get()
+        if(info) {
+            await sessionOrganization.del();
+            let objOrganizationUser=await OrganizationUserService.getItemById(info.organizationUserId)
+            if(objOrganizationUser) {
+                await objOrganizationUser.clearStatus()
+            }
+        }
     }
 
     async active(active:number) {

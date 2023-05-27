@@ -6,6 +6,7 @@ import {windowManager} from "../../../../teamOS/window/windowManager";
 import {markRaw} from "vue";
 import Im from "../../../controller/app/im/im.vue";
 import {SessionStorage} from "../../../common/storage/session";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
 export const iconIM=new Icon("im",iconGroupMap["im"])
 iconIM.addEventListener("dbClick",item => {
@@ -24,6 +25,27 @@ iconIM.addEventListener("dbClick",item => {
             },
             default:{
                 name:"im"
+            }
+        }
+    ],"im");
+    windowManager.open(win);
+})
+eventBus.on(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,(id, chatType) => {
+    const win=new Window("im",ETeamOS_Window_Type.SIMPLE, "im",false,[
+        {
+            id:v4(),
+            meta:{
+                title:"im"
+            },
+            components:{
+                im:markRaw(Im)
+            },
+            default:{
+                name:"im",
+                props:{
+                    id:id,
+                    chatType:chatType
+                }
             }
         }
     ],"im");

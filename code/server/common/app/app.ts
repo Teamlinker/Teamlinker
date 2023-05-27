@@ -14,6 +14,7 @@ import {generateHttpErrorResponse} from "../util/http";
 import {init} from "../util/init";
 import * as fs from "fs";
 import {SocketIO} from "../socket/socket";
+import {ECommon_Application_Mode} from "../../../common/types";
 
 var pipe = function (from, to): Promise<Buffer> {
     return new Promise(function (resolve) {
@@ -29,10 +30,7 @@ var pipe = function (from, to): Promise<Buffer> {
         })
     })
 }
-export enum ECommon_Application_Mode {
-    ONLINE,
-    OFFLINE
-}
+
 export default abstract class Application{
     private app=new Koa()
     public static needReset:boolean=false
@@ -57,7 +55,13 @@ export default abstract class Application{
         "port":number,
         "jwt": string,
         "version":string,
-        "mq":string
+        "mq":string,
+        "mail":{
+            "host": string,
+            "port": number,
+            "user":string,
+            "pass":string
+        }
     }
     Application(){
 

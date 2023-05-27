@@ -2,7 +2,7 @@ import {Entity} from "../../common/entity/entity";
 import {calendarModel} from "../../../common/model/calendar";
 import {calendarEventMapper, calendarMapper, calendarSettingMapper} from "../mapper/calendar";
 import {calendarSettingModel} from "../../../common/model/calendar_setting";
-import {EServer_Common_Event_Types} from "../../common/event/types";
+import {IServer_Common_Event_Types} from "../../common/event/types";
 import {calendarEventModel, ECommon_Calendar_Recurring_Type} from "../../../common/model/calendar_event";
 import userRpcApi from "../../user/rpc/user"
 import {generateSnowId} from "../../common/util/sql";
@@ -18,7 +18,7 @@ export class CalendarService extends Entity<typeof calendarModel,typeof calendar
         return ret;
     }
 
-    override async delete(eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await calendarMapper.clearEvent(this.getId())
     }
@@ -122,7 +122,7 @@ export class CalendarEventService extends Entity<typeof calendarEventModel,typeo
         }
     }
 
-    override async delete(eventPublish?: EServer_Common_Event_Types.Types): Promise<void> {
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await calendarEventMapper.clearGuestList(this.getId())
     }

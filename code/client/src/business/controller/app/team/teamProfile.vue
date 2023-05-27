@@ -20,6 +20,12 @@
               <a-space size="large">
                 <a-button type="primary" html-type="submit">Save</a-button>
                 <a-button status="danger" html-type="button" v-if="checkPermission(permission,Permission_Types.Team.DELETE)" @click="onDelete">Delete</a-button>
+                <a-button type="outline" size="small" html-type="button" @click="onMessage">
+                  <template #icon>
+                    <icon-message></icon-message>
+                  </template>
+                  Message
+                </a-button>
               </a-space>
             </a-form-item>
           </a-form>
@@ -29,7 +35,13 @@
             <a-list-item>
               <a-list-item-meta>
                 <template #title>
-                  {{basic.name}}
+                  {{basic.name}}&nbsp;&nbsp;
+                  <a-button type="outline" size="mini" html-type="button" @click="onMessage">
+                    <template #icon>
+                      <icon-message></icon-message>
+                    </template>
+                    Message
+                  </a-button>
                 </template>
                 <template #description>
                   <a-space direction="vertical">
@@ -107,6 +119,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import EditTeamMemberRole from "../setting/user&team/editTeamMemberRole.vue";
 import EditTeamRole from "../setting/role/team/editTeamRole.vue";
 import {checkPermission} from "../../../common/util/helper";
+import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
 
 const props=defineProps<{
   teamId:string
@@ -353,6 +366,10 @@ const onAddMember=async ()=>{
   if(ret) {
     listUser(1);
   }
+}
+
+const onMessage=()=>{
+  eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,props.teamId,ECommon_IM_Message_EntityType.TEAM)
 }
 </script>
 
