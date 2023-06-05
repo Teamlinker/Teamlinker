@@ -1,14 +1,14 @@
 import {REDIS_AUTH} from '../../common/cache/keys/auth';
 import {DComponent} from '../../common/decorate/component';
 import {PermissionBase} from './base';
-import {ECommon_Model_Role_Reserved} from "../../../common/model/role";
+import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../common/model/role";
 import {Err} from "../../../common/status/error";
 import {Permission_Types} from "../../../common/permission/permission";
 
 @DComponent
 class PermissionProject extends PermissionBase {
     fieldName="projectId"
-    async translateToField({commentId,projectIssueId,labelId,moduleId,projectReleaseId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,labelId:string,moduleId:string,projectReleaseId:string }): Promise<string> {
+    async translateToField({commentId,projectIssueId,labelId,moduleId,projectReleaseId,roleId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,labelId:string,moduleId:string,projectReleaseId:string ,roleId:string}): Promise<string> {
         let projectId:string
         if(commentId) {
             let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssueComment(commentId);
@@ -30,7 +30,13 @@ class PermissionProject extends PermissionBase {
             let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssue(projectReleaseId);
             projectId=await obj.getValue();
             return projectId;
-        } 
+        } else if(roleId) {
+            let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(roleId);
+            let value=await objRole.getValue()
+            if(value?.type===ECommon_Model_Role_Type.PROJECT) {
+                return value.item_id
+            }
+        }
     }
 
     async generatorValue({organizationUserId,projectId}: { [param: string]: any; organizationUserId?: string; isAdmin?: boolean;projectId:string }):Promise<number> {

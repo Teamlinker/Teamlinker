@@ -25,9 +25,9 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
         if(arr[2].length==1) {
             arr[2]="0"+arr[2]
         }
-        let dirPath = path.join(Application.teamlinkerPath,arr[0]+arr[2]+arr[1])
+        let dirPath = path.join(Application.uploadPath,arr[0]+arr[2]+arr[1])
         let filePath=path.join(dirPath,file.md5)+file.fileName.substr(file.fileName.lastIndexOf("."));
-        let dbPath=filePath.substring(Application.teamlinkerPath.length);
+        let dbPath=filePath.substring(Application.uploadPath.length);
         await fs.ensureDir(dirPath)
         fs.writeFile(filePath,file.data)
         this.item.path=dbPath

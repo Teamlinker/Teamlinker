@@ -1,5 +1,5 @@
 <template>
-	<div style="width: 100%;height: 100%;overflow-x: hidden;overflow-y:auto;background-color: rgb(25,27,31)">
+	<div style="width: 100%;height: 100%;overflow-x: hidden;overflow-y:auto;background-color: rgb(25,27,31)" v-if="$deployMode.value!==ECommon_Application_Mode.OFFLINE">
 		<div style="height: 70px;width: 100%;display: flex;justify-content: space-between;align-items: center;padding: 0 10px;box-sizing: border-box">
 			<a-space size="large">
 				<h2 style="color: white;">
@@ -24,7 +24,7 @@
 				<a-button size="large" type="primary" shape="round" status="success" @click="onLogin">
 					Sign In
 				</a-button>
-				<a-button size="large" type="primary" shape="round" status="warning">
+				<a-button size="large" type="primary" shape="round" status="warning" @click="onRegister">
 					Sign Up
 				</a-button>
 			</a-space>
@@ -174,11 +174,17 @@
 import img1 from "../../../assert/index_sample.png"
 import Company from "./company.vue";
 import {useRouter} from "vue-router";
+import {ECommon_Application_Mode} from "../../../../../common/types";
 
 const router=useRouter()
 const onLogin=async () =>{
 	await router.push("login")
 }
+
+const onRegister=async()=>{
+	await router.push("register")
+}
+
 </script>
 
 <style scoped>

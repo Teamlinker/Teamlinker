@@ -318,6 +318,8 @@ export class MeetingClient {
                 let params={track}
                 this.producerVideo=await this.transportSend.produce(params)
             }
+        },reason => {
+            console.log(reason)
         }).catch(reason => {
             console.log(reason)
         })

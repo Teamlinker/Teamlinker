@@ -57,13 +57,24 @@ export type RecentItem = {
 }
 const selectedKeys=ref<string[]>([])
 const recentList = ref<RecentItem[]>([])
+const myOrganizationId=SessionStorage.get("organizationId")
 watch(recentList,()=>{
-  SessionStorage.set("imRecentList",recentList.value.slice(0,20).map(item=>{
-    return {
-      id:item.id,
-      type:item.type
-    }
-  }))
+	let obj=SessionStorage.get("imRecentList")
+	if(!obj) {
+		obj={}
+	}
+	let list=recentList.value.slice(0,20).map(item=>{
+		return {
+			id:item.id,
+			type:item.type
+		}
+	})
+	if(list.length>0) {
+		obj[myOrganizationId]=list
+	} else {
+		delete obj[myOrganizationId]
+	}
+  SessionStorage.set("imRecentList",obj)
 },{
   deep:true
 })
@@ -81,7 +92,7 @@ watch(selectedKeys,()=>{
 })
 const socket=SocketIOClient.get(ECommon_Socket_Type.IM)
 const getRecentList = async () => {
-  let localList = SessionStorage.get("imRecentList")??[];
+  let localList = SessionStorage.get("imRecentList")?.[myOrganizationId]?? [];
   let unReadList=await socket.getSocket().emitWithAck("im_unread_message_list")
   let obj = userTeamInfoPick.getInfos([...localList,...unReadList.map(item=>{
     return {

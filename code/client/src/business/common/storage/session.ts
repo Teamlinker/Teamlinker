@@ -5,9 +5,11 @@ export interface IClient_SessionStorage_Type {
     userId:string
     userToken:string
     imRecentList:{
-        id:string,
-        type:ECommon_IM_Message_EntityType
-    }[]
+        [organizationId:string]:{
+            id:string,
+            type:ECommon_IM_Message_EntityType
+        }[]
+    }
     organizationUserId:string
 }
 

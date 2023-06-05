@@ -19,6 +19,8 @@ import {SessionStorage} from "../../../common/storage/session";
 import {handleIMEvent} from "../../app/im/event";
 import {ECommon_User_Online_Status} from "../../../../../../common/types";
 import {handleMeetingEvent} from "../../app/meeting/event";
+import {checkPermission} from "../../../common/util/helper";
+import {Permission_Types} from "../../../../../../common/permission/permission";
 
 export const useDesktopStore=defineStore("desktop",{
     state:()=>({
@@ -26,7 +28,6 @@ export const useDesktopStore=defineStore("desktop",{
         organizationList:null as DCSType<ICommon_Route_Res_Organization_List>,
         organizationPermission:0,
         appList:[
-            iconSetting,
             iconCalendar,
             iconMeeting,
             iconProject,
@@ -80,9 +81,15 @@ export const useDesktopStore=defineStore("desktop",{
                     })
                     if(ret?.code==0) {
                         this.organizationPermission=ret.data.value
+                        if(checkPermission(this.organizationPermission,Permission_Types.Organization.ADMIN)) {
+                            if(!this.appList.includes(iconSetting)) {
+                                this.appList.push(iconSetting)
+                            }
+                        }
                     }
                 })()
             ])
+            SocketIOClient.getSocket(ECommon_Socket_Type.CALENDAR)?.close()
             let objSocketCalendar=SocketIOClient.create(ECommon_Socket_Type.CALENDAR)
             objSocketCalendar.getSocket().on("calendar_event_reminder",(id, name, start_time) => {
                 if(this.status===ECommon_User_Online_Status.ONLINE) {

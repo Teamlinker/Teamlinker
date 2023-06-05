@@ -1,18 +1,20 @@
 import {getSocketEmitterInstance, getSocketIOInstance, SocketIO} from "../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../common/socket/types";
 import {MeetingServer} from "../../common/meeting/server";
-import * as fs from "fs";
-import * as path from "path";
 import {MeetingRoomService} from "../service/room";
 import {ECommon_Meeting_Room_Permission} from "../../../common/model/meeting_room";
 import rpcUserApi from "../../user/rpc/user";
+import meetingConfig from "../meeting.config"
+import Application from "../../common/app/app";
 
 export async function handleMeetingConnection() {
+    if(!Application.debug) {
+        meetingConfig.webRtcTransport.listenIps=Application.extraConfig.listenIps
+        meetingConfig.worker.rtcMinPort=Application.extraConfig.rtcMinPort
+        meetingConfig.worker.rtcMaxPort=Application.extraConfig.rtcMaxPort
+    }
     let io=getSocketIOInstance().of("/"+ECommon_Socket_Type.MEETING)
     let emit=getSocketEmitterInstance().of("/"+ECommon_Socket_Type.MEETING);
-    let config=fs.readFileSync(path.join(__dirname,"../../meeting.json"),{
-        encoding:"utf-8"
-    })
     SocketIO.initSocket(io,async socket => {
         socket.on("meeting_get_presenters",async (callback) => {
             try {
@@ -65,7 +67,7 @@ export async function handleMeetingConnection() {
             }
         })
     })
-    let objMeeting=new MeetingServer(io,JSON.parse(config))
+    let objMeeting=new MeetingServer(io,meetingConfig as any)
     objMeeting.onJoinRoom=async (roomId,extraData, socketData, socketId) => {
         let objRoom=await MeetingRoomService.getItemById(roomId)
         if(!objRoom) {

@@ -5,17 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "ttsc -p ./gateway"
+    "compile": "rm -rf ./dist && ttsc ./gateway/index.ts && mkdir -p ./dist/client && cp -r ../client/dist/* ./dist/client && cp ./teamlinker.config.json ./dist/server && cp ./init.sql ./dist/server && cp ./package.json ./dist/server && zip -q -r ./dist/teamlinker.zip ./dist && cp ./dist/teamlinker.zip ../docker"
   },
   "pkg": {
-    "scripts": [
-      "./user/dist/**/*.js",
-      "./cooperation/dist/**/*.js",
-      "./file/dist/**/*.js",
-      "./patch/dist/**/*.js"
-    ],
+    "scripts": [],
     "assets": [
-      "../client/dist/**/*"
+      "../client/**/*",
+      "./node_modules/mediasoup/worker/out/Release/mediasoup-worker"
     ],
     "outputPath": "./package"
   },
@@ -23,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@pivvenit/mysql-import": "^6.0.0",
     "@socket.io/admin-ui": "^0.5.1",
     "@socket.io/redis-adapter": "^8.1.0",
     "@socket.io/redis-emitter": "^5.1.0",
@@ -30,7 +27,6 @@
     "biguint-format": "^1.0.2",
     "flake-idgen": "^1.4.0",
     "fs-extra": "^10.1.0",
-    "got": "^12.5.2",
     "ioredis": "^5.2.4",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.4",
@@ -46,7 +42,6 @@
     "mediasoup": "^3.11.24",
     "moment": "^2.29.4",
     "mysql2": "^2.3.3",
-    "mysql2-import": "^5.0.22",
     "node-schedule": "^2.1.0",
     "nodemailer": "^6.9.2",
     "redlock": "^5.0.0-beta.2",

@@ -212,8 +212,8 @@ import {inject, onMounted, ref, watch} from "vue";
 import {apiIssue, apiOrganization, apiProject, apiRelease, DCSType} from "../../request/request";
 import UserAvatar from "../userAvatar.vue";
 import {
-  ICommon_Route_Res_Organization_User_Item,
-  ICommon_Route_Res_Project_CreateModule_Data
+	ICommon_Route_Res_Organization_User_Item,
+	ICommon_Route_Res_Project_CreateModule_Data
 } from "../../../../../../common/routes/response";
 import FieldPriority from "./fieldPriority.vue";
 import {ECommon_Model_Project_Issue_Priority} from "../../../../../../common/model/project_issue";
@@ -234,7 +234,7 @@ type Value=string|ECommon_Model_Project_Issue_Priority|User|ICommon_Model_Projec
 const props=defineProps<{
   projectIssueId:string,
   type:EClient_Field_Basic_Type,
-  value:Value
+  value?:Value
 }>()
 const fields={
   label:"name",

@@ -15,6 +15,7 @@ import {WorkflowNodeFieldTypeService} from './field';
 import {IssueTypeSolutionService} from './issueType';
 import {WorkflowService} from './workflow';
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import {emitServiceEvent} from "../../common/event/event";
 
 export class ProjectService extends Entity<typeof projectModel,typeof projectMapper> {
     constructor(){
@@ -50,11 +51,13 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
 
     async addMember(memberId:string, type:ECommon_Model_Organization_Member_Type, roleId:string) {
         let ret=await rpcAuthApi.addRoleMember(this.getId(),roleId,type,memberId)
+        emitServiceEvent("projectMemberAdd",this.getId(),memberId)
         return ret;
     }
 
     async removeMember(memberId:string,type:ECommon_Model_Organization_Member_Type){
         await rpcAuthApi.removeRoleMember(this.getId(),type,memberId)
+        emitServiceEvent("projectMemberDelete",this.getId(),memberId)
     }
 
     async editMember(memberId:string,type:ECommon_Model_Organization_Member_Type,roleId:string){
@@ -62,6 +65,7 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
             throw Err.Role.roleChangeForbidden
         }
         let ret=await rpcAuthApi.changeRoleMember(this.item.id,roleId,type,memberId)
+        emitServiceEvent("projectMemberEdit",this.getId(),memberId)
         return ret;
     }
 

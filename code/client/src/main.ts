@@ -15,6 +15,7 @@ import Register from "./business/controller/login/register.vue";
 import RegisterCode from "./business/controller/login/registerCode.vue";
 import Reset from "./business/controller/login/reset.vue";
 import ResetCode from "./business/controller/login/resetCode.vue";
+import {ECommon_Application_Mode} from "../../common/types";
 
 const Desktop =()=>import("./business/controller/desktop/desktop.vue")
 const routes=[
@@ -69,8 +70,15 @@ app.use(createPinia())
 app.use(router);
 app.component("sicon",sicon)
 app.mount('#app')
-apiGateway.deployInfo().then(value => {
+
+apiGateway.deployInfo().then(async value => {
     if(value?.code==0) {
         app.config.globalProperties.$deployMode.value=value.data.type
+        if(value.data.type===ECommon_Application_Mode.OFFLINE) {
+            let hash=location.hash
+            if(!(hash.startsWith("#/login") || hash.startsWith("#/desktop"))) {
+                await router.replace("login")
+            }
+        }
     }
 })

@@ -1,5 +1,5 @@
 import * as sio from "socket.io";
-import * as http from "http";
+import * as https from "https";
 import {createAdapter} from "@socket.io/redis-adapter";
 import {getRedisInstance} from "../cache/redis";
 import {Emitter} from "@socket.io/redis-emitter";
@@ -11,7 +11,6 @@ import {
 } from "../../../common/socket/types";
 import {instrument} from "@socket.io/admin-ui";
 import userRpcApi from "../../user/rpc/user";
-import {REDIS_USER} from "../cache/keys/user";
 
 let g_emitter:Emitter<ICommon_Socket_ServerToClientEvents>
 export function getSocketEmitterInstance() {
@@ -23,7 +22,7 @@ export function getSocketIOInstance() {
 
 export class SocketIO {
     private static io:sio.Server<ICommon_Socket_ClientToServerEvents,ICommon_Socket_ServerToClientEvents,ICommon_Socket_InterServerEvents,ICommon_Socket_Data>
-    static async start(portOrServer:number | http.Server){
+    static async start(portOrServer:number | https.Server){
         SocketIO.io=new sio.Server<ICommon_Socket_ClientToServerEvents,ICommon_Socket_ServerToClientEvents,ICommon_Socket_InterServerEvents,ICommon_Socket_Data>(portOrServer,{
             transports: ['websocket','polling'],
             cors: {
@@ -71,6 +70,14 @@ export class SocketIO {
             }
         })
         io.on("connection",async (socket)=>{
+            let set=io.adapter.rooms.get(socket.data.organizationUserId)
+            if(set) {
+                for(let socketId of set.values()) {
+                    if(socketId!==socket.id) {
+                        g_emitter.of(io.adapter.nsp.name).disconnectSockets(true)
+                    }
+                }
+            }
             socket.join(socket.data.organizationUserId)
             socket.join(socket.data.organizationId)
             if(callback) {

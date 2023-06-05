@@ -6,19 +6,19 @@ import {REDIS_AUTH} from "../../common/cache/keys/auth";
 @DComponent
 class PermissionClear {
     @DEventListener("organizationUserAdd")
-    async organizationUserAdd(organizationId:string,user:string) {
+    async organizationUserAdd(organizationId:string,organizationUserId:string) {
         let obj=new REDIS_AUTH.Permission.Organization.OrganizationUsers(organizationId);
         await obj.del()
     }
 
     @DEventListener("organizationUserEdit")
-    async organizationUserEdit(organizationId:string,user:string) {
+    async organizationUserEdit(organizationId:string,organizationUserId:string) {
         let obj=new REDIS_AUTH.Permission.Organization.OrganizationUsers(organizationId);
         await obj.del()
     }
 
     @DEventListener("organizationUserDelete")
-    async organizationUserDelete(organizationId:string,user:string) {
+    async organizationUserDelete(organizationId:string,organizationUserId:string) {
         let obj=new REDIS_AUTH.Permission.Organization.OrganizationUsers(organizationId);
         await obj.del()
     }

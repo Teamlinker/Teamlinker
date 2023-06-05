@@ -1,5 +1,5 @@
 import * as fs from "fs-extra";
-import * as Importer from "mysql2-import";
+import * as Importer from "@pivvenit/mysql-import";
 import * as path from "path";
 import {Table_Project} from '../../../common/model/project';
 import {Table_Project_Issue} from "../../../common/model/project_issue";
@@ -165,41 +165,37 @@ async function resetSystem(){
 }
 
 export async function checkIfNeedInit() {
-    if(Application.mode!=ECommon_Application_Mode.ONLINE) {
-        let mysql=getMysqlInstance()
-        let config=getConfigInstance()
-        let bExist=false;
-        try {
-            let ret=await mysql.executeOne(`select * from version;`)
-            if(ret) {
-                bExist=true;
-            }
-        } catch(err) {
-            bExist=false
+    let mysql=getMysqlInstance()
+    let config=getConfigInstance()
+    let bExist=false;
+    try {
+        let ret=await mysql.executeOne(`select * from version;`)
+        if(ret) {
+            bExist=true;
         }
-        if(!bExist) {
-            let sqlPath=Application.debug?path.join(__dirname,"../../init.sql"):path.join(__dirname,"../../../../../init.sql")
-            let importer = new Importer({
-                host:config.mysqlInfo.url,
-                user:config.mysqlInfo.username,
-                password:config.mysqlInfo.password,
-                database:config.mysqlInfo.database,
-                port:config.mysqlInfo.port
-            })
-            console.log("exec sql start")
-            await importer.import(sqlPath)
-            console.log("exec sql end")
-            await initSystem()
-        } else {
-            await checkIfNeedPatch()
-            if(Application.needReset) {
-                await resetSystem()
-            }
-        }
-    } else {
-        await initSystem()
+    } catch(err) {
+        bExist=false
     }
-
+    if(!bExist) {
+        let sqlPath=path.join(__dirname,"../../init.sql")
+        let importer = new Importer({
+            host:config.mysqlInfo.url,
+            user:config.mysqlInfo.username,
+            password:config.mysqlInfo.password,
+            database:config.mysqlInfo.database,
+            port:config.mysqlInfo.port,
+            charsetNumber:224
+        })
+        console.log("exec sql start")
+        await importer.import(sqlPath)
+        console.log("exec sql end")
+        await initSystem()
+    } else {
+        await checkIfNeedPatch()
+        if(Application.needReset) {
+            await initSystem()
+        }
+    }
 }
 
 async function checkIfNeedPatch() {

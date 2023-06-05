@@ -36,7 +36,6 @@ import {initMeeting} from "../../meeting/app/app";
 import authRpcApi from "../../auth/rpc/auth"
 import userRpcApi from "../../user/rpc/user"
 import {getRedisInstance} from "../../common/cache/redis";
-import {ECommon_Application_Mode} from "../../../common/types";
 
 var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi,wikiApi,calendarApi,meetingApi];
 export default class GateWay extends Application {
@@ -44,9 +43,11 @@ export default class GateWay extends Application {
         let redis=getRedisInstance();
         await Promise.all([
             redis.flush(),
+            checkIfNeedInit()
+        ])
+        await Promise.all([
             configFile(),
             initCalendar(),
-            checkIfNeedInit(),
             initIM(),
             initMeeting()
         ])
@@ -176,17 +177,15 @@ export default class GateWay extends Application {
             }
         })
         app.use(koaStaticServer({
-            rootDir: Application.teamlinkerPath,
+            rootDir: Application.uploadPath,
             rootPath: "/file",
             last: false
         }))
-        if(Application.mode!=ECommon_Application_Mode.ONLINE) {
-            app.use(koaStaticServer({
-                rootDir:Application.debug?path.resolve(__dirname,"../../../client/dist"):path.join(__dirname,"../../../../../../client/dist"),
-                rootPath:"/",
-                last:false
-            }))
-        }
+        app.use(koaStaticServer({
+            rootDir:path.resolve(__dirname,"../../../client"),
+            rootPath:"/",
+            last:false
+        }))
     }
 }
 

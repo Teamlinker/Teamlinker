@@ -28,17 +28,17 @@ class IconManager extends Base {
         let width=ele.clientWidth
         let count=Math.floor((height-40)/(Icon.height+20))
         this.iconList.sort((a,b)=>{
-            if(a.name[0]>b.name[0]) {
+            if(a.name>b.name) {
                 return 1
             } else {
                 return -1;
             }
         })
-        for(let i=0;i<this.iconList.length;i+=count) {
+        for(let i=0;i<this.iconList.length;i++) {
             for(let j=0;j<count;j++) {
                 let obj=this.iconList[i*count+j]
                 if(obj) {
-                    obj.point.left=`${(i+1)*20/width*100}%`;
+                    obj.point.left=`${((i+1)*20+(i*60))/width*100}%`;
                     obj.point.top=`${(20+((Icon.height+20)*j))/height*100}%`
                 }
             }

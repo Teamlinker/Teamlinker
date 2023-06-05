@@ -7,9 +7,9 @@ export interface IServer_Common_Event_Types {
     fileRef:(fileId:string)=>void
     fileUnref:(fileId:string)=>void
     issueTypeDelete:(issueTypeId:string)=>void
-    organizationUserAdd:(organizationId:string,user:string)=>void
-    organizationUserEdit:(organizationId:string,user:string)=>void
-    organizationUserDelete:(organizationId:string,user:string)=>void
+    organizationUserAdd:(organizationId:string,organizationUserId:string)=>void
+    organizationUserEdit:(organizationId:string,organizationUserId:string)=>void
+    organizationUserDelete:(organizationId:string,organizationUserId:string)=>void
     organizationUserStatusChange:(organizationId:string,organizationUserId:string,status:ECommon_User_Online_Status)=>void
     projectMemberAdd:(projectId:string,memberId:string)=>void
     projectMemberEdit:(projectId:string,memberId:string)=>void

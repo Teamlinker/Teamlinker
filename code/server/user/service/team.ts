@@ -17,7 +17,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     }
 
     override async create(): Promise<typeof teamModel["model"]> {
-        let ret=super.create();
+        let ret=await super.create();
         let roleId=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.TEAM)
         await this.addMember(this.getItem().created_by,roleId);
         return ret;

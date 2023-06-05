@@ -34,7 +34,7 @@
               </template>
             </a-button>
             <template #content>
-              <a-doption v-if="checkPermission(permission,Permission_Types.Project.ADMIN) || info.created_by.id===store.userInfo.id" @click="onDelete" style="color: red">Delete</a-doption>
+              <a-doption v-if="checkPermission(permission,Permission_Types.Project.ADMIN) || info?.created_by.id===store.userInfo.id" @click="onDelete" style="color: red">Delete</a-doption>
             </template>
           </a-dropdown>
         </a-space>
@@ -191,8 +191,8 @@ import {getCurrentInstance, inject, markRaw, onBeforeMount, ref, watch} from "vu
 import {injectProjectInfo} from "../../../../common/util/symbol";
 import {apiIssue, DCSType} from "../../../../common/request/request";
 import {
-  ICommon_Route_Res_ProjectIssue_BasicInfo,
-  ICommon_Route_Res_ProjectIssue_fieldsInfo
+	ICommon_Route_Res_ProjectIssue_BasicInfo,
+	ICommon_Route_Res_ProjectIssue_fieldsInfo
 } from "../../../../../../../common/routes/response";
 import FieldEditBasic from "../../../../common/component/field/fieldEditBasic.vue";
 import {EClient_Field_Basic_Type} from "../../../../common/component/field/fieldBasicType";

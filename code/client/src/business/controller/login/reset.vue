@@ -25,6 +25,7 @@ const form=reactive({
 	username:""
 })
 const router=useRouter()
+
 const onSubmit=async ()=>{
 	if(form.username) {
 		let res=await apiUser.resetCode({

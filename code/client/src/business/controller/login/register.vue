@@ -35,6 +35,7 @@ let form=reactive({
 	passwordRepeat:""
 })
 const router=useRouter()
+
 const onSubmit=async ()=>{
 	if(!form.username) {
 		Message.error("please type username")

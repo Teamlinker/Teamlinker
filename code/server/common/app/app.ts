@@ -1,6 +1,6 @@
 import path = require("path");
 import os = require("os");
-import * as http from "http";
+import * as https from "https";
 import * as Koa from "koa";
 import * as body from 'koa-bodyparser';
 import {PassThrough} from "stream";
@@ -12,7 +12,7 @@ import {IServer_Common_Http_Req_File} from "../types/http";
 import CommonUtil from "../util/common";
 import {generateHttpErrorResponse} from "../util/http";
 import {init} from "../util/init";
-import * as fs from "fs";
+import * as fs from "fs-extra";
 import {SocketIO} from "../socket/socket";
 import {ECommon_Application_Mode} from "../../../common/types";
 
@@ -37,8 +37,24 @@ export default abstract class Application{
     public static debug:boolean=false
     public static mode:ECommon_Application_Mode;
     public static teamlinkerPath:string=(os.platform()=="darwin" || os.platform()=="win32")?path.resolve(os.homedir(),"teamlinker-files"):"/opt/teamlinker-files"
-    public static configPath:string=path.join(this.teamlinkerPath,"teamlinker.config.json")
-
+    public static uploadPath=path.join(Application.teamlinkerPath,"upload")
+    public static configPath:string=path.join(this.teamlinkerPath,"extra.config.json")
+    public static certsPath=path.join(this.teamlinkerPath,"certs")
+    public static extraConfig:{
+        "mysql":{
+            "url":string,
+            "port":number,
+            "database":string,
+            "username":string,
+            "password":string
+        },
+        "listenIps": {
+            "ip": string,
+            "announcedIp": string
+        }[],
+        "rtcMinPort": number,
+        "rtcMaxPort": number
+    }
     public static privateConfig:{
         "redis":{
             "url":string,
@@ -75,14 +91,25 @@ export default abstract class Application{
         if(argv["debug"]) {
             Application.debug=true
             Application.configPath=path.join(__dirname,"../../teamlinker.config.json")
+            Application.privateConfig = JSON.parse(fs.readFileSync(Application.configPath,"utf-8"))
+            Application.certsPath=path.join(__dirname,"../../certs")
+        } else {
+            let selfConfig=JSON.parse(fs.readFileSync(path.join(__dirname,"../../teamlinker.config.json"),"utf-8"))
+            Application.extraConfig=JSON.parse(fs.readFileSync(Application.configPath,"utf-8"))
+            Application.privateConfig=Object.assign({},selfConfig,{
+                mysql:Application.extraConfig.mysql
+            })
         }
-
-        Application.privateConfig = JSON.parse(fs.readFileSync(Application.configPath,"utf-8"))
+        await fs.ensureDir(Application.uploadPath)
         Application.mode = mode
         initComponent()
         await init()
         await this.initKoa();
-        let httpServer = http.createServer(this.app.callback())
+        let httpServer = https.createServer({
+            cert:fs.readFileSync(path.join(Application.certsPath,"cert.pem")),
+            key:fs.readFileSync(path.join(Application.certsPath,"key.pem")),
+            rejectUnauthorized:false
+        },this.app.callback())
         let port=getConfigInstance().serverPort
         httpServer.listen(port,async ()=>{
             await SocketIO.start(httpServer)

@@ -1,19 +1,25 @@
 import {REDIS_AUTH} from '../../common/cache/keys/auth';
 import {DComponent} from '../../common/decorate/component';
 import {PermissionBase} from './base';
-import {ECommon_Model_Role_Reserved} from "../../../common/model/role";
+import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../common/model/role";
 import {Err} from "../../../common/status/error";
 import {Permission_Types} from "../../../common/permission/permission";
 
 @DComponent
 class PermissionWiki extends PermissionBase {
     fieldName="wikiId"
-    async translateToField({wikiItemId}: { [param: string]: any; isAdmin?: boolean;wikiItemId:string }): Promise<string> {
+    async translateToField({wikiItemId,roleId}: { [param: string]: any; isAdmin?: boolean;wikiItemId:string,roleId:string }): Promise<string> {
         let wikiId:string
         if(wikiItemId) {
             let obj=new REDIS_AUTH.Permission.Wiki.WikiIdFromWikiItem(wikiItemId);
             wikiId=await obj.getValue();
             return wikiId;
+        } else if(roleId) {
+            let objRole=new REDIS_AUTH.Permission.Role.RoleInfo(roleId);
+            let value=await objRole.getValue()
+            if(value?.type===ECommon_Model_Role_Type.WIKI) {
+                return value.item_id
+            }
         }
     }
 

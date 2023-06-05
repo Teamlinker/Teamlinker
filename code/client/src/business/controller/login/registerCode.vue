@@ -28,6 +28,7 @@ import {useRouter} from "vue-router";
 const props=defineProps<{
 	username:string
 }>()
+
 const form=reactive({
 	code:""
 })

@@ -1,3 +1,6 @@
-#!bin/sh
+#!/bin/sh
+rabbitmq-server -detached
 redis-server /etc/redis.conf
-/home/teamlinker/teamlinker
+#tail -f /dev/null
+sleep 5
+cd /home/teamlinker && ./teamlinker

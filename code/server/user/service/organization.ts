@@ -210,6 +210,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             rpcCalendarApi.addCalendar(objUser.id,"default",ECommon_Calendar_Color.BLUE, 1),
             rpcMeetingApi.addMeetingRoom(`${nickname}'s room`,ECommon_Model_Meeting_Room_Type.PRIVATE, objUser.id,CommonUtil.generateRandomNumbers(6),objUser.id)
         ])
+        emitServiceEvent("organizationUserAdd",this.getId(),objUser.id)
         return objUser
     }
 
@@ -235,6 +236,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             }
             await rpcAuthApi.changeRoleMember(this.getId(),roleId,ECommon_Model_Organization_Member_Type.USER,objUser.id )
         }
+        emitServiceEvent("organizationUserEdit",this.getId(),objUser.id)
         return objUser
     }
 
@@ -250,6 +252,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             rpcCalendarApi.clearCalendar(organizationUserId),
             rpcMeetingApi.clearMeetingRoom(organizationUserId)
         ])
+        emitServiceEvent("organizationUserDelete",this.getId(),organizationUserId)
     }
 
     async listTag() {

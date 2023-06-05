@@ -163,10 +163,8 @@ const onSelectChat=async (item:RecentItem)=>{
       })
       getTeamMemberList(item.id)
     }
-    if(item.count) {
-      item.count=0;
-      await socket.getSocket().emit("im_read_message",item.id)
-    }
+	  item.count=0;
+	  await socket.getSocket().emit("im_read_message",item.id)
     selectedChat.value=item
   } else if(!item) {
     selectedChat.value=null;

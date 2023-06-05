@@ -39,7 +39,7 @@ export class WikiService extends Entity<typeof wikiModel,typeof wikiMapper> {
     }
 
     override async create(): Promise<typeof wikiModel["model"]> {
-        let ret=super.create();
+        let ret=await super.create();
         let role=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.WIKI)
         if(role) {
             await rpcAuthApi.addRoleMember(this.getId(),role,ECommon_Model_Organization_Member_Type.USER,this.getItem().created_by)
