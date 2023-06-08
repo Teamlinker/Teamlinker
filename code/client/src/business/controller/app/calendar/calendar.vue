@@ -3,7 +3,7 @@
     <a-layout-sider style="width: 260px">
       <div style="padding: 10px;">
         <a-date-picker
-            v-model="pickerValue"
+            v-model="datePickerModel"
             hide-trigger
             style="border: 0px;box-shadow: 0px 0px 0px transparent"
             :show-now-btn="false"
@@ -52,7 +52,7 @@
             </template>
           </a-button>
           <span style="font-weight: bold">
-            {{calendarType=="day"?moment(pickerValue).format("YYYY-MM-DD"):moment(pickerValue).format("YYYY-MM")}}
+            {{calendarType=="day"?pickerValue.format("YYYY-MM-DD"):pickerValue.format("YYYY-MM")}}
           </span>
         </a-space>
         <a-space size="mini">
@@ -69,10 +69,10 @@
         </a-space>
       </a-row>
       <a-row style="flex: 1 1 auto;border-top: 1px solid lightgray;overflow-y: auto;position: relative">
-        <Calendar :mode="calendarType=='month'?'month':'day'" :start-date="startDay" :end-date="endDay" :month="month" :utc-offset="timezoneOffset" :event-list="calendarEventList" @blank-click="onAddCalendarEvent" @delete-event="onDeleteCalendarEvent" @change-event-date="onChangeCalendarEventDate" @edit-event="onEditCalendarEvent"></Calendar>
+        <Calendar :mode="calendarType=='month'?'month':'day'" :start-date="startDay" :end-date="endDay" :month="month" :utc-offset="timezoneOffset" :time-zone="setting.timezone" :event-list="calendarEventList" @blank-click="onAddCalendarEvent" @delete-event="onDeleteCalendarEvent" @change-event-date="onChangeCalendarEventDate" @edit-event="onEditCalendarEvent" v-if="setting?.timezone"></Calendar>
       </a-row>
     </a-layout-content>
-    <a-drawer :popup-container="root" :visible="settingVisible" @ok="onSetting" unmount-on-close title="Calendar Global Setting" :closable="false" @cancel="settingVisible=false" :width="400">
+    <a-drawer :popup-container="root" :visible="settingVisible" @ok="onSetting" unmount-on-close title="Calendar Global Setting" :closable="false" @cancel="settingVisible=false" :width="400" id="calendarSetting" :drawer-style="{zIndex:100}">
       <a-form :model="{}" layout="vertical">
         <a-form-item label="follow device timezone">
           <a-switch v-model="settingEdit.followDevice"></a-switch>
@@ -89,18 +89,28 @@
         </a-form-item>
       </a-form>
     </a-drawer>
-    <CalendarEventAddSimple style="position: absolute" v-if="isCalendarEventAddSimple" :style="{left:calendarEventAddSimpleLeft,top:calendarEventAddSimpleTop}" :start="calendarEventAddSimpleStartDate" ref="eventAddSimpleEle" @close="isCalendarEventAddSimple=false" @save="saveCalendarEvent" :resource-list="calendarList.map(item=>({id:item.id,name:item.name})).filter(item=>selectedCalendar.includes(item.id))" @more="onShowCalendarEventDetail"></CalendarEventAddSimple>
+    <CalendarEventAddSimple style="position: absolute" v-if="isCalendarEventAddSimple" :style="{left:calendarEventAddSimpleLeft,top:calendarEventAddSimpleTop}" :start="calendarEventAddSimpleStartDate" ref="eventAddSimpleEle" @close="isCalendarEventAddSimple=false" @save="saveCalendarEvent" :resource-list="calendarList.map(item=>({id:item.id,name:item.name})).filter(item=>selectedCalendar.includes(item.id))" @more="onShowCalendarEventDetail" :timezone="setting.timezone"></CalendarEventAddSimple>
   </a-layout>
 </template>
 
 <script setup lang="ts">
-import {computed, getCurrentInstance, markRaw, nextTick, onBeforeMount, ref, watch} from "vue";
+import {
+	computed,
+	getCurrentInstance,
+	markRaw,
+	nextTick,
+	onBeforeMount,
+	onBeforeUnmount,
+	provide,
+	ref,
+	watch
+} from "vue";
 import moment from "moment";
 import "moment-timezone"
 import {
-    calendarWeekDayName,
-    ECommon_Calendar_WeekDay,
-    ICommon_Model_Calendar_Setting
+	calendarWeekDayName,
+	ECommon_Calendar_WeekDay,
+	ICommon_Model_Calendar_Setting
 } from "../../../../../../common/model/calendar_setting";
 import {apiCalendar, DCSType} from "../../../common/request/request";
 import {ICommon_Model_Calendar} from "../../../../../../common/model/calendar";
@@ -114,14 +124,19 @@ import {CalendarEventModelType} from "./calendarEventDateEdit.vue";
 import {IClient_Calendar_Date, IClient_Calendar_Info} from "../../../common/component/calendar/type";
 import {ECommon_Calendar_Recurring_Type} from "../../../../../../common/model/calendar_event";
 import CalendarEventEdit from "./calendarEventEdit.vue";
+import {injectCalendarSetting} from "../../../common/util/symbol";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
+const props=defineProps<{
+	calendarEventId?:string
+}>()
 const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()
 const isCalendarEventAddSimple=ref(false)
 const calendarEventAddSimpleLeft=ref("0px")
 const calendarEventAddSimpleTop=ref("0px")
 const calendarEventAddSimpleStartDate=ref<moment.Moment>()
-const pickerValue=ref(moment().format("YYYY-MM-DD"))
+const pickerValue=ref(moment())
 const selectedCalendar=ref<string[]>([])
 const setting=ref<ICommon_Model_Calendar_Setting & {
   followDevice:boolean
@@ -135,30 +150,40 @@ const calendarType=ref<"week"|"day"|"month">("week")
 const settingVisible=ref(false)
 const timezoneOffset=ref(0)
 const calendarEventList=ref<IClient_Calendar_Info[]>([])
+provide(injectCalendarSetting,setting)
 const startDay=computed(()=>{
   let start_week_day=setting.value?.start_week_day
   if(calendarType.value=="day" && start_week_day!==undefined) {
-    let ret=moment(pickerValue.value).format("YYYY-MM-DD")
+    let ret=pickerValue.value.format("YYYY-MM-DD")
     return ret;
   } else {
-    let ret=moment(pickerValue.value).startOf("weeks").format("YYYY-MM-DD")
+    let ret=pickerValue.value.clone().startOf("weeks").format("YYYY-MM-DD")
     return ret;
   }
 
 })
+
+const datePickerModel=computed({
+	get() {
+		return pickerValue.value.format('YYYY-MM-DD')
+	},
+	set(newValue) {
+		pickerValue.value=moment.tz(newValue,setting.value.timezone)
+	}
+})
 const endDay=computed(()=>{
   let start_week_day=setting.value?.start_week_day
   if(calendarType.value=="day" && start_week_day!==undefined) {
-    return moment(pickerValue.value).format("YYYY-MM-DD")
+    return pickerValue.value.format("YYYY-MM-DD")
   } else {
-    return moment(pickerValue.value).endOf("weeks").format("YYYY-MM-DD")
+    return pickerValue.value.clone().endOf("weeks").format("YYYY-MM-DD")
   }
 })
 watch([selectedCalendar,calendarType,pickerValue,timezoneOffset],()=>{
   listCalendarEvent()
 })
 const month=computed(()=>{
-  return moment(pickerValue.value).format("YYYY-MM")
+  return pickerValue.value.format("YYYY-MM")
 })
 const getSetting=async ()=>{
   let res=await apiCalendar.getCalendarSetting()
@@ -170,7 +195,9 @@ const getSetting=async ()=>{
     if(setting.value.followDevice) {
       setting.value.timezone=moment.tz.guess()
     }
-    moment.tz.setDefault(setting.value.timezone)
+
+    //moment.tz.setDefault(setting.value.timezone)
+	  pickerValue.value=moment().tz(setting.value.timezone)
     timezoneOffset.value=moment.tz(setting.value.timezone).utcOffset()/60
     moment.updateLocale("en",{
       week:{
@@ -213,7 +240,7 @@ const listCalendar=async ()=>{
       }
     })]
     selectedCalendar.value=calendarList.value.filter(item=>{
-      return item.reserved
+      return !props.calendarEventId && item.reserved
     }).map(item=>item.id)
   }
 }
@@ -264,24 +291,24 @@ const onSetting=async ()=>{
 }
 const onPrevious=()=>{
   if(calendarType.value=="day") {
-    pickerValue.value=moment(pickerValue.value).add(-1,"days").format("YYYY-MM-DD")
+    pickerValue.value=pickerValue.value.clone().add(-1,"days")
   } else if(calendarType.value=="week") {
-    pickerValue.value=moment(pickerValue.value).add(-1,"weeks").format("YYYY-MM-DD")
+    pickerValue.value=pickerValue.value.clone().add(-1,"weeks")
   } else if(calendarType.value=="month") {
-    pickerValue.value=moment(pickerValue.value).add(-1,"months").format("YYYY-MM-DD")
+    pickerValue.value=pickerValue.value.clone().add(-1,"months")
   }
 }
 const onNext=()=>{
   if(calendarType.value=="day") {
-    pickerValue.value=moment(pickerValue.value).add(1,"days").format("YYYY-MM-DD")
+    pickerValue.value=pickerValue.value.clone().add(1,"days")
   } else if(calendarType.value=="week") {
-    pickerValue.value=moment(pickerValue.value).add(1,"weeks").format("YYYY-MM-DD")
+    pickerValue.value=pickerValue.value.clone().add(1,"weeks")
   } else if(calendarType.value=="month") {
-    pickerValue.value=moment(pickerValue.value).add(1,"months").format("YYYY-MM-DD")
+    pickerValue.value=pickerValue.value.clone().add(1,"months")
   }
 }
 const onToday=()=>{
-  pickerValue.value=moment().format("YYYY-MM-DD")
+  pickerValue.value=moment().tz(setting.value.timezone)
 }
 const onShowSetting=async ()=>{
   settingVisible.value=true
@@ -341,19 +368,19 @@ const listCalendarEvent=async ()=>{
   if(selectedCalendar.value.length>0) {
     let start:number,end:number
     if(calendarType.value=="day" || calendarType.value=="week") {
-      start=moment(startDay.value).set({
+      start=moment.tz(startDay.value,setting.value.timezone).set({
         hour:0,
         minute:0,
         second:0
       }).toDate().getTime()
-      end=moment(endDay.value).set({
+      end=moment.tz(endDay.value,setting.value.timezone).set({
         hour:23,
         minute:59,
         second:59
       }).toDate().getTime()
     } else {
-      start=moment(month.value).startOf("month").startOf("week").toDate().getTime()
-      end=moment(month.value).endOf("month").endOf("week").toDate().getTime()
+      start=moment.tz(month.value,setting.value.timezone).startOf("month").startOf("week").toDate().getTime()
+      end=moment.tz(month.value,setting.value.timezone).endOf("month").endOf("week").toDate().getTime()
     }
     let arrPromise=selectedCalendar.value.map(item=>{
       return apiCalendar.listCalendarEvent({
@@ -366,8 +393,8 @@ const listCalendarEvent=async ()=>{
     for(let res of arr) {
       if(res?.code==0) {
         calendarEventList.value=calendarEventList.value.concat(res.data.map(item=>{
-          let objStart=moment(item.start_time)
-          let objEnd=moment(item.end_time)
+          let objStart=moment(item.start_time).tz(setting.value.timezone)
+          let objEnd=moment(item.end_time).tz(setting.value.timezone)
           return {
             id:item.id,
             resource:{
@@ -429,7 +456,8 @@ const onEditCalendarEvent=async (event:IClient_Calendar_Info)=>{
   let ret=await Dialog.open(root.value,appContext,"Edit Event",markRaw(CalendarEventEdit),{
     type:"edit",
     calendarEventId:event.id,
-    resourceList:calendarList.value.map(item=>({id:item.id,name:item.name})).filter(item=>selectedCalendar.value.includes(item.id))
+    resourceList:calendarList.value.map(item=>({id:item.id,name:item.name})).filter(item=>selectedCalendar.value.includes(item.id)),
+	  timezone:setting.value.timezone
   })
   if(ret) {
     listCalendarEvent()
@@ -443,24 +471,44 @@ const onShowCalendarEventDetail=async (title:string,dateInfo:CalendarEventModelT
     resourceList:calendarList.value.map(item=>({id:item.id,name:item.name})).filter(item=>selectedCalendar.value.includes(item.id)),
     name:title,
     date:dateInfo,
+	  timezone:setting.value.timezone
   })
   if(ret) {
     listCalendarEvent()
   }
 }
 const momentFromCalendarInfoDate=(date:IClient_Calendar_Date)=>{
-  let obj=moment({
+  let obj=moment.tz({
     year:date.year,
     month:date.month-1,
     date:date.day,
     hour:date.hour,
     minute:date.minute
-  })
+  },setting.value.timezone)
   return obj;
 }
-onBeforeMount(()=>{
-  getSetting()
-  listCalendar()
+const handlePropsCalendarEventId=async (calendarEventId:string)=>{
+	let res=await apiCalendar.getCalendarEvent({
+		calendarEventId:calendarEventId
+	})
+	if(res?.code==0) {
+		selectedCalendar.value=[res.data.calendar_id]
+		datePickerModel.value=res.data.start_time
+		calendarType.value="day"
+	}
+}
+onBeforeUnmount(()=>{
+	eventBus.off(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,handlePropsCalendarEventId)
+})
+onBeforeMount(async ()=>{
+	eventBus.on(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,handlePropsCalendarEventId)
+	await Promise.all([
+		getSetting(),
+		listCalendar()
+	])
+	if(props.calendarEventId) {
+		handlePropsCalendarEventId(props.calendarEventId)
+	}
 })
 </script>
 

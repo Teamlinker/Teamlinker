@@ -10,7 +10,7 @@
       <template #label>
         <icon-clock-circle style="font-size: medium"></icon-clock-circle>
       </template>
-      <CalendarEventDateEdit :data="form.date"></CalendarEventDateEdit>
+      <CalendarEventDateEdit :timezone="timezone" :data="form.date"></CalendarEventDateEdit>
     </a-form-item>
     <a-form-item>
       <a-divider orientation="left" :margin="1">Advanced</a-divider>
@@ -77,7 +77,8 @@ const props=defineProps<{
   resourceList:{
     id:string,
     name:string
-  }[]
+  }[],
+	timezone:string
 }>()
 const formEle=ref()
 const calendarEventInfo=ref<DCSType<ICommon_Route_Res_Calendar_Event_Info>>()

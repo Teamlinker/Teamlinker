@@ -224,6 +224,7 @@ onBeforeMount(async ()=>{
 onBeforeUnmount(()=>{
   eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
 })
+
 </script>
 
 <style scoped>

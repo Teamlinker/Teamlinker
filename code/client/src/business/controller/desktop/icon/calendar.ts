@@ -6,6 +6,7 @@ import {windowManager} from "../../../../teamOS/window/windowManager";
 import {markRaw} from "vue";
 import Calendar from "../../app/calendar/calendar.vue";
 import {SessionStorage} from "../../../common/storage/session";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
 export const iconCalendar=new Icon("calendar",iconGroupMap["calendar"])
 iconCalendar.addEventListener("dbClick",item => {
@@ -24,6 +25,26 @@ iconCalendar.addEventListener("dbClick",item => {
             },
             default:{
                 name:"calendar"
+            }
+        }
+    ],"calendar");
+    windowManager.open(win);
+})
+eventBus.on(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,(calendarEventId) => {
+    const win=new Window("calendar",ETeamOS_Window_Type.SIMPLE, "calendar",false,[
+        {
+            id:v4(),
+            meta:{
+                title:"calendar"
+            },
+            components:{
+                calendar:markRaw(Calendar)
+            },
+            default:{
+                name:"calendar",
+                props:{
+                    calendarEventId:calendarEventId
+                }
             }
         }
     ],"calendar");

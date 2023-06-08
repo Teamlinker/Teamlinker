@@ -19,7 +19,7 @@
           <template #label>
             <icon-clock-circle style="font-size: medium"></icon-clock-circle>
           </template>
-          <CalendarEventDateEdit :data="form.dateInfo"></CalendarEventDateEdit>
+          <CalendarEventDateEdit :timezone="timezone" :data="form.dateInfo"></CalendarEventDateEdit>
         </a-form-item>
         <a-form-item field="resourceId" required hide-asterisk>
           <template #label>
@@ -52,6 +52,7 @@ const props=defineProps<{
     id:string,
     name:string
   }[]
+	timezone:string
 }>()
 const emit=defineEmits<{
   (e:"close"):void,

@@ -16,7 +16,8 @@ export enum EClient_EVENTBUS_TYPE {
     OPEN_IM_CHAT="open_im_chat",
     UPDATE_ORGANIZATION_USER_STATUS="update_organization_user_status",
     OPEN_MEETING="open_meeting",
-    LEAVE_MEETING="leave_meeting"
+    LEAVE_MEETING="leave_meeting",
+    OPEN_CALENDAR_EVENT="open_calendar_event"
 }
 
 interface IClient_EventBus_Func {
@@ -38,6 +39,7 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS]:(organizationUserId:string,status:ECommon_User_Online_Status)=>void
     [EClient_EVENTBUS_TYPE.OPEN_MEETING]:(meetingId:string,password:string)=>void
     [EClient_EVENTBUS_TYPE.LEAVE_MEETING]:()=>void
+    [EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT]:(calendarEventId:string)=>void
 }
 
 interface IClient_EventBus_Emit_Func {

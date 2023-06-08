@@ -1,6 +1,7 @@
 import {Ref, ref} from "vue";
 import {IClient_Calendar_Date, IClient_Calendar_Info} from "./type";
 import moment from "moment";
+import "moment-timezone"
 
 export class CalendarManage {
     private type=ref<"day"|"month">("day")
@@ -9,6 +10,10 @@ export class CalendarManage {
     private eventList=ref<IClient_Calendar_Info[]>([])
     private dateRange:Ref<[moment.Moment,moment.Moment]>=ref()
     private month=ref<moment.Moment>()
+    private timeZone:string
+    setTimeZone(timeZone:string) {
+        this.timeZone=timeZone
+    }
     getData() {
         return this.arr
     }
@@ -205,7 +210,7 @@ export class CalendarManage {
         this.type.value="day"
         this.arr.value=[]
         this.arrCross.value=[]
-        this.dateRange.value=[moment(startDate),moment(endDate)]
+        this.dateRange.value=[moment.tz(startDate,this.timeZone),moment.tz(endDate,this.timeZone)]
         this.pushCrossRow()
         let startDay=this.dateRange.value[0].clone()
         let i=0;
@@ -220,7 +225,7 @@ export class CalendarManage {
     initByMonth(month:string,eventList:IClient_Calendar_Info[]) {
         this.type.value="month"
         this.arr.value=[]
-        this.month.value=moment(month)
+        this.month.value=moment.tz(month,this.timeZone)
         this.eventList.value=eventList
         let days=this.getWeekDaysInMonth()
         for(let i=0;i< days.length/7;i++) {
@@ -548,7 +553,7 @@ export class CalendarManage {
         offset=Math.ceil(offset/15)*15
         let col=this.arr.value[start[0]][start[1]]
         let event=col[start[2]]
-        let objStart=moment()
+        let objStart=moment().tz(this.timeZone)
         objStart.set({
             year:event.startDate.year,
             month:event.startDate.month-1,
@@ -674,7 +679,7 @@ export class CalendarManage {
         startDate:moment.Moment
         endDate:moment.Moment
     } {
-        let objStart=moment()
+        let objStart=moment().tz(this.timeZone)
         objStart.set({
             year:event.startDate.year,
             month:event.startDate.month-1,
@@ -682,7 +687,7 @@ export class CalendarManage {
             hour:event.startDate.hour,
             minute:event.startDate.minute
         })
-        let objEnd=moment()
+        let objEnd=moment().tz(this.timeZone)
         objEnd.set({
             year:event.endDate.year,
             month:event.endDate.month-1,
@@ -700,7 +705,7 @@ export class CalendarManage {
         startDate:moment.Moment
         endDate:moment.Moment
     } {
-        let objStart=moment()
+        let objStart=moment().tz(this.timeZone)
         objStart.set({
             year:startDate.year,
             month:startDate.month-1,
@@ -708,7 +713,7 @@ export class CalendarManage {
             hour:startDate.hour,
             minute:startDate.minute
         })
-        let objEnd=moment()
+        let objEnd=moment().tz(this.timeZone)
         objEnd.set({
             year:endDate.year,
             month:endDate.month-1,

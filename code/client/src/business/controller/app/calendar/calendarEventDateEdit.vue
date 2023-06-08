@@ -44,6 +44,7 @@
 import {ECommon_Calendar_Recurring_Type} from "../../../../../../common/model/calendar_event";
 import {ref, watch} from "vue";
 import moment from "moment";
+import "moment-timezone"
 import {calendarWeekDayName, ECommon_Calendar_WeekDay} from "../../../../../../common/model/calendar_setting";
 
 export type CalendarEventModelType ={
@@ -55,18 +56,22 @@ export type CalendarEventModelType ={
 }
 const props=defineProps<{
   data:CalendarEventModelType,
+	timezone:string
 }>()
 const recurryingWeekDay=ref<number>()
 const recurryingMonthDay=ref<number>()
-const startDate=ref(props.data.start)
-const endDate=ref(props.data.end)
-const startTime=ref<number|string>(props.data.start)
-const endTime=ref<number|string>(props.data.end)
+
+const startDate=ref<string>("")
+const endDate=ref<string>("")
+const startTime=ref<number|string>("")
+const endTime=ref<number|string>("")
 watch(()=>[props.data.start,props.data.end],()=>{
-  startDate.value=props.data.start
-  endDate.value=props.data.end
-  startTime.value=props.data.start
-  endTime.value=props.data.end
+  startDate.value=moment(props.data.start).tz(props.timezone).format("YYYY-MM-DD")
+  endDate.value=moment(props.data.end).tz(props.timezone).format("YYYY-MM-DD")
+  startTime.value=moment(props.data.start).tz(props.timezone).format("HH:mm")
+  endTime.value=moment(props.data.end).tz(props.timezone).format("HH:mm")
+},{
+	immediate:true
 })
 watch(()=>props.data.recurring,()=>{
   if(props.data.recurring===ECommon_Calendar_Recurring_Type.WEEK || props.data.recurring===ECommon_Calendar_Recurring_Type.MONTH) {
@@ -82,23 +87,23 @@ watch(()=>props.data.recurring,()=>{
 })
 const onChangeStart=()=>{
   let objDate=moment(startDate.value)
-  props.data.start=moment({
+  props.data.start=moment.tz({
     year:objDate.year(),
     month:objDate.month(),
     date:objDate.date(),
     hour:typeof(startTime.value)=="number"?moment(startTime.value).hour():parseInt((startTime.value as string).split(":")[0]),
     minute:typeof(startTime.value)=="number"?moment(startTime.value).minute():parseInt((startTime.value as string).split(":")[1]),
-  }).toDate().getTime()
+  },props.timezone).toDate().getTime()
 }
 const onChangeEnd=()=>{
   let objDate=moment(endDate.value)
-  props.data.end=moment({
+  props.data.end=moment.tz({
     year:objDate.year(),
     month:objDate.month(),
     date:objDate.date(),
     hour:typeof(endTime.value)=="number"?moment(endTime.value).hour():parseInt((endTime.value as string).split(":")[0]),
     minute:typeof(endTime.value)=="number"?moment(endTime.value).minute():parseInt((endTime.value as string).split(":")[1]),
-  }).toDate().getTime()
+  },props.timezone).toDate().getTime()
 }
 const onChangeRecurry=()=>{
   if(props.data.recurring==ECommon_Calendar_Recurring_Type.WEEK) {
@@ -111,21 +116,21 @@ const onChangeRecurry=()=>{
 const onChangeAllDay=()=>{
   if(props.data.isAllDay) {
     let objDate=moment(startDate.value)
-    props.data.start=moment({
+    props.data.start=moment.tz({
       year:objDate.year(),
       month:objDate.month(),
       date:objDate.date(),
       hour:0,
       minute:0
-    }).toDate().getTime()
+    },props.timezone).toDate().getTime()
     objDate=moment(endDate.value)
-    props.data.end=moment({
+    props.data.end=moment.tz({
       year:objDate.year(),
       month:objDate.month(),
       date:objDate.date(),
       hour:23,
       minute:59
-    }).toDate().getTime()
+    },props.timezone).toDate().getTime()
   } else {
     onChangeStart()
     onChangeEnd()

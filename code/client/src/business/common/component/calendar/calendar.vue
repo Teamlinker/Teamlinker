@@ -42,7 +42,7 @@
         <div style="height: auto;flex: 1 1 auto;display: flex;position: relative" ref="eventListRef">
           <div v-for="(item,index) in days" :key="index" style="flex: 1 1 auto;display: flex;flex-direction: column;position: relative">
             <div style="position: absolute;right: 15px;left:0px;top:0px;bottom:0px;height: 1440px;">
-              <div style="position: absolute;height: 2px;background-color: red;z-index: 100;width: 100%" v-if="now.isSame(item,'day')" :style="{top:todayTop()}"></div>
+              <div style="position: absolute;height: 2px;background-color: red;z-index: 100;width: 100%" v-if="now.isSame(item,'days')" :style="{top:todayTop()}"></div>
               <div style="position: absolute;color: white;display: flex;" v-for="item in eventList[index]" :key="item.id" :style="{left:item.left,top:item.top,right:item.right,bottom:item.bottom}">
                 <div style="flex: 0 0 6px;border-radius: 5px 0 0 5px" :style="{backgroundColor:item.color}"></div>
                 <div style="flex: 1 1 auto;border-radius: 0 5px 5px 0;display: flex;flex-direction: column;overflow: hidden" :style="{backgroundColor:handleColorAlpha(item.color)}">
@@ -65,7 +65,7 @@
       <div style="flex: 1 1 auto;display: flex;flex-direction: column;position: relative" ref="eventListRef" tabindex="-1" @mousemove="onMouseMove" @mousedown="onMouseDown" @mouseup="onMouseUp" @mouseleave="onMouseLeave" @keydown="onKeyDown" name="eventListMonth">
         <div style="position: absolute;display: none;flex-direction: column;background-color: white;z-index: 100;border-radius: 5px;box-shadow: 0px 0px 3px 3px rgba(169, 169, 169, 0.2);padding: 10px" ref="moreEle" tabindex="-1" @blur="onBlur" name="more">
           <div v-for="item in moreColumn" style="line-height:20px;border-radius: 5px;padding-left: 5px;color: white;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;flex: 0 0 20px;margin-bottom: 5px;cursor: pointer" :style="{backgroundColor:objManage.checkCrossEvent(item)?item.color:'',color:objManage.checkCrossEvent(item)?'white':item.color}" name="more" :data-id="item.id">
-            {{moment({hour:item.startDate.hour,minute:item.startDate.minute}).format("HH:mm")+" "+item.name}}
+            {{moment.tz({hour:item.startDate.hour,minute:item.startDate.minute},props.timeZone).format("HH:mm")+" "+item.name}}
           </div>
         </div>
         <div v-for="index in days.length/7" style="flex: 1 1 0px;display: flex;position: relative;border-top: 1px solid lightgray">
@@ -76,7 +76,7 @@
           </div>
           <template v-for="(item,index1) in monthEventList[index-1]">
             <div style="position: absolute;line-height:20px;border-radius: 5px;padding-left: 5px;color: white;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: move" :style="{left:item.left,top:item.top,right:item.right,height:item.height,backgroundColor:objManage.checkCrossEvent(item)?item.color:'',color:objManage.checkCrossEvent(item)?'white':item.color}" :data-id="item.id" :data-index="JSON.stringify(item.index)" data-type="move" v-if="parseInt(item.top)+parseInt(item.height)<monthDayHeight-30">
-              {{moment({hour:item.startDate.hour,minute:item.startDate.minute}).format("HH:mm")+" "+item.name}}
+              {{moment.tz({hour:item.startDate.hour,minute:item.startDate.minute},props.timeZone).format("HH:mm")+" "+item.name}}
             </div>
             <div class="eventMore" style="position: absolute;line-height:20px;border-radius: 5px;padding-left: 5px;font-weight: bold;color: rgb(3,155,229)" :style="{left:item.left,top:item.top,right:item.right,height:item.height}" v-else-if="check(index,index1)" @click="onMore(index-1,$event)" name="more">more</div>
           </template>
@@ -130,6 +130,7 @@ import {IClient_Calendar_Date, IClient_Calendar_Info} from "./type";
 import {CalendarManage} from "./calendarManage";
 import {computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect} from "vue";
 import moment from "moment";
+import "moment-timezone"
 
 const emit=defineEmits<{
   (e:"deleteEvent",event:IClient_Calendar_Info):void
@@ -149,7 +150,8 @@ const props=defineProps<{
   endDate?:string,
   mode:"day"|"month",
   month?:string,
-  utcOffset?:number
+  utcOffset?:number,
+	timeZone:string
 }>()
 const isMask=ref(false)
 const maskInfoLeft=ref("")
@@ -195,10 +197,12 @@ const monthDayHeight=ref(0)
 const moreEle=ref<HTMLElement>()
 const moreColumn=ref<IClient_Calendar_Info[]>([])
 let resizeObserver:ResizeObserver
-const now=ref<moment.Moment>(moment())
+const now=ref<moment.Moment>(moment().tz(props.timeZone))
 const isMouseMove=ref(false)
 let nowInterval
 watchEffect(()=>{
+	objManage.setTimeZone(props.timeZone)
+	now.value=moment().tz(props.timeZone)
   if(props.mode=="day") {
     objManage.initByDay(props.startDate,props.endDate,props.eventList)
     days.value=objManage.getDays()
@@ -368,7 +372,7 @@ onMounted(()=>{
     monthDayHeight.value=eventListRef.value.offsetHeight/monthEventList.value.length
   }
   function assignMoment() {
-    now.value=moment()
+    now.value=moment().tz(props.timeZone)
     nowInterval=setTimeout(assignMoment,1000*60)
   }
   nowInterval=setTimeout(assignMoment,1000*60)
@@ -402,7 +406,7 @@ const todayTop=()=>{
 }
 const selectedDateFormat=computed(()=>{
   let event=selectedEvent.value
-  let objStart=moment()
+  let objStart=moment().tz(props.timeZone)
   objStart.set({
     year:event.startDate.year,
     month:event.startDate.month-1,
@@ -410,7 +414,7 @@ const selectedDateFormat=computed(()=>{
     hour:event.startDate.hour,
     minute:event.startDate.minute
   })
-  let objEnd=moment()
+  let objEnd=moment().tz(props.timeZone)
   objEnd.set({
     year:event.endDate.year,
     month:event.endDate.month-1,

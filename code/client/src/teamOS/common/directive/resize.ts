@@ -12,8 +12,14 @@ const resizeObserver=new ResizeObserver((entries, observer)=>{
         let win=getDesktopInstance().windowManager.getById(id);
         if(win && g_parentElement[id]) {
             let ele=g_parentElement[id]
-            win.rect.width= `${entry.contentRect.width/ele.clientWidth*100}%`
-            win.rect.height= `${entry.contentRect.height/ele.clientHeight*100}%`
+            let width=entry.contentRect.width/ele.clientWidth*100
+            let height=entry.contentRect.height/ele.clientHeight*100
+            if(Math.abs(width-parseFloat(win.rect.width))>0.1) {
+                win.rect.width= `${width}%`
+            }
+            if(Math.abs(height-parseFloat(win.rect.height))>0.1) {
+                win.rect.height= `${height}%`
+            }
         }
     }
 })
