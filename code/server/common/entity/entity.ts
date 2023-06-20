@@ -102,6 +102,11 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         let obj=new Cls(this.mapper)
         let data=await this.mapper.copy(this.item.id,deletedFields as string[],updatedFields)
         obj.setItem(data)
+        imagefields.forEach(item=>{
+            if(this.item[item]) {
+                emitServiceEvent("fileRef",this.item[item])
+            }
+        })
         return obj;
     }
 

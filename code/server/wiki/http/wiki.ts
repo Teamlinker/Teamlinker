@@ -256,4 +256,20 @@ class WikiController {
         await obj.removeMember(memberId,type)
         return
     }
+
+    @DHttpApi(wikiApi.routes.wikiItemInfo)
+    async wikiItemInfo(@DHttpReqParamRequired("wikiItemId") wikiItemId:string):Promise<typeof wikiApi.routes.wikiItemInfo.res>{
+        let obj=await WikiItemService.getItemById(wikiItemId)
+        if(!obj) {
+            throw Err.Wiki.wikiItemNotFound
+        }
+        let objWiki=await WikiService.getItemById(obj.getItem().wiki_id)
+        if(!objWiki) {
+            throw Err.Wiki.wikiNotFound
+        }
+        return {
+            ...obj.getItem(),
+            wiki:objWiki.getItem()
+        }
+    }
 }

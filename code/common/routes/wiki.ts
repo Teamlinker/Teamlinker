@@ -7,7 +7,8 @@ import {
     ICommon_Route_Res_Role_List,
     ICommon_Route_Res_Role_ListMember,
     ICommon_Route_Res_userWikiList,
-    ICommon_Route_Res_Wiki_Info
+    ICommon_Route_Res_Wiki_Info,
+    ICommon_Route_Res_Wiki_Item_Info
 } from "./response";
 import {ICommon_Model_Wiki_Item} from "../model/wiki_item";
 import {ECommon_Model_Organization_Member_Type} from "../model/organization";
@@ -254,7 +255,16 @@ const api= {
             }>{},
             res: {},
             permission: [Permission_Types.Wiki.ADMIN]
-        }
+        },
+        wikiItemInfo: {
+            method: ECommon_HttpApi_Method.GET,
+            path: "/item/info",
+            req: <{
+                wikiItemId:string,
+            }>{},
+            res: <ICommon_Route_Res_Wiki_Item_Info>{},
+            permission: [Permission_Types.Wiki.READ]
+        },
     }
 }
 export  default  api

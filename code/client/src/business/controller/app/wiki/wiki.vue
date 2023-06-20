@@ -4,7 +4,11 @@
     <a-collapse :default-active-key="['recent','all']" style="margin-top: 10px">
       <a-collapse-item header="Recent Wiki List" key="recent">
         <a-space wrap style="margin-top: 20px" size="large" v-if="recentList.length>0">
-          <CardItem v-for="item in recentList" style="background-color: white" :name="item.name" :description="item.description" :key="item.id" :photo="item.photo" @click="onClickWikiItem(item.id,item.name)"></CardItem>
+          <CardItem v-for="item in recentList" style="background-color: white" :name="item.name" :description="item.description" :key="item.id" :photo="item.photo" @click="onClickWikiItem(item.id,item.name)" v-drag.shortcut="{
+						shortcutType:ECommon_Model_Finder_Shortcut_Type.WIKI,
+						shortcutRefId:item.id,
+						shortcutName:item.name
+          }"></CardItem>
         </a-space>
         <a-empty v-else></a-empty>
       </a-collapse-item>
@@ -22,7 +26,11 @@
           </a-space>
         </a-row>
         <a-space wrap style="margin-top: 20px" size="large" v-if="list.length>0">
-          <CardItem v-for="item in list" style="background-color: white" :name="item.name" :description="item.description" :key="item.id" :photo="item.photo" @click="onClickWikiItem(item.id,item.name)"></CardItem>
+          <CardItem v-for="item in list" style="background-color: white" :name="item.name" :description="item.description" :key="item.id" :photo="item.photo" @click="onClickWikiItem(item.id,item.name)" v-drag.shortcut="{
+						shortcutType:ECommon_Model_Finder_Shortcut_Type.WIKI,
+						shortcutRefId:item.id,
+						shortcutName:item.name
+          }"></CardItem>
         </a-space>
         <a-empty v-else></a-empty>
         <a-pagination :page-size="20" :total="pagination.total" style="margin-top: 10px" @change="onPageChange"></a-pagination>
@@ -39,13 +47,15 @@ import {Permission_Types} from "../../../../../../common/permission/permission";
 import {useDesktopStore} from "../../desktop/store/desktop";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {
-  ETeamOS_Navigator_Action,
-  getCurrentNavigator,
-  onNavigatorShow
+	ETeamOS_Navigator_Action,
+	getCurrentNavigator,
+	onNavigatorShow
 } from "../../../../teamOS/common/component/navigator/navigator";
 import CardItem from "../../../common/component/cardItem.vue";
 import {ICommon_Model_Wiki} from "../../../../../../common/model/wiki";
 import EditWikiProfile from "../setting/wiki/editWikiProfile.vue";
+import {vDrag} from "../../../../teamOS/common/directive/drag";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 
 const recentList=ref<DCSType<ICommon_Model_Wiki[]>>([])
 const list=ref<DCSType<ICommon_Model_Wiki[]>>([])

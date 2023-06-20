@@ -1,7 +1,11 @@
 <template>
   <a-layout style="height: 100%">
     <a-layout-content id="issueProfileContent">
-      <a-row style="color: gray">
+      <a-row style="color: gray" v-drag.shortcut="()=>({
+				shortcutType:ECommon_Model_Finder_Shortcut_Type.PROJECT_ISSUE,
+				shortcutRefId:projectIssueId,
+				shortcutName:key+'-'+info?.unique_id+' '+info?.name
+      })">
         {{key+"-"+info?.unique_id}}
       </a-row>
       <a-row style="margin-top: 10px">
@@ -214,6 +218,8 @@ import {ICommon_Model_Workflow_Action} from "../../../../../../../common/model/w
 import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/model/workflow_node";
 import ProjectIssueNext from "./projectIssueNext.vue";
 import {ICommon_Model_Project_Release} from "../../../../../../../common/model/project_release";
+import {vDrag} from "../../../../../teamOS/common/directive/drag";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/model/finder_item";
 
 const props=defineProps<{
   projectIssueId:string

@@ -20,6 +20,10 @@ import {ICommon_Field_Type} from "../field/type";
 import {ICommon_Model_Wiki} from "../model/wiki";
 import {ICommon_Model_Calendar_Event} from "../model/calendar_event";
 import {ECommon_Calendar_Color} from "../model/calendar";
+import {ICommon_Model_Finder_Item} from "../model/finder_item";
+import {ICommon_Model_File} from "../model/file";
+import {ICommon_Model_Wiki_Item} from "../model/wiki_item";
+import {ICommon_Model_Meeting_Room} from "../model/meeting_room";
 
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -57,6 +61,10 @@ export type ICommon_Route_Res_User_Profile={
     info:Omit<ICommon_Model_User,"password">,
     team:ICommon_Route_Res_User_TeamList,
     organizationUser:ICommon_Model_Organization_User
+}
+
+export type ICommon_Route_Res_Wiki_Item_Info=ICommon_Model_Wiki_Item & {
+    wiki:ICommon_Model_Wiki
 }
 
 export type ICommon_Route_Res_User_List = {
@@ -334,5 +342,15 @@ export type ICommon_Route_Res_Organization_FilterUserAndTeam = {
         id:string,
             name:string,
             photo:string
+    }[]
+}
+
+export type ICommon_Route_Res_Finder_Info = ICommon_Model_Finder_Item &  {
+    file?:ICommon_Model_File,
+    organization?:ICommon_Model_Organization,
+    shortcut?:ICommon_Model_Project|ICommon_Model_Project_Issue|ICommon_Model_Project_Release|ICommon_Model_Wiki|ICommon_Model_Wiki_Item|ICommon_Model_Calendar_Event|ICommon_Model_Meeting_Room,
+    parentFolderList:{
+        id:string,
+        name:string
     }[]
 }

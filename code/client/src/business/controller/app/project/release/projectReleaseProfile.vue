@@ -2,7 +2,11 @@
   <div>
     <a-row style="justify-content: space-between;">
       <a-space size="large">
-        <span style="font-size: 20px;font-weight: bold">
+        <span style="font-size: 20px;font-weight: bold" v-drag.shortcut="()=>({
+          shortcutType:ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE,
+					shortcutRefId:projectReleaseId,
+					shortcutName:info?.name
+        })">
           {{info?.name}}
         </span>
         <a-tag color="blue" v-if="info?.status===ECommon_Model_Project_Release_Status.UNRELEASE">UNRELEASED</a-tag>
@@ -89,8 +93,8 @@
 import {getCurrentInstance, inject, markRaw, onBeforeMount, ref} from "vue";
 import {injectProjectInfo} from "../../../../common/util/symbol";
 import {
-  ICommon_Route_Res_Release_Info,
-  ICommon_Route_Res_Release_Info_Issue_Item
+	ICommon_Route_Res_Release_Info,
+	ICommon_Route_Res_Release_Info_Issue_Item
 } from "../../../../../../../common/routes/response";
 import {apiRelease, DCSType} from "../../../../common/request/request";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
@@ -104,6 +108,8 @@ import FieldPriority from "../../../../common/component/field/fieldPriority.vue"
 import UserAvatar from "../../../../common/component/userAvatar.vue";
 import ProjectIssueBind from "../issue/projectIssueBind.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
+import {vDrag} from "../../../../../teamOS/common/directive/drag";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/model/finder_item";
 
 const props=defineProps<{
   projectReleaseId:string

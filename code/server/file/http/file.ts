@@ -2,21 +2,28 @@ import {ECommon_Model_File_Type} from '../../../common/model/file';
 import fileApi from "../../../common/routes/file";
 import {Err} from '../../../common/status/error';
 import {DComponent} from "../../common/decorate/component";
-import {DHttpApi, DHttpController, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import {IServer_Common_Http_Req_File} from "../../common/types/http";
 import FileService from "../service/file";
 import {IUserSession} from "../../user/types/config";
 import {REDIS_FILE} from "../../common/cache/keys/file";
+import {emitServiceEvent} from "../../common/event/event";
 
 @DComponent
 @DHttpController(fileApi)
 class AdminController {
     @DHttpApi(fileApi.routes.upload)
-    async upload(@DHttpReqParamRequired("file") file:IServer_Common_Http_Req_File,@DHttpUser user:IUserSession):Promise<typeof fileApi.routes.upload.res>{
+    async upload(@DHttpReqParamRequired("file") file:IServer_Common_Http_Req_File,@DHttpReqParam("meta") meta:string,@DHttpUser user:IUserSession):Promise<typeof fileApi.routes.upload.res>{
         let obj=await FileService.getItemByMd5(file.md5)
         if(obj) {
+            if(meta) {
+                emitServiceEvent("fileUpload",meta,obj.getId())
+            }
             return {
-                id:obj.getItem().id
+                id:obj.getItem().id,
+                ...(meta && {
+                    meta
+                })
             }
         } else {
             let objFile=new FileService()
@@ -26,9 +33,12 @@ class AdminController {
                 type:ECommon_Model_File_Type.LOCAL,
                 md5:file.md5
             })
-            let ret=await objFile.upload(file)
+            let ret=await objFile.upload(file,meta)
             return {
-                id:ret
+                id:ret,
+                ...(meta && {
+                    meta
+                })
             }
         }
     }

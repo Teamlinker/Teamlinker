@@ -197,5 +197,12 @@ class CalendarController {
         return ret;
     }
 
-
+    @DHttpApi(calendarApi.routes.getCalendar)
+    async getCalendar(@DHttpReqParamRequired("calendarId") calendarId:string):Promise<typeof calendarApi.routes.getCalendar.res> {
+        let obj=await CalendarService.getItemById(calendarId)
+        if(!obj) {
+            throw Err.Calendar.calendarNotFound
+        }
+        return obj.getItem()
+    }
 }

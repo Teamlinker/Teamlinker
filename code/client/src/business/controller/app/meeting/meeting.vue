@@ -25,7 +25,11 @@
 				<a-row style="height: calc(100% - 30px);width: 100%;border-top: 1px solid lightgray;overflow-y: auto;flex-direction: column">
 					<template v-if="roomList.length>0">
 						<a-list :bordered="false" style="width: 100%;margin-top: 10px" :pagination-props="pagination" @pageChange="onChangePage">
-							<a-list-item v-for="item in roomList" :key="item.id" style="border-bottom: 1px solid var(--color-fill-3)">
+							<a-list-item v-for="item in roomList" :key="item.id" style="border-bottom: 1px solid var(--color-fill-3)" v-drag.shortcut="{
+								shortcutType:ECommon_Model_Finder_Shortcut_Type.MEETING_ROOM,
+								shortcutRefId:item.id,
+								shortcutName:item.name
+							}">
 								<a-list-item-meta>
 									<template #title>
 										{{item.name}}&nbsp;
@@ -69,6 +73,8 @@ import MeetingJoinInput from "./meetingJoinInput.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {useDesktopStore} from "../../desktop/store/desktop";
 import {ECommon_User_Online_Status} from "../../../../../../common/types";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
+import {vDrag} from "../../../../teamOS/common/directive/drag";
 
 const props=defineProps<{
 	meetingInitInfo?:{

@@ -132,4 +132,13 @@ class MeetingController {
             throw Err.Meeting.notInMeeting
         }
     }
+
+    @DHttpApi(meetingApi.routes.getRoom)
+    async getRoom(@DHttpReqParamRequired("meetingRoomId") meetingRoomId:string): Promise<typeof meetingApi.routes.getRoom.res> {
+        let obj=await MeetingRoomService.getItemById(meetingRoomId)
+        if(!obj) {
+            throw Err.Meeting.roomNotFound
+        }
+        return obj.getItem()
+    }
 }

@@ -17,7 +17,13 @@ export enum EClient_EVENTBUS_TYPE {
     UPDATE_ORGANIZATION_USER_STATUS="update_organization_user_status",
     OPEN_MEETING="open_meeting",
     LEAVE_MEETING="leave_meeting",
-    OPEN_CALENDAR_EVENT="open_calendar_event"
+    OPEN_CALENDAR_EVENT="open_calendar_event",
+    FINDER_NEW_FOLDER="finder_new_folder",
+    FINDER_RENAME="finder_rename",
+    FINDER_DELETE="finder_delete",
+    FINDER_REFRESH="finder_refresh",
+    FINDER_UPLOAD="finder_upload",
+    FINDER_OPEN_WINDOW="finder_open_window"
 }
 
 interface IClient_EventBus_Func {
@@ -40,6 +46,12 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.OPEN_MEETING]:(meetingId:string,password:string)=>void
     [EClient_EVENTBUS_TYPE.LEAVE_MEETING]:()=>void
     [EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT]:(calendarEventId:string)=>void
+    [EClient_EVENTBUS_TYPE.FINDER_NEW_FOLDER]:(needRefreshFolderId:string,newFolderId:string)=>void
+    [EClient_EVENTBUS_TYPE.FINDER_RENAME]:(finderItemId:string,name:string)=>void
+    [EClient_EVENTBUS_TYPE.FINDER_DELETE]:(finderItemIds:string[])=>void
+    [EClient_EVENTBUS_TYPE.FINDER_REFRESH]:(folderId:string)=>void
+    [EClient_EVENTBUS_TYPE.FINDER_UPLOAD]:(fileItemId:string)=>void
+    [EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW]:(folderId:string)=>void
 }
 
 interface IClient_EventBus_Emit_Func {

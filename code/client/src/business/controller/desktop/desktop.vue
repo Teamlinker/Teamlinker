@@ -1,5 +1,5 @@
 <template>
-  <TeamOS>
+  <TeamOS ref="root">
     <template #topLeft>
       <a-dropdown trigger="hover">
         <a-avatar :size="36" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
@@ -58,6 +58,20 @@
 			  </a-col>
 		  </a-row>
 	  </template>
+	  <template #finderItemList>
+		  <template v-for="(item,index) in finderItemIconList" :key="item.meta.id">
+			  <IconItem :item="item" :index="index" v-if="item.meta.type===ECommon_Model_Finder_Item_Type.FILE" v-selectable.file="item.meta.id" >
+			  </IconItem>
+			  <IconItem :item="item" :index="index" v-else-if="item.meta.type===ECommon_Model_Finder_Item_Type.FOLDER" v-selectable.folder="item.meta.id" v-drop.file.shortcut.folder.disk="objFinderHandle.onDrop.bind(objFinderHandle,item.meta.id)">
+			  </IconItem>
+			  <IconItem :item="item" :index="index" v-else-if="item.meta.type===ECommon_Model_Finder_Item_Type.SHORTCUT" v-selectable.shortcut="{
+				shortcutType:(item.meta as ICommon_Route_Res_Finder_Info).shortcut_type,
+				value:item.meta.id,
+				shortcutRefId:item.meta.ref_id
+			} as IClient_Drag_Shortcut_Value">
+			  </IconItem>
+		  </template>
+	  </template>
   </TeamOS>
 	<a-skeleton :animation="true" v-if="loading" style="position: absolute;left: 0;top: 0;height: 100%;width: 100%;background-color: white;z-index: 10000">
 		<a-space direction="vertical" :style="{width:'100%'}" size="large">
@@ -71,7 +85,7 @@
 <script setup lang="ts">
 
 import TeamOS from "../../../teamOS/index.vue";
-import img from "../../../assert/back.png"
+import img from "../../../assert/back2.jpg"
 import {getDesktopInstance} from "../../../teamOS/teamOS";
 import {getCurrentInstance, markRaw, nextTick, onBeforeMount, onBeforeUnmount, ref, watchEffect} from "vue";
 import {useDesktopStore} from "./store/desktop";
@@ -85,10 +99,24 @@ import {SessionStorage} from "../../common/storage/session";
 import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../../../common/types";
 import {apiOrganization} from "../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../common/event/event";
-import {ITeamOS_Desktop_Menu} from "../../../teamOS/desktop/desktop";
 import CreateOrganization from "./createOrganization.vue";
+import {ECommon_Model_Finder_Item_Type} from "../../../../../common/model/finder_item";
+import {vSelectable} from "../../../teamOS/common/directive/selectable";
+import {ICommon_Route_Res_Finder_Info} from "../../../../../common/routes/response";
+import {IClient_Drag_Shortcut_Value} from "../../../teamOS/common/directive/drag";
+import IconItem from "../../../teamOS/icon/iconItem.vue";
+import {FinderHandle} from "../app/finder/finderHandle";
+import {vDrop} from "../../../teamOS/common/directive/drop";
 
+interface ITeamOS_Desktop_Menu {
+	group:string,
+	data:{
+		name:string,
+		value:string
+	}[]
+}
 let desktop=getDesktopInstance().desktop;
+const root=ref()
 const menu=ref<ITeamOS_Desktop_Menu[]>([])
 const menuValue=ref("")
 desktop.setBackgroundImage(img)
@@ -99,6 +127,14 @@ let windowManager=getDesktopInstance().windowManager
 const appContext=getCurrentInstance().appContext
 const loading=ref(true)
 let avatar=ref("")
+const objFinderHandle=new FinderHandle(root,appContext,"")
+objFinderHandle.setNameColor("white")
+objFinderHandle.onEnterFolderFunc=folderId => {
+	eventBus.emit(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,folderId)
+}
+const finderItemIconList=objFinderHandle.getItemList()
+desktop.onDropFunc=objFinderHandle.onDrop.bind(objFinderHandle,"")
+desktop.contextMenu=objFinderHandle.contextMenuFunc.bind(objFinderHandle)
 const watchStop=watchEffect(()=>{
   if(store.organizationList) {
     let arr=[]
@@ -208,12 +244,16 @@ const onCreate=async ()=>{
 }
 
 onBeforeMount(async ()=>{
+	objFinderHandle.registerEvents()
   let isAuth=await store.isAuth();
   if(!isAuth) {
     await router.replace("login");
     return
   }
-  await store.getOrganizationList()
+  await Promise.allSettled([
+		store.getOrganizationList(),
+	  objFinderHandle.refresh()
+  ])
   if(SessionStorage.get("organizationId")) {
     await store.initOrganization(SessionStorage.get("organizationId"))
   }
@@ -222,6 +262,7 @@ onBeforeMount(async ()=>{
 })
 
 onBeforeUnmount(()=>{
+	objFinderHandle.unRegisterEvents()
   eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
 })
 

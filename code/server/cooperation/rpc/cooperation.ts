@@ -2,6 +2,8 @@ import {Err} from "../../../common/status/error";
 import {WorkflowNodeFieldTypeService} from "../service/field";
 import {ProjectService} from "../service/project";
 import {IssueTypeSolutionService} from './../service/issueType';
+import {ProjectIssueService} from "../service/issue";
+import {ProjectReleaseService} from "../service/release";
 
 class RpcCooperationApi  {
     
@@ -41,6 +43,30 @@ class RpcCooperationApi  {
         })
         await objProject.create()
         return objProject.getId();
+    }
+
+    async project(projectId:string) {
+        let obj=await ProjectService.getItemById(projectId)
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
+        return obj.getItem()
+    }
+
+    async projectIssue(projectIssueId:string) {
+        let obj=await ProjectIssueService.getItemById(projectIssueId)
+        if(!obj) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        return obj.getItem()
+    }
+
+    async projectRelease(projectReleaseId:string) {
+        let obj=await ProjectReleaseService.getItemById(projectReleaseId)
+        if(!obj) {
+            throw Err.Project.Release.releaseNotFound
+        }
+        return obj.getItem()
     }
     
 }

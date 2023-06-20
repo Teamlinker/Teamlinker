@@ -4,7 +4,11 @@
     <a-collapse :default-active-key="['recent','all']" style="margin-top: 10px">
       <a-collapse-item header="Recent Project List" key="recent">
         <a-space wrap style="margin-top: 20px" size="large" v-if="recentList.length>0">
-          <ProjectItem v-for="item in recentList" style="background-color: white" done-title="my done issue" :done-count="item.done" open-title="my open issue" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)"></ProjectItem>
+          <ProjectItem v-for="item in recentList" style="background-color: white" done-title="my done issue" :done-count="item.done" open-title="my open issue" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)" v-drag.shortcut="{
+						shortcutType:ECommon_Model_Finder_Shortcut_Type.PROJECT,
+						shortcutRefId:item.id,
+						shortcutName:item.name
+          }"></ProjectItem>
         </a-space>
         <a-empty v-else></a-empty>
       </a-collapse-item>
@@ -22,7 +26,11 @@
           </a-space>
         </a-row>
         <a-space wrap style="margin-top: 20px" size="large" v-if="list.length>0">
-          <ProjectItem v-for="item in list" style="background-color: white" done-title="done issue" :done-count="item.done" open-title="open issue" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)"></ProjectItem>
+          <ProjectItem v-for="item in list" style="background-color: white" done-title="done issue" :done-count="item.done" open-title="open issue" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)" v-drag.shortcut="{
+						shortcutType:ECommon_Model_Finder_Shortcut_Type.PROJECT,
+						shortcutRefId:item.id,
+						shortcutName:item.name
+          }"></ProjectItem>
         </a-space>
         <a-empty v-else></a-empty>
         <a-pagination :page-size="20" :total="pagination.total" style="margin-top: 10px" @change="onPageChange"></a-pagination>
@@ -42,10 +50,12 @@ import {useDesktopStore} from "../../desktop/store/desktop";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import EditProjectProfile from "../setting/project/editProjectProfile.vue";
 import {
-  ETeamOS_Navigator_Action,
-  getCurrentNavigator,
-  onNavigatorShow
+	ETeamOS_Navigator_Action,
+	getCurrentNavigator,
+	onNavigatorShow
 } from "../../../../teamOS/common/component/navigator/navigator";
+import {vDrag} from "../../../../teamOS/common/directive/drag";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 
 const recentList=ref<ICommon_Route_Res_recentProjectList_Item[]>([])
 const list=ref<ICommon_Route_Res_recentProjectList_Item[]>([])

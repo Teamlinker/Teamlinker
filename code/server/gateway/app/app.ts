@@ -18,6 +18,7 @@ import workflowApi from "../../../common/routes/workflow";
 import wikiApi from "../../../common/routes/wiki";
 import calendarApi from "../../../common/routes/calendar";
 import meetingApi from "../../../common/routes/meeting";
+import finderApi from "../../../common/routes/finder";
 import {Err} from "../../../common/status/error";
 import Application from "../../common/app/app";
 import {EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy} from "../../common/types/http";
@@ -30,6 +31,7 @@ import "../../cooperation/app/app"
 import {config as configFile} from "../../file/app/app"
 import "../../wiki/app/app"
 import "../../meeting/app/app"
+import "../../finder/app/app"
 import {initCalendar} from "../../calendar/app/app"
 import {initIM} from "../../im/app/app";
 import {initMeeting} from "../../meeting/app/app";
@@ -37,7 +39,7 @@ import authRpcApi from "../../auth/rpc/auth"
 import userRpcApi from "../../user/rpc/user"
 import {getRedisInstance} from "../../common/cache/redis";
 
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi,wikiApi,calendarApi,meetingApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi,wikiApi,calendarApi,meetingApi,finderApi];
 export default class GateWay extends Application {
     override async config(app: Koa<Koa.DefaultState, Koa.DefaultContext>) {
         let redis=getRedisInstance();

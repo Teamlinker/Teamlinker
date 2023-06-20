@@ -88,6 +88,15 @@ const api= {
             res: <ICommon_Model_Meeting_Room>{},
             permission: [Permission_Types.Organization.READ]
         },
+        getRoom: {
+            method: ECommon_HttpApi_Method.GET,
+            path: "/room",
+            req: <{
+                meetingRoomId:string,
+            }>{},
+            res: <ICommon_Model_Meeting_Room>{},
+            permission: [Permission_Types.Organization.READ]
+        },
     }
 }
 

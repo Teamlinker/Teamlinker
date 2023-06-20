@@ -34,15 +34,6 @@ class IconManager extends Base {
                 return -1;
             }
         })
-        for(let i=0;i<this.iconList.length;i++) {
-            for(let j=0;j<count;j++) {
-                let obj=this.iconList[i*count+j]
-                if(obj) {
-                    obj.point.left=`${((i+1)*20+(i*60))/width*100}%`;
-                    obj.point.top=`${(20+((Icon.height+20)*j))/height*100}%`
-                }
-            }
-        }
     }
     clear() {
         this.iconList.splice(0,this.iconList.length)

@@ -526,5 +526,20 @@ export namespace Err {
             msg:"not in meeting"
         }
     }
+
+    export const Finder={
+        itemNotFound: {
+            code:14000,
+            msg:"item not found"
+        },
+        typeNotMatch:{
+            code:14001,
+            msg:"type not match"
+        },
+        recursionFolder:{
+            code:14002,
+            msg:"recursion folder"
+        }
+    }
 }
 

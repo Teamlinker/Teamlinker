@@ -9,10 +9,12 @@ const api={
             method:ECommon_HttpApi_Method.POST,
             path:"/upload",
             req:<{
-                file:string                
+                file:string,
+                meta?:string
             }>{},
             res:<{
-                id:string
+                id:string,
+                meta?:string
             }>{}
         },
         getPath:{

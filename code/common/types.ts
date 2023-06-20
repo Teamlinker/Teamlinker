@@ -6,7 +6,8 @@ export enum ECommon_Services {
     AUTH="auth",
     Wiki="wiki",
     Calendar="calendar",
-    Meeting="meeting"
+    Meeting="meeting",
+    Finder="finder"
 }
 
 export enum ECommon_User_Online_Status {

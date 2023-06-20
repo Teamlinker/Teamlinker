@@ -3,7 +3,8 @@
     <DesktopBar style="height: 40px;background: rgba(255,255,255,0.3);">
       <template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope"/></template>
     </DesktopBar>
-    <IconContainer style="height: calc(100% - 40px)">
+    <IconContainer style="height: calc(100% - 40px);" v-drop.file.folder.shortcut.disk="desktop.onDropFunc" v-menu.self="desktop.contextMenu" v-select>
+	    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope"/></template>
       <WindowContainer></WindowContainer>
     </IconContainer>
   </div>
@@ -15,6 +16,9 @@ import DesktopBar from "./desktopBar.vue";
 import IconContainer from "../icon/iconContainer.vue";
 import {desktop} from "./desktop";
 import WindowContainer from "../window/windowContainer.vue";
+import {vDrop} from "../common/directive/drop";
+import {vMenu} from "../common/directive/menu";
+import {vSelect} from "../common/directive/select";
 
 let backImag=desktop.getBackgroundImage()
 </script>

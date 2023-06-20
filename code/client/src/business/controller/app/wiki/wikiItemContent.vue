@@ -3,7 +3,11 @@
     <a-row style="height: 45px;border-bottom: 1px lightgray solid;justify-content: space-between;align-items: center">
       <a-row style="height: 100%">
         <a-row style="width: 100%">
-          <a-space size="mini">
+          <a-space size="mini" v-drag.shortcut="()=>({
+            shortcutType:ECommon_Model_Finder_Shortcut_Type.WIKI_ITEM,
+						shortcutRefId:wikiItemId,
+						shortcutName:name
+          })">
             <template #split>
               /
             </template>
@@ -45,6 +49,8 @@ import RichEditor from "../../../common/component/richEditor/richEditor.vue";
 import {Line} from "../../../common/component/richEditor/type";
 import {checkPermission} from "../../../common/util/helper";
 import {Permission_Types} from "../../../../../../common/permission/permission";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
+import {vDrag} from "../../../../teamOS/common/directive/drag";
 
 const props=defineProps<{
   wikiItemId:string,

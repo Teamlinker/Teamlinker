@@ -1,5 +1,5 @@
 import {ITeamOS_Rect} from "../common/type";
-import {Component} from "vue";
+import {Component, inject} from "vue";
 import {Base} from "../common/util/base";
 import {v4} from "uuid";
 
@@ -41,6 +41,11 @@ export interface ITeamOS_Window_Event {
     "move":(item:Window)=>void,
     "newTab":(item:Window)=>Promise<ITeamOS_Window_Node>
     "removeTab":(item:Window)=>void
+}
+
+export function getCurrentWindow():Window {
+    let win=inject("windowRef") as Window
+    return win
 }
 
 export class Window extends Base{

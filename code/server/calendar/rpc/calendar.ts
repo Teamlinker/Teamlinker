@@ -1,5 +1,5 @@
 import {ECommon_Calendar_Color, ECommon_Calendar_Type} from "../../../common/model/calendar";
-import {CalendarService, CalendarSettingService} from "../service/calendar";
+import {CalendarEventService, CalendarService, CalendarSettingService} from "../service/calendar";
 import {Err} from "../../../common/status/error";
 import {ECommon_Calendar_WeekDay} from "../../../common/model/calendar_setting";
 
@@ -60,6 +60,14 @@ class RpcCalendarApi {
             throw Err.Calendar.settingNotFound
         }
         await obj.delete()
+    }
+
+    async calendarEvent(calendarEventId:string) {
+        let obj=await CalendarEventService.getItemById(calendarEventId)
+        if(!obj) {
+            throw Err.Calendar.calendarEventNotFound
+        }
+        return obj.getItem()
     }
 }
 

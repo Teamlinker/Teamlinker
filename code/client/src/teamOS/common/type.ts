@@ -11,8 +11,8 @@ export interface ITeamOS_Rect {
 }
 
 export interface ITeamOS_Menu {
-    icon:string,
+    icon?:string,
     title:string,
-    value:any,
-    func:(value:any)=>void
+    value?:any,
+    func?:(value:any)=>void
 }

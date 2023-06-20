@@ -1,10 +1,10 @@
-import {ITeamOS_Menu, ITeamOS_Point} from "../common/type";
+import {ITeamOS_Menu} from "../common/type";
 import {Base} from "../common/util/base";
 
 export interface ITeamOS_Icon_Event {
     "move":(item:Icon)=>void
     "dbClick":(item:Icon)=>void
-    "contextmenu":((item:Icon)=>ITeamOS_Menu[]) | ((item:Icon)=>Promise<ITeamOS_Menu[]>)
+    "contextmenu":((item:Icon)=>ITeamOS_Menu[])|((item:Icon)=>Promise<ITeamOS_Menu[]>)
 }
 
 export const iconGroupMap={
@@ -15,7 +15,8 @@ export const iconGroupMap={
     project:"project",
     setting:"setting",
     team:"team",
-    wiki:"file-text"
+    wiki:"file-text",
+    finder:"folder-view"
 }
 
 export class Icon extends Base{
@@ -23,17 +24,29 @@ export class Icon extends Base{
     static width=60;
     name=""
     icon=""
+    iconColor="white"
+    nameColor="white"
     meta:any
-    point:ITeamOS_Point
+    rename=false
+    loadingFunc:()=>boolean
     onDBClick:(item:Icon)=>void
     onMove:(item:Icon)=>void
-    onContextMenu:((item:Icon)=>ITeamOS_Menu[]) | ((item:Icon)=>Promise<ITeamOS_Menu[]>)
-    constructor(name:string,icon:string,point:ITeamOS_Point={left:"0%",top:"0%"},meta?:any) {
+    onRename:(item:Icon,name:string)=>Promise<void>
+    onContextMenu:((item:Icon)=>ITeamOS_Menu[])|((item:Icon)=>Promise<ITeamOS_Menu[]>)
+    constructor(name:string,icon:string,meta?:any,iconColor?:string,nameColor?:string) {
         super()
         this.name=name;
         this.icon=icon;
-        this.point=point
         this.meta=meta
+        if(iconColor) {
+            this.iconColor=iconColor
+        }
+        if(nameColor) {
+            this.nameColor=nameColor
+        }
+        this.onContextMenu=async item => {
+            return []
+        }
     }
     addEventListener<T extends keyof ITeamOS_Icon_Event>(eventType:T,func:ITeamOS_Icon_Event[T]) {
         if(eventType=="move") {

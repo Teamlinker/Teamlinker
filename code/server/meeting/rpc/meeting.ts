@@ -41,6 +41,14 @@ class RpcMeetingApi {
     async clearMeetingRoom(organizationUserId:string) {
         await MeetingRoomService.clear(organizationUserId)
     }
+
+    async meetingRoom(meetingRoomId:string) {
+        let obj=await MeetingRoomService.getItemById(meetingRoomId)
+        if(!obj) {
+            throw Err.Meeting.roomNotFound
+        }
+        return obj.getItem()
+    }
 }
 
 export default new RpcMeetingApi()

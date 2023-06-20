@@ -510,6 +510,7 @@ onBeforeMount(async ()=>{
 		handlePropsCalendarEventId(props.calendarEventId)
 	}
 })
+
 </script>
 
 <style scoped>

@@ -4,6 +4,7 @@ import {Entity} from "../../common/entity/entity";
 import {fileModel} from './../../../common/model/file';
 import {fileMapper} from './../mapper/file';
 import {IServer_Common_Http_Req_File} from "../../common/types/http";
+import {emitServiceEvent} from "../../common/event/event";
 import path = require("path");
 
 export default class File extends Entity<typeof fileModel,typeof fileMapper> {
@@ -20,7 +21,7 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
             return null;
         }
     }
-    async upload(file:IServer_Common_Http_Req_File){
+    async upload(file:IServer_Common_Http_Req_File,meta?:string){
         let arr=(new Date).toLocaleDateString().split("/").reverse()
         if(arr[2].length==1) {
             arr[2]="0"+arr[2]
@@ -32,6 +33,9 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
         fs.writeFile(filePath,file.data)
         this.item.path=dbPath
         await super.create()
+        if(meta) {
+            emitServiceEvent("fileUpload",meta,this.item.id)
+        }
         return this.item.id;
     }
 

@@ -13,6 +13,7 @@ import wiki from "../../../../../common/routes/wiki"
 import calendar from "../../../../../common/routes/calendar"
 import meeting from "../../../../../common/routes/meeting"
 import gateway from "../../../../../common/routes/gateway"
+import finder from "../../../../../common/routes/finder"
 import {Ref} from "vue";
 import {SessionStorage} from "../storage/session";
 
@@ -170,5 +171,5 @@ export const apiWiki=generatorApi(wiki)
 export const apiCalendar=generatorApi(calendar)
 export const apiMeeting=generatorApi(meeting)
 export const apiGateway=generatorApi(gateway)
-
+export const apiFinder=generatorApi(finder)
 

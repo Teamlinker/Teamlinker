@@ -130,7 +130,16 @@ const api= {
             }>{},
             res: {},
             permission: [Permission_Types.Organization.READ]
-        }
+        },
+        getCalendar:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/calendar",
+            req: <{
+                calendarId:string
+            }>{},
+            res: <ICommon_Model_Calendar>{},
+            permission: [Permission_Types.Organization.READ]
+        },
     }
 }
 export default api

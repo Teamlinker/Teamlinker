@@ -1,6 +1,6 @@
 <template>
-  <div  :data-id="item.id" :id="item.id" :style="{zIndex:item.isFocus?101:100,left:item.rect.left,top:item.rect.top,width:item.rect.width,height:item.rect.height}"  style="box-shadow:0px 0px 2px 2px rgba(169, 169, 169, 0.2);position:absolute;border-radius: 5px" :tabindex="index" @focus="onFocus(item.id)" v-resize="item.rect" v-show="item.status!=ETeamOS_Window_Status.MIN">
-    <a-row style="height: 35px;" :style="{backgroundColor:`rgb(249,249,249)`}" v-drag:[item.id]="item.rect" @dragend="item.onMove">
+  <div  :data-id="item.id" :id="item.id" :style="{zIndex:item.isFocus?101:100,left:item.rect.left,top:item.rect.top,width:item.rect.width,height:item.rect.height}"  style="box-shadow:0px 0px 2px 2px rgba(169, 169, 169, 0.2);position:absolute;border-radius: 5px" :tabindex="index" @focus="onFocus(item.id)" v-resize="item.rect" v-show="item.status!=ETeamOS_Window_Status.MIN" name="window">
+    <a-row style="height: 35px;" :style="{backgroundColor:`rgb(249,249,249)`}" v-drag:[item.id].free="item.rect" @dragend="item.onMove">
       <a-col flex="80px" style="height: 100%">
         <a-row style="height: 100%" align="center" justify="left" :wrap="false" v-if="item.isControl">
           <a-col flex="auto">
@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import {windowManager} from "./windowManager";
-import {nextTick, onMounted, reactive, ref, watch} from "vue";
+import {nextTick, onMounted, provide, reactive, ref, watch} from "vue";
 import NavigatorContainer from "../common/component/navigator/navigatorContainer.vue";
 import {ETeamOS_Window_Status, ETeamOS_Window_Type, Window} from "./window";
 import {vDrag} from "../common/directive/drag";
@@ -75,7 +75,7 @@ let props=defineProps<{
   item:Window,
   index:number
 }>()
-
+provide("windowRef",props.item)
 const onFocus=(id:string)=>{
   windowManager.setFocus(id);
 }

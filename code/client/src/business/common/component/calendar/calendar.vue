@@ -101,7 +101,11 @@
           <div style="flex: 0 0 30px">
             <div style="width: 10px;height: 10px;border-radius: 2px;margin-top: 7px;margin-left: 5px" :style="{backgroundColor:selectedEvent.color}"></div>
           </div>
-          <div style="font-size: 20px;flex: 1 1 auto">{{selectedEvent.name}}</div>
+          <div style="font-size: 20px;flex: 1 1 auto" v-drag.shortcut="()=>({
+            shortcutType:ECommon_Model_Finder_Shortcut_Type.CALENDAR_EVENT,
+						shortcutRefId:selectedEvent.id,
+						shortcutName:selectedEvent.name
+          })">{{selectedEvent.name}}</div>
         </div>
         <div style="display: flex;height: 30px">
           <div style="flex: 0 0 30px">
@@ -131,6 +135,8 @@ import {CalendarManage} from "./calendarManage";
 import {computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect} from "vue";
 import moment from "moment";
 import "moment-timezone"
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
+import {vDrag} from "../../../../teamOS/common/directive/drag";
 
 const emit=defineEmits<{
   (e:"deleteEvent",event:IClient_Calendar_Info):void

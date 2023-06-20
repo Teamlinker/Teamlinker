@@ -1,6 +1,7 @@
 <template>
-  <div id="teamOS-iconWindow" style="position: relative;overflow: hidden" v-menu.self="menu">
+  <div id="teamOS-iconWindow" style="position: relative;overflow: hidden;display: grid;grid-template-rows:repeat(auto-fill,120px);grid-template-columns: repeat(auto-fill,100px);grid-auto-flow: column;align-items: center;justify-items: center">
     <IconItem v-for="(item,index) in iconList" :index="index" :item="item" :key="item.id"></IconItem>
+	  <slot name="finderItemList"></slot>
     <slot></slot>
   </div>
 </template>
@@ -8,21 +9,10 @@
 <script setup lang="ts">
 import {iconManager} from "./iconManager";
 import IconItem from "./iconItem.vue";
-import {vMenu} from "../common/directive/menu";
-import {ITeamOS_Menu} from "../common/type";
 
-vMenu;
+
 let iconList=iconManager.getList();
-let menu:ITeamOS_Menu[]=[
-  {
-    icon:"sort-ascending",
-    title:"sort",
-    value:null,
-    func:(value:any)=>{
-      iconManager.sort();
-    }
-  }
-]
+
 </script>
 
 <style scoped>

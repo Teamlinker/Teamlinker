@@ -21,6 +21,7 @@ import {ECommon_User_Online_Status} from "../../../../../../common/types";
 import {handleMeetingEvent} from "../../app/meeting/event";
 import {checkPermission} from "../../../common/util/helper";
 import {Permission_Types} from "../../../../../../common/permission/permission";
+import {iconFinder} from "../icon/finder";
 
 export const useDesktopStore=defineStore("desktop",{
     state:()=>({
@@ -34,11 +35,13 @@ export const useDesktopStore=defineStore("desktop",{
             iconPeople,
             iconWiki,
             iconIM,
-            iconTeam
+            iconTeam,
+            iconFinder
         ] as Icon[],
         userInfo:{} as DCSType<Omit<ICommon_Model_User,"password">>,
         status:ECommon_User_Online_Status.OFFLINE,
-        heartbeatInterval:null
+        heartbeatInterval:null,
+        copyItemList:[] as string[]
     }),
     actions:{
         async getOrganizationList() {

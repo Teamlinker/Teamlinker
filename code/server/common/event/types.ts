@@ -6,6 +6,7 @@ export interface IServer_Common_Event_Types {
     teamDelete:(teamId:string)=>void
     fileRef:(fileId:string)=>void
     fileUnref:(fileId:string)=>void
+    fileUpload:(meta:string,fileId:string)=>void
     issueTypeDelete:(issueTypeId:string)=>void
     organizationUserAdd:(organizationId:string,organizationUserId:string)=>void
     organizationUserEdit:(organizationId:string,organizationUserId:string)=>void

@@ -1,15 +1,10 @@
 import {reactive, ref} from "vue";
 import {getBaseColor} from "../common/util/color";
 import {Base} from "../common/util/base";
+import {DropParam} from "../common/directive/drop";
+import {ITeamOS_Menu} from "../common/type";
 
 
-export interface ITeamOS_Desktop_Menu {
-    group:string,
-    data:{
-        name:string,
-        value:string
-    }[]
-}
 class Desktop extends Base{
     private backgroundImage=ref("")
     private baseColor:{
@@ -21,6 +16,8 @@ class Desktop extends Base{
         g:0,
         b:0
     });
+    onDropFunc:(destFolderId:string,data:DropParam)=>void
+    contextMenu:ITeamOS_Menu[]=[]
     getBackgroundImage() {
         return this.backgroundImage
     }

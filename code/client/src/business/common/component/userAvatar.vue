@@ -69,6 +69,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../event/event";
 import {SessionStorage} from "../storage/session";
 import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
 import {ECommon_User_Online_Status} from "../../../../../common/types";
+import {Message} from "@arco-design/web-vue";
 
 const loading=ref(true)
 const props=defineProps<{
@@ -77,6 +78,7 @@ const props=defineProps<{
   organizationUserId:string,
   closeable?:boolean,
   onlyPhoto?:boolean,
+	organizationId?:string,
   trigger?:'hover' | 'click' | 'focus' | 'contextMenu'
 }>()
 const emit=defineEmits<{
@@ -96,6 +98,10 @@ const imgName=computed(()=>{
 })
 const info=ref<DCSType<ICommon_Model_Organization_User>>(null)
 const onProfile=()=>{
+	if(info.value.organization_id!==SessionStorage.get("organizationId")) {
+		Message.error("you should switch to the specific organization")
+		return
+	}
   eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,props.organizationUserId);
   let ele=document.getElementById("popover"+props.organizationUserId)
   ele.parentElement.removeChild(ele);
@@ -104,14 +110,20 @@ const onPopup=async (visible:boolean)=>{
   if(!info.value && visible) {
     Promise.all([
       apiOrganization.user({
-        organizationUserId:props.organizationUserId
+        organizationUserId:props.organizationUserId,
+	      ...(props.organizationId && {
+					organizationId:props.organizationId
+	      })
       }).then(res => {
         if(res?.code==0) {
           info.value=res.data
         }
       }),
       apiOrganization.getUserStatus({
-        organizationUserId:props.organizationUserId
+        organizationUserId:props.organizationUserId,
+	      ...(props.organizationId && {
+		      organizationId:props.organizationId
+	      })
       }).then(res => {
         if(res?.code==0) {
           status.value=res.data.status
@@ -123,6 +135,10 @@ const onPopup=async (visible:boolean)=>{
   }
 }
 const onMessage=()=>{
+	if(info.value.organization_id!==SessionStorage.get("organizationId")) {
+		Message.error("you should switch to the specific organization")
+		return
+	}
   eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,props.organizationUserId,ECommon_IM_Message_EntityType.USER)
 }
 </script>
