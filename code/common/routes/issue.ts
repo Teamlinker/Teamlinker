@@ -8,7 +8,7 @@ import {ICommon_Model_Project_Module} from './../model/project_module';
 import {
     ICommon_Route_Req_ProjectIssue_Field,
     ICommon_Route_Req_ProjectIssue_Field_Value,
-    ICommon_Route_Res_Project_filter,
+    ICommon_Route_Res_Project_Issue_filter,
     ICommon_Route_Res_ProjectIssue_BasicInfo,
     ICommon_Route_Res_ProjectIssue_fieldsInfo,
     ICommon_Route_Res_Workflow_Node_Field
@@ -292,7 +292,7 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/filter",
             req:<{
-                projectId :string,
+                projectId? :string,
                 createdBy?:string,
                 issueTypeId?:string,
                 name?:string,
@@ -305,7 +305,7 @@ const api={
                 page:number,
                 size:number
             }>{},
-            res:<ICommon_Route_Res_Project_filter>{},
+            res:<ICommon_Route_Res_Project_Issue_filter>{},
             permission:[Permission_Types.Project.READ]
         },
         releaseList:{

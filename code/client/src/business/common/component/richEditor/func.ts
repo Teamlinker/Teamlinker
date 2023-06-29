@@ -1,7 +1,11 @@
-import {ELineConfigType, Line, LineConfig} from "./type";
 import {nextTick} from "vue";
 import {RichEditorEvent} from "./event";
 import {RichEditorHandle} from "./handle";
+import {
+    ECommon_Wiki_Content_Line_Config_Type,
+    ICommon_Wiki_Content_Line,
+    ICommon_Wiki_Content_Line_Config
+} from "../../../../../../common/model/wiki_item_content";
 
 function handleLink(obj:RichEditorEvent,link:string) {
     let lineList=obj.getLineList()
@@ -10,11 +14,11 @@ function handleLink(obj:RichEditorEvent,link:string) {
     if(selectElementList.length==1) {
         let selectLine=lineList[Array.from(root.value.children).indexOf(selectElementList[0])]
         if(selectLine.selectStartIndexPath.length>0 && selectLine.selectEndIndexPath.length>0) {
-            let newItem:LineConfig,newItemValueLength:number
+            let newItem:ICommon_Wiki_Content_Line_Config,newItemValueLength:number
             if(selectLine.selectEndIndexPath[0]>selectLine.selectStartIndexPath[0]) {
                 let startItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
                 let endItem=selectLine.arr[selectLine.selectEndIndexPath[0]]
-                let newItem:LineConfig
+                let newItem:ICommon_Wiki_Content_Line_Config
                 for(let i=selectLine.selectStartIndexPath[0]; i<=selectLine.selectEndIndexPath[0]; i++) {
                     let item=selectLine.arr[i]
                     if(item==startItem) {
@@ -24,7 +28,7 @@ function handleLink(obj:RichEditorEvent,link:string) {
                                     ...item.style
                                 },
                                 value: item.value.substring(selectLine.selectStartIndexPath[1]),
-                                type:ELineConfigType.LINK,
+                                type:ECommon_Wiki_Content_Line_Config_Type.LINK,
                                 link:link
                             }
                             item.value=item.value.substring(0,selectLine.selectStartIndexPath[1])
@@ -34,7 +38,7 @@ function handleLink(obj:RichEditorEvent,link:string) {
                             startItem=newItem
                         } else {
                             item.link=link
-                            item.type=ELineConfigType.LINK
+                            item.type=ECommon_Wiki_Content_Line_Config_Type.LINK
                             startItem=item
                         }
                     } else if(item==endItem) {
@@ -64,7 +68,7 @@ function handleLink(obj:RichEditorEvent,link:string) {
                 if(!item) {
                     return;
                 }
-                let startIndex:number,endIndex:number,selectItem:LineConfig
+                let startIndex:number,endIndex:number,selectItem:ICommon_Wiki_Content_Line_Config
                 let str=item.value.substring(selectLine.selectStartIndexPath[1],selectLine.selectEndIndexPath[1])
                 let startStr=item.value.substring(0,selectLine.selectStartIndexPath[1])
                 let endStr=item.value.substring(selectLine.selectEndIndexPath[1])
@@ -74,7 +78,7 @@ function handleLink(obj:RichEditorEvent,link:string) {
                     style:{
                         ...item.style
                     },
-                    type:ELineConfigType.LINK,
+                    type:ECommon_Wiki_Content_Line_Config_Type.LINK,
                     link:link
                 }
                 selectLine.arr.splice(selectLine.selectStartIndexPath[0]+1,0,newItem,{
@@ -113,8 +117,8 @@ function handleImage(obj:RichEditorEvent,link:string,width:number) {
         let selectLine=lineList[Array.from(root.value.children).indexOf(selectElementList[0])]
         RichEditorHandle.handleInnerHtml(selectLine,root.value.children[lineList.indexOf(selectLine)] as HTMLElement)
         if(selectLine.arr.length==0) {
-            let imageItem:LineConfig={
-                type:ELineConfigType.IMAGE,
+            let imageItem:ICommon_Wiki_Content_Line_Config={
+                type:ECommon_Wiki_Content_Line_Config_Type.IMAGE,
                 link,
                 value:"",
                 width
@@ -122,14 +126,14 @@ function handleImage(obj:RichEditorEvent,link:string,width:number) {
             selectLine.arr.push(imageItem)
         } else {
             let selectItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
-            let imageItem:LineConfig={
-                type:ELineConfigType.IMAGE,
+            let imageItem:ICommon_Wiki_Content_Line_Config={
+                type:ECommon_Wiki_Content_Line_Config_Type.IMAGE,
                 value:"",
                 link,
                 width
             }
-            let newItem:LineConfig=JSON.parse(JSON.stringify(selectItem))
-            if(newItem.type==ELineConfigType.IMAGE) {
+            let newItem:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(selectItem))
+            if(newItem.type==ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
                 selectLine.arr.splice(selectLine.selectStartIndexPath[0]+1,0,imageItem)
             } else {
                 newItem.value=newItem.value.substring(selectLine.selectStartIndexPath[1])
@@ -147,7 +151,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
     if(selectElementList.length==1) {
         let selectLine=lineList[Array.from(root.value.children).indexOf(selectElementList[0])]
         if(selectLine.selectStartIndexPath.length>0 && selectLine.selectEndIndexPath.length>0) {
-            let newItem:LineConfig,newItemValueLength:number
+            let newItem:ICommon_Wiki_Content_Line_Config,newItemValueLength:number
             if(selectLine.selectEndIndexPath[0]>selectLine.selectStartIndexPath[0]) {
                 let startItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
                 let endItem=selectLine.arr[selectLine.selectEndIndexPath[0]]
@@ -156,14 +160,14 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                     let item=selectLine.arr[i]
                     if(item==startItem) {
                         if(selectLine.selectStartIndexPath[1]>0 && item.style[style]!=value) {
-                            let newItem:LineConfig
+                            let newItem:ICommon_Wiki_Content_Line_Config
                             if(value) {
                                 newItem = {
                                     style: Object.assign({}, item.style, {
                                         [style]: value
                                     }),
                                     value: item.value.substring(selectLine.selectStartIndexPath[1]),
-                                    type:ELineConfigType.TEXT
+                                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                                 }
                             } else {
                                 let objStyle={
@@ -173,7 +177,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                                 newItem = {
                                     style: objStyle,
                                     value: item.value.substring(selectLine.selectStartIndexPath[1]),
-                                    type:ELineConfigType.TEXT
+                                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                                 }
                             }
                             item.value=item.value.substring(0,selectLine.selectStartIndexPath[1])
@@ -195,14 +199,14 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                         }
                     } else if(item==endItem) {
                         if(selectLine.selectEndIndexPath[1]<item.value.length && item.style[style]!=value) {
-                            let newItem:LineConfig
+                            let newItem:ICommon_Wiki_Content_Line_Config
                             if(value) {
                                 newItem={
                                     style:Object.assign({},item.style,{
                                         [style]:value
                                     }),
                                     value:item.value.substring(0,selectLine.selectEndIndexPath[1]),
-                                    type:ELineConfigType.TEXT
+                                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                                 }
                             } else {
                                 let objStyle={
@@ -212,7 +216,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                                 newItem = {
                                     style: objStyle,
                                     value: item.value.substring(0,selectLine.selectEndIndexPath[1]),
-                                    type:ELineConfigType.TEXT
+                                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                                 }
                             }
                             item.value=item.value.substring(selectLine.selectEndIndexPath[1])
@@ -280,7 +284,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                 if(!item) {
                     return;
                 }
-                let startIndex:number,endIndex:number,selectItem:LineConfig
+                let startIndex:number,endIndex:number,selectItem:ICommon_Wiki_Content_Line_Config
                 if(item.style[style]!=value) {
                     let str=item.value.substring(selectLine.selectStartIndexPath[1],selectLine.selectEndIndexPath[1])
                     let startStr=item.value.substring(0,selectLine.selectStartIndexPath[1])
@@ -306,7 +310,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                         style:{
                             ...item.style
                         },
-                        type:ELineConfigType.TEXT
+                        type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                     })
                     RichEditorHandle.fixLine(selectLine)
                     startIndex=0;
@@ -341,7 +345,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
             }
         }
     } else if(selectElementList.length>1) {
-        let selectLineList:Line[]=[]
+        let selectLineList:ICommon_Wiki_Content_Line[]=[]
         selectElementList.forEach((ele)=>{
             selectLineList.push(lineList[Array.from(root.value.children).indexOf(ele)])
         })
@@ -382,7 +386,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
         let endLine=selectLineList[selectLineList.length-1]
         let startItem=startLine.arr[selectStartIndexPath[0]]
         let endItem=endLine.arr[selectEndIndexPath[0]]
-        let startSelectItem:LineConfig=startItem,endSelectItem:LineConfig=endItem
+        let startSelectItem:ICommon_Wiki_Content_Line_Config=startItem,endSelectItem:ICommon_Wiki_Content_Line_Config=endItem
         let startIndex,endIndex
         for(let line of selectLineList) {
             if(line==startLine) {
@@ -390,7 +394,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                     let item=startLine.arr[i]
                     if(item.style[style]!=value) {
                         if(item==startItem) {
-                            let newItem:LineConfig
+                            let newItem:ICommon_Wiki_Content_Line_Config
                             if(value) {
                                 newItem={
                                     value:item.value.substring(selectStartIndexPath[1]),
@@ -398,7 +402,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                                         ...item.style,
                                         [style]:value
                                     },
-                                    type:ELineConfigType.TEXT
+                                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                                 }
                             } else {
                                 let objStyle={
@@ -408,7 +412,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                                 newItem={
                                     value:item.value.substring(selectStartIndexPath[1]),
                                     style:objStyle,
-                                    type:ELineConfigType.TEXT
+                                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                                 }
                             }
                             item.value=item.value.substring(0,selectStartIndexPath[1])
@@ -434,7 +438,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                     let item=endLine.arr[i]
                     if(item.style[style]!=value) {
                         if(item==endItem) {
-                            let newItem:LineConfig
+                            let newItem:ICommon_Wiki_Content_Line_Config
                             if(value) {
                                 newItem={
                                     value:item.value.substring(0,selectEndIndexPath[1]),
@@ -442,7 +446,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                                         ...item.style,
                                         [style]:value
                                     },
-                                    type:ELineConfigType.TEXT
+                                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                                 }
                             } else {
                                 let objStyle={
@@ -452,7 +456,7 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
                                 newItem={
                                     value:item.value.substring(0,selectEndIndexPath[1]),
                                     style:objStyle,
-                                    type:ELineConfigType.TEXT
+                                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                                 }
                             }
                             item.value=item.value.substring(selectEndIndexPath[1])
@@ -528,7 +532,12 @@ function handle(obj:RichEditorEvent,style:string,value:string) {
 }
 
 function check(obj:RichEditorEvent,style:string,value:string):boolean {
-    let itemList=obj.getSelectionItemList()
+    let itemList=[]
+    obj.getSelectionItemList().forEach(item=>{
+        itemList.push(...item.data.filter(item=>{
+            return item.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || item.type===ECommon_Wiki_Content_Line_Config_Type.LINK
+        }))
+    })
     for(let item of itemList) {
         if(!item.style || item.style[style]!=value) {
             return false

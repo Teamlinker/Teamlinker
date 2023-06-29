@@ -14,7 +14,7 @@
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {reactive, ref} from "vue";
 import {apiIssue, DCSType} from "../../../../common/request/request";
-import {ICommon_Route_Res_Project_filter_Item} from "../../../../../../../common/routes/response";
+import {ICommon_Route_Res_Project_Issue_filter_Item} from "../../../../../../../common/routes/response";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
 
 const props=defineProps<{
@@ -25,7 +25,7 @@ const eleForm=ref(null)
 const form=reactive({
   issueId:""
 })
-const issueList=ref<DCSType<ICommon_Route_Res_Project_filter_Item[]>>([])
+const issueList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item[]>>([])
 const onSearch=async (keyword:string)=>{
   let res=await apiIssue.filter({
     name:keyword,

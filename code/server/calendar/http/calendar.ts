@@ -205,4 +205,10 @@ class CalendarController {
         }
         return obj.getItem()
     }
+
+    @DHttpApi(calendarApi.routes.filterEvent)
+    async filterEvent(@DHttpReqParam("calendarId") calendarId:string,@DHttpReqParam("name") name:string,@DHttpReqParamRequired("size") size:number,@DHttpReqParamRequired("page") page:number,@DHttpUser user:IUserSession):Promise<typeof calendarApi.routes.filterEvent.res> {
+        let ret=await CalendarEventService.filterEvent(user.organizationInfo.organizationUserId,calendarId,name,page,size)
+        return ret;
+    }
 }

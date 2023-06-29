@@ -17,7 +17,7 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/list",
             req:<{
-                projectId:string,
+                projectId?:string,
                 name?:string,
                 status?:ECommon_Model_Project_Release_Status,
                 page:number,

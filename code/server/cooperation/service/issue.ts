@@ -381,12 +381,12 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     }
 
 
-    static async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string) {
+    static async filter(organizationId:string,projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string) {
         let project=await ProjectService.getItemById(projectId)
         if(!project) {
             throw Err.Project.projectNotFound
         }
-        let ret=await projectIssueMapper.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
+        let ret=await projectIssueMapper.filter(organizationId,projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
         return ret;
     }
 

@@ -118,6 +118,10 @@ export namespace Err {
             code:3004,
             msg:"project id not match"
         },
+        projectKeywordDuplicate:{
+            code:3004,
+            msg:"project keyword duplicate"
+        },
         Label:{
             labelSizeEmpty:{
                 code:3100,

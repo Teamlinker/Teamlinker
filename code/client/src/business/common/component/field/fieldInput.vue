@@ -23,15 +23,15 @@
 <script setup lang="ts">
 import {apiIssue, apiOrganization, apiRelease, apiUser, DCSType} from "../../request/request";
 import {
-  ICommon_Route_Req_ProjectIssue_Field,
-  ICommon_Route_Res_Project_filter_Item,
-  ICommon_Route_Res_Release_Item,
-  ICommon_Route_Res_Workflow_Node_Field
+	ICommon_Route_Req_ProjectIssue_Field,
+	ICommon_Route_Res_Project_Issue_filter_Item,
+	ICommon_Route_Res_Release_Item,
+	ICommon_Route_Res_Workflow_Node_Field
 } from "../../../../../../common/routes/response";
 import {ECommon_Field_Type} from "../../../../../../common/field/type";
 import {ref} from "vue";
 import {
-  ECommon_Model_Workflow_Node_Field_Type_Label_Type
+	ECommon_Model_Workflow_Node_Field_Type_Label_Type
 } from "../../../../../../common/model/workflow_node_field_type";
 import {SessionStorage} from "../../storage/session";
 
@@ -89,12 +89,12 @@ switch (props.item.fieldType.type) {
   default:
     break
 }
-const multiLabelList=ref<DCSType<ICommon_Route_Res_Project_filter_Item[] | ICommon_Route_Res_Release_Item[] | {
+const multiLabelList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item[] | ICommon_Route_Res_Release_Item[] | {
   name:string,
   id:string,
   photo:string
 }[]>>([])
-const labelList=ref<DCSType<ICommon_Route_Res_Project_filter_Item[] | ICommon_Route_Res_Release_Item[] | {
+const labelList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item[] | ICommon_Route_Res_Release_Item[] | {
   name:string,
   id:string,
   photo:string

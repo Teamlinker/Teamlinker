@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import {defineProps, onBeforeMount, reactive, ref} from "vue"
+import {onBeforeMount, reactive, ref} from "vue"
 import {ICommon_Route_Res_Workflow_Node_List_Item} from "../../../../../../../common/routes/response";
 import {apiField, apiWorkflow} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";

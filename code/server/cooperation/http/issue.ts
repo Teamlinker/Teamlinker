@@ -298,7 +298,7 @@ class IssueController {
      }
 
      @DHttpApi(projectIssueApi.routes.filter)
-     async filter(@DHttpReqParamRequired("projectId") projectId :string,
+     async filter(@DHttpReqParam("projectId") projectId :string,
      @DHttpReqParam("createdBy") createdBy :string,
      @DHttpReqParam("issueTypeId") issueTypeId :string,
      @DHttpReqParam("name") name :string,
@@ -309,8 +309,8 @@ class IssueController {
      @DHttpReqParam("moduleId") moduleId :string,
      @DHttpReqParam("labelId") labelId :string,
      @DHttpReqParamRequired("page") page :number,
-     @DHttpReqParamRequired("size") size :number):Promise<typeof projectIssueApi.routes.filter.res> {
-          let ret=await ProjectIssueService.filter(projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
+     @DHttpReqParamRequired("size") size :number,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.filter.res> {
+          let ret=await ProjectIssueService.filter(user.organizationInfo.organizationId,projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
           return ret;
      }
 

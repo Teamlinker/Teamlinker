@@ -23,7 +23,8 @@ class AdminController {
                 id:obj.getItem().id,
                 ...(meta && {
                     meta
-                })
+                }),
+                path:"/file"+obj.getItem().path
             }
         } else {
             let objFile=new FileService()
@@ -38,7 +39,8 @@ class AdminController {
                 id:ret,
                 ...(meta && {
                     meta
-                })
+                }),
+                path:"/file"+objFile.getItem().path
             }
         }
     }

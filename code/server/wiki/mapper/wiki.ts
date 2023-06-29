@@ -4,10 +4,12 @@ import {wikiItemModel} from "../../../common/model/wiki_item";
 import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
 import {
+    convertCountSql,
     generateBatchCreateOnUpdateSql,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
     generateLeftJoin3Sql,
+    generateLeftJoinSql,
     generateQuerySql,
     generateSnowId,
     generateUpdateSql
@@ -447,6 +449,61 @@ class WikiItemMapper extends Mapper<typeof wikiItemModel> {
             wiki_item_id:wikiItemId
         }));
         return ret;
+    }
+
+    async filterWikiItem(organizationId:string,wikiId:string,name:string,page:number,size:number) {
+        if(page===undefined || page<0 || size===undefined || size<=0) {
+            throw Err.Common.paramError
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:wikiItemModel,
+            columns:keys<typeof wikiItemModel["model"]>().map(item=>item.name)
+        },{
+            model:wikiModel,
+            columns:keys<typeof wikiModel["model"]>().map(item=>item.name),
+            aggregation:"wiki",
+            expression:{
+                id:{
+                    model:wikiItemModel,
+                    field:"wiki_id"
+                }
+            }
+        },{
+            organization_id:{
+                model:wikiModel,
+                value:organizationId
+            },
+            ...(wikiId && {
+                wiki_id:{
+                    model:wikiItemModel,
+                    value:wikiId
+                }
+            }),
+            ...(name && {
+                name:{
+                    model:wikiItemModel,
+                    value:{
+                        exp:"%like%",
+                        value:name
+                    }
+                }
+            }),
+        },"and",{
+            model:wikiItemModel,
+            field:"name",
+            type:"asc"
+        },page*size,size)
+        let countSql=convertCountSql(sql);
+        let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+        let totalPage=CommonUtil.pageTotal(count,size)
+        let ret=await mysql.execute(sql)
+        return {
+            count:count,
+            totalPage:totalPage,
+            page:page,
+            data:ret
+        }
     }
 }
 

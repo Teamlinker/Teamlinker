@@ -272,4 +272,10 @@ class WikiController {
             wiki:objWiki.getItem()
         }
     }
+
+    @DHttpApi(wikiApi.routes.filterWikiItem)
+    async filterWikiItem(@DHttpReqParam("wikiId") wikiId:string,@DHttpReqParam("name") name:string,@DHttpReqParamRequired("size") size:number,@DHttpReqParamRequired("page") page:number,@DHttpUser user:IUserSession):Promise<typeof wikiApi.routes.filterWikiItem.res>{
+        let ret=await WikiItemService.filterWikiItem(user.organizationInfo.organizationId,wikiId,name,page,size)
+        return ret;
+    }
 }

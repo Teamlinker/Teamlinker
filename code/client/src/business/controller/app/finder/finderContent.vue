@@ -1,5 +1,5 @@
 <template>
-	<div style="width: 100%;height: 100%;display: grid;grid-template-rows:repeat(auto-fill,120px);grid-template-columns: repeat(auto-fill,100px);align-items: center;justify-items: center" v-drop.file.shortcut.folder.disk="objFinderHandle.onDrop.bind(objFinderHandle,props.folderId)" v-select v-menu.self="objFinderHandle.contextMenuFunc.bind(objFinderHandle)" :key="folderId" @click="$event.currentTarget===$event.target && selectItem()">
+	<div style="width: 100%;height: 100%;display: grid;grid-template-rows:repeat(auto-fill,120px);grid-template-columns: repeat(auto-fill,100px);align-items: center;justify-items: center;" v-drop.file.shortcut.folder.disk="objFinderHandle.onDrop.bind(objFinderHandle,props.folderId)" v-select v-menu.self="objFinderHandle.contextMenuFunc.bind(objFinderHandle)" :key="folderId" @click="$event.currentTarget===$event.target && selectItem()" onselectstart="return false">
 		<template v-for="(item,index) in itemList" :key="item.meta.id">
 			<IconItem :item="item" :index="index" v-if="item.meta.type===ECommon_Model_Finder_Item_Type.FILE" v-selectable.file="item.meta.id" @click="selectItem(item.meta)">
 			</IconItem>
@@ -36,7 +36,6 @@ const emit=defineEmits<{
 	enterFolder:[folderId:string],
 	selectItem:[item:DCSType<ICommon_Model_Finder_Item>]
 }>()
-
 
 const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()

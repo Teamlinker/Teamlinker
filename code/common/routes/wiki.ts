@@ -7,7 +7,7 @@ import {
     ICommon_Route_Res_Role_List,
     ICommon_Route_Res_Role_ListMember,
     ICommon_Route_Res_userWikiList,
-    ICommon_Route_Res_Wiki_Info,
+    ICommon_Route_Res_Wiki_Info, ICommon_Route_Res_Wiki_Item_Filter,
     ICommon_Route_Res_Wiki_Item_Info
 } from "./response";
 import {ICommon_Model_Wiki_Item} from "../model/wiki_item";
@@ -26,7 +26,7 @@ const api= {
 
             }>{},
             res: <ICommon_Model_Wiki[]>{},
-            permission: [Permission_Types.Wiki.READ]
+            permission: [Permission_Types.Organization.READ]
         },
         userWikiList: {
             method: ECommon_HttpApi_Method.GET,
@@ -38,7 +38,7 @@ const api= {
                 type:"all"|"created"|"joined"
             }>{},
             res: <ICommon_Route_Res_userWikiList>{},
-            permission: [Permission_Types.Wiki.READ]
+            permission: [Permission_Types.Organization.READ]
         },
         list: {
             method: ECommon_HttpApi_Method.GET,
@@ -50,7 +50,7 @@ const api= {
                 organizationUserId?:string
             }>{},
             res: <ICommon_Route_Res_userWikiList>{},
-            permission: [Permission_Types.Wiki.READ]
+            permission: [Permission_Types.Organization.READ]
         },
         addWiki: {
             method: ECommon_HttpApi_Method.POST,
@@ -265,6 +265,18 @@ const api= {
             res: <ICommon_Route_Res_Wiki_Item_Info>{},
             permission: [Permission_Types.Wiki.READ]
         },
+        filterWikiItem:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/item/filter",
+            req: <{
+                wikiId?:string,
+                name?:string,
+                size:number,
+                page:number
+            }>{},
+            res: <ICommon_Route_Res_Wiki_Item_Filter>{},
+            permission: [Permission_Types.Wiki.READ]
+        }
     }
 }
 export  default  api

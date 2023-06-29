@@ -14,6 +14,7 @@ const api={
             }>{},
             res:<{
                 id:string,
+                path:string,
                 meta?:string
             }>{}
         },

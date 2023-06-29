@@ -4,8 +4,8 @@ export interface IServer_Common_Event_Types {
     userDelete:(userId:string)=>void
     projectDelete:(projectId:string)=>void
     teamDelete:(teamId:string)=>void
-    fileRef:(fileId:string)=>void
-    fileUnref:(fileId:string)=>void
+    fileRef:(fileId:string,count?:number)=>void
+    fileUnref:(fileId:string,count?:number)=>void
     fileUpload:(meta:string,fileId:string)=>void
     issueTypeDelete:(issueTypeId:string)=>void
     organizationUserAdd:(organizationId:string,organizationUserId:string)=>void
@@ -18,4 +18,5 @@ export interface IServer_Common_Event_Types {
     teamUserAdd:(teamId:string,organizationUserId:string)=>void
     teamUserEdit:(teamId:string,organizationUserId:string)=>void
     teamUserDelete:(teamId:string,organizationUserId:string)=>void
+    roleChange:(roleId:string)=>void
 }

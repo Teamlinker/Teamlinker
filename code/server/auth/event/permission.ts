@@ -98,4 +98,10 @@ class PermissionClear {
         await obj.del()
     }
 
+    @DEventListener("roleChange")
+    async roleChange(roleId:string) {
+        let obj=new REDIS_AUTH.Permission.Role.RoleInfo(roleId)
+        await obj.del()
+    }
+
 }

@@ -3,7 +3,7 @@ import {ICommon_Model_Project_Issue, projectIssueModel} from "../../../common/mo
 import {ICommon_Model_Project_Label, projectLabelModel} from "../../../common/model/project_label";
 import {ICommon_Model_Project_Module, projectModuleModel} from "../../../common/model/project_module";
 import {workflowNodeModel} from "../../../common/model/workflow_node";
-import {ICommon_Route_Res_Project_filter} from "../../../common/routes/response";
+import {ICommon_Route_Res_Project_Issue_filter} from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {keys} from "../../../common/transform";
 import {getMysqlInstance} from '../../common/db/mysql';
@@ -14,7 +14,6 @@ import {
     generateBatchCreateSql,
     generateCreateSql,
     generateDeleteSql,
-    generateLeftJoin2Sql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -607,11 +606,21 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }
     }
 
-    async filter(projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string):Promise<ICommon_Route_Res_Project_filter> {
-        if(!projectId) {
-            throw Err.Project.projectNotFound
-        }
+    async filter(organizationId:string,projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string):Promise<ICommon_Route_Res_Project_Issue_filter> {
         let mysql=getMysqlInstance()
+        if(!projectId && name && name.includes("-")) {
+            let arr=name.split("-")
+            let projectUniqueId=arr[0]
+            name=arr[1]
+            let obj=await mysql.executeOne(generateQuerySql(projectModel,["id"],{
+                keyword:projectUniqueId,
+                organization_id:organizationId
+            }))
+            if(!obj) {
+                throw Err.Project.projectNotFound
+            }
+            projectId=obj.id
+        }
         let setId:Set<string>=new Set;
         if(moduleId) {
             let arrModuleIssueId=(await mysql.execute(generateQuerySql(projectModuleIssueModel,["id"],{
@@ -629,7 +638,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 setId.add(obj)
             }
         }
-        let sql=generateLeftJoin2Sql({
+        let sql=generateLeftJoin3Sql({
             model:projectIssueModel,
             columns:["id","assigner_id","reporter_id","unique_id","name","unique_id","created_time","created_by","priority"]
         },{
@@ -652,10 +661,26 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 }
             }
         },{
-            project_id:{
-                model:projectIssueModel,
-                value:projectId
+            model:projectModel,
+            columns:keys<typeof projectModel["model"]>().map(item=>item.name),
+            aggregation:"project",
+            expression:{
+                id:{
+                    model:projectIssueModel,
+                    field:"project_id"
+                }
+            }
+        },{
+            organization_id:{
+                model:projectModel,
+                value:organizationId
             },
+            ...(projectId && {
+                project_id:{
+                    model:projectIssueModel,
+                    value:projectId
+                }
+            }),
             ...(createdBy && {
                 created_by:{
                     model:projectIssueModel,

@@ -87,19 +87,19 @@ import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/mo
 import {getCurrentInstance, inject, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {apiIssue, apiOrganization, apiProject, DCSType} from "../../../../common/request/request";
 import {
-  ICommon_Route_Res_Organization_User_Item,
-  ICommon_Route_Res_Project_CreateModule_Data,
-  ICommon_Route_Res_Project_filter_Item
+	ICommon_Route_Res_Organization_User_Item,
+	ICommon_Route_Res_Project_CreateModule_Data,
+	ICommon_Route_Res_Project_Issue_filter_Item
 } from "../../../../../../../common/routes/response";
 import {injectProjectInfo} from "../../../../common/util/symbol";
 import {checkPermission} from "../../../../common/util/helper";
 import {Permission_Types} from "../../../../../../../common/permission/permission";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {
-  ETeamOS_Navigator_Action,
-  getCurrentNavigator,
-  getRootNavigatorRef,
-  onNavigatorShow
+	ETeamOS_Navigator_Action,
+	getCurrentNavigator,
+	getRootNavigatorRef,
+	onNavigatorShow
 } from "../../../../../teamOS/common/component/navigator/navigator";
 import ProjectIssueCreate from "./projectIssueCreate.vue";
 import UserAvatar from "../../../../common/component/userAvatar.vue";
@@ -169,7 +169,7 @@ const assignerId=ref("all")
 const assignerList=ref<DCSType<ICommon_Route_Res_Organization_User_Item[]>>([])
 const reporterId=ref("all")
 const reporterList=ref<DCSType<ICommon_Route_Res_Organization_User_Item[]>>([])
-const issueList=ref<DCSType<ICommon_Route_Res_Project_filter_Item[]>>([])
+const issueList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item[]>>([])
 const root=getRootNavigatorRef();
 const appContext=getCurrentInstance().appContext
 const navigator=getCurrentNavigator();

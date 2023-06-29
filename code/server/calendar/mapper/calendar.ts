@@ -4,6 +4,7 @@ import {calendarSettingModel, ECommon_Calendar_WeekDay} from "../../../common/mo
 import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
 import {
+    convertCountSql,
     generateBatchCreateSql,
     generateDeleteInnerJoin2Sql,
     generateDeleteInnerJoinSql,
@@ -17,6 +18,8 @@ import {calendarEventModel, ECommon_Calendar_Recurring_Type} from "../../../comm
 import {calendarEventGuestModel, ICommon_Model_Calendar_Event_Guest} from "../../../common/model/calendar_event_guest";
 import {ICommon_Route_Res_Calendar_ListEvent_Item} from "../../../common/routes/response";
 import * as moment from "moment";
+import {keys} from "../../../common/transform";
+import CommonUtil from "../../common/util/common";
 
 
 class CalendarMapper extends Mapper<typeof calendarModel> {
@@ -662,6 +665,61 @@ class CalendarEventMapper extends Mapper<typeof calendarEventModel> {
             }
         }
         return isMatch
+    }
+
+    async filterEvent(organizationUserId:string,calendarId:string,name:string,page:number,size:number) {
+        if(page===undefined || page<0 || size===undefined || size<=0) {
+            throw Err.Common.paramError
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:calendarEventModel,
+            columns:keys<typeof calendarEventModel["model"]>().map(item=>item.name)
+        },{
+            model:calendarModel,
+            columns:keys<typeof calendarModel["model"]>().map(item=>item.name),
+            aggregation:"calendar",
+            expression:{
+                id:{
+                    model:calendarEventModel,
+                    field:"calendar_id"
+                }
+            }
+        },{
+            organization_user_id:{
+                model:calendarModel,
+                value:organizationUserId
+            },
+            ...(calendarId && {
+                calendar_id:{
+                    model:calendarEventModel,
+                    value:calendarId
+                }
+            }),
+            ...(name && {
+                name:{
+                    model:calendarEventModel,
+                    value:{
+                        exp:"%like%",
+                        value:name
+                    }
+                }
+            }),
+        },"and",{
+            model:calendarEventModel,
+            field:"name",
+            type:"asc"
+        },page*size,size)
+        let countSql=convertCountSql(sql);
+        let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+        let totalPage=CommonUtil.pageTotal(count,size)
+        let ret=await mysql.execute(sql)
+        return {
+            count:count,
+            totalPage:totalPage,
+            page:page,
+            data:ret
+        }
     }
 }
 

@@ -1,14 +1,21 @@
-import {nextTick, reactive, Ref} from "vue";
-import {ELineConfigType, Line, LineConfig, LineStyle} from "./type";
+import {AppContext, nextTick, reactive, Ref} from "vue";
 import {RichEditorHandle} from "./handle";
 import {RichEditorFunc} from "./func";
+import {
+    ECommon_Wiki_Content_Line_Config_Type,
+    ICommon_Wiki_Content_Line,
+    ICommon_Wiki_Content_Line_Config,
+    ICommon_Wiki_Content_Line_Style
+} from "../../../../../../common/model/wiki_item_content";
+import {renderComponent} from "../../../../teamOS/common/util/component";
+import PopMenu from "./popMenu.vue";
 
 export class RichEditorEvent {
     private selectElementList:HTMLElement[]=[]
     private isMouseDown=false
     private root:Ref<HTMLElement>
     private elementList:Ref<HTMLElement[]>
-    private lineList=reactive<Line[]>([])
+    private lineList=reactive<ICommon_Wiki_Content_Line[]>([])
     private imageHelperElement:HTMLElement
     private resizeImage:HTMLElement
     private resizeObserver:ResizeObserver
@@ -17,10 +24,33 @@ export class RichEditorEvent {
     private selectionLinkElement:HTMLElement
     private selectionColorElement:HTMLElement
     private linkEditElement:HTMLElement
+    private popMenuElement:HTMLElement
+    private appContext:AppContext
+    private destroyFunc:()=>void
+    private popMenuList:{
+        type: any,
+        title: string
+    }[]=[]
+    onUploadFileFunc:(file:File,handleFunc:(fileId:string,path:string)=>void)=>void
+    onPopMenuClickFunc:(type:any,handleFunc:(item:ICommon_Wiki_Content_Line_Config)=>void)=>void
+    clear() {
+        this.destroyFunc?.()
+        this.imageHelperElement?.remove()
+        this.resizeObserver?.disconnect()
+        this.selectionMenuElement?.remove()
+        this.linkEditElement?.remove()
+        this.popMenuElement?.parentElement.removeChild(this.popMenuElement)
+    }
+    setPopMenuList(popMenuList:{
+        type: any,
+        title: string
+    }[]) {
+        this.popMenuList=popMenuList
+    }
     getLineList(){
         return this.lineList
     }
-    setLineList(data:Line[]) {
+    setLineList(data:ICommon_Wiki_Content_Line[]) {
         this.lineList.splice(0,this.lineList.length,...data)
     }
     getSelectElementList() {
@@ -29,13 +59,13 @@ export class RichEditorEvent {
     getRoot() {
         return this.root
     }
-    addLine(value:string,style?:LineStyle){
-        let line:Line={
+    addLine(value:string,style?:ICommon_Wiki_Content_Line_Style){
+        let line:ICommon_Wiki_Content_Line={
             arr:[
                 {
                     value:value,
                     ...style,
-                    type:ELineConfigType.TEXT
+                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                 }
             ],
             selectEndIndexPath:[],
@@ -43,7 +73,7 @@ export class RichEditorEvent {
         }
         this.lineList.push(line)
     }
-    onFocus(item:Line,event:MouseEvent){
+    onFocus(item:ICommon_Wiki_Content_Line, event:MouseEvent){
         if(this.selectElementList.length==0) {
             this.selectElementList=[event.currentTarget as HTMLElement]
         }
@@ -52,7 +82,7 @@ export class RichEditorEvent {
         this.selectElementList=[event.currentTarget as HTMLElement]
     }
 
-    onBlur(item:Line,event:FocusEvent){
+    onBlur(item:ICommon_Wiki_Content_Line, event:FocusEvent){
         RichEditorHandle.handleInnerHtml(item,event.currentTarget as HTMLElement,true)
         if(this.selectionMenuElement) {
             if(!this.selectionMenuElement.contains(event.relatedTarget as HTMLElement) && !this.selectionLinkElement.contains(event.relatedTarget as HTMLElement)) {
@@ -66,17 +96,17 @@ export class RichEditorEvent {
         }
     }
 
-    onEnter(line:Line,index:number,event:MouseEvent){
+    onEnter(line:ICommon_Wiki_Content_Line, index:number, event:MouseEvent){
         event.preventDefault()
         event.stopPropagation()
         RichEditorHandle.handleInnerHtml(line,event.currentTarget as HTMLElement)
         let obj=line.arr[line.selectStartIndexPath[0]]
-        let newLine:Line={
+        let newLine:ICommon_Wiki_Content_Line={
             arr:line.arr.slice(line.selectStartIndexPath[0]+1),
             selectStartIndexPath:[],
             selectEndIndexPath:[]
         }
-        if(!obj || obj.type!=ELineConfigType.IMAGE) {
+        if(!obj || obj.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
             let value=obj?.value.substring(line.selectStartIndexPath[1])
             if(value) {
                 newLine.arr.unshift({
@@ -84,14 +114,14 @@ export class RichEditorEvent {
                     style:{
                         ...obj.style
                     },
-                    type:ELineConfigType.TEXT
+                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                 })
                 obj.value=obj.value.substring(0,line.selectStartIndexPath[1])
             } else {
                 newLine.arr.unshift({
                     value:"",
                     style:{},
-                    type:ELineConfigType.TEXT
+                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                 })
             }
         }
@@ -108,7 +138,7 @@ export class RichEditorEvent {
             selection.addRange(range)
         })
     }
-    onDelete(index,item:Line,event:MouseEvent){
+    onDelete(index, item:ICommon_Wiki_Content_Line, event:MouseEvent){
         let ele=event.currentTarget as HTMLElement
         let selection=window.getSelection()
         let range=selection.getRangeAt(0)
@@ -123,7 +153,7 @@ export class RichEditorEvent {
                 RichEditorHandle.handleInnerHtml(item,ele)
                 let preLine=this.lineList[index-1]
                 item.arr=item.arr.filter(obj=>{
-                    return obj.value.length>0 || obj.type==ELineConfigType.IMAGE
+                    return obj.value.length>0 || obj.type==ECommon_Wiki_Content_Line_Config_Type.IMAGE
                 })
                 let path=[preLine.arr.length-1>=0?preLine.arr.length-1:0,preLine.arr.length>0?preLine.arr[preLine.arr.length-1].value.length:0]
                 preLine.arr=preLine.arr.concat(item.arr)
@@ -157,6 +187,9 @@ export class RichEditorEvent {
     }
 
     onMouseDown(event:MouseEvent){
+        if(this.popMenuElement) {
+            this.popMenuElement.style.display="none"
+        }
         if(event.detail==1) {
             this.selectElementList=[event.currentTarget as HTMLElement]
             this.isMouseDown=true
@@ -183,7 +216,9 @@ export class RichEditorEvent {
         if(this.selectElementList.length>0) {
             range=range.cloneRange()
             for(let ele of this.selectElementList) {
-                ele.contentEditable="true"
+                nextTick(()=>{
+                    ele.contentEditable="true"
+                })
             }
             let startContainer=range.startContainer as HTMLElement
             while (startContainer.tagName!=="DIV") {
@@ -632,7 +667,7 @@ export class RichEditorEvent {
                 let remove=this.linkEditElement.querySelector("[name='remove']") as HTMLElement
                 remove.onclick=()=>{
                     let item=this.lineList[lineIndex].arr[index]
-                    item.type=ELineConfigType.TEXT
+                    item.type=ECommon_Wiki_Content_Line_Config_Type.TEXT
                     delete item.link
                     RichEditorHandle.fixLine(this.lineList[lineIndex])
                     this.linkEditElement.style.display="none"
@@ -641,34 +676,74 @@ export class RichEditorEvent {
         }
     }
 
+    onCopy(event:ClipboardEvent) {
+        const range=window.getSelection().getRangeAt(0)
+        const content=range.cloneContents()
+        const ele=document.createElement("div")
+        ele.setAttribute("copy","teamlinker")
+        ele.appendChild(content)
+        event.clipboardData.setData("text/html",ele.outerHTML)
+        event.preventDefault()
+        event.stopPropagation()
+    }
+
     onPaste(event:ClipboardEvent) {
         let types=event.clipboardData.types
         let elementList=this.getSelectElementList()
-        if(types?.includes("text/html")) {
+        if(types.includes("Files")) {
+            let file=event.clipboardData.files[0]
+            if(file) {
+                let selection=window.getSelection()
+                let range=selection.getRangeAt(0)
+                let container=range.startContainer as HTMLElement
+                while (container.tagName!="DIV") {
+                    container=container.parentElement
+                }
+                let startIndex=Array.from(this.root.value.children).indexOf(container)
+                let selectLine=this.lineList[startIndex]
+                RichEditorHandle.handleInnerHtml(selectLine,container,true)
+                this.onUploadFileFunc?.(file,(fileId, path) => {
+                    let originItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
+                    let objItem:ICommon_Wiki_Content_Line_Config={
+                        value:fileId,
+                        link:path,
+                        type:ECommon_Wiki_Content_Line_Config_Type.IMAGE
+                    }
+                    let index:number
+                    if(originItem) {
+                        let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+                        objTemp.value=objTemp.value.substring(selectLine.selectStartIndexPath[1])
+                        let appendItemList=[...selectLine.arr.slice(selectLine.selectStartIndexPath[0]+1)]
+                        if(objTemp.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+                            appendItemList.unshift(objTemp)
+                        }
+                        originItem.value=originItem.value.substring(0,selectLine.selectStartIndexPath[1])
+                        selectLine.arr.splice(selectLine.selectStartIndexPath[0]+1,0,objItem)
+                        index=selectLine.arr.length-1
+                        selectLine.arr=selectLine.arr.concat(appendItemList)
+                    } else {
+                        selectLine.arr=[objItem]
+                        index=0
+                    }
+                    RichEditorHandle.fixLine(selectLine)
+                    nextTick(()=>{
+                        let range=document.createRange()
+                        range.selectNode(container.childNodes[index])
+                        range.collapse(false)
+                        selection.removeAllRanges()
+                        selection.addRange(range)
+                    })
+                })
+            }
+        } else if(types?.includes("text/html")) {
             event.stopPropagation()
             event.preventDefault();
             let ele=document.createElement("div")
             ele.innerHTML=event.clipboardData.getData("text/html")
             let divList=ele.getElementsByTagName("div")
-            let isEdit=true
-            Array.from(divList).forEach(item=>{
-                if(item.contentEditable!="true") {
-                    isEdit=false
-                }
-            })
-            let isPlain=false
-            if(divList.length==0) {
-                let spanList=ele.getElementsByTagName("span")
-                let linkList=ele.getElementsByTagName("a")
-                let imgList=ele.getElementsByTagName("img")
-                if(spanList.length+linkList.length+imgList.length==ele.children.length-1) {
-                    isPlain=true
-                    let div=ele.cloneNode(true) as HTMLDivElement
-                    div.removeChild(div.firstChild)
-                    let wrapper=document.createElement("div")
-                    wrapper.appendChild(div)
-                    divList=wrapper.getElementsByTagName("div")
-                }
+            let isFromTeamLinker=false
+            if(divList.length==1 && divList[0].getAttribute("copy")==="teamlinker") {
+                isFromTeamLinker=true
             }
             let selection=window.getSelection()
             let range=selection.getRangeAt(0)
@@ -679,10 +754,10 @@ export class RichEditorEvent {
             let startIndex=Array.from(this.root.value.children).indexOf(container)
             let selectLine=this.lineList[Array.from(this.root.value.children).indexOf(container)]
             RichEditorHandle.handleInnerHtml(selectLine,container,true)
-            if((isEdit && divList.length==ele.children.length-1) || isPlain) {
-                let appendItemList:LineConfig[],indexPath:number[]=[];
+            if(isFromTeamLinker) {
+                let appendItemList:ICommon_Wiki_Content_Line_Config[],indexPath:number[]=[];
                 for(let i=0;i<divList.length;i++) {
-                    let line:Line={
+                    let line:ICommon_Wiki_Content_Line={
                         arr:[],
                         selectEndIndexPath:[],
                         selectStartIndexPath:[]
@@ -693,7 +768,7 @@ export class RichEditorEvent {
                             let text="",isImg=false
                             selectLine.arr.forEach(item=>{
                                 text+=item.value
-                                if(item.type==ELineConfigType.IMAGE) {
+                                if(item.type==ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
                                     isImg=true
                                 }
                             })
@@ -701,10 +776,10 @@ export class RichEditorEvent {
                                 this.lineList.splice(this.lineList.indexOf(selectLine),1,line)
                             } else {
                                 let originItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
-                                let objTemp:LineConfig=JSON.parse(JSON.stringify(originItem))
+                                let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
                                 objTemp.value=objTemp.value.substring(selectLine.selectStartIndexPath[1])
                                 appendItemList=[...selectLine.arr.slice(selectLine.selectStartIndexPath[0]+1)]
-                                if(objTemp.type!=ELineConfigType.IMAGE) {
+                                if(objTemp.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
                                     appendItemList.unshift(objTemp)
                                 }
                                 originItem.value=originItem.value.substring(0,selectLine.selectStartIndexPath[1])
@@ -772,7 +847,7 @@ export class RichEditorEvent {
                 } else {
                     selectLine.arr.push({
                         value:ele.innerText,
-                        type:ELineConfigType.TEXT,
+                        type:ECommon_Wiki_Content_Line_Config_Type.TEXT,
                         style:{}
                     })
                     nextTick(()=>{
@@ -793,8 +868,10 @@ export class RichEditorEvent {
         let ele=event.target as HTMLElement
         if(ele.tagName=="IMG") {
             let parent=ele.offsetParent;
-            let left=ele.offsetLeft
-            let top=ele.offsetTop
+            let parentRect=parent.getBoundingClientRect()
+            let rect=ele.getBoundingClientRect();
+            let left=rect.left-parentRect.left
+            let top=rect.top-parentRect.top
             let width=ele.offsetWidth
             let height=ele.offsetHeight
             if(!this.imageHelperElement) {
@@ -831,29 +908,121 @@ export class RichEditorEvent {
     }
 
     onKeyDown(event:KeyboardEvent) {
-        if((event.metaKey || event.ctrlKey) && event.key=="a") {
-            event.stopPropagation()
-            event.preventDefault()
+        if(event.metaKey || event.ctrlKey) {
+            if(event.key=="a") {
+                event.stopPropagation()
+                event.preventDefault()
+                let selection=window.getSelection()
+                let range=selection.getRangeAt(0)
+                let element=range.startContainer as HTMLElement
+                while (element.tagName!="DIV") {
+                    element=element.parentElement
+                }
+                let index=Array.from(this.root.value.children).indexOf(element)
+                let line=this.lineList[index]
+                RichEditorHandle.handleInnerHtml(line,element)
+                this.selectElementList=Array.from(this.root.value.children) as HTMLElement[]
+                nextTick(()=>{
+                    let range=document.createRange()
+                    let startNode:Node,endNode:Node
+                    for(let i=0;i<this.root.value.childNodes.length;i++) {
+                        let node=this.root.value.childNodes[i]
+                        for(let j=0;j<node.childNodes.length;j++) {
+                            let node1=node.childNodes[j]
+                            if(node1) {
+                                startNode=node1
+                                break
+                            }
+                        }
+                        if(startNode) {
+                            break
+                        }
+                    }
+                    for(let i=this.root.value.childNodes.length-1;i>=0;i--) {
+                        let node=this.root.value.childNodes[i]
+                        for(let j=node.childNodes.length-1;j>=0;j--) {
+                            let node1=node.childNodes[j]
+                            if(node1) {
+                                endNode=node1
+                                break
+                            }
+                        }
+                        if(endNode) {
+                            break
+                        }
+                    }
+                    if(startNode && endNode) {
+                        range.setStartBefore(startNode)
+                        range.setEndAfter(endNode)
+                        selection.removeAllRanges()
+                        selection.addRange(range)
+                    }
+                })
+            }
+        }
+        if(event.key==="/") {
+            if(!this.popMenuList || this.popMenuList.length==0) {
+                return;
+            }
+            if(!this.popMenuElement) {
+                this.popMenuElement=document.createElement("div")
+                this.popMenuElement.style.position="absolute"
+                this.popMenuElement.style.display="none"
+                this.popMenuElement.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                this.popMenuElement.style.backgroundColor="white"
+                this.popMenuElement.style.border="1px solid rgba(169, 169, 169, 0.2)"
+                this.popMenuElement.style.width="150px"
+                this.popMenuElement.style.height="200px"
+                this.popMenuElement.style.overflow="auto"
+                this.popMenuElement.style.backgroundColor="white";
+                this.popMenuElement.style.outlineWidth="0"
+                this.popMenuElement.tabIndex=-1;
+                (event.target as HTMLElement).offsetParent.appendChild(this.popMenuElement)
+                this.popMenuElement.onclick=()=>{
+                    this.popMenuElement.style.display="none"
+                }
+                this.destroyFunc=renderComponent(this.popMenuElement,PopMenu,this.appContext,{
+                    objEditor:this,
+                    popMenuList:this.popMenuList
+                });
+            }
             let selection=window.getSelection()
             let range=selection.getRangeAt(0)
-            let element=range.startContainer as HTMLElement
-            while (element.tagName!="DIV") {
-                element=element.parentElement
+            let rect=range.getBoundingClientRect()
+            if(rect.left==0 && rect.top==0 && rect.width==0 && rect.height==0) {
+                let ele=range.startContainer as HTMLElement
+                if(ele.tagName=="DIV" && range.startOffset!==0) {
+                    return
+                }
+                rect=(range.startContainer as HTMLElement).getBoundingClientRect()
             }
-            let index=Array.from(this.root.value.children).indexOf(element)
-            let line=this.lineList[index]
-            RichEditorHandle.handleInnerHtml(line,element)
-            nextTick(()=>{
-                let range=document.createRange()
-                range.setStartBefore(this.root.value.children[0].firstChild)
-                range.setEndAfter(this.root.value.children[this.root.value.children.length-1].lastChild)
-                selection.removeAllRanges()
-                selection.addRange(range)
-            })
+            let parent=(event.target as HTMLElement).offsetParent
+            let rectParent=parent.getBoundingClientRect()
+            let right=rectParent.right-rect.right+rect.width
+            let bottom=rectParent.bottom-rect.bottom
+            let left:number,top:number
+            if(right>160) {
+                left=rect.left-rectParent.left
+            } else {
+                left=rect.left-rectParent.left-150
+            }
+            if(bottom>210) {
+                top=rect.top-rectParent.top+rect.height
+            } else {
+                top=rect.top-rectParent.top-200
+            }
+            this.popMenuElement.style.left=left+"px"
+            this.popMenuElement.style.top=top+"px"
+            this.popMenuElement.style.display="block"
+        } else {
+            if(this.popMenuElement) {
+                this.popMenuElement.style.display="none"
+            }
         }
     }
 
-    constructor(root:Ref<HTMLElement>,elementList:Ref<HTMLElement[]>){
+    constructor(root:Ref<HTMLElement>,elementList:Ref<HTMLElement[]>,appContext:AppContext){
+        this.appContext=appContext
         this.root=root;
         this.elementList=elementList
         document.addEventListener("keydown",(event:KeyboardEvent)=>{
@@ -861,113 +1030,109 @@ export class RichEditorEvent {
                 if(this.selectElementList.length>0 && !window.getSelection().getRangeAt(0)?.collapsed) {
                     event.preventDefault()
                     event.stopPropagation()
-                    let selection=window.getSelection()
-                    let range=selection.getRangeAt(0)
-                    let startOffset=range.startOffset
-                    let endOffset=range.endOffset
-                    let startContainer=range.startContainer as HTMLElement
-                    let endContainer=range.endContainer as HTMLElement
-                    let selectStartIndexPath=[],selectEndIndexPath=[]
-                    selectStartIndexPath.unshift(startOffset)
-                    if(startContainer.tagName=="DIV") {
-                        selectStartIndexPath.unshift(0)
-                    } else {
-                        let parentElement=startContainer.parentElement
-                        if(parentElement.tagName=="DIV") {
-                            startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
-                            selectStartIndexPath.unshift(startOffset)
-                            startContainer=parentElement
-                        } else {
-                            startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
-                            selectStartIndexPath.unshift(startOffset)
-                            startContainer=parentElement.parentElement
-                        }
+                    let list=this.getSelectionItemList()
+                    let objStartInfo={
+                        startItem:null,
+                        startIndex:0
                     }
-                    selectEndIndexPath.unshift(endOffset)
-                    if(endContainer.tagName=="DIV") {
-                        selectEndIndexPath.unshift(0)
-                    } else {
-                        let parentElement=endContainer.parentElement
-                        if(parentElement.tagName=="DIV") {
-                            endOffset=Array.from(parentElement.childNodes).indexOf(endContainer as Element)
-                            selectEndIndexPath.unshift(endOffset)
-                            endContainer=parentElement
+                    if(list.length==1) {
+                        let line=list[0].line
+                        let startItem=line.arr[line.selectStartIndexPath[0]]
+                        let endItem=line.arr[line.selectEndIndexPath[0]]
+                        if(startItem===endItem) {
+                            if(startItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                let start=startItem.value.substring(0,line.selectStartIndexPath[1])
+                                let end=startItem.value.substring(line.selectEndIndexPath[1])
+                                startItem.value=start+end
+                            } else {
+                                line.arr.splice(line.selectStartIndexPath[0],1)
+                            }
+                            objStartInfo.startItem=startItem
+                            objStartInfo.startIndex=line.selectStartIndexPath[1]
                         } else {
-                            endOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
-                            selectEndIndexPath.unshift(endOffset)
-                            endContainer=parentElement.parentElement
-                        }
-                    }
-                    if(startContainer==endContainer) {
-                        let index=Array.from(root.value.children).indexOf(startContainer as HTMLElement)
-                        let line=this.lineList[index];
-                        RichEditorHandle.handleInnerHtml(line,startContainer as HTMLElement)
-                        if(line.selectEndIndexPath[0]>line.selectStartIndexPath[0]) {
-                            let startItem=line.arr[line.selectStartIndexPath[0]]
-                            let endItem=line.arr[line.selectEndIndexPath[0]]
-                            for(let i=line.selectStartIndexPath[0]; i<=line.selectEndIndexPath[0]; i++) {
-                                let item=line.arr[i]
-                                if(item==startItem) {
-                                    if(item.type==ELineConfigType.IMAGE) {
-                                        line.arr.splice(i,1)
-                                        i--;
-                                        line.selectEndIndexPath[0]--
+                            for(let obj of list[0].data) {
+                                if(obj===startItem) {
+                                    if(startItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                        startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
                                     } else {
-                                        item.value=item.value.substring(0,line.selectStartIndexPath[1])
+                                        line.arr.splice(line.arr.indexOf(startItem),1)
                                     }
-                                } else if(item==endItem) {
-                                    if(item.type==ELineConfigType.IMAGE) {
-                                        line.arr.splice(i,1)
-                                        i--;
-                                        line.selectEndIndexPath[0]--
+                                    objStartInfo.startItem=startItem
+                                    objStartInfo.startIndex=line.selectStartIndexPath[1]
+                                } else if(obj===endItem) {
+                                    if(endItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                        endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
                                     } else {
-                                        item.value=item.value.substring(line.selectEndIndexPath[1])
+                                        line.arr.splice(line.arr.indexOf(endItem),1)
                                     }
                                 } else {
-                                    line.arr.splice(i,1)
-                                    i--;
-                                    line.selectEndIndexPath[0]--
+                                    line.arr.splice(line.arr.indexOf(obj),1)
                                 }
                             }
-                            RichEditorHandle.fixLine(line)
-                        } else {
-                            let item=line.arr[line.selectStartIndexPath[0]]
-                            item.value=item.value.substring(0,line.selectStartIndexPath[1])+item.value.substring(line.selectEndIndexPath[1])
-                            RichEditorHandle.fixLine(line)
                         }
+                        RichEditorHandle.fixLine(line,objStartInfo)
                     } else {
-                        let indexStart=Array.from(root.value.children).indexOf(startContainer as HTMLElement)
-                        let indexEnd=Array.from(root.value.children).indexOf(endContainer as HTMLElement)
-                        let lineStart=this.lineList[indexStart];
-                        let lineEnd=this.lineList[indexEnd]
-                        let startItem=lineStart.arr[selectStartIndexPath[0]]
-                        let endItem=lineEnd.arr[selectEndIndexPath[0]]
-                        lineStart.arr.splice(selectStartIndexPath[0]+1)
-                        lineEnd.arr.splice(0,selectEndIndexPath[0])
-                        this.lineList.splice(indexStart+1,indexEnd-indexStart)
-                        startItem.value=startItem.value.substring(0,selectStartIndexPath[1])
-                        endItem.value=endItem.value.substring(selectEndIndexPath[1])
-                        lineStart.arr=lineStart.arr.concat(lineEnd.arr)
-                        RichEditorHandle.fixLine(lineStart)
+                        let startLine:ICommon_Wiki_Content_Line
+                        for(let i=0;i<list.length;i++) {
+                            let obj=list[i]
+                            let line=obj.line
+                            if(i==0 || i==list.length-1) {
+                                if(i==0) {
+                                    startLine=line
+                                    for(let i=0;i<obj.data.length;i++) {
+                                        let startItem=obj.data[i]
+                                        if(i==0) {
+                                            if(startItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                                startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
+                                            } else {
+                                                line.arr.splice(line.arr.indexOf(startItem),1)
+                                            }
+                                        } else {
+                                            line.arr.splice(line.arr.indexOf(startItem),1)
+                                        }
+                                    }
+                                } else {
+                                    for(let i=0;i<obj.data.length;i++) {
+                                        let endItem=obj.data[i]
+                                        if(i==obj.data.length-1) {
+                                            if(endItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                                endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
+                                            } else {
+                                                line.arr.splice(line.arr.indexOf(endItem),1)
+                                            }
+                                        } else {
+                                            line.arr.splice(line.arr.indexOf(endItem),1)
+                                        }
+                                    }
+                                    startLine.arr=startLine.arr.concat(line.arr)
+                                    this.lineList.splice(this.lineList.indexOf(line),1)
+                                    RichEditorHandle.fixLine(startLine)
+                                }
+                            } else {
+                                this.lineList.splice(this.lineList.indexOf(line),1)
+                            }
+                        }
                     }
                     nextTick(()=>{
                         let selection=window.getSelection()
                         let range=document.createRange()
-                        let ele=startContainer.childNodes[selectStartIndexPath[0]] as HTMLElement
+                        let index=this.lineList.indexOf(list[0].line)
+                        let ele=this.root.value.children[index].childNodes[list[0].line.selectStartIndexPath[0]] as HTMLElement
                         if(!ele) {
                             return
                         }
-                        if(ele.nodeType==Node.TEXT_NODE) {
-                            range.setStart(ele,selectStartIndexPath[1])
-                            range.setEnd(ele,selectStartIndexPath[1])
-                        } else if(ele.nodeType==Node.ELEMENT_NODE) {
-                            if(ele.tagName=="IMG") {
-                                range.selectNode(ele)
-                                range.collapse(false)
+                        if(ele.nodeType===Node.TEXT_NODE || ele.tagName==="SPAN") {
+                            let text=ele.tagName==="SPAN"?ele.innerText:ele.textContent
+                            if(list[0].line.selectStartIndexPath[1]>=text.length) {
+                                range.setStartAfter(ele)
+                                range.setEndAfter(ele)
                             } else {
-                                range.setStart(ele.firstChild,selectStartIndexPath[1])
-                                range.setEnd(ele.firstChild,selectStartIndexPath[1])
+                                range.setStart(ele,list[0].line.selectStartIndexPath[1])
+                                range.setEnd(ele,list[0].line.selectStartIndexPath[1])
                             }
+                        } else {
+                            range.setStartAfter(ele)
+                            range.setEndAfter(ele)
                         }
                         selection.removeAllRanges()
                         selection.addRange(range)
@@ -1046,8 +1211,11 @@ export class RichEditorEvent {
             }
         })
     }
-    getSelectionItemList():LineConfig[] {
-        let selectLineList:Line[]=[]
+    getSelectionItemList():{
+        line:ICommon_Wiki_Content_Line,
+        data:ICommon_Wiki_Content_Line_Config[]
+    }[] {
+        let selectLineList:ICommon_Wiki_Content_Line[]=[]
         this.selectElementList.forEach((ele)=>{
             selectLineList.push(this.lineList[Array.from(this.root.value.children).indexOf(ele)])
         })
@@ -1066,9 +1234,11 @@ export class RichEditorEvent {
             if(parentElement.tagName=="DIV") {
                 startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
                 selectStartIndexPath.unshift(startOffset)
+                startContainer=parentElement
             } else {
                 startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
                 selectStartIndexPath.unshift(startOffset)
+                startContainer=parentElement.parentElement
             }
         }
         if(endContainer.tagName=="DIV") {
@@ -1079,31 +1249,57 @@ export class RichEditorEvent {
             if(parentElement.tagName=="DIV") {
                 endOffset=Array.from(parentElement.childNodes).indexOf(endContainer as Element)
                 selectEndIndexPath.unshift(endOffset)
+                endContainer=parentElement
             } else {
                 endOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
                 selectEndIndexPath.unshift(endOffset)
+                endContainer=parentElement.parentElement
             }
         }
         let startLine=selectLineList[0]
+        startLine.selectStartIndexPath=selectStartIndexPath
         let endLine=selectLineList[selectLineList.length-1]
-        let itemList:LineConfig[]=[]
+        endLine.selectEndIndexPath=selectEndIndexPath
+        let itemList:{
+            line:ICommon_Wiki_Content_Line,
+            data:ICommon_Wiki_Content_Line_Config[]
+        }[]=[]
         if(selectLineList.length==1) {
-            itemList=[...selectLineList[0].arr.slice(selectStartIndexPath[0],selectEndIndexPath[0]+1)]
+            RichEditorHandle.handleInnerHtml(selectLineList[0],startContainer)
+            itemList=[{
+                line:selectLineList[0],
+                data:[...selectLineList[0].arr.slice(selectStartIndexPath[0],selectEndIndexPath[0]+1)]
+            }]
         } else {
             for(let line of selectLineList) {
+                let obj=itemList.find(value => {
+                    return value.line===line
+                })
+                if(!obj) {
+                    obj={
+                        line:line,
+                        data:[]
+                    }
+                    itemList.push(obj)
+                }
                 if(line==startLine) {
+                    RichEditorHandle.handleInnerHtml(line,startContainer)
                     for (let i = selectStartIndexPath[0]; i < startLine.arr.length; i++) {
                         let item=startLine.arr[i]
-                        itemList.push(item)
+                        obj.data.push(item)
                     }
                 } else if(line==endLine) {
+                    RichEditorHandle.handleInnerHtml(line,endContainer)
                     for (let i = 0; i <= selectEndIndexPath[0]; i++) {
                         let item=endLine.arr[i]
-                        itemList.push(item)
+                        if(item) {
+                            obj.data.push(item)
+                        }
                     }
                 } else {
+                    RichEditorHandle.handleInnerHtml(line,this.root.value.children[this.lineList.indexOf(line)] as HTMLElement)
                     line.arr.forEach(item=>{
-                        itemList.push(item)
+                        obj.data.push(item)
                     })
                 }
             }
@@ -1112,9 +1308,9 @@ export class RichEditorEvent {
     }
     getCurrentInfo():{
         element:HTMLElement,
-        line:Line,
+        line:ICommon_Wiki_Content_Line,
         lineIndex:number,
-        item:LineConfig,
+        item:ICommon_Wiki_Content_Line_Config,
         itemIndex
     }{
         let selection=window.getSelection()
@@ -1126,7 +1322,7 @@ export class RichEditorEvent {
         }
         let lineIndex=Array.from(this.root.value.children).indexOf(element)
         let line=this.lineList[lineIndex]
-        let item:LineConfig,itemIndex:number
+        let item:ICommon_Wiki_Content_Line_Config,itemIndex:number
         if(container!=element) {
             itemIndex=Array.from(element.childNodes).indexOf(container as HTMLElement)
             item=line.arr[itemIndex]

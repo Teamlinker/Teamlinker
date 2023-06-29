@@ -1,71 +1,105 @@
 import {nextTick, toRaw} from "vue";
-import {ELineConfigType, Line, LineConfig} from "./type";
-
+import {
+    ECommon_Wiki_Content_Line_Config_Type,
+    ICommon_Wiki_Content_Line,
+    ICommon_Wiki_Content_Line_Config
+} from "../../../../../../common/model/wiki_item_content";
 
 export class RichEditorHandle {
-    static handle(line:Line){
+    static handle(line:ICommon_Wiki_Content_Line){
         let str=""
         for(let obj of line.arr) {
             let ele:HTMLElement
-            if(obj.type==ELineConfigType.TEXT) {
+            if(obj.type==ECommon_Wiki_Content_Line_Config_Type.TEXT) {
                 if(obj.style && Object.keys(obj.style).length>0) {
                     ele=document.createElement("span")
+                    ele.innerText=obj.value
+                    if(obj.style) {
+                        for(let key in obj.style) {
+                            ele.style[key]=obj.style[key]
+                        }
+                    }
                 } else {
                     str+=obj.value
                     continue;
                 }
-            } else if(obj.type==ELineConfigType.LINK) {
+            } else if(obj.type==ECommon_Wiki_Content_Line_Config_Type.LINK) {
                 ele=document.createElement("a")
                 ele.setAttribute("href",obj.link)
                 ele.setAttribute("target","_blank")
                 ele.style.cursor="pointer"
-            } else if(obj.type==ELineConfigType.IMAGE) {
+                ele.innerText=obj.value
+                if(obj.style) {
+                    for(let key in obj.style) {
+                        ele.style[key]=obj.style[key]
+                    }
+                }
+            } else if(obj.type==ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
                 ele=document.createElement("img")
                 ele.setAttribute("src",obj.link)
                 ele.setAttribute("width",String(obj.width))
                 ele.setAttribute("height","auto")
-            }
-            if(obj.style) {
-                for(let key in obj.style) {
-                    ele.style[key]=obj.style[key]
-                }
+                ele.setAttribute("fileId",obj.value)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.FILE) {
+                ele=document.createElement("a")
+                ele.setAttribute("href",obj.link)
+                ele.setAttribute("download",obj.label)
+                ele.setAttribute("fileId",obj.value)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.color="black"
+                let icon=document.createElement("i")
+                icon.className="fa fa-file"
+                icon.style.marginRight="5px"
+                icon.style.color="gray"
+                ele.prepend(icon)
             }
             if(ele) {
-                ele.innerText=obj.value
                 str+=ele.outerHTML
             }
         }
         return str;
     }
-    static handleInnerHtml(item:Line,root:HTMLElement,relocate:boolean=false){
+    static handleInnerHtml(item:ICommon_Wiki_Content_Line, root:HTMLElement, relocate:boolean=false){
         item.selectEndIndexPath=[]
         item.selectStartIndexPath=[]
         item.arr=[]
         root.childNodes.forEach(node=>{
             if(node.nodeType==Node.TEXT_NODE) {
-                let objTemp:LineConfig={
+                let objTemp:ICommon_Wiki_Content_Line_Config={
                     value:node.nodeValue,
                     style:{},
-                    type:ELineConfigType.TEXT
+                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
                 }
                 item.arr.push(objTemp)
             } else if(node.nodeType==Node.ELEMENT_NODE) {
-                let obj=<LineConfig>{
+                let obj=<ICommon_Wiki_Content_Line_Config>{
                     value:"",
                     style:{}
                 }
                 let ele=node as HTMLElement
                 if(ele.tagName=="SPAN") {
-                    obj.type=ELineConfigType.TEXT
+                    obj.type=ECommon_Wiki_Content_Line_Config_Type.TEXT
                     obj.value=ele.innerText??""
                 } else if(ele.tagName=="A") {
-                    obj.type=ELineConfigType.LINK
-                    obj.link=ele.getAttribute("href")
-                    obj.value=ele.innerText??""
+                    let fileId=ele.getAttribute("fileId")
+                    if(fileId) {
+                        obj.type=ECommon_Wiki_Content_Line_Config_Type.FILE
+                        obj.link=ele.getAttribute("href")
+                        obj.value=fileId
+                        obj.label=ele.innerText??""
+                    } else {
+                        obj.type=ECommon_Wiki_Content_Line_Config_Type.LINK
+                        obj.link=ele.getAttribute("href")
+                        obj.value=ele.innerText??""
+                    }
                 } else if(ele.tagName=="IMG") {
-                    obj.type=ELineConfigType.IMAGE
+                    obj.type=ECommon_Wiki_Content_Line_Config_Type.IMAGE
                     obj.link=ele.getAttribute("src")
                     obj.width=parseInt(ele.getAttribute("width"))
+                    obj.value=ele.getAttribute("fileId")
                 }
                 if(ele.style?.color) {
                     obj.style.color=ele.style?.color
@@ -99,7 +133,7 @@ export class RichEditorHandle {
                 if(startContainer.childNodes.length==0 || startOffset>=startContainer.childNodes.length) {
                     item.selectStartIndexPath=[startOffset>0?(startOffset-1):0,startContainer.childNodes.length==0?0:(startContainer.lastChild.textContent?startContainer.lastChild.textContent.length:0)]
                 } else {
-                    item.selectStartIndexPath=[startOffset,startContainer.lastChild.textContent.length]
+                    item.selectStartIndexPath=[startOffset,0]
                 }
             } else {
                 item.selectStartIndexPath.unshift(startOffset)
@@ -180,11 +214,11 @@ export class RichEditorHandle {
             })
         }
     }
-    static fixLine(line:Line,objItem?:{startItem?:LineConfig,endItem?:LineConfig,startIndex?:number,endIndex?:number}){
+    static fixLine(line:ICommon_Wiki_Content_Line, objItem?:{startItem?:ICommon_Wiki_Content_Line_Config,endItem?:ICommon_Wiki_Content_Line_Config,startIndex?:number,endIndex?:number}){
         for(let i=1;i<line.arr.length;i++) {
             let obj=line.arr[i]
             let preObj=line.arr[i-1]
-            if((obj.style && preObj.style && JSON.stringify(obj.style)===JSON.stringify(preObj.style) && obj.type==preObj.type && obj.type==ELineConfigType.TEXT) || (!obj.value && obj.type!=ELineConfigType.IMAGE)) {
+            if((obj.style && preObj.style && JSON.stringify(obj.style)===JSON.stringify(preObj.style) && obj.type==preObj.type && obj.type==ECommon_Wiki_Content_Line_Config_Type.TEXT) || (!obj.value && obj.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE)) {
                 let len=preObj.value.length
                 preObj.value+=obj.value
                 line.arr.splice(i,1)
@@ -203,7 +237,7 @@ export class RichEditorHandle {
         }
         for(let i=0;i<line.arr.length;i++) {
             let obj=line.arr[i]
-            if(!obj.value && obj.type!=ELineConfigType.IMAGE) {
+            if(!obj.value && obj.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
                 line.arr.splice(i,1)
                 i--
             }

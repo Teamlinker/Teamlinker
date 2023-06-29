@@ -136,6 +136,11 @@ export class CalendarEventService extends Entity<typeof calendarEventModel,typeo
         let arr=calendarEventMapper.getMemberList(this.getId(),this.getItem().calendar_id)
         return arr;
     }
+
+    static async filterEvent(organizationUserId:string,calendarId:string,name:string,page:number,size:number) {
+        let ret=await calendarEventMapper.filterEvent(organizationUserId,calendarId,name,page,size)
+        return ret;
+    }
 }
 
 export class CalendarSettingService extends Entity<typeof calendarSettingModel,typeof calendarSettingMapper> {

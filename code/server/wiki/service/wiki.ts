@@ -8,6 +8,11 @@ import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../com
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import {Err} from "../../../common/status/error";
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import {
+    ECommon_Wiki_Content_Line_Config_Type,
+    ICommon_Wiki_Content_Line
+} from "../../../common/model/wiki_item_content";
+import {emitServiceEvent} from "../../common/event/event";
 
 export class WikiService extends Entity<typeof wikiModel,typeof wikiMapper> {
     constructor() {
@@ -32,6 +37,8 @@ export class WikiService extends Entity<typeof wikiModel,typeof wikiMapper> {
             data:ret.data
         }
     }
+
+
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
@@ -155,11 +162,63 @@ export class WikiItemService extends Entity<typeof wikiItemModel,typeof wikiItem
     }
 
     async saveContent(content:string,modified_by:string) {
+        let oldObjFile=await this.generateLineObj()
+        content=content.replaceAll("\\\"","\\\\\"")
         await wikiItemMapper.saveContent(this.getId(),content,modified_by);
+        let newObjFile=await this.generateLineObj()
+        for(let key in oldObjFile) {
+            let oldCount=oldObjFile[key]
+            let newCount=newObjFile[key]
+            if(newCount!==undefined) {
+                if(oldCount!==newCount) {
+                    if(oldCount>newCount) {
+                        emitServiceEvent("fileUnref",key,oldCount-newCount)
+                    } else {
+                        emitServiceEvent("fileRef",key,newCount-oldCount)
+                    }
+                }
+                delete newObjFile[key]
+            } else {
+                emitServiceEvent("fileUnref",key,oldCount)
+            }
+        }
+        for(let key in newObjFile) {
+            let count=newObjFile[key]
+            emitServiceEvent("fileRef",key,count)
+        }
+    }
+
+    async generateLineObj():Promise<{
+        [param:string]:number
+    }> {
+        let objFile:{
+            [param:string]:number
+        }={}
+        let content=await this.getContent()
+        if(content.content) {
+            let arr=JSON.parse(content.content) as ICommon_Wiki_Content_Line[]
+            for(let obj of arr) {
+                for(let obj1 of obj.arr) {
+                    if(obj1.type===ECommon_Wiki_Content_Line_Config_Type.FILE || obj1.type===ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+                        if(!objFile[obj1.value]) {
+                            objFile[obj1.value]=1
+                        } else {
+                            objFile[obj1.value]++
+                        }
+                    }
+                }
+            }
+        }
+        return objFile
     }
 
     async getContent() {
         let ret=await wikiItemMapper.getContent(this.getId());
+        return ret;
+    }
+
+    static async filterWikiItem(organizationId:string,wikiId:string,name:string,page:number,size:number) {
+        let ret=await wikiItemMapper.filterWikiItem(organizationId,wikiId,name,page,size)
         return ret;
     }
 }

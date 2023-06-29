@@ -1,7 +1,11 @@
 import {ECommon_Services} from "../types"
 import {ECommon_HttpApi_Method} from "./types"
 import {ECommon_Calendar_Color, ICommon_Model_Calendar} from "../model/calendar";
-import {ICommon_Route_Res_Calendar_Event_Info, ICommon_Route_Res_Calendar_ListEvent_Item} from "./response";
+import {
+    ICommon_Route_Res_Calendar_Event_Filter,
+    ICommon_Route_Res_Calendar_Event_Info,
+    ICommon_Route_Res_Calendar_ListEvent_Item
+} from "./response";
 import {ECommon_Calendar_Recurring_Type} from "../model/calendar_event";
 import {ECommon_Calendar_WeekDay, ICommon_Model_Calendar_Setting} from "../model/calendar_setting";
 import {Permission_Types} from "../permission/permission";
@@ -140,6 +144,18 @@ const api= {
             res: <ICommon_Model_Calendar>{},
             permission: [Permission_Types.Organization.READ]
         },
+        filterEvent:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/calendar/event/filter",
+            req: <{
+                calendarId?:string,
+                name?:string,
+                page:number,
+                size:number
+            }>{},
+            res: <ICommon_Route_Res_Calendar_Event_Filter>{},
+            permission: [Permission_Types.Organization.READ]
+        }
     }
 }
 export default api

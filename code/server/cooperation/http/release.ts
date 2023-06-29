@@ -10,8 +10,8 @@ import {IUserSession} from "../../user/types/config";
 @DHttpController(releaseApi)
 class ReleaseController {
      @DHttpApi(releaseApi.routes.list)
-     async list(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("name") name:string,@DHttpReqParam("status") status:ECommon_Model_Project_Release_Status):Promise<typeof releaseApi.routes.list.res> {
-         let list=await ProjectReleaseService.list(projectId,page,size,name,status)
+     async list(@DHttpReqParam("projectId") projectId:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("name") name:string,@DHttpReqParam("status") status:ECommon_Model_Project_Release_Status,@DHttpUser user:IUserSession):Promise<typeof releaseApi.routes.list.res> {
+         let list=await ProjectReleaseService.list(user.organizationInfo.organizationId,projectId,page,size,name,status)
          return list;
      }
      @DHttpApi(releaseApi.routes.info)

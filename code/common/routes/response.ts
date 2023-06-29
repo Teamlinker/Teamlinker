@@ -19,7 +19,7 @@ import {ICommon_Model_Member_Tag} from "../model/member_tag";
 import {ICommon_Field_Type} from "../field/type";
 import {ICommon_Model_Wiki} from "../model/wiki";
 import {ICommon_Model_Calendar_Event} from "../model/calendar_event";
-import {ECommon_Calendar_Color} from "../model/calendar";
+import {ECommon_Calendar_Color, ICommon_Model_Calendar} from "../model/calendar";
 import {ICommon_Model_Finder_Item} from "../model/finder_item";
 import {ICommon_Model_File} from "../model/file";
 import {ICommon_Model_Wiki_Item} from "../model/wiki_item";
@@ -65,6 +65,13 @@ export type ICommon_Route_Res_User_Profile={
 
 export type ICommon_Route_Res_Wiki_Item_Info=ICommon_Model_Wiki_Item & {
     wiki:ICommon_Model_Wiki
+}
+
+export type ICommon_Route_Res_Wiki_Item_Filter={
+    data:ICommon_Route_Res_Wiki_Item_Info[],
+    count:number,
+    totalPage:number,
+    page:number
 }
 
 export type ICommon_Route_Res_User_List = {
@@ -189,7 +196,7 @@ export interface ICommon_Route_Res_userWikiList {
     data:ICommon_Model_Wiki[]
 }
 
-export interface ICommon_Route_Res_Project_filter_Item {
+export interface ICommon_Route_Res_Project_Issue_filter_Item {
     id:string,
     name:string,
     unique_id:number,
@@ -203,11 +210,12 @@ export interface ICommon_Route_Res_Project_filter_Item {
     reporter_id:string,
     created_time:Date,
     created_by:string,
-    priority:ECommon_Model_Project_Issue_Priority
+    priority:ECommon_Model_Project_Issue_Priority,
+    project:ICommon_Model_Project
 }
 
-export interface ICommon_Route_Res_Project_filter {
-    data:ICommon_Route_Res_Project_filter_Item[],
+export interface ICommon_Route_Res_Project_Issue_filter {
+    data:ICommon_Route_Res_Project_Issue_filter_Item[],
     count:number,
     totalPage:number,
     page:number,
@@ -223,7 +231,8 @@ export interface ICommon_Route_Res_Release_List {
 export interface ICommon_Route_Res_Release_Item extends ICommon_Model_Project_Release {
     notstart:number,
     inprogress:number,
-    done:number
+    done:number,
+    project:ICommon_Model_Project
 }
 
 export type ICommon_Route_Res_Release_Info_Issue_Item = Omit<ICommon_Model_Project_Issue,"issue_type_id"|"workflow_node_id"> & {
@@ -330,6 +339,15 @@ export type ICommon_Route_Res_Calendar_Event_Info = ICommon_Model_Calendar_Event
         nickname:string,
         photo?:string
     }[]
+}
+
+export type ICommon_Route_Res_Calendar_Event_Filter={
+    count:number,
+    totalPage:number,
+    page:number,
+    data:(ICommon_Model_Calendar_Event & {
+        calendar:ICommon_Model_Calendar
+    })[]
 }
 
 export type ICommon_Route_Res_Organization_FilterUserAndTeam = {

@@ -7,24 +7,24 @@ import {fileModel} from './../../../common/model/file';
 @DComponent
 class FileEvents {
     @DEventListener("fileRef")
-    async refFile(fileId:string){
+    async refFile(fileId:string,count?:number){
         let mysql=getMysqlInstance()
         await mysql.execute(generateUpdateSql(fileModel,{
             ref:{
                 exp:"+",
-                value:1
+                value:count??1
             }
         },{
             id:fileId
         }))
     }
     @DEventListener("fileUnref")
-    async unrefFile(fileId:string){
+    async unrefFile(fileId:string,count?:number){
         let mysql=getMysqlInstance()
         await mysql.execute(generateUpdateSql(fileModel,{
             ref:{
                 exp:"-",
-                value:1
+                value:count??1
             }
         },{
             id:fileId

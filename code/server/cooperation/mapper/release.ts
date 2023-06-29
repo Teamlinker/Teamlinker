@@ -5,10 +5,11 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {Mapper} from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
 import {
-    generateCountSql,
+    convertCountSql,
     generateCreateSql,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
+    generateGroupLeftJoin3Sql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -27,47 +28,69 @@ import {
     ICommon_Route_Res_Release_Item,
     ICommon_Route_Res_Release_List
 } from './../../../common/routes/response';
+import {projectModel} from "../../../common/model/project";
 
 class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
     constructor() {
         super(projectReleaseModel)
     }
-    async list(projectId:string,page:number,size:number,name?:string,status?:ECommon_Model_Project_Release_Status):Promise<ICommon_Route_Res_Release_List> {
-        if(!projectId || page===undefined || page<0 || size===undefined || size<=0) {
+    async list(organizationId:string,projectId:string,page:number,size:number,name?:string,status?:ECommon_Model_Project_Release_Status):Promise<ICommon_Route_Res_Release_List> {
+        if(page===undefined || page<0 || size===undefined || size<=0) {
             throw Err.Common.paramError
         }
         let mysql=getMysqlInstance()
         let ret:ICommon_Route_Res_Release_Item[]=[]
-        let count=Number(Object.values(await mysql.executeOne(generateCountSql(projectReleaseModel,{
-            ...(name && {
-                name:{
-                    exp:"%like%",
-                    value:name
+        let sql=generateLeftJoinSql({
+            model:projectReleaseModel,
+            columns:keys<typeof projectReleaseModel["model"]>().map(item=>item.name)
+        },{
+            model:projectModel,
+            columns:keys<typeof projectModel["model"]>().map(item=>item.name),
+            aggregation:"project",
+            expression:{
+                id:{
+                    model:projectReleaseModel,
+                    field:"project_id"
+                }
+            }
+        },{
+            organization_id:{
+                model:projectModel,
+                value:organizationId
+            },
+            ...(projectId && {
+                project_id:{
+                    model:projectReleaseModel,
+                    value:projectId
                 }
             }),
-            ...(status && {
-                status:status
-            })
-        })))[0])
-        let totalPage=CommonUtil.pageTotal(count,size)
-        if(count>0) {
-            let arr=await mysql.execute(generateQuerySql(projectReleaseModel,null,{
-                project_id:projectId,
-                ...(name && {
-                    name:{
+            ...(name && {
+                name:{
+                    model:projectReleaseModel,
+                    value:{
                         exp:"%like%",
                         value:name
                     }
-                }),
-                ...(status && {
-                    status:status
-                })
-            },"and",{
-                field:"name",
-                type:"asc"
-            },page*size,size))
+                }
+            }),
+            ...(status && {
+                status:{
+                    model:projectReleaseModel,
+                    value:status
+                }
+            })
+        },"and",{
+            model:projectReleaseModel,
+            field:"name",
+            type:"asc"
+        },page*size,size)
+        let countSql=convertCountSql(sql);
+        let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+        let totalPage=CommonUtil.pageTotal(count,size)
+        if(count>0) {
+            let arr=await mysql.execute(sql)
             if(arr.length>0) {
-                let sql=generateGroupLeftJoin2Sql({
+                let sql=generateGroupLeftJoin3Sql({
                     model:projectReleaseIssueModel,
                     columns:{
                         columns:["project_release_id"],
@@ -79,6 +102,14 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                         id:{
                             model:projectReleaseIssueModel,
                             field:"project_issue_id"
+                        }
+                    }
+                },{
+                    model:projectModel,
+                    expression:{
+                        id:{
+                            model:projectReleaseIssueModel,
+                            field:"project_id"
                         }
                     }
                 },{
@@ -138,7 +169,7 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                         ...obj,
                         notstart:objTemp[obj.id]?Number(objTemp[obj.id].notstart):0,
                         inprogress:objTemp[obj.id]?Number(objTemp[obj.id].inprogress):0,
-                        done:objTemp[obj.id]?Number(objTemp[obj.id].done):0
+                        done:objTemp[obj.id]?Number(objTemp[obj.id].done):0,
                     })
                 }
             }
@@ -156,9 +187,26 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
             throw Err.Project.Release.releaseNotFound
         }
         let mysql=getMysqlInstance()
-        let objRelease = await mysql.executeOne(generateQuerySql(projectReleaseModel,[],{
-            id:projectReleaseId
-        }))
+        let sqlRelease=generateLeftJoinSql({
+            model:projectReleaseModel,
+            columns:keys<typeof projectReleaseModel["model"]>().map(item=>item.name)
+        },{
+            model:projectModel,
+            columns:keys<typeof projectModel["model"]>().map(item=>item.name),
+            aggregation:"project",
+            expression:{
+                id:{
+                    model:projectReleaseModel,
+                    field:"project_id"
+                }
+            }
+        },{
+            id:{
+                model:projectReleaseModel,
+                value:projectReleaseId
+            }
+        })
+        let objRelease = await mysql.executeOne(sqlRelease)
         if(!objRelease) {
             throw Err.Project.Release.releaseNotFound
         }

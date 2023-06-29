@@ -13,11 +13,11 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
     constructor(){
         super(releaseMapper)
     }
-    static async list(projectId:string,page:number,size:number,name?:string,status?:ECommon_Model_Project_Release_Status){
+    static async list(organizationId:string,projectId:string,page:number,size:number,name?:string,status?:ECommon_Model_Project_Release_Status){
         if(page<0 || size<=0){
             throw Err.Project.Release.releaseSizeEmpty
         }
-        let ret=await releaseMapper.list(projectId,page,size,name,status)
+        let ret=await releaseMapper.list(organizationId,projectId,page,size,name,status)
         return ret
     }
 

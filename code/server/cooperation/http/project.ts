@@ -21,6 +21,13 @@ class ProjectController {
 
     @DHttpApi(projectApi.routes.create)
     async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession):Promise<typeof projectApi.routes.create.res>{
+        let objProject=await ProjectService.getItemByExp({
+            organization_id:user.organizationInfo.organizationId,
+            keyword
+        })
+        if(objProject) {
+            throw Err.Project.projectKeywordDuplicate
+        }
         let obj=new ProjectService()
         obj.assignItem({
             keyword:keyword,
