@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
+import {nextTick, ref} from "vue";
 import {ICommon_Wiki_Content_Line_Config} from "../../../../../../common/model/wiki_item_content";
 import {RichEditorEvent} from "./event";
 import {RichEditorHandle} from "./handle";
@@ -29,12 +29,22 @@ const onClick=async (item:{
 	let selectStartIndexPath=JSON.parse(JSON.stringify(itemList[0].line.selectStartIndexPath))
 	props.objEditor.onPopMenuClickFunc?.(item.type,item1 => {
 		let line=itemList[0].line
+		let eleLine=props.objEditor.getRoot().value.children[props.objEditor.getLineList().indexOf(line)]
 		let originItem=line.arr[selectStartIndexPath[0]]
 		let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
 		objTemp.value=originItem.value.substring(selectStartIndexPath[1])
 		originItem.value=originItem.value.substring(0,selectStartIndexPath[1]-1)
 		line.arr.splice(selectStartIndexPath[0]+1,0,item1,objTemp)
-		RichEditorHandle.fixLine(line)
+		let objFix={startIndex:selectStartIndexPath[0]+1}
+		RichEditorHandle.fixLine(line,objFix)
+		nextTick(()=>{
+			let selection=window.getSelection()
+			let range=document.createRange()
+			range.setStartAfter(eleLine.childNodes[objFix.startIndex])
+			range.setEndAfter(eleLine.childNodes[objFix.startIndex])
+			selection.removeAllRanges()
+			selection.addRange(range)
+		})
 	})
 }
 </script>

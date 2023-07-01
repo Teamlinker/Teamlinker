@@ -5,6 +5,7 @@ import {
     ICommon_Route_Res_Member_Tag_Member,
     ICommon_Route_Res_Organization_FilterUserAndTeam,
     ICommon_Route_Res_Organization_List,
+    ICommon_Route_Res_Organization_User,
     ICommon_Route_Res_Organization_User_Item,
     ICommon_Route_Res_Organization_User_List,
     ICommon_Route_Res_Organization_User_Profile,
@@ -13,7 +14,6 @@ import {
 } from './response';
 import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Model_Member_Tag} from "../model/member_tag";
-import {ICommon_Model_Organization_User} from "../model/organization_user";
 import {ECommon_IM_Message_EntityType} from "../model/im_unread_message";
 
 const api={
@@ -133,7 +133,7 @@ const api={
             req:<{
                 organizationUserId:string
             }>{},
-            res:<ICommon_Model_Organization_User>{},
+            res:<ICommon_Route_Res_Organization_User>{},
             permission:[Permission_Types.Organization.READ]
         },
         enter:{

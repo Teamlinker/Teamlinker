@@ -372,3 +372,7 @@ export type ICommon_Route_Res_Finder_Info = ICommon_Model_Finder_Item &  {
         name:string
     }[]
 }
+
+export type ICommon_Route_Res_Organization_User=ICommon_Model_Organization_User & {
+    user:ICommon_Model_User
+}

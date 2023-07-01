@@ -1,28 +1,39 @@
 <template>
   <div>
-    <div ref="root" @mouseover="onMouseOver" @keydown="onKeyDown" style="padding: 10px" :style="{border:border?'border: 1px solid lightgray;':'0px'}" @copy="onCopy">
-      <div v-for="(item,index) in lineList" :key="index" contenteditable="true" @blur="onBlur(item,$event)" ref="elementList" v-html="RichEditorHandle.handle(item)" @keydown.enter="onEnter(item,index,$event)" @keydown.delete="onDelete(index,item,$event)" style="line-height: 1.5" @focus="onFocus(item,$event)" @mousedown="onMouseDown" @mouseup="onMouseUp" @mousemove="onMouseMove" @dblclick="onDbClick" @paste="onPaste" placeholder="type your content" v-if="!readonly">
+    <div ref="root" @mouseover="onMouseOver" @keydown="onKeyDown" style="padding: 10px" @keyup="onKeyUp" :style="{border:border?'border: 1px solid lightgray;':'0px'}" @copy="onCopy">
+      <div v-for="(item,index) in lineList" :key="index" contenteditable="true" @blur="onBlur(item,$event)" ref="elementList" v-html="RichEditorHandle.handle(item)" @keydown.enter="onEnter(item,index,$event)" @keydown.delete="onDelete(index,item,$event)" style="line-height: 1.5" @focus="onFocus(item,$event)" @mousedown="onMouseDown" @mouseup="onMouseUp" @mousemove="onMouseMove" @dblclick="onDbClick" @paste="onPaste" @click="onClick" placeholder="type your content" v-if="!readonly">
       </div>
-      <div v-for="(item,index) in lineList" :key="index+1" v-html="RichEditorHandle.handle(item)" style="line-height: 1.5;min-height: 21px" v-else>
+      <div v-for="(item,index) in lineList" @click="onClick" :key="index+1" v-html="RichEditorHandle.handle(item)" style="line-height: 1.5;min-height: 21px" v-else>
       </div>
     </div>
+	  <teleport to="body" v-if="userShortViewInfo">
+			<UserShortView ref="userShortViewEle" :organization-user-id="userShortViewInfo.id" style="position:absolute;z-index: 1000;box-shadow: rgba(169, 169, 169, 0.2) 0px 0px 2px 2px;border-radius: 5px;background-color: white" :style="{left:userShortViewInfo.x+'px',top:userShortViewInfo.y+'px'}" tabindex="0" @blur="onUserShotViewBlur"></UserShortView>
+	  </teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, onBeforeUnmount, ref, watch} from "vue";
+import {getCurrentInstance, nextTick, onBeforeUnmount, ref, watch} from "vue";
 import {RichEditorEvent} from "./event";
 import {RichEditorHandle} from "./handle";
 import {
+	ECommon_Wiki_Content_Line_Config_Type,
 	ICommon_Wiki_Content_Line,
 	ICommon_Wiki_Content_Line_Config
 } from "../../../../../../common/model/wiki_item_content";
 import "./font/css/font-awesome.min.css"
+import UserShortView from "../userShortView.vue";
 
 const emit=defineEmits<{
   (e:"update:modelValue",value:ICommon_Wiki_Content_Line[]):void
 	(e:"uploadFile", file:File, handleFunc:(fileId:string, path:string)=>void):void
 	(e:"popMenuClick",type:any,handleFunc:(item:ICommon_Wiki_Content_Line_Config)=>void):void
+	(e:"customAnchorClick",type:ECommon_Wiki_Content_Line_Config_Type,value:string,link:string,label:string):void
+	(e:"quoteList",keyword:string,handleFunc:(list:{
+		value:string,
+		label:string,
+		photo:string
+	}[])=>void):void
 }>()
 const props=defineProps<{
   readonly?:boolean,
@@ -33,9 +44,15 @@ const props=defineProps<{
 		title: string
 	}[]
 }>()
-
+const userShortViewEle=ref()
+const userShortViewInfo=ref<{
+	x:number,
+	y:number,
+	id:string
+}>()
 const root=ref<HTMLElement>()
 const elementList=ref<HTMLElement[]>([])
+let selectStartIndexPath=[0,0,0]
 const objEditor=new RichEditorEvent(root,elementList,getCurrentInstance().appContext)
 if(props.popMenuList) {
 	objEditor.setPopMenuList(props.popMenuList)
@@ -45,6 +62,12 @@ objEditor.onUploadFileFunc=(file, handleFunc) => {
 }
 objEditor.onPopMenuClickFunc=(type, handleFunc) => {
 	emit("popMenuClick",type,handleFunc)
+}
+objEditor.onCustomMenuClickFunc=(type, value, link, label) => {
+	emit("customAnchorClick",type,value,link,label)
+}
+objEditor.onQuoteListFunc=(keyword, handleFunc) => {
+	emit("quoteList",keyword,handleFunc)
 }
 const lineList=objEditor.getLineList()
 let historyList:ICommon_Wiki_Content_Line[][]=[]
@@ -110,8 +133,38 @@ const onMouseMove=(event:MouseEvent)=>{
   objEditor.onMouseMove(event)
 }
 
+const calculateIndex=()=>{
+	let selection=window.getSelection()
+	let range=selection.getRangeAt(0)
+	let startOffset=range.startOffset
+	selectStartIndexPath=[]
+	let startContainer=range.startContainer as HTMLElement
+	if(startContainer.tagName==="DIV") {
+		selectStartIndexPath=[0,startOffset]
+		selectStartIndexPath.unshift(Array.from(startContainer.parentElement.children).indexOf(startContainer))
+	} else {
+		selectStartIndexPath=[startOffset]
+		let parentElement=startContainer.parentElement
+		if(parentElement.tagName=="DIV") {
+			startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
+			selectStartIndexPath.unshift(startOffset)
+			startContainer=parentElement
+		} else {
+			startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
+			selectStartIndexPath.unshift(startOffset)
+			startContainer=parentElement.parentElement
+		}
+		selectStartIndexPath.unshift(Array.from(startContainer.parentElement.children).indexOf(startContainer))
+	}
+}
+
+const onKeyUp=(event:KeyboardEvent)=>{
+	calculateIndex()
+}
+
 const onMouseUp=(event:MouseEvent)=>{
   objEditor.onMouseUp(event)
+	calculateIndex()
 }
 const onPaste=(event:ClipboardEvent)=>{
   objEditor.onPaste(event)
@@ -142,8 +195,72 @@ const onKeyDown=(event:KeyboardEvent)=>{
   }
 }
 
+const onClick=(event:MouseEvent)=>{
+	objEditor.onClick(event)
+	if(props.readonly) {
+		let ele=event.target as HTMLElement
+		let type=ele.getAttribute("type")
+		if(ele.tagName==="A" && type && Number(type)===ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON) {
+			let value=ele.getAttribute("value")
+			userShortViewInfo.value={
+				id:value,
+				x:event.x,
+				y:event.y
+			}
+			nextTick(()=>{
+				userShortViewEle.value.$el.focus()
+			})
+		}
+	}
+}
+
+const onUserShotViewBlur=(event:FocusEvent)=>{
+	userShortViewInfo.value=null
+}
+
+const insertConfig=(itemList:ICommon_Wiki_Content_Line_Config[])=>{
+	if(itemList.length==0) {
+		return
+	}
+	let items:ICommon_Wiki_Content_Line_Config[]=[]
+	itemList.forEach(item=>{
+		items.push(item,{
+			type:ECommon_Wiki_Content_Line_Config_Type.TEXT,
+			value:"&nbsp;"
+		})
+	})
+	let line=lineList[selectStartIndexPath[0]]
+	let eleLine=elementList.value[selectStartIndexPath[0]]
+	RichEditorHandle.handleInnerHtml(line,eleLine)
+	let originItem=line.arr[selectStartIndexPath[1]]
+	let objFix
+	if(originItem) {
+		let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+		objTemp.value=originItem.value.substring(selectStartIndexPath[2])
+		originItem.value=originItem.value.substring(0,selectStartIndexPath[2])
+		line.arr.splice(selectStartIndexPath[1]+1,0,...items,objTemp)
+		objFix={endIndex:selectStartIndexPath[1]+items.length}
+	} else {
+		line.arr.push(...items)
+		objFix={endIndex:selectStartIndexPath[1]+items.length-1}
+	}
+	RichEditorHandle.fixLine(line,objFix)
+	nextTick(()=>{
+		let selection=window.getSelection()
+		let range=document.createRange()
+		range.setStart(eleLine.childNodes[objFix.endIndex],1)
+		range.setEnd(eleLine.childNodes[objFix.endIndex],1)
+		selection.removeAllRanges()
+		selection.addRange(range)
+	})
+}
+
 onBeforeUnmount(()=>{
 	objEditor.clear()
+})
+
+defineExpose({
+	insertConfig
 })
 </script>
 

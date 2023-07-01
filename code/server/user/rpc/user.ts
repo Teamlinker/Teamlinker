@@ -200,6 +200,14 @@ class RpcUserApi {
         return ret?.getItem()?.nickname
     }
 
+    async getUser(userId:string) {
+        let ret=await UserService.getItemById(userId)
+        if(!ret) {
+            throw Err.User.userNotFound
+        }
+        return ret.getItem()
+    }
+
     async getTeamList(organizationUserId:string) {
         let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId)
         if(!objOrganizationUser) {

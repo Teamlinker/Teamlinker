@@ -38,7 +38,7 @@
       </Chat>
     </a-layout-content>
     <teleport to="body" v-if="chatPhotoProfileInfo">
-      <UserShortView :organization-user-id="chatPhotoProfileInfo.id" :photo="chatPhotoProfileInfo.photo" style="position:absolute;z-index: 1000;box-shadow: rgba(169, 169, 169, 0.2) 0px 0px 2px 2px;border-radius: 5px;background-color: white" :style="{left:chatPhotoProfileInfo.x+'px',top:chatPhotoProfileInfo.y+'px'}" @mouseleave="chatPhotoProfileInfo=null" @click="chatPhotoProfileInfo=null"></UserShortView>
+      <UserShortView :organization-user-id="chatPhotoProfileInfo.id" style="position:absolute;z-index: 1000;box-shadow: rgba(169, 169, 169, 0.2) 0px 0px 2px 2px;border-radius: 5px;background-color: white" :style="{left:chatPhotoProfileInfo.x+'px',top:chatPhotoProfileInfo.y+'px'}" @mouseleave="chatPhotoProfileInfo=null" @click="chatPhotoProfileInfo=null"></UserShortView>
     </teleport>
   </a-layout>
 </template>
@@ -60,7 +60,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
 import {Message} from "@arco-design/web-vue";
 import UserAvatar from "../../../common/component/userAvatar.vue";
-import UserShortView from "./userShortView.vue";
+import UserShortView from "../../../common/component/userShortView.vue";
 
 const props=defineProps<{
   id?:string,

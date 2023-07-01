@@ -8,7 +8,8 @@
 			<IconItem :item="item" :index="index" v-else-if="item.meta.type===ECommon_Model_Finder_Item_Type.SHORTCUT" v-selectable.shortcut="{
 				shortcutType:(item.meta as ICommon_Route_Res_Finder_Info).shortcut_type,
 				value:item.meta.id,
-				shortcutRefId:item.meta.ref_id
+				shortcutRefId:item.meta.ref_id,
+				shortcutName:item.name
 			} as IClient_Drag_Shortcut_Value" @click="selectItem(item.meta)">
 			</IconItem>
 		</template>

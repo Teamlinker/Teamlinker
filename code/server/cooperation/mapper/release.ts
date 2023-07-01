@@ -9,7 +9,6 @@ import {
     generateCreateSql,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
-    generateGroupLeftJoin3Sql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -90,7 +89,7 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
         if(count>0) {
             let arr=await mysql.execute(sql)
             if(arr.length>0) {
-                let sql=generateGroupLeftJoin3Sql({
+                let sql=generateGroupLeftJoin2Sql({
                     model:projectReleaseIssueModel,
                     columns:{
                         columns:["project_release_id"],
@@ -102,14 +101,6 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                         id:{
                             model:projectReleaseIssueModel,
                             field:"project_issue_id"
-                        }
-                    }
-                },{
-                    model:projectModel,
-                    expression:{
-                        id:{
-                            model:projectReleaseIssueModel,
-                            field:"project_id"
                         }
                     }
                 },{

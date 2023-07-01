@@ -11,6 +11,7 @@ import {ECommon_IM_Message_EntityType} from "../../../common/model/im_unread_mes
 import {TeamService} from "../service/team";
 import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../common/types";
 import Application from "../../common/app/app";
+import rpcUserApi from "../../user/rpc/user"
 
 @DComponent
 @DHttpController(organizationApi)
@@ -219,7 +220,12 @@ class OrganizationController {
         if(!obj) {
             throw Err.Organization.userNotFound
         }
-        return obj.getItem();
+        let objUser=await rpcUserApi.getUser(obj.getItem().user_id)
+        delete objUser.password
+        return {
+            ...obj.getItem(),
+            user:objUser
+        };
     }
 
     @DHttpApi(organizationApi.routes.enter)

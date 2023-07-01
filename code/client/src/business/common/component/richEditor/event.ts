@@ -9,6 +9,7 @@ import {
 } from "../../../../../../common/model/wiki_item_content";
 import {renderComponent} from "../../../../teamOS/common/util/component";
 import PopMenu from "./popMenu.vue";
+import Quote from "./quote.vue";
 
 export class RichEditorEvent {
     private selectElementList:HTMLElement[]=[]
@@ -25,21 +26,38 @@ export class RichEditorEvent {
     private selectionColorElement:HTMLElement
     private linkEditElement:HTMLElement
     private popMenuElement:HTMLElement
+    private quoteElement:HTMLElement
     private appContext:AppContext
     private destroyFunc:()=>void
+    private destroyQuoteFunc:()=>void
     private popMenuList:{
         type: any,
         title: string
     }[]=[]
     onUploadFileFunc:(file:File,handleFunc:(fileId:string,path:string)=>void)=>void
     onPopMenuClickFunc:(type:any,handleFunc:(item:ICommon_Wiki_Content_Line_Config)=>void)=>void
+    onCustomMenuClickFunc:(type:ECommon_Wiki_Content_Line_Config_Type,value:string,link:string,label:string)=>void
+    onQuoteListFunc:(keyword:string,handleFunc:(list:{
+        value:string,
+        label:string,
+        photo:string
+    }[])=>void)=>void
     clear() {
         this.destroyFunc?.()
+        this.destroyQuoteFunc?.()
         this.imageHelperElement?.remove()
         this.resizeObserver?.disconnect()
         this.selectionMenuElement?.remove()
         this.linkEditElement?.remove()
-        this.popMenuElement?.parentElement.removeChild(this.popMenuElement)
+        this.popMenuElement?.remove()
+        this.quoteElement?.remove()
+    }
+    clearQuote() {
+        if(this.quoteElement) {
+            this.quoteElement.remove()
+            this.destroyQuoteFunc()
+            this.quoteElement=null;
+        }
     }
     setPopMenuList(popMenuList:{
         type: any,
@@ -106,7 +124,7 @@ export class RichEditorEvent {
             selectStartIndexPath:[],
             selectEndIndexPath:[]
         }
-        if(!obj || obj.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+        if(!obj || obj.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || obj.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
             let value=obj?.value.substring(line.selectStartIndexPath[1])
             if(value) {
                 newLine.arr.unshift({
@@ -144,16 +162,49 @@ export class RichEditorEvent {
         let range=selection.getRangeAt(0)
         let startOffset=range.startOffset
         let endOffset=range.endOffset
-        let startContainer=range.startContainer
-        let endContainer=range.endContainer
-        if(startOffset==0 && endOffset==0 && startContainer==endContainer && (startContainer==ele || startContainer.parentElement==ele || startContainer.parentElement.parentElement==ele)) {
+        let startContainer=range.startContainer as HTMLElement
+        let originStartContainer=startContainer
+        let endContainer=range.endContainer  as HTMLElement
+        let originEndContainer=endContainer
+        let selectStartIndexPath=[],selectEndIndexPath=[]
+        if(startContainer.tagName=="DIV") {
+            selectStartIndexPath=[0,startOffset]
+        } else {
+            selectStartIndexPath.unshift(startOffset)
+            let parentElement=startContainer.parentElement
+            if(parentElement.tagName=="DIV") {
+                startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
+                selectStartIndexPath.unshift(startOffset)
+                startContainer=parentElement
+            } else {
+                startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
+                selectStartIndexPath.unshift(startOffset)
+                startContainer=parentElement.parentElement
+            }
+        }
+        if(endContainer.tagName=="DIV") {
+            selectEndIndexPath=[0,endOffset]
+        } else {
+            selectEndIndexPath.unshift(endOffset)
+            let parentElement=endContainer.parentElement
+            if(parentElement.tagName=="DIV") {
+                endOffset=Array.from(parentElement.childNodes).indexOf(endContainer as Element)
+                selectEndIndexPath.unshift(endOffset)
+                endContainer=parentElement
+            } else {
+                endOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
+                selectEndIndexPath.unshift(endOffset)
+                endContainer=parentElement.parentElement
+            }
+        }
+        if(selectStartIndexPath[0]==0 && selectStartIndexPath[1]==0 && selectEndIndexPath[0]==0 && selectEndIndexPath[1]==0 && originStartContainer==originEndContainer) {
             if(index>0) {
                 event.preventDefault()
                 event.stopPropagation()
                 RichEditorHandle.handleInnerHtml(item,ele)
                 let preLine=this.lineList[index-1]
                 item.arr=item.arr.filter(obj=>{
-                    return obj.value.length>0 || obj.type==ECommon_Wiki_Content_Line_Config_Type.IMAGE
+                    return obj.value.length>0 || obj.type===ECommon_Wiki_Content_Line_Config_Type.IMAGE
                 })
                 let path=[preLine.arr.length-1>=0?preLine.arr.length-1:0,preLine.arr.length>0?preLine.arr[preLine.arr.length-1].value.length:0]
                 preLine.arr=preLine.arr.concat(item.arr)
@@ -171,7 +222,7 @@ export class RichEditorEvent {
                         range.setStart(ele,path[1])
                         range.setEnd(ele,path[1])
                     } else if(ele.nodeType==Node.ELEMENT_NODE) {
-                        if(ele.tagName=="IMG") {
+                        if(ele.tagName=="IMG" || ele.tagName=="A") {
                             range.selectNode(ele)
                             range.collapse(false)
                         } else {
@@ -190,6 +241,7 @@ export class RichEditorEvent {
         if(this.popMenuElement) {
             this.popMenuElement.style.display="none"
         }
+        this.clearQuote()
         if(event.detail==1) {
             this.selectElementList=[event.currentTarget as HTMLElement]
             this.isMouseDown=true
@@ -236,6 +288,22 @@ export class RichEditorEvent {
             selection.removeAllRanges()
             selection.addRange(range)
             this.handleMenu(event,range)
+        }
+    }
+
+    onClick(event:MouseEvent) {
+        let target=event.target as HTMLElement
+        if(target.tagName==="A" || target.parentElement.tagName==="A") {
+           let linkElement:HTMLAnchorElement
+           if(target.tagName==="A") {
+               linkElement=target as HTMLAnchorElement
+           } else if(target.parentElement.tagName==="A") {
+               linkElement=target.parentElement as HTMLAnchorElement
+           }
+           let type=linkElement.getAttribute("type")
+            if(type) {
+                this.onCustomMenuClickFunc?.(Number(type),linkElement.getAttribute("value"),linkElement.getAttribute("link"),linkElement.innerText)
+            }
         }
     }
 
@@ -626,7 +694,7 @@ export class RichEditorEvent {
                 this.selectionMenuElement.style.display="none"
             }
             let ele=event.target as HTMLElement
-            if(ele.tagName=="A") {
+            if(ele.tagName=="A" && ele.getAttribute("target")) {
                 if(!this.linkEditElement) {
                     this.generatorLinkEdit(ele)
                 }
@@ -742,7 +810,7 @@ export class RichEditorEvent {
             ele.innerHTML=event.clipboardData.getData("text/html")
             let divList=ele.getElementsByTagName("div")
             let isFromTeamLinker=false
-            if(divList.length==1 && divList[0].getAttribute("copy")==="teamlinker") {
+            if(ele.childNodes.length==2 && (ele.firstChild as HTMLElement).tagName==="META" && (ele.childNodes[1] as HTMLElement).tagName==="DIV" && (ele.childNodes[1] as HTMLElement).getAttribute("copy")==="teamlinker") {
                 isFromTeamLinker=true
             }
             let selection=window.getSelection()
@@ -978,9 +1046,9 @@ export class RichEditorEvent {
                 this.popMenuElement.style.outlineWidth="0"
                 this.popMenuElement.tabIndex=-1;
                 (event.target as HTMLElement).offsetParent.appendChild(this.popMenuElement)
-                this.popMenuElement.onclick=()=>{
+                this.popMenuElement.addEventListener("mousedown",ev => {
                     this.popMenuElement.style.display="none"
-                }
+                })
                 this.destroyFunc=renderComponent(this.popMenuElement,PopMenu,this.appContext,{
                     objEditor:this,
                     popMenuList:this.popMenuList
@@ -1018,6 +1086,56 @@ export class RichEditorEvent {
             if(this.popMenuElement) {
                 this.popMenuElement.style.display="none"
             }
+        }
+        if(event.key==="@") {
+            if(!this.quoteElement) {
+                this.quoteElement=document.createElement("div")
+                this.quoteElement.style.position="absolute"
+                this.quoteElement.style.display="none"
+                this.quoteElement.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                this.quoteElement.style.backgroundColor="white"
+                this.quoteElement.style.border="1px solid rgba(169, 169, 169, 0.2)"
+                this.quoteElement.style.width="150px"
+                this.quoteElement.style.height="200px"
+                this.quoteElement.style.overflow="auto"
+                this.quoteElement.style.backgroundColor="white";
+                this.quoteElement.style.outlineWidth="0"
+                this.quoteElement.tabIndex=-1;
+                (event.target as HTMLElement).offsetParent.appendChild(this.quoteElement)
+                this.destroyQuoteFunc=renderComponent(this.quoteElement,Quote,this.appContext,{
+                    objEditor:this
+                });
+            }
+            let selection=window.getSelection()
+            let range=selection.getRangeAt(0)
+            let rect=range.getBoundingClientRect()
+            if(rect.left==0 && rect.top==0 && rect.width==0 && rect.height==0) {
+                let ele=range.startContainer as HTMLElement
+                if(ele.tagName=="DIV" && range.startOffset!==0) {
+                    return
+                }
+                rect=(range.startContainer as HTMLElement).getBoundingClientRect()
+            }
+            let parent=(event.target as HTMLElement).offsetParent
+            let rectParent=parent.getBoundingClientRect()
+            let right=rectParent.right-rect.right+rect.width
+            let bottom=rectParent.bottom-rect.bottom
+            let left:number,top:number
+            if(right>160) {
+                left=rect.left-rectParent.left
+            } else {
+                left=rect.left-rectParent.left-150
+            }
+            if(bottom>210) {
+                top=rect.top-rectParent.top+rect.height
+            } else {
+                top=rect.top-rectParent.top-200
+            }
+            this.quoteElement.style.left=left+"px"
+            this.quoteElement.style.top=top+"px"
+            this.quoteElement.style.display="block"
+        } else {
+            this.clearQuote()
         }
     }
 

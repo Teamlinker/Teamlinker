@@ -12,7 +12,7 @@
                     </a-space>
                 </template>
                 <template #avatar>
-                    <a-avatar :image-url="photo" :size="64">{{calculateShortName(info.nickname)}}</a-avatar>
+                    <a-avatar :image-url="info.user.photo" :size="64">{{calculateShortName(info.nickname)}}</a-avatar>
                 </template>
                 <template #description>
                     <a-space v-if="info.job">
@@ -28,11 +28,11 @@
             </a-list-item-meta>
             <template #actions>
                 <template v-if="organizationUserId===myOrganizationUserId">
-                    <a-button type="outline" size="small" style="margin-left: 20px" @click="onProfile">Profile</a-button>
+                    <a-button type="outline" size="small" style="margin-left: 20px" @mousedown="onProfile">Profile</a-button>
                 </template>
                 <a-row v-else style="flex-direction: column">
-                    <a-button type="outline" size="mini" style="margin-left: 20px" @click="onProfile">Profile</a-button>
-                    <a-button type="outline" size="mini" style="margin-left: 20px;margin-top: 10px" @click="onMessage">
+                    <a-button type="outline" size="mini" style="margin-left: 20px" @mousedown="onProfile">Profile</a-button>
+                    <a-button type="outline" size="mini" style="margin-left: 20px;margin-top: 10px" @mousedown="onMessage">
                         <template #icon>
                             <icon-message></icon-message>
                         </template>
@@ -45,21 +45,20 @@
 </template>
 
 <script setup lang="ts">
-import {calculateShortName} from "../../../common/util/helper";
+import {calculateShortName} from "../util/helper";
 import {ref, watch} from "vue";
-import {apiOrganization, DCSType} from "../../../common/request/request";
-import {ICommon_Model_Organization_User} from "../../../../../../common/model/organization_user";
-import {SessionStorage} from "../../../common/storage/session";
-import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
-import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
-import {ECommon_User_Online_Status} from "../../../../../../common/types";
+import {apiOrganization, DCSType} from "../request/request";
+import {SessionStorage} from "../storage/session";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../event/event";
+import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
+import {ECommon_User_Online_Status} from "../../../../../common/types";
+import {ICommon_Route_Res_Organization_User} from "../../../../../common/routes/response";
 
 const props=defineProps<{
-    organizationUserId:string,
-    photo:string
+    organizationUserId:string
 }>()
 const loading=ref(false)
-const info=ref<DCSType<ICommon_Model_Organization_User>>()
+const info=ref<DCSType<ICommon_Route_Res_Organization_User>>()
 const myOrganizationUserId=SessionStorage.get("organizationUserId")
 const status=ref(ECommon_User_Online_Status.OFFLINE)
 watch(()=>props.organizationUserId,async ()=>{

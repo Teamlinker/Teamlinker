@@ -55,6 +55,179 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="gray"
                 ele.prepend(icon)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.PROJECT) {
+                ele=document.createElement("a")
+                ele.setAttribute("href","javascript:void(0)")
+                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.PROJECT))
+                ele.setAttribute("value",obj.value)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.padding="0 5px 0 5px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.color="black"
+                ele.style.borderRadius="5px"
+                ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                ele.style.border="1px solid rgb(210,210,210)"
+                ele.style.color="blue"
+                ele.style.fontSize="medium"
+                ele.style.textDecoration="none"
+                let icon=document.createElement("i")
+                icon.className="fa fa-list-alt"
+                icon.style.marginRight="5px"
+                icon.style.color="green"
+                ele.prepend(icon)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE) {
+                ele=document.createElement("a")
+                ele.setAttribute("href","javascript:void(0)")
+                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE))
+                ele.setAttribute("value",obj.value)
+                ele.setAttribute("link",obj.link)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.padding="0 5px 0 5px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.color="black"
+                ele.style.borderRadius="5px"
+                ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                ele.style.border="1px solid rgb(210,210,210)"
+                ele.style.color="blue"
+                ele.style.fontSize="medium"
+                ele.style.textDecoration="none"
+                let icon=document.createElement("i")
+                icon.className="fa fa-link"
+                icon.style.marginRight="5px"
+                icon.style.color="green"
+                ele.prepend(icon)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE) {
+                ele=document.createElement("a")
+                ele.setAttribute("href","javascript:void(0)")
+                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE))
+                ele.setAttribute("value",obj.value)
+                ele.setAttribute("link",obj.link)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.padding="0 5px 0 5px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.color="black"
+                ele.style.borderRadius="5px"
+                ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                ele.style.border="1px solid rgb(210,210,210)"
+                ele.style.color="blue"
+                ele.style.fontSize="medium"
+                ele.style.textDecoration="none"
+                let icon=document.createElement("i")
+                icon.className="fa fa-tasks"
+                icon.style.marginRight="5px"
+                icon.style.color="green"
+                ele.prepend(icon)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.WIKI) {
+                ele=document.createElement("a")
+                ele.setAttribute("href","javascript:void(0)")
+                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.WIKI))
+                ele.setAttribute("value",obj.value)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.padding="0 5px 0 5px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.color="black"
+                ele.style.borderRadius="5px"
+                ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                ele.style.border="1px solid rgb(210,210,210)"
+                ele.style.color="blue"
+                ele.style.fontSize="medium"
+                ele.style.textDecoration="none"
+                let icon=document.createElement("i")
+                icon.className="fa fa-files-o"
+                icon.style.marginRight="5px"
+                icon.style.color="rgb(0,120,212)"
+                ele.prepend(icon)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM) {
+                ele=document.createElement("a")
+                ele.setAttribute("href","javascript:void(0)")
+                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM))
+                ele.setAttribute("value",obj.value)
+                ele.setAttribute("link",obj.link)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.padding="0 5px 0 5px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.color="black"
+                ele.style.borderRadius="5px"
+                ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                ele.style.border="1px solid rgb(210,210,210)"
+                ele.style.color="blue"
+                ele.style.fontSize="medium"
+                ele.style.textDecoration="none"
+                let icon=document.createElement("i")
+                icon.className="fa fa-file-text-o"
+                icon.style.marginRight="5px"
+                icon.style.color="rgb(0,120,212)"
+                ele.prepend(icon)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT) {
+                ele=document.createElement("a")
+                ele.setAttribute("href","javascript:void(0)")
+                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT))
+                ele.setAttribute("value",obj.value)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.padding="0 5px 0 5px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.color="black"
+                ele.style.borderRadius="5px"
+                ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                ele.style.border="1px solid rgb(210,210,210)"
+                ele.style.color="blue"
+                ele.style.fontSize="medium"
+                ele.style.textDecoration="none"
+                let icon=document.createElement("i")
+                icon.className="fa fa-calendar-o"
+                icon.style.marginRight="5px"
+                icon.style.color="orange"
+                ele.prepend(icon)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM) {
+                ele=document.createElement("a")
+                ele.setAttribute("href","javascript:void(0)")
+                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM))
+                ele.setAttribute("value",obj.value)
+                ele.setAttribute("link",obj.link)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.padding="0 5px 0 5px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.color="black"
+                ele.style.borderRadius="5px"
+                ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+                ele.style.border="1px solid rgb(210,210,210)"
+                ele.style.color="blue"
+                ele.style.fontSize="medium"
+                ele.style.textDecoration="none"
+                let icon=document.createElement("i")
+                icon.className="fa fa-video-camera"
+                icon.style.marginRight="5px"
+                icon.style.color="red"
+                ele.prepend(icon)
+            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON) {
+                ele=document.createElement("a")
+                ele.setAttribute("href","javascript:void(0)")
+                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON))
+                ele.setAttribute("value",obj.value)
+                ele.style.margin="0 2px 0 2px"
+                ele.style.padding="0 5px 0 5px"
+                ele.style.cursor="pointer"
+                ele.contentEditable="false"
+                ele.innerText=obj.label
+                ele.style.backgroundColor="rgba(9, 30, 66, 0.08)"
+                ele.style.color="#42526E"
+                ele.style.borderRadius="10px"
+                ele.style.textDecoration="none"
+                ele.prepend(document.createTextNode("@"))
             }
             if(ele) {
                 str+=ele.outerHTML
@@ -91,9 +264,63 @@ export class RichEditorHandle {
                         obj.value=fileId
                         obj.label=ele.innerText??""
                     } else {
-                        obj.type=ECommon_Wiki_Content_Line_Config_Type.LINK
-                        obj.link=ele.getAttribute("href")
-                        obj.value=ele.innerText??""
+                        let type=ele.getAttribute("type")
+                        if(type) {
+                            let configType=Number(type)
+                            if(configType===ECommon_Wiki_Content_Line_Config_Type.PROJECT) {
+                                let projectId=ele.getAttribute("value")
+                                obj.type=ECommon_Wiki_Content_Line_Config_Type.PROJECT
+                                obj.value=projectId
+                                obj.label=ele.innerText??""
+                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE) {
+                                let projectId=ele.getAttribute("link")
+                                let projectIssueId=ele.getAttribute("value")
+                                obj.type=ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE
+                                obj.value=projectIssueId
+                                obj.link=projectId
+                                obj.label=ele.innerText??""
+                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE) {
+                                let projectId=ele.getAttribute("link")
+                                let projectReleaseId=ele.getAttribute("value")
+                                obj.type=ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE
+                                obj.value=projectReleaseId
+                                obj.link=projectId
+                                obj.label=ele.innerText??""
+                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.WIKI) {
+                                let wikiId=ele.getAttribute("value")
+                                obj.type=ECommon_Wiki_Content_Line_Config_Type.WIKI
+                                obj.value=wikiId
+                                obj.label=ele.innerText??""
+                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM) {
+                                let wikiItemId=ele.getAttribute("value")
+                                let wikiId=ele.getAttribute("link")
+                                obj.type=ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM
+                                obj.value=wikiItemId
+                                obj.link=wikiId
+                                obj.label=ele.innerText??""
+                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT) {
+                                let calendarEventId=ele.getAttribute("value")
+                                obj.type=ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT
+                                obj.value=calendarEventId
+                                obj.label=ele.innerText??""
+                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM) {
+                                let meetingRoomId=ele.getAttribute("value")
+                                let password=ele.getAttribute("link")
+                                obj.type=ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM
+                                obj.value=meetingRoomId
+                                obj.link=password
+                                obj.label=ele.innerText??""
+                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON) {
+                                let organizationUserId=ele.getAttribute("value")
+                                obj.type=ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON
+                                obj.value=organizationUserId
+                                obj.label=ele.innerText.replaceAll("@","")??""
+                            }
+                        } else {
+                            obj.type=ECommon_Wiki_Content_Line_Config_Type.LINK
+                            obj.link=ele.getAttribute("href")
+                            obj.value=ele.innerText??""
+                        }
                     }
                 } else if(ele.tagName=="IMG") {
                     obj.type=ECommon_Wiki_Content_Line_Config_Type.IMAGE
@@ -190,7 +417,9 @@ export class RichEditorHandle {
                             range.collapse(false)
                             return;
                         } else {
-                            range.setStart(ele.firstChild,item.selectStartIndexPath[1])
+                            if((ele as HTMLElement).contentEditable=="true") {
+                                range.setStart(ele.firstChild,item.selectStartIndexPath[1])
+                            }
                         }
                     }
                 }
@@ -206,7 +435,9 @@ export class RichEditorHandle {
                             range.selectNode(ele)
                             return;
                         } else {
-                            range.setEnd(ele.firstChild,item.selectEndIndexPath[1])
+                            if((ele as HTMLElement).contentEditable==="true") {
+                                range.setEnd(ele.firstChild,item.selectEndIndexPath[1])
+                            }
                         }
 
                     }

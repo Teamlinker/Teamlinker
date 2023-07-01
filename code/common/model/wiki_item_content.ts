@@ -11,7 +11,8 @@ export enum ECommon_Wiki_Content_Line_Config_Type {
     WIKI,
     WIKI_ITEM,
     CALENDAR_EVENT,
-    MEETING_ROOM
+    MEETING_ROOM,
+    QUOTE_PERSON
 }
 
 export type ICommon_Wiki_Content_Line_Style ={
@@ -31,6 +32,7 @@ export type ICommon_Wiki_Content_Line_Config ={
     width?:number,
     label?:string
 }
+
 export type ICommon_Wiki_Content_Line ={
     arr:ICommon_Wiki_Content_Line_Config[],
     selectStartIndexPath?:number[],
