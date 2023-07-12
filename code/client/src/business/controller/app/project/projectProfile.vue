@@ -28,6 +28,7 @@ import {injectProjectInfo} from "../../../common/util/symbol";
 import ProjectIssueProfile from "./issue/projectIssueProfile.vue";
 import {getCurrentNavigator, getCurrentNavigatorMeta} from "../../../../teamOS/common/component/navigator/navigator";
 import ProjectReleaseProfile from "./release/projectReleaseProfile.vue";
+import {Message} from "@arco-design/web-vue";
 
 const props=defineProps<{
   projectId:string
@@ -95,6 +96,8 @@ const getInfo=async ()=>{
   if(res?.code==0) {
     objProvide.key.value=res.data.keyword
     navigator.setCurrentPath(res.data.name)
+  } else {
+		Message.error(res.msg)
   }
 }
 </script>

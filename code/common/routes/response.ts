@@ -24,6 +24,7 @@ import {ICommon_Model_Finder_Item} from "../model/finder_item";
 import {ICommon_Model_File} from "../model/file";
 import {ICommon_Model_Wiki_Item} from "../model/wiki_item";
 import {ICommon_Model_Meeting_Room} from "../model/meeting_room";
+import {ICommon_Model_Notification} from "../model/notification";
 
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -376,3 +377,33 @@ export type ICommon_Route_Res_Finder_Info = ICommon_Model_Finder_Item &  {
 export type ICommon_Route_Res_Organization_User=ICommon_Model_Organization_User & {
     user:ICommon_Model_User
 }
+
+export type ICommon_Route_Res_Notification_Item = ICommon_Model_Notification & {
+    data:ICommon_Model_Organization|ICommon_Model_Team|{
+        issue:ICommon_Model_Project_Issue,
+        project:ICommon_Model_Project
+    }|ICommon_Model_Wiki_Item|ICommon_Model_Calendar_Event|ICommon_Model_Meeting_Room,
+    operationOrganizationUser?:{
+        id:string,
+        photo?:string,
+        name:string
+    },
+    organization?:ICommon_Model_Organization
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

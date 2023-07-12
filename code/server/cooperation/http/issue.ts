@@ -1,4 +1,4 @@
-import {ECommon_Model_Comment_Type} from "../../../common/model/comment";
+import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import projectIssueApi from "../../../common/routes/issue";
 import {
      ICommon_Route_Req_ProjectIssue_Field,
@@ -9,8 +9,10 @@ import {DComponent} from "../../common/decorate/component";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import {ProjectIssueService} from "../service/issue";
 import {ProjectService} from "../service/project";
-import {CommentService} from './../service/comment';
 import {IUserSession} from "../../user/types/config";
+import rpcContentApi from "../../content/rpc/content"
+import rpcNotificationApi from "../../notification/rpc/notification"
+import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 
 @DComponent
 @DHttpController(projectIssueApi)
@@ -47,7 +49,13 @@ class IssueController {
          })
          let obj=await projectIssue.create()
          projectIssue.assignItem(obj,true);
-         await projectIssue.createFieldValues(values)
+         await projectIssue.createFieldValues(values);
+         if(assignerId) {
+              rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN,obj.id,assignerId,user.organizationInfo.organizationUserId)
+         }
+         if(reporterId) {
+              rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN,obj.id,reporterId,user.organizationInfo.organizationUserId)
+         }
          return obj
      }
 
@@ -64,22 +72,24 @@ class IssueController {
      @DHttpApi(projectIssueApi.routes.confirmNextNode)
      async confirmNextNode(@DHttpReqParamRequired("projectIssueId") projectIssueId :string ,
      @DHttpReqParamRequired("workflowActionId") workflowActionId :string,
-     @DHttpReqParam("values")     values:ICommon_Route_Req_ProjectIssue_Field[]):Promise<typeof projectIssueApi.routes.confirmNextNode.res> {
+     @DHttpReqParam("values")     values:ICommon_Route_Req_ProjectIssue_Field[],@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.confirmNextNode.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
           await projectIssue.confirmNextNode(workflowActionId,values)
+          rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_WORKFLOW_CHANGE,projectIssueId,null,user.organizationInfo.organizationUserId)
           return
      }
      @DHttpApi(projectIssueApi.routes.editExtraField)
      async editExtraField(@DHttpReqParamRequired("projectIssueId") projectIssueId :string ,
-     @DHttpReqParam("value")     value:ICommon_Route_Req_ProjectIssue_Field_Value):Promise<typeof projectIssueApi.routes.editExtraField.res> {
+     @DHttpReqParam("value")     value:ICommon_Route_Req_ProjectIssue_Field_Value,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.editExtraField.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
           let ret=await projectIssue.updateFieldValue(value)
+          rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE,projectIssueId,null,user.organizationInfo.organizationUserId)
           return ret;
      }
      @DHttpApi(projectIssueApi.routes.editBasicField)
@@ -87,7 +97,7 @@ class IssueController {
      @DHttpReqParam("name")     name :string,
      @DHttpReqParam("priority")     priority :number,
      @DHttpReqParam("assignerId")     assignerId :string ,
-     @DHttpReqParam("reporterId")     reporterId :string):Promise<typeof projectIssueApi.routes.editBasicField.res> {
+     @DHttpReqParam("reporterId")     reporterId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.editBasicField.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
@@ -99,25 +109,37 @@ class IssueController {
                reporter_id:reporterId
           })
           let ret=await projectIssue.update()
+          if(assignerId) {
+               rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN,projectIssueId,assignerId,user.organizationInfo.organizationUserId)
+          }
+          if(reporterId) {
+               rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN,projectIssueId,reporterId,user.organizationInfo.organizationUserId)
+          }
+          if(name || priority) {
+               rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE,projectIssueId,null,user.organizationInfo.organizationUserId)
+          }
           return ret;
      }
      @DHttpApi(projectIssueApi.routes.editDescription)
      async editDescription(@DHttpReqParamRequired("projectIssueId") projectIssueId :string ,
-     @DHttpReqParam("description")     description :string):Promise<typeof projectIssueApi.routes.editDescription.res> {
+     @DHttpReqParam("description")     description :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.editDescription.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          await projectIssue.editDescription(description)
+          await projectIssue.editDescription(description,user.organizationInfo.organizationUserId)
+          rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE,projectIssueId,null,user.organizationInfo.organizationUserId)
           return;
      }
      @DHttpApi(projectIssueApi.routes.remove)
-     async remove(@DHttpReqParamRequired("projectIssueId") projectIssueId :string ):Promise<typeof projectIssueApi.routes.remove.res> {
+     async remove(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.remove.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
           await projectIssue.delete()
+          let objProject=await ProjectService.getItemById(projectIssue.getItem().project_id)
+          rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_REMOVE,projectIssueId,null,user.organizationInfo.organizationUserId,`${objProject.getItem().keyword}-${projectIssue.getItem().unique_id}`)
           return;
      }
      @DHttpApi(projectIssueApi.routes.basicInfo)
@@ -170,49 +192,38 @@ class IssueController {
      }
      @DHttpApi(projectIssueApi.routes.commentList)
      async commentList(@DHttpReqParamRequired("projectIssueId") projectIssueId :string):Promise<typeof projectIssueApi.routes.commentList.res> {
-          let commentList=await CommentService.list(projectIssueId)
+          let commentList=await rpcContentApi.list(projectIssueId,ECommon_Model_Content_Type.PROJECT_ISSUE_COMMENT)
           return commentList
      }
      @DHttpApi(projectIssueApi.routes.commentCreate)
      async commentCreate(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("content") content :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.commentCreate.res> {
-         let comment=new CommentService
-         comment.assignItem({
-              type:ECommon_Model_Comment_Type.PROJECT,
-              type_id:projectIssueId,
-              content:content,
-              created_by:user.organizationInfo.organizationUserId
-         })
-         let ret=await comment.create()
+         let ret=await rpcContentApi.add(projectIssueId,ECommon_Model_Content_Type.PROJECT_ISSUE_COMMENT,user.organizationInfo.organizationUserId,content)
+          rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_COMMENT_ADD,projectIssueId,null,user.organizationInfo.organizationUserId)
          return ret;
      }
      @DHttpApi(projectIssueApi.routes.commentEdit)
-     async commentEdit(@DHttpReqParamRequired("commentId") commentId :string,@DHttpReqParamRequired("content") content :string):Promise<typeof projectIssueApi.routes.commentEdit.res> {
-          let comment=await CommentService.getItemById(commentId)
-          if(!comment) {
-               throw Err.Comment.commentNotFound
-          }
-          comment.assignItem({
-               content
-          })
-          let ret=await comment.update()
+     async commentEdit(@DHttpReqParamRequired("contentId") contentId :string,@DHttpReqParamRequired("content") content :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.commentEdit.res> {
+          let ret=await rpcContentApi.edit(contentId,user.organizationInfo.organizationUserId,content)
           return ret;
      }
      @DHttpApi(projectIssueApi.routes.commentRemove)
-     async commentRemove(@DHttpReqParamRequired("commentId") commentId :string):Promise<typeof projectIssueApi.routes.commentRemove.res> {
-          let comment=await CommentService.getItemById(commentId)
-          if(!comment) {
-               throw Err.Comment.commentNotFound
-          }
-          await comment.delete()
+     async commentRemove(@DHttpReqParamRequired("contentId") contentId :string):Promise<typeof projectIssueApi.routes.commentRemove.res> {
+          await rpcContentApi.remove(contentId)
           return
      }
      @DHttpApi(projectIssueApi.routes.copy)
-     async copy(@DHttpReqParamRequired("projectIssueId") projectIssueId :string):Promise<typeof projectIssueApi.routes.copy.res> {
+     async copy(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.copy.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
           let ret=await projectIssue.copy()
+          if(ret.getItem().assigner_id) {
+               rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN,ret.getId(),ret.getItem().assigner_id,user.organizationInfo.organizationUserId)
+          }
+          if(ret.getItem().reporter_id) {
+               rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN,ret.getId(),ret.getItem().reporter_id,user.organizationInfo.organizationUserId)
+          }
           return ret.getItem()
      }
      @DHttpApi(projectIssueApi.routes.addChildIssue)

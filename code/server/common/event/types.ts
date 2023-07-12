@@ -1,4 +1,5 @@
 import {ECommon_User_Online_Status} from "../../../common/types";
+import {ICommon_Model_Notification} from "../../../common/model/notification";
 
 export interface IServer_Common_Event_Types {
     userDelete:(userId:string)=>void
@@ -19,4 +20,8 @@ export interface IServer_Common_Event_Types {
     teamUserEdit:(teamId:string,organizationUserId:string)=>void
     teamUserDelete:(teamId:string,organizationUserId:string)=>void
     roleChange:(roleId:string)=>void
+    notificationResolved:(param:ICommon_Model_Notification)=>void
+    wikiMemberAdd:(wikiId:string,memberId:string)=>void
+    wikiMemberEdit:(wikiId:string,memberId:string)=>void
+    wikiMemberDelete:(wikiId:string,memberId:string)=>void
 }

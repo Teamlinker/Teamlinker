@@ -124,7 +124,7 @@ class PermissionProject extends PermissionBase {
         await this.unlock()
         let ret=isAdmin?Permission_Types.Project.ADMIN.value:Array.from(permissionsSet).reduce((previousValue, currentValue, currentIndex, array)=>{
             return previousValue | currentValue;
-        })
+        },0)
         let obj=REDIS_AUTH.Permission.Project.calPermission(projectId,organizationUserId)
         await obj.set(ret);
         return ret;

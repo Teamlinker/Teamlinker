@@ -188,6 +188,15 @@ const api={
                 value:number
             }>{},
             permission:[Permission_Types.Team.READ]
+        },
+        quit:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/quit",
+            req:<{
+                teamId:string,
+            }>{},
+            res:{},
+            permission:[Permission_Types.Team.READ]
         }
     }
 }

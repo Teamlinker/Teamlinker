@@ -24,6 +24,10 @@ export class MeetingRoomService extends Entity<typeof meetingRoomModel,typeof me
         await meetingRoomMapper.clear(organizationUserId)
     }
 
+    static async clearByOrganizationId(organizationId:string) {
+        await meetingRoomMapper.clearByOrganizationId(organizationId)
+    }
+
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         if(this.getItem().type===ECommon_Model_Meeting_Room_Type.SCHEDULE) {
             let objRedis=REDIS_MEETING.roomInfo(this.getId())

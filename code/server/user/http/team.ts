@@ -7,6 +7,8 @@ import {OrganizationService, OrganizationUserService} from './../service/organiz
 import {IUserSession} from "../types/config";
 import rpcAuthApi from "../../auth/rpc/auth";
 import {ECommon_Model_Role_Type} from "../../../common/model/role";
+import rpcNotificationApi from "../../notification/rpc/notification"
+import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 
 @DComponent
 @DHttpController(teamApi)
@@ -54,12 +56,13 @@ class TeamController {
     }
 
     @DHttpApi(teamApi.routes.remove)
-    async remove(@DHttpReqParamRequired("teamId") teamId:string) {
+    async remove(@DHttpReqParamRequired("teamId") teamId:string,@DHttpUser user:IUserSession) {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
         }
         await team.delete("teamDelete")
+        rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.TEAM_DISMISS,teamId,null,user.organizationInfo.organizationUserId,team.getItem().name)
     }
     
     @DHttpApi(teamApi.routes.roles)
@@ -99,17 +102,18 @@ class TeamController {
     }
 
     @DHttpApi(teamApi.routes.addMember)
-    async addMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.addMember.res> {
+    async addMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpReqParamRequired("roleId") roleId:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.addMember.res> {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
         }
         let ret=await team.addMember(organizationUserId,roleId)
+        rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.TEAM_USER_ADD,teamId,organizationUserId,user.organizationInfo.organizationUserId)
         return ret;
     }
 
     @DHttpApi(teamApi.routes.removeMember)
-    async removeMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string) :Promise<typeof teamApi.routes.removeMember.res> {
+    async removeMember(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.removeMember.res> {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
@@ -121,11 +125,12 @@ class TeamController {
             throw Err.Organization.userNotFound
         }
         await team.removeMember(organizationUserId)
+        rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.TEAM_USER_REMOVE,teamId,organizationUserId,user.organizationInfo.organizationUserId)
         return;
     }
 
     @DHttpApi(teamApi.routes.changeRole)
-    async changeRole(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpReqParamRequired("roleId") roleId:string) :Promise<typeof teamApi.routes.changeRole.res> {
+    async changeRole(@DHttpReqParamRequired("teamId") teamId:string,@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpReqParamRequired("roleId") roleId:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.changeRole.res> {
         let team=await TeamService.getItemById(teamId)
         if(!team) {
             throw Err.Team.teamNotFound
@@ -141,6 +146,9 @@ class TeamController {
             throw Err.Organization.ownerDeleteForbidden
         }
         let ret=await team.changeRole(organizationUserId,roleId)
+        if(roleId) {
+            rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.TEAM_USER_ROLE_CHANGE,teamId,organizationUserId,user.organizationInfo.organizationUserId)
+        }
         return ret;
     }
 
@@ -210,6 +218,19 @@ class TeamController {
         return {
             value
         };
+    }
+
+    @DHttpApi(teamApi.routes.quit)
+    async quit(@DHttpReqParamRequired("teamId") teamId:string,@DHttpUser user:IUserSession) :Promise<typeof teamApi.routes.quit.res>{
+        let obj=await TeamService.getItemById(teamId)
+        if(!obj) {
+            throw Err.Team.teamNotFound
+        }
+        let ret=await obj.quit(user.organizationInfo.organizationUserId)
+        if(ret) {
+            rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.TEAM_USER_QUIT,teamId,user.organizationInfo.organizationUserId,user.organizationInfo.organizationUserId)
+        }
+        return
     }
 
 }

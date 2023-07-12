@@ -24,17 +24,12 @@ class RoleMapper extends Mapper<typeof roleModel> {
 
     async clearRoleByItemId(itemId:string) {
         let mysql=getMysqlInstance()
-        let ret=await mysql.execute(generateQuerySql(roleModel,["id"],{
+        await mysql.execute(generateDeleteSql(roleMemberModel,{
             item_id:itemId
         }))
-        if(ret.length>0) {
-            await mysql.execute(generateDeleteSql(roleMemberModel,{
-                item_id:itemId
-            }))
-            await mysql.execute(generateDeleteSql(roleModel,{
-                item_id:itemId
-            }))
-        }
+        await mysql.execute(generateDeleteSql(roleModel,{
+            item_id:itemId
+        }))
     }
 
     async clearRoleByItemIds(itemIds:string[]) {

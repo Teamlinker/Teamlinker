@@ -97,7 +97,7 @@ const api={
                 location?:string,
                 remark?:string
             }>{},
-            res:<ICommon_Route_Res_Organization_User_Item>{},
+            res:{},
             permission:[Permission_Types.Organization.ADMIN]
         },
         updateUser:{
@@ -386,6 +386,13 @@ const api={
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]
+        },
+        quit:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/user/quit",
+            req:{},
+            res:{},
+            permission:[Permission_Types.Organization.READ]
         }
     }
 }

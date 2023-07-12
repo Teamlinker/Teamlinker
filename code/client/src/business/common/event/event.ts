@@ -23,7 +23,9 @@ export enum EClient_EVENTBUS_TYPE {
     FINDER_DELETE="finder_delete",
     FINDER_REFRESH="finder_refresh",
     FINDER_UPLOAD="finder_upload",
-    FINDER_OPEN_WINDOW="finder_open_window"
+    FINDER_OPEN_WINDOW="finder_open_window",
+    REFRESH_ORGANIZATION_LIST="refresh_organization_list",
+    REFRESH_NOTIFICATION_UNREAD="refresh_notification_unread"
 }
 
 interface IClient_EventBus_Func {
@@ -52,6 +54,8 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.FINDER_REFRESH]:(folderId:string)=>void
     [EClient_EVENTBUS_TYPE.FINDER_UPLOAD]:(fileItemId:string)=>void
     [EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW]:(folderId:string)=>void
+    [EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST]:()=>void
+    [EClient_EVENTBUS_TYPE.REFRESH_NOTIFICATION_UNREAD]:()=>void
 }
 
 interface IClient_EventBus_Emit_Func {

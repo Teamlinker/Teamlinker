@@ -19,6 +19,7 @@
             <a-form-item>
               <a-space size="large">
                 <a-button type="primary" html-type="submit">Save</a-button>
+	              <a-button type="primary" status="danger" html-type="button" @click="onQuit">Quit</a-button>
                 <a-button status="danger" html-type="button" v-if="checkPermission(permission,Permission_Types.Team.DELETE)" @click="onDelete">Delete</a-button>
                 <a-button type="outline" size="small" html-type="button" @click="onMessage">
                   <template #icon>
@@ -36,6 +37,7 @@
               <a-list-item-meta>
                 <template #title>
                   {{basic.name}}&nbsp;&nbsp;
+	                <a-button type="primary" status="danger" size="mini" html-type="button" @click="onQuit">Quit</a-button>&nbsp;&nbsp;
                   <a-button type="outline" size="mini" html-type="button" @click="onMessage">
                     <template #icon>
                       <icon-message></icon-message>
@@ -370,6 +372,21 @@ const onAddMember=async ()=>{
 
 const onMessage=()=>{
   eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,props.teamId,ECommon_IM_Message_EntityType.TEAM)
+}
+
+const onQuit=async ()=>{
+	let ret=await Dialog.confirm(root.value,appContext,"Do you want to quit this team?")
+	if(ret) {
+		let res=await apiTeam.quit({
+			teamId:props.teamId
+		})
+		if(res?.code==0){
+			Message.success("quit success")
+			navigator.replaceRoot("team",null,"team");
+		} else {
+			Message.error(res.msg)
+		}
+	}
 }
 </script>
 

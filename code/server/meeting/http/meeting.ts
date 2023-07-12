@@ -38,7 +38,8 @@ class MeetingController {
             start_time:new Date(startTime),
             end_time:new Date(endTime),
             password,
-            created_by:user.organizationInfo.organizationUserId
+            created_by:user.organizationInfo.organizationUserId,
+            organization_id:user.organizationInfo.organizationId
         })
         let ret=await obj.create()
         return ret;

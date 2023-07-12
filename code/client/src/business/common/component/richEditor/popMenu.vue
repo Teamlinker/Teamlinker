@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import {nextTick, ref} from "vue";
-import {ICommon_Wiki_Content_Line_Config} from "../../../../../../common/model/wiki_item_content";
+import {ICommon_Content_Line_Config} from "../../../../../../common/model/content";
 import {RichEditorEvent} from "./event";
 import {RichEditorHandle} from "./handle";
 
@@ -31,7 +31,7 @@ const onClick=async (item:{
 		let line=itemList[0].line
 		let eleLine=props.objEditor.getRoot().value.children[props.objEditor.getLineList().indexOf(line)]
 		let originItem=line.arr[selectStartIndexPath[0]]
-		let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+		let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
 		objTemp.value=originItem.value.substring(selectStartIndexPath[1])
 		originItem.value=originItem.value.substring(0,selectStartIndexPath[1]-1)
 		line.arr.splice(selectStartIndexPath[0]+1,0,item1,objTemp)

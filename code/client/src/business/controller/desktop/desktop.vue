@@ -39,7 +39,7 @@
 			  <a-col flex="80px" style="align-items: center;display: flex">
 				  <img :src="store.organizationInfo.photo" style="height: 36px;width:80px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
-			  <a-col flex="170px">
+			  <a-col flex="140px">
 				  <a-select style="max-width: 170px;color: white" placeholder="organization" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
 					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
 						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
@@ -55,6 +55,9 @@
 				  <a-button type="primary" status="success" style="float: right;margin-right: 5px" @click="onCreate" v-else>
 					  Create Organization
 				  </a-button>
+			  </a-col>
+			  <a-col flex="30px">
+					<NotificationShow></NotificationShow>
 			  </a-col>
 		  </a-row>
 	  </template>
@@ -108,6 +111,7 @@ import {IClient_Drag_Shortcut_Value} from "../../../teamOS/common/directive/drag
 import IconItem from "../../../teamOS/icon/iconItem.vue";
 import {FinderHandle} from "../app/finder/finderHandle";
 import {vDrop} from "../../../teamOS/common/directive/drop";
+import NotificationShow from "./notificationShow.vue";
 
 interface ITeamOS_Desktop_Menu {
 	group:string,
@@ -253,18 +257,21 @@ onBeforeMount(async ()=>{
   }
   await Promise.allSettled([
 		store.getOrganizationList(),
-	  objFinderHandle.refresh()
+	  objFinderHandle.refresh(),
+	  store.initNotificationSocket()
   ])
   if(SessionStorage.get("organizationId")) {
     await store.initOrganization(SessionStorage.get("organizationId"))
   }
   eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
+	eventBus.on(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
 	loading.value=false
 })
 
 onBeforeUnmount(()=>{
 	objFinderHandle.unRegisterEvents()
   eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
+	eventBus.off(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
 })
 
 </script>

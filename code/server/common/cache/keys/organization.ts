@@ -1,6 +1,6 @@
 import {ECommon_Services} from "../../../../common/types";
 import {RedisStringKey} from "./base";
-import StringUtil from "../../util/string";
+import StringUtil from "../../../../common/util/string";
 import {cacheRedisType} from "../../types/cache";
 
 export namespace REDIS_ORGANIZATION {

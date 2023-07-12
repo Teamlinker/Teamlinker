@@ -390,14 +390,18 @@ export namespace Err {
         }
     }
 
-    export const Comment ={
-        commentNotFound:{
+    export const Content ={
+        contentNotFound:{
             code:7000,
             msg:"comment not found"
         },
-        commentTypeNotFound:{
+        contentTypeNotFound:{
             code:7001,
             msg:"comment type not found"
+        },
+        contentRefNotFound:{
+            code:7002,
+            msg:"comment ref not found"
         }
     }
 
@@ -543,6 +547,17 @@ export namespace Err {
         recursionFolder:{
             code:14002,
             msg:"recursion folder"
+        }
+    }
+
+    export const Notification={
+        notificationNotFound:{
+            code:15000,
+            msg:"notification not found"
+        },
+        notificationStatusNotMatch:{
+            code:15001,
+            msg:"notification status not match"
         }
     }
 }

@@ -12,6 +12,8 @@ import {TeamService} from "../service/team";
 import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../common/types";
 import Application from "../../common/app/app";
 import rpcUserApi from "../../user/rpc/user"
+import rpcNotificationApi from "../../notification/rpc/notification"
+import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 
 @DComponent
 @DHttpController(organizationApi)
@@ -103,7 +105,10 @@ class OrganizationController {
     @DHttpReqParam("email") email:string,
     @DHttpReqParam("phone") phone:string,
     @DHttpReqParam("remark") remark:string,
-    @DHttpReqParam("location") location:string) :Promise<typeof organizationApi.routes.addUser.res>{
+    @DHttpReqParam("location") location:string,@DHttpUser userInfo:IUserSession) :Promise<typeof organizationApi.routes.addUser.res>{
+        if(Application.mode!==ECommon_Application_Mode.ONLINE) {
+            throw Err.Common.interfaceForbidden
+        }
         let user=await UserService.getItemByName(username).then(user=>{
                 if(!user) {
                     throw Err.User.userNotFound;
@@ -132,12 +137,11 @@ class OrganizationController {
                 return objRole;
             })
         ])
-        let retUser=await organization.addUser(roleId,user.getId(),nickname,active,title,job,email,phone,location,remark);
-        return {
-            organizationUser:retUser,
-            user:user.getItem(),
-            role:objRole.getItem()
-        };
+        let extra=JSON.stringify({
+            userId:user.getId(),roleId,nickname,active,title,job,email,phone,location,remark
+        })
+        await rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ORGANIZATION_INVITATION, organizationId,user.getId(),userInfo.organizationInfo.organizationUserId,extra)
+        return
     }
 
     @DHttpApi(organizationApi.routes.updateUser)
@@ -150,7 +154,7 @@ class OrganizationController {
     @DHttpReqParam("email") email:string,
     @DHttpReqParam("phone") phone:string,
     @DHttpReqParam("location") location:string,
-    @DHttpReqParam("remark") remark:string) :Promise<typeof organizationApi.routes.updateUser.res>{
+    @DHttpReqParam("remark") remark:string,@DHttpUser userInfo:IUserSession) :Promise<typeof organizationApi.routes.updateUser.res>{
         if(nickname === "") {
             throw Err.Organization.nicknameEmpty
         }
@@ -193,6 +197,9 @@ class OrganizationController {
             throw Err.Common.requestForbidden
         }
         let retUser=await organization.updateUser(roleId,objOrganizationUser.getId(),nickname,active,department,job,email,phone,location,remark)
+        if(roleId!==objOriginalRole.getId()) {
+            rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ORGANIZATION_USER_ROLE_CHANGE,organization.getId(),organizationUserId,userInfo.organizationInfo.organizationUserId)
+        }
         return {
             organizationUser:retUser,
             user:user.getItem(),
@@ -201,7 +208,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.deleteUser)
-    async deleteUser(@DHttpReqParamRequired("organizationUserId") organizationUserId:string) :Promise<typeof organizationApi.routes.deleteUser.res>{
+    async deleteUser(@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.deleteUser.res>{
         let obj=await OrganizationUserService.getItemById(organizationUserId)
         if(!obj) {
             throw Err.Organization.userNotFound
@@ -211,6 +218,7 @@ class OrganizationController {
             throw Err.Organization.ownerDeleteForbidden
         }
         await objOrganization.removeUser(organizationUserId);
+        rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ORGANIZATION_USER_REMOVE,user.organizationInfo.organizationId,organizationUserId,user.organizationInfo.organizationUserId)
         return;
     }
 
@@ -568,6 +576,18 @@ class OrganizationController {
         }
         let user=await UserService.getItemById(obj.getItem().user_id)
         await user.delete("userDelete")
+        return
+    }
+
+    @DHttpApi(organizationApi.routes.quit)
+    async quit(@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.quit.res>{
+        if(Application.mode!==ECommon_Application_Mode.OFFLINE) {
+            throw Err.Common.interfaceForbidden
+        }
+        let objOrganizationUser=await OrganizationUserService.getItemById(user.organizationInfo.organizationUserId)
+        let obj=await OrganizationService.getItemById(user.organizationInfo.organizationId)
+        await obj.removeUser(user.organizationInfo.organizationUserId)
+        rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ORGANIZATION_USER_QUIT,null,null,null,objOrganizationUser.getItem().nickname)
         return
     }
 }

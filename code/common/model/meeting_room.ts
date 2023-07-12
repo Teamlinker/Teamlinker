@@ -19,7 +19,8 @@ export interface ICommon_Model_Meeting_Room {
     related_id:string,
     start_time:Date,
     end_time:Date,
-    password:string
+    password:string,
+    organization_id:string
 }
 export const Table_Meeting_Room="meeting_room"
 

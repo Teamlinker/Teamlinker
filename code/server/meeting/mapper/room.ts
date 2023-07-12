@@ -59,6 +59,13 @@ class MeetingRoomMapper extends Mapper<typeof meetingRoomModel> {
             created_by:organizationUserId
         }))
     }
+
+    async clearByOrganizationId(organizationId:string) {
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(meetingRoomModel,{
+            organization_id:organizationId
+        }))
+    }
 }
 
 export const meetingRoomMapper=new MeetingRoomMapper

@@ -17,6 +17,15 @@ class RpcCooperationApi  {
         }
         return obj.getItem()
     }
+
+    async clearWiki(organizationId:string) {
+        let arr=await WikiService.getItemsByExp({
+            organization_id:organizationId
+        })
+        await Promise.all(arr.map(item=>{
+            return item.delete()
+        }))
+    }
 }
 
 export default new RpcCooperationApi()

@@ -15,7 +15,8 @@ export interface ICommon_Model_Calendar_Setting {
     id:string,
     timezone:string,
     start_week_day:ECommon_Calendar_WeekDay,
-    organization_user_id:string
+    organization_user_id:string,
+    organization_id:string
 }
 export const Table_Calendar_Setting="calendar_setting"
 

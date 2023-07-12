@@ -4,7 +4,7 @@ import {Err} from "../../../common/status/error";
 import {ECommon_Calendar_WeekDay} from "../../../common/model/calendar_setting";
 
 class RpcCalendarApi {
-    async addCalendar(organizationUserId:string,name:string,color:ECommon_Calendar_Color,isDefault:number) {
+    async addCalendar(organizationUserId:string,name:string,color:ECommon_Calendar_Color,isDefault:number,organizationId:string) {
         if(isDefault) {
             let obj=await CalendarService.getItemByExp({
                 organization_user_id:organizationUserId,
@@ -20,14 +20,16 @@ class RpcCalendarApi {
             reserved:isDefault,
             name,
             color,
-            type:ECommon_Calendar_Type.NATIVE
+            type:ECommon_Calendar_Type.NATIVE,
+            organization_id:organizationId
         })
         let ret=await obj.create();
         let objSetting=await CalendarSettingService.getItemByExp({
-            organization_user_id:organizationUserId
+            organization_user_id:organizationUserId,
+            organization_id:organizationId
         })
         if(!objSetting) {
-            await this.addCalendarSetting(organizationUserId)
+            await this.addCalendarSetting(organizationUserId,organizationId)
         }
         return ret;
     }
@@ -37,7 +39,11 @@ class RpcCalendarApi {
         await this.removeCalendarSetting(organizationUserId)
     }
 
-    async addCalendarSetting(organizationUserId:string) {
+    async clearCalendarByOrganizationId(organizationId:string) {
+        await CalendarService.clearCalendarByOrganizationId(organizationId)
+    }
+
+    async addCalendarSetting(organizationUserId:string,organizationId:string) {
         let obj=await CalendarSettingService.getItemByExp({
             organization_user_id:organizationUserId
         })
@@ -47,7 +53,8 @@ class RpcCalendarApi {
         obj=new CalendarSettingService()
         obj.assignItem({
             organization_user_id:organizationUserId,
-            start_week_day:ECommon_Calendar_WeekDay.Sun
+            start_week_day:ECommon_Calendar_WeekDay.Sun,
+            organization_id:organizationId
         })
         await obj.create()
     }

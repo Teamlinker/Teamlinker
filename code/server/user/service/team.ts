@@ -10,6 +10,8 @@ import {teamModel} from './../../../common/model/team';
 import {OrganizationService} from "./organization";
 import {emitServiceEvent} from "../../common/event/event";
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import rpcNotificationApi from "../../notification/rpc/notification";
+import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 
 export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     constructor(){
@@ -101,6 +103,34 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         emitServiceEvent("teamUserDelete",this.item.id,organizationUserId)
     }
 
+    async quit(organizationUserId:string) {
+        let [adminRoleId,roles]=await Promise.all([
+            rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.TEAM),
+            await rpcAuthApi.getRolesByMemberIds([{
+                itemId:this.getId(),
+                memberId:organizationUserId
+            }])
+        ])
+        await this.removeMember(organizationUserId)
+        let count=await teamMapper.getMemberCount(this.getId())
+        if(count==0) {
+            await this.delete("teamDelete")
+            return false
+        } else {
+            if(roles[0].role.id===adminRoleId) {
+                let list=await rpcAuthApi.listRoleMember(this.getId(),ECommon_Model_Role_Type.TEAM, ECommon_Model_Organization_Member_Type.USER,0,10000,null,adminRoleId)
+                if(list.data.length==0) {
+                    let id=await teamMapper.pickupMember(this.getId())
+                    if(id) {
+                        await this.changeRole(id,adminRoleId)
+                        rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.TEAM_USER_ROLE_CHANGE,this.getId(),id,organizationUserId)
+                    }
+                }
+            }
+        }
+        return true
+    }
+
     async changeRole(organizationUserId:string,roleId:string){
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
@@ -175,6 +205,7 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await teamMapper.clearMemberByItemId(this.getId());
+        await rpcAuthApi.clearRoleByItemId(this.getId())
     }
 
     async createRole(name :string,

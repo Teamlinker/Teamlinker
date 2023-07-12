@@ -25,7 +25,8 @@ export interface ICommon_Model_Calendar {
     color:ECommon_Calendar_Color,
     reserved:number,
     organization_user_id:string,
-    type:ECommon_Calendar_Type
+    type:ECommon_Calendar_Type,
+    organization_id:string
 }
 export const Table_Calendar="calendar"
 

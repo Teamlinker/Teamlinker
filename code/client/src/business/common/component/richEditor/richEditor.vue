@@ -17,18 +17,18 @@ import {getCurrentInstance, nextTick, onBeforeUnmount, ref, watch} from "vue";
 import {RichEditorEvent} from "./event";
 import {RichEditorHandle} from "./handle";
 import {
-	ECommon_Wiki_Content_Line_Config_Type,
-	ICommon_Wiki_Content_Line,
-	ICommon_Wiki_Content_Line_Config
-} from "../../../../../../common/model/wiki_item_content";
+	ECommon_Content_Line_Config_Type,
+	ICommon_Content_Line,
+	ICommon_Content_Line_Config
+} from "../../../../../../common/model/content";
 import "./font/css/font-awesome.min.css"
 import UserShortView from "../userShortView.vue";
 
 const emit=defineEmits<{
-  (e:"update:modelValue",value:ICommon_Wiki_Content_Line[]):void
+  (e:"update:modelValue",value:ICommon_Content_Line[]):void
 	(e:"uploadFile", file:File, handleFunc:(fileId:string, path:string)=>void):void
-	(e:"popMenuClick",type:any,handleFunc:(item:ICommon_Wiki_Content_Line_Config)=>void):void
-	(e:"customAnchorClick",type:ECommon_Wiki_Content_Line_Config_Type,value:string,link:string,label:string):void
+	(e:"popMenuClick",type:any,handleFunc:(item:ICommon_Content_Line_Config)=>void):void
+	(e:"customAnchorClick",type:ECommon_Content_Line_Config_Type,value:string,link:string,label:string):void
 	(e:"quoteList",keyword:string,handleFunc:(list:{
 		value:string,
 		label:string,
@@ -37,7 +37,7 @@ const emit=defineEmits<{
 }>()
 const props=defineProps<{
   readonly?:boolean,
-  modelValue:ICommon_Wiki_Content_Line[],
+  modelValue:ICommon_Content_Line[],
   border?:boolean,
 	popMenuList?:{
 		type: any,
@@ -70,7 +70,7 @@ objEditor.onQuoteListFunc=(keyword, handleFunc) => {
 	emit("quoteList",keyword,handleFunc)
 }
 const lineList=objEditor.getLineList()
-let historyList:ICommon_Wiki_Content_Line[][]=[]
+let historyList:ICommon_Content_Line[][]=[]
 let recall=false
 watch(lineList,()=>{
   emit("update:modelValue",lineList)
@@ -108,21 +108,21 @@ watch(()=>props.modelValue,(value, oldValue, onCleanup)=>{
   deep:true,
   immediate:true
 })
-const onFocus=(item:ICommon_Wiki_Content_Line, event:MouseEvent)=>{
+const onFocus=(item:ICommon_Content_Line, event:MouseEvent)=>{
   objEditor.onFocus(item,event)
 }
 const onDbClick=(event:MouseEvent)=>{
   objEditor.onDbClick(event)
 }
 
-const onBlur=(item:ICommon_Wiki_Content_Line, event:FocusEvent)=>{
+const onBlur=(item:ICommon_Content_Line, event:FocusEvent)=>{
   objEditor.onBlur(item,event)
 }
 
-const onEnter=(line:ICommon_Wiki_Content_Line, index:number, event:MouseEvent)=>{
+const onEnter=(line:ICommon_Content_Line, index:number, event:MouseEvent)=>{
   objEditor.onEnter(line,index,event)
 }
-const onDelete=(index, item:ICommon_Wiki_Content_Line, event:MouseEvent)=>{
+const onDelete=(index, item:ICommon_Content_Line, event:MouseEvent)=>{
   objEditor.onDelete(index,item,event)
 }
 
@@ -200,7 +200,7 @@ const onClick=(event:MouseEvent)=>{
 	if(props.readonly) {
 		let ele=event.target as HTMLElement
 		let type=ele.getAttribute("type")
-		if(ele.tagName==="A" && type && Number(type)===ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON) {
+		if(ele.tagName==="A" && type && Number(type)===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
 			let value=ele.getAttribute("value")
 			userShortViewInfo.value={
 				id:value,
@@ -218,14 +218,14 @@ const onUserShotViewBlur=(event:FocusEvent)=>{
 	userShortViewInfo.value=null
 }
 
-const insertConfig=(itemList:ICommon_Wiki_Content_Line_Config[])=>{
+const insertConfig=(itemList:ICommon_Content_Line_Config[])=>{
 	if(itemList.length==0) {
 		return
 	}
-	let items:ICommon_Wiki_Content_Line_Config[]=[]
+	let items:ICommon_Content_Line_Config[]=[]
 	itemList.forEach(item=>{
 		items.push(item,{
-			type:ECommon_Wiki_Content_Line_Config_Type.TEXT,
+			type:ECommon_Content_Line_Config_Type.TEXT,
 			value:"&nbsp;"
 		})
 	})
@@ -235,7 +235,7 @@ const insertConfig=(itemList:ICommon_Wiki_Content_Line_Config[])=>{
 	let originItem=line.arr[selectStartIndexPath[1]]
 	let objFix
 	if(originItem) {
-		let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+		let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
 		objTemp.value=originItem.value.substring(selectStartIndexPath[2])
 		originItem.value=originItem.value.substring(0,selectStartIndexPath[2])
 		line.arr.splice(selectStartIndexPath[1]+1,0,...items,objTemp)

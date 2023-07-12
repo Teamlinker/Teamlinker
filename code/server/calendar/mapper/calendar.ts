@@ -92,6 +92,40 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
         ])
     }
 
+    async clearCalendarByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql=getMysqlInstance()
+        await Promise.all([
+            mysql.execute(generateDeleteInnerJoin2Sql(calendarModel,{
+                model:calendarEventModel,
+                expression:{
+                    calendar_id:{
+                        model:calendarModel,
+                        field: "id"
+                    }
+                }
+            },{
+                model:calendarEventGuestModel,
+                expression:{
+                    calendar_event_id:{
+                        model:calendarEventModel,
+                        field:"id"
+                    }
+                }
+            },{
+                organization_id:{
+                    model:calendarModel,
+                    value:organizationId
+                }
+            })),
+            mysql.execute(generateDeleteSql(calendarSettingModel,{
+                organization_id:organizationId
+            }))
+        ])
+    }
+
     async listCalendarEvent(organizationUserId:string,calendarId:string,start:number,end:number,isDefault:number):Promise<ICommon_Route_Res_Calendar_ListEvent_Item[]> {
         if(!calendarId) {
             throw Err.Calendar.calendarNotFound

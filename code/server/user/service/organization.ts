@@ -26,6 +26,7 @@ import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 import {emitServiceEvent} from "../../common/event/event";
 import {ECommon_Model_Meeting_Room_Type} from "../../../common/model/meeting_room";
 import CommonUtil from "../../common/util/common";
+import rpcWikiApi from "../../wiki/rpc/wiki"
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -75,9 +76,29 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete()
-        await organizationMapper.clearUser(this.getId());
-        await rpcCooperationApi.clearProject(this.getId())
-        await rpcCooperationApi.clearIssueType(this.getId())
+        await this.clearData()
+    }
+
+    async clearData() {
+        await Promise.all([
+            this.clearUser(),
+            this.clearTeam(),
+            rpcCooperationApi.clearProject(this.getId()),
+            rpcCooperationApi.clearIssueType(this.getId()),
+            rpcWikiApi.clearWiki(this.getId()),
+            rpcCalendarApi.clearCalendarByOrganizationId(this.getId()),
+            rpcMeetingApi.clearMeetingRoomByOrganizationId(this.getId())
+        ])
+    }
+
+    async clearUser() {
+        await organizationMapper.clearUser(this.getId())
+        await rpcAuthApi.clearRoleByItemId(this.getId())
+    }
+
+    async clearTeam() {
+        let ids=await organizationMapper.clearTeam(this.getId())
+        await rpcAuthApi.clearRoleByItemIds(ids)
     }
 
     static async init(adminIds:string[],userIds:string[]) {
@@ -209,8 +230,8 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         let objUser=await newUser.create();
         await Promise.all([
             rpcAuthApi.addRoleMember(this.getId(),roleId,ECommon_Model_Organization_Member_Type.USER,objUser.id ),
-            rpcCalendarApi.addCalendar(objUser.id,"default",ECommon_Calendar_Color.BLUE, 1),
-            rpcMeetingApi.addMeetingRoom(`${nickname}'s room`,ECommon_Model_Meeting_Room_Type.PRIVATE, objUser.id,CommonUtil.generateRandomNumbers(6),objUser.id)
+            rpcCalendarApi.addCalendar(objUser.id,"default",ECommon_Calendar_Color.BLUE, 1,this.getId()),
+            rpcMeetingApi.addMeetingRoom(this.getId(),`${nickname}'s room`,ECommon_Model_Meeting_Room_Type.PRIVATE, objUser.id,CommonUtil.generateRandomNumbers(6),objUser.id)
         ])
         emitServiceEvent("organizationUserAdd",this.getId(),objUser.id)
         return objUser

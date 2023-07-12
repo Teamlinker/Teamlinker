@@ -74,6 +74,14 @@ class RpcUserApi {
         })
         return arrUser;
     }
+
+    async organizationUser(organizationUserId:string) {
+        let obj=await OrganizationUserService.getItemById(organizationUserId)
+        if(!obj) {
+            throw Err.Organization.userNotFound
+        }
+        return obj.getItem()
+    }
     
     async getOrganizationUsersInfo?(organizationUserIds:string[]):Promise<{
         id:string,
@@ -270,6 +278,31 @@ class RpcUserApi {
             throw Err.Organization.userNotFound
         }
         let ret=await objOrganizationUser.getMeetingId()
+        return ret;
+    }
+
+    async organization(organizationId:string) {
+        let obj=await OrganizationService.getItemById(organizationId)
+        if(!obj) {
+            throw Err.Organization.organizationNotFound
+        }
+        return obj.getItem()
+    }
+
+    async team(teamId:string) {
+        let obj=await TeamService.getItemById(teamId)
+        if(!obj) {
+            throw Err.Team.teamNotFound
+        }
+        return obj.getItem()
+    }
+
+    async getTeamAllMember(teamId:string) {
+        let obj=await TeamService.getItemById(teamId)
+        if(!obj) {
+            throw Err.Team.teamNotFound
+        }
+        let ret=await obj.members(0,10000)
         return ret;
     }
 }

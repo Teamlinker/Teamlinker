@@ -18,7 +18,6 @@ import {Table_Issue_Type} from './../../../common/model/issue_type';
 import {Table_Issue_Type_Solution} from './../../../common/model/issue_type_solution';
 import {Table_Organization} from './../../../common/model/organization';
 import {Table_Organization_User} from './../../../common/model/organization_user';
-import {Table_Project_Issue_Description} from './../../../common/model/project_issue_description';
 import {Table_Project_Issue_Field_Value} from './../../../common/model/project_issue_field_value';
 import {Table_Project_Issue_Parent} from './../../../common/model/project_issue_parent';
 import {Table_Project_Issue_Process} from './../../../common/model/project_issue_process';
@@ -36,11 +35,18 @@ import {Table_User} from './../../../common/model/user';
 import {Table_Version, versionModel} from './../../../common/model/version';
 import {Table_Workflow_Action} from './../../../common/model/workflow_action';
 import {Table_Workflow_Node} from './../../../common/model/workflow_node';
-import {Table_Comment} from "../../../common/model/comment";
+import {Table_Content} from "../../../common/model/content";
 import {Table_File} from "../../../common/model/file";
 import {Table_Member_Tag} from "../../../common/model/member_tag";
 import {Table_Meeting_Room} from "../../../common/model/meeting_room";
 import {ECommon_Application_Mode} from "../../../common/types";
+import {Table_Notification} from "../../../common/model/notification";
+import {Table_Wiki} from "../../../common/model/wiki";
+import {Table_Wiki_Item} from "../../../common/model/wiki_item";
+import {Table_Calendar} from "../../../common/model/calendar";
+import {Table_Calendar_Event} from "../../../common/model/calendar_event";
+import {Table_Calendar_Setting} from "../../../common/model/calendar_setting";
+import {Table_Calendar_Event_Guest} from "../../../common/model/calendar_event_guest";
 
 export async function handleImageFields(data:object,organizationId?:string){
     let arrImage=<{
@@ -140,7 +146,6 @@ async function resetSystem(){
              mysql.execute(`delete from ${Table_Workflow_Node_Field_Type}`),
              mysql.execute(`delete from ${Table_Workflow_Node_Field_Type_Config}`),
              mysql.execute(`delete from ${Table_Project_Issue}`),
-             mysql.execute(`delete from ${Table_Project_Issue_Description}`),
              mysql.execute(`delete from ${Table_Project_Issue_Field_Value}`),
              mysql.execute(`delete from ${Table_Project_Issue_Parent}`),
              mysql.execute(`delete from ${Table_Project_Issue_Process}`),
@@ -150,12 +155,19 @@ async function resetSystem(){
              mysql.execute(`delete from ${Table_Project_Label_Issue}`),
              mysql.execute(`delete from ${Table_Organization}`),
              mysql.execute(`delete from ${Table_Organization_User}`),
-             mysql.execute(`delete from ${Table_Comment}`),
+             mysql.execute(`delete from ${Table_Content}`),
              mysql.execute(`delete from ${Table_File}`),
              mysql.execute(`delete from ${Table_Workflow_Node_Field_Type}`),
              mysql.execute(`delete from ${Table_Workflow_Node_Field_Type_Config}`),
              mysql.execute(`delete from ${Table_Member_Tag}`),
-             mysql.execute(`delete from ${Table_Meeting_Room}`)
+             mysql.execute(`delete from ${Table_Meeting_Room}`),
+            mysql.execute(`delete from ${Table_Notification}`),
+            mysql.execute(`delete from ${Table_Wiki}`),
+            mysql.execute(`delete from ${Table_Wiki_Item}`),
+            mysql.execute(`delete from ${Table_Calendar}`),
+            mysql.execute(`delete from ${Table_Calendar_Event}`),
+            mysql.execute(`delete from ${Table_Calendar_Setting}`),
+            mysql.execute(`delete from ${Table_Calendar_Event_Guest}`)
         ])
 
     } catch (err) {

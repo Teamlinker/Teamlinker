@@ -1,6 +1,6 @@
 import {ECommon_Services} from "../../../../common/types";
 import {RedisHashKey} from "./base";
-import StringUtil from "../../util/string";
+import StringUtil from "../../../../common/util/string";
 
 export namespace REDIS_MEETING {
     let ROOM_INFO_KEY=`${ECommon_Services.Meeting}:room:{0}:info`

@@ -20,6 +20,7 @@ import {
 import {ICommon_Model_User, Table_User, userModel} from './../../../common/model/user';
 import {ICommon_Model_Member_Tag, memberTagModel} from "../../../common/model/member_tag";
 import {memberTagMemberModel} from "../../../common/model/member_tag_member";
+import {teamModel} from "../../../common/model/team";
 
 class OrganizationMapper extends Mapper<typeof organizationModel> {
     constructor(){
@@ -72,6 +73,20 @@ class OrganizationMapper extends Mapper<typeof organizationModel> {
         await mysql.execute(generateDeleteSql(organizationUserModel,{
             organization_id:organizationId
         }))
+    }
+
+    async clearTeam(organizationId:string){
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(teamModel,["id"],{
+            organization_id:organizationId
+        }))
+        await mysql.execute(generateDeleteSql(teamModel,{
+            organization_id:organizationId
+        }))
+        return ret.map(item=>item.id)
     }
 
     async init(adminIds: string[], userIds: string[]) {

@@ -27,6 +27,10 @@ export class CalendarService extends Entity<typeof calendarModel,typeof calendar
         await calendarMapper.clearCalendar(organizationUserId)
     }
 
+    static async clearCalendarByOrganizationId(organizationId:string) {
+        await calendarMapper.clearCalendarByOrganizationId(organizationId)
+    }
+
     async listEvent(start:number,end:number) {
         let ret=await calendarMapper.listCalendarEvent(this.getItem().organization_user_id,this.getId(),start,end,this.getItem().reserved)
         return ret;
@@ -41,6 +45,11 @@ export class CalendarService extends Entity<typeof calendarModel,typeof calendar
 export class CalendarEventService extends Entity<typeof calendarEventModel,typeof calendarEventMapper> {
     constructor() {
         super(calendarEventMapper)
+    }
+
+    async listGuest() {
+        let arrGuest=await calendarEventMapper.listGuest(this.getId())
+        return arrGuest
     }
 
     async getInfo() {

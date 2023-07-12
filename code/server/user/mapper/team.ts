@@ -6,6 +6,7 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {Mapper} from '../../common/entity/mapper';
 import CommonUtil from '../../common/util/common';
 import {
+    convertCountSql,
     generateCreateSql,
     generateDeleteSql,
     generateLeftJoin3Sql,
@@ -297,6 +298,49 @@ class TeamMapper extends Mapper<typeof teamModel> {
         },0,size)
         let ret=await mysql.execute(sql)
         return ret
+    }
+
+    async getMemberCount(teamId:string) {
+        if(!teamId) {
+            throw Err.Team.teamNotFound
+        }
+        let mysql=getMysqlInstance();
+        let sql=generateQuerySql(teamUserModel,null,{
+            team_id:teamId
+        })
+        let countSql=convertCountSql(sql);
+        let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+        return count
+    }
+
+    async pickupMember(teamId:string) {
+        if(!teamId) {
+            throw Err.Team.teamNotFound
+        }
+        let mysql=getMysqlInstance();
+        let sql=generateLeftJoinSql({
+            model:teamUserModel,
+            columns:["organization_user_id"]
+        },{
+            model:organizationUserModel,
+            expression:{
+                id:{
+                    model:teamUserModel,
+                    field:"organization_user_id"
+                }
+            }
+        },{
+            team_id:{
+                model:teamUserModel,
+                value:teamId
+            }
+        },"and",{
+            type:"asc",
+            field:"nickname",
+            model:organizationUserModel
+        },0,1)
+        let obj=await mysql.executeOne(sql)
+        return obj?.organization_user_id
     }
 }
 

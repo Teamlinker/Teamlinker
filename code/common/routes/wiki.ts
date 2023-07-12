@@ -7,13 +7,14 @@ import {
     ICommon_Route_Res_Role_List,
     ICommon_Route_Res_Role_ListMember,
     ICommon_Route_Res_userWikiList,
-    ICommon_Route_Res_Wiki_Info, ICommon_Route_Res_Wiki_Item_Filter,
+    ICommon_Route_Res_Wiki_Info,
+    ICommon_Route_Res_Wiki_Item_Filter,
     ICommon_Route_Res_Wiki_Item_Info
 } from "./response";
 import {ICommon_Model_Wiki_Item} from "../model/wiki_item";
 import {ECommon_Model_Organization_Member_Type} from "../model/organization";
 import {ICommon_Model_Role} from "../model/role";
-import {ICommon_Model_Wiki_Item_Content} from "../model/wiki_item_content";
+import {ICommon_Model_Content} from "../model/content";
 
 const api= {
     baseUrl: "/wiki",
@@ -205,7 +206,7 @@ const api= {
             req: <{
                 wikiItemId:string
             }>{},
-            res: <ICommon_Model_Wiki_Item_Content>{},
+            res: <ICommon_Model_Content>{},
             permission: [Permission_Types.Wiki.READ]
         },
         listMember: {

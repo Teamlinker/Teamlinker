@@ -22,6 +22,7 @@ import {handleMeetingEvent} from "../../app/meeting/event";
 import {checkPermission} from "../../../common/util/helper";
 import {Permission_Types} from "../../../../../../common/permission/permission";
 import {iconFinder} from "../icon/finder";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
 export const useDesktopStore=defineStore("desktop",{
     state:()=>({
@@ -44,6 +45,13 @@ export const useDesktopStore=defineStore("desktop",{
         copyItemList:[] as string[]
     }),
     actions:{
+        async initNotificationSocket() {
+            SocketIOClient.getSocket(ECommon_Socket_Type.NOTIFICATION)?.close()
+            let objSocketNotification=SocketIOClient.create(ECommon_Socket_Type.NOTIFICATION)
+            objSocketNotification.getSocket().on("notification_new",notificationId => {
+                eventBus.emit(EClient_EVENTBUS_TYPE.REFRESH_NOTIFICATION_UNREAD)
+            })
+        },
         async getOrganizationList() {
             let ret=await apiOrganization.list()
             if(ret && ret.code==0) {

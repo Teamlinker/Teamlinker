@@ -66,13 +66,14 @@ import {checkPermission} from "../../../common/util/helper";
 import {Permission_Types} from "../../../../../../common/permission/permission";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {
-  getCurrentNavigator,
-  getCurrentNavigatorMeta,
-  getRootNavigatorRef
+	getCurrentNavigator,
+	getCurrentNavigatorMeta,
+	getRootNavigatorRef
 } from "../../../../teamOS/common/component/navigator/navigator";
 import NavigatorContainer from "../../../../teamOS/common/component/navigator/navigatorContainer.vue";
 import WikiItemContent from "./wikiItemContent.vue";
 import WikiSetting from "./setting/wikiSetting.vue";
+import {Message} from "@arco-design/web-vue";
 
 const props=defineProps<{
   wikiId:string
@@ -118,6 +119,8 @@ const getInfo=async ()=>{
         expandedKeys.value.splice(expandedKeys.value.indexOf(obj),1)
       }
     }
+  } else {
+		Message.error(res.msg)
   }
 }
 const onAccessId=(data:ICommon_Route_Res_Wiki_Info_Item[])=>{

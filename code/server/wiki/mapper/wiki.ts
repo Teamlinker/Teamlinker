@@ -5,22 +5,20 @@ import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
 import {
     convertCountSql,
-    generateBatchCreateOnUpdateSql,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
-    generateLeftJoin3Sql,
+    generateGroupLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
-    generateSnowId,
     generateUpdateSql
 } from "../../common/util/sql";
-import {wikiItemContentModel} from "../../../common/model/wiki_item_content";
 import {keys} from "../../../common/transform";
 import {roleMemberModel, Table_Role_Member} from "../../../common/model/role_member";
 import {Table_Team_User, teamUserModel} from "../../../common/model/team_user";
 import {memberTagMemberModel, Table_Member_Tag_Member} from "../../../common/model/member_tag_member";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import CommonUtil from "../../common/util/common";
+import {contentModel} from "../../../common/model/content";
 
 class WikiMapper extends Mapper<typeof wikiModel> {
     constructor() {
@@ -34,9 +32,9 @@ class WikiMapper extends Mapper<typeof wikiModel> {
         let sql=generateGroupLeftJoin2Sql({
             model:wikiItemModel
         },{
-            model:wikiItemContentModel,
+            model:contentModel,
             expression:{
-                wiki_item_id:{
+                ref_id:{
                     model:wikiItemModel,
                     field:"id"
                 }
@@ -55,13 +53,13 @@ class WikiMapper extends Mapper<typeof wikiModel> {
             }
         },["wiki_id"],{
             modified_by:{
-                model:wikiItemContentModel,
+                model:contentModel,
                 value:organizationUserId
             }
         },"and",null,"and",{
             isVirtualField:false,
             field:"modified_time",
-            model:wikiItemContentModel,
+            model:contentModel,
             type:"desc"
         },0,20)
         let ret=await mysql.execute(sql)
@@ -76,11 +74,14 @@ class WikiMapper extends Mapper<typeof wikiModel> {
         let calcCount=await mysql.executeOne<number>(`select count(1) from (select rm.item_id from ${Table_Role_Member} rm left join ${Table_Wiki} w on w.id=rm.item_id left join ${Table_Team_User} tu on tu.team_id=rm.member_id left join ${Table_Member_Tag_Member} mtm on mtm.member_tag_id=rm.member_id  where (rm.member_id='${organizationUserId}' or rm.member_type =${ECommon_Model_Organization_Member_Type.DEFAULT} or not isnull(tu.team_id) || not isnull(mtm.member_tag_id)) and not isnull(w.id)  ${type=="all"?``:type=="created"?`and w.created_by='${organizationUserId}'`:`and w.created_by<>'${organizationUserId}'`} ${keyword?` and w.name like '%${keyword}%'`:''} GROUP BY rm.item_id) as Z`)
         let count=Number(Object.values(calcCount)[0]);
         let totalPage=CommonUtil.pageTotal(count,size)
-        let sql=generateLeftJoin3Sql({
+        let sql=generateGroupLeftJoin3Sql({
             model:roleMemberModel,
         },{
             model:wikiModel,
-            columns:keys<ICommon_Model_Wiki>().map(item=>item.name),
+            columns:{
+                columns:keys<ICommon_Model_Wiki>().map(item=>item.name),
+                calcColumns:[]
+            },
             expression:{
                 id:{
                     model:roleMemberModel,
@@ -103,7 +104,7 @@ class WikiMapper extends Mapper<typeof wikiModel> {
                     field:"member_id"
                 }
             }
-        },{
+        },["item_id"],{
             "$or0":{
                 member_id:{
                     model:roleMemberModel,
@@ -150,10 +151,11 @@ class WikiMapper extends Mapper<typeof wikiModel> {
                     }
                 }
             })
-        },"and",{
+        },"and",null,"and",{
             field:"name",
             model:wikiModel,
             type:"asc",
+            isVirtualField:false
         },page*size,size)
         let arr=await mysql.execute(sql);
         return {
@@ -214,7 +216,7 @@ class WikiMapper extends Mapper<typeof wikiModel> {
         };
     }
 
-    async clearWiki(wikiId:string) {
+    async getWikiItemIds(wikiId:string) {
         if(!wikiId) {
             throw Err.Wiki.wikiNotFound
         }
@@ -222,20 +224,17 @@ class WikiMapper extends Mapper<typeof wikiModel> {
         let arr=await mysql.execute(generateQuerySql(wikiItemModel,["id"],{
             wiki_id:wikiId
         }))
-        if(arr.length>0) {
-            let ids=arr.map(item=>item.id)
-            await Promise.all([
-                mysql.execute(generateDeleteSql(wikiItemContentModel,{
-                    wiki_item_id:{
-                        exp:"in",
-                        value:ids
-                    }
-                })),
-                mysql.execute(generateDeleteSql(wikiItemModel,{
-                    wiki_id:wikiId
-                })),
-            ])
+        return arr.map(item=>item.id)
+    }
+
+    async clearWiki(wikiId:string) {
+        if(!wikiId) {
+            throw Err.Wiki.wikiNotFound
         }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(wikiItemModel,{
+            wiki_id:wikiId
+        }))
     }
 
     async info(wikiId:string,keyword?:string) {
@@ -307,9 +306,6 @@ class WikiItemMapper extends Mapper<typeof wikiItemModel> {
         }
         let mysql=getMysqlInstance()
         await Promise.all([
-            mysql.execute(generateDeleteSql(wikiItemContentModel,{
-                wiki_item_id:wikiItemId
-            })),
             mysql.execute(generateUpdateSql(wikiItemModel,{
                 weight:{
                     exp:"-",
@@ -422,33 +418,6 @@ class WikiItemMapper extends Mapper<typeof wikiItemModel> {
                 id:wikiItemId
             }))
         }
-    }
-
-    async saveContent(wikiItemId:string,content:string,modified_by:string) {
-        if(!wikiItemId) {
-            throw Err.Wiki.wikiItemNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateBatchCreateOnUpdateSql(wikiItemContentModel, [{
-            id:await generateSnowId(),
-            wiki_item_id:wikiItemId,
-            content,
-            modified_by
-        }], {
-            content,
-            modified_by
-        }));
-    }
-
-    async getContent(wikiItemId:string) {
-        if(!wikiItemId) {
-            throw Err.Wiki.wikiItemNotFound
-        }
-        let mysql=getMysqlInstance()
-        let ret=await mysql.executeOne(generateQuerySql(wikiItemContentModel,null,{
-            wiki_item_id:wikiItemId
-        }));
-        return ret;
     }
 
     async filterWikiItem(organizationId:string,wikiId:string,name:string,page:number,size:number) {

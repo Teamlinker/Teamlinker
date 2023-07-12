@@ -7,7 +7,8 @@ import {ECommon_Meeting_Room_Permission} from "../model/meeting_room";
 export enum ECommon_Socket_Type {
     CALENDAR = "calendar",
     IM = "im",
-    MEETING="meeting"
+    MEETING="meeting",
+    NOTIFICATION="notification"
 }
 
 
@@ -22,7 +23,9 @@ export interface ICommon_Socket_ServerToClientEvents {
     im_organization_user_status_change:(organizationUserId:string, status:ECommon_User_Online_Status)=>void
     //meeting
     meeting_presenter_change:(organizationUserId:string,permission:ECommon_Meeting_Room_Permission)=>void
-    meeting_invite:(fromOrganizationUserId:string,fromOrganizationUserName:string,roomId:string,password:string)=>void
+    meeting_invite:(fromOrganizationUserId:string,fromOrganizationUserName:string,roomId:string,password:string)=>void,
+    //notification
+    notification_new:(notificationId:string)=>void
 }
 
 export interface ICommon_Socket_ClientToServerEvents {

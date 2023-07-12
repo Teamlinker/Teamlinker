@@ -11,7 +11,6 @@ import {generateSnowId} from '../../common/util/sql';
 import {ProjectService} from "../service/project";
 import {ICommon_Model_Project_Issue, projectIssueModel} from './../../../common/model/project_issue';
 import {ICommon_Model_Project_Issue_Field_Value} from './../../../common/model/project_issue_field_value';
-import {commentMapper} from './../mapper/comment';
 import {projectIssueMapper} from './../mapper/issue';
 import {WorkflowNodeFieldTypeService} from './field';
 import {ProjectModuleService} from './module';
@@ -19,6 +18,8 @@ import {WorkflowActionService, WorkflowNodeService} from './workflow';
 import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
 import {ProjectReleaseService} from "./release";
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import rpcContentApi from "../../content/rpc/content"
+import {ECommon_Model_Content_Type} from "../../../common/model/content";
 
 export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof projectIssueMapper> {
     constructor(){
@@ -238,19 +239,19 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         return arr2;
     }
 
-    async editDescription(description:string) {
-        await projectIssueMapper.editDescription(this.getId(),description);
+    async editDescription(description:string,organizationUserId:string) {
+        await rpcContentApi.save(this.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION,organizationUserId,description )
     }
 
     async getDescription() {
-        let ret=await projectIssueMapper.getDescription(this.getId())
-        return ret;
+        let ret=await rpcContentApi.get(this.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION)
+        return ret?.content;
     }
 
     override async delete(eventPulish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete()
         await projectIssueMapper.clear(this.getId())
-        await commentMapper.clear(this.getId());
+        await rpcContentApi.clearByRefId(this.getId())
     }
 
     async getBasicInfo() {
@@ -293,6 +294,10 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     override async copy(deletedFields?: (keyof ICommon_Model_Project_Issue)[]): Promise<this> {
         let obj=await super.copy(["unique_id"])
         await projectIssueMapper.copyIssue(this.getId(),obj.getId())
+        let objDescription=await rpcContentApi.get(this.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION)
+        if(objDescription) {
+            await rpcContentApi.save(obj.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION, objDescription.created_by,objDescription.content)
+        }
         return obj;
     }
 
@@ -390,7 +395,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         let ret=await projectIssueMapper.getIdsByProjectIds(projectIds);
         if(ret.length>0) {
             await projectIssueMapper.clearMany(ret);
-            await commentMapper.clearByProjectIssueIds(ret)
+            await rpcContentApi.clearByRefIds(projectIds)
         }
         
     }
@@ -408,5 +413,9 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         let ret=await ProjectReleaseService.issueBindReleaseList(this.getId(),projectReleaseIds)
         return ret;
     }
-    
+
+    async getOrganizationUserIdsByIssueExtraField() {
+        let ret=await projectIssueMapper.getOrganizationUserIdsByIssueExtraField(this.getId())
+        return ret;
+    }
 }

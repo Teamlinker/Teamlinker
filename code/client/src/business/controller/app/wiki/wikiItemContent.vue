@@ -56,11 +56,11 @@ import {
 	DCSType
 } from "../../../common/request/request";
 import {
-	ECommon_Wiki_Content_Line_Config_Type,
-	ICommon_Model_Wiki_Item_Content,
-	ICommon_Wiki_Content_Line,
-	ICommon_Wiki_Content_Line_Config
-} from "../../../../../../common/model/wiki_item_content";
+	ECommon_Content_Line_Config_Type,
+	ICommon_Content_Line,
+	ICommon_Content_Line_Config,
+	ICommon_Model_Content
+} from "../../../../../../common/model/content";
 import UserAvatar from "../../../common/component/userAvatar.vue";
 import RichEditor from "../../../common/component/richEditor/richEditor.vue";
 import {checkPermission} from "../../../common/util/helper";
@@ -100,46 +100,46 @@ const loading=ref(false)
 const title=ref(props.name)
 const path=ref(props.path)
 const isWrite=ref(false)
-const info=ref<DCSType<ICommon_Model_Wiki_Item_Content>>()
-const content=ref<ICommon_Wiki_Content_Line[]>([])
+const info=ref<DCSType<ICommon_Model_Content>>()
+const content=ref<ICommon_Content_Line[]>([])
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
 const organizationId=SessionStorage.get("organizationId")
 const popMenuList=ref([
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.IMAGE,
+		type: ECommon_Content_Line_Config_Type.IMAGE,
 		title: "Image"
 	},
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.FILE,
+		type: ECommon_Content_Line_Config_Type.FILE,
 		title: "File"
 	},
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.PROJECT,
+		type: ECommon_Content_Line_Config_Type.PROJECT,
 		title: "Project"
 	},
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE,
+		type: ECommon_Content_Line_Config_Type.PROJECT_ISSUE,
 		title: "Project Issue"
 	},
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE,
+		type: ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
 		title: "Project Release"
 	},
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.WIKI,
+		type: ECommon_Content_Line_Config_Type.WIKI,
 		title: "Wiki Space"
 	},
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM,
+		type: ECommon_Content_Line_Config_Type.WIKI_ITEM,
 		title: "Wiki Item"
 	},
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT,
+		type: ECommon_Content_Line_Config_Type.CALENDAR_EVENT,
 		title: "Calendar Event"
 	},
 	{
-		type: ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM,
+		type: ECommon_Content_Line_Config_Type.MEETING_ROOM,
 		title: "Meeting Room"
 	},
 ])
@@ -214,11 +214,11 @@ const onUploadFile=async (file, handleFunc) => {
 	}
 }
 
-const onPopMenuClick=async (type:ECommon_Wiki_Content_Line_Config_Type,handleFunc:(item:ICommon_Wiki_Content_Line_Config)=>void)=>{
-	if(type===ECommon_Wiki_Content_Line_Config_Type.IMAGE || type===ECommon_Wiki_Content_Line_Config_Type.FILE) {
+const onPopMenuClick=async (type:ECommon_Content_Line_Config_Type,handleFunc:(item:ICommon_Content_Line_Config)=>void)=>{
+	if(type===ECommon_Content_Line_Config_Type.IMAGE || type===ECommon_Content_Line_Config_Type.FILE) {
 		let input = document.createElement('input');
 		input.type = 'file';
-		if(type===ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+		if(type===ECommon_Content_Line_Config_Type.IMAGE) {
 			input.accept=".png,.jpg,.gif,.jpeg,.bmp,.webp"
 		}
 		input.onchange=async (ev:InputEvent) => {
@@ -232,15 +232,15 @@ const onPopMenuClick=async (type:ECommon_Wiki_Content_Line_Config_Type,handleFun
 				if(res?.code==0) {
 					let fileId=res.data.id
 					let path=res.data.path
-					let objImageItem:ICommon_Wiki_Content_Line_Config=type===ECommon_Wiki_Content_Line_Config_Type.IMAGE?{
+					let objImageItem:ICommon_Content_Line_Config=type===ECommon_Content_Line_Config_Type.IMAGE?{
 						value:fileId,
 						link:path,
-						type:ECommon_Wiki_Content_Line_Config_Type.IMAGE,
+						type:ECommon_Content_Line_Config_Type.IMAGE,
 						width:200
 					}:{
 						value:fileId,
 						link:path,
-						type:ECommon_Wiki_Content_Line_Config_Type.FILE,
+						type:ECommon_Content_Line_Config_Type.FILE,
 						label:files[0].name
 					}
 					handleFunc(objImageItem)
@@ -248,74 +248,74 @@ const onPopMenuClick=async (type:ECommon_Wiki_Content_Line_Config_Type,handleFun
 			}
 		}
 		input.click();
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.PROJECT) {
+	} else if(type===ECommon_Content_Line_Config_Type.PROJECT) {
 		let ret:any=await Dialog.open(root.value,appContext,"Project",markRaw(ProjectFilter))
 		if(ret) {
-			let item:ICommon_Wiki_Content_Line_Config={
-				type:ECommon_Wiki_Content_Line_Config_Type.PROJECT,
+			let item:ICommon_Content_Line_Config={
+				type:ECommon_Content_Line_Config_Type.PROJECT,
 				value:ret.id,
 				label:ret.name
 			}
 			handleFunc(item)
 		}
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE) {
+	} else if(type===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
 		let ret:any=await Dialog.open(root.value,appContext,"Project Issue",markRaw(ProjectIssueFilter))
 		if(ret) {
-			let item:ICommon_Wiki_Content_Line_Config={
-				type:ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE,
+			let item:ICommon_Content_Line_Config={
+				type:ECommon_Content_Line_Config_Type.PROJECT_ISSUE,
 				value:ret.id,
 				label:ret.name,
 				link:ret.project.id
 			}
 			handleFunc(item)
 		}
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE) {
+	} else if(type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
 		let ret:any=await Dialog.open(root.value,appContext,"Project Release",markRaw(ProjectReleaseFilter))
 		if(ret) {
-			let item:ICommon_Wiki_Content_Line_Config={
-				type:ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE,
+			let item:ICommon_Content_Line_Config={
+				type:ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
 				value:ret.id,
 				label:ret.name,
 				link:ret.project.id
 			}
 			handleFunc(item)
 		}
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.WIKI) {
+	} else if(type===ECommon_Content_Line_Config_Type.WIKI) {
 		let ret:any=await Dialog.open(root.value,appContext,"Wiki Space",markRaw(WikiFilter))
 		if(ret) {
-			let item:ICommon_Wiki_Content_Line_Config={
-				type:ECommon_Wiki_Content_Line_Config_Type.WIKI,
+			let item:ICommon_Content_Line_Config={
+				type:ECommon_Content_Line_Config_Type.WIKI,
 				value:ret.id,
 				label:ret.name,
 			}
 			handleFunc(item)
 		}
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM) {
+	} else if(type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
 		let ret:any=await Dialog.open(root.value,appContext,"Wiki Item",markRaw(WikiItemFilter))
 		if(ret) {
-			let item:ICommon_Wiki_Content_Line_Config={
-				type:ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM,
+			let item:ICommon_Content_Line_Config={
+				type:ECommon_Content_Line_Config_Type.WIKI_ITEM,
 				value:ret.id,
 				label:ret.name,
 				link:ret.wiki.id
 			}
 			handleFunc(item)
 		}
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT) {
+	} else if(type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
 		let ret:any=await Dialog.open(root.value,appContext,"Calendar Event",markRaw(CalendarEventFilter))
 		if(ret) {
-			let item:ICommon_Wiki_Content_Line_Config={
-				type:ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT,
+			let item:ICommon_Content_Line_Config={
+				type:ECommon_Content_Line_Config_Type.CALENDAR_EVENT,
 				value:ret.id,
 				label:ret.name,
 			}
 			handleFunc(item)
 		}
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM) {
+	} else if(type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
 		let ret:any=await Dialog.open(root.value,appContext,"Meeting Room",markRaw(MeetingRoomFilter))
 		if(ret) {
-			let item:ICommon_Wiki_Content_Line_Config={
-				type:ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM,
+			let item:ICommon_Content_Line_Config={
+				type:ECommon_Content_Line_Config_Type.MEETING_ROOM,
 				value:ret.id,
 				label:ret.name,
 				link:ret.password
@@ -325,20 +325,20 @@ const onPopMenuClick=async (type:ECommon_Wiki_Content_Line_Config_Type,handleFun
 	}
 }
 
-const onCustomAnchorClick=(type:ECommon_Wiki_Content_Line_Config_Type,value:string,link:string,label:string)=>{
-	if(type===ECommon_Wiki_Content_Line_Config_Type.PROJECT) {
+const onCustomAnchorClick=(type:ECommon_Content_Line_Config_Type,value:string,link:string,label:string)=>{
+	if(type===ECommon_Content_Line_Config_Type.PROJECT) {
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_PROFILE,value)
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE) {
+	} else if(type===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,link,value)
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE) {
+	} else if(type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,link,value)
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.WIKI) {
+	} else if(type===ECommon_Content_Line_Config_Type.WIKI) {
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_WIKI_PROFILE,value)
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM) {
+	} else if(type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_WIKI_ITEM,link,value)
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT) {
+	} else if(type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,value)
-	} else if(type===ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM) {
+	} else if(type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,value,link)
 	}
 }
@@ -374,10 +374,10 @@ const onDrop=async (data?:DropParam)=>{
 					return apiFinder.info({
 						finderItemId:obj.value
 					}).then(res=>{
-						let ret:ICommon_Wiki_Content_Line_Config
+						let ret:ICommon_Content_Line_Config
 						if(res?.code==0) {
 							ret={
-								type:ECommon_Wiki_Content_Line_Config_Type.FILE,
+								type:ECommon_Content_Line_Config_Type.FILE,
 								value:res.data.file.id,
 								link:res.data.file.path,
 								label:obj.element.title
@@ -391,10 +391,10 @@ const onDrop=async (data?:DropParam)=>{
 							return apiProject.basic({
 								projectId:obj.shortcutRefId
 							}).then(res=>{
-								let ret:ICommon_Wiki_Content_Line_Config
+								let ret:ICommon_Content_Line_Config
 								if(res?.code==0) {
 									ret={
-										type:ECommon_Wiki_Content_Line_Config_Type.PROJECT,
+										type:ECommon_Content_Line_Config_Type.PROJECT,
 										value:obj.shortcutRefId,
 										label:obj.element.title
 									}
@@ -407,10 +407,10 @@ const onDrop=async (data?:DropParam)=>{
 							return apiIssue.basicInfo({
 								projectIssueId:obj.shortcutRefId
 							}).then(res=>{
-								let ret:ICommon_Wiki_Content_Line_Config
+								let ret:ICommon_Content_Line_Config
 								if(res?.code==0) {
 									ret={
-										type:ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE,
+										type:ECommon_Content_Line_Config_Type.PROJECT_ISSUE,
 										value:obj.shortcutRefId,
 										label:obj.element.title,
 										link:res.data.project.id
@@ -424,10 +424,10 @@ const onDrop=async (data?:DropParam)=>{
 							return apiRelease.info({
 								projectReleaseId:obj.shortcutRefId
 							}).then(res=>{
-								let ret:ICommon_Wiki_Content_Line_Config
+								let ret:ICommon_Content_Line_Config
 								if(res?.code==0) {
 									ret={
-										type:ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE,
+										type:ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
 										value:obj.shortcutRefId,
 										label:obj.element.title,
 										link:res.data.project.id
@@ -441,10 +441,10 @@ const onDrop=async (data?:DropParam)=>{
 							return apiWiki.wikiInfo({
 								wikiId:obj.shortcutRefId
 							}).then(res=>{
-								let ret:ICommon_Wiki_Content_Line_Config
+								let ret:ICommon_Content_Line_Config
 								if(res?.code==0) {
 									ret={
-										type:ECommon_Wiki_Content_Line_Config_Type.WIKI,
+										type:ECommon_Content_Line_Config_Type.WIKI,
 										value:obj.shortcutRefId,
 										label:obj.element.title,
 									}
@@ -457,10 +457,10 @@ const onDrop=async (data?:DropParam)=>{
 							return apiWiki.wikiItemInfo({
 								wikiItemId:obj.shortcutRefId
 							}).then(res=>{
-								let ret:ICommon_Wiki_Content_Line_Config
+								let ret:ICommon_Content_Line_Config
 								if(res?.code==0) {
 									ret={
-										type:ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM,
+										type:ECommon_Content_Line_Config_Type.WIKI_ITEM,
 										value:obj.shortcutRefId,
 										label:obj.element.title,
 										link:res.data.wiki_id
@@ -474,10 +474,10 @@ const onDrop=async (data?:DropParam)=>{
 							return apiCalendar.getCalendarEvent({
 								calendarEventId:obj.shortcutRefId
 							}).then(res=>{
-								let ret:ICommon_Wiki_Content_Line_Config
+								let ret:ICommon_Content_Line_Config
 								if(res?.code==0) {
 									ret={
-										type:ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT,
+										type:ECommon_Content_Line_Config_Type.CALENDAR_EVENT,
 										value:obj.shortcutRefId,
 										label:obj.element.title
 									}
@@ -490,10 +490,10 @@ const onDrop=async (data?:DropParam)=>{
 							return apiMeeting.getRoom({
 								meetingRoomId:obj.shortcutRefId
 							}).then(res=>{
-								let ret:ICommon_Wiki_Content_Line_Config
+								let ret:ICommon_Content_Line_Config
 								if(res?.code==0) {
 									ret={
-										type:ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM,
+										type:ECommon_Content_Line_Config_Type.MEETING_ROOM,
 										value:obj.shortcutRefId,
 										label:obj.element.title
 									}
@@ -520,10 +520,10 @@ const onDrop=async (data?:DropParam)=>{
 				return apiFile.upload({
 					file:file as any
 				}).then(res=>{
-					let ret:ICommon_Wiki_Content_Line_Config
+					let ret:ICommon_Content_Line_Config
 					if(res?.code==0) {
 						ret={
-							type:ECommon_Wiki_Content_Line_Config_Type.FILE,
+							type:ECommon_Content_Line_Config_Type.FILE,
 							value:res.data.id,
 							link:res.data.path,
 							label:file.name

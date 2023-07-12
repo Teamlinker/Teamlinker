@@ -8,6 +8,8 @@ import {ECommon_User_Type} from "../../../common/model/user";
 import {Err} from "../../../common/status/error";
 import rpcAuthApi from "../../auth/rpc/auth";
 import {ECommon_Model_Role_Type} from "../../../common/model/role";
+import rpcContentApi from "../../content/rpc/content"
+import {ECommon_Model_Content_Type} from "../../../common/model/content";
 
 @DComponent
 @DHttpController(wikiApi)
@@ -205,7 +207,7 @@ class WikiController {
         if(!obj) {
             throw Err.Wiki.wikiItemNotFound
         }
-        let ret=await obj.getContent()
+        let ret=await rpcContentApi.get(wikiItemId,ECommon_Model_Content_Type.WIKI_ITEM)
         return ret
     }
     @DHttpApi(wikiApi.routes.listMember)

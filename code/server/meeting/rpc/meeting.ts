@@ -3,7 +3,8 @@ import {MeetingRoomService} from "../service/room";
 import {Err} from "../../../common/status/error";
 
 class RpcMeetingApi {
-    async addMeetingRoom(name:string,
+    async addMeetingRoom(organizationId:string,
+                         name:string,
                          type:ECommon_Model_Meeting_Room_Type,
                          related_id:string,
                          password:string,
@@ -13,6 +14,7 @@ class RpcMeetingApi {
                          endTime?:number,) {
         let obj=new MeetingRoomService()
         obj.assignItem({
+            organization_id:organizationId,
             name,type,related_id,password,
             description,created_by,
             ...(startTime && {
@@ -40,6 +42,10 @@ class RpcMeetingApi {
 
     async clearMeetingRoom(organizationUserId:string) {
         await MeetingRoomService.clear(organizationUserId)
+    }
+
+    async clearMeetingRoomByOrganizationId(organizationId:string) {
+        await MeetingRoomService.clearByOrganizationId(organizationId)
     }
 
     async meetingRoom(meetingRoomId:string) {

@@ -4,6 +4,7 @@ import {createAdapter} from "@socket.io/redis-adapter";
 import {getRedisInstance} from "../cache/redis";
 import {Emitter} from "@socket.io/redis-emitter";
 import {
+    ECommon_Socket_Type,
     ICommon_Socket_ClientToServerEvents,
     ICommon_Socket_Data,
     ICommon_Socket_InterServerEvents,
@@ -59,13 +60,18 @@ export class SocketIO {
                 next(new Error("userId not match"))
                 return
             }
-            let objOrganization=await userRpcApi.checkOrganizationInfo(objCheck.userId)
-            if(!objOrganization) {
-                next(new Error("not in organization"))
+            if(io.adapter.nsp.name!=="/"+ECommon_Socket_Type.NOTIFICATION) {
+                let objOrganization=await userRpcApi.checkOrganizationInfo(objCheck.userId)
+                if(!objOrganization) {
+                    next(new Error("not in organization"))
+                } else {
+                    socket.data.organizationUserId=objOrganization.organizationUserId
+                    socket.data.userId=objHandshake.userId
+                    socket.data.organizationId=objOrganization.organizationId
+                    next()
+                }
             } else {
-                socket.data.organizationUserId=objOrganization.organizationUserId
                 socket.data.userId=objHandshake.userId
-                socket.data.organizationId=objOrganization.organizationId
                 next()
             }
         })
@@ -78,8 +84,12 @@ export class SocketIO {
                     }
                 }
             }
-            socket.join(socket.data.organizationUserId)
-            socket.join(socket.data.organizationId)
+            if(io.adapter.nsp.name==="/"+ECommon_Socket_Type.NOTIFICATION) {
+                socket.join(socket.data.userId)
+            } else {
+                socket.join(socket.data.organizationUserId)
+                socket.join(socket.data.organizationId)
+            }
             if(callback) {
                 callback(socket)
             }

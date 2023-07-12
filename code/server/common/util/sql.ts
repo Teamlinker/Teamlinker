@@ -3,7 +3,7 @@ import * as FlakeId from 'flake-idgen';
 import {BaseModel} from '../../../common/model/base';
 import * as moment from "moment";
 import CommonUtil from "./common";
-import Mysql from "../db/mysql";
+import Mysql, {getMysqlInstance} from "../db/mysql";
 
 const uid = new FlakeId(); 
 
@@ -13,7 +13,7 @@ type EXPR={
     }
 }
 type EXPRVALUEEXP ={
-    value?:string|number|boolean|string[]|[number,number]|string|Date|{
+    value?:string|number|boolean|string[]|number[]|[number,number]|string|Date|{
         model:BaseModel,
         field:string
     },
@@ -1798,5 +1798,19 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
         value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
+    }
+}
+
+export async function generateCommonListData<T extends {value:string,type:any}>(sql:T,page:number,size:number) {
+    let mysql=getMysqlInstance()
+    let countSql=convertCountSql(sql);
+    let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+    let totalPage=CommonUtil.pageTotal(count,size)
+    let ret=await mysql.execute(sql)
+    return {
+        count:count,
+        totalPage:totalPage,
+        page:page,
+        data:ret as T["type"][]
     }
 }

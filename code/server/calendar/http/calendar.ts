@@ -7,6 +7,8 @@ import {CalendarEventService, CalendarService, CalendarSettingService} from "../
 import {Err} from "../../../common/status/error";
 import {ECommon_Calendar_Color, ECommon_Calendar_Type} from "../../../common/model/calendar";
 import * as moment from "moment";
+import rpcNotificationApi from "../../notification/rpc/notification"
+import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 
 @DComponent
 @DHttpController(calendarApi)
@@ -24,7 +26,8 @@ class CalendarController {
             name,
             color,
             organization_user_id:user.organizationInfo.organizationUserId,
-            type:ECommon_Calendar_Type.NATIVE
+            type:ECommon_Calendar_Type.NATIVE,
+            organization_id:user.organizationInfo.organizationId
         })
         let ret=await obj.create()
         return ret;
@@ -87,7 +90,7 @@ class CalendarController {
                            @DHttpReqParam("recurring_day") recurring_day:number,
                            @DHttpReqParam("reminder_minutes") reminder_minutes:number,
                            @DHttpReqParam("location") location:string,
-                           @DHttpReqParam("guestList") guestList:string[]):Promise<typeof calendarApi.routes.addCalendarEvent.res> {
+                           @DHttpReqParam("guestList") guestList:string[],@DHttpUser user:IUserSession):Promise<typeof calendarApi.routes.addCalendarEvent.res> {
         let obj=new CalendarEventService()
         obj.assignItem({
             calendar_id:calendarId,
@@ -104,6 +107,11 @@ class CalendarController {
         await obj.create()
         await obj.handleGuestList(guestList)
         let ret=await obj.getInfo()
+        if(guestList?.length>0) {
+            guestList.forEach(item=>{
+                rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.CALENDAR_EVENT_INVITATION, ret.id,item,user.organizationInfo.organizationUserId)
+            })
+        }
         return ret;
     }
 
@@ -118,7 +126,7 @@ class CalendarController {
                             @DHttpReqParam("recurring_day") recurring_day:number,
                             @DHttpReqParam("reminder_minutes") reminder_minutes:number,
                             @DHttpReqParam("location") location:string,
-                            @DHttpReqParam("guestList") guestList:string[]):Promise<typeof calendarApi.routes.editCalendarEvent.res> {
+                            @DHttpReqParam("guestList") guestList:string[],@DHttpUser user:IUserSession):Promise<typeof calendarApi.routes.editCalendarEvent.res> {
         let obj=await CalendarEventService.getItemById(calendarEventId)
         if(!obj) {
             throw Err.Calendar.calendarEventNotFound
@@ -155,8 +163,25 @@ class CalendarController {
             reminder_minutes
         })
         await obj.update()
+        let originalGuestList=(await obj.listGuest()).map(item=>item.organization_user_id)
         await obj.handleGuestList(guestList)
         let ret=await obj.getInfo()
+        if(guestList?.length>0) {
+            originalGuestList.forEach(item=>{
+                if(!guestList.includes(item)) {
+                    rpcNotificationApi.removeNotification(ECommon_Model_Notification_Type.CALENDAR_EVENT_INVITATION,calendarEventId,item)
+                }
+            })
+            guestList.forEach(item=>{
+                if(!originalGuestList.includes(item)) {
+                    rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.CALENDAR_EVENT_INVITATION,calendarEventId,item,user.organizationInfo.organizationUserId)
+                }
+            })
+        } else {
+            originalGuestList.forEach(item=>{
+                rpcNotificationApi.removeNotification(ECommon_Model_Notification_Type.CALENDAR_EVENT_INVITATION,calendarEventId,item)
+            })
+        }
         return ret;
     }
 

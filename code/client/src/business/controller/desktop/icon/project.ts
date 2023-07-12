@@ -50,7 +50,7 @@ iconProject.addEventListener("dbClick",item => {
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_PROFILE,projectId => {
-    const win=new Window("team",ETeamOS_Window_Type.TAB, "project",true,[
+    const win=new Window("project",ETeamOS_Window_Type.TAB, "project",true,[
         {
             id:v4(),
             meta:{
@@ -68,11 +68,11 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_PROFILE,projectId => {
                 }
             }
         }
-    ],"team");
+    ],"project");
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,(projectId,projectIssueId) => {
-    const win=new Window("team",ETeamOS_Window_Type.TAB, "project",true,[
+    const win=new Window("project",ETeamOS_Window_Type.TAB, "project",true,[
         {
             id:v4(),
             meta:{
@@ -93,11 +93,11 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,(projectId,projectI
                 }
             }
         }
-    ],"team");
+    ],"project");
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,(projectId,projectReleaseId) => {
-    const win=new Window("team",ETeamOS_Window_Type.TAB, "project",true,[
+    const win=new Window("project",ETeamOS_Window_Type.TAB, "project",true,[
         {
             id:v4(),
             meta:{
@@ -118,6 +118,6 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,(projectId,projec
                 }
             }
         }
-    ],"team");
+    ],"project");
     windowManager.open(win);
 })

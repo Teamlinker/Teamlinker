@@ -1,16 +1,16 @@
 import {nextTick, toRaw} from "vue";
 import {
-    ECommon_Wiki_Content_Line_Config_Type,
-    ICommon_Wiki_Content_Line,
-    ICommon_Wiki_Content_Line_Config
-} from "../../../../../../common/model/wiki_item_content";
+    ECommon_Content_Line_Config_Type,
+    ICommon_Content_Line,
+    ICommon_Content_Line_Config
+} from "../../../../../../common/model/content";
 
 export class RichEditorHandle {
-    static handle(line:ICommon_Wiki_Content_Line){
+    static handle(line:ICommon_Content_Line){
         let str=""
         for(let obj of line.arr) {
             let ele:HTMLElement
-            if(obj.type==ECommon_Wiki_Content_Line_Config_Type.TEXT) {
+            if(obj.type==ECommon_Content_Line_Config_Type.TEXT) {
                 if(obj.style && Object.keys(obj.style).length>0) {
                     ele=document.createElement("span")
                     ele.innerText=obj.value
@@ -23,7 +23,7 @@ export class RichEditorHandle {
                     str+=obj.value
                     continue;
                 }
-            } else if(obj.type==ECommon_Wiki_Content_Line_Config_Type.LINK) {
+            } else if(obj.type==ECommon_Content_Line_Config_Type.LINK) {
                 ele=document.createElement("a")
                 ele.setAttribute("href",obj.link)
                 ele.setAttribute("target","_blank")
@@ -34,13 +34,13 @@ export class RichEditorHandle {
                         ele.style[key]=obj.style[key]
                     }
                 }
-            } else if(obj.type==ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+            } else if(obj.type==ECommon_Content_Line_Config_Type.IMAGE) {
                 ele=document.createElement("img")
                 ele.setAttribute("src",obj.link)
                 ele.setAttribute("width",String(obj.width))
                 ele.setAttribute("height","auto")
                 ele.setAttribute("fileId",obj.value)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.FILE) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.FILE) {
                 ele=document.createElement("a")
                 ele.setAttribute("href",obj.link)
                 ele.setAttribute("download",obj.label)
@@ -55,10 +55,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="gray"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.PROJECT) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.PROJECT) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.PROJECT))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.PROJECT))
                 ele.setAttribute("value",obj.value)
                 ele.style.margin="0 2px 0 2px"
                 ele.style.padding="0 5px 0 5px"
@@ -77,10 +77,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="green"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.PROJECT_ISSUE))
                 ele.setAttribute("value",obj.value)
                 ele.setAttribute("link",obj.link)
                 ele.style.margin="0 2px 0 2px"
@@ -100,10 +100,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="green"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.PROJECT_RELEASE))
                 ele.setAttribute("value",obj.value)
                 ele.setAttribute("link",obj.link)
                 ele.style.margin="0 2px 0 2px"
@@ -123,10 +123,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="green"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.WIKI) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.WIKI) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.WIKI))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.WIKI))
                 ele.setAttribute("value",obj.value)
                 ele.style.margin="0 2px 0 2px"
                 ele.style.padding="0 5px 0 5px"
@@ -145,10 +145,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="rgb(0,120,212)"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.WIKI_ITEM))
                 ele.setAttribute("value",obj.value)
                 ele.setAttribute("link",obj.link)
                 ele.style.margin="0 2px 0 2px"
@@ -168,10 +168,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="rgb(0,120,212)"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.CALENDAR_EVENT))
                 ele.setAttribute("value",obj.value)
                 ele.style.margin="0 2px 0 2px"
                 ele.style.padding="0 5px 0 5px"
@@ -190,10 +190,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="orange"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.MEETING_ROOM))
                 ele.setAttribute("value",obj.value)
                 ele.setAttribute("link",obj.link)
                 ele.style.margin="0 2px 0 2px"
@@ -213,10 +213,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="red"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.QUOTE_PERSON))
                 ele.setAttribute("value",obj.value)
                 ele.style.margin="0 2px 0 2px"
                 ele.style.padding="0 5px 0 5px"
@@ -235,31 +235,31 @@ export class RichEditorHandle {
         }
         return str;
     }
-    static handleInnerHtml(item:ICommon_Wiki_Content_Line, root:HTMLElement, relocate:boolean=false){
+    static handleInnerHtml(item:ICommon_Content_Line, root:HTMLElement, relocate:boolean=false){
         item.selectEndIndexPath=[]
         item.selectStartIndexPath=[]
         item.arr=[]
         root.childNodes.forEach(node=>{
             if(node.nodeType==Node.TEXT_NODE) {
-                let objTemp:ICommon_Wiki_Content_Line_Config={
+                let objTemp:ICommon_Content_Line_Config={
                     value:node.nodeValue,
                     style:{},
-                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
+                    type:ECommon_Content_Line_Config_Type.TEXT
                 }
                 item.arr.push(objTemp)
             } else if(node.nodeType==Node.ELEMENT_NODE) {
-                let obj=<ICommon_Wiki_Content_Line_Config>{
+                let obj=<ICommon_Content_Line_Config>{
                     value:"",
                     style:{}
                 }
                 let ele=node as HTMLElement
                 if(ele.tagName=="SPAN") {
-                    obj.type=ECommon_Wiki_Content_Line_Config_Type.TEXT
+                    obj.type=ECommon_Content_Line_Config_Type.TEXT
                     obj.value=ele.innerText??""
                 } else if(ele.tagName=="A") {
                     let fileId=ele.getAttribute("fileId")
                     if(fileId) {
-                        obj.type=ECommon_Wiki_Content_Line_Config_Type.FILE
+                        obj.type=ECommon_Content_Line_Config_Type.FILE
                         obj.link=ele.getAttribute("href")
                         obj.value=fileId
                         obj.label=ele.innerText??""
@@ -267,63 +267,63 @@ export class RichEditorHandle {
                         let type=ele.getAttribute("type")
                         if(type) {
                             let configType=Number(type)
-                            if(configType===ECommon_Wiki_Content_Line_Config_Type.PROJECT) {
+                            if(configType===ECommon_Content_Line_Config_Type.PROJECT) {
                                 let projectId=ele.getAttribute("value")
-                                obj.type=ECommon_Wiki_Content_Line_Config_Type.PROJECT
+                                obj.type=ECommon_Content_Line_Config_Type.PROJECT
                                 obj.value=projectId
                                 obj.label=ele.innerText??""
-                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE) {
+                            } else if(configType===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
                                 let projectId=ele.getAttribute("link")
                                 let projectIssueId=ele.getAttribute("value")
-                                obj.type=ECommon_Wiki_Content_Line_Config_Type.PROJECT_ISSUE
+                                obj.type=ECommon_Content_Line_Config_Type.PROJECT_ISSUE
                                 obj.value=projectIssueId
                                 obj.link=projectId
                                 obj.label=ele.innerText??""
-                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE) {
+                            } else if(configType===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
                                 let projectId=ele.getAttribute("link")
                                 let projectReleaseId=ele.getAttribute("value")
-                                obj.type=ECommon_Wiki_Content_Line_Config_Type.PROJECT_RELEASE
+                                obj.type=ECommon_Content_Line_Config_Type.PROJECT_RELEASE
                                 obj.value=projectReleaseId
                                 obj.link=projectId
                                 obj.label=ele.innerText??""
-                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.WIKI) {
+                            } else if(configType===ECommon_Content_Line_Config_Type.WIKI) {
                                 let wikiId=ele.getAttribute("value")
-                                obj.type=ECommon_Wiki_Content_Line_Config_Type.WIKI
+                                obj.type=ECommon_Content_Line_Config_Type.WIKI
                                 obj.value=wikiId
                                 obj.label=ele.innerText??""
-                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM) {
+                            } else if(configType===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
                                 let wikiItemId=ele.getAttribute("value")
                                 let wikiId=ele.getAttribute("link")
-                                obj.type=ECommon_Wiki_Content_Line_Config_Type.WIKI_ITEM
+                                obj.type=ECommon_Content_Line_Config_Type.WIKI_ITEM
                                 obj.value=wikiItemId
                                 obj.link=wikiId
                                 obj.label=ele.innerText??""
-                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT) {
+                            } else if(configType===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
                                 let calendarEventId=ele.getAttribute("value")
-                                obj.type=ECommon_Wiki_Content_Line_Config_Type.CALENDAR_EVENT
+                                obj.type=ECommon_Content_Line_Config_Type.CALENDAR_EVENT
                                 obj.value=calendarEventId
                                 obj.label=ele.innerText??""
-                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM) {
+                            } else if(configType===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
                                 let meetingRoomId=ele.getAttribute("value")
                                 let password=ele.getAttribute("link")
-                                obj.type=ECommon_Wiki_Content_Line_Config_Type.MEETING_ROOM
+                                obj.type=ECommon_Content_Line_Config_Type.MEETING_ROOM
                                 obj.value=meetingRoomId
                                 obj.link=password
                                 obj.label=ele.innerText??""
-                            } else if(configType===ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON) {
+                            } else if(configType===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
                                 let organizationUserId=ele.getAttribute("value")
-                                obj.type=ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON
+                                obj.type=ECommon_Content_Line_Config_Type.QUOTE_PERSON
                                 obj.value=organizationUserId
                                 obj.label=ele.innerText.replaceAll("@","")??""
                             }
                         } else {
-                            obj.type=ECommon_Wiki_Content_Line_Config_Type.LINK
+                            obj.type=ECommon_Content_Line_Config_Type.LINK
                             obj.link=ele.getAttribute("href")
                             obj.value=ele.innerText??""
                         }
                     }
                 } else if(ele.tagName=="IMG") {
-                    obj.type=ECommon_Wiki_Content_Line_Config_Type.IMAGE
+                    obj.type=ECommon_Content_Line_Config_Type.IMAGE
                     obj.link=ele.getAttribute("src")
                     obj.width=parseInt(ele.getAttribute("width"))
                     obj.value=ele.getAttribute("fileId")
@@ -445,11 +445,11 @@ export class RichEditorHandle {
             })
         }
     }
-    static fixLine(line:ICommon_Wiki_Content_Line, objItem?:{startItem?:ICommon_Wiki_Content_Line_Config,endItem?:ICommon_Wiki_Content_Line_Config,startIndex?:number,endIndex?:number}){
+    static fixLine(line:ICommon_Content_Line, objItem?:{startItem?:ICommon_Content_Line_Config,endItem?:ICommon_Content_Line_Config,startIndex?:number,endIndex?:number}){
         for(let i=1;i<line.arr.length;i++) {
             let obj=line.arr[i]
             let preObj=line.arr[i-1]
-            if((obj.style && preObj.style && JSON.stringify(obj.style)===JSON.stringify(preObj.style) && obj.type==preObj.type && obj.type==ECommon_Wiki_Content_Line_Config_Type.TEXT) || (!obj.value && obj.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE)) {
+            if((obj.style && preObj.style && JSON.stringify(obj.style)===JSON.stringify(preObj.style) && obj.type==preObj.type && obj.type==ECommon_Content_Line_Config_Type.TEXT) || (!obj.value && obj.type!=ECommon_Content_Line_Config_Type.IMAGE)) {
                 let len=preObj.value.length
                 preObj.value+=obj.value
                 line.arr.splice(i,1)
@@ -468,7 +468,7 @@ export class RichEditorHandle {
         }
         for(let i=0;i<line.arr.length;i++) {
             let obj=line.arr[i]
-            if(!obj.value && obj.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+            if(!obj.value && obj.type!=ECommon_Content_Line_Config_Type.IMAGE) {
                 line.arr.splice(i,1)
                 i--
             }

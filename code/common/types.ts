@@ -7,7 +7,9 @@ export enum ECommon_Services {
     Wiki="wiki",
     Calendar="calendar",
     Meeting="meeting",
-    Finder="finder"
+    Finder="finder",
+    Notification="notification",
+    Comment="comment"
 }
 
 export enum ECommon_User_Online_Status {

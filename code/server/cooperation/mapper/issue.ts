@@ -20,9 +20,11 @@ import {
     generateSnowId,
     generateUpdateSql
 } from '../../common/util/sql';
-import {workflowNodeFieldTypeModel} from '../../../common/model/workflow_node_field_type';
+import {
+    ECommon_Model_Workflow_Node_Field_Type_Label_Type,
+    workflowNodeFieldTypeModel
+} from '../../../common/model/workflow_node_field_type';
 import {ICommon_Model_Issue_Type, issueTypeModel} from './../../../common/model/issue_type';
-import {projectIssueDescriptionModel} from './../../../common/model/project_issue_description';
 import {
     ICommon_Model_Project_Issue_Field_Value,
     projectIssueFieldValueModel
@@ -137,52 +139,12 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         return ret;
     }
 
-    async editDescription(projectIssueId:string,description:string) {
-        if(!projectIssueId) {
-            throw Err.Project.ProjectIssue.projectIssueNotFound
-        }
-        let mysql=getMysqlInstance()
-        let ret=await mysql.executeOne(generateQuerySql(projectIssueDescriptionModel,["id"],{
-            project_issue_id:projectIssueId
-        }))
-        if(ret) {
-            await mysql.execute(generateUpdateSql(projectIssueDescriptionModel,{
-                content:description??""
-            },{
-                project_issue_id:projectIssueId
-            }))
-        } else {
-            await mysql.execute(generateCreateSql(projectIssueDescriptionModel,{
-                id:await generateSnowId(),
-                project_issue_id:projectIssueId,
-                content:description
-            }))
-        }
-    }
-
-    async getDescription(projectIssueId:string) {
-        if(!projectIssueId) {
-            throw Err.Project.ProjectIssue.projectIssueNotFound
-        }
-        let mysql=getMysqlInstance()
-        let ret=await mysql.executeOne(generateQuerySql(projectIssueDescriptionModel,[],{
-            project_issue_id:projectIssueId
-        }))
-        if(!ret) {
-            return null
-        }
-        return ret.content
-    }
-
     async clear(projectIssueId:string) {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         }
         let mysql=getMysqlInstance()
         await Promise.all([
-            mysql.execute(generateDeleteSql(projectIssueDescriptionModel,{
-                project_issue_id:projectIssueId
-            })),
             mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
                 project_issue_id:projectIssueId
             })),
@@ -273,16 +235,6 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         }
         let mysql=getMysqlInstance()
-        let description=await mysql.executeOne(generateQuerySql(projectIssueDescriptionModel,[],{
-            project_issue_id:projectIssueId
-        }))
-        if(description) {
-            await mysql.execute(generateCreateSql(projectIssueDescriptionModel,{
-                id:await generateSnowId(),
-                project_issue_id:newProjectIssueId,
-                content:description.content
-            }))
-        }
         let fieldValues=await mysql.execute(generateQuerySql(projectIssueFieldValueModel,[],{
             project_issue_id:projectIssueId
         }))
@@ -769,12 +721,6 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 value:projectIssueIds
             }
         }))
-        await mysql.execute(generateDeleteSql(projectIssueDescriptionModel,{
-            project_issue_id:{
-                exp:"in",
-                value:projectIssueIds
-            }
-        }))
         await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
             project_issue_id:{
                 exp:"in",
@@ -832,6 +778,39 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
             workflow_node_field_type_id:workflowFieldTypeId
         }))
+    }
+    async getOrganizationUserIdsByIssueExtraField(projectIssueId:string) {
+        if(!projectIssueId) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:projectIssueFieldValueModel,
+            columns:["ref_values"],
+        },{
+            model:workflowNodeFieldTypeModel,
+            expression:{
+                id:{
+                    model:projectIssueFieldValueModel,
+                    field:"workflow_node_field_type_id"
+                }
+            }
+        },{
+            project_issue_id:{
+                model:projectIssueFieldValueModel,
+                value:projectIssueId
+            },
+            label_type:{
+                model:projectIssueFieldValueModel,
+                value:ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER
+            }
+        })
+        let arr=await mysql.execute(sql)
+        let ret:string[]=[]
+        for(let obj of arr) {
+            ret.push(...obj.ref_values)
+        }
+        return ret;
     }
 
 }

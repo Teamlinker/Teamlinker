@@ -108,7 +108,7 @@ class PermissionWiki extends PermissionBase {
         await this.unlock()
         let ret=isAdmin?Permission_Types.Wiki.ADMIN.value:Array.from(permissionsSet).reduce((previousValue, currentValue, currentIndex, array)=>{
             return previousValue | currentValue;
-        })
+        },0)
         let obj=REDIS_AUTH.Permission.Wiki.calPermission(wikiId,organizationUserId)
         await obj.set(ret);
         return ret;

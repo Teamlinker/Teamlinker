@@ -1,4 +1,4 @@
-import {ICommon_Model_Comment} from "../model/comment";
+import {ICommon_Model_Content} from "../model/content";
 import {ICommon_Model_Workflow_Action} from "../model/workflow_action";
 import {Permission_Types} from "../permission/permission";
 import {ECommon_Services} from "../types";
@@ -152,7 +152,7 @@ const api={
             req:<{
                 projectIssueId :string
             }>{},
-            res:<ICommon_Model_Comment[]>{},
+            res:<ICommon_Model_Content[]>{},
             permission:[Permission_Types.Project.READ]
         },
         commentCreate:{
@@ -162,24 +162,24 @@ const api={
                 projectIssueId :string,
                 content:string
             }>{},
-            res:<ICommon_Model_Comment>{},
+            res:<ICommon_Model_Content>{},
             permission:[Permission_Types.Project.EDIT]
         },
         commentEdit:{
             method:ECommon_HttpApi_Method.PUT,
             path:"/item/comment",
             req:<{
-                commentId :string,
+                contentId :string,
                 content:string
             }>{},
-            res:<ICommon_Model_Comment>{},
+            res:<ICommon_Model_Content>{},
             permission:[Permission_Types.Project.EDIT]
         },
         commentRemove:{
             method:ECommon_HttpApi_Method.DELETE,
             path:"/item/comment",
             req:<{
-                commentId :string
+                contentId :string
             }>{},
             res:{},
             permission:[Permission_Types.Project.EDIT]

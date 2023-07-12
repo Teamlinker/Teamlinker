@@ -2,11 +2,11 @@ import {AppContext, nextTick, reactive, Ref} from "vue";
 import {RichEditorHandle} from "./handle";
 import {RichEditorFunc} from "./func";
 import {
-    ECommon_Wiki_Content_Line_Config_Type,
-    ICommon_Wiki_Content_Line,
-    ICommon_Wiki_Content_Line_Config,
-    ICommon_Wiki_Content_Line_Style
-} from "../../../../../../common/model/wiki_item_content";
+    ECommon_Content_Line_Config_Type,
+    ICommon_Content_Line,
+    ICommon_Content_Line_Config,
+    ICommon_Content_Line_Style
+} from "../../../../../../common/model/content";
 import {renderComponent} from "../../../../teamOS/common/util/component";
 import PopMenu from "./popMenu.vue";
 import Quote from "./quote.vue";
@@ -16,7 +16,7 @@ export class RichEditorEvent {
     private isMouseDown=false
     private root:Ref<HTMLElement>
     private elementList:Ref<HTMLElement[]>
-    private lineList=reactive<ICommon_Wiki_Content_Line[]>([])
+    private lineList=reactive<ICommon_Content_Line[]>([])
     private imageHelperElement:HTMLElement
     private resizeImage:HTMLElement
     private resizeObserver:ResizeObserver
@@ -35,8 +35,8 @@ export class RichEditorEvent {
         title: string
     }[]=[]
     onUploadFileFunc:(file:File,handleFunc:(fileId:string,path:string)=>void)=>void
-    onPopMenuClickFunc:(type:any,handleFunc:(item:ICommon_Wiki_Content_Line_Config)=>void)=>void
-    onCustomMenuClickFunc:(type:ECommon_Wiki_Content_Line_Config_Type,value:string,link:string,label:string)=>void
+    onPopMenuClickFunc:(type:any,handleFunc:(item:ICommon_Content_Line_Config)=>void)=>void
+    onCustomMenuClickFunc:(type:ECommon_Content_Line_Config_Type,value:string,link:string,label:string)=>void
     onQuoteListFunc:(keyword:string,handleFunc:(list:{
         value:string,
         label:string,
@@ -68,7 +68,7 @@ export class RichEditorEvent {
     getLineList(){
         return this.lineList
     }
-    setLineList(data:ICommon_Wiki_Content_Line[]) {
+    setLineList(data:ICommon_Content_Line[]) {
         this.lineList.splice(0,this.lineList.length,...data)
     }
     getSelectElementList() {
@@ -77,13 +77,13 @@ export class RichEditorEvent {
     getRoot() {
         return this.root
     }
-    addLine(value:string,style?:ICommon_Wiki_Content_Line_Style){
-        let line:ICommon_Wiki_Content_Line={
+    addLine(value:string,style?:ICommon_Content_Line_Style){
+        let line:ICommon_Content_Line={
             arr:[
                 {
                     value:value,
                     ...style,
-                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
+                    type:ECommon_Content_Line_Config_Type.TEXT
                 }
             ],
             selectEndIndexPath:[],
@@ -91,7 +91,7 @@ export class RichEditorEvent {
         }
         this.lineList.push(line)
     }
-    onFocus(item:ICommon_Wiki_Content_Line, event:MouseEvent){
+    onFocus(item:ICommon_Content_Line, event:MouseEvent){
         if(this.selectElementList.length==0) {
             this.selectElementList=[event.currentTarget as HTMLElement]
         }
@@ -100,7 +100,7 @@ export class RichEditorEvent {
         this.selectElementList=[event.currentTarget as HTMLElement]
     }
 
-    onBlur(item:ICommon_Wiki_Content_Line, event:FocusEvent){
+    onBlur(item:ICommon_Content_Line, event:FocusEvent){
         RichEditorHandle.handleInnerHtml(item,event.currentTarget as HTMLElement,true)
         if(this.selectionMenuElement) {
             if(!this.selectionMenuElement.contains(event.relatedTarget as HTMLElement) && !this.selectionLinkElement.contains(event.relatedTarget as HTMLElement)) {
@@ -114,17 +114,17 @@ export class RichEditorEvent {
         }
     }
 
-    onEnter(line:ICommon_Wiki_Content_Line, index:number, event:MouseEvent){
+    onEnter(line:ICommon_Content_Line, index:number, event:MouseEvent){
         event.preventDefault()
         event.stopPropagation()
         RichEditorHandle.handleInnerHtml(line,event.currentTarget as HTMLElement)
         let obj=line.arr[line.selectStartIndexPath[0]]
-        let newLine:ICommon_Wiki_Content_Line={
+        let newLine:ICommon_Content_Line={
             arr:line.arr.slice(line.selectStartIndexPath[0]+1),
             selectStartIndexPath:[],
             selectEndIndexPath:[]
         }
-        if(!obj || obj.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || obj.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+        if(!obj || obj.type===ECommon_Content_Line_Config_Type.TEXT || obj.type===ECommon_Content_Line_Config_Type.LINK) {
             let value=obj?.value.substring(line.selectStartIndexPath[1])
             if(value) {
                 newLine.arr.unshift({
@@ -132,14 +132,14 @@ export class RichEditorEvent {
                     style:{
                         ...obj.style
                     },
-                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
+                    type:ECommon_Content_Line_Config_Type.TEXT
                 })
                 obj.value=obj.value.substring(0,line.selectStartIndexPath[1])
             } else {
                 newLine.arr.unshift({
                     value:"",
                     style:{},
-                    type:ECommon_Wiki_Content_Line_Config_Type.TEXT
+                    type:ECommon_Content_Line_Config_Type.TEXT
                 })
             }
         }
@@ -156,7 +156,7 @@ export class RichEditorEvent {
             selection.addRange(range)
         })
     }
-    onDelete(index, item:ICommon_Wiki_Content_Line, event:MouseEvent){
+    onDelete(index, item:ICommon_Content_Line, event:MouseEvent){
         let ele=event.currentTarget as HTMLElement
         let selection=window.getSelection()
         let range=selection.getRangeAt(0)
@@ -204,7 +204,7 @@ export class RichEditorEvent {
                 RichEditorHandle.handleInnerHtml(item,ele)
                 let preLine=this.lineList[index-1]
                 item.arr=item.arr.filter(obj=>{
-                    return obj.value.length>0 || obj.type===ECommon_Wiki_Content_Line_Config_Type.IMAGE
+                    return obj.value.length>0 || obj.type===ECommon_Content_Line_Config_Type.IMAGE
                 })
                 let path=[preLine.arr.length-1>=0?preLine.arr.length-1:0,preLine.arr.length>0?preLine.arr[preLine.arr.length-1].value.length:0]
                 preLine.arr=preLine.arr.concat(item.arr)
@@ -735,7 +735,7 @@ export class RichEditorEvent {
                 let remove=this.linkEditElement.querySelector("[name='remove']") as HTMLElement
                 remove.onclick=()=>{
                     let item=this.lineList[lineIndex].arr[index]
-                    item.type=ECommon_Wiki_Content_Line_Config_Type.TEXT
+                    item.type=ECommon_Content_Line_Config_Type.TEXT
                     delete item.link
                     RichEditorHandle.fixLine(this.lineList[lineIndex])
                     this.linkEditElement.style.display="none"
@@ -772,17 +772,17 @@ export class RichEditorEvent {
                 RichEditorHandle.handleInnerHtml(selectLine,container,true)
                 this.onUploadFileFunc?.(file,(fileId, path) => {
                     let originItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
-                    let objItem:ICommon_Wiki_Content_Line_Config={
+                    let objItem:ICommon_Content_Line_Config={
                         value:fileId,
                         link:path,
-                        type:ECommon_Wiki_Content_Line_Config_Type.IMAGE
+                        type:ECommon_Content_Line_Config_Type.IMAGE
                     }
                     let index:number
                     if(originItem) {
-                        let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+                        let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
                         objTemp.value=objTemp.value.substring(selectLine.selectStartIndexPath[1])
                         let appendItemList=[...selectLine.arr.slice(selectLine.selectStartIndexPath[0]+1)]
-                        if(objTemp.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+                        if(objTemp.type!=ECommon_Content_Line_Config_Type.IMAGE) {
                             appendItemList.unshift(objTemp)
                         }
                         originItem.value=originItem.value.substring(0,selectLine.selectStartIndexPath[1])
@@ -823,9 +823,9 @@ export class RichEditorEvent {
             let selectLine=this.lineList[Array.from(this.root.value.children).indexOf(container)]
             RichEditorHandle.handleInnerHtml(selectLine,container,true)
             if(isFromTeamLinker) {
-                let appendItemList:ICommon_Wiki_Content_Line_Config[],indexPath:number[]=[];
+                let appendItemList:ICommon_Content_Line_Config[],indexPath:number[]=[];
                 for(let i=0;i<divList.length;i++) {
-                    let line:ICommon_Wiki_Content_Line={
+                    let line:ICommon_Content_Line={
                         arr:[],
                         selectEndIndexPath:[],
                         selectStartIndexPath:[]
@@ -836,7 +836,7 @@ export class RichEditorEvent {
                             let text="",isImg=false
                             selectLine.arr.forEach(item=>{
                                 text+=item.value
-                                if(item.type==ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+                                if(item.type==ECommon_Content_Line_Config_Type.IMAGE) {
                                     isImg=true
                                 }
                             })
@@ -844,10 +844,10 @@ export class RichEditorEvent {
                                 this.lineList.splice(this.lineList.indexOf(selectLine),1,line)
                             } else {
                                 let originItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
-                                let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+                                let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
                                 objTemp.value=objTemp.value.substring(selectLine.selectStartIndexPath[1])
                                 appendItemList=[...selectLine.arr.slice(selectLine.selectStartIndexPath[0]+1)]
-                                if(objTemp.type!=ECommon_Wiki_Content_Line_Config_Type.IMAGE) {
+                                if(objTemp.type!=ECommon_Content_Line_Config_Type.IMAGE) {
                                     appendItemList.unshift(objTemp)
                                 }
                                 originItem.value=originItem.value.substring(0,selectLine.selectStartIndexPath[1])
@@ -915,7 +915,7 @@ export class RichEditorEvent {
                 } else {
                     selectLine.arr.push({
                         value:ele.innerText,
-                        type:ECommon_Wiki_Content_Line_Config_Type.TEXT,
+                        type:ECommon_Content_Line_Config_Type.TEXT,
                         style:{}
                     })
                     nextTick(()=>{
@@ -1158,7 +1158,7 @@ export class RichEditorEvent {
                         let startItem=line.arr[line.selectStartIndexPath[0]]
                         let endItem=line.arr[line.selectEndIndexPath[0]]
                         if(startItem===endItem) {
-                            if(startItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                            if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
                                 let start=startItem.value.substring(0,line.selectStartIndexPath[1])
                                 let end=startItem.value.substring(line.selectEndIndexPath[1])
                                 startItem.value=start+end
@@ -1170,7 +1170,7 @@ export class RichEditorEvent {
                         } else {
                             for(let obj of list[0].data) {
                                 if(obj===startItem) {
-                                    if(startItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                    if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
                                         startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
                                     } else {
                                         line.arr.splice(line.arr.indexOf(startItem),1)
@@ -1178,7 +1178,7 @@ export class RichEditorEvent {
                                     objStartInfo.startItem=startItem
                                     objStartInfo.startIndex=line.selectStartIndexPath[1]
                                 } else if(obj===endItem) {
-                                    if(endItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                    if(endItem.type===ECommon_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Content_Line_Config_Type.LINK) {
                                         endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
                                     } else {
                                         line.arr.splice(line.arr.indexOf(endItem),1)
@@ -1190,7 +1190,7 @@ export class RichEditorEvent {
                         }
                         RichEditorHandle.fixLine(line,objStartInfo)
                     } else {
-                        let startLine:ICommon_Wiki_Content_Line
+                        let startLine:ICommon_Content_Line
                         for(let i=0;i<list.length;i++) {
                             let obj=list[i]
                             let line=obj.line
@@ -1200,7 +1200,7 @@ export class RichEditorEvent {
                                     for(let i=0;i<obj.data.length;i++) {
                                         let startItem=obj.data[i]
                                         if(i==0) {
-                                            if(startItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                            if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
                                                 startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
                                             } else {
                                                 line.arr.splice(line.arr.indexOf(startItem),1)
@@ -1213,7 +1213,7 @@ export class RichEditorEvent {
                                     for(let i=0;i<obj.data.length;i++) {
                                         let endItem=obj.data[i]
                                         if(i==obj.data.length-1) {
-                                            if(endItem.type===ECommon_Wiki_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Wiki_Content_Line_Config_Type.LINK) {
+                                            if(endItem.type===ECommon_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Content_Line_Config_Type.LINK) {
                                                 endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
                                             } else {
                                                 line.arr.splice(line.arr.indexOf(endItem),1)
@@ -1330,10 +1330,10 @@ export class RichEditorEvent {
         })
     }
     getSelectionItemList():{
-        line:ICommon_Wiki_Content_Line,
-        data:ICommon_Wiki_Content_Line_Config[]
+        line:ICommon_Content_Line,
+        data:ICommon_Content_Line_Config[]
     }[] {
-        let selectLineList:ICommon_Wiki_Content_Line[]=[]
+        let selectLineList:ICommon_Content_Line[]=[]
         this.selectElementList.forEach((ele)=>{
             selectLineList.push(this.lineList[Array.from(this.root.value.children).indexOf(ele)])
         })
@@ -1379,8 +1379,8 @@ export class RichEditorEvent {
         let endLine=selectLineList[selectLineList.length-1]
         endLine.selectEndIndexPath=selectEndIndexPath
         let itemList:{
-            line:ICommon_Wiki_Content_Line,
-            data:ICommon_Wiki_Content_Line_Config[]
+            line:ICommon_Content_Line,
+            data:ICommon_Content_Line_Config[]
         }[]=[]
         if(selectLineList.length==1) {
             RichEditorHandle.handleInnerHtml(selectLineList[0],startContainer)
@@ -1426,9 +1426,9 @@ export class RichEditorEvent {
     }
     getCurrentInfo():{
         element:HTMLElement,
-        line:ICommon_Wiki_Content_Line,
+        line:ICommon_Content_Line,
         lineIndex:number,
-        item:ICommon_Wiki_Content_Line_Config,
+        item:ICommon_Content_Line_Config,
         itemIndex
     }{
         let selection=window.getSelection()
@@ -1440,7 +1440,7 @@ export class RichEditorEvent {
         }
         let lineIndex=Array.from(this.root.value.children).indexOf(element)
         let line=this.lineList[lineIndex]
-        let item:ICommon_Wiki_Content_Line_Config,itemIndex:number
+        let item:ICommon_Content_Line_Config,itemIndex:number
         if(container!=element) {
             itemIndex=Array.from(element.childNodes).indexOf(container as HTMLElement)
             item=line.arr[itemIndex]

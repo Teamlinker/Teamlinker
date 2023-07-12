@@ -210,7 +210,7 @@ import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getCurrentNavigator, getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 import ProjectIssueBind from "./projectIssueBind.vue";
 import {Message} from "@arco-design/web-vue";
-import {ICommon_Model_Comment} from "../../../../../../../common/model/comment";
+import {ICommon_Model_Content} from "../../../../../../../common/model/content";
 import {useDesktopStore} from "../../../desktop/store/desktop";
 import {checkPermission} from "../../../../common/util/helper";
 import {Permission_Types} from "../../../../../../../common/permission/permission";
@@ -239,7 +239,7 @@ const parentIssue=ref<DCSType<ICommon_Model_Project_Issue>>();
 const relatedIssueList=ref<DCSType<ICommon_Model_Project_Issue>[]>([])
 const childIssueList=ref<DCSType<ICommon_Model_Project_Issue>[]>([])
 const commentList=ref<DCSType<{
-  value:ICommon_Model_Comment,
+  value:ICommon_Model_Content,
   isEdit:boolean,
   editContent:string
 }[]>>([])
@@ -253,6 +253,8 @@ const getInfo=async ()=>{
   })
   if(res?.code==0) {
     info.value=res.data
+  } else {
+		Message.error(res.msg)
   }
 }
 watch([key,info],()=>{
@@ -402,7 +404,7 @@ const onCommentAdd=async ()=>{
   }
 }
 const onEditComment=async (item:DCSType<{
-  value:ICommon_Model_Comment,
+  value:ICommon_Model_Content,
   isEdit:boolean,
   editContent:string
 }>)=>{
@@ -411,7 +413,7 @@ const onEditComment=async (item:DCSType<{
     return
   }
   let res=await apiIssue.commentEdit({
-    commentId:item.value.id,
+    contentId:item.value.id,
     content:item.editContent
   })
   if(res?.code==0) {
@@ -424,7 +426,7 @@ const onRemoveComment=async (index:number)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this comment?")
   if(ret) {
     let res=await apiIssue.commentRemove({
-      commentId:item.value.id
+      contentId:item.value.id
     })
     if(res?.code==0) {
       commentList.value.splice(index,1)

@@ -1,5 +1,5 @@
 import {cacheRedisType} from "../../types/cache";
-import StringUtil from "../../util/string";
+import StringUtil from "../../../../common/util/string";
 import {
     BaseRedisHashCache,
     BaseRedisSetCache,
@@ -10,7 +10,7 @@ import {
 } from './base';
 import {ICommon_Model_Role, roleModel} from "../../../../common/model/role";
 import {generateLeftJoin2Sql, generateLeftJoinSql, generateQuerySql} from "../../util/sql";
-import {commentModel} from "../../../../common/model/comment";
+import {contentModel} from "../../../../common/model/content";
 import {projectIssueModel} from "../../../../common/model/project_issue";
 import {getMysqlInstance} from "../../db/mysql";
 import {projectLabelModel} from "../../../../common/model/project_label";
@@ -49,12 +49,12 @@ export namespace REDIS_AUTH {
                         value=await this.objRedis.get()
                     } else {
                         let sql=generateLeftJoin2Sql({
-                            model:commentModel
+                            model:contentModel
                         },{
                             model:organizationUserModel,
                             expression:{
                                 id:{
-                                    model:commentModel,
+                                    model:contentModel,
                                     field:"created_by"
                                 }
                             }
@@ -69,7 +69,7 @@ export namespace REDIS_AUTH {
                             }
                         },{
                             id:{
-                                model:commentModel,
+                                model:contentModel,
                                 value:this.commentId
                             }
                         })
@@ -78,7 +78,7 @@ export namespace REDIS_AUTH {
                             value=ret.id
                             await this.objRedis.set(value)
                         } else {
-                            throw Err.Comment.commentNotFound
+                            throw Err.Content.contentNotFound
                         }
                     }
                     return value;
@@ -196,19 +196,19 @@ export namespace REDIS_AUTH {
                         value=await this.objRedis.get()
                     } else {
                         let sql=generateLeftJoinSql({
-                            model:commentModel
+                            model:contentModel
                         },{
                             model:projectIssueModel,
                             columns:["project_id"],
                             expression:{
                                 id:{
-                                    model:commentModel,
-                                    field:"type_id"
+                                    model:contentModel,
+                                    field:"ref_id"
                                 }
                             }
                         },{
                             id:{
-                                model:commentModel,
+                                model:contentModel,
                                 value:this.commentId
                             }
                         })
@@ -217,7 +217,7 @@ export namespace REDIS_AUTH {
                             value=ret.project_id
                             await this.objRedis.set(value)
                         } else {
-                            throw Err.Comment.commentNotFound
+                            throw Err.Content.contentNotFound
                         }
                     }
                     return value;

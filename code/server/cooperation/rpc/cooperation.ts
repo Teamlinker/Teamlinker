@@ -4,6 +4,8 @@ import {ProjectService} from "../service/project";
 import {IssueTypeSolutionService} from './../service/issueType';
 import {ProjectIssueService} from "../service/issue";
 import {ProjectReleaseService} from "../service/release";
+import rpcContentApi from "../../content/rpc/content"
+import {ECommon_Model_Content_Type} from "../../../common/model/content";
 
 class RpcCooperationApi  {
     
@@ -67,6 +69,39 @@ class RpcCooperationApi  {
             throw Err.Project.Release.releaseNotFound
         }
         return obj.getItem()
+    }
+
+    async getIssueRelatedOrganizationUserIds(projectIssueId:string) {
+        let arrPromise=await Promise.allSettled([
+            (async ()=>{
+                let obj=await ProjectIssueService.getItemById(projectIssueId)
+                if(!obj) {
+                    throw Err.Project.ProjectIssue.projectIssueNotFound
+                }
+                let list=await obj.getOrganizationUserIdsByIssueExtraField()
+                return [obj.getItem().assigner_id,obj.getItem().reporter_id,obj.getItem().created_by,...list]
+            })(),
+            (async ()=>{
+                let list=await rpcContentApi.list(projectIssueId,ECommon_Model_Content_Type.PROJECT_ISSUE_COMMENT)
+                let ret:string[]=[]
+                for(let obj of list) {
+                    ret.push(obj.created_by,obj.modified_by)
+                }
+                return ret;
+            })()
+        ])
+        let ret:string[]=[]
+        for(let promise of arrPromise) {
+            if(promise.status==="fulfilled") {
+                let objResolve=promise.value
+                for(let id of objResolve) {
+                    if(id && !ret.includes(id)) {
+                        ret.push(id)
+                    }
+                }
+            }
+        }
+        return ret;
     }
     
 }

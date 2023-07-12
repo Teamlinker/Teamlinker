@@ -15,10 +15,10 @@ import {nextTick, onBeforeMount, ref} from "vue";
 import {SessionStorage} from "../../storage/session";
 import {RichEditorEvent} from "./event";
 import {
-	ECommon_Wiki_Content_Line_Config_Type,
-	ICommon_Wiki_Content_Line,
-	ICommon_Wiki_Content_Line_Config
-} from "../../../../../../common/model/wiki_item_content";
+	ECommon_Content_Line_Config_Type,
+	ICommon_Content_Line,
+	ICommon_Content_Line_Config
+} from "../../../../../../common/model/content";
 import {RichEditorHandle} from "./handle";
 
 const props=defineProps<{
@@ -33,8 +33,8 @@ const list=ref<{
 }[]>([])
 const organizationId=SessionStorage.get("organizationId")
 let itemList:{
-	line: ICommon_Wiki_Content_Line,
-	data: ICommon_Wiki_Content_Line_Config[]
+	line: ICommon_Content_Line,
+	data: ICommon_Content_Line_Config[]
 }[]
 let selectStartIndexPath
 const onChange=async ()=>{
@@ -59,11 +59,11 @@ const onClick=async (item:{
 	let line=itemList[0].line
 	let eleLine=props.objEditor.getRoot().value.children[props.objEditor.getLineList().indexOf(line)]
 	let originItem=line.arr[selectStartIndexPath[0]]
-	let objTemp:ICommon_Wiki_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+	let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
 	objTemp.value=originItem.value.substring(selectStartIndexPath[1])
 	originItem.value=originItem.value.substring(0,selectStartIndexPath[1]-1)
-	let item1:ICommon_Wiki_Content_Line_Config={
-		type:ECommon_Wiki_Content_Line_Config_Type.QUOTE_PERSON,
+	let item1:ICommon_Content_Line_Config={
+		type:ECommon_Content_Line_Config_Type.QUOTE_PERSON,
 		value:item.value,
 		label:item.label
 	}
