@@ -8,6 +8,7 @@ export type IClient_Drag_Element={
     element:HTMLElement,
     type:EClient_Drag_Type,
     value:string,
+    from:"finder"|"content"|"entity",
     shortcutType?:ECommon_Model_Finder_Shortcut_Type,
     shortcutRefId?:string,
     shortcutName?:string
@@ -54,11 +55,13 @@ export const vDrag:ObjectDirective={
         } else if(modifiers.shortcut) {
             type=EClient_Drag_Type.SHORTCUT
         }
+        let from:"entity"|"finder"="entity"
         target.setAttribute("allowDrag","1")
         target.setAttribute("dragType",type)
         if(type===EClient_Drag_Type.SHORTCUT) {
             if(typeof(value)!=="function") {
                 if((value as IClient_Drag_Shortcut_Value).value!==undefined) {
+                    from="finder"
                     target.setAttribute("dragValue",(value as IClient_Drag_Shortcut_Value).value)
                 }
                 if((value as IClient_Drag_Shortcut_Value).shortcutType!==undefined){
@@ -73,6 +76,7 @@ export const vDrag:ObjectDirective={
             }
         } else {
             if(value) {
+                from="finder"
                 target.setAttribute("dragValue",value as string)
             }
         }
@@ -80,6 +84,7 @@ export const vDrag:ObjectDirective={
             if(type===EClient_Drag_Type.SHORTCUT && typeof value==="function") {
                 let ret=value()
                 if(ret.value) {
+                    from="finder"
                     target.setAttribute("dragValue",ret.value)
                 }
                 if(ret.shortcutType) {
@@ -139,7 +144,8 @@ export const vDrag:ObjectDirective={
                                 shortcutType:ele.getAttribute("shortcutType") as ECommon_Model_Finder_Shortcut_Type,
                                 shortcutRefId:ele.getAttribute("shortcutRefId"),
                                 shortcutName:ele.getAttribute("shortcutName")
-                            })
+                            }),
+                            from
                         })
                     })
                     let img = new Image();
@@ -157,14 +163,16 @@ export const vDrag:ObjectDirective={
                             type:type,
                             shortcutType:target.getAttribute("shortcutType") as ECommon_Model_Finder_Shortcut_Type,
                             shortcutRefId:target.getAttribute("shortcutRefId"),
-                            shortcutName:target.getAttribute("shortcutName")
+                            shortcutName:target.getAttribute("shortcutName"),
+                            from
                         })
                     } else {
                         ev.dataTransfer.setData(type,value as string)
                         dragElementList.push({
                             element:target,
                             value:value as string,
-                            type:type
+                            type:type,
+                            from
                         })
                     }
                     ev.dataTransfer.setDragImage(el,0,0)

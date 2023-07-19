@@ -15,7 +15,21 @@
       <a-dropdown trigger="contextMenu" alignPoint >
         <div>
           <a-badge :count="item.count!==undefined?item.count:0" dot :offset="[6,-2]">
-            {{item.name}}
+	          <template v-if="item.atYou">
+		          {{item.name}}
+		          <span style="color: red;font-size: small">
+			          (@You)
+		          </span>
+	          </template>
+	          <template v-else-if="item.atAll">
+		          {{item.name}}
+		          <span style="color: red;font-size: small">
+			          (@All)
+		          </span>
+	          </template>
+	          <template v-else>
+		          {{item.name}}
+	          </template>
           </a-badge>
         </div>
         <template #content>
@@ -32,7 +46,7 @@ import {onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
-import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
+import {ECommon_IM_Message_At, ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
 import {userTeamInfoPick} from "../../../common/component/userInfoPick";
 import {SessionStorage} from "../../../common/storage/session";
 import {calculateShortName} from "../../../common/util/helper";
@@ -53,11 +67,14 @@ export type RecentItem = {
   photo: string,
   count?:number,
   type:ECommon_IM_Message_EntityType,
-  status?:ECommon_User_Online_Status
+  status?:ECommon_User_Online_Status,
+	atYou?:boolean,
+	atAll?:boolean
 }
 const selectedKeys=ref<string[]>([])
 const recentList = ref<RecentItem[]>([])
 const myOrganizationId=SessionStorage.get("organizationId")
+const myOrganizationUserId=SessionStorage.get("organizationUserId")
 watch(recentList,()=>{
 	let obj=SessionStorage.get("imRecentList")
 	if(!obj) {
@@ -83,6 +100,8 @@ watch(selectedKeys,()=>{
   for(let obj of recentList.value) {
     if(obj.id===selectedKeys.value[0]) {
       item=obj
+	    item.atAll=false
+	    item.atYou=false
       break
     }
   }
@@ -105,7 +124,9 @@ const getRecentList = async () => {
       id:item.entity_id,
       type:item.entity_type,
       count:item.count,
-    }
+	    atAll:!!(item.at & ECommon_IM_Message_At.ALL),
+	    atYou:!!(item.at & ECommon_IM_Message_At.SPECIFIC)
+    } as RecentItem
   }),...localList.filter(item=>{
     return !unReadList.map(item=>item.entity_id).includes(item.id)
   }).map(item=>{
@@ -120,7 +141,9 @@ const getRecentList = async () => {
       photo:obj[item.id]?obj[item.id].photo:"",
       type:item.type,
       count:item.count,
-      status:obj[item.id]!==undefined?obj[item.id].status:ECommon_User_Online_Status.OFFLINE
+      status:obj[item.id]!==undefined?obj[item.id].status:ECommon_User_Online_Status.OFFLINE,
+	    atYou:(item as RecentItem).atYou,
+	    atAll:(item as RecentItem).atAll
     }
   })
   if(props.initData) {
@@ -144,7 +167,17 @@ const handleUserInfo = (id: string, info: {
     }
   }
 }
-const addRecentItem=(id:string,type:ECommon_IM_Message_EntityType,selected:boolean):RecentItem=>{
+
+const cancelSelectedItem=()=>{
+	selectedKeys.value=[]
+}
+
+const addRecentItem=(id:string,type:ECommon_IM_Message_EntityType,selected:boolean,objAt:{
+	all:boolean,
+	[param:string]:boolean
+}={
+	all:false
+}):RecentItem=>{
   let index=-1,item:RecentItem
   for(let i=0;i<recentList.value.length;i++) {
     if(recentList.value[i].id===id) {
@@ -172,10 +205,18 @@ const addRecentItem=(id:string,type:ECommon_IM_Message_EntityType,selected:boole
       status:obj[id]!==undefined?obj[id].status:ECommon_User_Online_Status.OFFLINE
     }
     recentList.value.unshift(item)
+	  item=recentList.value[0]
   }
   if(selected && !selectedKeys.value.includes(id)) {
     selectedKeys.value=[id]
   }
+	if(type===ECommon_IM_Message_EntityType.TEAM) {
+		if(objAt[myOrganizationUserId]) {
+			item.atYou=true
+		} else if(objAt.all) {
+			item.atAll=true
+		}
+	}
   return item
 }
 
@@ -226,7 +267,8 @@ onBeforeUnmount(() => {
 })
 defineExpose({
   addRecentItem,
-  checkRecentItem
+  checkRecentItem,
+	cancelSelectedItem
 })
 </script>
 

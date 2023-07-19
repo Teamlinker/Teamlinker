@@ -42,19 +42,8 @@
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, markRaw, onBeforeMount, ref, watch} from "vue";
-import {
-	apiCalendar,
-	apiFile,
-	apiFinder,
-	apiIssue,
-	apiMeeting,
-	apiOrganization,
-	apiProject,
-	apiRelease,
-	apiWiki,
-	DCSType
-} from "../../../common/request/request";
+import {getCurrentInstance, onBeforeMount, ref, watch} from "vue";
+import {apiFile, apiWiki, DCSType} from "../../../common/request/request";
 import {
 	ECommon_Content_Line_Config_Type,
 	ICommon_Content_Line,
@@ -66,20 +55,11 @@ import RichEditor from "../../../common/component/richEditor/richEditor.vue";
 import {checkPermission} from "../../../common/util/helper";
 import {Permission_Types} from "../../../../../../common/permission/permission";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
-import {EClient_Drag_Type, IClient_Drag_Element, vDrag} from "../../../../teamOS/common/directive/drag";
-import {Dialog} from "../../../common/component/dialog/dialog";
+import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
-import ProjectFilter from "./popMenu/projectFilter.vue";
-import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
-import ProjectIssueFilter from "./popMenu/projectIssueFilter.vue";
-import ProjectReleaseFilter from "./popMenu/projectReleaseFilter.vue";
-import WikiFilter from "./popMenu/wikiFilter.vue";
-import WikiItemFilter from "./popMenu/wikiItemFilter.vue";
-import CalendarEventFilter from "./popMenu/calendarEventFilter.vue";
-import MeetingRoomFilter from "./popMenu/meetingRoomFilter.vue";
-import {SessionStorage} from "../../../common/storage/session";
 import {DropParam, vDrop} from "../../../../teamOS/common/directive/drop";
 import moment from "moment";
+import {RichEditorEventHandle} from "../../../common/component/richEditorEventHandle";
 
 const props=defineProps<{
   wikiItemId:string,
@@ -104,45 +84,7 @@ const info=ref<DCSType<ICommon_Model_Content>>()
 const content=ref<ICommon_Content_Line[]>([])
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
-const organizationId=SessionStorage.get("organizationId")
-const popMenuList=ref([
-	{
-		type: ECommon_Content_Line_Config_Type.IMAGE,
-		title: "Image"
-	},
-	{
-		type: ECommon_Content_Line_Config_Type.FILE,
-		title: "File"
-	},
-	{
-		type: ECommon_Content_Line_Config_Type.PROJECT,
-		title: "Project"
-	},
-	{
-		type: ECommon_Content_Line_Config_Type.PROJECT_ISSUE,
-		title: "Project Issue"
-	},
-	{
-		type: ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
-		title: "Project Release"
-	},
-	{
-		type: ECommon_Content_Line_Config_Type.WIKI,
-		title: "Wiki Space"
-	},
-	{
-		type: ECommon_Content_Line_Config_Type.WIKI_ITEM,
-		title: "Wiki Item"
-	},
-	{
-		type: ECommon_Content_Line_Config_Type.CALENDAR_EVENT,
-		title: "Calendar Event"
-	},
-	{
-		type: ECommon_Content_Line_Config_Type.MEETING_ROOM,
-		title: "Meeting Room"
-	},
-])
+const popMenuList=ref(RichEditorEventHandle.popMenuList)
 let loadDate:number
 watch(()=>props.name,()=>{
   title.value=props.name
@@ -214,334 +156,25 @@ const onUploadFile=async (file, handleFunc) => {
 	}
 }
 
-const onPopMenuClick=async (type:ECommon_Content_Line_Config_Type,handleFunc:(item:ICommon_Content_Line_Config)=>void)=>{
-	if(type===ECommon_Content_Line_Config_Type.IMAGE || type===ECommon_Content_Line_Config_Type.FILE) {
-		let input = document.createElement('input');
-		input.type = 'file';
-		if(type===ECommon_Content_Line_Config_Type.IMAGE) {
-			input.accept=".png,.jpg,.gif,.jpeg,.bmp,.webp"
-		}
-		input.onchange=async (ev:InputEvent) => {
-			let files=Array.from((ev.target as HTMLInputElement).files)
-			if(files.length>0) {
-				loading.value=true
-				let res=await apiFile.upload({
-					file:files[0] as any
-				})
-				loading.value=false
-				if(res?.code==0) {
-					let fileId=res.data.id
-					let path=res.data.path
-					let objImageItem:ICommon_Content_Line_Config=type===ECommon_Content_Line_Config_Type.IMAGE?{
-						value:fileId,
-						link:path,
-						type:ECommon_Content_Line_Config_Type.IMAGE,
-						width:200
-					}:{
-						value:fileId,
-						link:path,
-						type:ECommon_Content_Line_Config_Type.FILE,
-						label:files[0].name
-					}
-					handleFunc(objImageItem)
-				}
-			}
-		}
-		input.click();
-	} else if(type===ECommon_Content_Line_Config_Type.PROJECT) {
-		let ret:any=await Dialog.open(root.value,appContext,"Project",markRaw(ProjectFilter))
-		if(ret) {
-			let item:ICommon_Content_Line_Config={
-				type:ECommon_Content_Line_Config_Type.PROJECT,
-				value:ret.id,
-				label:ret.name
-			}
-			handleFunc(item)
-		}
-	} else if(type===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
-		let ret:any=await Dialog.open(root.value,appContext,"Project Issue",markRaw(ProjectIssueFilter))
-		if(ret) {
-			let item:ICommon_Content_Line_Config={
-				type:ECommon_Content_Line_Config_Type.PROJECT_ISSUE,
-				value:ret.id,
-				label:ret.name,
-				link:ret.project.id
-			}
-			handleFunc(item)
-		}
-	} else if(type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
-		let ret:any=await Dialog.open(root.value,appContext,"Project Release",markRaw(ProjectReleaseFilter))
-		if(ret) {
-			let item:ICommon_Content_Line_Config={
-				type:ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
-				value:ret.id,
-				label:ret.name,
-				link:ret.project.id
-			}
-			handleFunc(item)
-		}
-	} else if(type===ECommon_Content_Line_Config_Type.WIKI) {
-		let ret:any=await Dialog.open(root.value,appContext,"Wiki Space",markRaw(WikiFilter))
-		if(ret) {
-			let item:ICommon_Content_Line_Config={
-				type:ECommon_Content_Line_Config_Type.WIKI,
-				value:ret.id,
-				label:ret.name,
-			}
-			handleFunc(item)
-		}
-	} else if(type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
-		let ret:any=await Dialog.open(root.value,appContext,"Wiki Item",markRaw(WikiItemFilter))
-		if(ret) {
-			let item:ICommon_Content_Line_Config={
-				type:ECommon_Content_Line_Config_Type.WIKI_ITEM,
-				value:ret.id,
-				label:ret.name,
-				link:ret.wiki.id
-			}
-			handleFunc(item)
-		}
-	} else if(type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
-		let ret:any=await Dialog.open(root.value,appContext,"Calendar Event",markRaw(CalendarEventFilter))
-		if(ret) {
-			let item:ICommon_Content_Line_Config={
-				type:ECommon_Content_Line_Config_Type.CALENDAR_EVENT,
-				value:ret.id,
-				label:ret.name,
-			}
-			handleFunc(item)
-		}
-	} else if(type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
-		let ret:any=await Dialog.open(root.value,appContext,"Meeting Room",markRaw(MeetingRoomFilter))
-		if(ret) {
-			let item:ICommon_Content_Line_Config={
-				type:ECommon_Content_Line_Config_Type.MEETING_ROOM,
-				value:ret.id,
-				label:ret.name,
-				link:ret.password
-			}
-			handleFunc(item)
-		}
-	}
+const onPopMenuClick=(type:ECommon_Content_Line_Config_Type,handleFunc:(item:ICommon_Content_Line_Config)=>void)=>{
+	RichEditorEventHandle.onPopMenuClick(type,root,appContext,loading,handleFunc)
 }
 
 const onCustomAnchorClick=(type:ECommon_Content_Line_Config_Type,value:string,link:string,label:string)=>{
-	if(type===ECommon_Content_Line_Config_Type.PROJECT) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_PROFILE,value)
-	} else if(type===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,link,value)
-	} else if(type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,link,value)
-	} else if(type===ECommon_Content_Line_Config_Type.WIKI) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_WIKI_PROFILE,value)
-	} else if(type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_WIKI_ITEM,link,value)
-	} else if(type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,value)
-	} else if(type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,value,link)
-	}
+	RichEditorEventHandle.onCustomAnchorClick(type,value,link,label)
 }
 
-const onQuoteList=async (keyword:string,handleFunc:(list:{
+const onQuoteList=(keyword:string,handleFunc:(list:{
 	value:string,
 	label:string,
 	photo:string
 }[])=>void)=>{
-	let res=await apiOrganization.listUser({
-		page:0,
-		size:20,
-		keyword:keyword,
-		organizationId
-	})
-	if(res?.code==0) {
-		handleFunc(res.data.data.map(item=>{
-			return {
-				value:item.organizationUser.id,
-				label:item.organizationUser.nickname,
-				photo:item.user.photo
-			}
-		}))
-	}
+	RichEditorEventHandle.onQuoteList(keyword,handleFunc)
 }
 
-const onDrop=async (data?:DropParam)=>{
-	if(isWrite) {
-		if(data.type==="internal") {
-			loading.value=true
-			let arrPromise=await Promise.allSettled((data.data as IClient_Drag_Element[]).map(obj=>{
-				if(obj.type===EClient_Drag_Type.FILE) {
-					return apiFinder.info({
-						finderItemId:obj.value
-					}).then(res=>{
-						let ret:ICommon_Content_Line_Config
-						if(res?.code==0) {
-							ret={
-								type:ECommon_Content_Line_Config_Type.FILE,
-								value:res.data.file.id,
-								link:res.data.file.path,
-								label:obj.element.title
-							}
-						}
-						return ret;
-					})
-				} else if(obj.type===EClient_Drag_Type.SHORTCUT) {
-					switch (obj.shortcutType) {
-						case ECommon_Model_Finder_Shortcut_Type.PROJECT:{
-							return apiProject.basic({
-								projectId:obj.shortcutRefId
-							}).then(res=>{
-								let ret:ICommon_Content_Line_Config
-								if(res?.code==0) {
-									ret={
-										type:ECommon_Content_Line_Config_Type.PROJECT,
-										value:obj.shortcutRefId,
-										label:obj.element.title
-									}
-								}
-								return ret;
-							})
-							break
-						}
-						case ECommon_Model_Finder_Shortcut_Type.PROJECT_ISSUE:{
-							return apiIssue.basicInfo({
-								projectIssueId:obj.shortcutRefId
-							}).then(res=>{
-								let ret:ICommon_Content_Line_Config
-								if(res?.code==0) {
-									ret={
-										type:ECommon_Content_Line_Config_Type.PROJECT_ISSUE,
-										value:obj.shortcutRefId,
-										label:obj.element.title,
-										link:res.data.project.id
-									}
-								}
-								return ret;
-							})
-							break
-						}
-						case ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE:{
-							return apiRelease.info({
-								projectReleaseId:obj.shortcutRefId
-							}).then(res=>{
-								let ret:ICommon_Content_Line_Config
-								if(res?.code==0) {
-									ret={
-										type:ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
-										value:obj.shortcutRefId,
-										label:obj.element.title,
-										link:res.data.project.id
-									}
-								}
-								return ret;
-							})
-							break
-						}
-						case ECommon_Model_Finder_Shortcut_Type.WIKI:{
-							return apiWiki.wikiInfo({
-								wikiId:obj.shortcutRefId
-							}).then(res=>{
-								let ret:ICommon_Content_Line_Config
-								if(res?.code==0) {
-									ret={
-										type:ECommon_Content_Line_Config_Type.WIKI,
-										value:obj.shortcutRefId,
-										label:obj.element.title,
-									}
-								}
-								return ret;
-							})
-							break
-						}
-						case ECommon_Model_Finder_Shortcut_Type.WIKI_ITEM:{
-							return apiWiki.wikiItemInfo({
-								wikiItemId:obj.shortcutRefId
-							}).then(res=>{
-								let ret:ICommon_Content_Line_Config
-								if(res?.code==0) {
-									ret={
-										type:ECommon_Content_Line_Config_Type.WIKI_ITEM,
-										value:obj.shortcutRefId,
-										label:obj.element.title,
-										link:res.data.wiki_id
-									}
-								}
-								return ret;
-							})
-							break
-						}
-						case ECommon_Model_Finder_Shortcut_Type.CALENDAR_EVENT:{
-							return apiCalendar.getCalendarEvent({
-								calendarEventId:obj.shortcutRefId
-							}).then(res=>{
-								let ret:ICommon_Content_Line_Config
-								if(res?.code==0) {
-									ret={
-										type:ECommon_Content_Line_Config_Type.CALENDAR_EVENT,
-										value:obj.shortcutRefId,
-										label:obj.element.title
-									}
-								}
-								return ret;
-							})
-							break
-						}
-						case ECommon_Model_Finder_Shortcut_Type.MEETING_ROOM:{
-							return apiMeeting.getRoom({
-								meetingRoomId:obj.shortcutRefId
-							}).then(res=>{
-								let ret:ICommon_Content_Line_Config
-								if(res?.code==0) {
-									ret={
-										type:ECommon_Content_Line_Config_Type.MEETING_ROOM,
-										value:obj.shortcutRefId,
-										label:obj.element.title
-									}
-								}
-								return ret;
-							})
-							break
-						}
-					}
-				}
-			}));
-			loading.value=false
-			let itemList=arrPromise.filter(item=>{
-				if(item.status==="fulfilled" && item.value) {
-					return true
-				}
-			}).map(item=>{
-				return (item as any).value
-			})
-			objEditor.value.insertConfig(itemList)
-		} else if(data.type==="external") {
-			loading.value=true
-			let arrPromise=await Promise.allSettled((data.data as File[]).map(file=>{
-				return apiFile.upload({
-					file:file as any
-				}).then(res=>{
-					let ret:ICommon_Content_Line_Config
-					if(res?.code==0) {
-						ret={
-							type:ECommon_Content_Line_Config_Type.FILE,
-							value:res.data.id,
-							link:res.data.path,
-							label:file.name
-						}
-					}
-					return ret;
-				})
-			}))
-			loading.value=false
-			let itemList=arrPromise.filter(item=>{
-				if(item.status==="fulfilled" && item.value) {
-					return true
-				}
-			}).map(item=>{
-				return (item as any).value
-			})
-			objEditor.value.insertConfig(itemList)
-		}
+const onDrop=(data?:DropParam)=>{
+	if(isWrite.value) {
+		RichEditorEventHandle.onDrop(objEditor,data,loading)
 	}
 }
 

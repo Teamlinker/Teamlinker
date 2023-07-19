@@ -4,6 +4,8 @@ import {Message} from "@arco-design/web-vue";
 import {Permission_Base} from "../../../../../common/permission/permission";
 import {ECommon_Model_Finder_Item_Type} from "../../../../../common/model/finder_item";
 import {EClient_Drag_Type} from "../../../teamOS/common/directive/drag";
+import {ECommon_IM_Message_ContentType} from "../../../../../common/model/im_user_message";
+import {ECommon_Content_Line_Config_Type, ICommon_Content_Line} from "../../../../../common/model/content";
 
 export function getMemberIdFromRoleMember(item:ICommon_Route_Res_Role_Member_Item){
     if(item.memberType==ECommon_Model_Organization_Member_Type.DEFAULT) {
@@ -101,4 +103,27 @@ export function convertFinderItemTypeToDragItemType(type:ECommon_Model_Finder_It
     } else if(type===ECommon_Model_Finder_Item_Type.FOLDER) {
         return EClient_Drag_Type.FOLDER
     }
+}
+
+export function getIMAtInfo(content,contentType) {
+    let objAt:{
+        all:boolean,
+        [param:string]:boolean
+    }={
+        all:false
+    }
+    if(contentType===ECommon_IM_Message_ContentType.RICH_TEXT) {
+        for(let objLine of content as ICommon_Content_Line[]) {
+            for(let objConfig of objLine.arr) {
+                if(objConfig.type===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
+                    if(objConfig.value==="0") {
+                        objAt.all=true
+                    } else {
+                        objAt[objConfig.value]=true
+                    }
+                }
+            }
+        }
+    }
+    return objAt
 }

@@ -501,6 +501,10 @@ export namespace Err {
         teamNotFound:{
             code:12001,
             msg:"team not found"
+        },
+        messageNotFound:{
+            code:12002,
+            msg:"message not found"
         }
     }
 

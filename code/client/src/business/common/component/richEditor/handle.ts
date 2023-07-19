@@ -4,6 +4,8 @@ import {
     ICommon_Content_Line,
     ICommon_Content_Line_Config
 } from "../../../../../../common/model/content";
+import {EClient_Drag_Type} from "../../../../teamOS/common/directive/drag";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 
 export class RichEditorHandle {
     static handle(line:ICommon_Content_Line){
@@ -37,9 +39,12 @@ export class RichEditorHandle {
             } else if(obj.type==ECommon_Content_Line_Config_Type.IMAGE) {
                 ele=document.createElement("img")
                 ele.setAttribute("src",obj.link)
-                ele.setAttribute("width",String(obj.width))
+                ele.setAttribute("width",String(obj.width??200))
                 ele.setAttribute("height","auto")
                 ele.setAttribute("fileId",obj.value)
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.FILE)
+                ele.setAttribute("dragValue",obj.value)
             } else if(obj.type===ECommon_Content_Line_Config_Type.FILE) {
                 ele=document.createElement("a")
                 ele.setAttribute("href",obj.link)
@@ -50,6 +55,9 @@ export class RichEditorHandle {
                 ele.contentEditable="false"
                 ele.innerText=obj.label
                 ele.style.color="black"
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.FILE)
+                ele.setAttribute("dragValue",obj.value)
                 let icon=document.createElement("i")
                 icon.className="fa fa-file"
                 icon.style.marginRight="5px"
@@ -72,6 +80,11 @@ export class RichEditorHandle {
                 ele.style.color="blue"
                 ele.style.fontSize="medium"
                 ele.style.textDecoration="none"
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.PROJECT)
+                ele.setAttribute("shortcutRefId",obj.value)
+                ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
                 icon.className="fa fa-list-alt"
                 icon.style.marginRight="5px"
@@ -95,6 +108,11 @@ export class RichEditorHandle {
                 ele.style.color="blue"
                 ele.style.fontSize="medium"
                 ele.style.textDecoration="none"
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.PROJECT_ISSUE)
+                ele.setAttribute("shortcutRefId",obj.value)
+                ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
                 icon.className="fa fa-link"
                 icon.style.marginRight="5px"
@@ -118,6 +136,11 @@ export class RichEditorHandle {
                 ele.style.color="blue"
                 ele.style.fontSize="medium"
                 ele.style.textDecoration="none"
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE)
+                ele.setAttribute("shortcutRefId",obj.value)
+                ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
                 icon.className="fa fa-tasks"
                 icon.style.marginRight="5px"
@@ -140,6 +163,11 @@ export class RichEditorHandle {
                 ele.style.color="blue"
                 ele.style.fontSize="medium"
                 ele.style.textDecoration="none"
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.WIKI)
+                ele.setAttribute("shortcutRefId",obj.value)
+                ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
                 icon.className="fa fa-files-o"
                 icon.style.marginRight="5px"
@@ -163,6 +191,11 @@ export class RichEditorHandle {
                 ele.style.color="blue"
                 ele.style.fontSize="medium"
                 ele.style.textDecoration="none"
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.WIKI_ITEM)
+                ele.setAttribute("shortcutRefId",obj.value)
+                ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
                 icon.className="fa fa-file-text-o"
                 icon.style.marginRight="5px"
@@ -185,6 +218,11 @@ export class RichEditorHandle {
                 ele.style.color="blue"
                 ele.style.fontSize="medium"
                 ele.style.textDecoration="none"
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.CALENDAR_EVENT)
+                ele.setAttribute("shortcutRefId",obj.value)
+                ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
                 icon.className="fa fa-calendar-o"
                 icon.style.marginRight="5px"
@@ -208,6 +246,11 @@ export class RichEditorHandle {
                 ele.style.color="blue"
                 ele.style.fontSize="medium"
                 ele.style.textDecoration="none"
+                ele.setAttribute("allowDrag","1")
+                ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.MEETING_ROOM)
+                ele.setAttribute("shortcutRefId",obj.value)
+                ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
                 icon.className="fa fa-video-camera"
                 icon.style.marginRight="5px"

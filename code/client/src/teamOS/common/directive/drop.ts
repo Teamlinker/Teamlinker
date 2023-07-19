@@ -87,8 +87,13 @@ export const vDrop:Directive= {
             if(ev.currentTarget===el) {
                 let target=ev.target as HTMLElement
                 if(ev.dataTransfer.items.length>0) {
+                    let continueCount=0
                     for(let i=0;i<ev.dataTransfer.items.length;i++) {
                         let item=ev.dataTransfer.items[i]
+                        if(item.type.includes("/")) {
+                            continueCount++
+                            continue
+                        }
                         if(item.kind=="file") {
                             if(!allowTypeList.includes(EClient_Drag_Type.DISK)) {
                                 isDrop=false
@@ -103,6 +108,10 @@ export const vDrop:Directive= {
                                 return;
                             }
                         }
+                    }
+                    if(continueCount===ev.dataTransfer.items.length) {
+                        isDrop=false
+                        return;
                     }
                     if(ev.dataTransfer.items[0].kind!="file") {
                         if(!el.contains(dragElementList[0].element)) {

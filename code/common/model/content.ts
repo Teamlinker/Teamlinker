@@ -41,7 +41,8 @@ export type ICommon_Content_Line ={
 export enum ECommon_Model_Content_Type {
     PROJECT_ISSUE_COMMENT,
     PROJECT_ISSUE_DESCRIPTION,
-    WIKI_ITEM
+    WIKI_ITEM,
+    MEETING
 }
 
 export interface ICommon_Model_Content {

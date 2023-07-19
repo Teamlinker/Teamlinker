@@ -27,7 +27,10 @@ class RpcFileApi  {
         if(!obj) {
             throw Err.File.fileNotFound
         }
-        return obj.getItem()
+        return {
+            ...obj.getItem(),
+            path:"/file"+obj.getItem().path
+        }
     }
 }
 export default new RpcFileApi;

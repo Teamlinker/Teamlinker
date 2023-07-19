@@ -1,5 +1,5 @@
 <template>
-  <a-layout style="height: 100%">
+  <a-layout style="height: 100%" id="imWindow">
     <a-layout-sider :resize-directions="['right']">
       <div style="width: 100%;height: 100%;overflow-y: auto;padding: 5px;box-sizing: border-box">
         <a-select style="width: 100%" placeholder="type user or team" allow-search allow-clear @change="onChange" @search="onSearch">
@@ -20,12 +20,26 @@
             </a-option>
           </a-optgroup>
         </a-select>
+	      <a-menu style="width: 100%;padding: 0px;margin-top: 5px" v-model:selected-keys="selectedMenuKeys" @menu-item-click="onClickFavorite" id="imMenu">
+		      <a-menu-item key="favorites">
+			      <template #icon>
+				      <icon-star></icon-star>
+			      </template>
+			      Favorites
+		      </a-menu-item>
+		      <a-menu-item key="messages">
+			      <template #icon>
+				      <icon-search></icon-search>
+			      </template>
+			      Messages
+		      </a-menu-item>
+	      </a-menu>
         <a-divider>Recent</a-divider>
         <RecentList ref="recentListRef" @select="onSelectChat" :init-data="id?{id,type:chatType}:undefined"></RecentList>
       </div>
     </a-layout-sider>
     <a-layout-content style="padding: 10px;">
-      <Chat :data="messageList" :type="selectedChat.type" :info="selectedChat" @send="onSend" v-if="selectedChat" ref="chatRef" @update-more="onShowMore" @click-photo="onClickChatPhoto">
+      <Chat :data="messageList" :type="selectedChat.type" :info="selectedChat" @send="onSend" v-if="selectedChat && selectedMenuKeys.length==0" ref="chatRef" @update-more="onShowMore" @click-photo="onClickChatPhoto" @favorite="onFavorite" :is-search="!!locateInfo">
         <template #info v-if="selectedChat.type===ECommon_IM_Message_EntityType.TEAM">
           <a-collapse :default-active-key="['members']">
             <a-collapse-item header="Members" key="members">
@@ -36,6 +50,8 @@
           </a-collapse>
         </template>
       </Chat>
+	    <Favorite v-else-if="selectedMenuKeys.includes('favorites')"></Favorite>
+	    <ImMessageSearch v-show="selectedMenuKeys.includes('messages')"></ImMessageSearch>
     </a-layout-content>
     <teleport to="body" v-if="chatPhotoProfileInfo">
       <UserShortView :organization-user-id="chatPhotoProfileInfo.id" style="position:absolute;z-index: 1000;box-shadow: rgba(169, 169, 169, 0.2) 0px 0px 2px 2px;border-radius: 5px;background-color: white" :style="{left:chatPhotoProfileInfo.x+'px',top:chatPhotoProfileInfo.y+'px'}" @mouseleave="chatPhotoProfileInfo=null" @click="chatPhotoProfileInfo=null"></UserShortView>
@@ -49,18 +65,29 @@ import {nextTick, onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
 import {ICommon_Route_Res_Organization_FilterUserAndTeam} from "../../../../../../common/routes/response";
 import {apiOrganization, apiTeam} from "../../../common/request/request";
 import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
-import {IClient_Chat_Message_Item} from "../../../common/component/chat/type";
+import {IClient_Chat_Message_Item} from "./type";
 import {SocketIOClient} from "../../../common/socket/socket";
-import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
+import {
+	ECommon_Socket_Type,
+	ICommon_Socket_IM_Search_Message_Team,
+	ICommon_Socket_IM_Search_Message_User
+} from "../../../../../../common/socket/types";
 import {userTeamInfoPick} from "../../../common/component/userInfoPick";
 import moment from "moment";
-import {ECommon_IM_Message_ContentType} from "../../../../../../common/model/im_user_message";
-import Chat from "../../../common/component/chat/chat.vue";
+import {
+	ECommon_IM_Message_ContentType,
+	ICommon_Model_IM_User_Message
+} from "../../../../../../common/model/im_user_message";
+import Chat from "./chat.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
 import {Message} from "@arco-design/web-vue";
 import UserAvatar from "../../../common/component/userAvatar.vue";
 import UserShortView from "../../../common/component/userShortView.vue";
+import {ECommon_Content_Line_Config_Type, ICommon_Content_Line} from "../../../../../../common/model/content";
+import Favorite from "./favorite.vue";
+import ImMessageSearch from "./imMessageSearch.vue";
+import {ICommon_Model_IM_Team_Message} from "../../../../../../common/model/im_team_message";
 
 const props=defineProps<{
   id?:string,
@@ -72,6 +99,12 @@ const messageList=ref<IClient_Chat_Message_Item[]>([])
 const selectedChat=ref<RecentItem>()
 const socket=SocketIOClient.get(ECommon_Socket_Type.IM)
 const chatRef=ref<InstanceType<typeof Chat>>()
+const selectedMenuKeys=ref([])
+let myOrganizationUserId=SessionStorage.get("organizationUserId")
+let locateInfo:{
+	id:string,
+	messageId:string
+}
 const chatPhotoProfileInfo=ref<{
   id:string,
   photo:string,
@@ -97,7 +130,7 @@ const onSearch=async (key:string)=>{
   }
 }
 type SendItem={
-  content:string,
+  content:ICommon_Content_Line[],
   contentType:ECommon_IM_Message_ContentType,
   toOrganizationUserId?:string,
   teamId:string,
@@ -129,34 +162,47 @@ const onChange=(id:string)=>{
 }
 const onSelectChat=async (item:RecentItem)=>{
   if(item && item !==selectedChat.value) {
+	  selectedMenuKeys.value=[]
     if(item.type===ECommon_IM_Message_EntityType.USER) {
-      let ret=await socket.getSocket().emitWithAck("im_user_message_list",item.id,20,0)
+      let ret:ICommon_Model_IM_User_Message[]
+	    if(locateInfo) {
+				ret=await socket.getSocket().emitWithAck("im_user_message_locate",locateInfo.id,locateInfo.messageId)
+	    } else {
+		    ret=await socket.getSocket().emitWithAck("im_user_message_list",item.id,20,0)
+	    }
       messageList.value=ret.map(item=>{
         let obj=userTeamInfoPick.getInfos([{
           id:item.from_organization_user_id,
           type:ECommon_IM_Message_EntityType.USER
         }])
         return {
+					messageId:item.id,
           id:item.from_organization_user_id,
           type:item.content_type,
           date:moment(item.created_time).format("YYYY-MM-DD HH:mm:ss.SSS"),
-          content:item.content || item.file_id,
+          content:JSON.parse(item.content),
           name:obj[item.from_organization_user_id]?obj[item.from_organization_user_id].name:"unknown",
           photo:obj[item.from_organization_user_id]?obj[item.from_organization_user_id].photo:""
         }
       })
     } else if(item.type===ECommon_IM_Message_EntityType.TEAM) {
-      let ret=await socket.getSocket().emitWithAck("im_team_message_list",item.id,20,0)
+      let ret:ICommon_Model_IM_Team_Message[]
+	    if(locateInfo) {
+				ret=await socket.getSocket().emitWithAck("im_team_message_locate",locateInfo.id,locateInfo.messageId)
+	    } else {
+				ret=await socket.getSocket().emitWithAck("im_team_message_list",item.id,20,0)
+	    }
       messageList.value=ret.map(item=>{
         let obj=userTeamInfoPick.getInfos([{
           id:item.from_organization_user_id,
           type:ECommon_IM_Message_EntityType.USER
         }])
         return {
+	        messageId:item.id,
           id:item.from_organization_user_id,
           type:item.content_type,
           date:moment(item.created_time).format("YYYY-MM-DD HH:mm:ss.SSS"),
-          content:item.content || item.file_id,
+          content:JSON.parse(item.content),
           name:obj[item.from_organization_user_id]?obj[item.from_organization_user_id].name:"unknown",
           photo:obj[item.from_organization_user_id]?obj[item.from_organization_user_id].photo:""
         }
@@ -164,14 +210,17 @@ const onSelectChat=async (item:RecentItem)=>{
       getTeamMemberList(item.id)
     }
 	  item.count=0;
+	  selectedChat.value=item
 	  await socket.getSocket().emit("im_read_message",item.id)
-    selectedChat.value=item
+	  if(locateInfo) {
+		  locateInfo=null;
+	  }
   } else if(!item) {
     selectedChat.value=null;
   }
 }
 
-const onSend=(content:string,contentType:ECommon_IM_Message_ContentType,chatType:ECommon_IM_Message_EntityType,toOrganizationUserId?:string,teamId?:string)=>{
+const onSend=(content:ICommon_Content_Line[],contentType:ECommon_IM_Message_ContentType,chatType:ECommon_IM_Message_EntityType,toOrganizationUserId?:string,teamId?:string)=>{
   sendBufferList.value.unshift({
     teamId,
     toOrganizationUserId,
@@ -193,19 +242,11 @@ const sendMessage=async (item:SendItem)=>{
       msg?:string,
       success:boolean
     }
-    if(item.contentType===ECommon_IM_Message_ContentType.TEXT) {
-      if(item.chatType===ECommon_IM_Message_EntityType.USER) {
-        ret=await socket.getSocket().timeout(5000).emitWithAck("im_user_send_text_message",item.toOrganizationUserId,item.content)
-      } else if(item.chatType===ECommon_IM_Message_EntityType.TEAM) {
-        ret=await socket.getSocket().timeout(5000).emitWithAck("im_team_send_text_message",item.teamId,item.content)
-      }
-    } else if(item.contentType===ECommon_IM_Message_ContentType.IMAGE) {
-      if(item.chatType===ECommon_IM_Message_EntityType.USER) {
-        ret=await socket.getSocket().timeout(5000).emitWithAck("im_user_send_image_message",item.toOrganizationUserId,item.content)
-      } else if(item.chatType===ECommon_IM_Message_EntityType.TEAM) {
-        ret = await socket.getSocket().timeout(5000).emitWithAck("im_team_send_image_message", item.teamId, item.content)
-      }
-    }
+	  if(item.chatType===ECommon_IM_Message_EntityType.USER) {
+		  ret=await socket.getSocket().timeout(5000).emitWithAck("im_user_send_message",item.toOrganizationUserId,item.content,item.contentType)
+	  } else if(item.chatType===ECommon_IM_Message_EntityType.TEAM) {
+		  ret=await socket.getSocket().timeout(5000).emitWithAck("im_team_send_message",item.teamId,item.content,item.contentType)
+	  }
     sendBufferList.value.pop()
     if(!ret.success) {
       Message.error(ret.msg)
@@ -218,7 +259,7 @@ const sendMessage=async (item:SendItem)=>{
   }
 
 }
-const onReceiveMessage=(chatType, fromOrganizationUserId, content, contentType,date, toOrganizationUserId, teamId) => {
+const onReceiveMessage=(messageId,chatType, fromOrganizationUserId, content, contentType,date, toOrganizationUserId, teamId) => {
   if(chatType===ECommon_IM_Message_EntityType.USER) {
     let obj=userTeamInfoPick.getInfos([{
       id:fromOrganizationUserId,
@@ -229,6 +270,7 @@ const onReceiveMessage=(chatType, fromOrganizationUserId, content, contentType,d
     }])
     if([toOrganizationUserId,fromOrganizationUserId].includes(selectedChat.value?.id)) {
       messageList.value.push({
+	      messageId:messageId,
         id:fromOrganizationUserId,
         content:content,
         type:contentType,
@@ -258,6 +300,7 @@ const onReceiveMessage=(chatType, fromOrganizationUserId, content, contentType,d
     }])
     if(selectedChat.value?.id===teamId) {
       messageList.value.push({
+	      messageId:messageId,
         id:fromOrganizationUserId,
         content:content,
         type:contentType,
@@ -271,7 +314,26 @@ const onReceiveMessage=(chatType, fromOrganizationUserId, content, contentType,d
         })
       }
     } else {
-      let item=recentListRef.value.addRecentItem(teamId,ECommon_IM_Message_EntityType.TEAM, false)
+	    let objAt:{
+		    all:boolean,
+		    [param:string]:boolean
+	    }={
+		    all:false
+	    }
+	    if(contentType===ECommon_IM_Message_ContentType.RICH_TEXT) {
+		    for(let objLine of content as ICommon_Content_Line[]) {
+			    for(let objConfig of objLine.arr) {
+				    if(objConfig.type===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
+					    if(objConfig.value==="0") {
+						    objAt.all=true
+					    } else {
+						    objAt[objConfig.value]=true
+					    }
+				    }
+			    }
+		    }
+	    }
+      let item=recentListRef.value.addRecentItem(teamId,ECommon_IM_Message_EntityType.TEAM, false,objAt)
       if(!item.count) {
         item.count=1;
         socket.getSocket().emit("im_unread_message",teamId,ECommon_IM_Message_EntityType.TEAM)
@@ -296,10 +358,11 @@ const onShowMore=async (lastItem:IClient_Chat_Message_Item, type: ECommon_IM_Mes
             type:ECommon_IM_Message_EntityType.USER
           }])
           return {
+	          messageId:item.id,
             id:item.from_organization_user_id,
             type:item.content_type,
             date:moment(item.created_time).format("YYYY-MM-DD HH:mm:ss.SSS"),
-            content:item.content || item.file_id,
+            content:JSON.parse(item.content),
             name:obj[item.from_organization_user_id]?obj[item.from_organization_user_id].name:"unknown",
             photo:obj[item.from_organization_user_id]?obj[item.from_organization_user_id].photo:""
           }
@@ -312,10 +375,11 @@ const onShowMore=async (lastItem:IClient_Chat_Message_Item, type: ECommon_IM_Mes
             type:ECommon_IM_Message_EntityType.USER
           }])
           return {
+	          messageId:item.id,
             id:item.from_organization_user_id,
             type:item.content_type,
             date:moment(item.created_time).format("YYYY-MM-DD HH:mm:ss.SSS"),
-            content:item.content || item.file_id,
+            content:JSON.parse(item.content),
             name:obj[item.from_organization_user_id]?obj[item.from_organization_user_id].name:"unknown",
             photo:obj[item.from_organization_user_id]?obj[item.from_organization_user_id].photo:""
           }
@@ -335,6 +399,16 @@ const onClickChatPhoto=(item:IClient_Chat_Message_Item, x:number, y:number)=>{
     x,
     y
   }
+}
+
+const onClickFavorite=(key:string)=>{
+	recentListRef.value.cancelSelectedItem()
+}
+
+const onFavorite=async (item:IClient_Chat_Message_Item,type: ECommon_IM_Message_EntityType)=>{
+	let myOrganizationUserId=SessionStorage.get("organizationUserId")
+	socket.getSocket().emit("im_favorite_message_add",myOrganizationUserId,type,item.messageId)
+	Message.info("favorite success")
 }
 
 const handleUserInfo = (id: string, info: {
@@ -375,19 +449,48 @@ const getTeamMemberList=async (teamId:string)=>{
 const openSpecificChat=(id:string, chatType:ECommon_IM_Message_EntityType)=>{
   recentListRef.value.addRecentItem(id,chatType,true)
 }
+
+const locateMessage=async (item:ICommon_Socket_IM_Search_Message_User|ICommon_Socket_IM_Search_Message_Team)=>{
+	let isTeam=false
+	if((item as ICommon_Socket_IM_Search_Message_Team).teamId) {
+		isTeam=true
+	}
+	if(!isTeam) {
+		let itemUser=item as ICommon_Socket_IM_Search_Message_User
+		let organizationUserId=itemUser.fromOrganizationUserId===myOrganizationUserId?itemUser.toOrganizationUserId:item.fromOrganizationUserId
+		locateInfo={
+			messageId:item.messageId,
+			id:organizationUserId
+		}
+		recentListRef.value.addRecentItem(organizationUserId,ECommon_IM_Message_EntityType.USER, true)
+	} else {
+		let itemTeam=item as ICommon_Socket_IM_Search_Message_Team
+		locateInfo={
+			messageId:item.messageId,
+			id:itemTeam.teamId
+		}
+		recentListRef.value.addRecentItem(itemTeam.teamId,ECommon_IM_Message_EntityType.TEAM, true)
+	}
+}
+
 onBeforeMount(()=>{
   eventBus.on(EClient_EVENTBUS_TYPE.RECEIVE_IM_MESSAGE, onReceiveMessage)
   eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_USER_INFO, handleUserInfo)
   eventBus.on(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,openSpecificChat)
+	eventBus.on(EClient_EVENTBUS_TYPE.LOCATE_IM_MESSAGE,locateMessage)
 })
 onBeforeUnmount(()=>{
   eventBus.off(EClient_EVENTBUS_TYPE.RECEIVE_IM_MESSAGE ,onReceiveMessage)
   eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_USER_INFO, handleUserInfo)
   eventBus.off(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,openSpecificChat)
+	eventBus.off(EClient_EVENTBUS_TYPE.LOCATE_IM_MESSAGE,locateMessage)
 })
 
 </script>
 
 <style scoped>
+#imMenu :deep .arco-menu-inner {
+	padding: 0px;
+}
 
 </style>

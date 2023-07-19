@@ -1,4 +1,4 @@
-import {AppContext, nextTick, reactive, Ref} from "vue";
+import {AppContext, markRaw, nextTick, reactive, Ref} from "vue";
 import {RichEditorHandle} from "./handle";
 import {RichEditorFunc} from "./func";
 import {
@@ -114,7 +114,7 @@ export class RichEditorEvent {
         }
     }
 
-    onEnter(line:ICommon_Content_Line, index:number, event:MouseEvent){
+    onEnter(line:ICommon_Content_Line, index:number, event:KeyboardEvent){
         event.preventDefault()
         event.stopPropagation()
         RichEditorHandle.handleInnerHtml(line,event.currentTarget as HTMLElement)
@@ -746,11 +746,15 @@ export class RichEditorEvent {
 
     onCopy(event:ClipboardEvent) {
         const range=window.getSelection().getRangeAt(0)
+        if(range.startContainer.nodeType===Node.TEXT_NODE && range.startContainer.parentElement.tagName==="A") {
+            range.setStartBefore(range.startContainer.parentElement)
+        }
         const content=range.cloneContents()
         const ele=document.createElement("div")
         ele.setAttribute("copy","teamlinker")
         ele.appendChild(content)
         event.clipboardData.setData("text/html",ele.outerHTML)
+        event.clipboardData.setData("text/plain",ele.innerText)
         event.preventDefault()
         event.stopPropagation()
     }
@@ -1088,6 +1092,9 @@ export class RichEditorEvent {
             }
         }
         if(event.key==="@") {
+            if(!this.onQuoteListFunc) {
+                return;
+            }
             if(!this.quoteElement) {
                 this.quoteElement=document.createElement("div")
                 this.quoteElement.style.position="absolute"
@@ -1102,7 +1109,7 @@ export class RichEditorEvent {
                 this.quoteElement.style.outlineWidth="0"
                 this.quoteElement.tabIndex=-1;
                 (event.target as HTMLElement).offsetParent.appendChild(this.quoteElement)
-                this.destroyQuoteFunc=renderComponent(this.quoteElement,Quote,this.appContext,{
+                this.destroyQuoteFunc=renderComponent(this.quoteElement,markRaw(Quote),this.appContext,{
                     objEditor:this
                 });
             }

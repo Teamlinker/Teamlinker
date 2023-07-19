@@ -17,7 +17,7 @@ type EXPRVALUEEXP ={
         model:BaseModel,
         field:string
     },
-    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"|"not in"
+    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"|"not in"|"regexp"
 }
 type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
     type:"and"|"or",
@@ -108,6 +108,8 @@ function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[],table?:string)
                 return typeof(item)=="number"?item:("'"+item+"'")
             }).join(",")})`)
         }
+    } else if(value.exp=="regexp") {
+        arrExpr.push(`${table?(table+"."):""}${key} regexp '${value.value}'`)
     }
 }
 
@@ -290,7 +292,9 @@ export function generateBatchCreateSql<T extends BaseModel>(model:T,arr:{
 }
 
 export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columns:K1[],objExpr?:{
-    [param in keyof T["model"]]?:EXPRVALUE
+    [param in ((keyof T["model"])|`${"$and"|"$or"}${number}`)]?:EXPRVALUE|{
+        [param in keyof T["model"]]?:EXPRVALUE
+    }
 },exprMode?:"and"|"or",order?:{
     field:keyof T["model"],
     type:"asc"|"desc"|"field",
@@ -424,7 +428,9 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
         value:number
     }|T["model"][param]
 },objExpr?:{
-    [param in keyof T["model"]]?:EXPRVALUE
+    [param in ((keyof T["model"])|`${"$and"|"$or"}${number}`)]?:EXPRVALUE|{
+        [param in keyof T["model"]]?:EXPRVALUE
+    }
 },exprMode?:"and"|"or"):{
     value:string,
     type:T["model"]
@@ -469,7 +475,9 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
 }
 
 export function generateDeleteSql<T extends BaseModel>(model:T,objExpr?:{
-    [param in keyof T["model"]]?:EXPRVALUE
+    [param in ((keyof T["model"])|`${"$and"|"$or"}${number}`)]?:EXPRVALUE|{
+        [param in keyof T["model"]]?:EXPRVALUE
+    }
 },exprMode?:"and"|"or"):{
     value:string,
     type:T["model"]

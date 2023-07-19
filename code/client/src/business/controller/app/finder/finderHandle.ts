@@ -22,7 +22,7 @@ import {
     ICommon_Model_Finder_Item
 } from "../../../../../../common/model/finder_item";
 import {selectedSelectableItems} from "../../../../teamOS/common/directive/selectable";
-import {IClient_Drag_Element} from "../../../../teamOS/common/directive/drag";
+import {EClient_Drag_Type, IClient_Drag_Element} from "../../../../teamOS/common/directive/drag";
 import {DropParam} from "../../../../teamOS/common/directive/drop";
 import {SessionStorage} from "../../../common/storage/session";
 import {Message} from "@arco-design/web-vue";
@@ -271,7 +271,7 @@ export class FinderHandle {
         if(data.type==="internal") {
             let arr=(data.data as IClient_Drag_Element[])
             await Promise.allSettled(arr.map(obj=>{
-                if(obj.value) {
+                if(obj.from==="finder") {
                     return apiFinder.info({
                         finderItemId:obj.value
                     }).then(res=>{
@@ -290,16 +290,36 @@ export class FinderHandle {
                         }
                     })
                 } else {
-                    return apiFinder.createShortcut({
-                        name:obj.shortcutName,
-                        parentFolderId:destId,
-                        shortcutType:obj.shortcutType,
-                        itemId:obj.shortcutRefId
-                    }).then(res=>{
-                        if(res.code!=0) {
-                            Message.error(res.msg)
-                        }
-                    })
+                    if(obj.type===EClient_Drag_Type.FILE) {
+                        return apiFile.getPath({
+                            fileId:obj.value
+                        }).then(res=>{
+                            if(res?.code==0) {
+                                return apiFinder.linkFile({
+                                    name:obj.element.tagName==="IMG"?`UnTitled${res.data.uri.substring(res.data.uri.lastIndexOf("."))}`:obj.element.innerText,
+                                    parentFolderId:destId,
+                                    fileId:obj.value
+                                })
+                            } else {
+                                Message.error(res.msg)
+                            }
+                        }).then(res=>{
+                            if(res.code!=0) {
+                                Message.error(res.msg)
+                            }
+                        })
+                    } else if(obj.type===EClient_Drag_Type.SHORTCUT) {
+                        return apiFinder.createShortcut({
+                            name:obj.shortcutName,
+                            parentFolderId:destId,
+                            shortcutType:obj.shortcutType,
+                            itemId:obj.shortcutRefId
+                        }).then(res=>{
+                            if(res.code!=0) {
+                                Message.error(res.msg)
+                            }
+                        })
+                    }
                 }
             }))
         } else if(data.type==="external") {

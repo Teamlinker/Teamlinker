@@ -5,6 +5,12 @@ export enum ECommon_IM_Message_EntityType {
     TEAM
 }
 
+export enum ECommon_IM_Message_At {
+    NONE,
+    ALL,
+    SPECIFIC
+}
+
 export interface ICommon_Model_IM_UnRead_Message {
     id:string,
     organization_user_id:string,
@@ -12,7 +18,9 @@ export interface ICommon_Model_IM_UnRead_Message {
     entity_id:string,
     entity_type:ECommon_IM_Message_EntityType,
     count:number,
-    unique_id:string
+    unique_id:string,
+    at:number,
+    organization_id:string
 }
 export const Table_IM_UnRead_Message="im_unread_message"
 

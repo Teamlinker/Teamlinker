@@ -11,6 +11,7 @@ import {IServer_Common_RPC_User_CheckSession} from "../types/config";
 import {Err} from "../../../common/status/error";
 import {ECommon_User_Online_Status} from "../../../common/types";
 import CommonUtil from "../../common/util/common";
+import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 
 
 class RpcUserApi {
@@ -225,8 +226,17 @@ class RpcUserApi {
         if(!objUser) {
             throw Err.User.userNotFound
         }
-        let ret=await objUser.teamList(objOrganizationUser.getId(),objOrganizationUser.getItem().organization_id)
-        return ret;
+        let redis=REDIS_ORGANIZATION.teamList(organizationUserId)
+        let exist=await redis.exists()
+        if(exist) {
+            let obj=await redis.get()
+            await redis.setTTL(10)
+            return obj
+        } else {
+            let ret=await objUser.teamList(objOrganizationUser.getId(),objOrganizationUser.getItem().organization_id)
+            await redis.set(ret,10)
+            return ret;
+        }
     }
 
     async listTeamUser(teamId:string) {

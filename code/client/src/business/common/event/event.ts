@@ -2,6 +2,11 @@ import EventEmitter from "eventemitter3"
 import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
 import {ECommon_IM_Message_ContentType} from "../../../../../common/model/im_user_message";
 import {ECommon_User_Online_Status} from "../../../../../common/types";
+import {ICommon_Content_Line} from "../../../../../common/model/content";
+import {
+    ICommon_Socket_IM_Search_Message_Team,
+    ICommon_Socket_IM_Search_Message_User
+} from "../../../../../common/socket/types";
 
 export enum EClient_EVENTBUS_TYPE {
     OPEN_PEOPLE_PROFILE="open_people_profile",
@@ -14,6 +19,7 @@ export enum EClient_EVENTBUS_TYPE {
     UPDATE_USER_INFO="update_user_info",
     RECEIVE_IM_MESSAGE="receive_im_message",
     OPEN_IM_CHAT="open_im_chat",
+    LOCATE_IM_MESSAGE="locate_im_message",
     UPDATE_ORGANIZATION_USER_STATUS="update_organization_user_status",
     OPEN_MEETING="open_meeting",
     LEAVE_MEETING="leave_meeting",
@@ -42,7 +48,7 @@ interface IClient_EventBus_Func {
         photo:string,
         type:ECommon_IM_Message_EntityType
     })=>void
-    [EClient_EVENTBUS_TYPE.RECEIVE_IM_MESSAGE]:(chatType:ECommon_IM_Message_EntityType,fromOrganizationUserId:string,content:string,contentType:ECommon_IM_Message_ContentType,date:Date,toOrganizationUserId?:string,teamId?:string)=>void
+    [EClient_EVENTBUS_TYPE.RECEIVE_IM_MESSAGE]:(messageId:string,chatType:ECommon_IM_Message_EntityType,fromOrganizationUserId:string,content:ICommon_Content_Line[],contentType:ECommon_IM_Message_ContentType,date:Date,toOrganizationUserId?:string,teamId?:string)=>void
     [EClient_EVENTBUS_TYPE.OPEN_IM_CHAT]:(id:string,chatType:ECommon_IM_Message_EntityType)=>void
     [EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS]:(organizationUserId:string,status:ECommon_User_Online_Status)=>void
     [EClient_EVENTBUS_TYPE.OPEN_MEETING]:(meetingId:string,password:string)=>void
@@ -56,6 +62,7 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW]:(folderId:string)=>void
     [EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST]:()=>void
     [EClient_EVENTBUS_TYPE.REFRESH_NOTIFICATION_UNREAD]:()=>void
+    [EClient_EVENTBUS_TYPE.LOCATE_IM_MESSAGE]:(item:ICommon_Socket_IM_Search_Message_User|ICommon_Socket_IM_Search_Message_Team)=>void
 }
 
 interface IClient_EventBus_Emit_Func {

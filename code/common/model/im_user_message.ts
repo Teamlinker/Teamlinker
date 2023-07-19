@@ -1,8 +1,7 @@
 import {BaseModel} from "./base"
 
 export enum ECommon_IM_Message_ContentType {
-    TEXT,
-    IMAGE
+    RICH_TEXT,
 }
 export interface ICommon_Model_IM_User_Message {
     id:string,
@@ -10,8 +9,8 @@ export interface ICommon_Model_IM_User_Message {
     to_organization_user_id:string,
     created_time:Date,
     content:string,
-    content_type:ECommon_IM_Message_ContentType
-    file_id:string
+    content_type:ECommon_IM_Message_ContentType,
+    organization_id:string
 }
 export const Table_IM_User_Message="im_user_message"
 

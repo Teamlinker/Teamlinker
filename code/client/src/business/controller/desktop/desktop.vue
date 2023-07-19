@@ -63,7 +63,7 @@
 	  </template>
 	  <template #finderItemList>
 		  <template v-for="(item,index) in finderItemIconList" :key="item.meta.id">
-			  <IconItem :item="item" :index="index" v-if="item.meta.type===ECommon_Model_Finder_Item_Type.FILE" v-selectable.file="item.meta.id" >
+			  <IconItem :item="item" :index="index" v-if="item.meta.type===ECommon_Model_Finder_Item_Type.FILE" v-selectable.file="item.meta.id" @dblclick="onFileDbClick(item.meta)">
 			  </IconItem>
 			  <IconItem :item="item" :index="index" v-else-if="item.meta.type===ECommon_Model_Finder_Item_Type.FOLDER" v-selectable.folder="item.meta.id" v-drop.file.shortcut.folder.disk="objFinderHandle.onDrop.bind(objFinderHandle,item.meta.id)">
 			  </IconItem>
@@ -75,6 +75,9 @@
 			} as IClient_Drag_Shortcut_Value">
 			  </IconItem>
 		  </template>
+		  <a-image-preview :src="imgUri"
+		                   v-model:visible="imgVisible"
+		  />
 	  </template>
   </TeamOS>
 	<a-skeleton :animation="true" v-if="loading" style="position: absolute;left: 0;top: 0;height: 100%;width: 100%;background-color: white;z-index: 10000">
@@ -101,10 +104,10 @@ import {v4} from "uuid";
 import Account from "../app/account/account.vue";
 import {SessionStorage} from "../../common/storage/session";
 import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../../../common/types";
-import {apiOrganization} from "../../common/request/request";
+import {apiFile, apiOrganization, DCSType} from "../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../common/event/event";
 import CreateOrganization from "./createOrganization.vue";
-import {ECommon_Model_Finder_Item_Type} from "../../../../../common/model/finder_item";
+import {ECommon_Model_Finder_Item_Type, ICommon_Model_Finder_Item} from "../../../../../common/model/finder_item";
 import {vSelectable} from "../../../teamOS/common/directive/selectable";
 import {ICommon_Route_Res_Finder_Info} from "../../../../../common/routes/response";
 import {IClient_Drag_Shortcut_Value} from "../../../teamOS/common/directive/drag";
@@ -120,6 +123,8 @@ interface ITeamOS_Desktop_Menu {
 		value:string
 	}[]
 }
+const imgUri=ref("")
+const imgVisible=ref(false)
 let desktop=getDesktopInstance().desktop;
 const root=ref()
 const menu=ref<ITeamOS_Desktop_Menu[]>([])
@@ -245,6 +250,26 @@ const onCreate=async ()=>{
 	let ret=await Dialog.open(document.body,appContext,"Create Organization",markRaw(CreateOrganization))
 	if(ret) {
 		store.$update()
+	}
+}
+
+const onFileDbClick=async (item:DCSType<ICommon_Model_Finder_Item>)=>{
+	let arr=[".png",".jpg",".gif",".jpeg",".bmp",".webp"]
+	let isImg=false
+	for(let ext of arr) {
+		if(item.name.toLowerCase().endsWith(ext)) {
+			isImg=true
+			break
+		}
+	}
+	if(isImg) {
+		let res=await apiFile.getPath({
+			fileId:item.file_id
+		})
+		if(res?.code==0) {
+			imgUri.value=res.data.uri
+			imgVisible.value=true
+		}
 	}
 }
 
