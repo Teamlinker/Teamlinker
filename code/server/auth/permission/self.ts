@@ -5,7 +5,7 @@ import {Permission_Types} from "../../../common/permission/permission";
 
 @DComponent
 export class PermissionSelf extends PermissionBase {
-    async translateToField({commentId,projectIssueId,projectReleaseId,meetingRoomId}: { [param: string]: any; userId?: string; isAdmin?: boolean; }): Promise<string>
+    async translateToField({commentId,projectIssueId,projectReleaseId,meetingRoomId,calendarEventId}: { [param: string]: any; userId?: string; isAdmin?: boolean; }): Promise<string>
     {
         let createdByPureId:string
         if(commentId) {
@@ -22,6 +22,10 @@ export class PermissionSelf extends PermissionBase {
             return createdByPureId;
         } else if(meetingRoomId) {
             let obj=new REDIS_AUTH.Permission.Meeting.createdByPureFromMeetingRoom(meetingRoomId);
+            createdByPureId=await obj.getValue();
+            return createdByPureId;
+        } else if(calendarEventId) {
+            let obj=new REDIS_AUTH.Permission.Calendar.createdByPureFromCalendarEvent(calendarEventId);
             createdByPureId=await obj.getValue();
             return createdByPureId;
         }

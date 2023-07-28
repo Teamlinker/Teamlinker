@@ -9,7 +9,7 @@ import TeamProfile from "../../app/team/teamProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
 
-export const iconTeam=new Icon("team",iconGroupMap["team"])
+export const iconTeam=new Icon("Team",iconGroupMap["team"])
 iconTeam.addEventListener("dbClick", item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
@@ -30,7 +30,7 @@ iconTeam.addEventListener("dbClick", item => {
                 title: "team"
             }
         }
-    ],"team");
+    ],"Team");
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -68,6 +68,22 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_TEAM_PROFILE,teamId => {
                 }
             }
         }
-    ],"team");
+    ],"Team");
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"team"
+            },
+            components:{
+                team:markRaw(Team),
+                profile:markRaw(TeamProfile)
+            },
+            default:{
+                name:"team",
+                title: "team"
+            }
+        }
+    })
     windowManager.open(win);
 })

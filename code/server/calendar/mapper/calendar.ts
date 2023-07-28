@@ -7,7 +7,7 @@ import {
     convertCountSql,
     generateBatchCreateSql,
     generateDeleteInnerJoin2Sql,
-    generateDeleteInnerJoinSql,
+    generateDeleteInnerJoin3Sql,
     generateDeleteSql,
     generateLeftJoin2Sql,
     generateLeftJoinSql,
@@ -20,6 +20,7 @@ import {ICommon_Route_Res_Calendar_ListEvent_Item} from "../../../common/routes/
 import * as moment from "moment";
 import {keys} from "../../../common/transform";
 import CommonUtil from "../../common/util/common";
+import {meetingRoomModel} from "../../../common/model/meeting_room";
 
 
 class CalendarMapper extends Mapper<typeof calendarModel> {
@@ -42,10 +43,18 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
             throw Err.Calendar.calendarNotFound
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteInnerJoinSql(calendarEventModel,{
+        await mysql.execute(generateDeleteInnerJoin2Sql(calendarEventModel,{
             model:calendarEventGuestModel,
             expression:{
                 calendar_event_id:{
+                    model:calendarEventModel,
+                    field:"id"
+                }
+            }
+        },{
+            model:meetingRoomModel,
+            expression:{
+                related_id:{
                     model:calendarEventModel,
                     field:"id"
                 }
@@ -64,7 +73,7 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
         }
         let mysql=getMysqlInstance()
         await Promise.all([
-            mysql.execute(generateDeleteInnerJoin2Sql(calendarModel,{
+            mysql.execute(generateDeleteInnerJoin3Sql(calendarModel,{
                 model:calendarEventModel,
                 expression:{
                     calendar_id:{
@@ -76,6 +85,14 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                 model:calendarEventGuestModel,
                 expression:{
                     calendar_event_id:{
+                        model:calendarEventModel,
+                        field:"id"
+                    }
+                }
+            },{
+                model:meetingRoomModel,
+                expression:{
+                    related_id:{
                         model:calendarEventModel,
                         field:"id"
                     }
@@ -98,7 +115,7 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
         }
         let mysql=getMysqlInstance()
         await Promise.all([
-            mysql.execute(generateDeleteInnerJoin2Sql(calendarModel,{
+            mysql.execute(generateDeleteInnerJoin3Sql(calendarModel,{
                 model:calendarEventModel,
                 expression:{
                     calendar_id:{
@@ -110,6 +127,14 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                 model:calendarEventGuestModel,
                 expression:{
                     calendar_event_id:{
+                        model:calendarEventModel,
+                        field:"id"
+                    }
+                }
+            },{
+                model:meetingRoomModel,
+                expression:{
+                    related_id:{
                         model:calendarEventModel,
                         field:"id"
                     }
@@ -136,7 +161,7 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
         let arrPromise=[
             Promise.resolve(generateLeftJoinSql({
                 model:calendarEventModel,
-                columns:["name","id","start_time","end_time","reminder_minutes","all_day"]
+                columns:["name","id","start_time","end_time","reminder_minutes","all_day","created_by"]
             },{
                 model:calendarModel,
                 columns:["color","id","name"],
@@ -239,14 +264,15 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                             name:obj.calendarName
                         },
                         all_day:obj.all_day,
-                        reminder_minutes:obj.reminder_minutes
+                        reminder_minutes:obj.reminder_minutes,
+                        created_by:obj.created_by
                     })
                 }
                 return ret;
             }),
             Promise.resolve(generateLeftJoinSql({
                 model: calendarEventModel,
-                columns: ["name", "id", "start_time", "end_time", "recurring", "recurring_day","all_day","reminder_minutes"]
+                columns: ["name", "id", "start_time", "end_time", "recurring", "recurring_day","all_day","reminder_minutes","created_by"]
             }, {
                 model: calendarModel,
                 columns:["color","id","name"],
@@ -303,7 +329,8 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                                     name:obj.calendarName
                                 },
                                 all_day:obj.all_day,
-                                reminder_minutes:obj.reminder_minutes
+                                reminder_minutes:obj.reminder_minutes,
+                                created_by:obj.created_by
                             })
                         }
                         objStart.add(1,"days")
@@ -316,7 +343,7 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
             arrPromise.push(
                 Promise.resolve(generateLeftJoin2Sql({
                     model:calendarEventModel,
-                    columns:["name","id","start_time","end_time","reminder_minutes","all_day"]
+                    columns:["name","id","start_time","end_time","reminder_minutes","all_day","created_by"]
                 },{
                     model:calendarModel,
                     columns:["color","id","name"],
@@ -427,14 +454,15 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                                 name:obj.calendarName
                             },
                             all_day:obj.all_day,
-                            reminder_minutes:obj.reminder_minutes
+                            reminder_minutes:obj.reminder_minutes,
+                            created_by:obj.created_by
                         })
                     }
                     return ret;
                 }),
             Promise.resolve(generateLeftJoin2Sql({
                 model: calendarEventModel,
-                columns: ["name", "id", "start_time", "end_time", "recurring", "recurring_day","reminder_minutes","all_day"]
+                columns: ["name", "id", "start_time", "end_time", "recurring", "recurring_day","reminder_minutes","all_day","created_by"]
             }, {
                 model: calendarModel,
                 columns:["color","id","name"],
@@ -503,7 +531,8 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                                     name:obj.calendarName
                                 },
                                 all_day:obj.all_day,
-                                reminder_minutes:obj.reminder_minutes
+                                reminder_minutes:obj.reminder_minutes,
+                                created_by:obj.created_by
                             })
                         }
                         objStart.add(1,"days")
@@ -754,6 +783,601 @@ class CalendarEventMapper extends Mapper<typeof calendarEventModel> {
             page:page,
             data:ret
         }
+    }
+
+
+    async searchCalendarEvent(organizationUserId:string,calendarId?:string,start?:number,end?:number,keyword?:string,location?:string):Promise<ICommon_Route_Res_Calendar_ListEvent_Item[]> {
+        if(!organizationUserId) {
+            throw Err.Organization.userNotFound
+        }
+        let startStr:string,endStr:string
+        if(start) {
+            startStr=moment(start).format("YYYY-MM-DD HH:mm")
+        }
+        if(end) {
+            endStr=moment(end).format("YYYY-MM-DD HH:mm")
+        }
+        let mysql=getMysqlInstance()
+        let arrPromise=[
+            Promise.resolve(generateLeftJoinSql({
+                model:calendarEventModel,
+                columns:["name","id","start_time","end_time","reminder_minutes","all_day","created_by"]
+            },{
+                model:calendarModel,
+                columns:["color","id","name"],
+                rename:{
+                    fields:["id","name"],
+                    newFields:["calendarId","calendarName"]
+                },
+                expression:{
+                    id:{
+                        model:calendarEventModel,
+                        field:"calendar_id"
+                    }
+                }
+            },{
+                "$and0":{
+                    ...(startStr && {
+                        start_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"<=",
+                                value:startStr
+                            }
+                        }
+                    }),
+                    ...(endStr && {
+                        end_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp: ">",
+                                value:startStr
+                            }
+                        }
+                    }),
+                    ...(calendarId && {
+                        calendar_id: {
+                            model:calendarEventModel,
+                            value:calendarId
+                        }
+                    }),
+                    recurring:{
+                        model:calendarEventModel,
+                        value:ECommon_Calendar_Recurring_Type.NONE
+                    },
+                    created_by:{
+                        model:calendarEventModel,
+                        value:organizationUserId
+                    },
+                    ...(keyword && {
+                        name:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:keyword
+                            }
+                        }
+                    }),
+                    ...(location && {
+                        location:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:location
+                            }
+                        }
+                    })
+                },
+                "$and1":{
+                    ...(startStr && {
+                        start_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"<=",
+                                value:endStr
+                            }
+                        }
+                    }),
+                    ...(endStr && {
+                        end_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp: ">",
+                                value:endStr
+                            }
+                        }
+                    }),
+                    ...(calendarId && {
+                        calendar_id: {
+                            model:calendarEventModel,
+                            value:calendarId
+                        }
+                    }),
+                    recurring:{
+                        model:calendarEventModel,
+                        value:ECommon_Calendar_Recurring_Type.NONE
+                    },
+                    created_by:{
+                        model:calendarEventModel,
+                        value:organizationUserId
+                    },
+                    ...(keyword && {
+                        name:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:keyword
+                            }
+                        }
+                    }),
+                    ...(location && {
+                        location:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:location
+                            }
+                        }
+                    })
+                },
+                "$and2":{
+                    ...(startStr && {
+                        start_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:">=",
+                                value:startStr
+                            }
+                        }
+                    }),
+                    ...(endStr && {
+                        end_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp: "<=",
+                                value:endStr
+                            }
+                        }
+                    }),
+                    ...(calendarId && {
+                        calendar_id: {
+                            model:calendarEventModel,
+                            value:calendarId
+                        }
+                    }),
+                    recurring:{
+                        model:calendarEventModel,
+                        value:ECommon_Calendar_Recurring_Type.NONE
+                    },
+                    created_by:{
+                        model:calendarEventModel,
+                        value:organizationUserId
+                    },
+                    ...(keyword && {
+                        name:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:keyword
+                            }
+                        }
+                    }),
+                    ...(location && {
+                        location:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:location
+                            }
+                        }
+                    })
+                }
+            },"or")).then(sql=>{
+                return mysql.execute(sql)
+            }).then(arr=>{
+                let ret:ICommon_Route_Res_Calendar_ListEvent_Item[]=[]
+                for(let obj of arr) {
+                    ret.push({
+                        name:obj.name,
+                        color:obj.color,
+                        id:obj.id,
+                        start_time:obj.start_time,
+                        end_time:obj.end_time,
+                        calendar:{
+                            id:obj.calendarId,
+                            name:obj.calendarName
+                        },
+                        all_day:obj.all_day,
+                        reminder_minutes:obj.reminder_minutes,
+                        created_by:obj.created_by
+                    })
+                }
+                return ret;
+            }),
+            Promise.resolve(generateLeftJoinSql({
+                model: calendarEventModel,
+                columns: ["name", "id", "start_time", "end_time", "recurring", "recurring_day","all_day","reminder_minutes","created_by"]
+            }, {
+                model: calendarModel,
+                columns:["color","id","name"],
+                rename:{
+                    fields:["id","name"],
+                    newFields:["calendarId","calendarName"]
+                },
+                expression: {
+                    id: {
+                        model: calendarEventModel,
+                        field: "calendar_id"
+                    }
+                }
+            }, {
+                ...(calendarId && {
+                    calendar_id: {
+                        model: calendarEventModel,
+                        value: calendarId
+                    }
+                }),
+                recurring: {
+                    model: calendarEventModel,
+                    value: {
+                        exp: "<>",
+                        value: ECommon_Calendar_Recurring_Type.NONE
+                    }
+                },
+                ...(startStr && {
+                    start_time: {
+                        model: calendarEventModel,
+                        value: {
+                            exp: "<=",
+                            value: endStr
+                        }
+                    }
+                }),
+                created_by:{
+                    model:calendarEventModel,
+                    value:organizationUserId
+                },
+                ...(keyword && {
+                    name:{
+                        model:calendarEventModel,
+                        value:{
+                            exp:"%like%",
+                            value:keyword
+                        }
+                    }
+                }),
+                ...(location && {
+                    location:{
+                        model:calendarEventModel,
+                        value:{
+                            exp:"%like%",
+                            value:location
+                        }
+                    }
+                })
+            }, "and")).then(sql=>{
+                return mysql.execute(sql)
+            }).then(arr => {
+                let ret:ICommon_Route_Res_Calendar_ListEvent_Item[]=[]
+                for(let obj of arr) {
+                    let objStart=moment(start)
+                    let objEnd=moment(end)
+                    let objStartTime=moment(obj.start_time)
+                    let objEndTime=moment(obj.end_time)
+                    while (objStart.isSameOrBefore(objEnd,"days")) {
+                        let isMatch=calendarEventMapper.checkRecurringEvent(obj.recurring,obj.recurring_day,obj.start_time,objStart)
+                        if(isMatch) {
+                            let offsetDay=objStart.diff(objStartTime.clone().startOf("days"),"days")
+                            ret.push({
+                                name:obj.name,
+                                color:obj.color,
+                                id:obj.id,
+                                start_time:objStartTime.clone().add(offsetDay,"days").toDate(),
+                                end_time:objEndTime.clone().add(offsetDay,"days").toDate(),
+                                calendar:{
+                                    id:obj.calendarId,
+                                    name:obj.calendarName
+                                },
+                                all_day:obj.all_day,
+                                reminder_minutes:obj.reminder_minutes,
+                                created_by:obj.created_by
+                            })
+                        }
+                        objStart.add(1,"days")
+                    }
+                }
+                return ret;
+            }),
+            Promise.resolve(generateLeftJoin2Sql({
+                model:calendarEventModel,
+                columns:["name","id","start_time","end_time","reminder_minutes","all_day","created_by"]
+            },{
+                model:calendarModel,
+                columns:["color","id","name"],
+                rename:{
+                    fields:["id","name"],
+                    newFields:["calendarId","calendarName"]
+                },
+                expression:{
+                    id:{
+                        model:calendarEventModel,
+                        field:"calendar_id"
+                    }
+                }
+            },{
+                model:calendarEventGuestModel,
+                expression:{
+                    calendar_event_id:{
+                        model:calendarEventModel,
+                        field:"id"
+                    }
+                }
+            },{
+                "$and0":{
+                    ...(startStr && {
+                        start_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"<=",
+                                value:startStr
+                            }
+                        }
+                    }),
+                    ...(endStr && {
+                        end_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp: ">",
+                                value:startStr
+                            }
+                        }
+                    }),
+                    organization_user_id: {
+                        model:calendarEventGuestModel,
+                        value:organizationUserId
+                    },
+                    recurring:{
+                        model:calendarEventModel,
+                        value:ECommon_Calendar_Recurring_Type.NONE
+                    },
+                    ...(keyword && {
+                        name:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:keyword
+                            }
+                        }
+                    }),
+                    ...(location && {
+                        location:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:location
+                            }
+                        }
+                    })
+                },
+                "$and1":{
+                    ...(startStr && {
+                        start_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"<=",
+                                value:endStr
+                            }
+                        }
+                    }),
+                    ...(endStr && {
+                        end_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp: ">",
+                                value:endStr
+                            }
+                        }
+                    }),
+                    organization_user_id: {
+                        model:calendarEventGuestModel,
+                        value:organizationUserId
+                    },
+                    recurring:{
+                        model:calendarEventModel,
+                        value:ECommon_Calendar_Recurring_Type.NONE
+                    },
+                    ...(keyword && {
+                        name:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:keyword
+                            }
+                        }
+                    }),
+                    ...(location && {
+                        location:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:location
+                            }
+                        }
+                    })
+                },
+                "$and2":{
+                    ...(startStr && {
+                        start_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:">=",
+                                value:startStr
+                            }
+                        }
+                    }),
+                    ...(endStr && {
+                        end_time:{
+                            model:calendarEventModel,
+                            value:{
+                                exp: "<=",
+                                value:endStr
+                            }
+                        }
+                    }),
+                    organization_user_id: {
+                        model:calendarEventGuestModel,
+                        value:organizationUserId
+                    },
+                    recurring:{
+                        model:calendarEventModel,
+                        value:ECommon_Calendar_Recurring_Type.NONE
+                    },
+                    ...(keyword && {
+                        name:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:keyword
+                            }
+                        }
+                    }),
+                    ...(location && {
+                        location:{
+                            model:calendarEventModel,
+                            value:{
+                                exp:"%like%",
+                                value:location
+                            }
+                        }
+                    })
+                }
+            },"or")).then(sql=>{
+                return mysql.execute(sql)
+            }).then(arr=>{
+                let ret:ICommon_Route_Res_Calendar_ListEvent_Item[]=[]
+                for(let obj of arr) {
+                    ret.push({
+                        name:obj.name,
+                        color:obj.color,
+                        id:obj.id,
+                        start_time:obj.start_time,
+                        end_time:obj.end_time,
+                        calendar:{
+                            id:obj.calendarId,
+                            name:obj.calendarName
+                        },
+                        all_day:obj.all_day,
+                        reminder_minutes:obj.reminder_minutes,
+                        created_by:obj.created_by
+                    })
+                }
+                return ret;
+            }),
+            Promise.resolve(generateLeftJoin2Sql({
+                model: calendarEventModel,
+                columns: ["name", "id", "start_time", "end_time", "recurring", "recurring_day","reminder_minutes","all_day","created_by"]
+            }, {
+                model: calendarModel,
+                columns:["color","id","name"],
+                rename:{
+                    fields:["id","name"],
+                    newFields:["calendarId","calendarName"]
+                },
+                expression: {
+                    id: {
+                        model: calendarEventModel,
+                        field: "calendar_id"
+                    }
+                }
+            },{
+                model:calendarEventGuestModel,
+                expression:{
+                    calendar_event_id:{
+                        model:calendarEventModel,
+                        field:"id"
+                    }
+                }
+            }, {
+                ...(calendarId && {
+                    calendar_id: {
+                        model: calendarEventModel,
+                        value: calendarId
+                    }
+                }),
+                recurring: {
+                    model: calendarEventModel,
+                    value: {
+                        exp: "<>",
+                        value: ECommon_Calendar_Recurring_Type.NONE
+                    }
+                },
+                ...(startStr && {
+                    start_time: {
+                        model: calendarEventModel,
+                        value: {
+                            exp: "<=",
+                            value: endStr
+                        }
+                    }
+                }),
+                organization_user_id:{
+                    model:calendarEventGuestModel,
+                    value:organizationUserId
+                },
+                ...(keyword && {
+                    name:{
+                        model:calendarEventModel,
+                        value:{
+                            exp:"%like%",
+                            value:keyword
+                        }
+                    }
+                }),
+                ...(location && {
+                    location:{
+                        model:calendarEventModel,
+                        value:{
+                            exp:"%like%",
+                            value:location
+                        }
+                    }
+                })
+            }, "and")).then(sql=>{
+                return mysql.execute(sql)
+            }).then(arr => {
+                let ret:ICommon_Route_Res_Calendar_ListEvent_Item[]=[]
+                for(let obj of arr) {
+                    let objStart=moment(start)
+                    let objEnd=moment(end)
+                    let objStartTime=moment(obj.start_time)
+                    let objEndTime=moment(obj.end_time)
+                    while (objStart.isSameOrBefore(objEnd,"days")) {
+                        let isMatch=calendarEventMapper.checkRecurringEvent(obj.recurring,obj.recurring_day,obj.start_time,objStart)
+                        if(isMatch) {
+                            let offsetDay=objStart.diff(objStartTime.clone().startOf("days"),"days")
+                            ret.push({
+                                name:obj.name,
+                                color:obj.color,
+                                id:obj.id,
+                                start_time:objStartTime.clone().add(offsetDay,"days").toDate(),
+                                end_time:objEndTime.clone().add(offsetDay,"days").toDate(),
+                                calendar:{
+                                    id:obj.calendarId,
+                                    name:obj.calendarName
+                                },
+                                all_day:obj.all_day,
+                                reminder_minutes:obj.reminder_minutes,
+                                created_by:obj.created_by
+                            })
+                        }
+                        objStart.add(1,"days")
+                    }
+                }
+                return ret;
+            })
+        ]
+        let [arr1,arr2,arr3,arr4]=await Promise.all(arrPromise)
+        return [...arr1,...arr2,...arr3,...arr4]
     }
 }
 

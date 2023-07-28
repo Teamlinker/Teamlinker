@@ -92,8 +92,7 @@ import {
 	ICommon_Route_Res_Project_Issue_filter_Item
 } from "../../../../../../../common/routes/response";
 import {injectProjectInfo} from "../../../../common/util/symbol";
-import {checkPermission} from "../../../../common/util/helper";
-import {Permission_Types} from "../../../../../../../common/permission/permission";
+import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {
 	ETeamOS_Navigator_Action,

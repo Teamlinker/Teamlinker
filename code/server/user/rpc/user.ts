@@ -47,6 +47,7 @@ class RpcUserApi {
         id:string,
         username:string,
         photo?:string,
+        nickname:string
     }[]> {
         let arrUser:any[]=[...userIds];
         let arr=await UserService.userInfos(userIds.join(","),false,organizationId);

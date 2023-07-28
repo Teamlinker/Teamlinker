@@ -326,6 +326,19 @@ const api={
             }>{},
             res:<ICommon_Model_Project_Release[]>{},
             permission:[Permission_Types.Project.EDIT]
+        },
+        issueRelatedUsers:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/related/users",
+            req:<{
+                projectIssueId:string
+            }>{},
+            res:<{
+                id:string,
+                name:string,
+                photo:string
+            }[]>{},
+            permission:[Permission_Types.Project.READ]
         }
     }
 }

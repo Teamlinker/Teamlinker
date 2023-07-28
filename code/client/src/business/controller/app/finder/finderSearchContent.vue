@@ -41,6 +41,7 @@ const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()
 const objFinderHandle=new FinderHandle(root,appContext,props.folderId)
 const itemList=objFinderHandle.getItemList()
+objFinderHandle.setNameColor("#2a2d33")
 objFinderHandle.onEnterFolderFunc=folderId => {
 	eventBus.emit(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,folderId)
 }

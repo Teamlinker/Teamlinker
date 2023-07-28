@@ -5,7 +5,8 @@
 		height:Icon.height+'px',
 	}">
 			<a-row :style="{width: Icon.width+'px',height:Icon.width+'px',textAlign: 'center'}" style="justify-content: center;align-items: center">
-				<sicon name="Ant" :type="item.icon" size="40" :color="item.iconColor"></sicon>
+<!--				<sicon name="Ant" :type="item.icon" size="40" :color="item.iconColor"></sicon>-->
+				<SvgIcon prefix="" :name="item.icon" class-name="" style="width: 45px;height: 45px"></SvgIcon>
 			</a-row>
 			<div :style="{width: '100%',height:Icon.height-Icon.width+'px',color:item.nameColor}" style="overflow-y: visible;text-overflow:ellipsis;textAlign:center;vertical-align:middle;white-space: nowrap;user-select: none;">
 				<a-input ref="input" size="mini" v-if="item.rename" v-model="editName" :autofocus="true" @press-enter="onEnter" @blur="onBlur" @dragstart="$event.stopPropagation();$event.preventDefault()" @click="$event.stopPropagation();" @mousedown="$event.stopPropagation();" @mouseup="$event.stopPropagation();" @contextmenu="$event.stopPropagation();" @dblclick="$event.stopPropagation();" draggable="true"></a-input>
@@ -19,12 +20,10 @@
 
 <script setup lang="ts">
 import {Icon} from "./icon"
-import {vDrag} from "../common/directive/drag";
 import {vMenu} from "../common/directive/menu";
 import {computed, nextTick, ref, watch} from "vue";
+import SvgIcon from "../../icon/custom/svgIcon.vue";
 
-vMenu;
-vDrag;
 const props=defineProps<{
   item:Icon,
   index:number,

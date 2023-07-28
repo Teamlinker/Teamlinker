@@ -72,7 +72,7 @@ export class RichEditorEventHandle {
             handleFunc(res.data.id,res.data.path)
         }
     }
-    static async onPopMenuClick(type:ECommon_Content_Line_Config_Type,root:Ref<HTMLElement>,appContext:AppContext,loading:Ref<boolean>,handleFunc:(item:ICommon_Content_Line_Config)=>void) {
+    static async onPopMenuClick(type:ECommon_Content_Line_Config_Type,root:Ref<any>,appContext:AppContext,loading:Ref<boolean>,handleFunc:(item:ICommon_Content_Line_Config)=>void) {
         if(type===ECommon_Content_Line_Config_Type.IMAGE || type===ECommon_Content_Line_Config_Type.FILE) {
             let input = document.createElement('input');
             input.type = 'file';
@@ -111,7 +111,7 @@ export class RichEditorEventHandle {
             }
             input.click();
         } else if(type===ECommon_Content_Line_Config_Type.PROJECT) {
-            let ret:any=await Dialog.open(root.value,appContext,"Project",markRaw(ProjectFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Project",markRaw(ProjectFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.PROJECT,
@@ -121,7 +121,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
-            let ret:any=await Dialog.open(root.value,appContext,"Project Issue",markRaw(ProjectIssueFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Project Issue",markRaw(ProjectIssueFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.PROJECT_ISSUE,
@@ -132,7 +132,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
-            let ret:any=await Dialog.open(root.value,appContext,"Project Release",markRaw(ProjectReleaseFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Project Release",markRaw(ProjectReleaseFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
@@ -143,7 +143,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.WIKI) {
-            let ret:any=await Dialog.open(root.value,appContext,"Wiki Space",markRaw(WikiFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Wiki Space",markRaw(WikiFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.WIKI,
@@ -153,7 +153,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
-            let ret:any=await Dialog.open(root.value,appContext,"Wiki Item",markRaw(WikiItemFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Wiki Item",markRaw(WikiItemFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.WIKI_ITEM,
@@ -164,7 +164,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
-            let ret:any=await Dialog.open(root.value,appContext,"Calendar Event",markRaw(CalendarEventFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Calendar Event",markRaw(CalendarEventFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.CALENDAR_EVENT,
@@ -174,7 +174,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
-            let ret:any=await Dialog.open(root.value,appContext,"Meeting Room",markRaw(MeetingRoomFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Meeting Room",markRaw(MeetingRoomFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.MEETING_ROOM,

@@ -4,8 +4,8 @@ import {Err} from "../../../common/status/error";
 import rpcUserApi from "../../user/rpc/user"
 
 class RpcContentApi {
-    async list(refId:string,type:ECommon_Model_Content_Type) {
-        let ret=await ContentService.list(refId,type)
+    async list(refId:string,type:ECommon_Model_Content_Type,isAsc:boolean,lastMessageId?:string) {
+        let ret=await ContentService.list(refId,type,isAsc,lastMessageId)
         return ret;
     }
 

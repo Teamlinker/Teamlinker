@@ -75,14 +75,13 @@ import {injectProjectInfo} from "../../../../common/util/symbol";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
 import {apiRelease, DCSType} from "../../../../common/request/request";
 import {ICommon_Route_Res_Release_Item} from "../../../../../../../common/routes/response";
-import {checkPermission} from "../../../../common/util/helper";
-import {Permission_Types} from "../../../../../../../common/permission/permission";
+import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {
-  ETeamOS_Navigator_Action,
-  getCurrentNavigator,
-  getRootNavigatorRef,
-  onNavigatorShow
+	ETeamOS_Navigator_Action,
+	getCurrentNavigator,
+	getRootNavigatorRef,
+	onNavigatorShow
 } from "../../../../../teamOS/common/component/navigator/navigator";
 import ProjectReleaseEdit from "./projectReleaseEdit.vue";
 import {Message} from "@arco-design/web-vue";

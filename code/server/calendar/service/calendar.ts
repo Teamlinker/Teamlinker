@@ -8,6 +8,9 @@ import userRpcApi from "../../user/rpc/user"
 import {generateSnowId} from "../../common/util/sql";
 import * as moment from "moment";
 import {calendarMq} from "../mq/calendar";
+import rpcContentApi from "../../content/rpc/content"
+import {ECommon_Model_Content_Type} from "../../../common/model/content";
+import rpcMeetingApi from "../../meeting/rpc/meeting"
 
 export class CalendarService extends Entity<typeof calendarModel,typeof calendarMapper> {
     constructor() {
@@ -36,9 +39,7 @@ export class CalendarService extends Entity<typeof calendarModel,typeof calendar
         return ret;
     }
 
-    static async listAllEvent(start:number,end:number) {
 
-    }
 
 }
 
@@ -53,7 +54,13 @@ export class CalendarEventService extends Entity<typeof calendarEventModel,typeo
     }
 
     async getInfo() {
-        let arrGuest=await calendarEventMapper.listGuest(this.getId())
+        let [arrGuest,objAgenda,objMeeting]=await Promise.all([
+            calendarEventMapper.listGuest(this.getId()),
+            rpcContentApi.get(this.getId(),ECommon_Model_Content_Type.CALENDAR_EVENT_AGENDA),
+            rpcMeetingApi.meetingRoomByRelatedId(this.getId()).catch(()=>{
+                return null;
+            })
+        ])
         return {
             ...this.getItem(),
             guestList:(await userRpcApi.getOrganizationUsersInfo(arrGuest.map(item=>item.organization_user_id))).map(item=>{
@@ -63,7 +70,9 @@ export class CalendarEventService extends Entity<typeof calendarEventModel,typeo
                     nickname:item.nickname,
                     photo:item.photo
                 }
-            })
+            }),
+            agenda:objAgenda?.content,
+            meeting:objMeeting?.id
         }
     }
 
@@ -134,6 +143,8 @@ export class CalendarEventService extends Entity<typeof calendarEventModel,typeo
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await calendarEventMapper.clearGuestList(this.getId())
+        await rpcContentApi.clearByRefId(this.getId())
+        await rpcMeetingApi.clearMeetingRoomByRelatedId(this.getId())
     }
 
     static async listReminderEvent(start:number,end:number) {
@@ -148,6 +159,11 @@ export class CalendarEventService extends Entity<typeof calendarEventModel,typeo
 
     static async filterEvent(organizationUserId:string,calendarId:string,name:string,page:number,size:number) {
         let ret=await calendarEventMapper.filterEvent(organizationUserId,calendarId,name,page,size)
+        return ret;
+    }
+
+    static async searchEvent(organizationUserId:string,calendarId?:string,start?:number,end?:number,keyword?:string,location?:string) {
+        let ret=await calendarEventMapper.searchCalendarEvent(organizationUserId,calendarId,start,end,keyword,location)
         return ret;
     }
 }

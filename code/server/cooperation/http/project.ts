@@ -7,6 +7,7 @@ import {ProjectService} from "../service/project";
 import {IUserSession} from "../../user/types/config";
 import rpcAuthApi from "../../auth/rpc/auth";
 import {ECommon_Model_Role_Type} from "../../../common/model/role";
+import {checkPermission, Permission_Types} from "../../../common/permission/permission";
 
 @DHttpController(projectApi)
 class ProjectController {
@@ -108,11 +109,18 @@ class ProjectController {
 
     @DHttpApi(projectApi.routes.list)
     async list(@DHttpReqParam("keyword") keyword:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("organizationUserId") organizationUserId:string,@DHttpUser userInfo:IUserSession) :Promise<typeof projectApi.routes.list.res>{
-        let user=""
-        if(userInfo.type==ECommon_User_Type.ADMIN && organizationUserId) {
+        let user
+        if(organizationUserId) {
             user=organizationUserId
+        } else if(userInfo.type==ECommon_User_Type.ADMIN) {
+            user=""
         } else if(userInfo.type==ECommon_User_Type.USER) {
-            user=userInfo.organizationInfo.organizationUserId
+            let permission=await rpcAuthApi.getPermissionByMemberId(userInfo.organizationInfo.organizationId,userInfo.organizationInfo.organizationUserId,ECommon_Model_Role_Type.ORGANIZATION)
+            if(checkPermission(permission,Permission_Types.Organization.ADMIN)) {
+                user=""
+            } else {
+                user=userInfo.organizationInfo.organizationUserId
+            }
         }
         let list=await ProjectService.list(userInfo.organizationInfo.organizationId,page,size,keyword,user)
         return list

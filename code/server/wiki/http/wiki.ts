@@ -10,6 +10,7 @@ import rpcAuthApi from "../../auth/rpc/auth";
 import {ECommon_Model_Role_Type} from "../../../common/model/role";
 import rpcContentApi from "../../content/rpc/content"
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
+import {checkPermission, Permission_Types} from "../../../common/permission/permission";
 
 @DComponent
 @DHttpController(wikiApi)
@@ -32,11 +33,18 @@ class WikiController {
                @DHttpReqParamRequired("page") page:number,
                @DHttpReqParamRequired("size") size:number,
                @DHttpReqParam("organizationUserId") organizationUserId:string,@DHttpUser userInfo:IUserSession):Promise<typeof wikiApi.routes.list.res>{
-        let user=""
-        if(userInfo.type==ECommon_User_Type.ADMIN && organizationUserId) {
+        let user
+        if(organizationUserId) {
             user=organizationUserId
+        } else if(userInfo.type==ECommon_User_Type.ADMIN) {
+            user=""
         } else if(userInfo.type==ECommon_User_Type.USER) {
-            user=userInfo.organizationInfo.organizationUserId
+            let permission=await rpcAuthApi.getPermissionByMemberId(userInfo.organizationInfo.organizationId,userInfo.organizationInfo.organizationUserId,ECommon_Model_Role_Type.ORGANIZATION)
+            if(checkPermission(permission,Permission_Types.Organization.ADMIN)) {
+                user=""
+            } else {
+                user=userInfo.organizationInfo.organizationUserId
+            }
         }
         let list=await WikiService.list(userInfo.organizationInfo.organizationId,page,size,keyword,user)
         return list

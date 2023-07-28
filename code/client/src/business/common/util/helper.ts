@@ -1,7 +1,6 @@
 import {ICommon_Route_Res_Role_Member_Item} from "../../../../../common/routes/response";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../common/model/organization";
 import {Message} from "@arco-design/web-vue";
-import {Permission_Base} from "../../../../../common/permission/permission";
 import {ECommon_Model_Finder_Item_Type} from "../../../../../common/model/finder_item";
 import {EClient_Drag_Type} from "../../../teamOS/common/directive/drag";
 import {ECommon_IM_Message_ContentType} from "../../../../../common/model/im_user_message";
@@ -58,10 +57,6 @@ export function dialogFuncGenerator({func,form}:{
     }
 }
 
-export function checkPermission(permission:number,permissionChecked:Permission_Base) {
-    return (permission & permissionChecked.value) && permission>=permissionChecked.value
-}
-
 export function clone(o){
     let k, ret= o, b;
     if(o && ((b = (o instanceof Array)) || o instanceof Object)) {
@@ -106,24 +101,32 @@ export function convertFinderItemTypeToDragItemType(type:ECommon_Model_Finder_It
 }
 
 export function getIMAtInfo(content,contentType) {
-    let objAt:{
-        all:boolean,
-        [param:string]:boolean
-    }={
-        all:false
+    let objAt: {
+        all: boolean,
+        [param: string]: boolean
+    } = {
+        all: false
     }
-    if(contentType===ECommon_IM_Message_ContentType.RICH_TEXT) {
-        for(let objLine of content as ICommon_Content_Line[]) {
-            for(let objConfig of objLine.arr) {
-                if(objConfig.type===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
-                    if(objConfig.value==="0") {
-                        objAt.all=true
+    if (contentType === ECommon_IM_Message_ContentType.RICH_TEXT) {
+        for (let objLine of content as ICommon_Content_Line[]) {
+            for (let objConfig of objLine.arr) {
+                if (objConfig.type === ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
+                    if (objConfig.value === "0") {
+                        objAt.all = true
                     } else {
-                        objAt[objConfig.value]=true
+                        objAt[objConfig.value] = true
                     }
                 }
             }
         }
     }
     return objAt
+}
+
+export function debounce(func, timeout = 300){
+    let timer;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(null, args); }, timeout);
+    };
 }

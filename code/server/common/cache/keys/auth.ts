@@ -25,6 +25,7 @@ import {memberTagMemberModel} from "../../../../common/model/member_tag_member";
 import {wikiModel} from "../../../../common/model/wiki";
 import {wikiItemModel} from "../../../../common/model/wiki_item";
 import {meetingRoomModel} from "../../../../common/model/meeting_room";
+import {calendarEventModel} from "../../../../common/model/calendar_event";
 
 export namespace REDIS_AUTH {
     export namespace Permission {
@@ -735,6 +736,57 @@ export namespace REDIS_AUTH {
                             await this.objRedis.set(value)
                         } else {
                             throw Err.Meeting.roomNotFound
+                        }
+                    }
+                    return value;
+                }
+            }
+        }
+        export namespace Calendar {
+            export class createdByPureFromCalendarEvent extends BaseRedisStringCache<string> {
+                key="permission:calendar:event:{0}:createdByPure"
+                constructor(private calendarEventId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,calendarEventId),cacheRedisType<string>().String,1000*10);
+                }
+                override async getValue(): Promise<string> {
+                    let value:string;
+                    let mysql=getMysqlInstance()
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        value=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoin2Sql({
+                            model:calendarEventModel
+                        },{
+                            model:organizationUserModel,
+                            expression:{
+                                id:{
+                                    model:calendarEventModel,
+                                    field:"created_by"
+                                }
+                            }
+                        },{
+                            model:userModel,
+                            columns:["id"],
+                            expression:{
+                                id:{
+                                    model:organizationUserModel,
+                                    field:"user_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:calendarEventModel,
+                                value:this.calendarEventId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            value=ret.id
+                            await this.objRedis.set(value)
+                        } else {
+                            throw Err.Calendar.calendarEventNotFound
                         }
                     }
                     return value;

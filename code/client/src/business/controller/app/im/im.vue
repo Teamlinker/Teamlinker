@@ -39,7 +39,7 @@
       </div>
     </a-layout-sider>
     <a-layout-content style="padding: 10px;">
-      <Chat :data="messageList" :type="selectedChat.type" :info="selectedChat" @send="onSend" v-if="selectedChat && selectedMenuKeys.length==0" ref="chatRef" @update-more="onShowMore" @click-photo="onClickChatPhoto" @favorite="onFavorite" :is-search="!!locateInfo">
+      <Chat :data="messageList" :type="selectedChat.type" :info="selectedChat" @send="onSend" v-if="selectedChat && selectedMenuKeys.length==0" ref="chatRef" @update-more="onShowMore" @click-photo="onClickChatPhoto" @favorite="onFavorite" :is-search="!!locateInfo" :teamMemberList="teamMemberList">
         <template #info v-if="selectedChat.type===ECommon_IM_Message_EntityType.TEAM">
           <a-collapse :default-active-key="['members']">
             <a-collapse-item header="Members" key="members">

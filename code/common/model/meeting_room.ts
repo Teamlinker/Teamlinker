@@ -2,7 +2,8 @@ import {BaseModel} from "./base"
 
 export enum ECommon_Model_Meeting_Room_Type {
     PRIVATE,
-    SCHEDULE
+    SCHEDULE,
+    CALENDAR
 }
 
 export enum ECommon_Meeting_Room_Permission {

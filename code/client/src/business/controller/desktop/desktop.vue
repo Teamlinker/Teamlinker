@@ -2,7 +2,7 @@
   <TeamOS ref="root">
     <template #topLeft>
       <a-dropdown trigger="hover">
-        <a-avatar :size="36" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
+        <a-avatar :size="32" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
           T
           <template #trigger-icon>
             <div style="height: 100%;width: 100%;background-color: #03ad03;border-radius: 6px" v-if="store.status===ECommon_User_Online_Status.ONLINE"></div>
@@ -36,10 +36,10 @@
     </template>
 	  <template #topRight>
 		  <a-row style="height: 100%;" align="center">
-			  <a-col flex="80px" style="align-items: center;display: flex">
+			  <a-col flex="70px" style="align-items: center;display: flex">
 				  <img :src="store.organizationInfo.photo" style="height: 36px;width:80px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
-			  <a-col flex="140px">
+			  <a-col flex="120px">
 				  <a-select style="max-width: 170px;color: white" placeholder="organization" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
 					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
 						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
@@ -56,8 +56,11 @@
 					  Create Organization
 				  </a-button>
 			  </a-col>
-			  <a-col flex="30px">
+			  <a-col :flex="menuValue?'30px':'60px'" style="justify-content: center;display: flex">
 					<NotificationShow></NotificationShow>
+			  </a-col>
+			  <a-col flex="30px" v-if="menuValue" style="justify-content: center;display: flex">
+					<MissCallShow></MissCallShow>
 			  </a-col>
 		  </a-row>
 	  </template>
@@ -115,6 +118,7 @@ import IconItem from "../../../teamOS/icon/iconItem.vue";
 import {FinderHandle} from "../app/finder/finderHandle";
 import {vDrop} from "../../../teamOS/common/directive/drop";
 import NotificationShow from "./notificationShow.vue";
+import MissCallShow from "./missCallShow.vue";
 
 interface ITeamOS_Desktop_Menu {
 	group:string,
@@ -138,7 +142,6 @@ const appContext=getCurrentInstance().appContext
 const loading=ref(true)
 let avatar=ref("")
 const objFinderHandle=new FinderHandle(root,appContext,"")
-objFinderHandle.setNameColor("white")
 objFinderHandle.onEnterFolderFunc=folderId => {
 	eventBus.emit(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,folderId)
 }
@@ -298,6 +301,7 @@ onBeforeUnmount(()=>{
   eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
 	eventBus.off(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
 })
+
 
 </script>
 

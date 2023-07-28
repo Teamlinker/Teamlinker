@@ -8,13 +8,38 @@
 				</a-avatar>&nbsp;
 				{{ info.name }}
 			</div>
-			<div v-if="type===ECommon_IM_Message_EntityType.TEAM">
-				<a-button type="text" size="large" @click="isInfoVisible=!isInfoVisible">
+			<a-space>
+				<a-button type="text" @click="onMeeting" v-if="type===ECommon_IM_Message_EntityType.USER">
 					<template #icon>
-						<icon-info-circle></icon-info-circle>
+						<icon-video-camera style="font-size: large;color: red"></icon-video-camera>
 					</template>
 				</a-button>
-			</div>
+				<a-popover v-else-if="type===ECommon_IM_Message_EntityType.TEAM" trigger="click" position="br">
+					<a-button type="text">
+						<template #icon>
+							<icon-video-camera style="font-size: large;color: red"></icon-video-camera>
+						</template>
+					</a-button>
+					<template #content>
+						<a-row style="flex-direction: column;align-items: center">
+							<a-input size="small" placeholder="type user name" v-model="searchUserKey"></a-input>
+							<a-table style="width: 100%;margin-top: 10px" row-key="id" :columns="columns" :data="teamMemberList.filter(item=>(item.id!==organizationUserId && item.name.includes(searchUserKey)))" :row-selection="rowSelection" v-model:selected-keys="selectKeys" :pagination="false">
+								<template #name="{record}">
+									<UserAvatar :organization-user-id="record.id" :name="record.name" :photo="record.photo"></UserAvatar>
+								</template>
+							</a-table>
+							<a-button type="primary" style="margin-top: 10px" size="small" @click="onMeeting">Invite</a-button>
+						</a-row>
+					</template>
+				</a-popover>
+				<div v-if="type===ECommon_IM_Message_EntityType.TEAM">
+					<a-button type="text" size="large" @click="isInfoVisible=!isInfoVisible">
+						<template #icon>
+							<icon-info-circle style="font-size: large"></icon-info-circle>
+						</template>
+					</a-button>
+				</div>
+			</a-space>
 		</div>
 		<div style="flex: 1 1 auto;height: calc(100% - 37px)">
 			<a-split direction="vertical" style="height: 100%" :default-size="0.8">
@@ -99,8 +124,12 @@ import {
 } from "../../../../../../common/model/content";
 import RichEditor from "../../../common/component/richEditor/richEditor.vue";
 import {RichEditorEventHandle} from "../../../common/component/richEditorEventHandle";
-import {apiFile, apiTeam} from "../../../common/request/request";
+import {apiFile, apiMeeting, apiTeam} from "../../../common/request/request";
 import {DropParam, vDrop} from "../../../../teamOS/common/directive/drop";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
+import {TableRowSelection} from "@arco-design/web-vue/es/table/interface";
+import UserAvatar from "../../../common/component/userAvatar.vue";
 
 const root = ref()
 const appContext=getCurrentInstance().appContext
@@ -122,7 +151,12 @@ const props = defineProps<{
 		photo: string,
 		id: string,
 	},
-	isSearch?:boolean
+	isSearch?:boolean,
+	teamMemberList?:{
+		id:string,
+		photo:string,
+		name:string
+	}[]
 }>()
 const loading = ref(false)
 const contentRef = ref<HTMLDivElement>()
@@ -133,9 +167,22 @@ const organizationUserId = SessionStorage.get("organizationUserId")
 const popMenuList=ref(RichEditorEventHandle.popMenuList)
 const objEditorUser=ref<InstanceType<typeof RichEditor>>()
 const objEditorTeam=ref<InstanceType<typeof RichEditor>>()
+const searchUserKey=ref("")
 let topElement:HTMLElement
 let isWheel = false
 let isManualSend=false
+const selectKeys=ref([])
+const rowSelection=ref<TableRowSelection>({
+	type:"checkbox",
+	showCheckedAll:true,
+	onlyCurrent:false
+})
+const columns = [
+	{
+		title: 'Name',
+		slotName: 'name',
+	}
+]
 watch(() => props.data, () => {
 	messageList.value = JSON.parse(JSON.stringify(props.data))
 	messageList.value.sort((a, b) => {
@@ -252,6 +299,19 @@ const onFavorite=(item:IClient_Chat_Message_Item)=>{
 	emit("favorite",item,props.type)
 }
 
+const onMeeting=async ()=>{
+	let res=await apiMeeting.getPersonalRoom()
+	if(res?.code===0) {
+		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,props.type===ECommon_IM_Message_EntityType.USER?[{
+			id:props.info.id,
+			type:ECommon_Model_Organization_Member_Type.USER
+		}]:selectKeys.value.map(item=>({
+			id:item,
+			type:ECommon_Model_Organization_Member_Type.USER
+		})))
+	}
+}
+
 defineExpose({
 	scrollToBottom
 })
@@ -264,5 +324,10 @@ defineExpose({
 
 :deep .arco-split-pane-second textarea {
 	resize: none;
+}
+
+:deep .arco-table-td-content {
+	display: flex;
+	align-items: center;
 }
 </style>

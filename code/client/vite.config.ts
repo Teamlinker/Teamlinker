@@ -3,12 +3,17 @@ import vue from '@vitejs/plugin-vue'
 import * as fs from "fs";
 import * as path from "path";
 import viteCompression from 'vite-plugin-compression'
+import {createSvgIconsPlugin} from "vite-plugin-svg-icons";
 
 export default defineConfig({
   plugins: [
       vue(),
       viteCompression({
           threshold:102400
+      }),
+      createSvgIconsPlugin({
+          iconDirs:[path.join(__dirname,"./src/icon/custom")],
+          symbolId:'[name]'
       })
   ],
   server:{

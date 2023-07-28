@@ -84,63 +84,19 @@
       </div>
     </template>
   </div>
-  <div style="height: 100%;width: 100%;position: absolute;left: 0;top: 0;z-index: 100" v-if="isMask" @click="$event.target===$event.currentTarget && (isMask=false)">
-    <div style="position: absolute;width: 300px;background-color: white;border-radius: 5px;box-shadow:0 24px 38px 3px rgba(0,0,0,.14), 0 9px 46px 8px rgba(0,0,0,.12), 0 11px 15px -7px rgba(0,0,0,.12)" :style="{left:maskInfoLeft,top:maskInfoTop}">
-      <div style="height: 30px;display: flex">
-        <div style="flex:1 1 auto">
-
-        </div>
-        <div style="flex: 0 0 100px;display: flex;justify-content: space-around;align-items: center">
-          <svg focusable="false" width="20" height="20" viewBox="0 0 24 24" class="svg" @click="onEditEvent"><path d="M20.41 4.94l-1.35-1.35c-.78-.78-2.05-.78-2.83 0L3 16.82V21h4.18L20.41 7.77c.79-.78.79-2.05 0-2.83zm-14 14.12L5 19v-1.36l9.82-9.82 1.41 1.41-9.82 9.83z"></path></svg>
-          <svg focusable="false" width="20" height="20" viewBox="0 0 24 24" class="svg" @click="onDeleteEvent"><path d="M15 4V3H9v1H4v2h1v13c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V6h1V4h-5zm2 15H7V6h10v13z"></path><path d="M9 8h2v9H9zm4 0h2v9h-2z"></path></svg>
-          <svg focusable="false" width="20" height="20" viewBox="0 0 24 24" class="svg" @click="isMask=false"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
-        </div>
-      </div>
-      <div style="padding: 0px 10px 10px 10px;">
-        <div style="display: flex;height: 30px">
-          <div style="flex: 0 0 30px">
-            <div style="width: 10px;height: 10px;border-radius: 2px;margin-top: 7px;margin-left: 5px" :style="{backgroundColor:selectedEvent.color}"></div>
-          </div>
-          <div style="font-size: 20px;flex: 1 1 auto" v-drag.shortcut="()=>({
-            shortcutType:ECommon_Model_Finder_Shortcut_Type.CALENDAR_EVENT,
-						shortcutRefId:selectedEvent.id,
-						shortcutName:selectedEvent.name
-          })">{{selectedEvent.name}}</div>
-        </div>
-        <div style="display: flex;height: 30px">
-          <div style="flex: 0 0 30px">
-          </div>
-          <div style="flex: 1 1 auto;color: gray">{{selectedDateFormat}}</div>
-        </div>
-        <div style="display: flex;height: 20px" v-if="selectedEvent.reminder">
-          <div style="flex: 0 0 30px">
-            <svg focusable="false" width="18" height="18" viewBox="0 0 24 24" class="svg" style="margin-left: 2px"><path d="M18 17v-6c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v6H4v2h16v-2h-2zm-2 0H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6zm-4 5c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2z"></path></svg>
-          </div>
-          <div style="flex: 1 1 auto;height: 20px;line-height: 20px">{{`${selectedEvent.reminder} min before`}}</div>
-        </div>
-        <div style="display: flex;height: 20px;margin-top: 5px">
-          <div style="flex: 0 0 30px">
-            <svg focusable="false" width="16" height="16" viewBox="0 0 1024 1024" class="svg" style="margin-left: 3px;margin-top: 2px"><path d="M880 184H712v-64c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v64H384v-64c0-4.4-3.6-8-8-8h-56c-4.4 0-8 3.6-8 8v64H144c-17.7 0-32 14.3-32 32v664c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V216c0-17.7-14.3-32-32-32z m-40 656H184V460h656v380zM184 392V256h128v48c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8v-48h256v48c0 4.4 3.6 8 8 8h56c4.4 0 8-3.6 8-8v-48h128v136H184z"></path></svg>
-          </div>
-          <div style="flex: 1 1 auto;height: 20px;line-height: 20px">{{selectedEvent.resource.name}}</div>
-        </div>
-      </div>
-    </div>
-  </div>
+	<div style="height: 100%;width: 100%;position: absolute;left: 0;top: 0;z-index: 100" v-if="isMask" @click="$event.target===$event.currentTarget && (isMask=false)">
+		<slot name="shortView" :timeZone="timeZone" :selectedEvent="selectedEvent" :maskInfoTop="maskInfoTop" :maskInfoLeft="maskInfoLeft" :onClose="()=>{isMask=false}"></slot>
+	</div>
 </template>
 
 <script setup lang="ts">
 import {IClient_Calendar_Date, IClient_Calendar_Info} from "./type";
 import {CalendarManage} from "./calendarManage";
-import {computed, nextTick, onBeforeUnmount, onMounted, ref, watchEffect} from "vue";
+import {nextTick, onBeforeUnmount, onMounted, ref, watchEffect} from "vue";
 import moment from "moment";
 import "moment-timezone"
-import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
-import {vDrag} from "../../../../teamOS/common/directive/drag";
 
 const emit=defineEmits<{
-  (e:"deleteEvent",event:IClient_Calendar_Info):void
-  (e:"editEvent",event:IClient_Calendar_Info):void
   (e:"changeEventDate", event:IClient_Calendar_Info, originalDateRange:{
     start:IClient_Calendar_Date,
     end:IClient_Calendar_Date
@@ -255,6 +211,7 @@ const onMouseDown=(event:MouseEvent)=>{
     if(ele.dataset.type=="resize") {
       let rect=ele.parentElement.getBoundingClientRect()
       eventResizeStartY.value=rect.top
+	    eventResizeStartDate.value=JSON.parse(JSON.stringify(eventActionEvent.value.startDate))
       eventResizeEndDate.value=JSON.parse(JSON.stringify(eventActionEvent.value.endDate))
       eventActionType.value="resize"
     } else if(ele.dataset.type=="move") {
@@ -304,11 +261,11 @@ const onMouseUp=(event:MouseEvent,item?:IClient_Calendar_Info)=>{
     } else {
       maskInfoLeft.value=offset+5+"px"
     }
-    offset=element.getBoundingClientRect().top-rootEle.value.getBoundingClientRect().top
+    offset=event.y-rootEle.value.getBoundingClientRect().top
     if(offset>125) {
       maskInfoTop.value=offset-130+"px"
     } else {
-      maskInfoTop.value=offset+element.offsetHeight+5+"px"
+      maskInfoTop.value=offset+"px"
     }
   } else if(isMouseMove.value) {
     if(eventResizeStartRowIndex.value) {
@@ -409,42 +366,6 @@ const onBlur=()=>{
 const todayTop=()=>{
   let ret=(now.value.hour()*60+now.value.minute())/(60*24)*100+'%'
   return ret;
-}
-const selectedDateFormat=computed(()=>{
-  let event=selectedEvent.value
-  let objStart=moment().tz(props.timeZone)
-  objStart.set({
-    year:event.startDate.year,
-    month:event.startDate.month-1,
-    date:event.startDate.day,
-    hour:event.startDate.hour,
-    minute:event.startDate.minute
-  })
-  let objEnd=moment().tz(props.timeZone)
-  objEnd.set({
-    year:event.endDate.year,
-    month:event.endDate.month-1,
-    date:event.endDate.day,
-    hour:event.endDate.hour,
-    minute:event.endDate.minute
-  })
-  if(event.isAllDay) {
-    if(objStart.isSame(objEnd,"days")) {
-      return `${objStart.format("MM/DD")}`
-    } else {
-      return `${objStart.format("MM/DD")} - ${objEnd.format("MM/DD")}`
-    }
-  } else {
-    return `${objStart.format("MM/DD HH:mm")} - ${objEnd.format("MM/DD HH:mm")}`
-  }
-})
-const onEditEvent=()=>{
-  emit("editEvent",selectedEvent.value)
-  isMask.value=false
-}
-const onDeleteEvent=()=>{
-  emit("deleteEvent",selectedEvent.value)
-  isMask.value=false
 }
 const handleColorAlpha=(color:string)=>{
   let regex=color.match(/(\d+).*?(\d+).*?(\d+)/)

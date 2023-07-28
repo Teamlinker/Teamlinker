@@ -17,13 +17,18 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {apiWiki, DCSType} from "../../../../common/request/request";
+import {apiWiki} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
-import {ICommon_Model_Wiki} from "../../../../../../../common/model/wiki";
+import {useDesktopStore} from "../../../desktop/store/desktop";
+import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 
-const data=ref<DCSType<ICommon_Model_Wiki>[]>([])
+const data=ref<{
+	id:string,
+	name:string
+}[]>([])
 const selectedKeys=ref([])
 const keyword=ref("")
+const store=useDesktopStore()
 const columns=[
 	{
 		title:"Name",
@@ -36,11 +41,16 @@ const pagination=reactive({
 	pageSize:10
 })
 const search=async (page:number)=>{
-	let res=await apiWiki.list({
+	let res=await (checkPermission(store.organizationPermission,Permission_Types.Organization.ADMIN)?apiWiki.list({
 		page:page-1,
 		size:10,
 		keyword:keyword.value
-	})
+	}):apiWiki.userWikiList({
+		page:page-1,
+		size:10,
+		keyword:keyword.value,
+		type:"all"
+	}))
 	if(res?.code==0) {
 		data.value=res.data.data
 		pagination.total=res.data.count;

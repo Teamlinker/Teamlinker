@@ -17,7 +17,7 @@ import Reset from "./business/controller/login/reset.vue";
 import ResetCode from "./business/controller/login/resetCode.vue";
 import {ECommon_Application_Mode} from "../../common/types";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
-
+import 'virtual:svg-icons-register'
 
 const Desktop =()=>import("./business/controller/desktop/desktop.vue")
 const routes=[

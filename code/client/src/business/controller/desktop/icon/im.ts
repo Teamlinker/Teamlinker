@@ -8,7 +8,7 @@ import Im from "../../../controller/app/im/im.vue";
 import {SessionStorage} from "../../../common/storage/session";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
-export const iconIM=new Icon("im",iconGroupMap["im"])
+export const iconIM=new Icon("IM",iconGroupMap["im"])
 iconIM.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
@@ -27,7 +27,7 @@ iconIM.addEventListener("dbClick",item => {
                 name:"im"
             }
         }
-    ],"im");
+    ],"IM");
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,(id, chatType) => {
@@ -48,6 +48,6 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,(id, chatType) => {
                 }
             }
         }
-    ],"im");
+    ],"IM");
     windowManager.open(win);
 })

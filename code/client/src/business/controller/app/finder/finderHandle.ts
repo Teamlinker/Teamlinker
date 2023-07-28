@@ -33,7 +33,7 @@ export class FinderHandle {
     private root:Ref<any>
     private folderId:string
     private store=useDesktopStore()
-    private nameColor="black"
+    private nameColor="white"
     private keyword=""
     onEnterFolderFunc:(folderId:string)=>void
     constructor(root:Ref<HTMLElement>,appContext:AppContext,folderId:string) {
@@ -129,45 +129,45 @@ export class FinderHandle {
             this.itemList.value=res.data.map(value => {
                 let icon:string,iconColor:string
                 if(value.type===ECommon_Model_Finder_Item_Type.FOLDER) {
-                    icon="folder-fill"
+                    icon="folder"
                     iconColor="rgb(252,218,115)"
                 } else if(value.type===ECommon_Model_Finder_Item_Type.FILE) {
-                    icon="file-fill"
+                    icon="file"
                     iconColor="gray"
                 } else if(value.type===ECommon_Model_Finder_Item_Type.SHORTCUT) {
                     switch (value.shortcut_type) {
                         case ECommon_Model_Finder_Shortcut_Type.PROJECT:{
-                            icon="project-fill"
+                            icon="project_item"
                             iconColor="green"
                             break
                         }
                         case ECommon_Model_Finder_Shortcut_Type.PROJECT_ISSUE:{
-                            icon="api-fill"
+                            icon="project_issue_item"
                             iconColor="green"
                             break
                         }
                         case ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE:{
-                            icon="detail-fill"
+                            icon="project_release_item"
                             iconColor="green"
                             break
                         }
                         case ECommon_Model_Finder_Shortcut_Type.WIKI:{
-                            icon="file-copy-fill"
+                            icon="wiki_space_item"
                             iconColor="darkblue"
                             break
                         }
                         case ECommon_Model_Finder_Shortcut_Type.WIKI_ITEM:{
-                            icon="file-text-fill"
+                            icon="wiki_item"
                             iconColor="darkblue"
                             break
                         }
                         case ECommon_Model_Finder_Shortcut_Type.CALENDAR_EVENT:{
-                            icon="calendar-fill"
+                            icon="calendar_event_item"
                             iconColor="orange"
                             break
                         }
                         case ECommon_Model_Finder_Shortcut_Type.MEETING_ROOM:{
-                            icon="video-fill"
+                            icon="meeting_room_item"
                             iconColor="red"
                             break
                         }

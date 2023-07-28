@@ -572,6 +572,70 @@ export function generateDeleteInnerJoin2Sql<T1 extends BaseModel, T2 extends Bas
     }
 }
 
+export function generateDeleteInnerJoin3Sql<T1 extends BaseModel, T2 extends BaseModel,T3 extends BaseModel,T4 extends BaseModel>(mainModel: T1, joinModel: {
+    model: T2,
+    expression: {
+        [key in keyof T2["model"]]?:{
+            model:T1|T3|T4,
+            field:keyof (T1 & T3 & T4)["model"]
+        }
+    }
+}, joinModel2: {
+    model:T3,
+    expression:{
+        [key in keyof T3["model"]]?:{
+            model:T1|T2|T4,
+            field:keyof (T1 & T2 & T4)["model"]
+        }
+    }
+},joinModel3: {
+    model:T4,
+    expression:{
+        [key in keyof T4["model"]]?:{
+            model:T1|T2|T3,
+            field:keyof (T1 & T2 & T3)["model"]
+        }
+    }
+},objExpr?: {
+    [param in ((keyof (T1 & T2 & T3 & T4)["model"])|`${"$and"|"$or"}${number}`)]?:{
+    value:EXPRVALUE,
+    model:T1|T2|T3|T4
+}|{
+    [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
+        value:EXPRVALUE,
+        model:T1|T2|T3|T4
+    }
+}
+}, exprMode?: "and" | "or") {
+    let expr = generateLeftJoinExp(objExpr, exprMode);
+    let table = mainModel.table
+    let joinTable = joinModel.model.table
+    let arrExpression = []
+    for (let key in joinModel.expression) {
+        let value = joinModel.expression[key]
+        arrExpression.push(`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression = arrExpression.join(" and ")
+    let joinTable2 = joinModel2.model.table
+    let arrExpression2 = []
+    for (let key in joinModel2.expression) {
+        let value = joinModel2.expression[key]
+        arrExpression2.push(`${joinTable2}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression2 = arrExpression2.join(" and ")
+    let joinTable3 = joinModel3.model.table
+    let arrExpression3 = []
+    for (let key in joinModel3.expression) {
+        let value = joinModel3.expression[key]
+        arrExpression3.push(`${joinTable3}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression3 = arrExpression3.join(" and ")
+    return {
+        value: `delete ${table},${joinTable},${joinTable2},${joinTable3} from ${table} inner join ${joinTable} on ${expression} inner join ${joinTable2} on ${expression2} inner join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}`,
+        type: null,
+    }
+}
+
 type Rename<T, K extends keyof T, N extends string> = Pick<T, Exclude<keyof T, K>> & { [P in N]: T[K] }
 
 export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1 extends keyof T1["model"]=null,K2 extends keyof T2["model"]=null,F1 extends string=null,F2 extends string=null,R1 extends K1=null,RR1 extends string=null,R2 extends K2=null,RR2 extends string=null>(mainModel:{

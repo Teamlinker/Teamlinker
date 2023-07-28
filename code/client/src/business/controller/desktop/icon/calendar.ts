@@ -8,7 +8,7 @@ import Calendar from "../../app/calendar/calendar.vue";
 import {SessionStorage} from "../../../common/storage/session";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
-export const iconCalendar=new Icon("calendar",iconGroupMap["calendar"])
+export const iconCalendar=new Icon("Calendar",iconGroupMap["calendar"])
 iconCalendar.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
@@ -27,7 +27,7 @@ iconCalendar.addEventListener("dbClick",item => {
                 name:"calendar"
             }
         }
-    ],"calendar");
+    ],"Calendar");
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,(calendarEventId) => {
@@ -47,6 +47,6 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,(calendarEventId) => {
                 }
             }
         }
-    ],"calendar");
+    ],"Calendar");
     windowManager.open(win);
 })

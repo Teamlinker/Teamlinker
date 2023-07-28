@@ -218,8 +218,7 @@ import {
 import FieldPriority from "./fieldPriority.vue";
 import {ECommon_Model_Project_Issue_Priority} from "../../../../../../common/model/project_issue";
 import {injectProjectInfo} from "../../util/symbol";
-import {checkPermission} from "../../util/helper";
-import {Permission_Types} from "../../../../../../common/permission/permission";
+import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {ICommon_Model_Project_Release} from "../../../../../../common/model/project_release";
 import ProjectReleasePreview from "../../../controller/app/project/release/projectReleasePreview.vue";
 import {SessionStorage} from "../../storage/session";

@@ -7,7 +7,7 @@ import {windowManager} from "../../../../teamOS/window/windowManager";
 import {markRaw} from "vue";
 import {SessionStorage} from "../../../common/storage/session";
 
-export const iconSetting=new Icon("setting",iconGroupMap["setting"])
+export const iconSetting=new Icon("Setting",iconGroupMap["setting"])
 iconSetting.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
@@ -26,6 +26,6 @@ iconSetting.addEventListener("dbClick",item => {
                 name:"setting"
             }
         }
-    ],"setting");
+    ],"Setting");
     windowManager.open(win);
 })

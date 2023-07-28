@@ -6,14 +6,15 @@ import {ECommon_Model_Meeting_Room_Type} from "../../../common/model/meeting_roo
 import {MeetingRoomService} from "../service/room";
 import {Err} from "../../../common/status/error";
 import rpcUserApi from "../../user/rpc/user";
+import {MeetingMissCallService} from "../service/missCall";
 import moment = require("moment");
 
 @DComponent
 @DHttpController(meetingApi)
 class MeetingController {
     @DHttpApi(meetingApi.routes.listRoom)
-    async listRoom(@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("type") type:ECommon_Model_Meeting_Room_Type,@DHttpUser user:IUserSession): Promise<typeof meetingApi.routes.listRoom.res> {
-        let ret=await MeetingRoomService.list(user.organizationInfo.organizationUserId,page,size,keyword,type)
+    async listRoom(@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string,@DHttpUser user:IUserSession): Promise<typeof meetingApi.routes.listRoom.res> {
+        let ret=await MeetingRoomService.list(user.organizationInfo.organizationUserId,page,size,keyword)
         return ret;
     }
 
@@ -141,5 +142,36 @@ class MeetingController {
             throw Err.Meeting.roomNotFound
         }
         return obj.getItem()
+    }
+
+    @DHttpApi(meetingApi.routes.listMissCall)
+    async listMissCall(@DHttpUser user:IUserSession): Promise<typeof meetingApi.routes.listMissCall.res> {
+        let ret=await MeetingMissCallService.list(user.organizationInfo.organizationUserId)
+        return ret
+    }
+
+    @DHttpApi(meetingApi.routes.missCallRead)
+    async missCallRead(@DHttpUser user:IUserSession): Promise<typeof meetingApi.routes.missCallRead.res> {
+        await MeetingMissCallService.readAll(user.organizationInfo.organizationUserId)
+        return
+    }
+
+    @DHttpApi(meetingApi.routes.missCallCount)
+    async missCallCount(@DHttpUser user:IUserSession): Promise<typeof meetingApi.routes.missCallCount.res> {
+        let ret=await MeetingMissCallService.unReadCount(user.organizationInfo.organizationUserId)
+        return {
+            count:ret
+        }
+    }
+
+    @DHttpApi(meetingApi.routes.missCallAdd)
+    async missCallAdd(@DHttpReqParamRequired("fromOrganizationUserId") fromOrganizationUserId:string,@DHttpUser user:IUserSession): Promise<typeof meetingApi.routes.missCallAdd.res> {
+        let obj=new MeetingMissCallService()
+        obj.assignItem({
+            from_organization_user_id:fromOrganizationUserId,
+            to_organization_user_id:user.organizationInfo.organizationUserId
+        })
+        await obj.create()
+        return
     }
 }

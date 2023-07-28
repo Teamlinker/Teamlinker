@@ -41,8 +41,11 @@
 								</a-list-item-meta>
 								<template #actions>
 									<icon-video-camera style="color: red" @click="onStartScheduleMeeting(item)"></icon-video-camera>
-									<icon-edit @click="onEditMeeting(item)"></icon-edit>
-									<icon-delete @click="onDeleteMeeting(item)"></icon-delete>
+									<template v-if="item.type===ECommon_Model_Meeting_Room_Type.SCHEDULE">
+										<icon-edit @click="onEditMeeting(item)"></icon-edit>
+										<icon-delete @click="onDeleteMeeting(item)"></icon-delete>
+									</template>
+									<icon-calendar style="color: cornflowerblue" v-else-if="item.type===ECommon_Model_Meeting_Room_Type.CALENDAR" @click="onCalendarEvent(item)"></icon-calendar>
 								</template>
 							</a-list-item>
 						</a-list>
@@ -75,11 +78,16 @@ import {useDesktopStore} from "../../desktop/store/desktop";
 import {ECommon_User_Online_Status} from "../../../../../../common/types";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
+import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 
 const props=defineProps<{
 	meetingInitInfo?:{
 		id:string,
-		password:string
+		password:string,
+		inviteBusinessIds?:{
+			id:string,
+			type:ECommon_Model_Organization_Member_Type
+		}[]
 	}
 }>()
 const store=useDesktopStore()
@@ -93,7 +101,11 @@ const pagination=reactive({
 })
 let meetingWillJoinInfo:{
 	id:string,
-	password:string
+	password:string,
+	inviteBusinessIds?:{
+		id:string,
+		type:ECommon_Model_Organization_Member_Type
+	}[]
 }=null
 const keyword=ref("");
 const navigator=getCurrentNavigator()
@@ -147,6 +159,10 @@ const onDeleteMeeting=async (item:DCSType<ICommon_Model_Meeting_Room>)=>{
 	}
 }
 
+const onCalendarEvent=async (item:DCSType<ICommon_Model_Meeting_Room>)=>{
+	eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,item.related_id)
+}
+
 const onSearch=async ()=>{
 	getMeetingList(1)
 }
@@ -172,8 +188,7 @@ const getMeetingList=async (page:number)=>{
 	let res=await apiMeeting.listRoom({
 		keyword:keyword.value,
 		size:10,
-		page:page-1,
-		type:ECommon_Model_Meeting_Room_Type.SCHEDULE
+		page:page-1
 	})
 	if(res?.code==0) {
 		roomList.value=res.data.data
@@ -182,17 +197,22 @@ const getMeetingList=async (page:number)=>{
 	}
 }
 
-const handleInvite=async (roomId, password) =>{
+const handleInvite=async (roomId, password,inviteBusinessIds?:{
+	id:string,
+	type:ECommon_Model_Organization_Member_Type
+}[]) =>{
 	if(store.status===ECommon_User_Online_Status.MEETING) {
 		meetingWillJoinInfo={
 			id:roomId,
-			password
+			password,
+			inviteBusinessIds
 		}
 		eventBus.emit(EClient_EVENTBUS_TYPE.LEAVE_MEETING)
 	} else {
 		navigator.push("meetingProfile",{
 			meetingId:roomId,
-			password:password
+			password:password,
+			inviteBusinessIds
 		})
 	}
 }
@@ -209,7 +229,8 @@ onMounted(()=>{
 	if(props.meetingInitInfo) {
 		navigator.push("meetingProfile",{
 			meetingId:props.meetingInitInfo.id,
-			password:props.meetingInitInfo.password
+			password:props.meetingInitInfo.password,
+			inviteBusinessIds:props.meetingInitInfo.inviteBusinessIds
 		})
 	}
 })
@@ -219,7 +240,8 @@ onNavigatorShow(action => {
 		if(meetingWillJoinInfo) {
 			navigator.push("meetingProfile",{
 				meetingId:meetingWillJoinInfo.id,
-				password:meetingWillJoinInfo.password
+				password:meetingWillJoinInfo.password,
+				inviteBusinessIds:meetingWillJoinInfo.inviteBusinessIds
 			})
 			meetingWillJoinInfo=null;
 		}

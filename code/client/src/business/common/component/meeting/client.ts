@@ -5,53 +5,68 @@ import {Socket} from "socket.io-client";
 import {Meeting_ClientToServerEvents, Meeting_ServerToClientEvents} from "./type";
 import {AutoExecuteArray} from "./AutoExecuteArray";
 import {MediaKind, RtpCapabilities} from "mediasoup-client/lib/RtpParameters";
+import {ProducerOptions} from "mediasoup-client/lib/Producer";
 
 export class MeetingClient {
     private device:Device
     private producerAudio:mediaSoup.types.Producer<mediaSoup.types.AppData>
     private producerVideo:mediaSoup.types.Producer<mediaSoup.types.AppData>
+    private producerAudioScreen:mediaSoup.types.Producer<mediaSoup.types.AppData>
+    private producerVideoScreen:mediaSoup.types.Producer<mediaSoup.types.AppData>
+    private producerChat:mediaSoup.types.DataProducer<mediaSoup.types.AppData>
     private producerSet=new Set<string>()
     private transportReceive:Transport
     private transportSend:Transport
+    private transportDataSend:Transport
     private socket:Socket<Meeting_ServerToClientEvents,Meeting_ClientToServerEvents>
     private roomInfo:{
         roomId:string,
         roomName:string
     }
-    onProducerStateChange:(state:"new"|"close"|"pause"|"resume", kind: mediaSoup.types.MediaKind, businessId:string,stream?: MediaStream,producerId?:string)=>void
+    private defaultVideo=true
+    private defaultAudio=true
+    private defaultCameraId:string
+    onProducerStateChange:(state:"new"|"close"|"pause"|"resume", kind: mediaSoup.types.MediaKind, businessId:string,type:"data"|"camera"|"screen",stream?: MediaStream,producerId?:string)=>void
     onLocalProducerInit:(stream:MediaStream)=>void
     onLocalProducerStart:(kind:MediaKind)=>void
     onJoinedRoom:(roomInfo:typeof this.roomInfo)=>void
     onLeavedRoom:(roomInfo:typeof this.roomInfo)=>void
     onSpeaker:(businessId:string)=>void
     onKick:()=>void
+    onMessageReceive:(data:any,businessId:string)=>void
+    onMessageSend:(data:any)=>void
+    onScreenStopped:()=>void
     private onDisconnect:any
     constructor(socket:any) {
         this.onDisconnect=this._onDisconnect.bind(this)
         this.socket=socket
-        this.socket.on('newProducer', async ( producerId) => {
+        this.socket.on('newProducer', async ( producerId,kind,businessId,type) => {
             if(!this.producerSet.has(producerId)) {
                 this.producerSet.add(producerId)
-                AutoExecuteArray.push(this.subscribe.bind(this,producerId))
+                if(type==="data") {
+                    AutoExecuteArray.push(this.subscribeData.bind(this,producerId))
+                } else if(type==="camera" || type==="screen") {
+                    AutoExecuteArray.push(this.subscribe.bind(this,producerId))
+                }
             }
         });
 
-        this.socket.on('producerClosed', (producerId, kind, businessId)=>{
+        this.socket.on('producerClosed', (producerId, kind, businessId,type)=>{
             if(this.onProducerStateChange) {
-                this.onProducerStateChange("close",kind,businessId,null,producerId)
+                this.onProducerStateChange("close",kind,businessId,type,null,producerId)
             }
             this.producerSet.delete(producerId)
         });
 
         this.socket.on("producerPause",(producerId, kind, businessId) => {
             if(this.onProducerStateChange) {
-                this.onProducerStateChange("pause",kind,businessId,null,producerId)
+                this.onProducerStateChange("pause",kind,businessId,"camera",null,producerId)
             }
         })
 
         this.socket.on("producerResume",(producerId, kind, businessId) => {
             if(this.onProducerStateChange) {
-                this.onProducerStateChange("resume",kind,businessId,null,producerId)
+                this.onProducerStateChange("resume",kind,businessId,"camera",null,producerId)
             }
         })
 
@@ -69,6 +84,25 @@ export class MeetingClient {
                 this.onSpeaker(businessId)
             }
         })
+
+        this.socket.on("messageReceive",(message, businessId) => {
+            this.onMessageReceive?.(message,businessId)
+        })
+    }
+    static async enumVideoDevice() {
+        let ret=await navigator.mediaDevices.enumerateDevices()
+        return ret.filter(item=>item.kind==="videoinput").map(item=>({
+            id:item.deviceId,
+            name:item.label
+        }))
+    }
+    static async checkVideoStream(id:string) {
+        let stream=await navigator.mediaDevices.getUserMedia({
+            video:{
+                deviceId:id
+            }
+        })
+        return stream
     }
     private _onDisconnect(reason) {
         this.clearRoomConnection()
@@ -76,7 +110,7 @@ export class MeetingClient {
     getRoomInfo() {
         return this.roomInfo
     }
-    async join(roomId:string,extraData:any):Promise<{
+    async join(roomId:string,extraData:any,isVideo=true,isAudio=true,cameraId?:string):Promise<{
         success:boolean,
         msg?:string
     }> {
@@ -86,6 +120,9 @@ export class MeetingClient {
                 msg:"you have joined a meeting"
             }
         }
+        this.defaultVideo=isVideo
+        this.defaultAudio=isAudio
+        this.defaultCameraId=cameraId
         let ret=await this.socket.emitWithAck("joinRoom",roomId,extraData)
         if(ret) {
             this.roomInfo=ret;
@@ -136,6 +173,80 @@ export class MeetingClient {
         let ret=await this.socket.emitWithAck("states")
         return ret;
     }
+    async sendMessage(message:string|Buffer) {
+        let ret=await this.socket.emitWithAck("messageSend",message)
+        //this.producerChat.send(message)
+        if(ret) {
+            this.onMessageSend?.(message)
+        }
+    }
+
+    async startShare() {
+        let ret=await this.socket.emitWithAck("getScreenProducers")
+        if(ret) {
+            return false
+        }
+        const mediaConstraints = {
+            audio: {
+                echoCancellation:true,
+                noiseSuppression:true
+            },
+            video: {
+                cursor: "always"
+            },
+        }
+        try {
+            let stream=await navigator.mediaDevices.getDisplayMedia(mediaConstraints as any)
+            if(stream) {
+                let trackAudio = stream.getAudioTracks()[0];
+                if(trackAudio) {
+                    let params:ProducerOptions = {
+                        track:trackAudio,
+                        appData:{
+                            screen:true
+                        }
+                    };
+                    params.codecOptions = {
+                        opusStereo: true,
+                        opusDtx: true
+                    }
+                    this.producerAudioScreen =await this.transportSend.produce(params);
+                }
+                let trackVideo=stream.getVideoTracks()[0]
+                if(trackVideo) {
+                    trackVideo.onended=ev => {
+                        this.stopShare()
+                    }
+                    let params={
+                        track:trackVideo,
+                        appData:{
+                            screen:true
+                        }
+                    };
+                    this.producerVideoScreen=await this.transportSend.produce(params)
+                }
+                return true
+            }
+        } catch (err) {
+            console.log(err)
+            return false
+        }
+    }
+
+    stopShare() {
+        this.socket.emit("stopScreen")
+        if(this.producerVideoScreen) {
+            this.producerVideoScreen.removeAllListeners()
+            this.producerVideoScreen.close()
+            this.producerVideoScreen=null
+        }
+        if(this.producerAudioScreen) {
+            this.producerAudioScreen.removeAllListeners()
+            this.producerAudioScreen.close()
+            this.producerAudioScreen=null;
+        }
+        this.onScreenStopped?.()
+    }
     private clearRoomConnection() {
         if(this.roomInfo) {
             if(this.onLeavedRoom) {
@@ -145,6 +256,7 @@ export class MeetingClient {
         }
         this.device=null;
         this.producerSet=new Set
+        this.stopShare()
         if(this.producerAudio) {
             this.producerAudio.removeAllListeners();
             this.producerAudio.close()
@@ -164,6 +276,16 @@ export class MeetingClient {
             this.transportSend.removeAllListeners()
             this.transportSend.close()
             this.transportSend=null
+        }
+        if(this.producerChat) {
+            this.producerChat.removeAllListeners()
+            this.producerChat.close()
+            this.producerChat=null;
+        }
+        if(this.transportDataSend) {
+            this.transportDataSend.removeAllListeners()
+            this.transportDataSend.close()
+            this.transportDataSend=null
         }
         this.socket.removeAllListeners("newProducer")
         this.socket.removeAllListeners("producerClosed")
@@ -221,7 +343,7 @@ export class MeetingClient {
         this.consume(this.transportReceive, remoteProducerId).then(async value=>{
             await this.socket.emitWithAck("resume",value.consumer.id)
             if(this.onProducerStateChange) {
-                this.onProducerStateChange("new",value.consumer.kind,value.businessId,value.stream,remoteProducerId)
+                this.onProducerStateChange("new",value.consumer.kind,value.businessId,value.type,value.stream,remoteProducerId)
             }
         })
     }
@@ -235,6 +357,7 @@ export class MeetingClient {
             id,
             kind,
             rtpParameters,
+            type
         } = data;
         const consumer = await transport.consume({
             id,
@@ -244,7 +367,70 @@ export class MeetingClient {
         });
         const stream = new MediaStream();
         stream.addTrack(consumer.track);
-        return {stream,consumer,businessId:data.businessId};
+        return {stream,consumer,businessId:data.businessId,type};
+    }
+
+    private async subscribeData(remoteProducerId:string) {
+        const data = await this.socket.emitWithAck('createDataConsumerTransport');
+        if (!data) {
+            this.producerSet.delete(remoteProducerId)
+            return;
+        }
+        const transportDataReceive = this.device.createRecvTransport({...data, iceServers : []});
+        transportDataReceive.on('connect', async ({ dtlsParameters, }, callback, errback) => {
+            this.socket.emitWithAck('connectDataConsumerTransport', {
+                dtlsParameters,
+                sctpParameters:data.sctpParameters
+            })
+                .then(callback)
+                .catch(errback);
+        });
+        transportDataReceive.on('connectionstatechange', async (state) => {
+            switch (state) {
+                case 'connecting':
+                    console.log("Connecting to consumer for audio, transport id: " + transportDataReceive.id)
+                    break;
+                case 'connected':
+                    console.log("Connected to consumer for audio, transport id: " + transportDataReceive.id)
+                    break;
+                case 'failed':
+                case "closed":
+                case "disconnected": {
+                    this.leave()
+                    break
+                }
+                default: break;
+            }
+        });
+        this.consumeData(transportDataReceive, remoteProducerId).then(async value=>{
+            if(this.onProducerStateChange) {
+                this.onProducerStateChange("new",null,value.businessId,"data",null,remoteProducerId)
+            }
+            value.consumer.on("message",data => {
+                this.onMessageReceive?.(data,value.businessId)
+            })
+        })
+    }
+
+    private async consumeData(transport: mediaSoup.types.Transport<mediaSoup.types.AppData>, remoteProducerId:string) {
+        const transportId  = transport.id;
+        const data = await this.socket.emitWithAck('consumeData', { remoteProducerId, transportId});
+        const {
+            id,
+        } = data;
+        console.log(`producerId:${remoteProducerId} consumerId:${id}`)
+        const consumer = await transport.consumeData({
+            id,
+            dataProducerId:remoteProducerId,
+            sctpStreamParameters:{
+                streamId:0,
+                ordered:true
+            }
+        });
+        consumer.on("close",() => {
+            consumer.removeAllListeners()
+        })
+        return {consumer,businessId:data.businessId};
     }
 
     private async publish() {
@@ -258,11 +444,12 @@ export class MeetingClient {
                 .then(callback)
                 .catch(errback);
         });
-        this.transportSend.on('produce', async ({ kind, rtpParameters }, callback, errback) => {
+        this.transportSend.on('produce', async ({ kind, rtpParameters,appData }, callback, errback) => {
             try {
                 const { id, producersExist } = await this.socket.emitWithAck('produce', {
                     kind,
                     rtpParameters,
+                    appData
                 });
                 if(this.onLocalProducerStart) {
                     this.onLocalProducerStart(kind)
@@ -282,7 +469,7 @@ export class MeetingClient {
                     break;
                 case 'connected':
                     console.log("Connected")
-                    if(this.onJoinedRoom) {
+                    if (this.onJoinedRoom) {
                         this.onJoinedRoom(this.roomInfo)
                     }
                     break;
@@ -293,12 +480,21 @@ export class MeetingClient {
                 default: break;
             }
         });
+        let ret=await navigator.mediaDevices.enumerateDevices()
+        let isVideo=false
+        for(let obj of ret) {
+            if(obj.kind==="videoinput") {
+                isVideo=true
+            }
+        }
         const mediaConstraints:MediaStreamConstraints = {
             audio: {
                 echoCancellation:true,
                 noiseSuppression:true
             },
-            video: true,
+            video: (isVideo && this.defaultCameraId)?{
+                deviceId:this.defaultCameraId
+            }:isVideo,
         }
         navigator.mediaDevices.getUserMedia(mediaConstraints).then( async (stream) => {
             if(this.onLocalProducerInit) {
@@ -306,16 +502,26 @@ export class MeetingClient {
             }
             let track = stream.getAudioTracks()[0];
             if(track) {
-                let params:any = { track };
+                let params:ProducerOptions = {
+                    track,
+                    appData:{
+                        paused:!this.defaultAudio
+                    }
+                };
                 params.codecOptions = {
-                    opusStereo: 1,
-                    opusDtx: 1
+                    opusStereo: true,
+                    opusDtx: true,
                 }
                 this.producerAudio =await this.transportSend.produce(params);
             }
             track=stream.getVideoTracks()[0]
             if(track) {
-                let params={track}
+                let params:ProducerOptions={
+                    track,
+                    appData:{
+                        paused:!this.defaultVideo
+                    }
+                }
                 this.producerVideo=await this.transportSend.produce(params)
             }
         },reason => {
@@ -325,14 +531,66 @@ export class MeetingClient {
         })
     }
 
+    private async publishData() {
+        const data = await this.socket.emitWithAck('createDataProducerTransport');
+        if (!data) {
+            return;
+        }
+        this.transportDataSend = this.device.createSendTransport({...data, iceServers: []});
+        this.transportDataSend.on('connect', async ({dtlsParameters}, callback, errback) => {
+            this.socket.emitWithAck('connectDataProducerTransport', {dtlsParameters})
+                .then(callback)
+                .catch(errback);
+        });
+        this.transportDataSend.on('producedata', async (_, callback, errback) => {
+            try {
+                const {id, producersExist} = await this.socket.emitWithAck('produceData');
+                if (this.onLocalProducerStart) {
+                    this.onLocalProducerStart(null)
+                }
+                if (producersExist) {
+                    this.getProducers()
+                }
+                callback({id});
+            } catch (err) {
+                errback(err);
+            }
+        });
+        this.transportDataSend.on('connectionstatechange', (state) => {
+            switch (state) {
+                case 'connecting':
+                    console.log("data Connecting to publish")
+                    break;
+                case 'connected':
+                    console.log("data connected")
+                    // if (this.onJoinedRoom) {
+                    //     this.onJoinedRoom(this.roomInfo)
+                    // }
+                    break;
+                case 'failed':
+                    this.transportDataSend.close();
+                    console.log("data Failed connection")
+                    break;
+                default:
+                    break;
+            }
+        });
+        this.producerChat=await this.transportDataSend.produceData()
+    }
+
     private getProducers(){
-        this.socket.emit('getProducers', async producerIds => {
-            for(let id of producerIds) {
-                if(!this.producerSet.has(id)) {
-                    this.producerSet.add(id)
-                    AutoExecuteArray.push(this.subscribe.bind(this,id))
+        this.socket.emit('getProducers', async producerList => {
+            for(let obj of producerList) {
+                if(!this.producerSet.has(obj.id)) {
+                    this.producerSet.add(obj.id)
+                    if(obj.type==="data") {
+                        AutoExecuteArray.push(this.subscribeData.bind(this,obj.id))
+                    } else if(obj.type==="camera"|| obj.type==="screen") {
+                        AutoExecuteArray.push(this.subscribe.bind(this,obj.id))
+                    }
                 }
             }
         })
     }
+
 }

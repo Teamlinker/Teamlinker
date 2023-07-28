@@ -20,13 +20,19 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {apiProject, DCSType} from "../../../../common/request/request";
-import {ICommon_Model_Project} from "../../../../../../../common/model/project";
+import {apiProject} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
+import {useDesktopStore} from "../../../desktop/store/desktop";
+import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 
-const data=ref<DCSType<ICommon_Model_Project>[]>([])
+const data=ref<{
+	id:string,
+	name:string,
+	keyword:string
+}[]>([])
 const selectedKeys=ref([])
 const keyword=ref("")
+const store=useDesktopStore()
 const columns=[
 	{
 		title:"Name",
@@ -43,11 +49,16 @@ const pagination=reactive({
 	pageSize:10
 })
 const search=async (page:number)=>{
-	let res=await apiProject.list({
+	let res=await (checkPermission(store.organizationPermission,Permission_Types.Organization.ADMIN)?apiProject.list({
 		page:page-1,
 		size:10,
-		keyword:keyword.value
-	})
+		keyword:keyword.value,
+	}):apiProject.userProjectList({
+		page:page-1,
+		size:10,
+		keyword:keyword.value,
+		type:"all"
+	}))
 	if(res?.code==0) {
 		data.value=res.data.data
 		pagination.total=res.data.count;

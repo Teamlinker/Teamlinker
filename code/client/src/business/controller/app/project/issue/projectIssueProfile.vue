@@ -38,6 +38,20 @@
               </template>
             </a-button>
             <template #content>
+	            <a-popover trigger="hover" position="rt" @popup-visible-change="showQuickMeeting">
+		            <a-doption>Quick Meeting</a-doption>
+		            <template #content>
+			            <a-row style="flex-direction: column;align-items: center">
+				            <a-input size="small" placeholder="type user name" v-model="searchUserKey"></a-input>
+				            <a-table style="width: 100%;margin-top: 10px" row-key="id" :columns="columns" :data="issueRelatedUserList.filter(item=>(item.id!==organizationUserId && item.name.includes(searchUserKey)))" :row-selection="rowSelection" v-model:selected-keys="selectKeys" :pagination="false">
+					            <template #name="{record}">
+						            <UserAvatar :organization-user-id="record.id" :name="record.name" :photo="record.photo"></UserAvatar>
+					            </template>
+				            </a-table>
+				            <a-button type="primary" style="margin-top: 10px" size="small" @click="onMeeting">Invite</a-button>
+			            </a-row>
+		            </template>
+	            </a-popover>
               <a-doption v-if="checkPermission(permission,Permission_Types.Project.ADMIN) || info?.created_by.id===store.userInfo.id" @click="onDelete" style="color: red">Delete</a-doption>
             </template>
           </a-dropdown>
@@ -193,7 +207,7 @@
 <script setup lang="ts">
 import {getCurrentInstance, inject, markRaw, onBeforeMount, ref, watch} from "vue";
 import {injectProjectInfo} from "../../../../common/util/symbol";
-import {apiIssue, DCSType} from "../../../../common/request/request";
+import {apiIssue, apiMeeting, DCSType} from "../../../../common/request/request";
 import {
 	ICommon_Route_Res_ProjectIssue_BasicInfo,
 	ICommon_Route_Res_ProjectIssue_fieldsInfo
@@ -212,14 +226,18 @@ import ProjectIssueBind from "./projectIssueBind.vue";
 import {Message} from "@arco-design/web-vue";
 import {ICommon_Model_Content} from "../../../../../../../common/model/content";
 import {useDesktopStore} from "../../../desktop/store/desktop";
-import {checkPermission} from "../../../../common/util/helper";
-import {Permission_Types} from "../../../../../../../common/permission/permission";
+import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 import {ICommon_Model_Workflow_Action} from "../../../../../../../common/model/workflow_action";
 import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/model/workflow_node";
 import ProjectIssueNext from "./projectIssueNext.vue";
 import {ICommon_Model_Project_Release} from "../../../../../../../common/model/project_release";
 import {vDrag} from "../../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/model/finder_item";
+import UserAvatar from "../../../../common/component/userAvatar.vue";
+import {SessionStorage} from "../../../../common/storage/session";
+import {TableRowSelection} from "@arco-design/web-vue/es/table/interface";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
+import {ECommon_Model_Organization_Member_Type} from "../../../../../../../common/model/organization";
 
 const props=defineProps<{
   projectIssueId:string
@@ -247,6 +265,25 @@ const actionList=ref<DCSType<ICommon_Model_Workflow_Action>[]>([])
 const releaseList=ref<DCSType<ICommon_Model_Project_Release[]>>([])
 const commentAdd=ref("")
 const store=useDesktopStore()
+const issueRelatedUserList=ref<{
+	id:string,
+	name:string,
+	photo:string
+}[]>([])
+const searchUserKey=ref("")
+const organizationUserId=SessionStorage.get("organizationUserId")
+const selectKeys=ref([])
+const rowSelection=ref<TableRowSelection>({
+	type:"checkbox",
+	showCheckedAll:true,
+	onlyCurrent:false
+})
+const columns = [
+	{
+		title: 'Name',
+		slotName: 'name',
+	}
+]
 const getInfo=async ()=>{
   let res=await apiIssue.basicInfo({
     projectIssueId:props.projectIssueId
@@ -482,6 +519,17 @@ const onAction=async (item:ICommon_Model_Workflow_Action)=>{
     Message.error(res.msg)
   }
 }
+
+const onMeeting=async ()=>{
+	let res=await apiMeeting.getPersonalRoom()
+	if(res?.code===0) {
+		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,selectKeys.value.map(item=>({
+			id:item,
+			type:ECommon_Model_Organization_Member_Type.USER
+		})))
+	}
+}
+
 const getReleaseList=async ()=>{
   let res=await apiIssue.releaseList({
     projectIssueId:props.projectIssueId
@@ -490,6 +538,16 @@ const getReleaseList=async ()=>{
     releaseList.value=res.data
   }
 }
+
+const showQuickMeeting=async ()=>{
+	let res=await apiIssue.issueRelatedUsers({
+		projectIssueId:props.projectIssueId
+	})
+	if(res?.code==0) {
+		issueRelatedUserList.value=res.data
+	}
+}
+
 onBeforeMount(()=>{
   getInfo()
   getDescription()

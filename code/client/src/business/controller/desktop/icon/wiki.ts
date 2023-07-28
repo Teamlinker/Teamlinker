@@ -9,7 +9,7 @@ import WikiProfile from "../../app/wiki/wikiProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
 
-export const iconWiki=new Icon("wiki",iconGroupMap["wiki"])
+export const iconWiki=new Icon("Wiki",iconGroupMap["wiki"])
 iconWiki.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
@@ -30,7 +30,7 @@ iconWiki.addEventListener("dbClick",item => {
                 title:"wiki"
             }
         }
-    ],"wiki");
+    ],"Wiki");
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -68,7 +68,23 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_PROFILE,wikiId => {
                 }
             }
         }
-    ],"wiki");
+    ],"Wiki");
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"wiki"
+            },
+            components:{
+                wiki:markRaw(Wiki),
+                profile:markRaw(WikiProfile)
+            },
+            default:{
+                name:"wiki",
+                title:"wiki"
+            }
+        }
+    })
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_ITEM,(wikiId, wikiItemId) => {
@@ -93,6 +109,22 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_ITEM,(wikiId, wikiItemId) => {
                 }
             }
         }
-    ],"wiki");
+    ],"Wiki");
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"wiki"
+            },
+            components:{
+                wiki:markRaw(Wiki),
+                profile:markRaw(WikiProfile)
+            },
+            default:{
+                name:"wiki",
+                title:"wiki"
+            }
+        }
+    })
     windowManager.open(win);
 })

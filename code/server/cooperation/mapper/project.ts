@@ -16,7 +16,6 @@ import {roleMemberModel, Table_Role_Member} from "../../../common/model/role_mem
 import {Table_Team_User, teamUserModel} from "../../../common/model/team_user";
 import {memberTagMemberModel, Table_Member_Tag_Member} from "../../../common/model/member_tag_member";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
-import field from "../../../common/routes/field";
 
 class ProjectMapper extends Mapper<typeof projectModel>{
     constructor(){
@@ -137,7 +136,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                 }
             },
             columns:{
-                columns:["id","name","photo"],
+                columns:["id","name","photo","keyword"],
                 calcColumns:[]
             }
         },["project_id"],{
@@ -158,6 +157,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         let ret=await mysql.execute(sql)
         ret=ret.map(item=>{
             return {
+                keyword:item.keyword,
                 id:item.id,
                 name:item.name,
                 photo:item.photo,
@@ -266,7 +266,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             let sql=generateGroupLeftJoin2Sql({
                 model:projectModel,
                 columns:{
-                    columns:["id","name","photo"],
+                    columns:["id","name","photo","keyword"],
                     calcColumns:[]
                 }
             },{
@@ -331,6 +331,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             let ret=await mysql.execute(sql)
             ret=ret.map(item=>{
                 return {
+                    keyword:item.keyword,
                     id:item.id,
                     name:item.name,
                     photo:item.photo,

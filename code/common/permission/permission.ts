@@ -10,6 +10,10 @@ export function getAllPermissions(obj):Permission_Base[] {
     return arr;
 }
 
+export function checkPermission(permission:number,permissionChecked:Permission_Base) {
+    return (permission & permissionChecked.value) && permission>=permissionChecked.value
+}
+
 export class Permission_Base {
     constructor(public readonly name:string,public readonly description=name,public readonly value){}
     toString() {

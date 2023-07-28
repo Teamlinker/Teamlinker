@@ -110,7 +110,7 @@ import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {apiTeam, DCSType} from "../../../common/request/request";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../common/routes/response";
 import {ICommon_Model_Team} from "../../../../../../common/model/team";
-import {Permission_Base, Permission_Types} from "../../../../../../common/permission/permission";
+import {checkPermission, Permission_Base, Permission_Types} from "../../../../../../common/permission/permission";
 import {getCurrentNavigator} from "../../../../teamOS/common/component/navigator/navigator";
 import Upload from "../../../common/component/upload.vue";
 import UserAvatar from "../../../common/component/userAvatar.vue";
@@ -120,7 +120,6 @@ import CardItem from "../../../common/component/cardItem.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import EditTeamMemberRole from "../setting/user&team/editTeamMemberRole.vue";
 import EditTeamRole from "../setting/role/team/editTeamRole.vue";
-import {checkPermission} from "../../../common/util/helper";
 import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
 
 const props=defineProps<{

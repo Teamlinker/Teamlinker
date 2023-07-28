@@ -6,7 +6,7 @@ import {markRaw} from "vue";
 import Finder from "../../app/finder/finder.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
-export const iconFinder=new Icon("finder",iconGroupMap["finder"])
+export const iconFinder=new Icon("Finder",iconGroupMap["finder"])
 iconFinder.addEventListener("dbClick",item => {
     const win=new Window("finder",ETeamOS_Window_Type.SIMPLE, "finder",false,[
         {
@@ -21,7 +21,7 @@ iconFinder.addEventListener("dbClick",item => {
                 name:"finder"
             }
         }
-    ],"finder");
+    ],"Finder");
     windowManager.open(win,true);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,(folderId) => {
@@ -41,6 +41,6 @@ eventBus.on(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,(folderId) => {
                 }
             }
         }
-    ],"finder");
+    ],"Finder");
     windowManager.open(win,true);
 })

@@ -85,7 +85,8 @@ const api= {
                 recurring_day?:number,
                 reminder_minutes?:number,
                 location?:string,
-                guestList?:string[]
+                guestList?:string[],
+                meeting:boolean
             }>{},
             res: <ICommon_Route_Res_Calendar_Event_Info>{},
             permission: [Permission_Types.Organization.READ]
@@ -105,9 +106,21 @@ const api= {
                 reminder_minutes?:number,
                 location?:string,
                 guestList?:string[]
+                meeting?:boolean
             }>{},
             res: <ICommon_Route_Res_Calendar_Event_Info>{},
-            permission: [Permission_Types.Organization.READ]
+            permission: [Permission_Types.Organization.READ,Permission_Types.Common.SELF]
+        },
+        editCalendarEventDate:{
+            method: ECommon_HttpApi_Method.PUT,
+            path: "/calendar/eventdate",
+            req: <{
+                calendarEventId:string,
+                startTime?:number,
+                endTime?:number
+            }>{},
+            res: <ICommon_Route_Res_Calendar_Event_Info>{},
+            permission: [Permission_Types.Organization.READ,Permission_Types.Common.SELF]
         },
         removeCalendarEvent:{
             method: ECommon_HttpApi_Method.DELETE,
@@ -116,7 +129,7 @@ const api= {
                 calendarEventId:string
             }>{},
             res: {},
-            permission: [Permission_Types.Organization.READ]
+            permission: [Permission_Types.Organization.READ,Permission_Types.Common.SELF]
         },
         getCalendarSetting:{
             method: ECommon_HttpApi_Method.GET,
@@ -154,6 +167,30 @@ const api= {
                 size:number
             }>{},
             res: <ICommon_Route_Res_Calendar_Event_Filter>{},
+            permission: [Permission_Types.Organization.READ]
+        },
+        searchCalendarEvent:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/calendar/event/search",
+            req: <{
+                calendarId?:string,
+                start?:number,
+                end?:number,
+                keyword?:string,
+                location?:string
+            }>{},
+            res: <ICommon_Route_Res_Calendar_ListEvent_Item[]>{},
+            permission: [Permission_Types.Organization.READ]
+        },
+        relatedMeeting:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/calendar/event/meeting",
+            req: <{
+                calendarEventId:string
+            }>{},
+            res: <{
+                meetingId:string
+            }>{},
             permission: [Permission_Types.Organization.READ]
         }
     }

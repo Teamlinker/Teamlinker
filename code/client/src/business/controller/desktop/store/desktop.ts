@@ -19,8 +19,7 @@ import {SessionStorage} from "../../../common/storage/session";
 import {handleIMEvent} from "../../app/im/event";
 import {ECommon_User_Online_Status} from "../../../../../../common/types";
 import {handleMeetingEvent} from "../../app/meeting/event";
-import {checkPermission} from "../../../common/util/helper";
-import {Permission_Types} from "../../../../../../common/permission/permission";
+import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {iconFinder} from "../icon/finder";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
@@ -100,6 +99,7 @@ export const useDesktopStore=defineStore("desktop",{
                     }
                 })()
             ])
+            eventBus.emit(EClient_EVENTBUS_TYPE.REFRESH_MISS_CALL_UNREAD)
             SocketIOClient.getSocket(ECommon_Socket_Type.CALENDAR)?.close()
             let objSocketCalendar=SocketIOClient.create(ECommon_Socket_Type.CALENDAR)
             objSocketCalendar.getSocket().on("calendar_event_reminder",(id, name, start_time) => {

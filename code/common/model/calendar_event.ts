@@ -11,7 +11,6 @@ export enum ECommon_Calendar_Recurring_Type {
 export interface ICommon_Model_Calendar_Event {
     id:string,
     name:string,
-    agenda:string,
     start_time:Date,
     end_time:Date,
     all_day:number,
@@ -21,7 +20,8 @@ export interface ICommon_Model_Calendar_Event {
     calendar_id:string,
     location:string,
     unique_id:string,
-    is_reminder:number
+    is_reminder:number,
+    created_by:string
 }
 export const Table_Calendar_Event="calendar_event"
 

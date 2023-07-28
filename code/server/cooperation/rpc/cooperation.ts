@@ -82,7 +82,7 @@ class RpcCooperationApi  {
                 return [obj.getItem().assigner_id,obj.getItem().reporter_id,obj.getItem().created_by,...list]
             })(),
             (async ()=>{
-                let list=await rpcContentApi.list(projectIssueId,ECommon_Model_Content_Type.PROJECT_ISSUE_COMMENT)
+                let list=await rpcContentApi.list(projectIssueId,ECommon_Model_Content_Type.PROJECT_ISSUE_COMMENT,false)
                 let ret:string[]=[]
                 for(let obj of list) {
                     ret.push(obj.created_by,obj.modified_by)

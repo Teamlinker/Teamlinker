@@ -52,8 +52,7 @@ import {
 } from "../../../../../../common/model/content";
 import UserAvatar from "../../../common/component/userAvatar.vue";
 import RichEditor from "../../../common/component/richEditor/richEditor.vue";
-import {checkPermission} from "../../../common/util/helper";
-import {Permission_Types} from "../../../../../../common/permission/permission";
+import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";

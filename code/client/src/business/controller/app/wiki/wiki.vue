@@ -42,8 +42,7 @@
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {apiWiki, DCSType} from "../../../common/request/request";
-import {checkPermission} from "../../../common/util/helper";
-import {Permission_Types} from "../../../../../../common/permission/permission";
+import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {useDesktopStore} from "../../desktop/store/desktop";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {

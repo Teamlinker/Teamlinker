@@ -801,7 +801,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 value:projectIssueId
             },
             label_type:{
-                model:projectIssueFieldValueModel,
+                model:workflowNodeFieldTypeModel,
                 value:ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER
             }
         })

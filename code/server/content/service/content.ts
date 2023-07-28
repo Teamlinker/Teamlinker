@@ -9,15 +9,27 @@ import {contentMapper} from '../mapper/content';
 import {emitServiceEvent} from "../../common/event/event";
 import rpcNotificationApi from "../../notification/rpc/notification"
 import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export class ContentService extends Entity<typeof contentModel,typeof contentMapper> {
     constructor(){
         super(contentMapper)
     }
 
-    static async list(refId:string,type:ECommon_Model_Content_Type) {
-        let ret=await contentMapper.list(refId,type)
+    static async list(refId:string,type:ECommon_Model_Content_Type,isAsc:boolean,lastMessageId?:string) {
+        let ret=await contentMapper.list(refId,type,isAsc,lastMessageId)
         return ret;
+    }
+
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
+        await super.delete(eventPublish);
+        for(let objLine of JSON.parse(this.getItem().content) as ICommon_Content_Line[]) {
+            for(let objConfig of objLine.arr) {
+                if(objConfig.type===ECommon_Content_Line_Config_Type.FILE || objConfig.type===ECommon_Content_Line_Config_Type.IMAGE) {
+                    emitServiceEvent("fileUnref",objConfig.value)
+                }
+            }
+        }
     }
 
     override async create(): Promise<typeof contentModel["model"]> {
@@ -139,15 +151,33 @@ export class ContentService extends Entity<typeof contentModel,typeof contentMap
     }
 
     static async clearByRefId(refId:string) {
-        await contentMapper.clearByRefId(refId)
+        let arr=await ContentService.getItemsByExp({
+            ref_id:refId
+        })
+        let arrPromise=[]
+        for(let obj of arr) {
+            arrPromise.push(obj.delete())
+        }
+        await Promise.all(arrPromise)
     }
 
     static async clearByRefIds(refIds:string[]) {
-        await contentMapper.clearByRefIds(refIds)
+        let arrPromise=[]
+        for(let refId of refIds) {
+            arrPromise.push(ContentService.clearByRefId(refId))
+        }
+        await Promise.all(arrPromise)
     }
 
     static async clearByOrganizationId(organizationId:string) {
-        await contentMapper.clearByOrganizationId(organizationId)
+        let arr=await ContentService.getItemsByExp({
+            organization_id:organizationId
+        })
+        let arrPromise=[]
+        for(let obj of arr) {
+            arrPromise.push(obj.delete())
+        }
+        await Promise.all(arrPromise)
     }
 
 }

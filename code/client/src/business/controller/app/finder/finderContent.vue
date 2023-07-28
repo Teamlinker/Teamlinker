@@ -46,6 +46,7 @@ const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()
 const objFinderHandle=new FinderHandle(root,appContext,props.folderId)
 const itemList=objFinderHandle.getItemList()
+objFinderHandle.setNameColor("#2a2d33")
 objFinderHandle.onEnterFolderFunc=folderId => {
 	emit("enterFolder",folderId)
 }

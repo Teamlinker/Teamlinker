@@ -42,7 +42,8 @@ export enum ECommon_Model_Content_Type {
     PROJECT_ISSUE_COMMENT,
     PROJECT_ISSUE_DESCRIPTION,
     WIKI_ITEM,
-    MEETING
+    MEETING_CHAT,
+    CALENDAR_EVENT_AGENDA
 }
 
 export interface ICommon_Model_Content {

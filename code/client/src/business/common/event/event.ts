@@ -7,6 +7,7 @@ import {
     ICommon_Socket_IM_Search_Message_Team,
     ICommon_Socket_IM_Search_Message_User
 } from "../../../../../common/socket/types";
+import {ECommon_Model_Organization_Member_Type} from "../../../../../common/model/organization";
 
 export enum EClient_EVENTBUS_TYPE {
     OPEN_PEOPLE_PROFILE="open_people_profile",
@@ -31,7 +32,8 @@ export enum EClient_EVENTBUS_TYPE {
     FINDER_UPLOAD="finder_upload",
     FINDER_OPEN_WINDOW="finder_open_window",
     REFRESH_ORGANIZATION_LIST="refresh_organization_list",
-    REFRESH_NOTIFICATION_UNREAD="refresh_notification_unread"
+    REFRESH_NOTIFICATION_UNREAD="refresh_notification_unread",
+    REFRESH_MISS_CALL_UNREAD="refresh_miss_call_unread"
 }
 
 interface IClient_EventBus_Func {
@@ -51,7 +53,10 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.RECEIVE_IM_MESSAGE]:(messageId:string,chatType:ECommon_IM_Message_EntityType,fromOrganizationUserId:string,content:ICommon_Content_Line[],contentType:ECommon_IM_Message_ContentType,date:Date,toOrganizationUserId?:string,teamId?:string)=>void
     [EClient_EVENTBUS_TYPE.OPEN_IM_CHAT]:(id:string,chatType:ECommon_IM_Message_EntityType)=>void
     [EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS]:(organizationUserId:string,status:ECommon_User_Online_Status)=>void
-    [EClient_EVENTBUS_TYPE.OPEN_MEETING]:(meetingId:string,password:string)=>void
+    [EClient_EVENTBUS_TYPE.OPEN_MEETING]:(meetingId:string,password:string,inviteBusinessIds?:{
+        id:string,
+        type:ECommon_Model_Organization_Member_Type
+    }[])=>void
     [EClient_EVENTBUS_TYPE.LEAVE_MEETING]:()=>void
     [EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT]:(calendarEventId:string)=>void
     [EClient_EVENTBUS_TYPE.FINDER_NEW_FOLDER]:(needRefreshFolderId:string,newFolderId:string)=>void
@@ -63,6 +68,7 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST]:()=>void
     [EClient_EVENTBUS_TYPE.REFRESH_NOTIFICATION_UNREAD]:()=>void
     [EClient_EVENTBUS_TYPE.LOCATE_IM_MESSAGE]:(item:ICommon_Socket_IM_Search_Message_User|ICommon_Socket_IM_Search_Message_Team)=>void
+    [EClient_EVENTBUS_TYPE.REFRESH_MISS_CALL_UNREAD]:()=>void
 }
 
 interface IClient_EventBus_Emit_Func {

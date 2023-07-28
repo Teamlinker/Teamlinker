@@ -9,7 +9,7 @@ import ProjectProfile from "../../app/project/projectProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
 
-export const iconProject=new Icon("project",iconGroupMap["project"])
+export const iconProject=new Icon("Project",iconGroupMap["project"])
 iconProject.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
@@ -30,7 +30,7 @@ iconProject.addEventListener("dbClick",item => {
                 title:"project"
             }
         }
-    ],"project");
+    ],"Project");
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -68,7 +68,23 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_PROFILE,projectId => {
                 }
             }
         }
-    ],"project");
+    ],"Project");
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"project"
+            },
+            components:{
+                project:markRaw(Project),
+                profile:markRaw(ProjectProfile)
+            },
+            default:{
+                name:"project",
+                title: "project"
+            }
+        }
+    })
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,(projectId,projectIssueId) => {
@@ -93,7 +109,23 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,(projectId,projectI
                 }
             }
         }
-    ],"project");
+    ],"Project");
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"project"
+            },
+            components:{
+                project:markRaw(Project),
+                profile:markRaw(ProjectProfile)
+            },
+            default:{
+                name:"project",
+                title: "project"
+            }
+        }
+    })
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,(projectId,projectReleaseId) => {
@@ -118,6 +150,22 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,(projectId,projec
                 }
             }
         }
-    ],"project");
+    ],"Project");
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"project"
+            },
+            components:{
+                project:markRaw(Project),
+                profile:markRaw(ProjectProfile)
+            },
+            default:{
+                name:"project",
+                title: "project"
+            }
+        }
+    })
     windowManager.open(win);
 })

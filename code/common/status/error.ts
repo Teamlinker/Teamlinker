@@ -536,6 +536,10 @@ export namespace Err {
         notInMeeting:{
             code:13006,
             msg:"not in meeting"
+        },
+        organizationUserNotFound:{
+            code:13007,
+            msg:"organization user not found"
         }
     }
 

@@ -3,8 +3,10 @@ import {ECommon_IM_Message_ContentType, ICommon_Model_IM_User_Message} from "../
 import {ICommon_Model_IM_Team_Message} from "../model/im_team_message";
 import {ECommon_User_Online_Status} from "../types";
 import {ECommon_Meeting_Room_Permission} from "../model/meeting_room";
-import {ICommon_Content_Line} from "../model/content";
+import {ICommon_Content_Line, ICommon_Model_Content} from "../model/content";
 import {ICommon_Model_IM_Favorite_Message} from "../model/im_favorite_message";
+import {DCSType} from "../../client/src/business/common/request/request";
+import {ECommon_Model_Organization_Member_Type} from "../model/organization";
 
 export enum ECommon_Socket_Type {
     CALENDAR = "calendar",
@@ -51,6 +53,7 @@ export interface ICommon_Socket_ServerToClientEvents {
     //meeting
     meeting_presenter_change:(organizationUserId:string,permission:ECommon_Meeting_Room_Permission)=>void
     meeting_invite:(fromOrganizationUserId:string,fromOrganizationUserName:string,roomId:string,password:string)=>void,
+    meeting_rejected:(rejectOrganizationUserId:string,rejectOrganizationUserName:string,roomId:string)=>void
     //notification
     notification_new:(notificationId:string)=>void
 }
@@ -87,7 +90,12 @@ export interface ICommon_Socket_ClientToServerEvents {
     meeting_get_presenters:(callback:(presenters:{
         [id:string]:ECommon_Meeting_Room_Permission
     })=>void)=>void
-    meeting_invite:(inviteBusinessIds:string[])=>void
+    meeting_invite:(inviteBusinessIds:{
+        id:string,
+        type:ECommon_Model_Organization_Member_Type
+    }[])=>void
+    meeting_message_list:(lastMessageId:string,callback:(list:DCSType<ICommon_Model_Content[]>)=>void)=>void
+    meeting_reject:(fromOrganizationUserId:string,roomId:string)=>void
 }
 
 export interface ICommon_Socket_InterServerEvents {

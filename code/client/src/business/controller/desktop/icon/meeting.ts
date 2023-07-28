@@ -9,7 +9,7 @@ import Meeting from "../../app/meeting/meeting.vue";
 import MeetingProfile from "../../app/meeting/meetingProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 
-export const iconMeeting=new Icon("meeting",iconGroupMap["meeting"])
+export const iconMeeting=new Icon("Meeting",iconGroupMap["meeting"])
 iconMeeting.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
@@ -29,10 +29,10 @@ iconMeeting.addEventListener("dbClick",item => {
                 name:"meeting"
             }
         }
-    ],"meeting");
+    ],"Meeting");
     windowManager.open(win);
 })
-eventBus.on(EClient_EVENTBUS_TYPE.OPEN_MEETING,(meetingId, password) => {
+eventBus.on(EClient_EVENTBUS_TYPE.OPEN_MEETING,(meetingId, password,inviteBusinessIds) => {
     const win=new Window("meeting",ETeamOS_Window_Type.SIMPLE, "meeting",false,[
         {
             id:v4(),
@@ -48,11 +48,12 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_MEETING,(meetingId, password) => {
                 props:{
                     meetingInitInfo:{
                         id:meetingId,
-                        password
+                        password,
+                        inviteBusinessIds
                     }
                 }
             }
         }
-    ],"meeting");
+    ],"Meeting");
     windowManager.open(win);
 })

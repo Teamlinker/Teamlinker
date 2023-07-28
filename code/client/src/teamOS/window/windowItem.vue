@@ -1,6 +1,10 @@
 <template>
-  <div  :data-id="item.id" :id="item.id" :style="{zIndex:item.isFocus?101:100,left:item.rect.left,top:item.rect.top,width:item.rect.width,height:item.rect.height}"  style="box-shadow:0px 0px 2px 2px rgba(169, 169, 169, 0.2);position:absolute;border-radius: 5px" :tabindex="index" @focus="onFocus(item.id)" v-resize="item.rect" v-show="item.status!=ETeamOS_Window_Status.MIN" name="window">
-    <a-row style="height: 35px;" :style="{backgroundColor:`rgb(249,249,249)`}" v-drag:[item.id].free="item.rect" @dragend="item.onMove">
+  <div  :data-id="item.id" :id="item.id" :style="{zIndex:item.isFocus?101:100,left:item.rect.left,top:item.rect.top,width:item.rect.width,height:item.rect.height}"  style="box-shadow:0px 0px 2px 2px rgba(169, 169, 169, 0.2);position:absolute;border-radius: 5px;" :tabindex="index" @focus="onFocus(item.id)" v-resize="item.rect" v-show="item.status!=ETeamOS_Window_Status.MIN" name="window">
+    <a-row style="height: 35px;background-color: rgba(249,249,249,0.9)" v-drag:[item.id].free="item.rect" @dragend="item.onMove">
+	    <a-col flex="100px" style="height: 100%;text-align: center;line-height: 35px;color: rgb(93,93,93);font-size: medium;cursor: move;align-items: center;display: flex">
+		    <SvgIcon style="margin-left: 10px;margin-right: 10px;width: 18px;height: 18px" :name="iconGroupMap[item.group]"></SvgIcon>
+		    <span style="font-size: small;color: #333">{{item.title}}</span>
+	    </a-col>
       <a-col flex="80px" style="height: 100%">
         <a-row style="height: 100%" align="center" justify="left" :wrap="false" v-if="item.isControl">
           <a-col flex="auto">
@@ -19,8 +23,8 @@
           </a-col>
         </a-row>
       </a-col>
-      <a-col flex="auto" style="height: 100%;text-align: center;line-height: 35px;color: rgb(93,93,93);font-size: larger;cursor: move">
-        {{item.title}}
+      <a-col flex="auto" style="height: 100%;text-align: center;line-height: 35px;color: rgb(93,93,93);font-size: medium;cursor: move">
+
       </a-col>
       <a-col flex="80px" style="height: 100%">
         <a-row style="height: 100%" align="center" justify="center" :wrap="false">
@@ -68,6 +72,8 @@ import {ETeamOS_Window_Status, ETeamOS_Window_Type, Window} from "./window";
 import {vDrag} from "../common/directive/drag";
 import {vResize} from "../common/directive/resize";
 import {v4} from "uuid"
+import SvgIcon from "../../icon/custom/svgIcon.vue";
+import {iconGroupMap} from "../icon/icon";
 
 vResize;
 vDrag;

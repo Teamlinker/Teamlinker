@@ -1,7 +1,8 @@
 import {ECommon_Services} from "../types";
 import {ECommon_HttpApi_Method} from "./types";
 import {Permission_Types} from "../permission/permission";
-import {ECommon_Model_Meeting_Room_Type, ICommon_Model_Meeting_Room} from "../model/meeting_room";
+import {ICommon_Model_Meeting_Room} from "../model/meeting_room";
+import {ICommon_Route_Res_Meeting_Miss_Call} from "./response";
 
 const api= {
     baseUrl: "/meeting",
@@ -12,7 +13,6 @@ const api= {
             path: "/room/list",
             req: <{
                 keyword?:string,
-                type?:ECommon_Model_Meeting_Room_Type,
                 page:number,
                 size:number
             }>{},
@@ -95,6 +95,38 @@ const api= {
                 meetingRoomId:string,
             }>{},
             res: <ICommon_Model_Meeting_Room>{},
+            permission: [Permission_Types.Organization.READ]
+        },
+        listMissCall:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/miss/list",
+            req: {},
+            res: <ICommon_Route_Res_Meeting_Miss_Call[]>{},
+            permission: [Permission_Types.Organization.READ]
+        },
+        missCallRead:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/miss/read",
+            req: {},
+            res: {},
+            permission: [Permission_Types.Organization.READ]
+        },
+        missCallCount:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/miss/count",
+            req: {},
+            res: <{
+                count:number
+            }>{},
+            permission: [Permission_Types.Organization.READ]
+        },
+        missCallAdd:{
+            method: ECommon_HttpApi_Method.POST,
+            path: "/miss",
+            req:  <{
+                fromOrganizationUserId:string
+            }>{},
+            res:{},
             permission: [Permission_Types.Organization.READ]
         },
     }

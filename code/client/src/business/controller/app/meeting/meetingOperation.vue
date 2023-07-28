@@ -14,14 +14,15 @@
 				</template>
 			</a-button>
 		</a-space>
-		<a-popover>
-			<a-button size="large" type="text">
-				<template #icon>
-					<sicon size="20" color="" name="Ant" type="add user"></sicon>
-				</template>
-			</a-button>
-			<template #content>
-				<a-descriptions title="Meeting Info" :data="[
+		<a-space>
+			<a-popover>
+				<a-button size="large" type="text">
+					<template #icon>
+						<sicon size="20" color="" name="Ant" type="add user"></sicon>
+					</template>
+				</a-button>
+				<template #content>
+					<a-descriptions title="Meeting Info" :data="[
 									{
 										label:'Meeting Id',
 										value:currentMeeting.id
@@ -31,19 +32,41 @@
 										value:currentMeeting.password
 									}
 								]" v-if="currentMeeting"></a-descriptions>
-				<a-divider :margin="10"></a-divider>
-				<a-form :model="form" auto-label-width>
-					<a-form-item field="userIds" label="Users" required>
-						<a-select multiple allow-clear allow-search v-model="form.userIds" @search="onSearch">
-							<a-option v-for="item in organizationUserList" :key="item.organizationUserId" :label="item.name" :value="item.organizationUserId"></a-option>
-						</a-select>
-					</a-form-item>
-					<a-form-item>
-						<a-button html-type="button" type="primary" @click="onInvite">Invite</a-button>
-					</a-form-item>
-				</a-form>
-			</template>
-		</a-popover>
+					<a-divider :margin="10"></a-divider>
+					<a-form :model="form" auto-label-width>
+						<a-form-item field="memberIds" label="Users" required>
+							<a-select style="width: 100%" placeholder="type user or team" multiple allow-search allow-clear v-model="form.memberIds" @search="onSearch">
+								<a-optgroup label="Team" v-if="selectList && selectList.teams && selectList.teams.length>0">
+									<a-option v-for="item in selectList.teams" :value="item.id">
+										<a-row style="align-items: center">
+											<a-avatar :image-url="item.photo" :size="24"></a-avatar>&nbsp;
+											{{item.name}}
+										</a-row>
+									</a-option>
+								</a-optgroup>
+								<a-optgroup label="User" v-if="selectList && selectList.users && selectList.users.length>0">
+									<a-option v-for="item in selectList.users" :value="item.id">
+										<a-row style="align-items: center">
+											<a-avatar :image-url="item.photo" :size="24"></a-avatar>&nbsp;
+											{{item.name}}
+										</a-row>
+									</a-option>
+								</a-optgroup>
+							</a-select>
+						</a-form-item>
+						<a-form-item>
+							<a-button html-type="button" type="primary" @click="onInvite">Invite</a-button>
+						</a-form-item>
+					</a-form>
+				</template>
+			</a-popover>
+			<a-button size="large" type="text" @click="onToggleScreen">
+				<template #icon>
+					<sicon size="20" color="" name="Ant" type="desktop" v-if="!isScreen"></sicon>
+					<sicon size="20" color="red" name="Ant" type="desktop" v-else></sicon>
+				</template>
+			</a-button>
+		</a-space>
 		<a-space>
 			<a-button size="mini" type="primary" @click="onLeave">
 				Leave
@@ -65,9 +88,10 @@ import {Message} from "@arco-design/web-vue";
 import {getCurrentNavigator, getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import {MeetingClient} from "../../../common/component/meeting/client";
 import {getCurrentInstance, reactive, ref} from "vue";
-import {SessionStorage} from "../../../common/storage/session";
 import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
+import {ICommon_Route_Res_Organization_FilterUserAndTeam} from "../../../../../../common/routes/response";
+import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 
 const props=defineProps<{
 	me:OrganizationUserItem,
@@ -75,16 +99,17 @@ const props=defineProps<{
 	meetingClient:MeetingClient
 }>()
 const form=reactive({
-	userIds:[]
+	memberIds:[]
 })
-const organizationUserList=ref<{
-	organizationUserId:string,
-	name:string
-}[]>([])
+const selectList=ref<ICommon_Route_Res_Organization_FilterUserAndTeam>()
 const navigator=getCurrentNavigator()
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
 const socket=SocketIOClient.getSocket(ECommon_Socket_Type.MEETING).getSocket()
+let isScreen=ref(false)
+props.meetingClient.onScreenStopped=() => {
+	isScreen.value=false
+}
 const onToggleAudio=()=>{
 	if(props.me.audio) {
 		props.meetingClient.pause("audio")
@@ -126,28 +151,44 @@ const onEnd=async ()=>{
 }
 
 const onSearch=async (keyword:string)=>{
-	let res=await apiOrganization.listUser({
-		keyword,
-		page:0,
-		size:10,
-		organizationId:SessionStorage.get("organizationId")
+	if(!keyword) {
+		return
+	}
+	let ret=await apiOrganization.filterAvailableUserAndTeam({
+		keyword:keyword,
+		exceptMe:1
 	})
-	if(res?.code==0) {
-		organizationUserList.value=res.data.data.map(item=>{
-			return {
-				name:item.organizationUser.nickname,
-				organizationUserId:item.organizationUser.id
-			}
-		})
+	if(ret?.code==0) {
+		selectList.value=ret.data
 	}
 }
 
 const onInvite=async()=>{
-	if(form.userIds.length>0) {
-		socket.emit("meeting_invite",form.userIds)
-		form.userIds=[]
+	if(form.memberIds.length>0) {
+		socket.emit("meeting_invite",form.memberIds.map(item=>{
+			return {
+				id:item,
+				type:selectList.value.users.map(item=>item.id).includes(item)?ECommon_Model_Organization_Member_Type.USER:ECommon_Model_Organization_Member_Type.TEAM
+			}
+		}))
+		form.memberIds=[]
 	}
 }
+
+const onToggleScreen=async ()=>{
+	if(!isScreen.value) {
+		let ret=await props.meetingClient.startShare()
+		if(ret===false) {
+			Message.error("can't share now")
+		} else if(ret===true) {
+			isScreen.value=true
+		}
+	} else {
+		props.meetingClient.stopShare()
+		isScreen.value=false
+	}
+}
+
 </script>
 
 <style scoped>

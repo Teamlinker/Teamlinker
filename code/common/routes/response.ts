@@ -25,6 +25,7 @@ import {ICommon_Model_File} from "../model/file";
 import {ICommon_Model_Wiki_Item} from "../model/wiki_item";
 import {ICommon_Model_Meeting_Room} from "../model/meeting_room";
 import {ICommon_Model_Notification} from "../model/notification";
+import {ICommon_Model_Meeting_Miss_Call} from "../model/meeting_miss_call";
 
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -175,6 +176,7 @@ export type ICommon_Route_Res_ProjectIssue_fieldsInfo = {
 
 
 export interface ICommon_Route_Res_recentProjectList_Item {
+    keyword:string,
     id:string,
     name:string,
     photo:string,
@@ -330,7 +332,8 @@ export type ICommon_Route_Res_Calendar_ListEvent_Item = {
         name:string
     },
     all_day:number,
-    reminder_minutes:number
+    reminder_minutes:number,
+    created_by:string
 }
 
 export type ICommon_Route_Res_Calendar_Event_Info = ICommon_Model_Calendar_Event & {
@@ -339,7 +342,9 @@ export type ICommon_Route_Res_Calendar_Event_Info = ICommon_Model_Calendar_Event
         organizationUserId:string,
         nickname:string,
         photo?:string
-    }[]
+    }[],
+    agenda:string,
+    meeting?:string
 }
 
 export type ICommon_Route_Res_Calendar_Event_Filter={
@@ -357,7 +362,7 @@ export type ICommon_Route_Res_Organization_FilterUserAndTeam = {
             name:string,
             photo:string
     }[],
-        teams:{
+    teams:{
         id:string,
             name:string,
             photo:string
@@ -391,8 +396,9 @@ export type ICommon_Route_Res_Notification_Item = ICommon_Model_Notification & {
     organization?:ICommon_Model_Organization
 }
 
-
-
+export type ICommon_Route_Res_Meeting_Miss_Call = (ICommon_Model_Meeting_Miss_Call & {
+    organizationUser:ICommon_Model_Organization_User
+})
 
 
 

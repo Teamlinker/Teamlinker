@@ -9,7 +9,7 @@ import PeopleProfile from "../../app/people/peopleProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
 
-export const iconPeople=new Icon("people",iconGroupMap["people"])
+export const iconPeople=new Icon("People",iconGroupMap["people"])
 iconPeople.addEventListener("dbClick", item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error("you must choose organization")
@@ -30,7 +30,7 @@ iconPeople.addEventListener("dbClick", item => {
                 title: "people"
             }
         }
-    ],"people");
+    ],"People");
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -68,6 +68,22 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,organizationUserId => {
                 }
             }
         }
-    ],"people");
+    ],"People");
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"people"
+            },
+            components:{
+                people:markRaw(People),
+                profile:markRaw(PeopleProfile)
+            },
+            default:{
+                name:"people",
+                title: "people"
+            }
+        }
+    })
     windowManager.open(win);
 })

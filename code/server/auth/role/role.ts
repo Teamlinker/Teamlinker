@@ -3,6 +3,7 @@ import "../permission/project";
 import "../permission/team";
 import "../permission/organization";
 import "../permission/wiki";
+import "../permission/self"
 import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../common/model/role";
 
 

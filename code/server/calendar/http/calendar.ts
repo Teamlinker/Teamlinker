@@ -9,6 +9,11 @@ import {ECommon_Calendar_Color, ECommon_Calendar_Type} from "../../../common/mod
 import * as moment from "moment";
 import rpcNotificationApi from "../../notification/rpc/notification"
 import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
+import rpcContentApi from "../../content/rpc/content"
+import {ECommon_Model_Content_Type} from "../../../common/model/content";
+import rpcMeetingApi from "../../meeting/rpc/meeting"
+import {ECommon_Model_Meeting_Room_Type} from "../../../common/model/meeting_room";
+import CommonUtil from "../../common/util/common";
 
 @DComponent
 @DHttpController(calendarApi)
@@ -84,6 +89,7 @@ class CalendarController {
                            @DHttpReqParamRequired("name") name:string,
                            @DHttpReqParam("agenda") agenda:string,
                            @DHttpReqParamRequired("startTime") startTime:number,
+                           @DHttpReqParamRequired("meeting") meeting:boolean,
                            @DHttpReqParam("endTime") endTime:number,
                            @DHttpReqParamRequired("all_day") all_day:number,
                            @DHttpReqParamRequired("recurring") recurring:ECommon_Calendar_Recurring_Type,
@@ -95,17 +101,23 @@ class CalendarController {
         obj.assignItem({
             calendar_id:calendarId,
             name,
-            agenda,
             location,
             all_day,
             recurring_day,
             recurring,
             start_time:new Date(startTime),
             end_time:new Date(endTime),
-            reminder_minutes
+            reminder_minutes,
+            created_by:user.organizationInfo.organizationUserId
         })
-        await obj.create()
+        await obj.create(),
         await obj.handleGuestList(guestList)
+        if(agenda) {
+            await rpcContentApi.save(obj.getId(),ECommon_Model_Content_Type.CALENDAR_EVENT_AGENDA, user.organizationInfo.organizationUserId,agenda)
+        }
+        if(meeting) {
+            await rpcMeetingApi.addMeetingRoom(user.organizationInfo.organizationId,name,ECommon_Model_Meeting_Room_Type.CALENDAR,obj.getId(),CommonUtil.generateRandomNumbers(6),user.organizationInfo.organizationUserId,null,startTime,endTime)
+        }
         let ret=await obj.getInfo()
         if(guestList?.length>0) {
             guestList.forEach(item=>{
@@ -126,7 +138,9 @@ class CalendarController {
                             @DHttpReqParam("recurring_day") recurring_day:number,
                             @DHttpReqParam("reminder_minutes") reminder_minutes:number,
                             @DHttpReqParam("location") location:string,
-                            @DHttpReqParam("guestList") guestList:string[],@DHttpUser user:IUserSession):Promise<typeof calendarApi.routes.editCalendarEvent.res> {
+                            @DHttpReqParam("guestList") guestList:string[],
+                            @DHttpReqParam("meeting") meeting:boolean,
+                            @DHttpUser user:IUserSession):Promise<typeof calendarApi.routes.editCalendarEvent.res> {
         let obj=await CalendarEventService.getItemById(calendarEventId)
         if(!obj) {
             throw Err.Calendar.calendarEventNotFound
@@ -151,9 +165,22 @@ class CalendarController {
                 objEnd=new Date(endTime)
             }
         }
+        if(meeting!==undefined) {
+            let objMeeting=await rpcMeetingApi.meetingRoomByRelatedId(obj.getId())
+            if(meeting) {
+                if(!objMeeting) {
+                    await rpcMeetingApi.addMeetingRoom(user.organizationInfo.organizationId,name,ECommon_Model_Meeting_Room_Type.CALENDAR,obj.getId(),CommonUtil.generateRandomNumbers(6),user.organizationInfo.organizationUserId,null,startTime,endTime)
+                } else {
+                    await rpcMeetingApi.updateMeetingRoom(objMeeting.id,name??name,startTime??startTime,endTime??endTime)
+                }
+            } else {
+                if(objMeeting) {
+                    await rpcMeetingApi.removeMeeting(objMeeting.id)
+                }
+            }
+        }
         obj.assignItem({
             name,
-            agenda,
             start_time:objStart,
             end_time:objEnd,
             all_day,
@@ -163,6 +190,9 @@ class CalendarController {
             reminder_minutes
         })
         await obj.update()
+        if(agenda) {
+            await rpcContentApi.save(obj.getId(),ECommon_Model_Content_Type.CALENDAR_EVENT_AGENDA, user.organizationInfo.organizationUserId,agenda)
+        }
         let originalGuestList=(await obj.listGuest()).map(item=>item.organization_user_id)
         await obj.handleGuestList(guestList)
         let ret=await obj.getInfo()
@@ -182,6 +212,33 @@ class CalendarController {
                 rpcNotificationApi.removeNotification(ECommon_Model_Notification_Type.CALENDAR_EVENT_INVITATION,calendarEventId,item)
             })
         }
+        return ret;
+    }
+
+
+    @DHttpApi(calendarApi.routes.editCalendarEventDate)
+    async editCalendarEventDate(@DHttpReqParamRequired("calendarEventId") calendarEventId:string,@DHttpReqParam("startTime") startTime:number, @DHttpReqParam("endTime") endTime:number, @DHttpUser user:IUserSession):Promise<typeof calendarApi.routes.editCalendarEventDate.res> {
+        let obj=await CalendarEventService.getItemById(calendarEventId)
+        if(!obj) {
+            throw Err.Calendar.calendarEventNotFound
+        }
+        let objStart:Date,objEnd:Date
+        if(startTime) {
+            objStart=new Date(startTime)
+        }
+        if(endTime) {
+            objEnd=new Date(endTime)
+        }
+        obj.assignItem({
+            start_time:objStart,
+            end_time:objEnd
+        })
+        await obj.update()
+        let objMeeting=await rpcMeetingApi.meetingRoomByRelatedId(obj.getId())
+        if(objMeeting) {
+            await rpcMeetingApi.updateMeetingRoom(objMeeting.id,undefined,startTime??startTime,endTime??endTime)
+        }
+        let ret=await obj.getInfo()
         return ret;
     }
 
@@ -236,4 +293,28 @@ class CalendarController {
         let ret=await CalendarEventService.filterEvent(user.organizationInfo.organizationUserId,calendarId,name,page,size)
         return ret;
     }
+
+    @DHttpApi(calendarApi.routes.searchCalendarEvent)
+    async searchCalendarEvent(@DHttpReqParam("calendarId") calendarId:string,@DHttpReqParam("start") start:number,@DHttpReqParam("end") end:number,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("location") location:string,@DHttpUser user:IUserSession):Promise<typeof calendarApi.routes.searchCalendarEvent.res> {
+        let ret=await CalendarEventService.searchEvent(user.organizationInfo.organizationUserId,calendarId,start,end,keyword,location)
+        return ret;
+    }
+
+    @DHttpApi(calendarApi.routes.relatedMeeting)
+    async relatedMeeting(@DHttpReqParamRequired("calendarEventId") calendarEventId:string):Promise<typeof calendarApi.routes.relatedMeeting.res> {
+        let obj=await rpcMeetingApi.meetingRoomByRelatedId(calendarEventId)
+        return {
+            meetingId:obj?.id
+        };
+    }
+
 }
+
+
+
+
+
+
+
+
+

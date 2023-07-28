@@ -10,7 +10,7 @@ class MeetingRoomMapper extends Mapper<typeof meetingRoomModel> {
         super(meetingRoomModel)
     }
 
-    async list(organizationUserId:string,page:number,size:number,keyword?:string,type?:ECommon_Model_Meeting_Room_Type) {
+    async list(organizationUserId:string,page:number,size:number,keyword?:string) {
         if(page===undefined || page<0 || size===undefined || size<=0) {
             throw Err.Common.paramError
         }
@@ -24,21 +24,17 @@ class MeetingRoomMapper extends Mapper<typeof meetingRoomModel> {
                     value:keyword
                 }
             }),
-            ...(type!==undefined && {
-                type
-            }),
-            ...(type===ECommon_Model_Meeting_Room_Type.SCHEDULE && {
-                "$or0":{
-                    start_time:{
-                        exp: ">=",
-                        value: nowStr
-                    },
-                    end_time:{
-                        exp:">=",
-                        value:nowStr
-                    }
+            "$or0":{
+                start_time:{
+                    exp: ">=",
+                    value: nowStr
+                },
+                end_time:{
+                    exp:">=",
+                    value:nowStr
                 }
-            })
+            },
+            type:ECommon_Model_Meeting_Room_Type.SCHEDULE
         },"and",{
             type:"asc",
             field:"start_time"
@@ -53,6 +49,17 @@ class MeetingRoomMapper extends Mapper<typeof meetingRoomModel> {
         }
     }
 
+    async roomsByRelatedIds(relatedIds:string[]) {
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(meetingRoomModel,null,{
+            related_id:{
+                exp:"in",
+                value:relatedIds
+            }
+        }))
+        return ret;
+    }
+
     async clear(organizationUserId:string) {
         let mysql=getMysqlInstance()
         await mysql.execute(generateDeleteSql(meetingRoomModel,{
@@ -64,6 +71,13 @@ class MeetingRoomMapper extends Mapper<typeof meetingRoomModel> {
         let mysql=getMysqlInstance()
         await mysql.execute(generateDeleteSql(meetingRoomModel,{
             organization_id:organizationId
+        }))
+    }
+
+    async clearByRelatedId(relatedId:string) {
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(meetingRoomModel,{
+            related_id:relatedId
         }))
     }
 }

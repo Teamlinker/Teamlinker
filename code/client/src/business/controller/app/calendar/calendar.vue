@@ -38,7 +38,7 @@
       </div>
     </a-layout-sider>
     <a-layout-content style="flex-direction: column;display: flex;padding: 10px;">
-      <a-row style="flex: 0 0 40px;display: flex;justify-content: space-between;justify-items: center">
+      <a-row style="flex: 0 0 40px;display: flex;justify-content: space-between;justify-items: center;flex-wrap: nowrap">
         <a-space size="mini">
           <a-button type="primary" size="mini" @click="onToday">Today</a-button>
           <a-button type="text" @click="onPrevious">
@@ -55,6 +55,32 @@
             {{calendarType=="day"?pickerValue.format("YYYY-MM-DD"):pickerValue.format("YYYY-MM")}}
           </span>
         </a-space>
+	      <a-input style="width: 40%" placeholder="type event name" v-model="searchForm.keyword" allow-clear @input="onSearch">
+					<template #append>
+						<a-popover position="br" @popup-visible-change="visible => !visible && onSearch()">
+							<icon-arrow-down style="margin-left: 10px;cursor: pointer"></icon-arrow-down>
+							<template #content>
+								<a-form :model="{}" layout="vertical">
+									<a-form-item label="calendar">
+										<a-select size="small" v-model="searchForm.calendarId">
+											<a-option value="all">All</a-option>
+											<a-option v-for="item in calendarList" :value="item.id">{{item.name}}</a-option>
+										</a-select>
+									</a-form-item>
+									<a-form-item label="start date">
+										<a-date-picker v-model="searchForm.startDate"></a-date-picker>
+									</a-form-item>
+									<a-form-item label="end date">
+										<a-date-picker v-model="searchForm.endDate"></a-date-picker>
+									</a-form-item>
+									<a-form-item label="location">
+										<a-input size="small" v-model="searchForm.location"></a-input>
+									</a-form-item>
+								</a-form>
+							</template>
+						</a-popover>
+					</template>
+	      </a-input>
         <a-space size="mini">
           <a-radio-group type="button" v-model="calendarType" size="small">
             <a-radio value="day">Day</a-radio>
@@ -69,7 +95,12 @@
         </a-space>
       </a-row>
       <a-row style="flex: 1 1 auto;border-top: 1px solid lightgray;overflow-y: auto;position: relative">
-        <Calendar :mode="calendarType=='month'?'month':'day'" :start-date="startDay" :end-date="endDay" :month="month" :utc-offset="timezoneOffset" :time-zone="setting.timezone" :event-list="calendarEventList" @blank-click="onAddCalendarEvent" @delete-event="onDeleteCalendarEvent" @change-event-date="onChangeCalendarEventDate" @edit-event="onEditCalendarEvent" v-if="setting?.timezone"></Calendar>
+        <Calendar :mode="calendarType=='month'?'month':'day'" :start-date="startDay" :end-date="endDay" :month="month" :utc-offset="timezoneOffset" :time-zone="setting.timezone" :event-list="calendarEventList" @blank-click="onAddCalendarEvent" @change-event-date="onChangeCalendarEventDate"  v-if="(setting?.timezone && !searchForm.keyword)">
+	        <template #shortView="{timeZone,selectedEvent,maskInfoTop,maskInfoLeft,onClose}">
+		        <CalendarEventShortView :time-zone="timeZone" :selected-event="selectedEvent" :mask-info-left="maskInfoLeft" :mask-info-top="maskInfoTop" @edit="(event)=>{onClose();onEditCalendarEvent(event)}" @delete="(event)=>{onClose();onDeleteCalendarEvent(event)}" @close="onClose"></CalendarEventShortView>
+	        </template>
+        </Calendar>
+	      <CalendarEventSearch :list="searchResultList" :timezone="setting.timezone" v-else-if="searchForm.keyword" style="width: 100%;height: 100%" @edit="onEditCalendarEvent" @delete="onDeleteCalendarEvent"></CalendarEventSearch>
       </a-row>
     </a-layout-content>
     <a-drawer :popup-container="root" :visible="settingVisible" @ok="onSetting" unmount-on-close title="Calendar Global Setting" :closable="false" @cancel="settingVisible=false" :width="400" id="calendarSetting" :drawer-style="{zIndex:100}">
@@ -102,6 +133,7 @@ import {
 	onBeforeMount,
 	onBeforeUnmount,
 	provide,
+	reactive,
 	ref,
 	watch
 } from "vue";
@@ -126,6 +158,11 @@ import {ECommon_Calendar_Recurring_Type} from "../../../../../../common/model/ca
 import CalendarEventEdit from "./calendarEventEdit.vue";
 import {injectCalendarSetting} from "../../../common/util/symbol";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import CalendarEventShortView from "./calendarEventShortView.vue";
+import {SessionStorage} from "../../../common/storage/session";
+import {ICommon_Route_Res_Calendar_ListEvent_Item} from "../../../../../../common/routes/response";
+import CalendarEventSearch from "./calendarEventSearch.vue";
+import {debounce} from "../../../common/util/helper";
 
 const props=defineProps<{
 	calendarEventId?:string
@@ -150,6 +187,16 @@ const calendarType=ref<"week"|"day"|"month">("week")
 const settingVisible=ref(false)
 const timezoneOffset=ref(0)
 const calendarEventList=ref<IClient_Calendar_Info[]>([])
+const organizationUserId=SessionStorage.get("organizationUserId")
+const searchForm=reactive({
+	keyword:"",
+	calendarId:"All",
+	startDate:null,
+	endDate:null,
+	location:""
+})
+const searchResultList=ref<DCSType<ICommon_Route_Res_Calendar_ListEvent_Item>[]>([])
+let searchDebounce=null
 provide(injectCalendarSetting,setting)
 const startDay=computed(()=>{
   let start_week_day=setting.value?.start_week_day
@@ -355,7 +402,8 @@ const saveCalendarEvent=async (title:string, dateInfo:CalendarEventModelType, ca
     endTime:dateInfo.end,
     all_day:dateInfo.isAllDay,
     recurring:dateInfo.recurring,
-    recurring_day:dateInfo.recurring_day
+    recurring_day:dateInfo.recurring_day,
+	  meeting:false
   })
   if(res?.code==0) {
     listCalendarEvent()
@@ -418,7 +466,9 @@ const listCalendarEvent=async ()=>{
               hour:objEnd.hour(),
               minute:objEnd.minute()
             },
-            name:item.name
+            name:item.name,
+	          created_by:item.created_by,
+	          fixed:item.created_by.organizationUserId!=organizationUserId
           }
         }))
       }
@@ -441,7 +491,12 @@ const onChangeCalendarEventDate=async (event:IClient_Calendar_Info, originalDate
   start:IClient_Calendar_Date,
   end:IClient_Calendar_Date
 }, type:"resize"|"move")=>{
-  let res=await apiCalendar.editCalendarEvent({
+	if(event.fixed) {
+		event.startDate=originalDateRange.start
+		event.endDate=originalDateRange.end
+		return
+	}
+  let res=await apiCalendar.editCalendarEventDate({
     calendarEventId:event.id,
     startTime:momentFromCalendarInfoDate(event.startDate).toDate().getTime(),
     endTime:momentFromCalendarInfoDate(event.endDate).toDate().getTime()
@@ -477,6 +532,34 @@ const onShowCalendarEventDetail=async (title:string,dateInfo:CalendarEventModelT
     listCalendarEvent()
   }
 }
+
+const onSearch=async ()=>{
+	if(!searchDebounce) {
+		searchDebounce=debounce(async ()=>{
+			if(!searchForm.keyword) {
+				return
+			}
+			let res=await apiCalendar.searchCalendarEvent({
+				location:searchForm.location,
+				keyword:searchForm.keyword,
+				...(searchForm.calendarId!=="All" && {
+					calendarId:searchForm.calendarId
+				}),
+				...(searchForm.startDate && {
+					start:moment.tz(searchForm.startDate,setting.value.timezone).startOf("day").toDate().getTime()
+				}),
+				...(searchForm.endDate && {
+					end:moment.tz(searchForm.endDate,setting.value.timezone).endOf("day").toDate().getTime()
+				})
+			})
+			if(res?.code==0) {
+				searchResultList.value=res.data
+			}
+		},300)
+	}
+	searchDebounce()
+}
+
 const momentFromCalendarInfoDate=(date:IClient_Calendar_Date)=>{
   let obj=moment.tz({
     year:date.year,

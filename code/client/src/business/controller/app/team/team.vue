@@ -30,8 +30,7 @@ import {Dialog} from "../../../common/component/dialog/dialog";
 import EditTeamProfile from "../setting/user&team/editTeamProfile.vue";
 import {getCurrentNavigator} from "../../../../teamOS/common/component/navigator/navigator";
 import {useDesktopStore} from "../../desktop/store/desktop";
-import {checkPermission} from "../../../common/util/helper";
-import {Permission_Types} from "../../../../../../common/permission/permission";
+import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 
 const keyword=ref("")
 const root=ref(null);

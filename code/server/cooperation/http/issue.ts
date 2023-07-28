@@ -13,6 +13,8 @@ import {IUserSession} from "../../user/types/config";
 import rpcContentApi from "../../content/rpc/content"
 import rpcNotificationApi from "../../notification/rpc/notification"
 import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
+import rpcCooperationApi from "../rpc/cooperation"
+import rpcUserApi from "../../user/rpc/user"
 
 @DComponent
 @DHttpController(projectIssueApi)
@@ -192,7 +194,7 @@ class IssueController {
      }
      @DHttpApi(projectIssueApi.routes.commentList)
      async commentList(@DHttpReqParamRequired("projectIssueId") projectIssueId :string):Promise<typeof projectIssueApi.routes.commentList.res> {
-          let commentList=await rpcContentApi.list(projectIssueId,ECommon_Model_Content_Type.PROJECT_ISSUE_COMMENT)
+          let commentList=await rpcContentApi.list(projectIssueId,ECommon_Model_Content_Type.PROJECT_ISSUE_COMMENT,false)
           return commentList
      }
      @DHttpApi(projectIssueApi.routes.commentCreate)
@@ -343,6 +345,19 @@ class IssueController {
           }
           let ret=await projectIssue.bindReleases(projectReleaseIds)
           return ret;
+     }
+
+     @DHttpApi(projectIssueApi.routes.issueRelatedUsers)
+     async issueRelatedUsers(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.issueRelatedUsers.res> {
+          let userIds=await rpcCooperationApi.getIssueRelatedOrganizationUserIds(projectIssueId)
+          let arr=await rpcUserApi.getOrganizationUsersInfo(userIds)
+          return arr.map(item=>{
+               return {
+                    id:item.organizationUserId,
+                    photo:item.photo,
+                    name:item.nickname
+               }
+          });
      }
 
 }

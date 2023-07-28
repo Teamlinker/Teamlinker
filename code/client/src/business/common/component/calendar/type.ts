@@ -17,5 +17,8 @@ export interface IClient_Calendar_Info {
         id:string,
         name:string
     },
-    reminder?:number
+    reminder?:number,
+    created_by:any,
+    fixed:boolean,
+    extra?:any
 }
