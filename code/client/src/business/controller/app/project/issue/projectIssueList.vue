@@ -50,6 +50,7 @@
       </a-space>
     </a-row>
     <a-divider></a-divider>
+	  <span style="font-size: small;color: gray">If you wanna open in a new tab,hold command(Mac) or control(Win) Key,click the link below</span>
     <a-table style="margin-top: 10px" :columns="columns" :data="issueList" :pagination="pagination" @pageChange="onPageChange">
       <template #type="{record}">
         {{record.issueType.name}}

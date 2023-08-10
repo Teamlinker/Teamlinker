@@ -30,13 +30,17 @@ import {
     projectIssueFieldValueModel
 } from './../../../common/model/project_issue_field_value';
 import {projectIssueParentModel} from './../../../common/model/project_issue_parent';
-import {projectIssueProcessModel} from './../../../common/model/project_issue_process';
+import {projectIssueProcessModel, Table_Project_Issue_Process} from './../../../common/model/project_issue_process';
 import {projectIssueRelatedModel} from './../../../common/model/project_issue_related';
 import {projectLabelIssueModel} from './../../../common/model/project_label_issue';
 import {projectModuleIssueModel} from './../../../common/model/project_module_issue';
 import {ICommon_Model_Workflow_Node} from './../../../common/model/workflow_node';
 import CommonUtil from "../../common/util/common";
 import {projectReleaseIssueModel} from "../../../common/model/project_release_issue";
+import {projectIssueHistoryModel} from "../../../common/model/project_issue_history";
+import {projectIssueApprovalModel} from "../../../common/model/project_issue_approval";
+import {workflowNodeFieldTypeMapper} from "./field";
+import {workflowNodeFieldTypeConfigModel} from "../../../common/model/workflow_node_field_type_config";
 
 class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
@@ -60,6 +64,18 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }))
         let ret=await mysql.executeOne(generateQuerySql(projectIssueFieldValueModel,[],{
             id:value.id
+        }))
+        return ret;
+    }
+
+    async getFieldValueByProjectIssueAndFieldType(projectIssueId:string,workflowNodeFieldTypeId:string) {
+        if(!projectIssueId || !workflowNodeFieldTypeId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.executeOne(generateQuerySql(projectIssueFieldValueModel,[],{
+            project_issue_id:projectIssueId,
+            workflow_node_field_type_id:workflowNodeFieldTypeId
         }))
         return ret;
     }
@@ -95,13 +111,15 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     let arr=await mysql.execute(generateQuerySql(workflowNodeFieldTypeModel,["id"],{
                         workflow_node_id:nodeId,
                     }))
-                    await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
-                        workflow_node_field_type_id:{
-                            exp:"in",
-                            value:arr.map(item=>item.id)
-                        },
-                        project_issue_id:projectIssueId
-                    }))
+                    if(arr.length>0) {
+                        await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
+                            workflow_node_field_type_id:{
+                                exp:"in",
+                                value:arr.map(item=>item.id)
+                            },
+                            project_issue_id:projectIssueId
+                        }))
+                    }
                 }
             } else {
                 process=process.concat(workflowNodeId)
@@ -176,6 +194,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         }
         let mysql=getMysqlInstance()
+        let process=await this.getProcess(projectIssueId)
         let sql=generateLeftJoin3Sql({
             model:projectIssueModel,
             columns:keys<Omit<ICommon_Model_Project_Issue,"issue_type_id"|"workflow_node_id"|"project_id">>().map(item=>item.name)
@@ -713,6 +732,8 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     async clearMany(projectIssueIds:string[]) {
         if(!projectIssueIds) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
+        } else if(projectIssueIds.length==0) {
+            return
         }
         let mysql=getMysqlInstance()
         await mysql.execute(generateDeleteSql(projectIssueModel,{
@@ -813,6 +834,117 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         return ret;
     }
 
+    async clearWorkflowNodeProcessAndFields(workflowNodeId:string) {
+        if(!workflowNodeId) {
+            throw Err.Project.Workflow.workflowNodeNotFound
+        }
+        let mysql=getMysqlInstance()
+        await Promise.all([
+            (async ()=>{
+                let arr=await workflowNodeFieldTypeMapper.getWorkflowNodeFieldList(workflowNodeId)
+                if(arr.length>0) {
+                    await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
+                        workflow_node_field_type_id:{
+                            exp:"in",
+                            value:arr.map(item=>item.field.id)
+                        }
+                    }))
+                }
+            })(),
+            (async ()=>{
+                await mysql.execute(`select JSON_REMOVE(workflow_node_process,JSON_UNQUOTE(JSON_SEARCH(workflow_node_process,'one','${workflowNodeId}'))) from ${Table_Project_Issue_Process} where JSON_SEARCH(workflow_node_process,'one','${workflowNodeId}') IS NOT NULL`)
+            })()
+        ])
+    }
+
+    async clearWorkflowNodeFieldTypeConfig(fieldTypeConfigValueId:string) {
+        if(!fieldTypeConfigValueId) {
+            throw Err.Project.Field.fieldTypeConfigValueIdNotFound
+        }
+        let mysql=getMysqlInstance()
+        let objFieldTypeConfig=await mysql.executeOne(generateQuerySql(workflowNodeFieldTypeConfigModel,null,{
+            id:fieldTypeConfigValueId
+        }))
+        if(objFieldTypeConfig) {
+            let arr=await mysql.execute(generateQuerySql(projectIssueFieldValueModel,[],{
+                workflow_node_field_type_id:objFieldTypeConfig.workflow_node_field_type_id
+            }))
+            let arrUpdate=arr.filter(item=>{
+                if(item.field_config_ids?.includes(fieldTypeConfigValueId)) {
+                    return true
+                }
+            })
+            if(arrUpdate.length>0) {
+                arrUpdate.forEach(item=>{
+                    if(item.field_config_ids.length==1 && item.field_config_ids.includes(fieldTypeConfigValueId)) {
+                        mysql.execute(generateUpdateSql(projectIssueFieldValueModel,{
+                            field_config_ids:null
+                        },{
+                            id:item.id
+                        }))
+                    } else {
+                        let index=item.field_config_ids.indexOf(fieldTypeConfigValueId)
+                        mysql.execute(generateUpdateSql(projectIssueFieldValueModel,{
+                            field_config_ids:item.field_config_ids.splice(index,1)
+                        },{
+                            id:item.id
+                        }))
+                    }
+                })
+            }
+        }
+    }
+
 }
 
 export let projectIssueMapper=new ProjectIssueMapper
+
+class ProjectIssueHistoryMapper extends Mapper<typeof projectIssueHistoryModel> {
+    constructor() {
+        super(projectIssueHistoryModel)
+    }
+    async list(projectIssueId:string) {
+        if(!projectIssueId) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(projectIssueHistoryModel,null,{
+            project_issue_id:projectIssueId
+        },"and",{
+            type:"desc",
+            field:"id"
+        }))
+        return ret;
+    }
+
+    async clear(projectIssueId:string) {
+        if(!projectIssueId) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectIssueHistoryModel,{
+            project_issue_id:projectIssueId
+        }))
+    }
+
+    async clearByProjectIds(projectIds:string[]) {
+        if(projectIds.length>0) {
+            let mysql=getMysqlInstance()
+            await mysql.execute(generateDeleteSql(projectIssueHistoryModel,{
+                project_id:{
+                    exp:"in",
+                    value:projectIds
+                }
+            }))
+        }
+    }
+}
+
+export let projectIssueHistoryMapper=new ProjectIssueHistoryMapper
+
+class ProjectIssueApprovalMapper extends Mapper<typeof projectIssueApprovalModel> {
+    constructor() {
+        super(projectIssueApprovalModel)
+    }
+}
+export let projectIssueApprovalMapper=new ProjectIssueApprovalMapper

@@ -20,7 +20,10 @@
     "noImplicitThis": true,
     "plugins": [
       { "transform": "../common/transform/transformer.js" }
-    ]
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"],
   "references": [{ "path": "./tsconfig.node.json" }]

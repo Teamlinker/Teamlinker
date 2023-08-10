@@ -264,6 +264,9 @@ export class RichEditorEvent {
     onMouseUp(event:MouseEvent){
         this.isMouseDown=false
         let selection=window.getSelection()
+        if(selection.rangeCount==0) {
+            return
+        }
         let range=selection.getRangeAt(0)
         if(this.selectElementList.length>0) {
             range=range.cloneRange()

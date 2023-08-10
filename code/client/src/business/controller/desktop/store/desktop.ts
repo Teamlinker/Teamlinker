@@ -95,6 +95,11 @@ export const useDesktopStore=defineStore("desktop",{
                             if(!this.appList.includes(iconSetting)) {
                                 this.appList.push(iconSetting)
                             }
+                        } else {
+                            let index=this.appList.indexOf(iconSetting)
+                            if(index>-1) {
+                                this.appList.splice(index,1)
+                            }
                         }
                     }
                 })()

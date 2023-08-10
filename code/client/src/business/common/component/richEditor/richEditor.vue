@@ -21,7 +21,6 @@ import {
 	ICommon_Content_Line,
 	ICommon_Content_Line_Config
 } from "../../../../../../common/model/content";
-import "./font/css/font-awesome.min.css"
 import UserShortView from "../userShortView.vue";
 import {dragElementList, EClient_Drag_Type} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
@@ -147,6 +146,9 @@ const onMouseMove=(event:MouseEvent)=>{
 
 const calculateIndex=()=>{
 	let selection=window.getSelection()
+	if(selection.rangeCount==0) {
+		return
+	}
 	let range=selection.getRangeAt(0)
 	let startOffset=range.startOffset
 	selectStartIndexPath=[]
@@ -342,5 +344,39 @@ div {
 }
 :deep a[fileId]:hover {
 	background-color: lightgray;
+}
+:deep .svg {
+	display: inline-block;
+	width: 1em;
+	vertical-align: middle;
+	background-position: 50% 50%;
+	background-repeat: repeat;
+	background-size: contain;
+	height: 1em;
+	transform: translateY(-1px);
+}
+:deep .svg-file {
+	background-image: url("@/assert/custom/file.svg");
+}
+:deep .svg-project {
+	background-image: url("@/assert/custom/project_item.svg");
+}
+:deep .svg-project-issue {
+	background-image: url("@/assert/custom/project_issue_item.svg");
+}
+:deep .svg-project-release {
+	background-image: url("@/assert/custom/project_release_item.svg");
+}
+:deep .svg-wiki {
+	background-image: url("@/assert/custom/wiki_space_item.svg");
+}
+:deep .svg-wiki-item {
+	background-image: url("@/assert/custom/wiki_item.svg");
+}
+:deep .svg-calendar-event {
+	background-image: url("@/assert/custom/calendar_event_item.svg");
+}
+:deep .svg-meeting-room {
+	background-image: url("@/assert/custom/meeting_room_item.svg");
 }
 </style>

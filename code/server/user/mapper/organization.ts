@@ -254,6 +254,9 @@ class OrganizationUserMapper extends Mapper<typeof organizationUserModel> {
     }
 
     async users(organizationUserIds:string[]){
+        if(organizationUserIds.length==0) {
+            return []
+        }
         let mysql=getMysqlInstance()
         let ret:(ICommon_Model_User & {
             nickname:string
@@ -302,13 +305,19 @@ class MemberTagMapper extends Mapper<typeof memberTagModel> {
         super(memberTagModel)
     }
 
-    async listTag(organizationId:string):Promise<ICommon_Model_Member_Tag[]> {
+    async listTag(organizationId:string,keyword?:string):Promise<ICommon_Model_Member_Tag[]> {
         if(!organizationId) {
             throw Err.Organization.organizationNotFound
         }
         let mysql=getMysqlInstance()
         let ret=await mysql.execute(generateQuerySql(memberTagModel,null,{
-            organization_id:organizationId
+            organization_id:organizationId,
+            ...(keyword && {
+                name:{
+                    exp:"%like%",
+                    value:keyword
+                }
+            })
         },"and",{
             type:"asc",
             field:"name"

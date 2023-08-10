@@ -1,9 +1,8 @@
-
 import * as mysql from "mysql2";
-import { Pool as PromisePool } from "mysql2/promise";
+import {Pool as PromisePool} from "mysql2/promise";
 import "reflect-metadata";
-import { Err } from '../../../common/status/error';
-import { IServer_Common_Config_Mysql } from './../types/config';
+import {Err} from '../../../common/status/error';
+import {IServer_Common_Config_Mysql} from './../types/config';
 
 var g_mysqlConnection:InstanceType<typeof Mysql>
 export function getMysqlInstance(){
@@ -84,6 +83,18 @@ export default class Mysql {
                             ret[key]=item[key]
                         }
                     }
+                    for(let key in ret) {
+                        let obj=ret[key]
+                        if(typeof(obj)==="object") {
+                            let set=new Set
+                            for(let k in obj) {
+                                set.add(obj[k])
+                            }
+                            if(set.size==1 && set.has(null)) {
+                                delete ret[key]
+                            }
+                        }
+                    }
                     return ret as any;
                 }
             } else {
@@ -129,6 +140,18 @@ export default class Mysql {
                             }
                         } else {
                             ret[key as any]=item[key]
+                        }
+                    }
+                    for(let key in ret) {
+                        let obj=ret[key]
+                        if(typeof(obj)==="object") {
+                            let set=new Set
+                            for(let k in obj) {
+                                set.add(obj[k])
+                            }
+                            if(set.size==1 && set.has(null)) {
+                                delete ret[key]
+                            }
                         }
                     }
                     return ret as any;

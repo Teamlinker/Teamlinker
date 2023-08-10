@@ -72,7 +72,7 @@ class NotificationMapper extends Mapper<typeof notificationModel> {
         },"and",{
             type:"desc",
             model:notificationModel,
-            field:"modified_time"
+            field:"id"
         },size*page,size)
         let ret=await generateCommonListData(sql,page,size)
         return ret;

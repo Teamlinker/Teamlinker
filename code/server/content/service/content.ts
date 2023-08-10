@@ -23,17 +23,19 @@ export class ContentService extends Entity<typeof contentModel,typeof contentMap
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
-        for(let objLine of JSON.parse(this.getItem().content) as ICommon_Content_Line[]) {
-            for(let objConfig of objLine.arr) {
-                if(objConfig.type===ECommon_Content_Line_Config_Type.FILE || objConfig.type===ECommon_Content_Line_Config_Type.IMAGE) {
-                    emitServiceEvent("fileUnref",objConfig.value)
+        if(this.getItem().content) {
+            for(let objLine of JSON.parse(this.getItem().content) as ICommon_Content_Line[]) {
+                for(let objConfig of objLine.arr) {
+                    if(objConfig.type===ECommon_Content_Line_Config_Type.FILE || objConfig.type===ECommon_Content_Line_Config_Type.IMAGE) {
+                        emitServiceEvent("fileUnref",objConfig.value)
+                    }
                 }
             }
         }
     }
 
     override async create(): Promise<typeof contentModel["model"]> {
-        this.item.content=this.item.content.replaceAll("\\\"","\\\\\"")
+        this.item.content=this.item.content.replaceAll("\\","\\\\")
         let ret=await super.create();
         let obj=this.generateLineObj(ret.content)
         for(let key in obj.file) {
@@ -61,7 +63,7 @@ export class ContentService extends Entity<typeof contentModel,typeof contentMap
 
     override async update(): Promise<typeof contentModel["model"]> {
         let oldObj=this.generateLineObj(this._item.content)
-        this.item.content=this.item.content.replaceAll("\\\"","\\\\\"")
+        this.item.content=this.item.content.replaceAll("\\","\\\\")
         let ret=await super.update();
         let newObj=this.generateLineObj(ret.content)
         for(let key in oldObj.file) {
@@ -125,7 +127,7 @@ export class ContentService extends Entity<typeof contentModel,typeof contentMap
             [param:string]:number
         }={}
         if(content) {
-            let arr=JSON.parse(content) as ICommon_Content_Line[]
+            let arr=JSON.parse(decodeURIComponent(content)) as ICommon_Content_Line[]
             for(let obj of arr) {
                 for(let obj1 of obj.arr) {
                     if(obj1.type===ECommon_Content_Line_Config_Type.FILE || obj1.type===ECommon_Content_Line_Config_Type.IMAGE) {
@@ -153,6 +155,18 @@ export class ContentService extends Entity<typeof contentModel,typeof contentMap
     static async clearByRefId(refId:string) {
         let arr=await ContentService.getItemsByExp({
             ref_id:refId
+        })
+        let arrPromise=[]
+        for(let obj of arr) {
+            arrPromise.push(obj.delete())
+        }
+        await Promise.all(arrPromise)
+    }
+
+    static async clearByRefIdAndType(refId:string,type:ECommon_Model_Content_Type) {
+        let arr=await ContentService.getItemsByExp({
+            ref_id:refId,
+            type
         })
         let arrPromise=[]
         for(let obj of arr) {

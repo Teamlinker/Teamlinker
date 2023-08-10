@@ -20,6 +20,8 @@ class FileMapper extends Mapper<typeof fileModel> {
     async getPaths(ids:string[]) {
         if(!ids) {
             throw Err.File.fileNotFound
+        } else if(ids.length==0) {
+            return []
         }
         var mysql=getMysqlInstance()
         let ret=await mysql.execute(generateQuerySql(fileModel,[],{

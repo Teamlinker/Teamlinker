@@ -50,6 +50,9 @@ class MeetingRoomMapper extends Mapper<typeof meetingRoomModel> {
     }
 
     async roomsByRelatedIds(relatedIds:string[]) {
+        if(relatedIds.length==0) {
+            return []
+        }
         let mysql=getMysqlInstance()
         let ret=await mysql.execute(generateQuerySql(meetingRoomModel,null,{
             related_id:{

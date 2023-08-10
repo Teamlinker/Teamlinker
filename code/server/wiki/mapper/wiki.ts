@@ -66,12 +66,12 @@ class WikiMapper extends Mapper<typeof wikiModel> {
         return ret;
     }
 
-    async userWikiList(organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
+    async userWikiList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
         if(!organizationUserId) {
             throw Err.User.userIdNotExists
         }
         let mysql=getMysqlInstance();
-        let calcCount=await mysql.executeOne<number>(`select count(1) from (select rm.item_id from ${Table_Role_Member} rm left join ${Table_Wiki} w on w.id=rm.item_id left join ${Table_Team_User} tu on tu.team_id=rm.member_id left join ${Table_Member_Tag_Member} mtm on mtm.member_tag_id=rm.member_id  where (rm.member_id='${organizationUserId}' or rm.member_type =${ECommon_Model_Organization_Member_Type.DEFAULT} or not isnull(tu.team_id) || not isnull(mtm.member_tag_id)) and not isnull(w.id)  ${type=="all"?``:type=="created"?`and w.created_by='${organizationUserId}'`:`and w.created_by<>'${organizationUserId}'`} ${keyword?` and w.name like '%${keyword}%'`:''} GROUP BY rm.item_id) as Z`)
+        let calcCount=await mysql.executeOne<number>(`select count(1) from (select rm.item_id from ${Table_Role_Member} rm left join ${Table_Wiki} w on w.id=rm.item_id left join ${Table_Team_User} tu on tu.team_id=rm.member_id left join ${Table_Member_Tag_Member} mtm on mtm.member_tag_id=rm.member_id  where (rm.member_id='${organizationUserId}' or rm.member_type =${ECommon_Model_Organization_Member_Type.DEFAULT} or not isnull(tu.team_id) || not isnull(mtm.member_tag_id)) and not isnull(w.id)  ${type=="all"?``:type=="created"?`and w.created_by='${organizationUserId}'`:`and w.created_by<>'${organizationUserId}'`} ${keyword?` and w.name like '%${keyword}%'`:''} and organization_id='${organizationId}' GROUP BY rm.item_id) as Z`)
         let count=Number(Object.values(calcCount)[0]);
         let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateGroupLeftJoin3Sql({
@@ -150,7 +150,11 @@ class WikiMapper extends Mapper<typeof wikiModel> {
                         value:organizationUserId
                     }
                 }
-            })
+            }),
+            organization_id:{
+                model:wikiModel,
+                value:organizationId
+            }
         },"and",null,"and",{
             field:"name",
             model:wikiModel,

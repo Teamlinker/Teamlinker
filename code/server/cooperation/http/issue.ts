@@ -7,7 +7,7 @@ import {
 import {Err} from "../../../common/status/error";
 import {DComponent} from "../../common/decorate/component";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
-import {ProjectIssueService} from "../service/issue";
+import {ProjectIssueHistoryService, ProjectIssueService} from "../service/issue";
 import {ProjectService} from "../service/project";
 import {IUserSession} from "../../user/types/config";
 import rpcContentApi from "../../content/rpc/content"
@@ -15,6 +15,7 @@ import rpcNotificationApi from "../../notification/rpc/notification"
 import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 import rpcCooperationApi from "../rpc/cooperation"
 import rpcUserApi from "../../user/rpc/user"
+import {ECommon_Model_Project_Issue_History_Type} from "../../../common/model/project_issue_history";
 
 @DComponent
 @DHttpController(projectIssueApi)
@@ -79,7 +80,7 @@ class IssueController {
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          await projectIssue.confirmNextNode(workflowActionId,values)
+          await projectIssue.confirmNextNode(workflowActionId,values,user.organizationInfo.organizationUserId)
           rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_WORKFLOW_CHANGE,projectIssueId,null,user.organizationInfo.organizationUserId)
           return
      }
@@ -90,7 +91,7 @@ class IssueController {
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          let ret=await projectIssue.updateFieldValue(value)
+          let ret=await projectIssue.updateFieldValue(value,user.organizationInfo.organizationUserId)
           rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE,projectIssueId,null,user.organizationInfo.organizationUserId)
           return ret;
      }
@@ -120,6 +121,30 @@ class IssueController {
           if(name || priority) {
                rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE,projectIssueId,null,user.organizationInfo.organizationUserId)
           }
+          let key:string,value:string
+          if(name) {
+               key="Name"
+               value=name
+          } else if(priority!==undefined) {
+               key="Priority"
+               value=String(priority)
+          } else if(assignerId) {
+               key="Assigner"
+               value=assignerId
+          } else if(reporterId) {
+               key="Reporter"
+               value=reporterId
+          }
+          let objHistory=new ProjectIssueHistoryService()
+          objHistory.assignItem({
+               project_issue_id:ret.id,
+               name:key,
+               type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+               organization_user_id:user.organizationInfo.organizationUserId,
+               project_id:ret.project_id,
+               value:value
+          })
+          objHistory.create()
           return ret;
      }
      @DHttpApi(projectIssueApi.routes.editDescription)
@@ -184,12 +209,12 @@ class IssueController {
           return ret
      }
      @DHttpApi(projectIssueApi.routes.actionsInfo)
-     async actionsInfo(@DHttpReqParamRequired("projectIssueId") projectIssueId :string):Promise<typeof projectIssueApi.routes.actionsInfo.res> {
+     async actionsInfo(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.actionsInfo.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          let ret=await projectIssue.actionsInfo()
+          let ret=await projectIssue.actionsInfo(user.organizationInfo.organizationUserId)
           return ret
      }
      @DHttpApi(projectIssueApi.routes.commentList)
@@ -214,12 +239,18 @@ class IssueController {
           return
      }
      @DHttpApi(projectIssueApi.routes.copy)
-     async copy(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.copy.res> {
+     async copy(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParam("name") name :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.copy.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
           let ret=await projectIssue.copy()
+          if(name) {
+               ret.assignItem({
+                    name
+               })
+               await ret.update()
+          }
           if(ret.getItem().assigner_id) {
                rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN,ret.getId(),ret.getItem().assigner_id,user.organizationInfo.organizationUserId)
           }
@@ -292,21 +323,21 @@ class IssueController {
           return ret;
      }
      @DHttpApi(projectIssueApi.routes.bindLabel)
-     async bindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("labelIds") labelIds :string[]):Promise<typeof projectIssueApi.routes.bindLabel.res> {
+     async bindTag(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("labelIds") labelIds :string[],@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.bindLabel.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          let ret=await projectIssue.bindLabels(labelIds)
+          let ret=await projectIssue.bindLabels(labelIds,user.organizationInfo.organizationUserId)
           return ret;
      }
      @DHttpApi(projectIssueApi.routes.bindModule)
-     async bindModule(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParam("moduleId") moduleId :string):Promise<typeof projectIssueApi.routes.bindModule.res> {
+     async bindModule(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParam("moduleId") moduleId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.bindModule.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          let ret=await projectIssue.bindModule(moduleId)
+          let ret=await projectIssue.bindModule(moduleId,user.organizationInfo.organizationUserId)
           return ret;
      }
 
@@ -338,12 +369,12 @@ class IssueController {
      }
 
      @DHttpApi(projectIssueApi.routes.bindReleases)
-     async bindReleases(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("projectReleaseIds") projectReleaseIds :string[]):Promise<typeof projectIssueApi.routes.bindReleases.res> {
+     async bindReleases(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("projectReleaseIds") projectReleaseIds :string[],@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.bindReleases.res> {
           let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
           if(!projectIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          let ret=await projectIssue.bindReleases(projectReleaseIds)
+          let ret=await projectIssue.bindReleases(projectReleaseIds,user.organizationInfo.organizationUserId)
           return ret;
      }
 
@@ -358,6 +389,93 @@ class IssueController {
                     name:item.nickname
                }
           });
+     }
+
+     @DHttpApi(projectIssueApi.routes.createChildIssue)
+     async createChildIssue(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("name") name :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.createChildIssue.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          let ret=await projectIssue.copy()
+          ret.assignItem({
+               name
+          })
+          await Promise.all([
+               ret.update(),
+               projectIssue.addChildIssue(ret.getId())
+          ])
+          if(ret.getItem().assigner_id) {
+               rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN,ret.getId(),ret.getItem().assigner_id,user.organizationInfo.organizationUserId)
+          }
+          if(ret.getItem().reporter_id) {
+               rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN,ret.getId(),ret.getItem().reporter_id,user.organizationInfo.organizationUserId)
+          }
+          return ret.getItem()
+     }
+
+     @DHttpApi(projectIssueApi.routes.listHistory)
+     async listHistory(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.listHistory.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          let ret=await ProjectIssueHistoryService.list(projectIssueId)
+          return ret;
+     }
+
+     @DHttpApi(projectIssueApi.routes.checkApproval)
+     async checkApproval(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.checkApproval.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          let ret=await projectIssue.checkApproval(user.organizationInfo.organizationUserId)
+          return {
+               access:ret
+          }
+     }
+
+     @DHttpApi(projectIssueApi.routes.revokeApproval)
+     async revokeApproval(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.revokeApproval.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          await projectIssue.revokeApproval()
+          return
+     }
+
+     @DHttpApi(projectIssueApi.routes.resolveApproval)
+     async resolveApproval(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.resolveApproval.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          await projectIssue.resolveApproval(user.organizationInfo.organizationUserId)
+          rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE,projectIssue.getId(),projectIssue.getItem().assigner_id,user.organizationInfo.organizationUserId)
+          return
+     }
+
+     @DHttpApi(projectIssueApi.routes.rejectApproval)
+     async rejectApproval(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("reason") reason :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.rejectApproval.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          await projectIssue.rejectApproval(user.organizationInfo.organizationUserId,reason)
+          rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT,projectIssue.getId(),projectIssue.getItem().assigner_id,user.organizationInfo.organizationUserId)
+          return
+     }
+
+     @DHttpApi(projectIssueApi.routes.commitApproval)
+     async commitApproval(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.commitApproval.res> {
+          let projectIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!projectIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          await projectIssue.commitApproval()
+          return
      }
 
 }

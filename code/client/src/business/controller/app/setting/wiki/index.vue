@@ -39,7 +39,6 @@ import {getCurrentNavigator} from "../../../../../teamOS/common/component/naviga
 import EditWikiProfile from "./editWikiProfile.vue";
 import EditWikiAccess from "./editWikiAccess.vue";
 import {ICommon_Model_Wiki} from "../../../../../../../common/model/wiki";
-import {SessionStorage} from "../../../../common/storage/session";
 
 const columns=[
   {
@@ -72,7 +71,6 @@ const navigator=getCurrentNavigator();
 navigator.register("editWikiAccess",markRaw(EditWikiAccess));
 const search=async (page:number)=>{
   let res=await apiWiki.list({
-    organizationUserId:SessionStorage.get("organizationId"),
     size:pagination.pageSize,
     page:page-1,
     keyword:keyword.value

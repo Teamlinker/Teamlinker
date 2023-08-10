@@ -49,6 +49,14 @@ const api= {
                 notificationId:string
             }>{},
             res: <ICommon_Route_Res_Notification_Item>{}
+        },
+        remove:{
+            method: ECommon_HttpApi_Method.DELETE,
+            path: "/item",
+            req: <{
+                notificationId:string
+            }>{},
+            res: <ICommon_Route_Res_Notification_Item>{}
         }
     }
 }

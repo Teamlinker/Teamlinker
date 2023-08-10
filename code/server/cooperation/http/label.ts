@@ -2,10 +2,19 @@ import projectApi from "../../../common/routes/project";
 import {DComponent} from "../../common/decorate/component";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired} from "../../common/http/http";
 import {ProjectLabelService} from "../service/label";
+import {Err} from "../../../common/status/error";
 
 @DComponent
 @DHttpController(projectApi)
 class TagController {
+     @DHttpApi(projectApi.routes.getLabel)
+     async getLabel(@DHttpReqParamRequired("labelId") labelId:string):Promise<typeof projectApi.routes.getLabel.res> {
+          let tag=await ProjectLabelService.getItemById(labelId)
+          if(!tag) {
+               throw Err.Project.Label.labelNotfound
+          }
+          return tag.getItem();
+     }
      @DHttpApi(projectApi.routes.listLabel)
      async listTag(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string):Promise<typeof projectApi.routes.listLabel.res> {
          let tag=new ProjectLabelService()

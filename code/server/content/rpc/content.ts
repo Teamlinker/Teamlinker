@@ -85,6 +85,10 @@ class RpcContentApi {
         }
     }
 
+    async clearByRefIdAndType(refId:string,type:ECommon_Model_Content_Type) {
+        await ContentService.clearByRefIdAndType(refId,type)
+    }
+
     async clearByRefId(refId:string) {
         await ContentService.clearByRefId(refId)
     }

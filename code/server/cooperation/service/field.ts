@@ -1,4 +1,3 @@
-import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../../../common/model/workflow_node_field_type_config";
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
 import {workflowNodeFieldTypeModel} from '../../../common/model/workflow_node_field_type';
@@ -28,7 +27,6 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
     }
 
     override async delete(eventPulish?: keyof IServer_Common_Event_Types): Promise<void> {
-        await super.delete()
         await workflowNodeFieldTypeMapper.deleteWorkflowNodeField(this.getId());
         await ProjectIssueService.clearIssueValueByFieldTypeId(this.getId());
     }
@@ -92,6 +90,7 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
     }
 
     async editWorkflowNodeFieldConfigs( data:{
+        id?:string,
         value :string,
         selected :number
     }[]) {
@@ -108,17 +107,27 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
         } else if(objFieldType.type!=ECommon_Field_Type.SELECT && objFieldType.type!=ECommon_Field_Type.MULTISELECT) {
             throw Err.Project.Field.fieldTypeNotMatch
         }
-        await workflowNodeFieldTypeMapper.deleteConfigByFieldId(this.getId())
-        let arr:ICommon_Model_Workflow_Node_Field_Type_Config[]=new Array(data.length);
-        let i=0,arrPromise=[]
+        let arrConfig=await this.listWorkflowNodeFieldConfig()
+        let arrPromise=[]
         for(let i=0;i<data.length;i++) {
-            let obj=data[i];
-            arrPromise.push((async ()=>{
-                let ret=await workflowNodeFieldTypeMapper.addWorkflowNodeFieldConfig(this.getId(),obj.value,obj.selected,i)
-                arr[i]=ret;
-            })())
+            let obj=data[i]
+            if(obj.id) {
+                let index=arrConfig.findIndex(item=>item.id===obj.id)
+                if(index>-1) {
+                    arrPromise.push(workflowNodeFieldTypeMapper.editWorkflowNodeFieldConfig(obj.id,obj.value,obj.selected,i))
+                    arrConfig.splice(index,1)
+                } else {
+                    arrPromise.push(workflowNodeFieldTypeMapper.addWorkflowNodeFieldConfig(this.getId(),obj.value,obj.selected,i))
+                }
+            } else {
+                arrPromise.push(workflowNodeFieldTypeMapper.addWorkflowNodeFieldConfig(this.getId(),obj.value,obj.selected,i))
+            }
         }
-        await Promise.all(arrPromise);
+        for(let i=0;i<arrConfig.length;i++) {
+            arrPromise.push(workflowNodeFieldTypeMapper.deleteWorkflowNodeFieldConfigs([arrConfig[i].id]))
+        }
+        await Promise.all(arrPromise)
+        let arr=await this.listWorkflowNodeFieldConfig()
         return arr;
     }
 

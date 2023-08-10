@@ -2,7 +2,6 @@
   <a-form style="width: 80%" :model="form" ref="eleForm">
     <a-form-item field="status" label="type" required>
       <a-select v-model="form.status">
-        <a-option :value="ECommon_Model_Workflow_Node_Status.NOTSTART">NOTSTART</a-option>
         <a-option :value="ECommon_Model_Workflow_Node_Status.INPROGRESS">INPROGRESS</a-option>
         <a-option :value="ECommon_Model_Workflow_Node_Status.DONE">DONE</a-option>
       </a-select>

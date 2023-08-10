@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {computed, onBeforeMount, ref, watch} from "vue";
 import {ICommon_Model_Organization_User} from "../../../../../common/model/organization_user";
 import {apiOrganization, DCSType} from "../request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../event/event";
@@ -73,7 +73,7 @@ import {Message} from "@arco-design/web-vue";
 
 const loading=ref(true)
 const props=defineProps<{
-  name:string,
+  name?:string,
   photo?:string,
   organizationUserId:string,
   closeable?:boolean,
@@ -87,13 +87,21 @@ const emit=defineEmits<{
 const myOrganizationUserId=SessionStorage.get("organizationUserId")
 const showCloseable=ref(false)
 const root=ref(null);
+const name=ref("")
+const photo=ref("")
 const status=ref(ECommon_User_Online_Status.OFFLINE)
+watch(()=>[props.name,props.photo],()=>{
+	name.value=props.name
+	photo.value=props.photo
+},{
+	immediate:true
+})
 const imgName=computed(()=>{
-  if(props.name.includes(" ")) {
-    let arr=props.name.split(" ")
+  if(name.value?.includes(" ")) {
+    let arr=name.value.split(" ")
     return arr[0][0].toUpperCase()+arr[1][0].toUpperCase()
   } else {
-    return props.name[0].toUpperCase()
+    return name.value?name.value[0].toUpperCase():""
   }
 })
 const info=ref<DCSType<ICommon_Model_Organization_User>>(null)
@@ -141,6 +149,20 @@ const onMessage=()=>{
 	}
   eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,props.organizationUserId,ECommon_IM_Message_EntityType.USER)
 }
+onBeforeMount(async ()=>{
+	if(props.organizationUserId && !props.name) {
+		let res=await apiOrganization.user({
+			organizationUserId:props.organizationUserId,
+			...(props.organizationId && {
+				organizationId:props.organizationId
+			})
+		})
+		if(res?.code==0) {
+			name.value=res.data.nickname
+			photo.value=res.data.user.photo
+		}
+	}
+})
 </script>
 
 <style scoped>

@@ -40,7 +40,7 @@ const data=ref<ICommon_Model_Member_Tag[]>([])
 const root=ref(null);
 const appContext=getCurrentInstance().appContext
 const search=async ()=>{
-  let ret=await apiOrganization.listTag()
+  let ret=await apiOrganization.listTag({})
   if(ret?.code==0) {
     data.value=ret.data
   }

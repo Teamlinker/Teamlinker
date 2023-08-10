@@ -59,7 +59,7 @@ export class RichEditorHandle {
                 ele.setAttribute("dragType",EClient_Drag_Type.FILE)
                 ele.setAttribute("dragValue",obj.value)
                 let icon=document.createElement("i")
-                icon.className="fa fa-file"
+                icon.className="svg svg-file"
                 icon.style.marginRight="5px"
                 icon.style.color="gray"
                 ele.prepend(icon)
@@ -86,7 +86,7 @@ export class RichEditorHandle {
                 ele.setAttribute("shortcutRefId",obj.value)
                 ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
-                icon.className="fa fa-list-alt"
+                icon.className="svg svg-project"
                 icon.style.marginRight="5px"
                 icon.style.color="green"
                 ele.prepend(icon)
@@ -114,7 +114,7 @@ export class RichEditorHandle {
                 ele.setAttribute("shortcutRefId",obj.value)
                 ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
-                icon.className="fa fa-link"
+                icon.className="svg svg-project-issue"
                 icon.style.marginRight="5px"
                 icon.style.color="green"
                 ele.prepend(icon)
@@ -142,7 +142,7 @@ export class RichEditorHandle {
                 ele.setAttribute("shortcutRefId",obj.value)
                 ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
-                icon.className="fa fa-tasks"
+                icon.className="svg svg-project-release"
                 icon.style.marginRight="5px"
                 icon.style.color="green"
                 ele.prepend(icon)
@@ -169,7 +169,7 @@ export class RichEditorHandle {
                 ele.setAttribute("shortcutRefId",obj.value)
                 ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
-                icon.className="fa fa-files-o"
+                icon.className="svg svg-wiki"
                 icon.style.marginRight="5px"
                 icon.style.color="rgb(0,120,212)"
                 ele.prepend(icon)
@@ -197,7 +197,7 @@ export class RichEditorHandle {
                 ele.setAttribute("shortcutRefId",obj.value)
                 ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
-                icon.className="fa fa-file-text-o"
+                icon.className="svg svg-wiki-item"
                 icon.style.marginRight="5px"
                 icon.style.color="rgb(0,120,212)"
                 ele.prepend(icon)
@@ -224,7 +224,7 @@ export class RichEditorHandle {
                 ele.setAttribute("shortcutRefId",obj.value)
                 ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
-                icon.className="fa fa-calendar-o"
+                icon.className="svg svg-calendar-event"
                 icon.style.marginRight="5px"
                 icon.style.color="orange"
                 ele.prepend(icon)
@@ -252,7 +252,7 @@ export class RichEditorHandle {
                 ele.setAttribute("shortcutRefId",obj.value)
                 ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
-                icon.className="fa fa-video-camera"
+                icon.className="svg svg-meeting-room"
                 icon.style.marginRight="5px"
                 icon.style.color="red"
                 ele.prepend(icon)

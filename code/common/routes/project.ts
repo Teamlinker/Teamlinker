@@ -16,6 +16,7 @@ import {
 } from './response';
 import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Model_Role} from "../model/role";
+import {ICommon_Model_Project_Label} from "../model/project_label";
 
 const api={
     baseUrl:"/project",
@@ -74,6 +75,15 @@ const api={
                 keyword?:string  
             }>{},
             res:<ICommon_Route_Res_Project_ListTag>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        getLabel:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/tag/item",
+            req:<{
+                labelId:string
+            }>{},
+            res:<ICommon_Model_Project_Label>{},
             permission:[Permission_Types.Project.READ]
         },
         createLabel:{//创建tag

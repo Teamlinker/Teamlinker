@@ -1,12 +1,12 @@
 <template>
-  <a-space v-if="!isEdit">
+  <a-space v-if="!isEdit" wrap>
     <template v-if="showValue && showValue.length>0">
       <a-tag v-for="item in showValue">{{item.value}}</a-tag>
     </template>
     <span v-else style="line-height: 30px;width: 100%;color: gray">None</span>
   </a-space>
   <template v-else>
-    <a-space size="mini">
+    <a-space size="mini" wrap>
       <a-select v-model="editValue" allow-clear allow-search multiple>
         <a-option v-for="item1 in list" :label="item1.value" :value="item1.id"></a-option>
       </a-select>
@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import {ref, watchEffect} from "vue";
 import {
-  ICommon_Model_Workflow_Node_Field_Type_Config
+	ICommon_Model_Workflow_Node_Field_Type_Config
 } from "../../../../../../common/model/workflow_node_field_type_config";
 
 const props=defineProps<{

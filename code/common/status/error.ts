@@ -250,6 +250,18 @@ export namespace Err {
             unbindReservedWorkflowSolutionForbidden:{
                 code:3514,
                 msg:"unbind reserved workflow solution forbidden"
+            },
+            approvalOnlyHaveOneExport:{
+                code:2515,
+                msg:"approval only have one export"
+            },
+            approvalNotFound:{
+                code:2516,
+                msg:"approval not found"
+            },
+            workflowNodeIsNotApproval:{
+                code:2517,
+                msg:"workflow node is not aproval"
             }
         },
         Field:{

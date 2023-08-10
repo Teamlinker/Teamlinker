@@ -1,23 +1,48 @@
 import {Err} from '../../../common/status/error';
 import {getMysqlInstance} from "../../common/db/mysql";
 import {Mapper} from "../../common/entity/mapper";
-import {generateBatchCreateSql, generateCreateSql, generateQuerySql, generateSnowId} from "../../common/util/sql";
+import {
+    generateBatchCreateSql,
+    generateCreateSql,
+    generateLeftJoinSql,
+    generateQuerySql,
+    generateSnowId
+} from "../../common/util/sql";
 import {ICommon_Model_Workflow_Action, workflowActionModel} from './../../../common/model/workflow_action';
 import {
     ECommon_Model_Workflow_Node_Status,
     ICommon_Model_Workflow_Node,
     workflowNodeModel
 } from './../../../common/model/workflow_node';
+import {ICommon_Model_Workflow_Approval, workflowApprovalModel} from "../../../common/model/workflow_approval";
+import {keys} from "../../../common/transform";
 
 class WorkflowMapper  {
-    async nodeList(issueTypeId:string):Promise<ICommon_Model_Workflow_Node[]>{
+    async nodeList(issueTypeId:string) {
         if(!issueTypeId) {
             throw Err.Project.Workflow.workflowNotFound
         }
         let mysql=getMysqlInstance()
-        let ret=await mysql.execute(generateQuerySql(workflowNodeModel,[],{
-            issue_type_id:issueTypeId
-        }))
+        let sql=generateLeftJoinSql({
+            model:workflowNodeModel,
+            columns:keys<ICommon_Model_Workflow_Node>().map(item=>item.name),
+        },{
+            model:workflowApprovalModel,
+            columns:keys<ICommon_Model_Workflow_Approval>().map(item=>item.name),
+            aggregation:"approval",
+            expression:{
+                workflow_node_id:{
+                    model:workflowNodeModel,
+                    field:"id"
+                }
+            }
+        },{
+            issue_type_id:{
+                model:workflowNodeModel,
+                value:issueTypeId
+            }
+        })
+        let ret=await mysql.execute(sql)
         return ret;
     }
     async actionList(issueTypeId:string):Promise<ICommon_Model_Workflow_Action[]>{
@@ -220,6 +245,34 @@ class WorkflowNodeMapper extends Mapper<typeof workflowNodeModel> {
         }))
         return ret;
     }
+
+    async info(workflowNodeId:string) {
+        if(!workflowNodeId) {
+            throw Err.Project.Workflow.workflowNodeNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:workflowNodeModel,
+            columns:keys<ICommon_Model_Workflow_Node>().map(item=>item.name)
+        },{
+            model:workflowApprovalModel,
+            columns:keys<ICommon_Model_Workflow_Approval>().map(item=>item.name),
+            aggregation:"approval",
+            expression:{
+                workflow_node_id:{
+                    model:workflowNodeModel,
+                    field: "id"
+                }
+            }
+        },{
+            id:{
+                model:workflowNodeModel,
+                value:workflowNodeId
+            }
+        })
+        let ret=await mysql.executeOne(sql)
+        return ret
+    }
 }
 
 export let workflowNodeMapper=new WorkflowNodeMapper
@@ -231,3 +284,11 @@ class WorkflowActionMapper extends Mapper<typeof workflowActionModel> {
 }
 
 export let workflowActionMapper=new WorkflowActionMapper
+
+class WorkflowApprovalMapper extends Mapper<typeof workflowApprovalModel> {
+    constructor() {
+        super(workflowApprovalModel)
+    }
+}
+
+export let workflowApprovalMapper=new WorkflowApprovalMapper

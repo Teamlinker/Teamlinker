@@ -124,6 +124,7 @@ class FieldController {
     @DHttpApi(fieldApi.routes.editWorkflowNodeFieldConfig)
     async addWorkflowNodeFieldConfig(@DHttpReqParamRequired("workflowNodeFieldTypeId") workflowNodeFieldTypeId:string,
     @DHttpReqParamRequired("data") data:{
+        id?:string,
         value :string,
         selected :number
     }[]): Promise<typeof fieldApi.routes.editWorkflowNodeFieldConfig.res> {

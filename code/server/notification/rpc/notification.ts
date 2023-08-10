@@ -143,6 +143,18 @@ class RpcNotificationApi  {
                     let userInfos=await rpcAuthApi.listRoleMember(organizationId,ECommon_Model_Role_Type.ORGANIZATION,ECommon_Model_Organization_Member_Type.USER,0,10000,null,roleId)
                     notificationUserList=userInfos.data.map(item=>item.user.id)
                 }
+                case ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT:{
+                    let organizationUserIds=await rpcCooperationApi.getIssueRelatedOrganizationUserIds(refId)
+                    let userInfos=await rpcUserApi.getOrganizationUsersInfo(organizationUserIds)
+                    notificationUserList=userInfos.map(item=>item.id)
+                    break
+                }
+                case ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE:{
+                    let organizationUserIds=await rpcCooperationApi.getIssueRelatedOrganizationUserIds(refId)
+                    let userInfos=await rpcUserApi.getOrganizationUsersInfo(organizationUserIds)
+                    notificationUserList=userInfos.map(item=>item.id)
+                    break
+                }
             }
             for(let id of notificationUserList) {
                 let objNotification:ICommon_Model_Notification

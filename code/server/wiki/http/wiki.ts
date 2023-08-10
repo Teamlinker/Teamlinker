@@ -25,7 +25,7 @@ class WikiController {
                        @DHttpReqParamRequired("page") page:number,
                        @DHttpReqParamRequired("size") size:number,
                        @DHttpReqParamRequired("type",) type:"all"|"created"|"joined",@DHttpUser user:IUserSession):Promise<typeof wikiApi.routes.userWikiList.res>{
-        let ret=await WikiService.userWikiList(user.organizationInfo.organizationUserId,page,size,type,keyword);
+        let ret=await WikiService.userWikiList(user.organizationInfo.organizationId,user.organizationInfo.organizationUserId,page,size,type,keyword);
         return ret;
     }
     @DHttpApi(wikiApi.routes.list)

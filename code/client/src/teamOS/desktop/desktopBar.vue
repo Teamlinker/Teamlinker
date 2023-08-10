@@ -24,7 +24,7 @@ import {desktop} from "./desktop";
 import {windowManager} from "../window/windowManager";
 import {ETeamOS_Window_Status} from "../window/window.js";
 import {iconGroupMap} from "../icon/icon";
-import SvgIcon from "../../icon/custom/svgIcon.vue";
+import SvgIcon from "../../icon/svgIcon.vue";
 
 const list=windowManager.getList();
 const color=desktop.getBaseColor();

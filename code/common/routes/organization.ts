@@ -73,7 +73,7 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/user/list",
             req:<{
-                organizationId:string,
+                organizationId?:string,
                 page:number,
                 size:number,
                 keyword?:string     
@@ -193,7 +193,7 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/tag/list",
             req:<{
-
+                keyword?:string
             }>{},
             res:<ICommon_Model_Member_Tag[]>{},
             permission:[Permission_Types.Organization.READ]
@@ -216,6 +216,15 @@ const api={
             }>{},
             res:<ICommon_Model_Member_Tag>{},
             permission:[Permission_Types.Organization.ADMIN]
+        },
+        getTag:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/tag",
+            req:<{
+                memberTagId:string
+            }>{},
+            res:<ICommon_Model_Member_Tag>{},
+            permission:[Permission_Types.Organization.READ]
         },
         editTag:{
             method:ECommon_HttpApi_Method.PUT,

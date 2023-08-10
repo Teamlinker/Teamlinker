@@ -82,11 +82,12 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.listUser)
-    async listUser(@DHttpReqParamRequired("organizationId") organizationId:string,
-    @DHttpReqParamRequired("page") page:number,
+    async listUser(@DHttpReqParamRequired("page") page:number,
     @DHttpReqParamRequired("size") size:number,
-    @DHttpReqParam("keyword") keyword:string) :Promise<typeof organizationApi.routes.listUser.res>{
-        let obj=await OrganizationService.getItemById(organizationId)
+    @DHttpReqParam("keyword") keyword:string,
+    @DHttpReqParam("organizationId") organizationId:string,
+    @DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.listUser.res>{
+        let obj=await OrganizationService.getItemById(organizationId??user.organizationInfo.organizationId)
         if(!obj) {
             throw Err.Organization.organizationNotFound
         }
@@ -296,12 +297,12 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.listTag)
-    async listTag(@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.listTag.res>{
+    async listTag(@DHttpReqParam("keyword") keyword:string,@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.listTag.res>{
         let obj=await OrganizationService.getItemById(user.organizationInfo.organizationId)
         if(!obj) {
             throw Err.Organization.organizationNotFound
         }
-        let ret=await obj.listTag()
+        let ret=await obj.listTag(keyword)
         return ret;
     }
 
@@ -320,6 +321,15 @@ class OrganizationController {
         })
         let ret=await objTag.create();
         return ret;
+    }
+
+    @DHttpApi(organizationApi.routes.getTag)
+    async getTag(@DHttpReqParam("memberTagId") memberTagId:string) :Promise<typeof organizationApi.routes.getTag.res>{
+        let obj=await MemberTagService.getItemById(memberTagId)
+        if(!obj) {
+            throw Err.Organization.memberTagNotFound
+        }
+        return obj.getItem();
     }
 
     @DHttpApi(organizationApi.routes.editTag)

@@ -278,8 +278,8 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         emitServiceEvent("organizationUserDelete",this.getId(),organizationUserId)
     }
 
-    async listTag() {
-        let ret=await memberTagMapper.listTag(this.getId());
+    async listTag(keyword?:string) {
+        let ret=await memberTagMapper.listTag(this.getId(),keyword);
         return ret;
     }
 

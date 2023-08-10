@@ -22,7 +22,7 @@
 import {Icon} from "./icon"
 import {vMenu} from "../common/directive/menu";
 import {computed, nextTick, ref, watch} from "vue";
-import SvgIcon from "../../icon/custom/svgIcon.vue";
+import SvgIcon from "../../icon/svgIcon.vue";
 
 const props=defineProps<{
   item:Icon,

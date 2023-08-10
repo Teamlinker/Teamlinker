@@ -72,7 +72,7 @@
 				  <template v-if="calendarEventInfo?.meeting">
 					  <a-switch v-model="form.meeting"></a-switch>
 					  <a-popover position="right" v-if="form.meeting" trigger="click">
-						  <a-button type="primary" status="danger" style="margin-left: 20px">
+						  <a-button type="primary" status="success" style="margin-left: 20px">
 							  Start Meeting
 						  </a-button>
 						  <template #content>
@@ -91,7 +91,7 @@
 				  <a-switch v-model="form.meeting" v-else></a-switch>
 			  </template>
 		  </template>
-		  <a-button type="primary" status="danger" @click="onMeeting" v-else>
+		  <a-button type="primary" status="success" @click="onMeeting" v-else>
 			  Join Meeting
 		  </a-button>
 	  </a-form-item>

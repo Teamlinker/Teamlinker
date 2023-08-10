@@ -6,13 +6,18 @@ import viteCompression from 'vite-plugin-compression'
 import {createSvgIconsPlugin} from "vite-plugin-svg-icons";
 
 export default defineConfig({
+    resolve:{
+      alias:{
+          "@":path.join(__dirname,"src")
+      }
+    },
   plugins: [
       vue(),
       viteCompression({
           threshold:102400
       }),
       createSvgIconsPlugin({
-          iconDirs:[path.join(__dirname,"./src/icon/custom")],
+          iconDirs:[path.join(__dirname,"./src/assert/custom")],
           symbolId:'[name]'
       })
   ],

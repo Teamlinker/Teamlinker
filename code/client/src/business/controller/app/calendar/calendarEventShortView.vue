@@ -43,7 +43,7 @@
 				</div>
 				<div style="flex: 1 1 auto;display: flex;align-items: center">
 					<a-popover position="right" trigger="click" v-if="isSelf">
-						<a-button type="primary" status="danger" size="mini">
+						<a-button type="primary" status="success" size="mini">
 							Start Meeting
 						</a-button>
 						<template #content>
@@ -58,7 +58,7 @@
 							</a-row>
 						</template>
 					</a-popover>
-					<a-button type="primary" status="danger" size="mini" @click="onMeeting" v-else>
+					<a-button type="primary" status="success" size="mini" @click="onMeeting" v-else>
 						Join Meeting
 					</a-button>
 				</div>

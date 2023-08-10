@@ -72,7 +72,7 @@ import {ETeamOS_Window_Status, ETeamOS_Window_Type, Window} from "./window";
 import {vDrag} from "../common/directive/drag";
 import {vResize} from "../common/directive/resize";
 import {v4} from "uuid"
-import SvgIcon from "../../icon/custom/svgIcon.vue";
+import SvgIcon from "../../icon/svgIcon.vue";
 import {iconGroupMap} from "../icon/icon";
 
 vResize;

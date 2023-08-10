@@ -25,7 +25,7 @@ const tagList=ref<{
   checked:boolean
 }[]>([])
 onBeforeMount(async ()=>{
-  let res=await apiOrganization.listTag();
+  let res=await apiOrganization.listTag({});
   if(res?.code==0) {
     let userTagIds=props.tags.map(item=>item.id);
     tagList.value=res.data.map(item=>{

@@ -130,6 +130,9 @@ class UserMapper extends Mapper<typeof userModel> {
     }
 
     async users(userIds:string[],organizationId?:string):Promise<({nickname?:string} & ICommon_Model_User)[]> {
+        if(userIds.length==0) {
+            return []
+        }
         let mysql=getMysqlInstance()
         if(organizationId) {
             let sql=generateLeftJoinSql({

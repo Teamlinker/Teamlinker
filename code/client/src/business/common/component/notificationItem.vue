@@ -132,6 +132,24 @@
 			&nbsp;&nbsp;
 			to you
 		</template>
+		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE">
+			ISSUE:
+			&nbsp;&nbsp;
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			&nbsp;&nbsp;
+			resolved the approval of issue
+			&nbsp;&nbsp;
+			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+		</template>
+		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT">
+			ISSUE:
+			&nbsp;&nbsp;
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			&nbsp;&nbsp;
+			rejected the approval of issue
+			&nbsp;&nbsp;
+			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+		</template>
 	</div>
 </template>
 

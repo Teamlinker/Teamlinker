@@ -45,7 +45,7 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
     getItem():T["model"] {
         return this.item;
     }
-    async create():Promise<T["model"]> {
+    async create(...param:any):Promise<T["model"]> {
         if(!this.item) {
             throw  Err.Common.itemNotFound;
         } else if(this.item.id) {
@@ -60,7 +60,7 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         })
         return this.item;
     }
-    async update():Promise<T["model"]>{
+    async update(...param:any):Promise<T["model"]>{
         if(!this.item || !this.item.id) {
             throw  Err.Common.itemNotFound;
         }
@@ -79,7 +79,7 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         await this.loadItem();
         return this.item;
     }
-    async delete(eventPublish?:keyof IServer_Common_Event_Types){
+    async delete(eventPublish?:keyof IServer_Common_Event_Types,...param:any){
         await this.mapper.delete(this.item.id);
         if(eventPublish) {
             emitServiceEvent(eventPublish,this.item.id);

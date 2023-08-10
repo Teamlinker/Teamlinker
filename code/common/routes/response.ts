@@ -26,6 +26,8 @@ import {ICommon_Model_Wiki_Item} from "../model/wiki_item";
 import {ICommon_Model_Meeting_Room} from "../model/meeting_room";
 import {ICommon_Model_Notification} from "../model/notification";
 import {ICommon_Model_Meeting_Miss_Call} from "../model/meeting_miss_call";
+import {ICommon_Model_Workflow_Approval} from "../model/workflow_approval";
+import {ICommon_Model_Project_Issue_Approval} from "../model/project_issue_approval";
 
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -141,7 +143,9 @@ export interface ICommon_Route_Res_Workflow_Info_Action {
 }
 
 export interface ICommon_Route_Res_Workflow_Info {
-    nodes:ICommon_Model_Workflow_Node[],
+    nodes:(ICommon_Model_Workflow_Node & {
+        approval?:ICommon_Model_Workflow_Approval
+    })[],
     actions:ICommon_Model_Workflow_Action[]
 }
 
@@ -166,7 +170,11 @@ export type ICommon_Route_Req_ProjectIssue_Field_Value={
 export interface ICommon_Route_Res_ProjectIssue_BasicInfo extends Omit<ICommon_Model_Project_Issue,"workflow_node_id"|"issue_type_id"|"project_id"> {
     workflowNode:ICommon_Model_Workflow_Node
     issueType:ICommon_Model_Issue_Type,
-    project:ICommon_Model_Project
+    project:ICommon_Model_Project,
+    approval?:ICommon_Model_Project_Issue_Approval & {
+        reason?:string,
+        workflowNode:ICommon_Model_Workflow_Node
+    }
 }
 
 export type ICommon_Route_Res_ProjectIssue_fieldsInfo = {

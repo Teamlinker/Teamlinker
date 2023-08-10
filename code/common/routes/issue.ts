@@ -16,6 +16,7 @@ import {
 import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Model_Project_Issue_Field_Value} from "../model/project_issue_field_value";
 import {ICommon_Model_Project_Release} from "../model/project_release";
+import {ICommon_Model_Project_Issue_History} from "../model/project_issue_history";
 
 const api={
     baseUrl:"/issue",
@@ -143,7 +144,10 @@ const api={
             req:<{
                 projectIssueId :string
             }>{},
-            res:<ICommon_Model_Workflow_Action[]>{},
+            res:<ICommon_Model_Workflow_Action[] | {
+                isApproval:true,
+                name:"Resolve"|"Reject"|"Revoke"|"Commit"
+            }[]>{},
             permission:[Permission_Types.Project.READ]
         },
         commentList:{
@@ -188,7 +192,8 @@ const api={
             method:ECommon_HttpApi_Method.POST,
             path:"/item/copy",
             req:<{
-                projectIssueId :string
+                projectIssueId :string,
+                name:string
             }>{},
             res:<ICommon_Model_Project_Issue>{},
             permission:[Permission_Types.Project.EDIT]
@@ -339,6 +344,73 @@ const api={
                 photo:string
             }[]>{},
             permission:[Permission_Types.Project.READ]
+        },
+        createChildIssue:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/item/createchild",
+            req:<{
+                projectIssueId :string,
+                name:string
+            }>{},
+            res:<ICommon_Model_Project_Issue>{},
+            permission:[Permission_Types.Project.EDIT]
+        },
+        listHistory:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/history",
+            req:<{
+                projectIssueId :string,
+            }>{},
+            res:<ICommon_Model_Project_Issue_History[]>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        checkApproval:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/approval/check",
+            req:<{
+                projectIssueId :string,
+            }>{},
+            res:<{
+                access:boolean
+            }>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        revokeApproval:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/approval/revoke",
+            req:<{
+                projectIssueId :string,
+            }>{},
+            res:{},
+            permission:[Permission_Types.Project.EDIT]
+        },
+        resolveApproval:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/approval/resolve",
+            req:<{
+                projectIssueId :string,
+            }>{},
+            res:{},
+            permission:[Permission_Types.Project.EDIT]
+        },
+        rejectApproval:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/approval/reject",
+            req:<{
+                projectIssueId :string,
+                reason:string
+            }>{},
+            res:{},
+            permission:[Permission_Types.Project.EDIT]
+        },
+        commitApproval:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/approval/commit",
+            req:<{
+                projectIssueId :string
+            }>{},
+            res:{},
+            permission:[Permission_Types.Project.EDIT]
         }
     }
 }

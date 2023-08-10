@@ -11,15 +11,28 @@ import {generateSnowId} from '../../common/util/sql';
 import {ProjectService} from "../service/project";
 import {ICommon_Model_Project_Issue, projectIssueModel} from './../../../common/model/project_issue';
 import {ICommon_Model_Project_Issue_Field_Value} from './../../../common/model/project_issue_field_value';
-import {projectIssueMapper} from './../mapper/issue';
+import {projectIssueApprovalMapper, projectIssueHistoryMapper, projectIssueMapper} from './../mapper/issue';
 import {WorkflowNodeFieldTypeService} from './field';
 import {ProjectModuleService} from './module';
-import {WorkflowActionService, WorkflowNodeService} from './workflow';
+import {WorkflowActionService, WorkflowApprovalService, WorkflowNodeService} from './workflow';
 import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
 import {ProjectReleaseService} from "./release";
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import rpcContentApi from "../../content/rpc/content"
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
+import {
+    ECommon_Model_Project_Issue_History_Type,
+    projectIssueHistoryModel
+} from "../../../common/model/project_issue_history";
+import {ECommon_Model_Workflow_Approval_Type} from "../../../common/model/workflow_approval";
+import rpcUserApi from "../../user/rpc/user"
+import {
+    ECommon_Model_Project_Issue_Approval_Type,
+    ICommon_Model_Project_Issue_Approval,
+    projectIssueApprovalModel
+} from "../../../common/model/project_issue_approval";
+import {ICommon_Model_Workflow_Action} from "../../../common/model/workflow_action";
+import {ICommon_Model_Workflow_Node} from "../../../common/model/workflow_node";
 
 export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof projectIssueMapper> {
     constructor(){
@@ -46,6 +59,159 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         }
         if(arr.length>0) {
             await projectIssueMapper.createFieldValues(arr);
+        }
+    }
+
+    async checkApproval(organizationUserId:string) {
+        let process=await projectIssueMapper.getProcess(this.getId())
+        let objWorkFlowApproval=await WorkflowApprovalService.getItemByExp({
+            workflow_node_id:process[process.length-1]
+        })
+        if(!objWorkFlowApproval) {
+            throw Err.Project.Workflow.approvalNotFound
+        }
+        switch (objWorkFlowApproval.getItem().type) {
+            case ECommon_Model_Workflow_Approval_Type.PERSON:{
+                let organizationUserIds=objWorkFlowApproval.getItem().value
+                if(organizationUserIds.includes(organizationUserId)) {
+                    return true
+                } else {
+                    return false
+                }
+                break
+            }
+            case ECommon_Model_Workflow_Approval_Type.TEAM:{
+                let teamIds=objWorkFlowApproval.getItem().value
+                let arrTeamPerson=await Promise.allSettled(teamIds.map(item=>{
+                    return rpcUserApi.listTeamUser(item).then(data=>{
+                        return data.map(item=>item.id)
+                    })
+                }))
+                let tagId=objWorkFlowApproval.getItem().extra
+                let tagPerson=[]
+                if(tagId) {
+                    tagPerson=await rpcUserApi.listTagUser(tagId).then(data=>{
+                        return data.map(item=>item.organizationUser.id)
+                    })
+                }
+                let arrPerson=[...tagPerson]
+                for(let obj of arrTeamPerson) {
+                    if(obj.status==="fulfilled") {
+                        arrPerson.push(...obj.value)
+                    }
+                }
+                if(arrPerson.includes(organizationUserId)) {
+                    return true
+                }
+                return false
+                break
+            }
+            case ECommon_Model_Workflow_Approval_Type.FIELD:{
+                let fieldTypeId=objWorkFlowApproval.getItem().value[0]
+                let obj=await projectIssueMapper.getFieldValueByProjectIssueAndFieldType(this.getId(),fieldTypeId)
+                let users=obj.ref_values
+                if(users.includes(organizationUserId)) {
+                    return true
+                } else {
+                    return false
+                }
+                break
+            }
+        }
+        return false
+    }
+
+    async revokeApproval() {
+        let process=await projectIssueMapper.getProcess(this.getId())
+        let lastWorkflowId=process?.[process.length-1]
+        if(lastWorkflowId) {
+            let objWorkflowNode=await WorkflowNodeService.getItemById(lastWorkflowId)
+            if(objWorkflowNode?.getItem().is_approval) {
+                let workflowId=process?.[process.length-2]
+                objWorkflowNode=await WorkflowNodeService.getItemById(workflowId)
+                if(objWorkflowNode) {
+                    await Promise.all([
+                        projectIssueMapper.handleProcess(this.getId(),objWorkflowNode.getId()),
+                        (async ()=>{
+                            let objApproval=await ProjectIssueApprovalService.getItemByExp({
+                                project_issue_id:this.getId()
+                            })
+                            await objApproval?.delete()
+                        })()
+                    ])
+                }
+            }
+        }
+    }
+
+    async resolveApproval(organizationUserId:string) {
+        let process=await projectIssueMapper.getProcess(this.getId())
+        let objWorkflow=await WorkflowNodeService.getItemById(process[process.length-1])
+        if(objWorkflow?.getItem().is_approval) {
+            let objApproval=await ProjectIssueApprovalService.getItemByExp({
+                project_issue_id:this.getId()
+            })
+            if(objApproval?.getItem().type===ECommon_Model_Project_Issue_Approval_Type.PENDING) {
+                objApproval.assignItem({
+                    type:ECommon_Model_Project_Issue_Approval_Type.RESOLVED,
+                    approval_organization_user_id:organizationUserId
+                })
+                await objApproval.update()
+                this.assignItem({
+                    workflow_node_id:objWorkflow.getId()
+                })
+                await this.update()
+                let objHistory=new ProjectIssueHistoryService()
+                objHistory.assignItem({
+                    project_issue_id:this.getId(),
+                    type:ECommon_Model_Project_Issue_History_Type.APPROVAL_RESOLVE,
+                    organization_user_id:organizationUserId,
+                    project_id:this.getItem().project_id
+                })
+                objHistory.create()
+            }
+        }
+    }
+
+    async rejectApproval(organizationUserId:string,reason:string) {
+        let process=await projectIssueMapper.getProcess(this.getId())
+        let objWorkflow=await WorkflowNodeService.getItemById(process[process.length-1])
+        if(objWorkflow?.getItem().is_approval) {
+            let objApproval=await ProjectIssueApprovalService.getItemByExp({
+                project_issue_id:this.getId()
+            })
+            if(objApproval?.getItem().type===ECommon_Model_Project_Issue_Approval_Type.PENDING) {
+                objApproval.assignItem({
+                    type:ECommon_Model_Project_Issue_Approval_Type.REJECTED,
+                    approval_organization_user_id:organizationUserId
+                })
+                await objApproval.update(reason)
+                let objHistory=new ProjectIssueHistoryService()
+                objHistory.assignItem({
+                    project_issue_id:this.getId(),
+                    type:ECommon_Model_Project_Issue_History_Type.APPROVAL_REJECT,
+                    organization_user_id:organizationUserId,
+                    project_id:this.getItem().project_id
+                })
+                objHistory.create()
+            }
+        }
+    }
+
+    async commitApproval() {
+        let process=await projectIssueMapper.getProcess(this.getId())
+        let objWorkflow=await WorkflowNodeService.getItemById(process[process.length-1])
+        if(objWorkflow?.getItem().is_approval) {
+            let objApproval=await ProjectIssueApprovalService.getItemByExp({
+                project_issue_id:this.getId()
+            })
+            if(objApproval?.getItem().type===ECommon_Model_Project_Issue_Approval_Type.REJECTED) {
+                objApproval.assignItem({
+                    type:ECommon_Model_Project_Issue_Approval_Type.PENDING,
+                    approval_organization_user_id:null
+                })
+                await objApproval.update()
+            }
         }
     }
 
@@ -99,7 +265,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         return ret;
     }
 
-    async updateFieldValue(value:ICommon_Route_Req_ProjectIssue_Field_Value) {
+    async updateFieldValue(value:ICommon_Route_Req_ProjectIssue_Field_Value,organizationUserId:string) {
         if(!value) {
             return
         }
@@ -107,6 +273,19 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         if(fieldTypes && fieldTypes.length>0) {
             let obj=await this.generateFieldValue(fieldTypes[0],value,value.fieldValueId)
             let ret=await projectIssueMapper.updateFieldValue(obj)
+            WorkflowNodeFieldTypeService.getItemById(value.fieldId).then(data=>{
+                if(data) {
+                    let objHistory=new ProjectIssueHistoryService()
+                    objHistory.assignItem({
+                        project_issue_id:this.getId(),
+                        name:data.getItem().name,
+                        type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+                        organization_user_id:organizationUserId,
+                        project_id:this.getItem().project_id
+                    })
+                    objHistory.create()
+                }
+            })
             return ret;
         }
     }
@@ -123,6 +302,16 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         this.item.workflow_node_id=info.id
         let obj=await super.create()
         await projectIssueMapper.handleProcess(obj.id,info.id)
+        await rpcContentApi.save(obj.id,ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION, obj.created_by,"")
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:obj.id,
+            type:ECommon_Model_Project_Issue_History_Type.CREATE_ISSUE,
+            organization_user_id:obj.created_by,
+            project_id:project.getId(),
+            value:obj.name
+        })
+        objHistory.create()
         return obj;
     }
 
@@ -147,20 +336,64 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         return ret;
     }
 
-    async confirmNextNode(workflowActionId:string,values:ICommon_Route_Req_ProjectIssue_Field[]) {
+    async confirmNextNode(workflowActionId:string,values:ICommon_Route_Req_ProjectIssue_Field[],organizationUserId:string) {
         let obj=await WorkflowActionService.getItemById(workflowActionId)
         if(!obj) {
             throw Err.Project.Workflow.workflowActionNotFound
         }
         if(obj.getItem().dest_node_id) {
-            this.assignItem({
-                workflow_node_id:obj.getItem().dest_node_id
+            await this.handleConfirmNextNode(obj.getItem().dest_node_id,values)
+            WorkflowNodeService.getItemById(obj.getItem().dest_node_id).then(data=>{
+                if(data) {
+                    let objHistory=new ProjectIssueHistoryService()
+                    objHistory.assignItem({
+                        project_issue_id:this.getId(),
+                        type:ECommon_Model_Project_Issue_History_Type.UPDATE_NODE,
+                        organization_user_id:organizationUserId,
+                        project_id:this.getItem().project_id,
+                        value:data.getItem().name
+                    })
+                    objHistory.create()
+                }
             })
-            await this.update()
-            await this.createFieldValues(values)
-            let project=await ProjectService.getItemById(this.getItem().project_id)
-            await projectIssueMapper.handleProcess(this.getId(),obj.getItem().dest_node_id)
         }
+    }
+
+    async handleConfirmNextNode(workflowNodeId:string,values:ICommon_Route_Req_ProjectIssue_Field[]) {
+        let objDestNode=await WorkflowNodeService.getItemById(workflowNodeId)
+        if(!objDestNode) {
+            throw Err.Project.Workflow.workflowNodeNotFound
+        }
+        let process=await projectIssueMapper.getProcess(this.getId())
+        await Promise.all([
+            (async ()=>{
+                if(!objDestNode.getItem().is_approval) {
+                    this.assignItem({
+                        workflow_node_id:workflowNodeId
+                    })
+                    await this.update()
+                }
+            })(),
+            this.createFieldValues(values),
+            projectIssueMapper.handleProcess(this.getId(),workflowNodeId),
+            (async ()=>{
+                let objApproval=await ProjectIssueApprovalService.getItemByExp({
+                    project_issue_id:this.getId()
+                })
+                if(objApproval) {
+                    await objApproval.delete()
+                }
+                if(objDestNode.getItem().is_approval && !process.includes(objDestNode.getId())) {
+                    objApproval=new ProjectIssueApprovalService
+                    objApproval.assignItem({
+                        project_issue_id:this.getId(),
+                        workflow_node_id:objDestNode.getId(),
+                        type:ECommon_Model_Project_Issue_Approval_Type.PENDING
+                    })
+                    await objApproval.create()
+                }
+            })()
+        ])
     }
     
     async fieldsInfo(){
@@ -241,6 +474,15 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
 
     async editDescription(description:string,organizationUserId:string) {
         await rpcContentApi.save(this.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION,organizationUserId,description )
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:this.getId(),
+            name:"Description",
+            type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+            organization_user_id:organizationUserId,
+            project_id:this.getItem().project_id
+        })
+        objHistory.create()
     }
 
     async getDescription() {
@@ -252,11 +494,35 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         await super.delete()
         await projectIssueMapper.clear(this.getId())
         await rpcContentApi.clearByRefId(this.getId())
+        await projectIssueHistoryMapper.clear(this.getId())
+        let objApproval=await ProjectIssueApprovalService.getItemByExp({
+            project_issue_id:this.getId()
+        })
+        await objApproval?.delete()
     }
 
     async getBasicInfo() {
-        let ret=await projectIssueMapper.getBasicInfo(this.getId())
-        return ret;
+        let [ret,process]=await Promise.all([
+            projectIssueMapper.getBasicInfo(this.getId()),
+            await projectIssueMapper.getProcess(this.getId())
+        ])
+        let approval:ICommon_Model_Project_Issue_Approval & {
+            reason?:string,
+            workflowNode:ICommon_Model_Workflow_Node
+        }
+        let workflowNode=await WorkflowNodeService.getItemById(process[process.length-1])
+        if(workflowNode.getItem().is_approval) {
+            let obj=await ProjectIssueApprovalService.getItemByExp({
+                project_issue_id:this.getId()
+            })
+            if(obj) {
+                approval=await obj.info()
+            }
+        }
+        return {
+            ...ret,
+            approval
+        };
     }
 
     static async getObjByUniqueKey(uniqueKey:string) {
@@ -282,13 +548,63 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         
     }
 
-    async actionsInfo() {
-        let workflowNode=await WorkflowNodeService.getItemById(this.getItem().workflow_node_id)
+    async actionsInfo(organizationUserId:string):Promise<ICommon_Model_Workflow_Action[] | {
+        isApproval:true,
+        name:"Resolve"|"Reject"|"Revoke"|"Commit"
+    }[]> {
+        let process=await projectIssueMapper.getProcess(this.getId())
+        let workflowNode=await WorkflowNodeService.getItemById(process[process.length-1])
         if(!workflowNode){
             throw Err.Project.Workflow.workflowNodeNotFound
         }
-        let ret=await workflowNode.getActionList()
-        return ret;
+        if(workflowNode.getItem().is_approval) {
+            let objApproval=await ProjectIssueApprovalService.getItemByExp({
+                project_issue_id:this.getId()
+            })
+            if(objApproval) {
+                if(objApproval.getItem().type===ECommon_Model_Project_Issue_Approval_Type.PENDING) {
+                    let access=await this.checkApproval(organizationUserId)
+                    if(access) {
+                        return [
+                            {
+                                isApproval:true,
+                                name:"Resolve"
+                            },
+                            {
+                                isApproval:true,
+                                name:"Reject"
+                            }
+                        ]
+                    } else {
+                        return [
+                            {
+                                isApproval:true,
+                                name:"Revoke"
+                            }
+                        ]
+                    }
+                } else if(objApproval.getItem().type===ECommon_Model_Project_Issue_Approval_Type.REJECTED) {
+                    return [
+                        {
+                            isApproval:true,
+                            name:"Revoke"
+                        },
+                        {
+                            isApproval:true,
+                            name:"Commit"
+                        }
+                    ]
+                } else if(objApproval.getItem().type===ECommon_Model_Project_Issue_Approval_Type.RESOLVED) {
+                    let ret=await workflowNode.getActionList()
+                    return ret;
+                }
+            } else {
+                return []
+            }
+        } else {
+            let ret=await workflowNode.getActionList()
+            return ret;
+        }
     }
 
     override async copy(deletedFields?: (keyof ICommon_Model_Project_Issue)[]): Promise<this> {
@@ -298,6 +614,15 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         if(objDescription) {
             await rpcContentApi.save(obj.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION, objDescription.created_by,objDescription.content)
         }
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:obj.getItem().id,
+            type:ECommon_Model_Project_Issue_History_Type.CREATE_ISSUE,
+            organization_user_id:obj.getItem().created_by,
+            project_id:obj.getItem().project_id,
+            value:obj.getItem().name
+        })
+        objHistory.create()
         return obj;
     }
 
@@ -366,14 +691,24 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         }
     }
 
-    async bindLabels(labelIds :string[]) {
+    async bindLabels(labelIds :string[],organizationUserId:string) {
         await projectIssueMapper.bindIssueLabels(this.getId(),labelIds)
         let ret=await projectIssueMapper.issueLabelList(this.getId());
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:this.getId(),
+            name:"Label",
+            type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+            organization_user_id:organizationUserId,
+            project_id:this.getItem().project_id,
+            value:ret.map(item=>item.name).join(",")
+        })
+        objHistory.create()
         return ret;
     }
 
 
-    async bindModule(moduleId? :string) {
+    async bindModule(moduleId :string,organizationUserId:string) {
         if(moduleId) {
             let obj=await ProjectModuleService.getItemById(moduleId)
             if(!obj) {
@@ -382,6 +717,16 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         }
         await projectIssueMapper.bindIssueModule(this.getId(),moduleId)
         let ret=await projectIssueMapper.issueModuleList(this.getId())
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:this.getId(),
+            name:"Module",
+            type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+            organization_user_id:organizationUserId,
+            project_id:this.getItem().project_id,
+            value:ret.map(item=>item.name).join(",")
+        })
+        objHistory.create()
         return ret;
     }
 
@@ -395,9 +740,9 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         let ret=await projectIssueMapper.getIdsByProjectIds(projectIds);
         if(ret.length>0) {
             await projectIssueMapper.clearMany(ret);
-            await rpcContentApi.clearByRefIds(projectIds)
+            await rpcContentApi.clearByRefIds(ret)
         }
-        
+        await projectIssueHistoryMapper.clearByProjectIds(projectIds)
     }
 
     static async clearIssueValueByFieldTypeId(workflowFieldTypeId:string) {
@@ -409,13 +754,88 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         return ret;
     }
 
-    async bindReleases(projectReleaseIds:string[]) {
+    async bindReleases(projectReleaseIds:string[],organizationUserId:string) {
         let ret=await ProjectReleaseService.issueBindReleaseList(this.getId(),projectReleaseIds)
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:this.getId(),
+            name:"Release",
+            type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+            organization_user_id:organizationUserId,
+            project_id:this.getItem().project_id,
+            value:ret.map(item=>item.name).join(",")
+        })
+        objHistory.create()
         return ret;
     }
 
     async getOrganizationUserIdsByIssueExtraField() {
         let ret=await projectIssueMapper.getOrganizationUserIdsByIssueExtraField(this.getId())
         return ret;
+    }
+
+    static async clearWorkflowNode(workflowNodeId:string) {
+        let arr=await ProjectIssueService.getItemsByExp({
+            workflow_node_id:workflowNodeId
+        })
+        await Promise.allSettled(arr.map(obj=>{
+            return projectIssueMapper.getProcess(obj.getId()).then(process=>{
+                let index=process.indexOf(obj.getId())
+                let lastWorkflowNodeId=process[index-1]
+                return obj.handleConfirmNextNode(lastWorkflowNodeId,null)
+            })
+        }))
+        await projectIssueMapper.clearWorkflowNodeProcessAndFields(workflowNodeId)
+    }
+
+    static async clearWorkflowNodeFieldTypeConfig(fieldTypeConfigValueId:string) {
+
+    }
+}
+
+export class ProjectIssueHistoryService extends Entity<typeof projectIssueHistoryModel,typeof projectIssueHistoryMapper> {
+    constructor() {
+        super(projectIssueHistoryMapper)
+    }
+
+    static async list(projectIssueId:string) {
+        let ret=await projectIssueHistoryMapper.list(projectIssueId)
+        return ret;
+    }
+}
+
+export class ProjectIssueApprovalService extends Entity<typeof projectIssueApprovalModel,typeof projectIssueApprovalMapper> {
+    constructor() {
+        super(projectIssueApprovalMapper)
+    }
+
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
+        await super.delete(eventPublish);
+        await rpcContentApi.clearByRefIdAndType(this.getItem().project_issue_id,ECommon_Model_Content_Type.PROJECT_ISSUE_REJECT)
+    }
+
+    async info() {
+        let reason:string
+        if(this.getItem().type===ECommon_Model_Project_Issue_Approval_Type.REJECTED) {
+            let obj=await rpcContentApi.get(this.getItem().project_issue_id,ECommon_Model_Content_Type.PROJECT_ISSUE_REJECT)
+            reason=obj.content
+        }
+        let objWorkflow=await WorkflowNodeService.getItemById(this.getItem().workflow_node_id)
+        return {
+            ...this.getItem(),
+            workflowNode:objWorkflow.getItem(),
+            reason
+        }
+    }
+
+    override async update(reason?: any): Promise<typeof projectIssueApprovalModel["model"]> {
+        if(this._item.type===ECommon_Model_Project_Issue_Approval_Type.REJECTED && this._item.type!==this.getItem().type) {
+            await rpcContentApi.clearByRefIdAndType(this.getItem().project_issue_id,ECommon_Model_Content_Type.PROJECT_ISSUE_REJECT)
+        }
+        let ret=await super.update();
+        if(ret.type===ECommon_Model_Project_Issue_Approval_Type.REJECTED && reason) {
+            await rpcContentApi.save(this.getItem().project_issue_id,ECommon_Model_Content_Type.PROJECT_ISSUE_REJECT, ret.approval_organization_user_id,reason)
+        }
+        return ret
     }
 }

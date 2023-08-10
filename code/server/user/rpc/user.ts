@@ -5,7 +5,7 @@ import {getConfigInstance} from '../../common/config/config';
 import {AdminService} from "../service/admin";
 import {TeamService} from "../service/team";
 import {UserService} from "../service/user";
-import {OrganizationService, OrganizationUserService} from './../service/organization';
+import {MemberTagService, OrganizationService, OrganizationUserService} from './../service/organization';
 import rpcFileApi from "../../file/rpc/file";
 import {IServer_Common_RPC_User_CheckSession} from "../types/config";
 import {Err} from "../../../common/status/error";
@@ -248,6 +248,15 @@ class RpcUserApi {
         } else {
             return []
         }
+    }
+
+    async listTagUser(tagId:string) {
+        let objTag=await MemberTagService.getItemById(tagId)
+        if(!objTag) {
+            throw Err.Organization.memberTagNotFound
+        }
+        let ret=await objTag.listTagMember()
+        return ret;
     }
 
     async keepAlive(userId:string) {

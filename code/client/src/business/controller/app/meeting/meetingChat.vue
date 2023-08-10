@@ -106,7 +106,11 @@ const onPopMenuClick=(type:ECommon_Content_Line_Config_Type,handleFunc:(item:ICo
 
 const onSend = () => {
 	if(content.value.length>0) {
-		props.meetingClient.sendMessage(JSON.stringify(content.value))
+		props.meetingClient.sendMessage(JSON.stringify(content.value.map(item=>{
+			return {
+				arr:item.arr
+			}
+		})))
 	}
 	content.value = []
 }

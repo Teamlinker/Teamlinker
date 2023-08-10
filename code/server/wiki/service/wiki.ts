@@ -21,8 +21,8 @@ export class WikiService extends Entity<typeof wikiModel,typeof wikiMapper> {
         return ret
     }
 
-    static async userWikiList(organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
-        let ret=await wikiMapper.userWikiList(organizationUserId,page,size,type,keyword)
+    static async userWikiList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
+        let ret=await wikiMapper.userWikiList(organizationId,organizationUserId,page,size,type,keyword)
         return ret
     }
 

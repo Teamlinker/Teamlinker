@@ -107,7 +107,7 @@ import {ICommon_Route_Res_Workflow_Node_Field} from "../../../../../../../common
 import {Message} from "@arco-design/web-vue";
 import {ECommon_Field_Type, Field_Types} from "../../../../../../../common/field/type";
 import {
-  ECommon_Model_Workflow_Node_Field_Type_Label_Type
+	ECommon_Model_Workflow_Node_Field_Type_Label_Type
 } from "../../../../../../../common/model/workflow_node_field_type";
 import AddField from "./addField.vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
@@ -146,6 +146,7 @@ const form=reactive({
   default_number_value:0,
   label_type:0,
   values:[] as {
+		id?:string
     value:string,
     selected:number
   }[]
@@ -244,6 +245,7 @@ const onClickRow=async (item:ICommon_Route_Res_Workflow_Node_Field)=>{
     form.values=[]
     for(let obj of item.values) {
       form.values.push({
+	      id:obj.id,
         value:obj.value,
         selected:obj.selected
       })

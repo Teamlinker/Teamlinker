@@ -80,7 +80,7 @@ const onSearch=async (value:string)=>{
       })
     }
   } else if(form.type==ECommon_Model_Organization_Member_Type.MEMBERTAG) {
-    let res=await apiOrganization.listTag()
+    let res=await apiOrganization.listTag({})
     if(res?.code==0) {
       userList.value=res.data.map(item=>{
         return {

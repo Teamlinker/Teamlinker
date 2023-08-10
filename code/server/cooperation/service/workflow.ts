@@ -1,4 +1,7 @@
-import {ICommon_Model_Workflow_Node_Field_Type} from "../../../common/model/workflow_node_field_type";
+import {
+    ECommon_Model_Workflow_Node_Field_Type_Label_Type,
+    ICommon_Model_Workflow_Node_Field_Type
+} from "../../../common/model/workflow_node_field_type";
 import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../../../common/model/workflow_node_field_type_config";
 import {workflowActionModel} from "../../../common/model/workflow_action";
 import {
@@ -14,11 +17,13 @@ import {
     ICommon_Model_Workflow_Node,
     workflowNodeModel
 } from './../../../common/model/workflow_node';
-import {workflowActionMapper, workflowMapper, workflowNodeMapper} from './../mapper/workflow';
+import {workflowActionMapper, workflowApprovalMapper, workflowMapper, workflowNodeMapper} from './../mapper/workflow';
 import {WorkflowNodeFieldTypeService} from './field';
-import {ICommon_Field_Type} from "../../../common/field/type";
+import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
 import {IssueTypeSolutionService} from "./issueType";
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import {workflowApprovalModel} from "../../../common/model/workflow_approval";
+import {ProjectIssueService} from "./issue";
 
 export class WorkflowService  {
 
@@ -90,7 +95,10 @@ export class WorkflowService  {
             nodes:[],
             actions:[]
         };
-        let [nodes,actions]=await Promise.all([workflowMapper.nodeList(issueTypeId),workflowMapper.actionList(issueTypeId)])
+        let [nodes,actions]=await Promise.all([
+            workflowMapper.nodeList(issueTypeId),
+            workflowMapper.actionList(issueTypeId)
+        ])
         obj.nodes=nodes;
         obj.actions=actions;
         return obj;
@@ -146,8 +154,14 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
     constructor() {
         super(workflowNodeMapper)
     }
+
+    async info() {
+        let ret=await workflowNodeMapper.info(this.getId())
+        return ret;
+    }
+
     override async create(): Promise<ICommon_Model_Workflow_Node> {
-        if(this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART || this.getItem().status===undefined) {
+        if(!this.getItem().is_approval && (this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART || this.getItem().status===undefined)) {
             let obj=await workflowNodeMapper.getOpenNode(this.getItem().issue_type_id)
             if(obj) {
                 throw Err.Project.Workflow.workflowOpenNodeDuplicate
@@ -158,7 +172,7 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
     }
 
     override async update(): Promise<ICommon_Model_Workflow_Node> {
-        if(this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART) {
+        if(!this.getItem().is_approval && this.getItem().status==ECommon_Model_Workflow_Node_Status.NOTSTART) {
             let obj=await workflowNodeMapper.getOpenNode(this.getItem().issue_type_id)
             if(obj && obj.id!=this.getId()) {
                 throw Err.Project.Workflow.workflowOpenNodeDuplicate
@@ -169,8 +183,13 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
     }
 
     override async delete(eventPulish?: keyof IServer_Common_Event_Types): Promise<void> {
+        await ProjectIssueService.clearWorkflowNode(this.getId())
         await super.delete()
         await WorkflowNodeFieldTypeService.clearItemsByWorkflowNodeId(this.getId())
+        let objApproval=await WorkflowApprovalService.getItemByExp({
+            workflow_node_id:this.getId()
+        })
+        await objApproval?.delete()
     }
 
     async getActionList() {
@@ -209,10 +228,34 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
         await Promise.all(arrPromise);
         return ret;
     }
+
+    async listApprovalField() {
+        let objNode=await WorkflowService.getFirstNode(this.getItem().issue_type_id)
+        let arr=await WorkflowNodeFieldTypeService.listWorkflowNodeField(objNode.id)
+        let ret:{
+            id:string,
+            name:string
+        }[]=[]
+        for(let obj of arr) {
+            if((obj.fieldType.type===ECommon_Field_Type.MULTILABEL || obj.fieldType.type===ECommon_Field_Type.LABEL) && obj.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER) {
+                ret.push({
+                    id:obj.field.id,
+                    name:obj.field.name
+                })
+            }
+        }
+        return ret;
+    }
 }
 
 export class WorkflowActionService extends Entity<typeof workflowActionModel,typeof workflowActionMapper> {
     constructor() {
         super(workflowActionMapper)
+    }
+}
+
+export class WorkflowApprovalService extends Entity<typeof workflowApprovalModel,typeof workflowApprovalMapper> {
+    constructor() {
+        super(workflowApprovalMapper)
     }
 }

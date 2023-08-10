@@ -307,14 +307,15 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
         return !!ret;
     }
 
-    async editWorkflowNodeFieldConfig(fieldTypeConfigValueId :string,value? :string,name? :string,selected? :number):Promise<ICommon_Model_Workflow_Node_Field_Type_Config> {
+    async editWorkflowNodeFieldConfig(fieldTypeConfigValueId :string,value :string,selected :number,weight:number):Promise<ICommon_Model_Workflow_Node_Field_Type_Config> {
         if(!fieldTypeConfigValueId) {
             throw Err.Project.Field.fieldTypeConfigValueIdNotFound
         }
         let mysql=getMysqlInstance()
         await mysql.execute(generateUpdateSql(workflowNodeFieldTypeConfigModel,{
             value,
-            selected
+            selected,
+            weight
         },{
             id:fieldTypeConfigValueId
         }))
@@ -405,6 +406,9 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
         fieldId:string,
         fieldType:ICommon_Field_Type
     }[]> {
+        if(fieldIds.length==0) {
+            return []
+        }
         let mysql=getMysqlInstance()
         let sql=generateQuerySql(workflowNodeFieldTypeModel,null,{
             id:{

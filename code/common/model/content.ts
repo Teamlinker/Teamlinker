@@ -43,7 +43,8 @@ export enum ECommon_Model_Content_Type {
     PROJECT_ISSUE_DESCRIPTION,
     WIKI_ITEM,
     MEETING_CHAT,
-    CALENDAR_EVENT_AGENDA
+    CALENDAR_EVENT_AGENDA,
+    PROJECT_ISSUE_REJECT
 }
 
 export interface ICommon_Model_Content {

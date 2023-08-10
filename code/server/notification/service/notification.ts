@@ -27,6 +27,8 @@ export class NotificationService extends Entity<typeof notificationModel,typeof 
                 case ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE:
                 case ECommon_Model_Notification_Type.ISSUE_COMMENT_AT:
                 case ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN:
+                case ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE:
+                case ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT:
                 case ECommon_Model_Notification_Type.ISSUE_WORKFLOW_CHANGE:{
                     let objIssue:ICommon_Model_Project_Issue
                     return rpcCooperationApi.projectIssue(item.ref_id).then(issue=>{

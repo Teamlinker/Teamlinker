@@ -5,6 +5,7 @@ import {ECommon_Services} from './../types';
 import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Route_Res_Workflow_Info, ICommon_Route_Res_Workflow_Node_List_Item} from "./response";
 import {Permission_Types} from "../permission/permission";
+import {ECommon_Model_Workflow_Approval_Type, ICommon_Model_Workflow_Approval} from "../model/workflow_approval";
 
 const api={
     baseUrl:"/workflow",
@@ -42,9 +43,15 @@ const api={
                 description? :string,
                 status? :ECommon_Model_Workflow_Node_Status,
                 x?:number,
-                y?:number
+                y?:number,
+                approval?:number,
+                approvalType?:ECommon_Model_Workflow_Approval_Type,
+                approvalValue?:string[],
+                approvalExtra?:string
             }>{},
-            res:<ICommon_Model_Workflow_Node>{},
+            res:<ICommon_Model_Workflow_Node & {
+                approval?:ICommon_Model_Workflow_Approval
+            }>{},
             permission:[Permission_Types.Organization.ADMIN]
         },
         deleteNode:{
@@ -65,6 +72,8 @@ const api={
                 description? :string,
                 sourceNodeId:string,
                 destNodeId:string,
+                sourceAnchorPoint:string,
+                endAnchorPoint:string
             }>{},
             res:<ICommon_Model_Workflow_Action>{},
             permission:[Permission_Types.Organization.ADMIN]
@@ -78,6 +87,8 @@ const api={
                 description? :string,
                 sourceNodeId?:string,
                 destNodeId?:string,
+                sourceAnchorPoint?:string,
+                endAnchorPoint?:string
             }>{},
             res:<ICommon_Model_Workflow_Action>{},
             permission:[Permission_Types.Organization.ADMIN]
@@ -98,6 +109,18 @@ const api={
             res:<ICommon_Route_Res_Workflow_Node_List_Item[]>{},
             permission:[Permission_Types.Organization.READ]
         },
+        listApprovalField:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/approval/field",
+            req:<{
+                workflowNodeId:string
+            }>{},
+            res:<{
+               id:string,
+               name:string
+            }[]>{},
+            permission:[Permission_Types.Organization.READ]
+        }
     }
 }
 export default api

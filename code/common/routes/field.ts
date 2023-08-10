@@ -123,6 +123,7 @@ const api={
             req: <{
                 workflowNodeFieldTypeId :string,
                 data:{
+                    id?:string
                     value :string,
                     selected :number
                 }[]

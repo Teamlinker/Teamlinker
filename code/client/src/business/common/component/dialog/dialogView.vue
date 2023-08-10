@@ -1,5 +1,5 @@
 <template>
-  <div style="position: absolute;left: 0;top: 0;width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;background-color: rgba(29,33,41,0.6);z-index: 10000">
+  <div style="position: absolute;left: 0;top: 0;width: 100%;height: 100%;display: flex;justify-content: center;align-items: center;background-color: rgba(29,33,41,0.6);z-index: 10000" ref="root">
     <div style="background-color: white;width: 60%;height:auto;max-height: 80%;border-radius: 5px;display: flex;flex-direction: column">
       <div style="height: 35px;line-height: 35px;width: 100%;text-align: center;color: rgb(93,93,93);border-bottom: 1px solid gainsboro;flex: 1 1 auto">
         <b>{{component?title:input?"Input":"Alert"}}</b>
@@ -42,6 +42,8 @@ const props=defineProps<{
   }
 }>()
 const inputValue=props.input?props.input.text:ref("")
+const root=ref()
+provide("dialogRootRef",root)
 if(props.events) {
   provide("dialogEvents",props.events);
 }

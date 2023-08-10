@@ -4,7 +4,7 @@
 	    <template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope"/></template>
       <WindowContainer></WindowContainer>
     </IconContainer>
-	  <DesktopBar style="height: 40px;background-color: rgb(93,92,140)">
+	  <DesktopBar style="height: 40px;background-color: rgb(93,92,140);">
 		  <template v-for="(_, slot) of $slots" v-slot:[slot]="scope"><slot :name="slot" v-bind="scope"/></template>
 	  </DesktopBar>
   </div>

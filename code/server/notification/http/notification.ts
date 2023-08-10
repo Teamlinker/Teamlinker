@@ -57,4 +57,11 @@ class NotificationController {
         let ret=await obj.info()
         return ret;
     }
+
+    @DHttpApi(notificationApi.routes.remove)
+    async remove(@DHttpReqParamRequired("notificationId") notificationId:string): Promise<typeof notificationApi.routes.remove.res> {
+        let obj=await NotificationService.getItemById(notificationId)
+        await obj?.delete()
+        return;
+    }
 }
