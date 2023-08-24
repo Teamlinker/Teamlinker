@@ -29,7 +29,7 @@ import {
 	ICommon_Route_Res_Workflow_Node_Field
 } from "../../../../../../common/routes/response";
 import {ECommon_Field_Type} from "../../../../../../common/field/type";
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import {
 	ECommon_Model_Workflow_Node_Field_Type_Label_Type
 } from "../../../../../../common/model/workflow_node_field_type";
@@ -92,6 +92,88 @@ switch (props.item.fieldType.type) {
   default:
     break
 }
+watch(()=>props.item,async ()=>{
+	if(props.item.fieldType.type===ECommon_Field_Type.LABEL) {
+		if(/\d{16,}/.test(props.item.fieldValue.value as string)) {
+			if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER) {
+				apiOrganization.userProfile({
+					organizationUserId:props.item.fieldValue.value as string
+				}).then(res=>{
+					if(res?.code==0) {
+						labelList.value=[{
+							id:res.data.organizationUser.id,
+							name:res.data.organizationUser.nickname,
+							photo:res.data.user.photo
+						}]
+					}
+				})
+			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE) {
+				apiIssue.filter({
+					projectIssueIds:[props.item.fieldValue.value as string],
+					page:0,
+					size:1
+				}).then(res=>{
+					if(res?.code==0) {
+						labelList.value=res.data.data
+					}
+				})
+			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE) {
+				apiRelease.list({
+					projectReleaseIds:[props.item.fieldValue.value as string],
+					page:0,
+					size:1
+				}).then(res=>{
+					if(res?.code==0) {
+						labelList.value=res.data.data
+					}
+				})
+			}
+		}
+	} else if(props.item.fieldType.type===ECommon_Field_Type.MULTILABEL) {
+		if((props.item.fieldValue.value as string[])?.length>0 && /\d{16,}/.test(props.item.fieldValue.value[0])) {
+			if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER) {
+				apiOrganization.listUser({
+					organizationUserIds:props.item.fieldValue.value as string[],
+					page:0,
+					size:(props.item.fieldValue.value as string[]).length
+				}).then(res=>{
+					if(res?.code==0) {
+						multiLabelList.value=res.data.data.map(item=>{
+							return {
+								id:item.organizationUser.id,
+								name:item.organizationUser.nickname,
+								photo:item.user.photo
+							}
+						})
+					}
+				})
+			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE) {
+				apiIssue.filter({
+					projectIssueIds:props.item.fieldValue.value as string[],
+					page:0,
+					size:(props.item.fieldValue.value as string[]).length
+				}).then(res=>{
+					if(res?.code==0) {
+						multiLabelList.value=res.data.data
+					}
+				})
+			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE) {
+				apiRelease.list({
+					projectReleaseIds:props.item.fieldValue.value as string[],
+					page:0,
+					size:(props.item.fieldValue.value as string[]).length
+				}).then(res=>{
+					if(res?.code==0) {
+						multiLabelList.value=res.data.data
+					}
+				})
+			}
+		}
+	}
+},{
+	immediate:true,
+	deep:true
+})
 const multiLabelList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item | ICommon_Route_Res_Release_Item | {
   name:string,
   id:string,

@@ -28,6 +28,10 @@ import {ICommon_Model_Notification} from "../model/notification";
 import {ICommon_Model_Meeting_Miss_Call} from "../model/meeting_miss_call";
 import {ICommon_Model_Workflow_Approval} from "../model/workflow_approval";
 import {ICommon_Model_Project_Issue_Approval} from "../model/project_issue_approval";
+import {ICommon_Model_Board_Sprint} from "../model/board_sprint";
+import {ICommon_Model_Board_Sprint_SwimLane} from "../model/board_sprint_swimlane";
+import {ICommon_Model_Board} from "../model/board";
+import {ICommon_Model_Board_Column} from "../model/board_column";
 
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -407,12 +411,32 @@ export type ICommon_Route_Res_Notification_Item = ICommon_Model_Notification & {
 export type ICommon_Route_Res_Meeting_Miss_Call = (ICommon_Model_Meeting_Miss_Call & {
     organizationUser:ICommon_Model_Organization_User
 })
+export type ICommon_Route_Res_Board_Sprint_Info = ICommon_Model_Board_Sprint & {
+    swimLanes:ICommon_Model_Board_Sprint_SwimLane[],
+    issues:(ICommon_Model_Project_Issue & {
+        swimLaneId:string
+    })[]
+}
 
+export type ICommon_Route_Res_Board_List={
+    count:number,
+    totalPage:number,
+    page:number,
+    data:ICommon_Model_Board[]
+}
 
+export type ICommon_Route_Res_Board_Sprint_List={
+    count:number,
+    totalPage:number,
+    page:number,
+    data:ICommon_Model_Board_Sprint[]
+}
 
-
-
-
+export type ICommon_Route_Res_Board_Column_Workflow_Node_Item={
+    workflowNode:ICommon_Model_Workflow_Node,
+    issueType:ICommon_Model_Issue_Type,
+    boardColumn:ICommon_Model_Board_Column
+}
 
 
 

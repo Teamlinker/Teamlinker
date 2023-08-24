@@ -12,12 +12,14 @@
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
-import {apiIssueType, DCSType} from "../../../../common/request/request";
+import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
+import {apiIssue, apiIssueType, DCSType} from "../../../../common/request/request";
 import {ICommon_Model_Issue_Type_Solution} from "../../../../../../../common/model/issue_type_solution";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 import {Message} from "@arco-design/web-vue";
+import ProjectSettingIssueSolutionConvert
+	from "@/business/controller/app/project/setting/projectSettingIssueSolutionConvert.vue";
 
 const props=defineProps<{
   projectId:string
@@ -25,21 +27,39 @@ const props=defineProps<{
 const form=reactive({
   issueTypeSolutionId:""
 })
+const currentIssueTypeSolutionId=ref("")
 const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()
 const issueSolutionList=ref<DCSType<ICommon_Model_Issue_Type_Solution>[]>([])
 const onSubmit=async ()=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to switch to this issue type solution?")
   if(ret) {
-    let res=await apiIssueType.solutionBindProject({
-      projectId:props.projectId,
-      issueTypeSolutionId:form.issueTypeSolutionId
-    })
-    if(res?.code==0) {
-      Message.success("bind success")
-    } else {
-      Message.error(res.msg)
-    }
+		let res=await apiIssue.count({
+			projectId:props.projectId
+		})
+	  if(res?.code==0) {
+			if(res.data.count==0) {
+				let res=await apiIssueType.solutionBindProject({
+					projectId:props.projectId,
+					issueTypeSolutionId:form.issueTypeSolutionId
+				})
+				if(res?.code==0) {
+					Message.success("bind success")
+					currentIssueTypeSolutionId.value=form.issueTypeSolutionId
+				} else {
+					Message.error(res.msg)
+				}
+			} else {
+				let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(ProjectSettingIssueSolutionConvert),{
+					originalIssueTypeSolutionId:currentIssueTypeSolutionId.value,
+					newIssueTypeSolutionId:form.issueTypeSolutionId,
+					projectId:props.projectId
+				})
+				if(ret) {
+					currentIssueTypeSolutionId.value=form.issueTypeSolutionId
+				}
+			}
+	  }
   }
 }
 const getIssueSolutionList=async ()=>{
@@ -54,11 +74,12 @@ const getCurrentSolution=async ()=>{
   })
   if(res?.code==0) {
     form.issueTypeSolutionId=res.data.id
+	  currentIssueTypeSolutionId.value=form.issueTypeSolutionId
   }
 }
-onBeforeMount(()=>{
-  getIssueSolutionList()
-  getCurrentSolution()
+onBeforeMount(async ()=>{
+	await getCurrentSolution()
+  await getIssueSolutionList()
 })
 </script>
 

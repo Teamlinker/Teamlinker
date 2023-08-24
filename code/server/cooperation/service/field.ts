@@ -125,6 +125,7 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
         }
         for(let i=0;i<arrConfig.length;i++) {
             arrPromise.push(workflowNodeFieldTypeMapper.deleteWorkflowNodeFieldConfigs([arrConfig[i].id]))
+            arrPromise.push(ProjectIssueService.clearWorkflowNodeFieldTypeConfig(arrConfig[i].id))
         }
         await Promise.all(arrPromise)
         let arr=await this.listWorkflowNodeFieldConfig()

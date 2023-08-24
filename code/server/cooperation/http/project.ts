@@ -21,7 +21,7 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.create)
-    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpUser user:IUserSession):Promise<typeof projectApi.routes.create.res>{
+    async createProject(@DHttpReqParamRequired("name") name:string,@DHttpReqParamRequired("keyword") keyword:string,@DHttpReqParam("photo") photo:string,@DHttpReqParam("description") description:string,@DHttpReqParam("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpUser user:IUserSession):Promise<typeof projectApi.routes.create.res>{
         let objProject=await ProjectService.getItemByExp({
             organization_id:user.organizationInfo.organizationId,
             keyword
@@ -38,7 +38,7 @@ class ProjectController {
             photo:photo,
             organization_id:user.organizationInfo.organizationId
         })
-        let ret=await obj.create()
+        let ret=await obj.create(issueTypeSolutionId)
         return ret
     }
 

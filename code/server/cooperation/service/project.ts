@@ -31,15 +31,23 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
         await issueTypeSolutionMapper.clearProjects([this.item.id]);
     }
 
-    override async create(): Promise<ICommon_Model_Project> {
+    override async create(issueTypeSolutionId?:string): Promise<ICommon_Model_Project> {
         let ret=await super.create();
         let role=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.PROJECT)
         if(role) {
             await rpcAuthApi.addRoleMember(this.getId(),role,ECommon_Model_Organization_Member_Type.USER,this.getItem().created_by)
         }
-        let issueTypeSolution=await IssueTypeSolutionService.getReservedItem(ret.organization_id)
-        if(issueTypeSolution) {
-            await issueTypeSolution.bindProject(this.getId())
+        if(issueTypeSolutionId) {
+            let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId)
+            if(!obj) {
+                throw Err.Project.Issue.issueTypeSolutionNotFound
+            }
+            await obj.bindProject(this.getId())
+        } else {
+            let issueTypeSolution=await IssueTypeSolutionService.getReservedItem(ret.organization_id)
+            if(issueTypeSolution) {
+                await issueTypeSolution.bindProject(this.getId())
+            }
         }
         return ret;
     }
@@ -202,6 +210,11 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
 
     async removeRole(roleId:string){
         let ret=await rpcAuthApi.removeRole(roleId);
+        return ret;
+    }
+
+    async issueCount() {
+        let ret=await projectMapper.issueCount(this.getId())
         return ret;
     }
 }

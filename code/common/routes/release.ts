@@ -20,6 +20,7 @@ const api={
                 projectId?:string,
                 name?:string,
                 status?:ECommon_Model_Project_Release_Status,
+                projectReleaseIds?:string[],
                 page:number,
                 size:number       
             }>{},

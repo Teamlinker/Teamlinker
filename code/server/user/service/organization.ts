@@ -189,8 +189,8 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         return ret;
     }
 
-    async listUser(page:number,size:number,keyword?:string):Promise<typeof organizationApi.routes.listUser.res> {
-        let arr=await organizationMapper.listUser(this.getId(),page,size,keyword)
+    async listUser(page:number,size:number,keyword?:string,organizationUserIds?:string[]):Promise<typeof organizationApi.routes.listUser.res> {
+        let arr=await organizationMapper.listUser(this.getId(),page,size,keyword,organizationUserIds)
         let users=arr.data.map(item=>{
             return {
                 itemId:item.organizationUser.organization_id,

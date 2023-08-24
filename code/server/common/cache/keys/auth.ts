@@ -26,6 +26,10 @@ import {wikiModel} from "../../../../common/model/wiki";
 import {wikiItemModel} from "../../../../common/model/wiki_item";
 import {meetingRoomModel} from "../../../../common/model/meeting_room";
 import {calendarEventModel} from "../../../../common/model/calendar_event";
+import {boardModel} from "../../../../common/model/board";
+import {boardSprintModel} from "../../../../common/model/board_sprint";
+import {boardSprintSwimLaneModel} from "../../../../common/model/board_sprint_swimlane";
+import {boardColumnModel} from "../../../../common/model/board_column";
 
 export namespace REDIS_AUTH {
     export namespace Permission {
@@ -323,6 +327,155 @@ export namespace REDIS_AUTH {
                             await this.objRedis.set(projectId)
                         } else {
                             throw Err.Project.ProjectIssue.projectIssueNotFound
+                        }
+                    }
+                    return projectId;
+                }
+            }
+            export class ProjectIdFromBoard extends BaseRedisStringCache<string> {
+                key="permission:projectBoard:{0}"
+                constructor(private boardId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,boardId),cacheRedisType<string>().String,1000*10);
+                }
+                async getValue():Promise<string> {
+                    let mysql=getMysqlInstance()
+                    let projectId:string
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        projectId=await this.objRedis.get()
+                    } else {
+                        let ret=await mysql.executeOne(generateQuerySql(boardModel,["project_id"],{
+                            id:this.boardId
+                        }))
+                        if(ret) {
+                            projectId=ret.project_id
+                            await this.objRedis.set(projectId)
+                        } else {
+                            throw Err.Project.Board.boardNotFound
+                        }
+                    }
+                    return projectId;
+                }
+            }
+            export class ProjectIdFromBoardSprint extends BaseRedisStringCache<string> {
+                key="permission:projectBoardSprint:{0}"
+                constructor(private boardSprintId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,boardSprintId),cacheRedisType<string>().String,1000*10);
+                }
+                async getValue():Promise<string> {
+                    let mysql=getMysqlInstance()
+                    let projectId:string
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        projectId=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoinSql({
+                            model:boardSprintModel
+                        },{
+                            model:boardModel,
+                            columns:["project_id"],
+                            expression:{
+                                id:{
+                                    model:boardSprintModel,
+                                    field:"board_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:boardSprintModel,
+                                value:this.boardSprintId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            projectId=ret.project_id
+                            await this.objRedis.set(projectId)
+                        } else {
+                            throw Err.Project.Board.boardSprintNotFound
+                        }
+                    }
+                    return projectId;
+                }
+            }
+            export class ProjectIdFromBoardSprintSwimLane extends BaseRedisStringCache<string> {
+                key="permission:projectBoardSprintSwimLane:{0}"
+                constructor(private boardSprintSwimLaneId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,boardSprintSwimLaneId),cacheRedisType<string>().String,1000*10);
+                }
+                async getValue():Promise<string> {
+                    let mysql=getMysqlInstance()
+                    let projectId:string
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        projectId=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoinSql({
+                            model:boardSprintSwimLaneModel
+                        },{
+                            model:boardModel,
+                            columns:["project_id"],
+                            expression:{
+                                id:{
+                                    model:boardSprintSwimLaneModel,
+                                    field:"board_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:boardSprintSwimLaneModel,
+                                value:this.boardSprintSwimLaneId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            projectId=ret.project_id
+                            await this.objRedis.set(projectId)
+                        } else {
+                            throw Err.Project.Board.boardSprintSwimLaneNotFound
+                        }
+                    }
+                    return projectId;
+                }
+            }
+            export class ProjectIdFromBoardColumn extends BaseRedisStringCache<string> {
+                key="permission:projectBoardColumn:{0}"
+                constructor(private boardColumnId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,boardColumnId),cacheRedisType<string>().String,1000*10);
+                }
+                async getValue():Promise<string> {
+                    let mysql=getMysqlInstance()
+                    let projectId:string
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        projectId=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoinSql({
+                            model:boardColumnModel
+                        },{
+                            model:boardModel,
+                            columns:["project_id"],
+                            expression:{
+                                id:{
+                                    model:boardColumnModel,
+                                    field:"board_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:boardColumnModel,
+                                value:this.boardColumnId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            projectId=ret.project_id
+                            await this.objRedis.set(projectId)
+                        } else {
+                            throw Err.Project.Board.boardColumnNotFound
                         }
                     }
                     return projectId;

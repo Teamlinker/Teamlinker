@@ -17,7 +17,7 @@ type EXPRVALUEEXP ={
         model:BaseModel,
         field:string
     },
-    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"|"not in"|"regexp"
+    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"|"not in"|"regexp"|"json_array_contain"
 }
 type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
     type:"and"|"or",
@@ -110,6 +110,8 @@ function handleExp(key:string,value:EXPRVALUEEXP,arrExpr:string[],table?:string)
         }
     } else if(value.exp=="regexp") {
         arrExpr.push(`${table?(table+"."):""}${key} regexp '${value.value}'`)
+    } else if(value.exp=="json_array_contain") {
+        arrExpr.push(`JSON_CONTAINS(${table?(table+"."):""}${key},'["${value.value}"]')`)
     }
 }
 
@@ -424,8 +426,8 @@ export function generateBatchCreateOnUpdateSql<T extends BaseModel>(model:T, arr
 
 export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
     [param in keyof T["model"]]?:{
-        exp:"+"|"-",
-        value:number
+        exp:"+"|"-"|"json_array_remove",
+        value:number|string
     }|T["model"][param]
 },objExpr?:{
     [param in ((keyof T["model"])|`${"$and"|"$or"}${number}`)]?:EXPRVALUE|{
@@ -448,7 +450,11 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
         } else if(typeof(value)=="boolean") {
             val=value?1:0+""
         } else if(typeof(value)=="object" && !(value instanceof Date) && !Array.isArray(value) && value.exp) {
-            val=`${key}${value.exp}${value.value}`
+            if(value.exp=="json_array_remove") {
+                val=`JSON_REMOVE(${key}, JSON_UNQUOTE(JSON_SEARCH(${key}, 'one', '${value.value}')))`
+            } else {
+                val=`${key}${value.exp}${value.value}`
+            }
         } else if(Array.isArray(value)) {
             val="'"+JSON.stringify(value)+"'"
         } else if(value instanceof Date) {
@@ -496,7 +502,8 @@ export function generateDeleteInnerJoinSql<T1 extends BaseModel, T2 extends Base
             model: T1,
             field: keyof T1["model"]
         }
-    }
+    },
+    isDelete:boolean
 }, objExpr?: {
     [param in ((keyof (T1 & T2)["model"]) | `${"$and" | "$or"}${number}`)]?: {
     value: EXPRVALUE,
@@ -518,7 +525,7 @@ export function generateDeleteInnerJoinSql<T1 extends BaseModel, T2 extends Base
     }
     let expression = arrExpression.join(" and ")
     return {
-        value: `delete ${table},${joinTable} from ${table} inner join ${joinTable} on ${expression} ${expr?(" where "+expr):""}`,
+        value: `delete ${table}${joinModel.isDelete?`,${joinTable}`:""} from ${table} inner join ${joinTable} on ${expression} ${expr?(" where "+expr):""}`,
         type: null,
     }
 }
@@ -530,7 +537,8 @@ export function generateDeleteInnerJoin2Sql<T1 extends BaseModel, T2 extends Bas
             model:T1|T3,
             field:keyof (T1 & T3)["model"]
         }
-    }
+    },
+    isDelete:boolean
 }, joinModel2: {
     model:T3,
     expression:{
@@ -538,7 +546,8 @@ export function generateDeleteInnerJoin2Sql<T1 extends BaseModel, T2 extends Bas
             model:T1|T2,
             field:keyof (T1 & T2)["model"]
         }
-    }
+    },
+    isDelete:boolean
 },objExpr?: {
     [param in ((keyof (T1 & T2 & T3)["model"])|`${"$and"|"$or"}${number}`)]?:{
     value:EXPRVALUE,
@@ -567,7 +576,7 @@ export function generateDeleteInnerJoin2Sql<T1 extends BaseModel, T2 extends Bas
     }
     let expression2 = arrExpression2.join(" and ")
     return {
-        value: `delete ${table},${joinTable},${joinTable2} from ${table} inner join ${joinTable} on ${expression} inner join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}`,
+        value: `delete ${table}${joinModel.isDelete?`,${joinTable}`:""}${joinModel2.isDelete?`,${joinTable2}`:""} from ${table} inner join ${joinTable} on ${expression} inner join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}`,
         type: null,
     }
 }

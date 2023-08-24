@@ -8,7 +8,7 @@ import {Permission_Types} from "../../../common/permission/permission";
 @DComponent
 class PermissionProject extends PermissionBase {
     fieldName="projectId"
-    async translateToField({commentId,projectIssueId,labelId,moduleId,projectReleaseId,roleId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,labelId:string,moduleId:string,projectReleaseId:string ,roleId:string}): Promise<string> {
+    async translateToField({commentId,projectIssueId,labelId,moduleId,projectReleaseId,roleId,boardId,boardSprintId,boardSprintSwimLaneId,boardColumnId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,labelId:string,moduleId:string,projectReleaseId:string ,roleId:string}): Promise<string> {
         let projectId:string
         if(commentId) {
             let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssueComment(commentId);
@@ -36,6 +36,22 @@ class PermissionProject extends PermissionBase {
             if(value?.type===ECommon_Model_Role_Type.PROJECT) {
                 return value.item_id
             }
+        } else if(boardId) {
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromBoard(boardId);
+            projectId=await obj.getValue();
+            return projectId;
+        } else if(boardSprintId) {
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromBoardSprint(boardSprintId);
+            projectId=await obj.getValue();
+            return projectId;
+        } else if(boardSprintSwimLaneId) {
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromBoardSprintSwimLane(boardSprintSwimLaneId);
+            projectId=await obj.getValue();
+            return projectId;
+        } else if(boardColumnId) {
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromBoardColumn(boardColumnId);
+            projectId=await obj.getValue();
+            return projectId;
         }
     }
 

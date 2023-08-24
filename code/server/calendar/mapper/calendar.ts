@@ -50,7 +50,8 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                     model:calendarEventModel,
                     field:"id"
                 }
-            }
+            },
+            isDelete:true
         },{
             model:meetingRoomModel,
             expression:{
@@ -58,7 +59,8 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                     model:calendarEventModel,
                     field:"id"
                 }
-            }
+            },
+            isDelete:true
         },{
             calendar_id:{
                 model:calendarEventModel,

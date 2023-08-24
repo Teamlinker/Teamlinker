@@ -6,6 +6,8 @@ import {issueTypeSolutionModel} from './../../../common/model/issue_type_solutio
 import {ICommon_Route_Res_IssueTypeSolution_List_Item} from './../../../common/routes/response';
 import {issueTypeMapper, issueTypeSolutionMapper} from './../mapper/issueType';
 import {WorkflowService} from "./workflow";
+import {projectIssueMapper} from "../mapper/issue";
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issueTypeMapper> {
     constructor(){
@@ -23,7 +25,15 @@ export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issue
         return ret;
     }
 
-    override async delete() {
+    override async delete(eventPublish?:keyof IServer_Common_Event_Types,convertIssueTypeId?:string) {
+        if(convertIssueTypeId) {
+            await Promise.all([
+                projectIssueMapper.clearBeforeConvertByIssueTypeId(this.getId()),
+                projectIssueMapper.updateConvertIssueType({
+                    [this.getId()]:convertIssueTypeId
+                })
+            ])
+        }
         await super.delete()
         await WorkflowService.delete(this.getId());
     }
@@ -54,8 +64,20 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         return obj;
     }
 
-    override async delete() {
+    override async delete(eventPublish?:keyof IServer_Common_Event_Types,relationship?:{
+        [id:string]:string
+    }) {
+        let arrIssueType=await this.issueTypeList()
+        if(arrIssueType.length>0 && !relationship) {
+            throw Err.Project.Issue.issueTypeSolutionConvertMissRelationship
+        }
         await super.delete()
+        let arrProject=await this.projectList(0,10000)
+        let arrPromise=[]
+        arrProject.data.forEach(project=>{
+            arrPromise.push(this.unbindProject(project.id,relationship))
+        })
+        await Promise.all(arrPromise)
         await issueTypeSolutionMapper.resetProjects(this.getId(),this.getItem().organization_id);
         let list=await this.issueTypeList();
         let arr=[];
@@ -105,10 +127,22 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         return ret;
     }
 
-    async bindProject(projectId:string) {
+    async bindProject(projectId:string,relationship?:{
+        [id:string]:string
+    }) {
         let objProject=await ProjectService.getItemById(projectId)
         if(!objProject) {
             throw Err.Project.projectNotFound
+        }
+        let count=await objProject.issueCount()
+        if(count>0 && !relationship) {
+            throw Err.Project.ProjectIssue.issueShouldEmpty
+        }
+        if(count!=0) {
+            await Promise.all([
+                projectIssueMapper.clearBeforeConvertByProjectId(projectId),
+                projectIssueMapper.updateConvertIssueType(relationship,projectId)
+            ])
         }
         let objExist=await IssueTypeSolutionService.getObjByProjectId(projectId)
         if(objExist) {
@@ -116,13 +150,24 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         } else {
             await issueTypeSolutionMapper.bindProject(this.getId(),projectId)
         }
-        
     }
 
-    async unbindProject(projectId:string) {
+    async unbindProject(projectId:string,relationship?:{
+        [id:string]:string
+    }) {
         let objProject=await ProjectService.getItemById(projectId)
         if(!objProject) {
             throw Err.Project.projectNotFound
+        }
+        let count=await objProject.issueCount()
+        if(count>0 && !relationship) {
+            throw Err.Project.ProjectIssue.issueShouldEmpty
+        }
+        if(count!=0) {
+            await Promise.all([
+                projectIssueMapper.clearBeforeConvertByProjectId(projectId),
+                projectIssueMapper.updateConvertIssueType(relationship,projectId)
+            ])
         }
         await issueTypeSolutionMapper.unbindProject(this.getId(),projectId,this.getItem().organization_id)
     }

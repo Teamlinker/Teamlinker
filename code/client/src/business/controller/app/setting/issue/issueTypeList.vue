@@ -41,6 +41,7 @@ import EditIssueType from "./editIssueType.vue";
 import IssueTypeCopyFrom from "./issueTypeCopyFrom.vue";
 import {getCurrentNavigator} from "../../../../../teamOS/common/component/navigator/navigator";
 import Workflow from "./workflow.vue";
+import IssueTypeDeleteConvert from "@/business/controller/app/setting/issue/issueTypeDeleteConvert.vue";
 
 const props=defineProps<{
   issueTypeSolutionId:string
@@ -101,7 +102,7 @@ const onEditWorkflow=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
   },`${item.name} -> Workflow`)
 }
 
-const onCopyFrom=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
+const onCopyFrom=async ()=>{
   let ret=await Dialog.open(root.value,appContext,"Copy From",markRaw(IssueTypeCopyFrom),{
     issueTypeSolutionId:props.issueTypeSolutionId
   })
@@ -132,13 +133,13 @@ const onCopy=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
 const onDelete=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this issue type from this issue type solution?")
   if(ret) {
-    let res=await apiIssueType.delete({
-      issueTypeId:item.id
-    })
-    if(res?.code==0) {
-      Message.success("remove success")
-      search()
-    }
+		let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(IssueTypeDeleteConvert),{
+			issueTypeId:item.id,
+			issueTypeSolutionId:props.issueTypeSolutionId
+		})
+	  if(ret) {
+			search()
+	  }
   }
 }
 </script>

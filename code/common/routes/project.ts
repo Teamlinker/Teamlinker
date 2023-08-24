@@ -37,6 +37,7 @@ const api={
             req:<{
                 keyword :string,
                 name :string,
+                issueTypeSolutionId?:string,
                 photo? :string,
                 description? :string,                
             }>{},

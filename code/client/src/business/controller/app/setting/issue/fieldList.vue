@@ -38,7 +38,7 @@
           </a-table>
         </a-form>
       </a-layout-content>
-      <a-layout-sider :resize-directions="['left']">
+      <a-layout-sider :resize-directions="['left']" :width="250">
         <a-form :model="form" layout="vertical" style="margin:10px 5px 0px 5px;width: 90%" v-if="form.type!==null && form.type!==undefined" @submitSuccess="onEdit" ref="eleForm">
           <a-form-item label="type">
             {{Field_Types[form.type].name.toUpperCase()}}
@@ -68,7 +68,7 @@
           </a-form-item>
           <a-form-item field="values" label="options" v-if="form.type==ECommon_Field_Type.SELECT || form.type==ECommon_Field_Type.MULTISELECT">
             <a-checkbox-group v-model="valueSelected" :max="form.type==ECommon_Field_Type.SELECT?1:100" style="width: 100%">
-              <a-table :data="form.values" :draggable="{ type: 'handle', width: 20 }" :columns="columnsValues" :show-header="false" style="width: 100%" :pagination="false" @change="(_data)=>{form.values=_data}">
+              <a-table :data="form.values" :draggable="{ type: 'handle', width: 20 }" :columns="columnsValues" :show-header="false" style="width: 100%" :pagination="false" @change="(_data)=>{form.values=_data as any}">
                 <template #name="{record,rowIndex}">
                   <a-input size="small" v-model="record.value"></a-input>
                 </template>
@@ -83,7 +83,7 @@
                   </a-space>
                 </template>
                 <template #footer>
-                  <a-button size="mini" html-type="button" type="primary" @click="onAddValue(record)">add item</a-button>
+                  <a-button size="mini" html-type="button" type="primary" @click="onAddValue">add item</a-button>
                 </template>
               </a-table>
             </a-checkbox-group>

@@ -1,7 +1,7 @@
 <template>
   <a-layout style="height: 100%">
     <a-layout-content class="issueProfileContent">
-      <a-row style="color: gray" v-drag.shortcut="()=>({
+      <a-row style="color: grey" v-drag.shortcut="()=>({
 				shortcutType:ECommon_Model_Finder_Shortcut_Type.PROJECT_ISSUE,
 				shortcutRefId:projectIssueId,
 				shortcutName:key+'-'+info?.unique_id+' '+info?.name
@@ -66,6 +66,7 @@
 		            </template>
 	            </a-popover>
 	            <a-doption v-if="checkPermission(permission,Permission_Types.Project.EDIT)" @click="onCopy">Copy</a-doption>
+	            <a-doption v-if="checkPermission(permission,Permission_Types.Project.EDIT)" @click="onConvert">Convert</a-doption>
               <a-doption v-if="checkPermission(permission,Permission_Types.Project.ADMIN) || info?.created_by.id===store.userInfo.id" @click="onDelete" style="color: red">Delete</a-doption>
             </template>
           </a-dropdown>
@@ -129,6 +130,8 @@ import {ECommon_Model_Project_Issue_Approval_Type} from "../../../../../../../co
 import RichEditor from "@/business/common/component/richEditor/richEditor.vue";
 import {ECommon_Content_Line_Config_Type} from "../../../../../../../common/model/content";
 import {RichEditorEventHandle} from "@/business/common/component/richEditorEventHandle";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/model/finder_item";
+import ProjectIssueConvert from "@/business/controller/app/project/issue/projectIssueConvert.vue";
 
 const props=defineProps<{
   projectIssueId:string
@@ -373,6 +376,19 @@ const onCopy=async ()=>{
 		if(res?.code==0) {
 			eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,projectId,res.data.id);
 		}
+	}
+}
+
+const onConvert=async ()=>{
+	let ret=await Dialog.open(root.value,appContext,"Convert",markRaw(ProjectIssueConvert),{
+		projectId:projectId,
+		projectIssueId:props.projectIssueId,
+		issueTypeId:info.value.issueType.id
+	})
+	if(ret) {
+		getInfo()
+		getActionList()
+		getFieldList()
 	}
 }
 

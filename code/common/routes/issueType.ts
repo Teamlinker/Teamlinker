@@ -12,6 +12,13 @@ const api={
     baseUrl:"/issuetype",
     service:ECommon_Services.Cooperation,
     routes:{
+        reserved:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/reserved",
+            req:{},
+            res:<ICommon_Model_Issue_Type_Solution>{},
+            permission:[Permission_Types.Organization.READ]
+        },
         list:{
             method:ECommon_HttpApi_Method.GET,
             path:"/list",
@@ -58,7 +65,8 @@ const api={
             method:ECommon_HttpApi_Method.DELETE,
             path:"/item",
             req:<{
-                issueTypeId:string           
+                issueTypeId:string,
+                convertIssueTypeId:string
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]
@@ -106,7 +114,10 @@ const api={
             method:ECommon_HttpApi_Method.DELETE,
             path:"/solution/item",
             req:<{
-                issueTypeSolutionId:string           
+                issueTypeSolutionId:string,
+                relationship?:{
+                    [id:string]:string
+                }
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]
@@ -116,7 +127,10 @@ const api={
             path:"/solution/project",
             req:<{
                 issueTypeSolutionId:string,
-                projectId:string
+                projectId:string,
+                relationship?:{
+                    [id:string]:string
+                }
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]
@@ -125,8 +139,10 @@ const api={
             method:ECommon_HttpApi_Method.DELETE,
             path:"/solution/project",
             req:<{
-                issueTypeSolutionId:string,
-                projectId:string
+                projectId:string,
+                relationship?:{
+                    [id:string]:string
+                }
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]

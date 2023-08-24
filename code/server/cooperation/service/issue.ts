@@ -14,7 +14,7 @@ import {ICommon_Model_Project_Issue_Field_Value} from './../../../common/model/p
 import {projectIssueApprovalMapper, projectIssueHistoryMapper, projectIssueMapper} from './../mapper/issue';
 import {WorkflowNodeFieldTypeService} from './field';
 import {ProjectModuleService} from './module';
-import {WorkflowActionService, WorkflowApprovalService, WorkflowNodeService} from './workflow';
+import {WorkflowActionService, WorkflowApprovalService, WorkflowNodeService, WorkflowService} from './workflow';
 import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
 import {ProjectReleaseService} from "./release";
 import {IServer_Common_Event_Types} from "../../common/event/types";
@@ -38,7 +38,27 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     constructor(){
         super(projectIssueMapper)
     }
-    
+
+    async convert(issueTypeId:string,values:ICommon_Route_Req_ProjectIssue_Field[]) {
+        if(this.getItem().issue_type_id===issueTypeId) {
+            return
+        }
+        await projectIssueMapper.clearBeforeConvert(this.getId())
+        let objFirstNode=await WorkflowService.getFirstNode(issueTypeId)
+        if(!objFirstNode) {
+            throw Err.Project.Workflow.workflowNodeNotFound
+        }
+        this.assignItem({
+            issue_type_id:issueTypeId,
+            workflow_node_id:objFirstNode.id
+        })
+        await Promise.all([
+            this.update(),
+            projectIssueMapper.handleProcess(this.getId(),objFirstNode.id),
+            this.createFieldValues(values)
+        ])
+    }
+
     async createFieldValues(values:ICommon_Route_Req_ProjectIssue_Field[]) {
         if(!Array.isArray(values) || !values) {
             return
@@ -731,8 +751,8 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     }
 
 
-    static async filter(organizationId:string,projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string) {
-        let ret=await projectIssueMapper.filter(organizationId,projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
+    static async filter(organizationId:string,projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string,projectIssueIds?:string[]) {
+        let ret=await projectIssueMapper.filter(organizationId,projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId,projectIssueIds)
         return ret;
     }
 
@@ -789,7 +809,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     }
 
     static async clearWorkflowNodeFieldTypeConfig(fieldTypeConfigValueId:string) {
-
+        await projectIssueMapper.clearWorkflowNodeFieldTypeConfig(fieldTypeConfigValueId)
     }
 }
 

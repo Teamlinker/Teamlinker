@@ -56,7 +56,12 @@
     <a-row style="height: calc(100% - 35px);background-color: white;position: relative;z-index: -1">
       <NavigatorContainer :routes="item.nodes[0].components" :id="item.nodes[0].id" :path="item.nodes[0].path" :default="item.nodes[0].default" ref="navigator" v-if="item.type==ETeamOS_Window_Type.SIMPLE" name="root" style="position: relative"/>
       <a-tabs type="card-gutter" :editable="true" show-add-button auto-switch :justify="true" v-else-if="item.type==ETeamOS_Window_Type.TAB" @change="change" style="width: 100%" @add="addTab" @delete="removeTab" @tabClick="change" :active-key="item.activeKey">
-        <a-tab-pane v-for="(node,index) in item.nodes" :key="node.id" :title="getTabTitle(node.id)" tabindex="-1" :closable="item.nodes.length>1">
+        <a-tab-pane v-for="(node,index) in item.nodes" :key="node.id" tabindex="-1" :closable="item.nodes.length>1">
+	        <template #title>
+		        <div style="width: 100%;height: 100%">
+			        {{getTabTitle(node.id)}}
+		        </div>
+	        </template>
           <NavigatorContainer :id="node.id" :routes="node.components" :default="node.default" :meta="node.meta" ref="navigatorList" name="root" :path="node.path" @focus="onFocus(item.id)" :tabindex="index" style="position: relative"/>
         </a-tab-pane>
       </a-tabs>

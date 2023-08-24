@@ -22,8 +22,8 @@ export abstract class PermissionBase {
         if(!PermissionBase.Lock) {
             PermissionBase.Lock=new Redlock([getRedisInstance().getIORedis()],{
                 driftFactor:0.01,
-                retryCount:10,
-                retryDelay:100,
+                retryCount:20,
+                retryDelay:200,
                 retryJitter:100,
                 automaticExtensionThreshold:500
             })

@@ -46,6 +46,7 @@ import {getCurrentNavigator} from "../../../../../teamOS/common/component/naviga
 import EditIssueSolution from "./editIssueTypeSolution.vue";
 import BindProjectList from "./bindProjectList.vue";
 import IssueTypeList from "./issueTypeList.vue";
+import IssueSolutionDeleteConvert from "@/business/controller/app/setting/issue/issueSolutionDeleteConvert.vue";
 
 const columns=[
   {
@@ -135,13 +136,28 @@ const onCopy=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)
 const onDelete=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this solution from this organization?")
   if(ret) {
-    let res=await apiIssueType.solutionDelete({
-      issueTypeSolutionId:item.id
-    })
-    if(res?.code==0) {
-      Message.success("remove success")
-      search()
-    }
+		let res=await apiIssueType.list({
+			issueTypeSolutionId:item.id
+		})
+	  if(res?.code==0) {
+			if(res.data.length==0) {
+				let res=await apiIssueType.solutionDelete({
+					issueTypeSolutionId:item.id
+				})
+				if(res?.code==0) {
+					Message.success("remove success")
+					search()
+				}
+			} else {
+				let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(IssueSolutionDeleteConvert),{
+					issueTypeSolutionId:item.id
+				})
+				if(ret) {
+					search()
+				}
+			}
+	  }
+
   }
 }
 </script>

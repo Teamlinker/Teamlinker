@@ -6,4 +6,5 @@ import "../http/project";
 import "../http/release";
 import "../http/label";
 import "../http/workflow";
+import "../http/board"
 import "../rpc/cooperation";

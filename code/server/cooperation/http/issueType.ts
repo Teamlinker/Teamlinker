@@ -55,15 +55,19 @@ class IssueTypeController {
      }
 
      @DHttpApi(issueTypeApi.routes.delete)
-     async delete(@DHttpReqParamRequired("issueTypeId") issueTypeId:string,@DHttpReqParam("name") name:string,@DHttpReqParam("icon") icon:string,@DHttpReqParam("description") description:string):Promise<typeof issueTypeApi.routes.delete.res> {
-         let obj=await IssueTypeService.getItemById(issueTypeId)
-         if(!obj) {
+     async delete(@DHttpReqParamRequired("issueTypeId") issueTypeId:string,@DHttpReqParamRequired("convertIssueTypeId") convertIssueTypeId:string):Promise<typeof issueTypeApi.routes.delete.res> {
+         let [obj,objConvert]=await Promise.all([
+             IssueTypeService.getItemById(issueTypeId),
+             IssueTypeService.getItemById(convertIssueTypeId)
+         ])
+         if(!obj || !objConvert) {
              throw Err.Project.Issue.issueTypeNotFound
-         }
-         if(obj.getItem().reserved) {
+         } else if(obj.getItem().reserved) {
              throw Err.Project.Issue.issueTypeForbidden
+         } else if(obj.getItem().issue_type_solution_id!==objConvert.getItem().issue_type_solution_id) {
+             throw Err.Project.Issue.issueTypeSolutionNotSame
          }
-         await obj.delete()
+         await obj.delete(null,convertIssueTypeId)
          return;
      }
 
@@ -106,7 +110,9 @@ class IssueTypeController {
      }
 
      @DHttpApi(issueTypeApi.routes.solutionDelete)
-     async solutionDelete(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.solutionDelete.res> {
+     async solutionDelete(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParam("relationship") relationship:{
+         [id:string]:string
+     }):Promise<typeof issueTypeApi.routes.solutionDelete.res> {
          let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId)
          if(!obj) {
              throw Err.Project.Issue.issueTypeNotFound
@@ -114,27 +120,41 @@ class IssueTypeController {
          if(obj.getItem().reserved) {
              throw Err.Project.Issue.issueTypeForbidden
          }
-         await obj.delete()
+         await obj.delete(null,relationship)
          return;
      }
 
      @DHttpApi(issueTypeApi.routes.solutionBindProject)
-     async solutionBindProject(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof issueTypeApi.routes.solutionBindProject.res> {
-        let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
-        if(!obj) {
+     async solutionBindProject(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParam("relationship") relationship:{
+         [id:string]:string
+     }):Promise<typeof issueTypeApi.routes.solutionBindProject.res> {
+         let [objIssueTypeSolution,objCurrentIssueTypeSolution]=await Promise.all([
+             IssueTypeSolutionService.getItemById(issueTypeSolutionId),
+             IssueTypeSolutionService.getObjByProjectId(projectId)
+         ])
+         if(!objIssueTypeSolution || !objCurrentIssueTypeSolution) {
             throw Err.Project.Issue.issueTypeSolutionNotFound
-        }
-        await obj.bindProject(projectId)
-        return 
+         } else if(objIssueTypeSolution.getId()===objCurrentIssueTypeSolution.getId()) {
+             throw Err.Project.Issue.issueTypeSolutionSame
+         }
+         await objIssueTypeSolution.bindProject(projectId,relationship)
+         return
      }
 
      @DHttpApi(issueTypeApi.routes.solutionUnbindProject)
-     async solutionUnbindProject(@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpReqParamRequired("projectId") projectId:string):Promise<typeof issueTypeApi.routes.solutionUnbindProject.res> {
-        let obj=await IssueTypeSolutionService.getItemById(issueTypeSolutionId);
-        if(!obj) {
-            throw Err.Project.Issue.issueTypeSolutionNotFound
-        }
-        await obj.unbindProject(projectId)
+     async solutionUnbindProject(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParam("relationship") relationship:{
+         [id:string]:string
+     },@DHttpUser user:IUserSession):Promise<typeof issueTypeApi.routes.solutionUnbindProject.res> {
+         let [objReversedIssueTypeSolution,objCurrentIssueTypeSolution]=await Promise.all([
+             IssueTypeSolutionService.getReservedItem(user.organizationInfo.organizationId),
+             IssueTypeSolutionService.getObjByProjectId(projectId)
+         ])
+         if(!objReversedIssueTypeSolution || !objCurrentIssueTypeSolution) {
+             throw Err.Project.Issue.issueTypeSolutionNotFound
+         } else if(objReversedIssueTypeSolution.getId()===objCurrentIssueTypeSolution.getId()) {
+             throw Err.Project.Issue.issueTypeSolutionSame
+         }
+        await objCurrentIssueTypeSolution.unbindProject(projectId,relationship)
         return 
      }
 
@@ -189,5 +209,9 @@ class IssueTypeController {
         return obj.getItem();
     }
 
-
+    @DHttpApi(issueTypeApi.routes.reserved)
+    async reserved(@DHttpUser user:IUserSession):Promise<typeof issueTypeApi.routes.reserved.res> {
+        let ret=await IssueTypeSolutionService.getReservedItem(user.organizationInfo.organizationId)
+        return ret.getItem();
+    }
 }

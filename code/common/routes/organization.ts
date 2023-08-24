@@ -74,6 +74,7 @@ const api={
             path:"/user/list",
             req:<{
                 organizationId?:string,
+                organizationUserIds?:string[]
                 page:number,
                 size:number,
                 keyword?:string     

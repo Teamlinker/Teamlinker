@@ -2,8 +2,8 @@ import {Err} from '../../../common/status/error';
 import {keys} from '../../../common/transform';
 import {getMysqlInstance} from '../../common/db/mysql';
 import {Mapper} from '../../common/entity/mapper';
-import CommonUtil from '../../common/util/common';
 import {
+    generateCommonListData,
     generateCreateSql,
     generateDeleteSql,
     generateLeftJoin3Sql,
@@ -12,12 +12,8 @@ import {
     generateSnowId
 } from '../../common/util/sql';
 import {ICommon_Model_Organization, organizationModel} from './../../../common/model/organization';
-import {
-    ICommon_Model_Organization_User,
-    organizationUserModel,
-    Table_Organization_User
-} from './../../../common/model/organization_user';
-import {ICommon_Model_User, Table_User, userModel} from './../../../common/model/user';
+import {ICommon_Model_Organization_User, organizationUserModel} from './../../../common/model/organization_user';
+import {ICommon_Model_User, userModel} from './../../../common/model/user';
 import {ICommon_Model_Member_Tag, memberTagModel} from "../../../common/model/member_tag";
 import {memberTagMemberModel} from "../../../common/model/member_tag_member";
 import {teamModel} from "../../../common/model/team";
@@ -146,13 +142,11 @@ class OrganizationMapper extends Mapper<typeof organizationModel> {
         return ret;
     }
 
-    async listUser(organizationId:string,page:number,size:number,keyword?:string) {
+    async listUser(organizationId:string,page:number,size:number,keyword?:string,organizationUserIds?:string[]) {
         if(page===undefined || page<0 || size===undefined || size<=0 || !organizationId) {
             throw Err.Common.paramError
         }
         var mysql=getMysqlInstance();
-        let count=Number(Object.values(await mysql.executeOne<number>(`select count(1) from ${Table_Organization_User} ou  left join ${Table_User} u on u.id=ou.user_id where ou.organization_id=${organizationId}${keyword?` and (u.username like '%${keyword}%' or ou.nickname like '%${keyword}%')`:""}`))[0])
-        let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateLeftJoinSql({
             model:organizationUserModel,
             columns:keys<ICommon_Model_Organization_User>().map(item=>item.name),
@@ -189,18 +183,28 @@ class OrganizationMapper extends Mapper<typeof organizationModel> {
                         }
                     }
                 }
+            }),
+            ...(organizationUserIds?.length>0 && {
+                id:{
+                    model:organizationUserModel,
+                    value:{
+                        exp:"in",
+                        value:organizationUserIds
+                    }
+                }
             })
-        },"and",{
+        },"and",organizationUserIds?.length>0?{
+            field:"id",
+            model:organizationUserModel,
+            type:"field",
+            value:organizationUserIds
+        }:{
             field:"nickname",
             model:organizationUserModel,
             type:"asc"
         },size*page,size)
-        let ret=await mysql.execute(sql)
-        return {
-            count:count,
-            totalPage:totalPage,
-            data:ret
-        };
+        let ret=await generateCommonListData(sql,page,size)
+        return ret
     }
 
     async filterUser(organizationId:string,size:number,keyword:string) {

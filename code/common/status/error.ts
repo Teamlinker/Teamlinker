@@ -188,6 +188,18 @@ export namespace Err {
             issueTypeSolutionBindProject:{
                 code:3406,
                 msg:"issue type solution bind project"
+            },
+            issueTypeSolutionSame:{
+                code:3407,
+                msg:"issue type solution is same"
+            },
+            issueTypeSolutionConvertMissRelationship:{
+                code:3408,
+                msg:"issue type solution miss relationship"
+            },
+            issueTypeSolutionNotSame:{
+                code:3409,
+                msg:"issue type solution is not same"
             }
         },
         Workflow:{
@@ -322,6 +334,10 @@ export namespace Err {
             issueEqualForbidden:{
                 code:3705,
                 msg:"issue equal forbidden"
+            },
+            issueShouldEmpty:{
+                code:3706,
+                msg:"issue should be empty"
             }
         },
         Release: {
@@ -344,6 +360,28 @@ export namespace Err {
             releaseStartDateNotLessReleaseDate:{
                 code:3804,
                 msg:"release start date not less release date"
+            }
+        },
+        Board:{
+            boardNotFound:{
+                code:3900,
+                msg:"board not found"
+            },
+            boardSprintNotFound:{
+                code:3901,
+                msg:"board sprint not found"
+            },
+            boardColumnNotFound:{
+                code:3902,
+                msg:"board column not found"
+            },
+            boardSprintSwimLaneNotFound:{
+                code:3903,
+                msg:"board sprint swim lane not found"
+            },
+            boardNotIncludeIssueType:{
+                code:3904,
+                msg:"board not include issue type"
             }
         }
     }

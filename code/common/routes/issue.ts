@@ -297,6 +297,7 @@ const api={
             method:ECommon_HttpApi_Method.GET,
             path:"/filter",
             req:<{
+                projectIssueIds?:string[],
                 projectId? :string,
                 createdBy?:string,
                 issueTypeId?:string,
@@ -411,6 +412,38 @@ const api={
             }>{},
             res:{},
             permission:[Permission_Types.Project.EDIT]
+        },
+        convert:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/convert",
+            req:<{
+                projectIssueId :string,
+                issueTypeId:string
+                values:ICommon_Route_Req_ProjectIssue_Field[]
+            }>{},
+            res:{},
+            permission:[Permission_Types.Project.EDIT]
+        },
+        listConvertField:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/convert/fields",
+            req:<{
+                projectId :string,
+                issueTypeId:string
+            }>{},
+            res:<ICommon_Route_Res_Workflow_Node_Field[]>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        count:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/count",
+            req:<{
+                projectId :string
+            }>{},
+            res:<{
+                count:number
+            }>{},
+            permission:[Permission_Types.Project.READ]
         }
     }
 }

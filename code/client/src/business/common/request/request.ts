@@ -15,6 +15,7 @@ import meeting from "../../../../../common/routes/meeting"
 import gateway from "../../../../../common/routes/gateway"
 import finder from "../../../../../common/routes/finder"
 import notification from "../../../../../common/routes/notification"
+import board from "../../../../../common/routes/board"
 import {Ref} from "vue";
 import {SessionStorage} from "../storage/session";
 
@@ -174,3 +175,4 @@ export const apiMeeting=generatorApi(meeting)
 export const apiGateway=generatorApi(gateway)
 export const apiFinder=generatorApi(finder)
 export const apiNotification=generatorApi(notification)
+export const apiBoard=generatorApi(board)

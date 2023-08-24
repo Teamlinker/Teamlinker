@@ -36,6 +36,7 @@ let props=defineProps<{
 let root=ref(null);
 let parent=inject("navigator",null) as Navigator;
 const objNavigator=new Navigator(props.name,props.routes)
+const duplicateFunc=ref()
 objNavigator.setParent(parent);
 let manager:NavigatorManager;
 if(!parent) {

@@ -3,6 +3,7 @@
     <a-layout-sider :resize-directions="['right']">
       <a-menu style="width: 100%" @menu-item-click="onSubMenuClick" v-model:selected-keys="menuKey">
         <a-menu-item key="issue">Issue</a-menu-item>
+	      <a-menu-item key="board">Board</a-menu-item>
         <a-menu-item key="release">Release</a-menu-item>
         <a-menu-item key="setting" v-if="checkPermission(permission,Permission_Types.Project.ADMIN)">Setting</a-menu-item>
       </a-menu>

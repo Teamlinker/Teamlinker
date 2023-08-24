@@ -5,6 +5,7 @@ import {getMysqlInstance} from '../../common/db/mysql';
 import {Mapper} from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
 import {
+    convertCountSql,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
     generateGroupLeftJoin3Sql,
@@ -380,6 +381,18 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                 value:projectIds
             }
         }))
+    }
+
+    async issueCount(projectId:string) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=convertCountSql(generateQuerySql(projectIssueModel,null,{
+            project_id:projectId
+        }))
+        let count=Number(Object.values(await mysql.executeOne(sql))[0])
+        return count
     }
 }
 export let projectMapper=new ProjectMapper

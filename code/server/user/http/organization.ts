@@ -86,12 +86,13 @@ class OrganizationController {
     @DHttpReqParamRequired("size") size:number,
     @DHttpReqParam("keyword") keyword:string,
     @DHttpReqParam("organizationId") organizationId:string,
+    @DHttpReqParam("organizationUserIds") organizationUserIds:string[],
     @DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.listUser.res>{
         let obj=await OrganizationService.getItemById(organizationId??user.organizationInfo.organizationId)
         if(!obj) {
             throw Err.Organization.organizationNotFound
         }
-        let ret=await obj.listUser(page,size,keyword)
+        let ret=await obj.listUser(page,size,keyword,organizationUserIds)
         return ret;
     }
 

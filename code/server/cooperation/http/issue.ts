@@ -16,6 +16,7 @@ import {ECommon_Model_Notification_Type} from "../../../common/model/notificatio
 import rpcCooperationApi from "../rpc/cooperation"
 import rpcUserApi from "../../user/rpc/user"
 import {ECommon_Model_Project_Issue_History_Type} from "../../../common/model/project_issue_history";
+import {IssueTypeService} from "../service/issueType";
 
 @DComponent
 @DHttpController(projectIssueApi)
@@ -51,7 +52,6 @@ class IssueController {
               created_by:user.organizationInfo.organizationUserId
          })
          let obj=await projectIssue.create()
-         projectIssue.assignItem(obj,true);
          await projectIssue.createFieldValues(values);
          if(assignerId) {
               rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN,obj.id,assignerId,user.organizationInfo.organizationUserId)
@@ -343,6 +343,7 @@ class IssueController {
 
      @DHttpApi(projectIssueApi.routes.filter)
      async filter(@DHttpReqParam("projectId") projectId :string,
+     @DHttpReqParam("projectIssueIds") projectIssueIds :string[],
      @DHttpReqParam("createdBy") createdBy :string,
      @DHttpReqParam("issueTypeId") issueTypeId :string,
      @DHttpReqParam("name") name :string,
@@ -354,7 +355,7 @@ class IssueController {
      @DHttpReqParam("labelId") labelId :string,
      @DHttpReqParamRequired("page") page :number,
      @DHttpReqParamRequired("size") size :number,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.filter.res> {
-          let ret=await ProjectIssueService.filter(user.organizationInfo.organizationId,projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId)
+          let ret=await ProjectIssueService.filter(user.organizationInfo.organizationId,projectId ,page ,size ,createdBy ,issueTypeId,name,priority,assignerId,reporterId,status,moduleId,labelId,projectIssueIds)
           return ret;
      }
 
@@ -476,6 +477,42 @@ class IssueController {
           }
           await projectIssue.commitApproval()
           return
+     }
+
+     @DHttpApi(projectIssueApi.routes.convert)
+     async convert(@DHttpReqParamRequired("projectIssueId") projectIssueId :string,@DHttpReqParamRequired("issueTypeId") issueTypeId :string,@DHttpReqParamRequired("values") values :ICommon_Route_Req_ProjectIssue_Field[],@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.convert.res> {
+          let objIssue=await ProjectIssueService.getItemById(projectIssueId)
+          if(!objIssue) {
+               throw Err.Project.ProjectIssue.projectIssueNotFound
+          }
+          await objIssue.convert(issueTypeId,values)
+          return
+     }
+
+     @DHttpApi(projectIssueApi.routes.listConvertField)
+     async listConvertField(@DHttpReqParamRequired("projectId") projectId :string,@DHttpReqParamRequired("issueTypeId") issueTypeId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.listConvertField.res> {
+          let project=await ProjectService.getItemById(projectId)
+          if(!project) {
+               throw Err.Project.projectNotFound
+          }
+          let objIssueType=await IssueTypeService.getItemById(issueTypeId)
+          if(!objIssueType) {
+               throw Err.Project.Issue.issueTypeNotFound
+          }
+          let ret=await project.getFirstNodeFields(objIssueType.getId())
+          return ret;
+     }
+
+     @DHttpApi(projectIssueApi.routes.count)
+     async count(@DHttpReqParamRequired("projectId") projectId :string,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.count.res> {
+          let project=await ProjectService.getItemById(projectId)
+          if(!project) {
+               throw Err.Project.projectNotFound
+          }
+          let ret=await project.issueCount()
+          return {
+               count:ret
+          };
      }
 
 }

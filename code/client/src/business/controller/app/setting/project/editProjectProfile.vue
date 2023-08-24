@@ -1,5 +1,5 @@
 <template>
-  <a-form ref="eleForm" style="width: 80%" :model="form">
+  <a-form ref="eleForm" :model="form" auto-label-width>
     <a-form-item field="name" label="name" required>
       <a-input v-model="form.name" v-if="type=='add'"></a-input>
       <template v-else>{{form.name}}</template>
@@ -11,6 +11,11 @@
     <a-form-item field="description" label="description">
       <a-textarea v-model="form.description" allow-clear></a-textarea>
     </a-form-item>
+	  <a-form-item field="issueTypeSolutionId" label="issue solution" required v-if="type==='add'">
+		  <a-select v-model="form.issueTypeSolutionId" allow-search>
+			  <a-option v-for="item in issueSolutionList" :label="item.name" :value="item.id"></a-option>
+		  </a-select>
+	  </a-form-item>
     <a-form-item label="logo">
       <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="type=='edit'?item.photo:''" @upload="onUpload"></Upload>
     </a-form-item>
@@ -20,10 +25,11 @@
 <script setup lang="ts">
 import {ICommon_Model_Project} from "../../../../../../../common/model/project";
 import Upload from "../../../../common/component/upload.vue";
-import {getCurrentInstance, reactive, ref} from "vue";
+import {getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
-import {apiProject, DCSType} from "../../../../common/request/request";
+import {apiIssueType, apiProject, DCSType} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
+import {ICommon_Model_Issue_Type_Solution} from "../../../../../../../common/model/issue_type_solution";
 
 const props=defineProps<{
   type:"edit"|"add",
@@ -33,13 +39,31 @@ const form=reactive({
   name:props.type=="edit"?props.item.name:"",
   keyword:props.type=="edit"?props.item.keyword:"",
   description:props.type=="edit"?props.item.description:"",
+	...(props.type==="add" && {
+		issueTypeSolutionId:""
+	})
 })
+const issueSolutionList=ref<DCSType<ICommon_Model_Issue_Type_Solution>[]>([])
 const uploadUriId=ref("")
 const onUpload=(id:string)=> {
   uploadUriId.value=id
 }
 const eleForm=ref(null);
 const appContext=getCurrentInstance().appContext;
+
+const getIssueSolutionList=async ()=>{
+	let res=await apiIssueType.solutionList();
+	if(res?.code==0) {
+		issueSolutionList.value=res.data
+	}
+}
+
+onBeforeMount(()=>{
+	if(props.type==="add") {
+		getIssueSolutionList()
+	}
+})
+
 onDialogOk(async ()=>{
   let isError=await eleForm.value.validate()
   if(isError) {
@@ -55,7 +79,7 @@ onDialogOk(async ()=>{
     ...form,
     ...(uploadUriId.value && {
       photo:uploadUriId.value
-    })
+    }),
   }))
   if(res?.code==0){
     Message.success("operation success");

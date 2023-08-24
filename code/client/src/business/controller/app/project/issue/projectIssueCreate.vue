@@ -51,9 +51,9 @@ import {onBeforeMount, reactive, ref, toRef} from "vue";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
 import {apiIssue, apiOrganization, apiProject, DCSType} from "../../../../common/request/request";
 import {
-  ICommon_Route_Req_ProjectIssue_Field,
-  ICommon_Route_Res_Organization_User_Item,
-  ICommon_Route_Res_Workflow_Node_Field
+	ICommon_Route_Req_ProjectIssue_Field,
+	ICommon_Route_Res_Organization_User_Item,
+	ICommon_Route_Res_Workflow_Node_Field
 } from "../../../../../../../common/routes/response";
 import FieldInput from "../../../../common/component/field/fieldInput.vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
@@ -64,12 +64,12 @@ const props=defineProps<{
   projectId:string
 }>()
 const eleForm=ref(null);
-const issueTypeList=ref<DCSType<ICommon_Model_Issue_Type[]>>([])
-const assignerList=ref<DCSType<ICommon_Route_Res_Organization_User_Item[]>>([])
-const reporterList=ref<DCSType<ICommon_Route_Res_Organization_User_Item[]>>([])
+const issueTypeList=ref<DCSType<ICommon_Model_Issue_Type>[]>([])
+const assignerList=ref<DCSType<ICommon_Route_Res_Organization_User_Item>[]>([])
+const reporterList=ref<DCSType<ICommon_Route_Res_Organization_User_Item>[]>([])
 const valueList=ref<DCSType<(ICommon_Route_Res_Workflow_Node_Field & {
   fieldValue:ICommon_Route_Req_ProjectIssue_Field
-})[]>>([])
+})>[]>([])
 const form=reactive({
   issueTypeId:"",
   name:"",

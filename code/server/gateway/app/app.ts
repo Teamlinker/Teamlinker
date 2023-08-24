@@ -20,6 +20,7 @@ import calendarApi from "../../../common/routes/calendar";
 import meetingApi from "../../../common/routes/meeting";
 import finderApi from "../../../common/routes/finder";
 import notificationApi from "../../../common/routes/notification";
+import boardApi from "../../../common/routes/board";
 import {Err} from "../../../common/status/error";
 import Application from "../../common/app/app";
 import {EServer_Common_Http_Body_Type, IServer_Common_Http_Proxy} from "../../common/types/http";
@@ -42,7 +43,7 @@ import userRpcApi from "../../user/rpc/user"
 import {getRedisInstance} from "../../common/cache/redis";
 import {initNotification} from "../../notification/app/app";
 
-var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi,wikiApi,calendarApi,meetingApi,finderApi,notificationApi];
+var apis:ICommon_HttpApi[]=[userApi,projectApi,teamApi,fileApi,issueTypeApi,workflowApi,fieldApi,issueApi,releaseApi,gatewayApi,organizationApi,wikiApi,calendarApi,meetingApi,finderApi,notificationApi,boardApi];
 export default class GateWay extends Application {
     override async config(app: Koa<Koa.DefaultState, Koa.DefaultContext>) {
         let redis=getRedisInstance();

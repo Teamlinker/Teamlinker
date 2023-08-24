@@ -33,7 +33,7 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
     constructor() {
         super(projectReleaseModel)
     }
-    async list(organizationId:string,projectId:string,page:number,size:number,name?:string,status?:ECommon_Model_Project_Release_Status):Promise<ICommon_Route_Res_Release_List> {
+    async list(organizationId:string,projectId:string,page:number,size:number,name?:string,status?:ECommon_Model_Project_Release_Status,projectReleaseIds?:string[]):Promise<ICommon_Route_Res_Release_List> {
         if(page===undefined || page<0 || size===undefined || size<=0) {
             throw Err.Common.paramError
         }
@@ -77,8 +77,22 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                     model:projectReleaseModel,
                     value:status
                 }
+            }),
+            ...(projectReleaseIds?.length>0 && {
+                id:{
+                    model:projectReleaseModel,
+                    value:{
+                        exp:"in",
+                        value:projectReleaseIds
+                    }
+                }
             })
-        },"and",{
+        },"and",projectReleaseIds?.length>0?{
+            model:projectReleaseModel,
+            field:"id",
+            type:"field",
+            value:projectReleaseIds
+        }:{
             model:projectReleaseModel,
             field:"name",
             type:"asc"

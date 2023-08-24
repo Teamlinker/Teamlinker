@@ -14,11 +14,13 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
-import {apiIssueType, DCSType} from "../../../../common/request/request";
+import {apiIssue, apiIssueType, DCSType} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {ICommon_Model_Project} from "../../../../../../../common/model/project";
 import EditBindProject from "./editBindProject.vue";
+import ProjectSettingIssueSolutionConvert
+	from "@/business/controller/app/project/setting/projectSettingIssueSolutionConvert.vue";
 
 const props=defineProps<{
   issueTypeSolutionId:string,
@@ -80,14 +82,28 @@ const onBind=async ()=>{
 const onUnBind=async (item:DCSType<ICommon_Model_Project>)=>{
   let ret=await Dialog.confirm(root.value,appContext,"Do you want to unbind this project with this issue type solution")
   if(ret) {
-    let res=await apiIssueType.solutionUnbindProject({
-      issueTypeSolutionId:props.issueTypeSolutionId,
-      projectId:item.id
-    })
-    if(res?.code==0) {
-      Message.success("remove success")
-      search(pagination.current)
-    }
+	  let res=await apiIssue.count({
+		  projectId:item.id
+	  })
+	  if(res?.code==0) {
+		  if(res.data.count==0) {
+			  let res=await apiIssueType.solutionUnbindProject({
+				  projectId:item.id
+			  })
+			  if(res?.code==0) {
+				  Message.success("remove success")
+				  search(pagination.current)
+			  }
+		  } else {
+			  let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(ProjectSettingIssueSolutionConvert),{
+				  projectId:item.id,
+				  originalIssueTypeSolutionId:props.issueTypeSolutionId
+			  })
+			  if(ret) {
+				  search(pagination.current);
+			  }
+		  }
+	  }
   }
 }
 </script>

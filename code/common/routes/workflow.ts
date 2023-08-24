@@ -103,7 +103,7 @@ const api={
             permission:[Permission_Types.Organization.ADMIN]
         },
         listAllNode:{
-            method:ECommon_HttpApi_Method.DELETE,
+            method:ECommon_HttpApi_Method.GET,
             path:"/node/listall",
             req:{},
             res:<ICommon_Route_Res_Workflow_Node_List_Item[]>{},

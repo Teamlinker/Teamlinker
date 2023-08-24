@@ -13,6 +13,7 @@ import {
     generateBatchCreateOnUpdateSql,
     generateBatchCreateSql,
     generateCreateSql,
+    generateDeleteInnerJoinSql,
     generateDeleteSql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
@@ -22,6 +23,7 @@ import {
 } from '../../common/util/sql';
 import {
     ECommon_Model_Workflow_Node_Field_Type_Label_Type,
+    ICommon_Model_Workflow_Node_Field_Type,
     workflowNodeFieldTypeModel
 } from '../../../common/model/workflow_node_field_type';
 import {ICommon_Model_Issue_Type, issueTypeModel} from './../../../common/model/issue_type';
@@ -40,7 +42,11 @@ import {projectReleaseIssueModel} from "../../../common/model/project_release_is
 import {projectIssueHistoryModel} from "../../../common/model/project_issue_history";
 import {projectIssueApprovalModel} from "../../../common/model/project_issue_approval";
 import {workflowNodeFieldTypeMapper} from "./field";
-import {workflowNodeFieldTypeConfigModel} from "../../../common/model/workflow_node_field_type_config";
+import {IssueTypeService} from "../service/issueType";
+import {WorkflowService} from "../service/workflow";
+import {WorkflowNodeFieldTypeService} from "../service/field";
+import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
+import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../../../common/model/workflow_node_field_type_config";
 
 class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
@@ -130,6 +136,233 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 project_issue_id:projectIssueId
             }))
         }
+    }
+
+    async clearBeforeConvert(projectIssueId:string) {
+        if(!projectIssueId) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let mysql=getMysqlInstance()
+        await Promise.all([
+            mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectIssueProcessModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectIssueApprovalModel,{
+                project_issue_id:projectIssueId
+            }))
+        ])
+    }
+
+    async updateConvertIssueType(relationship:{
+        [id:string]:string
+    },projectId?:string) {
+        let mysql=getMysqlInstance()
+        let arrPromise=[]
+        Object.keys(relationship).forEach(originalId=>{
+            arrPromise.push((async ()=>{
+                let newId=relationship[originalId]
+                let objIssueType=await IssueTypeService.getItemById(newId)
+                if(objIssueType) {
+                    let objNode=await WorkflowService.getFirstNode(objIssueType.getId())
+                    let list=await WorkflowNodeFieldTypeService.listWorkflowNodeField(objNode.id)
+                    let arrIssue=await mysql.execute(generateQuerySql(projectIssueModel,["id"],{
+                        ...(projectId && {
+                            project_id:projectId
+                        }),
+                        issue_type_id:originalId
+                    }))
+                    let arrPromise=[]
+                    for(let objIssueId of arrIssue.map(item=>item.id)) {
+                        arrPromise.push((async ()=>{
+                            let arr=await this.generateField(list,objIssueId)
+                            await this.createFieldValues(arr)
+                            await mysql.execute(generateCreateSql(projectIssueProcessModel,{
+                                id:await generateSnowId(),
+                                project_issue_id:objIssueId,
+                                workflow_node_process:[objNode.id]
+                            }))
+                        })())
+                    }
+                    await Promise.all(arrPromise)
+                    await mysql.execute(generateUpdateSql(projectIssueModel,{
+                        issue_type_id:newId,
+                        workflow_node_id:objNode.id
+                    },{
+                        ...(projectId && {
+                            project_id:projectId
+                        }),
+                        issue_type_id:originalId
+                    }))
+                }
+            })())
+        })
+        await Promise.all(arrPromise)
+    }
+
+    async generateField(list:{
+        field:ICommon_Model_Workflow_Node_Field_Type,
+        fieldType:ICommon_Field_Type,
+        values?:ICommon_Model_Workflow_Node_Field_Type_Config[]
+    }[],objIssueId:string) {
+        let arr:ICommon_Model_Project_Issue_Field_Value[]=[]
+        for(let field of list) {
+            let ret=<ICommon_Model_Project_Issue_Field_Value>{}
+            let id=await generateSnowId()
+            if(field.fieldType.type==ECommon_Field_Type.DATE || field.fieldType.type==ECommon_Field_Type.TIME || field.fieldType.type==ECommon_Field_Type.TEXT || field.fieldType.type==ECommon_Field_Type.MULTITEXT) {
+                ret={
+                    id:id,
+                    project_issue_id:objIssueId,
+                    string_value:"",
+                    workflow_node_field_type_id:field.field.id,
+                    number_value:null,
+                    ref_values:null,
+                    field_config_ids:null
+                }
+            } else if(field.fieldType.type == ECommon_Field_Type.SWITCH) {
+                ret={
+                    id:id,
+                    project_issue_id:objIssueId,
+                    number_value:0,
+                    workflow_node_field_type_id:field.field.id,
+                    string_value:null,
+                    ref_values:null,
+                    field_config_ids:null
+                }
+            } else if(field.fieldType.type == ECommon_Field_Type.SELECT || field.fieldType.type == ECommon_Field_Type.MULTISELECT) {
+                ret={
+                    id:id,
+                    project_issue_id:objIssueId,
+                    field_config_ids:[],
+                    workflow_node_field_type_id:field.field.id,
+                    string_value:null,
+                    ref_values:null,
+                    number_value:null,
+                }
+            } else if(field.fieldType.type == ECommon_Field_Type.LABEL || field.fieldType.type == ECommon_Field_Type.MULTILABEL) {
+                ret={
+                    id:id,
+                    project_issue_id:objIssueId,
+                    ref_values:[],
+                    number_value:null,
+                    workflow_node_field_type_id:field.field.id,
+                    string_value:null,
+                    field_config_ids:null
+                }
+            }
+            arr.push(ret)
+        }
+        return arr;
+    }
+
+    async clearBeforeConvertByProjectId(projectId:string) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        await Promise.all([
+            mysql.execute(generateDeleteInnerJoinSql(projectIssueFieldValueModel,{
+                model:projectIssueModel,
+                expression:{
+                    id:{
+                        model:projectIssueFieldValueModel,
+                        field:"project_issue_id"
+                    }
+                },
+                isDelete:false
+            },{
+                project_id:{
+                    model:projectIssueModel,
+                    value:projectId
+                }
+            })),
+            mysql.execute(generateDeleteInnerJoinSql(projectIssueProcessModel,{
+                model:projectIssueModel,
+                expression:{
+                    id:{
+                        model:projectIssueProcessModel,
+                        field:"project_issue_id"
+                    }
+                },
+                isDelete:false
+            },{
+                project_id:{
+                    model:projectIssueModel,
+                    value:projectId
+                }
+            })),
+            mysql.execute(generateDeleteInnerJoinSql(projectIssueApprovalModel,{
+                model:projectIssueModel,
+                expression:{
+                    id:{
+                        model:projectIssueApprovalModel,
+                        field:"project_issue_id"
+                    }
+                },
+                isDelete:false
+            },{
+                project_id:{
+                    model:projectIssueModel,
+                    value:projectId
+                }
+            }))
+        ])
+    }
+
+    async clearBeforeConvertByIssueTypeId(issueTypeId:string) {
+        if(!issueTypeId) {
+            throw Err.Project.Issue.issueTypeNotFound
+        }
+        let mysql=getMysqlInstance()
+        await Promise.all([
+            mysql.execute(generateDeleteInnerJoinSql(projectIssueFieldValueModel,{
+                model:projectIssueModel,
+                expression:{
+                    id:{
+                        model:projectIssueFieldValueModel,
+                        field:"project_issue_id"
+                    }
+                },
+                isDelete:false
+            },{
+                issue_type_id:{
+                    model:projectIssueModel,
+                    value:issueTypeId
+                }
+            })),
+            mysql.execute(generateDeleteInnerJoinSql(projectIssueProcessModel,{
+                model:projectIssueModel,
+                expression:{
+                    id:{
+                        model:projectIssueProcessModel,
+                        field:"project_issue_id"
+                    }
+                },
+                isDelete:false
+            },{
+                issue_type_id:{
+                    model:projectIssueModel,
+                    value:issueTypeId
+                }
+            })),
+            mysql.execute(generateDeleteInnerJoinSql(projectIssueApprovalModel,{
+                model:projectIssueModel,
+                expression:{
+                    id:{
+                        model:projectIssueApprovalModel,
+                        field:"project_issue_id"
+                    }
+                },
+                isDelete:false
+            },{
+                issue_type_id:{
+                    model:projectIssueModel,
+                    value:issueTypeId
+                }
+            }))
+        ])
     }
 
     async getProcess(projectIssueId:string) {
@@ -577,7 +810,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }
     }
 
-    async filter(organizationId:string,projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string):Promise<ICommon_Route_Res_Project_Issue_filter> {
+    async filter(organizationId:string,projectId :string,page :number,size :number,createdBy? :string,issueTypeId? :string,name? :string,priority? :number,assignerId? :string,reporterId? :string,status? :number,moduleId? :string,labelId? :string,projectIssueIds?:string[]):Promise<ICommon_Route_Res_Project_Issue_filter> {
         let mysql=getMysqlInstance()
         if(!projectId && name && name.includes("-")) {
             let arr=name.split("-")
@@ -711,8 +944,22 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                         value:Array.from(setId)
                     }
                 }
+            }),
+            ...(projectIssueIds?.length>0 && {
+                id:{
+                    model:projectIssueModel,
+                    value:{
+                        exp:"in",
+                        value:projectIssueIds
+                    }
+                }
             })
-        },"and",{
+        },"and",projectIssueIds?.length>0?{
+            model:projectIssueModel,
+            field:"id",
+            type:"field",
+            value:projectIssueIds
+        }:{
             model:projectIssueModel,
             field:"name",
             type:"asc"
@@ -862,37 +1109,17 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             throw Err.Project.Field.fieldTypeConfigValueIdNotFound
         }
         let mysql=getMysqlInstance()
-        let objFieldTypeConfig=await mysql.executeOne(generateQuerySql(workflowNodeFieldTypeConfigModel,null,{
-            id:fieldTypeConfigValueId
-        }))
-        if(objFieldTypeConfig) {
-            let arr=await mysql.execute(generateQuerySql(projectIssueFieldValueModel,[],{
-                workflow_node_field_type_id:objFieldTypeConfig.workflow_node_field_type_id
-            }))
-            let arrUpdate=arr.filter(item=>{
-                if(item.field_config_ids?.includes(fieldTypeConfigValueId)) {
-                    return true
-                }
-            })
-            if(arrUpdate.length>0) {
-                arrUpdate.forEach(item=>{
-                    if(item.field_config_ids.length==1 && item.field_config_ids.includes(fieldTypeConfigValueId)) {
-                        mysql.execute(generateUpdateSql(projectIssueFieldValueModel,{
-                            field_config_ids:null
-                        },{
-                            id:item.id
-                        }))
-                    } else {
-                        let index=item.field_config_ids.indexOf(fieldTypeConfigValueId)
-                        mysql.execute(generateUpdateSql(projectIssueFieldValueModel,{
-                            field_config_ids:item.field_config_ids.splice(index,1)
-                        },{
-                            id:item.id
-                        }))
-                    }
-                })
+        await mysql.execute(generateUpdateSql(projectIssueFieldValueModel,{
+            field_config_ids:{
+                exp:"json_array_remove",
+                value:fieldTypeConfigValueId
             }
-        }
+        },{
+            field_config_ids:{
+                exp:"json_array_contain",
+                value:fieldTypeConfigValueId
+            }
+        }))
     }
 
 }
