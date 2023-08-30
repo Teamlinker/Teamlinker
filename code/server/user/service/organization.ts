@@ -9,6 +9,8 @@ import {
 import {memberTagMapper, organizationMapper, organizationUserMapper} from './../mapper/organization';
 import {REDIS_USER} from "../../common/cache/keys/user";
 import rpcAuthApi from "../../auth/rpc/auth"
+import rpcIMApi from "../../im/rpc/im"
+import rpcFinderApi from "../../finder/rpc/finder"
 import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../common/model/role";
 import organizationApi from "../../../common/routes/organization";
 import {ICommon_Model_User} from "../../../common/model/user";
@@ -84,10 +86,12 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             this.clearUser(),
             this.clearTeam(),
             rpcCooperationApi.clearProject(this.getId()),
-            rpcCooperationApi.clearIssueType(this.getId()),
+            rpcCooperationApi.clearIssueTypeSolution(this.getId()),
             rpcWikiApi.clearWiki(this.getId()),
             rpcCalendarApi.clearCalendarByOrganizationId(this.getId()),
-            rpcMeetingApi.clearMeetingRoomByOrganizationId(this.getId())
+            rpcMeetingApi.clearMeetingRoomByOrganizationId(this.getId()),
+            rpcIMApi.clearByOrganizationId(this.getId()),
+            rpcFinderApi.clearByOrganizationId(this.getId())
         ])
     }
 

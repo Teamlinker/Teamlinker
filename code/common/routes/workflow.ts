@@ -47,7 +47,8 @@ const api={
                 approval?:number,
                 approvalType?:ECommon_Model_Workflow_Approval_Type,
                 approvalValue?:string[],
-                approvalExtra?:string
+                approvalExtra?:string,
+                isAllComing?:number
             }>{},
             res:<ICommon_Model_Workflow_Node & {
                 approval?:ICommon_Model_Workflow_Approval

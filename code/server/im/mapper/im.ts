@@ -9,7 +9,12 @@ import {
 } from "../../../common/model/im_unread_message";
 import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
-import {generateBatchCreateOnUpdateSql, generateQuerySql, generateSnowId} from "../../common/util/sql";
+import {
+    generateBatchCreateOnUpdateSql,
+    generateDeleteSql,
+    generateQuerySql,
+    generateSnowId
+} from "../../common/util/sql";
 import * as moment from "moment";
 import {ICommon_Model_IM_Favorite_Message, iMFavoriteMessageModel} from "../../../common/model/im_favorite_message";
 
@@ -84,6 +89,16 @@ class IMUserMessageMapper extends Mapper<typeof iMUserMessageModel> {
         }))
         return ret;
     }
+
+    async clearByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(iMUserMessageModel,{
+            organization_id:organizationId
+        }))
+    }
 }
 
 export const iMUserMessageMapper=new IMUserMessageMapper
@@ -145,6 +160,15 @@ class IMTeamMessageMapper extends Mapper<typeof iMTeamMessageModel> {
             team_id:teamId
         }))
         return ret;
+    }
+    async clearByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(iMTeamMessageModel,{
+            organization_id:organizationId
+        }))
     }
 }
 
@@ -222,6 +246,16 @@ class IMUnReadMessageMapper extends Mapper<typeof iMUnReadMessageModel> {
         }
     }
 
+    async clearByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(iMUnReadMessageModel,{
+            organization_id:organizationId
+        }))
+    }
+
 }
 
 export const iMUnReadMessageMapper=new IMUnReadMessageMapper
@@ -246,6 +280,16 @@ class IMFavoriteMessageMapper extends Mapper<typeof iMFavoriteMessageModel> {
             field:"created_time"
         },0,size))
         return ret;
+    }
+
+    async clearByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(iMFavoriteMessageModel,{
+            organization_id:organizationId
+        }))
     }
 }
 

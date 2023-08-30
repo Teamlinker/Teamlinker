@@ -16,19 +16,23 @@ import {IssueTypeSolutionService} from './issueType';
 import {WorkflowService} from './workflow';
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import {emitServiceEvent} from "../../common/event/event";
+import {BoardService} from "./board";
 
 export class ProjectService extends Entity<typeof projectModel,typeof projectMapper> {
     constructor(){
         super(projectMapper)
     }
     override async delete(type?:keyof IServer_Common_Event_Types) {
-        await super.delete("projectDelete")
-        await moduleMapper.deleteByProjectId(this.item.id)
-        await labelMapper.deleteByProjectId(this.item.id)
-        await rpcAuthApi.clearRoleByItemId(this.item.id);
-        await ProjectIssueService.clearByProjectIds([this.item.id]);
-        await releaseMapper.clear(this.item.id);
-        await issueTypeSolutionMapper.clearProjects([this.item.id]);
+        await Promise.all([
+            super.delete("projectDelete"),
+            moduleMapper.deleteByProjectId(this.item.id),
+            labelMapper.deleteByProjectId(this.item.id),
+            rpcAuthApi.clearRoleByItemId(this.item.id),
+            ProjectIssueService.clearByProjectIds([this.item.id]),
+            releaseMapper.clear(this.item.id),
+            issueTypeSolutionMapper.clearProjects([this.item.id]),
+            BoardService.clearByProjectId(this.getId())
+        ])
     }
 
     override async create(issueTypeSolutionId?:string): Promise<ICommon_Model_Project> {
@@ -152,13 +156,16 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
     }
 
     static async clearProjects(projectIds:string[]) {
-        await projectMapper.clearProjects(projectIds);
-        await moduleMapper.deleteByProjectIds(projectIds)
-        await labelMapper.deleteByProjectIds(projectIds)
-        await rpcAuthApi.clearRoleByItemIds(projectIds);
-        await ProjectIssueService.clearByProjectIds(projectIds);
-        await releaseMapper.clearByProjectIds(projectIds);
-        await issueTypeSolutionMapper.clearProjects(projectIds);
+        await Promise.all([
+            projectMapper.clearProjects(projectIds),
+            moduleMapper.deleteByProjectIds(projectIds),
+            labelMapper.deleteByProjectIds(projectIds),
+            rpcAuthApi.clearRoleByItemIds(projectIds),
+            ProjectIssueService.clearByProjectIds(projectIds),
+            releaseMapper.clearByProjectIds(projectIds),
+            issueTypeSolutionMapper.clearProjects(projectIds),
+            BoardService.clearByProjectIds(projectIds)
+        ])
     }
 
     async listRole(){

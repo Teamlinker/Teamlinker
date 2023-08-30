@@ -132,6 +132,24 @@
 			&nbsp;&nbsp;
 			to you
 		</template>
+		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGN_RELEASE">
+			ISSUE:the release of issue
+			&nbsp;&nbsp;
+			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+			&nbsp;&nbsp;
+			has been changed by
+			&nbsp;&nbsp;
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+		</template>
+		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGN_SPRINT">
+			ISSUE:the sprint of issue
+			&nbsp;&nbsp;
+			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+			&nbsp;&nbsp;
+			has been changed by
+			&nbsp;&nbsp;
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE">
 			ISSUE:
 			&nbsp;&nbsp;

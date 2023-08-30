@@ -7,8 +7,11 @@ import {ICommon_Model_Board_Column_Workflow_Node} from "../model/board_column_wo
 import {ICommon_Model_Board_Sprint} from "../model/board_sprint";
 import {
     ICommon_Route_Res_Board_Column_Workflow_Node_Item,
+    ICommon_Route_Res_Board_Issue_Action,
     ICommon_Route_Res_Board_List,
+    ICommon_Route_Res_Board_Sprint_filter,
     ICommon_Route_Res_Board_Sprint_Info,
+    ICommon_Route_Res_Board_Sprint_Issue_Item,
     ICommon_Route_Res_Board_Sprint_List
 } from "./response";
 import {ECommon_Model_Project_Issue_Priority} from "../model/project_issue";
@@ -31,6 +34,15 @@ const api= {
                 keyword?:string
             }>{},
             res:<ICommon_Route_Res_Board_List>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        board:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/item",
+            req:<{
+                boardId:string
+            }>{},
+            res:<ICommon_Model_Board>{},
             permission:[Permission_Types.Project.READ]
         },
         createBoard:{
@@ -88,6 +100,15 @@ const api= {
         listIssueType:{
             method:ECommon_HttpApi_Method.GET,
             path:"/issuetype/list",
+            req:<{
+                boardId :string
+            }>{},
+            res:<ICommon_Model_Issue_Type[]>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        listUnBindIssueType:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/issuetype/unbind/list",
             req:<{
                 boardId :string
             }>{},
@@ -178,7 +199,7 @@ const api= {
                 boardId :string,
                 page:number,
                 size:number,
-                keyword?:string
+                keyword?:string,
             }>{},
             res:<ICommon_Route_Res_Board_Sprint_List>{},
             permission:[Permission_Types.Project.READ]
@@ -189,8 +210,8 @@ const api= {
             req:<{
                 boardId :string,
                 name:string,
-                startTime:number,
-                endTime:number
+                startTime:string,
+                endTime:string
             }>{},
             res:<ICommon_Model_Board_Sprint>{},
             permission:[Permission_Types.Project.EDIT]
@@ -201,8 +222,8 @@ const api= {
             req:<{
                 boardSprintId :string,
                 name?:string,
-                startTime?:number,
-                endTime?:number
+                startTime?:string,
+                endTime?:string
             }>{},
             res:<ICommon_Model_Board_Sprint>{},
             permission:[Permission_Types.Project.EDIT]
@@ -223,6 +244,15 @@ const api= {
                 boardSprintId :string
             }>{},
             res:<ICommon_Route_Res_Board_Sprint_Info>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        listSwimLane:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/swimlane/list",
+            req:<{
+                boardSprintId :string
+            }>{},
+            res:<ICommon_Model_Board_Sprint_SwimLane[]>{},
             permission:[Permission_Types.Project.READ]
         },
         createSwimLane:{
@@ -256,15 +286,34 @@ const api= {
             res:{},
             permission:[Permission_Types.Project.EDIT]
         },
-        putProjectIssue:{
+        addProjectIssue:{
             method:ECommon_HttpApi_Method.PUT,
             path:"/issue",
             req:<{
                 projectIssueId:string,
-                boardSprintId?:string,
+                boardSprintId:string,
                 boardSprintSwimLaneId? :string
             }>{},
             res:<ICommon_Model_Board_Sprint_Issue>{},
+            permission:[Permission_Types.Project.EDIT]
+        },
+        removeProjectIssue:{
+            method:ECommon_HttpApi_Method.DELETE,
+            path:"/issue",
+            req:<{
+                projectIssueId:string,
+            }>{},
+            res:{},
+            permission:[Permission_Types.Project.EDIT]
+        },
+        addSprintIssues:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/issue",
+            req:<{
+                boardSprintId:string,
+                projectIssueIds:string[]
+            }>{},
+            res:{},
             permission:[Permission_Types.Project.EDIT]
         },
         listUnSetWorkflowNode:{
@@ -275,6 +324,48 @@ const api= {
                 issueTypeId:string
             }>{},
             res:<ICommon_Model_Workflow_Node[]>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        listSprintIssue:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/sprint/issue/list",
+            req:<{
+                boardSprintId :string
+            }>{},
+            res:<ICommon_Route_Res_Board_Sprint_Issue_Item[]>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        checkIssueAction:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/issue/next",
+            req:<{
+                projectIssueId :string,
+                boardSprintId:string,
+                boardColumnId:string
+            }>{},
+            res:<ICommon_Route_Res_Board_Issue_Action>{},
+            permission:[Permission_Types.Project.READ]
+        },
+        filterSprint:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/sprint/filter",
+            req:<{
+                projectId? :string,
+                boardSprintIds?:string[],
+                keyword?:string,
+                page:number,
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_Board_Sprint_filter>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        getIssueSprint:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/issue/sprint",
+            req:<{
+                projectIssueId :string
+            }>{},
+            res:<ICommon_Model_Board_Sprint>{},
             permission:[Permission_Types.Project.READ]
         }
     }

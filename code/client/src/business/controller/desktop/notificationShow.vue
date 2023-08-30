@@ -17,7 +17,7 @@
 			</a-space>
 			<a-list @reach-bottom="onReachBottom" :max-height="240" :key="type">
 				<a-list-item v-for="item in list" :key="item.id" @mouseenter="onRead(item)" :style="{backgroundColor:item.is_read?'white':'lightgray'}">
-					<div style="color: gray;font-size: small;display: flex;justify-content: space-between"><span style="color: black">{{item.organization.name}}:</span>{{moment(item.created_time).format("YYYY-MM-DD HH:mm:ss")}}</div>
+					<div style="color: grey;font-size: small;display: flex;justify-content: space-between"><span style="color: black">{{item.organization.name}}:</span>{{moment(item.created_time).format("YYYY-MM-DD HH:mm:ss")}}</div>
 					<NotificationItem :obj="item"></NotificationItem>
 				</a-list-item>
 				<template #scroll-loading v-if="!bottom">
@@ -108,7 +108,7 @@ const onChange=(value:string)=>{
 	} else if(value==="organization") {
 		types.value=[ECommon_Model_Notification_Type.ORGANIZATION_USER_QUIT,ECommon_Model_Notification_Type.ORGANIZATION_INVITATION,ECommon_Model_Notification_Type.ORGANIZATION_USER_REMOVE,ECommon_Model_Notification_Type.ORGANIZATION_USER_ROLE_CHANGE]
 	} else if(value==="issue") {
-		types.value=[ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE,ECommon_Model_Notification_Type.ISSUE_REMOVE,ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN,ECommon_Model_Notification_Type.ISSUE_WORKFLOW_CHANGE,ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN,ECommon_Model_Notification_Type.ISSUE_COMMENT_ADD,ECommon_Model_Notification_Type.ISSUE_COMMENT_AT,ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT,ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE]
+		types.value=[ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE,ECommon_Model_Notification_Type.ISSUE_REMOVE,ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN,ECommon_Model_Notification_Type.ISSUE_WORKFLOW_CHANGE,ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN,ECommon_Model_Notification_Type.ISSUE_COMMENT_ADD,ECommon_Model_Notification_Type.ISSUE_COMMENT_AT,ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT,ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE,ECommon_Model_Notification_Type.ISSUE_ASSIGN_SPRINT,ECommon_Model_Notification_Type.ISSUE_ASSIGN_RELEASE]
 	} else if(value==="team") {
 		types.value=[ECommon_Model_Notification_Type.TEAM_USER_QUIT,ECommon_Model_Notification_Type.TEAM_USER_ROLE_CHANGE,ECommon_Model_Notification_Type.TEAM_USER_REMOVE,ECommon_Model_Notification_Type.TEAM_DISMISS,ECommon_Model_Notification_Type.TEAM_USER_ADD]
 	} else if(value==="calendar") {

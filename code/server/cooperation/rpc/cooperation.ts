@@ -1,11 +1,11 @@
 import {Err} from "../../../common/status/error";
-import {WorkflowNodeFieldTypeService} from "../service/field";
 import {ProjectService} from "../service/project";
 import {IssueTypeSolutionService} from './../service/issueType';
 import {ProjectIssueService} from "../service/issue";
 import {ProjectReleaseService} from "../service/release";
 import rpcContentApi from "../../content/rpc/content"
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
+import {BoardSprintService} from "../service/board";
 
 class RpcCooperationApi  {
     
@@ -17,17 +17,11 @@ class RpcCooperationApi  {
         await ProjectService.clearProjects(ret.map(item=>item.id));
     }
     
-    async clearIssueType(organizationId:string) {
+    async clearIssueTypeSolution(organizationId:string) {
         if(!organizationId) {
             throw Err.Organization.organizationNotFound;
         }
-        let arrIssueTypeId=await IssueTypeSolutionService.getIssueTypesByOrganizationId(organizationId)
-        let arr=[]
-        for(let id of arrIssueTypeId) {
-            let obj=await WorkflowNodeFieldTypeService.getItemById(id);
-            arr.push(obj.delete());
-        }
-        await Promise.all(arr)
+        await IssueTypeSolutionService.clearByOrganizationId(organizationId)
     }
     
     async initIssueTypeSolution(organizationId: string) {
@@ -102,6 +96,14 @@ class RpcCooperationApi  {
             }
         }
         return ret;
+    }
+
+    async boardSprint(boardSprintId:string) {
+        let obj=await BoardSprintService.getItemById(boardSprintId)
+        if(!obj) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        return obj.getItem()
     }
     
 }

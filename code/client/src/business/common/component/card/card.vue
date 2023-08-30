@@ -5,8 +5,8 @@
 		height:rect.height+(gap??0)*2+15+'px'
 	})}">
 		<div v-if="props.type==='fixed' && !multiRow && $slots.pinHeader" style="position: sticky;z-index: 1;left: 0px;background-color: white;" :style="{height:rect.height+'px',width:(rect.width+(gap??0))+'px'}">
-      <div style="height: 100%;background-color: rgb(244, 245, 247);border-radius: 5px;;position: relative" :style="{marginLeft:(gap??0)+'px',width:rect.width+'px',top:(gap??0)+'px'}">
-        <div style="width: 100%;height: 30px;position: sticky;top: 0px">
+      <div style="height: 100%;background-color: rgb(244, 245, 247);border-radius: 5px;;position: relative;z-index: 1" :style="{marginLeft:(gap??0)+'px',width:rect.width+'px',top:(gap??0)+'px'}">
+        <div style="width: 100%;height: 30px;position: sticky;top: 0px;background-color: rgb(244, 245, 247);z-index: 1">
           <slot name="pinHeader"></slot>
         </div>
         <div style="width: 100%;height: calc(100% - 30px)">
@@ -15,10 +15,10 @@
       </div>
 		</div>
 		<div v-for="item in list" :key="item.id" style="position: absolute;background-color: rgb(244, 245, 247);border-radius: 5px;user-select: none;" :style="{left:item.x+'px',top:item.y+'px',transition:selectedObj?.id!==item.id?'all .3s':'none',height:rect.height+'px',width:type==='fixed'?(rect.width+'px'):(item.width+'px')}" @mousedown="onMouseDown($event,item)" @mousemove="onMouseMove" @mouseup="onMouseUp($event)" ref="cardEleList">
-			<div style="width: 100%;height: 30px;" :style="{cursor:readonly?'normal':'move',...((type==='fixed' && !multiRow) && {
+			<div style="width: 100%;height: 30px;background-color: rgb(244, 245, 247);z-index: 1" :style="{cursor:readonly?'normal':'move',...((type==='fixed' && !multiRow) && {
 		position:selectedObj?.id===item.id?'':'sticky',
 		top:'0px'
-	})}" drag>
+	})}">
 				<slot name="header" :item="item"></slot>
 			</div>
 			<div style="width: 100%;height: calc(100% - 30px)">
@@ -63,7 +63,7 @@ const cardEleList=ref<HTMLElement[]>([])
 const root=ref<HTMLElement>()
 const selectedObj=ref<Item>()
 let pin:boolean=false
-let rootRect:DOMRect,originalIndex:number
+let originalIndex:number
 let left:number,top:number,observer:ResizeObserver
 let slots=useSlots()
 let lastNopElement:HTMLElement
@@ -129,7 +129,7 @@ watchEffect(()=>{
 	handleData()
 })
 const onMouseDown=(event:MouseEvent,item:Item)=>{
-	if(event.button!==0 || !(event.target as HTMLElement).hasAttribute("drag") || props.readonly) {
+	if(event.button!==0 || !(event.currentTarget as HTMLElement).firstChild.contains(event.target as HTMLElement) || props.readonly) {
 		return
 	}
 	let ele=event.currentTarget as HTMLElement
@@ -151,6 +151,11 @@ const onMouseDown=(event:MouseEvent,item:Item)=>{
 }
 const onMouseMove=(event:MouseEvent)=>{
 	if(selectedObj.value) {
+		event.stopPropagation()
+		event.preventDefault()
+		let rootRect=root.value.getBoundingClientRect()
+		rootRect.x+=scrollParent.scrollLeft
+		rootRect.y+=scrollParent.scrollTop
 		let selectedIndex=list.value.indexOf(selectedObj.value)
 		selectedObj.value.x=event.x-rootRect.x-left+scrollParent.scrollLeft
 		selectedObj.value.y=event.y-rootRect.y-top
@@ -239,6 +244,10 @@ const onMouseMove=(event:MouseEvent)=>{
 }
 const onMouseUp=(event:MouseEvent)=>{
 	if(selectedObj.value) {
+		if(lastNopElement) {
+			lastNopElement.remove()
+			lastNopElement=null;
+		}
 		let index=list.value.indexOf(selectedObj.value)
 		if(props.type==="fixed") {
 			if(props.multiRow) {
@@ -251,8 +260,6 @@ const onMouseUp=(event:MouseEvent)=>{
 			} else {
 				selectedObj.value.x=(props.gap??0)*((pin?(index+1):index)+1)+props.rect.width*(pin?(index+1):index)
 				selectedObj.value.y=props.gap??0
-				lastNopElement.remove()
-				lastNopElement=null;
 			}
 		} else if(props.type==="calculate") {
 			let rootWidth=root.value.offsetWidth
@@ -271,7 +278,6 @@ const onMouseUp=(event:MouseEvent)=>{
 	}
 }
 onMounted(()=>{
-	rootRect=root.value.getBoundingClientRect()
 	if(props.multiRow || props.type==="calculate") {
 		observer=new ResizeObserver(entries => {
 			handleData()

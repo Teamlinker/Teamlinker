@@ -246,6 +246,18 @@ class WorkflowNodeMapper extends Mapper<typeof workflowNodeModel> {
         return ret;
     }
 
+    async getAllComingNodeList(issueTypeId:string) {
+        if(!issueTypeId) {
+            throw Err.Project.Issue.issueTypeNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateQuerySql(workflowNodeModel,[],{
+            issue_type_id:issueTypeId,
+            is_all_coming:1
+        }))
+        return ret;
+    }
+
     async info(workflowNodeId:string) {
         if(!workflowNodeId) {
             throw Err.Project.Workflow.workflowNodeNotFound

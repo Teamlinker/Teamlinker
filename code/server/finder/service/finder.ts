@@ -113,6 +113,10 @@ export class FinderItemService extends Entity<typeof finderItemModel,typeof find
                     ret.shortcut=await rpcCooperationApi.projectRelease(refId)
                     break
                 }
+                case ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT:{
+                    ret.shortcut=await rpcCooperationApi.boardSprint(refId)
+                    break
+                }
                 case ECommon_Model_Finder_Shortcut_Type.WIKI:{
                     ret.shortcut=await rpcWikiApi.wiki(refId)
                     break
@@ -133,5 +137,9 @@ export class FinderItemService extends Entity<typeof finderItemModel,typeof find
             }
         }
         return ret;
+    }
+
+    static async clearByOrganizationId(organizationId:string) {
+        await finderItemMapper.clearByOrganizationId(organizationId)
     }
 }

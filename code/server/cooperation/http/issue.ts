@@ -1,8 +1,8 @@
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import projectIssueApi from "../../../common/routes/issue";
 import {
-     ICommon_Route_Req_ProjectIssue_Field,
-     ICommon_Route_Req_ProjectIssue_Field_Value
+    ICommon_Route_Req_ProjectIssue_Field,
+    ICommon_Route_Req_ProjectIssue_Field_Value
 } from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {DComponent} from "../../common/decorate/component";
@@ -485,7 +485,7 @@ class IssueController {
           if(!objIssue) {
                throw Err.Project.ProjectIssue.projectIssueNotFound
           }
-          await objIssue.convert(issueTypeId,values)
+          await objIssue.convert(issueTypeId,values,user.organizationInfo.organizationUserId)
           return
      }
 

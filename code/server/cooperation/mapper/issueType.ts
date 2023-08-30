@@ -5,6 +5,7 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {Mapper} from "../../common/entity/mapper";
 import {
     generateCreateSql,
+    generateDeleteInnerJoinSql,
     generateDeleteSql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -18,6 +19,11 @@ import {
     Table_Project_Issue_Type_Solution
 } from './../../../common/model/project_issue_type_solution';
 import CommonUtil from "../../common/util/common";
+import {workflowActionModel} from "../../../common/model/workflow_action";
+import {workflowNodeModel} from "../../../common/model/workflow_node";
+import {workflowApprovalModel} from "../../../common/model/workflow_approval";
+import {workflowNodeFieldTypeConfigModel} from "../../../common/model/workflow_node_field_type_config";
+import {workflowNodeFieldTypeModel} from "../../../common/model/workflow_node_field_type";
 
 class IssueTypeMapper extends Mapper<typeof issueTypeModel> {
     constructor() {
@@ -252,12 +258,61 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
             ])
             if(issueTypeList.length>0) {
                 let ids=issueTypeList.map(item=>item.id);
-                await mysql.execute(generateDeleteSql(issueTypeModel,{
-                    issue_type_solution_id:{
-                        exp:"in",
-                        value:ids
-                    }
-                }))
+                let [_,__,workflowNodeList]=await Promise.all([
+                    mysql.execute(generateDeleteSql(issueTypeModel,{
+                        id:{
+                            exp:"in",
+                            value:ids
+                        }
+                    })),
+                    mysql.execute(generateDeleteSql(workflowActionModel,{
+                        issue_type_id:{
+                            exp:"in",
+                            value:ids
+                        }
+                    })),
+                    mysql.execute(generateQuerySql(workflowNodeModel,["id"],{
+                        issue_type_id:{
+                            exp:"in",
+                            value:ids
+                        }
+                    }))
+                ])
+                if(workflowNodeList.length>0) {
+                    let workflowNodeIds=workflowNodeList.map(item=>item.id)
+                    await Promise.all([
+                        mysql.execute(generateDeleteSql(workflowNodeModel,{
+                            id:{
+                                exp:"in",
+                                value:workflowNodeIds
+                            }
+                        })),
+                        mysql.execute(generateDeleteSql(workflowApprovalModel,{
+                            workflow_node_id:{
+                                exp:"in",
+                                value:workflowNodeIds
+                            }
+                        })),
+                        mysql.execute(generateDeleteInnerJoinSql(workflowNodeFieldTypeModel,{
+                            model:workflowNodeFieldTypeConfigModel,
+                            expression:{
+                                workflow_node_field_type_id:{
+                                    model:workflowNodeFieldTypeModel,
+                                    field:"id"
+                                }
+                            },
+                            isDelete:true
+                        },{
+                            workflow_node_id:{
+                                model:workflowNodeFieldTypeModel,
+                                value:{
+                                    exp:"in",
+                                    value:workflowNodeIds
+                                }
+                            }
+                        }))
+                    ])
+                }
             }
             return issueTypeList.map(item=>item.id);
         } else {

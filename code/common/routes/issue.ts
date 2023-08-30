@@ -312,7 +312,7 @@ const api={
                 size:number
             }>{},
             res:<ICommon_Route_Res_Project_Issue_filter>{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Organization.READ]
         },
         releaseList:{
             method:ECommon_HttpApi_Method.GET,

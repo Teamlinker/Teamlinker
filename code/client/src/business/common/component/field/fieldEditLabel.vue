@@ -4,8 +4,9 @@
       <UserAvatar :organization-user-id="showValue.id" :name="showValue.name" :photo="showValue.photo" v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER"></UserAvatar>
       <ProjectReleasePreview v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE" :key="showValue.id" :project-release-id="showValue.id" :name="showValue.name"></ProjectReleasePreview>
       <ProjectIssuePreview :name="key+'-'+showValue.uniqueId" :project-issue-id="showValue.id" v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE"></ProjectIssuePreview>
+	    <BoardSprintPreview :name="showValue.name" :board-sprint-id="showValue.id" v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT"></BoardSprintPreview>
     </template>
-    <span v-else style="line-height: 30px;width: 100%;color: gray">None</span>
+    <span v-else style="line-height: 30px;width: 100%;color: grey">None</span>
   </template>
   <template v-else>
     <a-space size="mini">
@@ -15,6 +16,9 @@
         <a-option v-for="item1 in searchValueList" :value="item1.id" v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE" :key="item1.id">
           {{projectKey+"-"+item1.uniqueId+" "+item1.name}}
         </a-option>
+	      <a-option v-for="item1 in searchValueList" :value="item1.id" v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT" :key="item1.id" :label="item1.name">
+		      {{item1.boardName+" -> "+item1.name}}
+	      </a-option>
         <template #label="{data}" v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE">
           {{data?.label.split(" ")[0]}}
         </template>
@@ -25,16 +29,17 @@
 </template>
 
 <script setup lang="ts">
-import {apiIssue, apiOrganization, apiRelease, apiUser} from "../../request/request";
+import {apiBoard, apiIssue, apiOrganization, apiRelease, apiUser} from "../../request/request";
 import {inject, ref, watchEffect} from "vue";
 import UserAvatar from "../userAvatar.vue";
 import {
-  ECommon_Model_Workflow_Node_Field_Type_Label_Type
+	ECommon_Model_Workflow_Node_Field_Type_Label_Type
 } from "../../../../../../common/model/workflow_node_field_type";
 import {injectProjectInfo} from "../../util/symbol";
 import ProjectIssuePreview from "../../../controller/app/project/issue/projectIssuePreview.vue";
 import ProjectReleasePreview from "../../../controller/app/project/release/projectReleasePreview.vue";
 import {SessionStorage} from "../../storage/session";
+import BoardSprintPreview from "@/business/controller/app/project/board/boardSprintPreview.vue";
 
 const props=defineProps<{
   value:string[],
@@ -55,7 +60,8 @@ const searchValueList=ref<{
   photo?:string,
   name?:string,
   id:string,
-  uniqueId?:string
+  uniqueId?:string,
+	boardName?:string
 }[]>([])
 const request=async ()=>{
   if(props.value && props.value.length>0) {
@@ -93,6 +99,17 @@ const request=async ()=>{
         }
         editValue.value=""
       }
+    } else if(props.type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT) {
+	    let res = await apiBoard.sprintInfo({
+		    boardSprintId:props.value[0]
+	    });
+	    if(res?.code==0) {
+		    showValue.value={
+			    id:res.data.id,
+			    name:res.data.name,
+		    }
+		    editValue.value=""
+	    }
     }
   } else {
     showValue.value=null;
@@ -150,6 +167,22 @@ const onSearch=async (keyword:string)=>{
         }
       })
     }
+  } else if(props.type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT) {
+	  let res=await apiBoard.filterSprint({
+		  projectId:projectId,
+		  page:0,
+		  size:10,
+		  keyword:keyword
+	  })
+	  if(res?.code==0) {
+		  searchValueList.value=res.data.data.map(item=>{
+			  return {
+				  id:item.id,
+				  boardName:item.board.name,
+				  name:item.name
+			  }
+		  })
+	  }
   }
 }
 </script>

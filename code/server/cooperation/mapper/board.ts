@@ -1,10 +1,13 @@
 import {Mapper} from "../../common/entity/mapper";
-import {boardModel} from "../../../common/model/board";
+import {boardModel, ICommon_Model_Board} from "../../../common/model/board";
 import {boardColumnModel, ICommon_Model_Board_Column} from "../../../common/model/board_column";
 import {boardColumnWorkflowNodeModel} from "../../../common/model/board_column_workflow_node";
 import {boardIssueTypeModel} from "../../../common/model/board_issue_type";
-import {boardSprintModel} from "../../../common/model/board_sprint";
-import {boardSprintSwimLaneModel} from "../../../common/model/board_sprint_swimlane";
+import {boardSprintModel, ICommon_Model_Board_Sprint} from "../../../common/model/board_sprint";
+import {
+    boardSprintSwimLaneModel,
+    ICommon_Model_Board_Sprint_SwimLane
+} from "../../../common/model/board_sprint_swimlane";
 import {boardSprintIssueModel} from "../../../common/model/board_sprint_issue";
 import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
@@ -12,6 +15,7 @@ import {
     generateCommonListData,
     generateDeleteInnerJoinSql,
     generateDeleteSql,
+    generateLeftJoin2Sql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -21,6 +25,7 @@ import {keys} from "../../../common/transform";
 import {ICommon_Model_Workflow_Node, workflowNodeModel} from "../../../common/model/workflow_node";
 import {ICommon_Model_Issue_Type, issueTypeModel} from "../../../common/model/issue_type";
 import {ICommon_Model_Project_Issue, projectIssueModel} from "../../../common/model/project_issue";
+import {ICommon_Model_Project, projectModel} from "../../../common/model/project";
 
 class BoardMapper extends Mapper<typeof boardModel> {
     constructor() {
@@ -31,7 +36,7 @@ class BoardMapper extends Mapper<typeof boardModel> {
             throw Err.Project.projectNotFound
         }
         let sql=generateQuerySql(boardModel,null,{
-            id:projectId,
+            project_id:projectId,
             ...(keyword && {
                 name:{
                     exp:"%like%",
@@ -44,6 +49,67 @@ class BoardMapper extends Mapper<typeof boardModel> {
         },page*size,size)
         let ret=generateCommonListData(sql,page,size)
         return ret;
+    }
+
+    async clearByProjects(projectIds:string[]) {
+        if(projectIds.length==0) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        let arrBoard=await mysql.execute(generateQuerySql(boardModel,["id"],{
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        }))
+        if(arrBoard.length>0) {
+            let boardIds=arrBoard.map(item=>item.id)
+            await Promise.all([
+                mysql.execute(generateDeleteSql(boardModel,{
+                    project_id:{
+                        exp:"in",
+                        value:projectIds
+                    }
+                })),
+                mysql.execute(generateDeleteSql(boardColumnModel,{
+                    board_id:{
+                        exp:"in",
+                        value:boardIds
+                    }
+                })),
+                mysql.execute(generateDeleteSql(boardColumnWorkflowNodeModel,{
+                    board_id:{
+                        exp:"in",
+                        value:boardIds
+                    }
+                })),
+                mysql.execute(generateDeleteSql(boardIssueTypeModel,{
+                    board_id:{
+                        exp:"in",
+                        value:boardIds
+                    }
+                })),
+                mysql.execute(generateDeleteSql(boardSprintModel,{
+                    board_id:{
+                        exp:"in",
+                        value:boardIds
+                    }
+                })),
+                mysql.execute(generateDeleteSql(boardSprintIssueModel,{
+                    board_id:{
+                        exp:"in",
+                        value:boardIds
+                    }
+                })),
+                mysql.execute(generateDeleteSql(boardSprintSwimLaneModel,{
+                    board_id:{
+                        exp:"in",
+                        value:boardIds
+                    }
+                }))
+            ])
+        }
+
     }
 }
 
@@ -303,6 +369,59 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
         let ret=await generateCommonListData(sql,page,size)
         return ret;
     }
+
+    async filter(projectId:string,page:number,size:number,keyword?:string,boardSprintIds?:string[]) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let sql=generateLeftJoin2Sql({
+            model:boardSprintModel,
+            columns:keys<ICommon_Model_Board_Sprint>().map(item=>item.name)
+        },{
+            model:boardModel,
+            columns:keys<ICommon_Model_Board>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:boardSprintModel,
+                    field:"board_id"
+                }
+            },
+            aggregation:"board"
+        },{
+            model:projectModel,
+            columns:keys<ICommon_Model_Project>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:boardModel,
+                    field:"project_id"
+                }
+            },
+            aggregation:"project"
+        },{
+            ...(projectId && {
+                project_id:{
+                    model:boardModel,
+                    value:projectId
+                }
+            }),
+            ...(boardSprintIds?.length>0 && {
+                id:{
+                    model:boardSprintModel,
+                    value:{
+                        exp:"in",
+                        value:boardSprintIds
+                    }
+                }
+            })
+        },"and",{
+            type:"desc",
+            field:"name",
+            model:boardSprintModel
+        },page*size,size)
+        let ret=await generateCommonListData(sql,page,size)
+        return ret;
+    }
+
 }
 
 export let boardSprintMapper=new BoardSprintMapper
@@ -316,7 +435,7 @@ class BoardSprintIssueMapper extends Mapper<typeof boardSprintIssueModel> {
             throw Err.Project.Board.boardSprintNotFound
         }
         let mysql=getMysqlInstance()
-        let sql=generateLeftJoinSql({
+        let sql=generateLeftJoin3Sql({
             model:boardSprintIssueModel,
             columns:["board_sprint_swimlane_id"],
             rename:{
@@ -332,6 +451,62 @@ class BoardSprintIssueMapper extends Mapper<typeof boardSprintIssueModel> {
                     field:"project_issue_id"
                 }
             }
+        },{
+            model:issueTypeModel,
+            columns:keys<ICommon_Model_Issue_Type>().map(item=>item.name),
+            expression:{
+                id: {
+                    model:projectIssueModel,
+                    field:"issue_type_id"
+                }
+            },
+            aggregation:"issueType"
+        },{
+            model:workflowNodeModel,
+            columns:keys<ICommon_Model_Workflow_Node>().map(item=>item.name),
+            expression:{
+                id: {
+                    model:projectIssueModel,
+                    field:"workflow_node_id"
+                }
+            },
+            aggregation:"workflowNode"
+        },{
+            board_sprint_id:{
+                model:boardSprintIssueModel,
+                value:boardSprintId
+            }
+        })
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
+
+    async listWithSwimLane(boardSprintId:string) {
+        if(!boardSprintId) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoin2Sql({
+            model:boardSprintIssueModel
+        },{
+            model:projectIssueModel,
+            columns:keys<ICommon_Model_Project_Issue>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:boardSprintIssueModel,
+                    field:"project_issue_id"
+                }
+            }
+        },{
+            model:boardSprintSwimLaneModel,
+            columns:keys<ICommon_Model_Board_Sprint_SwimLane>().map(item=>item.name),
+            expression:{
+                id: {
+                    model:boardSprintIssueModel,
+                    field:"board_sprint_swimlane_id"
+                }
+            },
+            aggregation:"swimLane"
         },{
             board_sprint_id:{
                 model:boardSprintIssueModel,
@@ -396,21 +571,39 @@ class BoardSprintSwimLaneMapper extends Mapper<typeof boardSprintSwimLaneModel> 
         return ret;
     }
 
-    async clear(boardSprintId:string,boardSprintSwimLaneId?:string) {
+    async clear(boardSprintId:string) {
         if(!boardSprintId) {
             throw Err.Project.Board.boardSprintNotFound
         }
         let mysql=getMysqlInstance()
+        let arr=await mysql.execute(generateQuerySql(boardSprintSwimLaneModel,["id"],{
+            board_sprint_id:boardSprintId
+        }))
         await mysql.execute(generateDeleteSql(boardSprintSwimLaneModel,{
             board_sprint_id:boardSprintId
         }))
-        if(boardSprintSwimLaneId) {
+        if(arr.length>0) {
             await mysql.execute(generateUpdateSql(boardSprintIssueModel,{
                 board_sprint_swimlane_id:null,
             },{
-                board_sprint_swimlane_id:boardSprintSwimLaneId
+                board_sprint_swimlane_id:{
+                    exp:"in",
+                    value:arr.map(item=>item.id)
+                }
             }))
         }
+    }
+
+    async clearIssue(boardSprintSwimLaneId:string) {
+        if(!boardSprintSwimLaneId) {
+            throw Err.Project.Board.boardSprintSwimLaneNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateUpdateSql(boardSprintIssueModel,{
+            board_sprint_swimlane_id:null,
+        },{
+            board_sprint_swimlane_id:boardSprintSwimLaneId
+        }))
     }
 
 }

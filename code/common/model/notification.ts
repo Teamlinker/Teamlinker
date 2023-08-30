@@ -20,7 +20,9 @@ export enum ECommon_Model_Notification_Type {
     WIKI_ITEM_AT,
     CALENDAR_EVENT_INVITATION,
     ISSUE_APPROVAL_RESOLVE,
-    ISSUE_APPROVAL_REJECT
+    ISSUE_APPROVAL_REJECT,
+    ISSUE_ASSIGN_RELEASE,
+    ISSUE_ASSIGN_SPRINT
 }
 
 export enum ECommon_Model_Notification_Status {

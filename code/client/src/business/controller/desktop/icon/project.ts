@@ -169,3 +169,45 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,(projectId,projec
     })
     windowManager.open(win);
 })
+eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_SPRINT_KANBAN_PROFILE,(projectId,boardId, boardSprintId) => {
+    const win=new Window("project",ETeamOS_Window_Type.TAB, "project",true,[
+        {
+            id:v4(),
+            meta:{
+                title:"project",
+                data:{
+                    boardSprintId:boardSprintId,
+                    boardId:boardId
+                }
+            },
+            components:{
+                project:markRaw(Project),
+                profile:markRaw(ProjectProfile)
+            },
+            default:{
+                name:"profile",
+                title: "profile",
+                props:{
+                    projectId:projectId
+                }
+            }
+        }
+    ],"Project");
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"project"
+            },
+            components:{
+                project:markRaw(Project),
+                profile:markRaw(ProjectProfile)
+            },
+            default:{
+                name:"project",
+                title: "project"
+            }
+        }
+    })
+    windowManager.open(win);
+})

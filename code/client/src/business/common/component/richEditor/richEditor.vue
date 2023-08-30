@@ -367,6 +367,9 @@ div {
 :deep .svg-project-release {
 	background-image: url("@/assert/custom/project_release_item.svg");
 }
+:deep .svg-board-sprint {
+	background-image: url("@/assert/custom/board_sprint_item.svg");
+}
 :deep .svg-wiki {
 	background-image: url("@/assert/custom/wiki_space_item.svg");
 }

@@ -16,7 +16,7 @@ export interface ICommon_Model_Project_Issue {
     project_id: string,
     issue_type_id: string,
     name: string,
-    priority: number,
+    priority: ECommon_Model_Project_Issue_Priority,
     assigner_id: string,
     reporter_id: string,
     workflow_node_id: string

@@ -33,13 +33,14 @@ import {
 } from "../../../common/model/project_issue_approval";
 import {ICommon_Model_Workflow_Action} from "../../../common/model/workflow_action";
 import {ICommon_Model_Workflow_Node} from "../../../common/model/workflow_node";
+import {BoardSprintIssueService} from "./board";
 
 export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof projectIssueMapper> {
     constructor(){
         super(projectIssueMapper)
     }
 
-    async convert(issueTypeId:string,values:ICommon_Route_Req_ProjectIssue_Field[]) {
+    async convert(issueTypeId:string,values:ICommon_Route_Req_ProjectIssue_Field[],organizationUserId:string) {
         if(this.getItem().issue_type_id===issueTypeId) {
             return
         }
@@ -57,6 +58,14 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
             projectIssueMapper.handleProcess(this.getId(),objFirstNode.id),
             this.createFieldValues(values)
         ])
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:this.getId(),
+            type:ECommon_Model_Project_Issue_History_Type.ISSUE_TYPE_CONVERT,
+            organization_user_id:organizationUserId,
+            project_id:this.getItem().project_id,
+        })
+        objHistory.create()
     }
 
     async createFieldValues(values:ICommon_Route_Req_ProjectIssue_Field[]) {
@@ -336,15 +345,21 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     }
 
     async getNextNodeFields(workflowActionId:string) {
-        let obj=await WorkflowActionService.getItemById(workflowActionId)
-        if(!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+        let destNodeId=""
+        if(workflowActionId.startsWith("_")) {
+            destNodeId=workflowActionId.substring(1)
+        } else {
+            let obj=await WorkflowActionService.getItemById(workflowActionId)
+            if(!obj) {
+                throw Err.Project.Workflow.workflowActionNotFound
+            }
+            destNodeId=obj.getItem().dest_node_id
         }
         let process=await projectIssueMapper.getProcess(this.getId())
-        if(process && process.includes(obj.getItem().dest_node_id)) {
+        if(process && process.includes(destNodeId)) {
             return []
         }
-        let ret=await this.getWorkflowNodeFields(obj.getItem().dest_node_id)
+        let ret=await this.getWorkflowNodeFields(destNodeId)
         return ret;
     }
 
@@ -357,13 +372,19 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
     }
 
     async confirmNextNode(workflowActionId:string,values:ICommon_Route_Req_ProjectIssue_Field[],organizationUserId:string) {
-        let obj=await WorkflowActionService.getItemById(workflowActionId)
-        if(!obj) {
-            throw Err.Project.Workflow.workflowActionNotFound
+        let destNodeId=""
+        if(workflowActionId.startsWith("_")) {
+            destNodeId=workflowActionId.substring(1)
+        } else {
+            let obj=await WorkflowActionService.getItemById(workflowActionId)
+            if(!obj) {
+                throw Err.Project.Workflow.workflowActionNotFound
+            }
+            destNodeId=obj.getItem().dest_node_id
         }
-        if(obj.getItem().dest_node_id) {
-            await this.handleConfirmNextNode(obj.getItem().dest_node_id,values)
-            WorkflowNodeService.getItemById(obj.getItem().dest_node_id).then(data=>{
+        if(destNodeId) {
+            await this.handleConfirmNextNode(destNodeId,values)
+            WorkflowNodeService.getItemById(destNodeId).then(data=>{
                 if(data) {
                     let objHistory=new ProjectIssueHistoryService()
                     objHistory.assignItem({
@@ -519,6 +540,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
             project_issue_id:this.getId()
         })
         await objApproval?.delete()
+        await BoardSprintIssueService.clearByIssueTypeIds([this.getId()])
     }
 
     async getBasicInfo() {
@@ -526,9 +548,20 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
             projectIssueMapper.getBasicInfo(this.getId()),
             await projectIssueMapper.getProcess(this.getId())
         ])
+        let approval=await this.getApprovalInfo(process)
+        return {
+            ...ret,
+            approval
+        };
+    }
+
+    async getApprovalInfo(process?:string[]) {
         let approval:ICommon_Model_Project_Issue_Approval & {
             reason?:string,
             workflowNode:ICommon_Model_Workflow_Node
+        }
+        if(!process) {
+            process=await projectIssueMapper.getProcess(this.getId())
         }
         let workflowNode=await WorkflowNodeService.getItemById(process[process.length-1])
         if(workflowNode.getItem().is_approval) {
@@ -539,10 +572,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
                 approval=await obj.info()
             }
         }
-        return {
-            ...ret,
-            approval
-        };
+        return approval
     }
 
     static async getObjByUniqueKey(uniqueKey:string) {
@@ -767,6 +797,10 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
 
     static async clearIssueValueByFieldTypeId(workflowFieldTypeId:string) {
         await projectIssueMapper.clearIssueValueByFieldTypeId(workflowFieldTypeId)
+    }
+
+    static async clearByIssueTypeId(issueTypeId:string) {
+        await projectIssueMapper.clearByIssueTypeId(issueTypeId)
     }
 
     async releaseList() {

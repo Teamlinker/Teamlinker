@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import {apiIssue, apiOrganization, apiRelease, apiUser, DCSType} from "../../request/request";
+import {apiBoard, apiIssue, apiOrganization, apiRelease, DCSType} from "../../request/request";
 import {
 	ICommon_Route_Req_ProjectIssue_Field,
 	ICommon_Route_Res_Project_Issue_filter_Item,
@@ -37,6 +37,7 @@ import {SessionStorage} from "../../storage/session";
 import {
 	ICommon_Model_Workflow_Node_Field_Type_Config
 } from "../../../../../../common/model/workflow_node_field_type_config";
+import {ICommon_Model_Board_Sprint} from "../../../../../../common/model/board_sprint";
 
 const props=defineProps<{
   item:DCSType<ICommon_Route_Res_Workflow_Node_Field & {
@@ -110,6 +111,7 @@ watch(()=>props.item,async ()=>{
 			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE) {
 				apiIssue.filter({
 					projectIssueIds:[props.item.fieldValue.value as string],
+					projectId:props.projectId,
 					page:0,
 					size:1
 				}).then(res=>{
@@ -120,6 +122,18 @@ watch(()=>props.item,async ()=>{
 			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE) {
 				apiRelease.list({
 					projectReleaseIds:[props.item.fieldValue.value as string],
+					projectId:props.projectId,
+					page:0,
+					size:1
+				}).then(res=>{
+					if(res?.code==0) {
+						labelList.value=res.data.data
+					}
+				})
+			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT) {
+				apiBoard.filterSprint({
+					boardSprintIds:[props.item.fieldValue.value as string],
+					projectId:props.projectId,
 					page:0,
 					size:1
 				}).then(res=>{
@@ -149,6 +163,7 @@ watch(()=>props.item,async ()=>{
 				})
 			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE) {
 				apiIssue.filter({
+					projectId:props.projectId,
 					projectIssueIds:props.item.fieldValue.value as string[],
 					page:0,
 					size:(props.item.fieldValue.value as string[]).length
@@ -159,7 +174,19 @@ watch(()=>props.item,async ()=>{
 				})
 			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE) {
 				apiRelease.list({
+					projectId:props.projectId,
 					projectReleaseIds:props.item.fieldValue.value as string[],
+					page:0,
+					size:(props.item.fieldValue.value as string[]).length
+				}).then(res=>{
+					if(res?.code==0) {
+						multiLabelList.value=res.data.data
+					}
+				})
+			} else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT) {
+				apiBoard.filterSprint({
+					projectId:props.projectId,
+					boardSprintIds:props.item.fieldValue.value as string[],
 					page:0,
 					size:(props.item.fieldValue.value as string[]).length
 				}).then(res=>{
@@ -174,12 +201,12 @@ watch(()=>props.item,async ()=>{
 	immediate:true,
 	deep:true
 })
-const multiLabelList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item | ICommon_Route_Res_Release_Item | {
+const multiLabelList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item | ICommon_Route_Res_Release_Item | ICommon_Model_Board_Sprint | {
   name:string,
   id:string,
   photo:string
 }>[]>([])
-const labelList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item | ICommon_Route_Res_Release_Item | {
+const labelList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item | ICommon_Route_Res_Release_Item | ICommon_Model_Board_Sprint | {
   name:string,
   id:string,
   photo:string
@@ -221,6 +248,16 @@ const onSearchMultiLabel=async (value:string)=>{
     if(res?.code==0) {
       multiLabelList.value=res.data.data
     }
+  } else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT) {
+	  let res=await apiBoard.filterSprint({
+		  projectId:props.projectId,
+		  keyword:value,
+		  page:0,
+		  size:10
+	  })
+	  if(res?.code==0) {
+		  multiLabelList.value=res.data.data
+	  }
   }
 }
 const onSearchLabel=async (value:string)=>{
@@ -235,11 +272,20 @@ const onSearchLabel=async (value:string)=>{
       labelList.value=res.data.data
     }
   } else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER) {
-    let res=await apiUser.filterUser({
-      name:value
+    let res=await apiOrganization.listUser({
+	    organizationId:SessionStorage.get("organizationId"),
+	    size:10,
+	    page:0,
+	    keyword:value
     })
     if(res?.code==0) {
-      labelList.value=res.data
+      labelList.value=res.data.data.map(item=>{
+	      return {
+		      id:item.organizationUser.id,
+		      name:item.organizationUser.nickname,
+		      photo:item.user.photo
+	      }
+      })
     }
   } else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE) {
     let res=await apiRelease.list({
@@ -251,6 +297,16 @@ const onSearchLabel=async (value:string)=>{
     if(res?.code==0) {
       labelList.value=res.data.data
     }
+  } else if(props.item.field.label_type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT) {
+	  let res=await apiBoard.filterSprint({
+		  projectId:props.projectId,
+		  keyword:value,
+		  page:0,
+		  size:10
+	  })
+	  if(res?.code==0) {
+		  labelList.value=res.data.data
+	  }
   }
 }
 </script>

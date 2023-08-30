@@ -8,6 +8,7 @@ import {issueTypeMapper, issueTypeSolutionMapper} from './../mapper/issueType';
 import {WorkflowService} from "./workflow";
 import {projectIssueMapper} from "../mapper/issue";
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import {ProjectIssueService} from "./issue";
 
 export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issueTypeMapper> {
     constructor(){
@@ -33,6 +34,8 @@ export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issue
                     [this.getId()]:convertIssueTypeId
                 })
             ])
+        } else {
+            await ProjectIssueService.clearByIssueTypeId(this.getId())
         }
         await super.delete()
         await WorkflowService.delete(this.getId());
@@ -72,16 +75,18 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
             throw Err.Project.Issue.issueTypeSolutionConvertMissRelationship
         }
         await super.delete()
-        let arrProject=await this.projectList(0,10000)
-        let arrPromise=[]
-        arrProject.data.forEach(project=>{
-            arrPromise.push(this.unbindProject(project.id,relationship))
-        })
-        await Promise.all(arrPromise)
-        await issueTypeSolutionMapper.resetProjects(this.getId(),this.getItem().organization_id);
-        let list=await this.issueTypeList();
+        if(relationship) {
+            let arrProject=await this.projectList(0,10000)
+            let arrPromise=[]
+            arrProject.data.forEach(project=>{
+                arrPromise.push(this.unbindProject(project.id,relationship))
+            })
+            await Promise.all(arrPromise)
+        } else {
+            await issueTypeSolutionMapper.resetProjects(this.getId(),this.getItem().organization_id);
+        }
         let arr=[];
-        for(let obj of list) {
+        for(let obj of arrIssueType) {
             arr.push((async ()=>{
                 let o=await IssueTypeService.getItemById(obj.id);
                 await o.delete()

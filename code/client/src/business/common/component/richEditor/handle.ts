@@ -118,10 +118,10 @@ export class RichEditorHandle {
                 icon.style.marginRight="5px"
                 icon.style.color="green"
                 ele.prepend(icon)
-            } else if(obj.type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
+            } else if(obj.type===ECommon_Content_Line_Config_Type.BOARD_SPRINT) {
                 ele=document.createElement("a")
                 ele.setAttribute("href","javascript:void(0)")
-                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.PROJECT_RELEASE))
+                ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.BOARD_SPRINT))
                 ele.setAttribute("value",obj.value)
                 ele.setAttribute("link",obj.link)
                 ele.style.margin="0 2px 0 2px"
@@ -138,11 +138,11 @@ export class RichEditorHandle {
                 ele.style.textDecoration="none"
                 ele.setAttribute("allowDrag","1")
                 ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
-                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE)
+                ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT)
                 ele.setAttribute("shortcutRefId",obj.value)
                 ele.setAttribute("shortcutName",obj.label)
                 let icon=document.createElement("i")
-                icon.className="svg svg-project-release"
+                icon.className="svg svg-board-sprint"
                 icon.style.marginRight="5px"
                 icon.style.color="green"
                 ele.prepend(icon)
@@ -328,6 +328,13 @@ export class RichEditorHandle {
                                 obj.type=ECommon_Content_Line_Config_Type.PROJECT_RELEASE
                                 obj.value=projectReleaseId
                                 obj.link=projectId
+                                obj.label=ele.innerText??""
+                            } else if(configType===ECommon_Content_Line_Config_Type.BOARD_SPRINT) {
+                                let projectAndBoardId=ele.getAttribute("link")
+                                let boardSprintId=ele.getAttribute("value")
+                                obj.type=ECommon_Content_Line_Config_Type.BOARD_SPRINT
+                                obj.value=boardSprintId
+                                obj.link=projectAndBoardId
                                 obj.label=ele.innerText??""
                             } else if(configType===ECommon_Content_Line_Config_Type.WIKI) {
                                 let wikiId=ele.getAttribute("value")

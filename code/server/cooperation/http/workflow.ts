@@ -42,7 +42,8 @@ class WorkflowController {
                    @DHttpReqParam("approval") approval: number,
                    @DHttpReqParam("approvalType") approvalType: ECommon_Model_Workflow_Approval_Type,
                    @DHttpReqParam("approvalValue") approvalValue: string[],
-                   @DHttpReqParam("approvalExtra") approvalExtra: string): Promise<typeof workflowApi.routes.editNode.res> {
+                   @DHttpReqParam("approvalExtra") approvalExtra: string,
+                   @DHttpReqParam("isAllComing") isAllComing: number): Promise<typeof workflowApi.routes.editNode.res> {
         let obj = await WorkflowNodeService.getItemById(workflowNodeId);
         if (!obj) {
             throw Err.Project.Workflow.workflowNodeNotFound
@@ -56,7 +57,8 @@ class WorkflowController {
             status: status,
             x:x,
             y:y,
-            is_approval:approval
+            is_approval:approval,
+            is_all_coming:isAllComing
         })
         await obj.update()
         if((status===ECommon_Model_Workflow_Node_Status.INPROGRESS || status===ECommon_Model_Workflow_Node_Status.DONE) && approval!==undefined) {

@@ -47,6 +47,7 @@ import {WorkflowService} from "../service/workflow";
 import {WorkflowNodeFieldTypeService} from "../service/field";
 import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
 import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../../../common/model/workflow_node_field_type_config";
+import {boardSprintIssueModel} from "../../../common/model/board_sprint_issue";
 
 class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
@@ -417,6 +418,15 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 project_issue_id:projectIssueId
             })),
             mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectIssueApprovalModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(projectIssueHistoryModel,{
+                project_issue_id:projectIssueId
+            })),
+            mysql.execute(generateDeleteSql(boardSprintIssueModel,{
                 project_issue_id:projectIssueId
             }))
         ])
@@ -983,44 +993,82 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             return
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectIssueModel,{
-            id:{
-                exp:"in",
-                value:projectIssueIds
-            }
-        }))
-        await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
-            project_issue_id:{
-                exp:"in",
-                value:projectIssueIds
-            }
-        }))
-        await mysql.execute(generateDeleteSql(projectIssueParentModel,{
-            parent_id:{
-                exp:"in",
-                value:projectIssueIds
-            },
-            child_id:{
-                exp:"in",
-                value:projectIssueIds
-            }
-        },"or"))
-        await mysql.execute(generateDeleteSql(projectIssueProcessModel,{
-            project_issue_id:{
-                exp:"in",
-                value:projectIssueIds
-            }
-        }))
-        await mysql.execute(generateDeleteSql(projectIssueRelatedModel,{
-            project_issue_1_id:{
-                exp:"in",
-                value:projectIssueIds
-            },
-            project_issue_2_id:{
-                exp:"in",
-                value:projectIssueIds
-            }
-        },"or"))
+        await Promise.all([
+            mysql.execute(generateDeleteSql(projectIssueModel,{
+                id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+            mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
+                project_issue_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+            mysql.execute(generateDeleteSql(projectIssueParentModel,{
+                parent_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                },
+                child_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            },"or")),
+            mysql.execute(generateDeleteSql(projectIssueProcessModel,{
+                project_issue_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+            mysql.execute(generateDeleteSql(projectIssueRelatedModel,{
+                project_issue_1_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                },
+                project_issue_2_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            },"or")),
+            mysql.execute(generateDeleteSql(projectIssueApprovalModel,{
+                project_issue_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+            mysql.execute(generateDeleteSql(projectIssueHistoryModel,{
+                project_issue_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+            mysql.execute(generateDeleteSql(boardSprintIssueModel,{
+                project_issue_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+            mysql.execute(generateDeleteSql(projectModuleIssueModel,{
+                project_issue_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+            mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
+                project_issue_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+            mysql.execute(generateDeleteSql(projectLabelIssueModel,{
+                project_issue_id:{
+                    exp:"in",
+                    value:projectIssueIds
+                }
+            })),
+        ])
     }
 
     async getIdsByProjectIds(projectIds:string[]){
@@ -1047,6 +1095,21 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             workflow_node_field_type_id:workflowFieldTypeId
         }))
     }
+
+    async clearByIssueTypeId(issueTypeId:string) {
+        if(!issueTypeId) {
+            throw Err.Project.Issue.issueTypeNotFound
+        }
+        let mysql=getMysqlInstance()
+        let arr=await mysql.execute(generateQuerySql(projectIssueModel,["id"],{
+            issue_type_id:issueTypeId
+        }))
+        if(arr.length>0) {
+            let projectIssueIds=arr.map(item=>item.id)
+            await this.clearMany(projectIssueIds)
+        }
+    }
+
     async getOrganizationUserIdsByIssueExtraField(projectIssueId:string) {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound

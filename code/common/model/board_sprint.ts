@@ -4,8 +4,8 @@ export interface ICommon_Model_Board_Sprint {
     id:string,
     name:string,
     board_id:string,
-    start_time:Date,
-    end_time:Date
+    start_time:string,
+    end_time:string
 }
 export const Table_Board_Sprint="board_sprint"
 

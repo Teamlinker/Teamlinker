@@ -155,6 +155,18 @@ class RpcNotificationApi  {
                     notificationUserList=userInfos.map(item=>item.id)
                     break
                 }
+                case ECommon_Model_Notification_Type.ISSUE_ASSIGN_RELEASE:{
+                    let organizationUserIds=await rpcCooperationApi.getIssueRelatedOrganizationUserIds(refId)
+                    let userInfos=await rpcUserApi.getOrganizationUsersInfo(organizationUserIds)
+                    notificationUserList=userInfos.map(item=>item.id)
+                    break
+                }
+                case ECommon_Model_Notification_Type.ISSUE_ASSIGN_SPRINT:{
+                    let organizationUserIds=await rpcCooperationApi.getIssueRelatedOrganizationUserIds(refId)
+                    let userInfos=await rpcUserApi.getOrganizationUsersInfo(organizationUserIds)
+                    notificationUserList=userInfos.map(item=>item.id)
+                    break
+                }
             }
             for(let id of notificationUserList) {
                 let objNotification:ICommon_Model_Notification

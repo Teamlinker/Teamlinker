@@ -1,6 +1,6 @@
 <template>
   <div style="width: 100%;height: 100%;overflow: auto;display: flex;flex-direction:column" ref="root" >
-    <a-space style="flex:0 1 auto;margin-bottom: 10px">
+    <a-space style="flex:0 1 auto;margin-bottom: 10px;width: 100%">
       <a-button type="primary" @click="addNode">Add Node</a-button>
     </a-space>
     <a-layout style="flex:1 1 auto;border: 1px solid gainsboro">
@@ -23,9 +23,12 @@
           <a-form-item field="description" label="description">
             <a-textarea v-model="form.description"></a-textarea>
           </a-form-item>
-	        <template v-if="form.status===ECommon_Model_Workflow_Node_Status.INPROGRESS || form.status===ECommon_Model_Workflow_Node_Status.DONE">
+	        <template v-if="(form.status===ECommon_Model_Workflow_Node_Status.INPROGRESS || form.status===ECommon_Model_Workflow_Node_Status.DONE) && (form.type==='node' || form.type==='approval')">
 		        <a-form-item field="approval" label="approval">
 			        <a-switch :checked-value="1" :unchecked-value="0" v-model="form.approval"></a-switch>
+		        </a-form-item>
+		        <a-form-item field="allComing" label="allow all connections" extra="the border of node is pink">
+			        <a-switch :checked-value="1" :unchecked-value="0" v-model="form.allComing"></a-switch>
 		        </a-form-item>
 		        <a-form-item field="approvalType" label="approval type" v-if="form.approval">
 							<a-select v-model="form.approvalType" @change="onApprovalTypeChange">
@@ -88,7 +91,8 @@ const form=reactive({
 	approval:0,
 	approvalType:ECommon_Model_Workflow_Approval_Type.PERSON,
 	approvalValue:[] as string[]|string,
-	approvalExtra:""
+	approvalExtra:"",
+	allComing:0
 })
 let lf:LogicFlow
 const onKeyDelete=async (event:KeyboardEvent)=>{
@@ -130,7 +134,8 @@ const onSubmit=async ()=>{
 			approvalType:form.approvalType,
 		  approvalValue:Array.isArray(form.approvalValue)?form.approvalValue:form.approvalValue?[form.approvalValue]:[],
 		  approvalExtra:form.approvalExtra
-	  })
+	  }),
+	  isAllComing:form.allComing
   }):apiWorkflow.editAction({
     workflowActionId:form.id,
     name:form.name,
@@ -142,6 +147,21 @@ const onSubmit=async ()=>{
       let obj=lf.getNodeModelById(form.id)
       obj.updateText(form.name)
 	    obj.setProperties(res.data)
+	    let type=form.type
+	    let newType=form.approval?"approval":"node"
+	    if(type!==newType) {
+		    lf.graphModel.changeNodeType(form.id,newType)
+		    form.type=newType
+	    }
+			if(form.allComing) {
+				let arr=[...lf.getNodeIncomingEdge(form.id)]
+				for(let obj of arr) {
+					lf.deleteEdge(obj.id)
+					apiWorkflow.deleteAction({
+						workflowActionId:obj.id
+					})
+				}
+			}
     } else {
       let obj=lf.getEdgeModelById(form.id)
       obj.updateText(form.name)
@@ -308,6 +328,7 @@ onMounted(async ()=>{
       form.description=data.properties.description
       if(data.type=="node" || data.type=="approval") {
         form.status=data.properties.status
+	      form.allComing=data.properties.is_all_coming
 	      form.approval=data.properties.is_approval
 	      if(form.approval) {
 					form.approvalType=data.properties.approval.type

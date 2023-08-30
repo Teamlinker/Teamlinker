@@ -115,6 +115,23 @@
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>
+				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT">
+					<a-descriptions-item label="name">{{sprintInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item label="issues">{{sprintInfo?.issues.length}}</a-descriptions-item>
+					<a-descriptions-item label="swimLanes">{{sprintInfo?.swimLanes.length}}</a-descriptions-item>
+					<a-descriptions-item label="start">
+						{{moment(sprintInfo?.start_time).format("YYYY-MM-DD HH:mm:ss")}}
+					</a-descriptions-item>
+					<a-descriptions-item label="end">
+						{{moment(sprintInfo?.end_time).format("YYYY-MM-DD HH:mm:ss")}}
+					</a-descriptions-item>
+					<a-descriptions-item label="project">
+						{{sprintInfo?.project.name}}
+					</a-descriptions-item>
+					<a-descriptions-item label="organization" v-if="organizationInfo">
+						{{organizationInfo.name}}
+					</a-descriptions-item>
+				</template>
 				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.WIKI">
 					<a-descriptions-item label="name">{{wikiInfo?.name}}</a-descriptions-item>
 					<a-descriptions-item label="type">
@@ -213,6 +230,7 @@
 
 <script setup lang="ts">
 import {
+	apiBoard,
 	apiCalendar,
 	apiFinder,
 	apiIssue,
@@ -238,6 +256,7 @@ import {
 import {ICommon_Model_Calendar_Event} from "../../../../../../common/model/calendar_event";
 import {ICommon_Model_Meeting_Room} from "../../../../../../common/model/meeting_room";
 import {
+	ICommon_Route_Res_Board_Sprint_Info,
 	ICommon_Route_Res_Finder_Info,
 	ICommon_Route_Res_ProjectIssue_BasicInfo,
 	ICommon_Route_Res_Wiki_Info,
@@ -256,6 +275,7 @@ const projectIssueInfo=ref<DCSType<ICommon_Route_Res_ProjectIssue_BasicInfo>>()
 const projectReleaseInfo=ref<DCSType<ICommon_Model_Project_Release & {
 	projectName:string
 }>>()
+const sprintInfo=ref<DCSType<ICommon_Route_Res_Board_Sprint_Info>>()
 const wikiInfo=ref<DCSType<ICommon_Route_Res_Wiki_Info>>()
 const wikiItemInfo=ref<DCSType<ICommon_Route_Res_Wiki_Item_Info>>()
 const calendarEventInfo=ref<DCSType<ICommon_Model_Calendar_Event & {
@@ -333,6 +353,19 @@ const refresh=async ()=>{
 								}
 							})).data.name
 						}
+					}
+				})
+				break
+			}
+			case ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT:{
+				apiBoard.sprintInfo({
+					boardSprintId:props.item.ref_id,
+					...{
+						organizationId:props.item.organization_id
+					}
+				}).then(async res=>{
+					if(res?.code==0) {
+						sprintInfo.value=res.data
 					}
 				})
 				break

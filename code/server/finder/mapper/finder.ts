@@ -5,8 +5,9 @@ import {
     ICommon_Model_Finder_Item
 } from "../../../common/model/finder_item";
 import {getMysqlInstance} from "../../common/db/mysql";
-import {generateQuerySql} from "../../common/util/sql";
+import {generateDeleteSql, generateQuerySql} from "../../common/util/sql";
 import {Err} from "../../../common/status/error";
+import {emitServiceEvent} from "../../common/event/event";
 
 class FinderItemMapper extends Mapper<typeof finderItemModel> {
     constructor() {
@@ -72,6 +73,24 @@ class FinderItemMapper extends Mapper<typeof finderItemModel> {
             id:""
         })
         return ret;
+    }
+
+    async clearByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        let arr=await mysql.execute(generateQuerySql(finderItemModel,["id","file_id"],{
+            organization_id:organizationId
+        }))
+        if(arr.length>0) {
+            arr.forEach(item=>{
+                emitServiceEvent("fileUnref",item.file_id)
+            })
+        }
+        await mysql.execute(generateDeleteSql(finderItemModel,{
+            organization_id:organizationId
+        }))
     }
 }
 

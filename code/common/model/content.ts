@@ -12,7 +12,8 @@ export enum ECommon_Content_Line_Config_Type {
     WIKI_ITEM,
     CALENDAR_EVENT,
     MEETING_ROOM,
-    QUOTE_PERSON
+    QUOTE_PERSON,
+    BOARD_SPRINT
 }
 
 export type ICommon_Content_Line_Style ={

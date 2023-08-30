@@ -5,6 +5,7 @@ export enum ECommon_Model_Workflow_Node_Field_Type_Label_Type {
     USER,
     RELEASE,
     ISSUE,
+    SPRINT
 }
 
 export interface ICommon_Model_Workflow_Node_Field_Type {

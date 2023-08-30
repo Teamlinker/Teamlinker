@@ -10,6 +10,7 @@ export enum ECommon_Model_Finder_Shortcut_Type {
     PROJECT="project",
     PROJECT_ISSUE="project_issue",
     PROJECT_RELEASE="project_release",
+    BOARD_SPRINT="board_sprint",
     WIKI="wiki",
     WIKI_ITEM="wiki_item",
     CALENDAR_EVENT="calendar_event",

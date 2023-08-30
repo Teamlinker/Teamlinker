@@ -194,6 +194,22 @@ export class WorkflowNodeService extends Entity<typeof workflowNodeModel,typeof 
 
     async getActionList() {
         let ret=await workflowNodeMapper.getActionList(this.getId())
+        let allComingNodeList=await workflowNodeMapper.getAllComingNodeList(this.getItem().issue_type_id)
+        if(this.getItem().is_all_coming) {
+            allComingNodeList=allComingNodeList.filter(item=>item.id!=this.getId())
+        }
+        ret=ret.concat(allComingNodeList.map(obj=>{
+            return {
+                id:"_"+obj.id,
+                name:"To "+obj.name,
+                issue_type_id:this.getItem().issue_type_id,
+                dest_node_id:obj.id,
+                source_node_id:null,
+                end_anchor_point:null,
+                source_anchor_point:null,
+                description:null
+            }
+        }))
         return ret;
     }
 

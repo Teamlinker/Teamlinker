@@ -384,7 +384,7 @@ export type ICommon_Route_Res_Organization_FilterUserAndTeam = {
 export type ICommon_Route_Res_Finder_Info = ICommon_Model_Finder_Item &  {
     file?:ICommon_Model_File,
     organization?:ICommon_Model_Organization,
-    shortcut?:ICommon_Model_Project|ICommon_Model_Project_Issue|ICommon_Model_Project_Release|ICommon_Model_Wiki|ICommon_Model_Wiki_Item|ICommon_Model_Calendar_Event|ICommon_Model_Meeting_Room,
+    shortcut?:ICommon_Model_Project|ICommon_Model_Project_Issue|ICommon_Model_Project_Release|ICommon_Model_Wiki|ICommon_Model_Wiki_Item|ICommon_Model_Calendar_Event|ICommon_Model_Meeting_Room|ICommon_Model_Board_Sprint,
     parentFolderList:{
         id:string,
         name:string
@@ -411,11 +411,23 @@ export type ICommon_Route_Res_Notification_Item = ICommon_Model_Notification & {
 export type ICommon_Route_Res_Meeting_Miss_Call = (ICommon_Model_Meeting_Miss_Call & {
     organizationUser:ICommon_Model_Organization_User
 })
+
+export type ICommon_Route_Res_Board_Sprint_Info_Issue=ICommon_Model_Project_Issue & {
+    workflowNode:ICommon_Model_Workflow_Node,
+    issueType:ICommon_Model_Issue_Type,
+    approval?:ICommon_Model_Project_Issue_Approval & {
+        reason?:string,
+        workflowNode:ICommon_Model_Workflow_Node
+    }
+}
+
 export type ICommon_Route_Res_Board_Sprint_Info = ICommon_Model_Board_Sprint & {
     swimLanes:ICommon_Model_Board_Sprint_SwimLane[],
-    issues:(ICommon_Model_Project_Issue & {
-        swimLaneId:string
-    })[]
+    issues:(ICommon_Route_Res_Board_Sprint_Info_Issue & {
+        swimLaneId:string,
+    })[],
+    board:ICommon_Model_Board,
+    project:ICommon_Model_Project
 }
 
 export type ICommon_Route_Res_Board_List={
@@ -438,10 +450,29 @@ export type ICommon_Route_Res_Board_Column_Workflow_Node_Item={
     boardColumn:ICommon_Model_Board_Column
 }
 
+export type ICommon_Route_Res_Board_Sprint_Issue_Item=ICommon_Model_Project_Issue & {
+    swimLane?:ICommon_Model_Board_Sprint_SwimLane,
+    approval?:ICommon_Model_Project_Issue_Approval & {
+        reason?:string,
+        workflowNode:ICommon_Model_Workflow_Node
+    }
+}
 
+export type ICommon_Route_Res_Board_Issue_Action ={
+    nextActionList:ICommon_Model_Workflow_Action[]
+    isDirect:boolean
+}
 
+export type ICommon_Route_Res_Board_Sprint_filter_Item=ICommon_Model_Board_Sprint & {
+    board:ICommon_Model_Board,
+    project:ICommon_Model_Project
+}
 
-
-
+export interface ICommon_Route_Res_Board_Sprint_filter {
+    data:ICommon_Route_Res_Board_Sprint_filter_Item[],
+    count:number,
+    totalPage:number,
+    page:number,
+}
 
 

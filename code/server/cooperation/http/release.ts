@@ -5,6 +5,8 @@ import {DComponent} from "../../common/decorate/component";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import {ProjectReleaseService} from './../service/release';
 import {IUserSession} from "../../user/types/config";
+import rpcNotificationApi from "../../notification/rpc/notification";
+import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 
 @DComponent
 @DHttpController(releaseApi)
@@ -61,21 +63,22 @@ class ReleaseController {
         return;
      }
      @DHttpApi(releaseApi.routes.addIssue)
-     async addIssue(@DHttpReqParamRequired("projectReleaseId") projectReleaseId:string,@DHttpReqParamRequired("projectIssueId") projectIssueId:string):Promise<typeof releaseApi.routes.addIssue.res> {
+     async addIssue(@DHttpReqParamRequired("projectReleaseId") projectReleaseId:string,@DHttpReqParamRequired("projectIssueId") projectIssueId:string,@DHttpUser user:IUserSession):Promise<typeof releaseApi.routes.addIssue.res> {
         let obj=await ProjectReleaseService.getItemById(projectReleaseId)
         if(!obj) {
            throw Err.Project.Release.releaseNotFound
         }
-        await obj.addIssue(projectIssueId)
+        await obj.addIssue(projectIssueId,user.organizationInfo.organizationUserId)
+         rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGN_RELEASE,projectIssueId,null,user.organizationInfo.organizationUserId)
         return;
      }
      @DHttpApi(releaseApi.routes.removeIssue)
-     async removeIssue(@DHttpReqParamRequired("projectReleaseId") projectReleaseId:string,@DHttpReqParamRequired("projectIssueId") projectIssueId:string):Promise<typeof releaseApi.routes.removeIssue.res> {
+     async removeIssue(@DHttpReqParamRequired("projectReleaseId") projectReleaseId:string,@DHttpReqParamRequired("projectIssueId") projectIssueId:string,@DHttpUser user:IUserSession):Promise<typeof releaseApi.routes.removeIssue.res> {
         let obj=await ProjectReleaseService.getItemById(projectReleaseId)
         if(!obj) {
            throw Err.Project.Release.releaseNotFound
         }
-        await obj.removeIssue(projectIssueId)
+        await obj.removeIssue(projectIssueId,user.organizationInfo.organizationUserId)
         return;
      }
      @DHttpApi(releaseApi.routes.checkIfCanRelease)

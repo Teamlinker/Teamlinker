@@ -27,6 +27,10 @@ export class IMUserMessageService extends Entity<typeof iMUserMessageModel,typeo
         let ret=await iMUserMessageMapper.locate(organizationUserIds,messageId)
         return ret;
     }
+
+    static async clearByOrganizationId(organizationId:string) {
+        await iMUserMessageMapper.clearByOrganizationId(organizationId)
+    }
 }
 
 export class IMTeamMessageService extends Entity<typeof iMTeamMessageModel,typeof iMTeamMessageMapper> {
@@ -48,6 +52,10 @@ export class IMTeamMessageService extends Entity<typeof iMTeamMessageModel,typeo
         }
         let ret=await iMTeamMessageMapper.locate(teamId,messageId)
         return ret;
+    }
+
+    static async clearByOrganizationId(organizationId:string) {
+        await iMTeamMessageMapper.clearByOrganizationId(organizationId)
     }
 }
 
@@ -72,6 +80,9 @@ export class IMUnReadMessageService extends Entity<typeof iMUnReadMessageModel,t
         await iMUnReadMessageMapper.addTeam(offlineIds,teamId,objAt,organizationId)
     }
 
+    static async clearByOrganizationId(organizationId:string) {
+        await iMUnReadMessageMapper.clearByOrganizationId(organizationId)
+    }
 }
 
 export class IMFavoriteMessageService extends Entity<typeof iMFavoriteMessageModel,typeof iMFavoriteMessageMapper> {
@@ -81,5 +92,9 @@ export class IMFavoriteMessageService extends Entity<typeof iMFavoriteMessageMod
     static async list(organizationUserId:string,size:number,lastTime?:number):Promise<ICommon_Model_IM_Favorite_Message[]> {
         let ret=await iMFavoriteMessageMapper.list(organizationUserId,size,lastTime)
         return ret;
+    }
+
+    static async clearByOrganizationId(organizationId:string) {
+        await iMFavoriteMessageMapper.clearByOrganizationId(organizationId)
     }
 }

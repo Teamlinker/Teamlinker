@@ -183,6 +183,8 @@ const removeTab=async (id:string)=>{
       if(id==props.item.activeKey) {
         if(i>=props.item.nodes.length) {
           props.item.activeKey=props.item.nodes[props.item.nodes.length-1].id;
+        } else {
+					props.item.activeKey=props.item.nodes[i].id
         }
       }
       break;

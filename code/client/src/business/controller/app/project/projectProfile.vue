@@ -29,6 +29,8 @@ import ProjectIssueProfile from "./issue/projectIssueProfile.vue";
 import {getCurrentNavigator, getCurrentNavigatorMeta} from "../../../../teamOS/common/component/navigator/navigator";
 import ProjectReleaseProfile from "./release/projectReleaseProfile.vue";
 import {Message} from "@arco-design/web-vue";
+import BoardList from "@/business/controller/app/project/board/boardList.vue";
+import BoardProfile from "@/business/controller/app/project/board/boardProfile.vue";
 
 const props=defineProps<{
   projectId:string
@@ -43,7 +45,9 @@ let objComponent={
   release:markRaw(ProjectReleaseList),
   setting:markRaw(ProjectSetting),
   issueProfile:markRaw(ProjectIssueProfile),
-  releaseProfile:markRaw(ProjectReleaseProfile)
+  releaseProfile:markRaw(ProjectReleaseProfile),
+	board:markRaw(BoardList),
+	boardProfile:markRaw(BoardProfile)
 }
 const objProvide={
   id:props.projectId,
@@ -53,10 +57,14 @@ const objProvide={
 provide(injectProjectInfo,objProvide);
 let objMeta=getCurrentNavigatorMeta()?.data as {
   projectIssueId?:string
-  projectReleaseId?:string
+  projectReleaseId?:string,
+	boardSprintId?:string,
+	boardId?:string
 }
 if(objMeta?.projectReleaseId) {
   menuKey.value=["release"]
+} else if(objMeta?.boardSprintId) {
+	menuKey.value=["board"]
 }
 onMounted(()=>{
   if(objMeta?.projectIssueId) {
@@ -69,6 +77,13 @@ onMounted(()=>{
       projectReleaseId:objMeta?.projectReleaseId
     });
     delete objMeta.projectIssueId
+  } else if(objMeta?.boardSprintId) {
+	  eleNavigator.value.navigator.replaceRoot("boardProfile",{
+		  boardId:objMeta?.boardId,
+		  boardSprintId:objMeta?.boardSprintId
+	  });
+	  delete objMeta.boardId
+	  delete objMeta.boardSprintId
   } else {
     eleNavigator.value.navigator.replaceRoot(type.value,null);
   }

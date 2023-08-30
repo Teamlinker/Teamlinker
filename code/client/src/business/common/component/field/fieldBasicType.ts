@@ -6,5 +6,6 @@ export enum EClient_Field_Basic_Type {
     LABEL,
     MODULE,
     PRIORITY,
-    FIXVERSIONS
+    FIXVERSIONS,
+    SPRINT
 }

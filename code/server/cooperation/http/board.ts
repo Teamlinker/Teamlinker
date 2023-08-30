@@ -1,5 +1,5 @@
 import {DComponent} from "../../common/decorate/component";
-import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired} from "../../common/http/http";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import boardApi from "../../../common/routes/board";
 import {ECommon_Model_Project_Issue_Priority} from "../../../common/model/project_issue";
 import {
@@ -13,16 +13,30 @@ import {
 } from "../service/board";
 import {Err} from "../../../common/status/error";
 import {WorkflowNodeService} from "../service/workflow";
-import {ProjectIssueService} from "../service/issue";
+import {ProjectIssueHistoryService, ProjectIssueService} from "../service/issue";
 import {IssueTypeService} from "../service/issueType";
+import {IUserSession} from "../../user/types/config";
+import rpcNotificationApi from "../../notification/rpc/notification";
+import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
+import {ECommon_Model_Project_Issue_History_Type} from "../../../common/model/project_issue_history";
 
 @DComponent
 @DHttpController(boardApi)
-class IssueController {
+class BoardController {
     @DHttpApi(boardApi.routes.listBoard)
     async listBoard(@DHttpReqParamRequired("projectId") projectId: string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string): Promise<typeof boardApi.routes.listBoard.res> {
         let ret=await BoardService.list(projectId,page,size,keyword)
         return ret;
+    }
+
+    @DHttpApi(boardApi.routes.board)
+    async board(@DHttpReqParamRequired("boardId") boardId: string): Promise<typeof boardApi.routes.board.res> {
+        let obj=await BoardService.getItemById(boardId)
+        if(!obj) {
+            throw Err.Project.Board.boardNotFound
+        }
+        return obj.getItem()
+
     }
 
     @DHttpApi(boardApi.routes.createBoard)
@@ -87,6 +101,16 @@ class IssueController {
     @DHttpApi(boardApi.routes.listIssueType)
     async listIssueType(@DHttpReqParamRequired("boardId") boardId: string): Promise<typeof boardApi.routes.listIssueType.res> {
         let ret=await BoardIssueTypeService.list(boardId)
+        return ret;
+    }
+
+    @DHttpApi(boardApi.routes.listUnBindIssueType)
+    async listUnBindIssueType(@DHttpReqParamRequired("boardId") boardId: string): Promise<typeof boardApi.routes.listUnBindIssueType.res> {
+        let obj=await BoardService.getItemById(boardId)
+        if(!obj) {
+            throw Err.Project.Board.boardNotFound
+        }
+        let ret=await obj.listUnBindIssueType()
         return ret;
     }
 
@@ -211,28 +235,28 @@ class IssueController {
     }
 
     @DHttpApi(boardApi.routes.createSprint)
-    async createSprint(@DHttpReqParamRequired("boardId") boardId: string,@DHttpReqParamRequired("name") name: string,@DHttpReqParamRequired("startTime") startTime: number,@DHttpReqParamRequired("endTime") endTime: number): Promise<typeof boardApi.routes.createSprint.res> {
+    async createSprint(@DHttpReqParamRequired("boardId") boardId: string,@DHttpReqParamRequired("name") name: string,@DHttpReqParamRequired("startTime") startTime: string,@DHttpReqParamRequired("endTime") endTime: string): Promise<typeof boardApi.routes.createSprint.res> {
         let objSprint=new BoardSprintService
         objSprint.assignItem({
             name,
             board_id:boardId,
-            start_time:new Date(startTime),
-            end_time:new Date(endTime)
+            start_time:startTime,
+            end_time:endTime
         })
         let ret=await objSprint.create()
         return ret;
     }
 
     @DHttpApi(boardApi.routes.editSprint)
-    async editSprint(@DHttpReqParamRequired("boardSprintId") boardSprintId: string,@DHttpReqParam("name") name: string,@DHttpReqParam("startTime") startTime: number,@DHttpReqParam("endTime") endTime: number): Promise<typeof boardApi.routes.editSprint.res> {
+    async editSprint(@DHttpReqParamRequired("boardSprintId") boardSprintId: string,@DHttpReqParam("name") name: string,@DHttpReqParam("startTime") startTime: string,@DHttpReqParam("endTime") endTime: string): Promise<typeof boardApi.routes.editSprint.res> {
         let objSprint=await BoardSprintService.getItemById(boardSprintId)
         if(!objSprint) {
             throw Err.Project.Board.boardSprintNotFound
         }
         objSprint.assignItem({
             name,
-            start_time:new Date(startTime),
-            end_time:new Date(endTime)
+            start_time:startTime,
+            end_time:endTime
         })
         let ret=await objSprint.update()
         return ret;
@@ -255,6 +279,16 @@ class IssueController {
             throw Err.Project.Board.boardSprintNotFound
         }
         let ret=await objSprint.info()
+        return ret;
+    }
+
+    @DHttpApi(boardApi.routes.listSwimLane)
+    async listSwimLane(@DHttpReqParamRequired("boardSprintId") boardSprintId: string): Promise<typeof boardApi.routes.listSwimLane.res> {
+        let objSprint=await BoardSprintService.getItemById(boardSprintId)
+        if(!objSprint) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        let ret=await objSprint.listSwimLane()
         return ret;
     }
 
@@ -299,8 +333,8 @@ class IssueController {
         return
     }
 
-    @DHttpApi(boardApi.routes.putProjectIssue)
-    async putProjectIssue(@DHttpReqParamRequired("projectIssueId") projectIssueId: string,@DHttpReqParam("boardSprintId") boardSprintId: string,@DHttpReqParam("boardSprintSwimLaneId") boardSprintSwimLaneId: string): Promise<typeof boardApi.routes.putProjectIssue.res> {
+    @DHttpApi(boardApi.routes.addProjectIssue)
+    async addProjectIssue(@DHttpReqParamRequired("projectIssueId") projectIssueId: string,@DHttpReqParamRequired("boardSprintId") boardSprintId: string,@DHttpReqParam("boardSprintSwimLaneId") boardSprintSwimLaneId: string,@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.addProjectIssue.res> {
         let [objProjectIssue,objBoardSprint,objBoardSprintSwimLane]=await Promise.all([
             ProjectIssueService.getItemById(projectIssueId),
             BoardSprintService.getItemById(boardSprintId),
@@ -320,12 +354,23 @@ class IssueController {
         }
         let obj=await BoardSprintIssueService.getItemByExp({
             project_issue_id:projectIssueId,
-            board_id:objBoardSprint.getItem().board_id
         })
+        rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGN_SPRINT,projectIssueId,null,user.organizationInfo.organizationUserId)
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:objProjectIssue.getId(),
+            type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+            organization_user_id:user.organizationInfo.organizationUserId,
+            project_id:objProjectIssue.getItem().project_id,
+            name:"Sprint",
+            value:objBoardSprint.getItem().name
+        })
+        objHistory.create()
         if(obj) {
             obj.assignItem({
                 board_sprint_swimlane_id:boardSprintSwimLaneId??null,
-                board_sprint_id:boardSprintId
+                board_sprint_id:boardSprintId,
+                board_id:objBoardSprint.getItem().board_id
             })
             let ret=await obj.update()
             return ret;
@@ -342,6 +387,86 @@ class IssueController {
         }
     }
 
+    @DHttpApi(boardApi.routes.removeProjectIssue)
+    async removeProjectIssue(@DHttpReqParamRequired("projectIssueId") projectIssueId: string,@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.removeProjectIssue.res> {
+        let objProjectIssue=await ProjectIssueService.getItemById(projectIssueId)
+        if(!objProjectIssue) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let obj=await BoardSprintIssueService.getItemByExp({
+            project_issue_id:projectIssueId,
+        })
+        await obj?.delete()
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:objProjectIssue.getId(),
+            type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+            organization_user_id:user.organizationInfo.organizationUserId,
+            project_id:objProjectIssue.getItem().project_id,
+            name:"Sprint",
+        })
+        objHistory.create()
+        return
+    }
+
+    @DHttpApi(boardApi.routes.addSprintIssues)
+    async addSprintIssue(@DHttpReqParamRequired("boardSprintId") boardSprintId: string,@DHttpReqParamRequired("projectIssueIds") projectIssueIds: string[],@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.addSprintIssues.res> {
+        let [objBoardSprint,...objProjectIssueList]=await Promise.all([
+            BoardSprintService.getItemById(boardSprintId),
+            ...projectIssueIds.map(id=>{
+                return ProjectIssueService.getItemById(id)
+            })
+        ])
+        if(!objBoardSprint) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        let arrIssueType=await BoardIssueTypeService.list(objBoardSprint.getItem().board_id)
+        let ids=arrIssueType.map(item=>item.id)
+        let arrPromise=[]
+        for(let objProjectIssue of objProjectIssueList) {
+            if(objProjectIssue===null) {
+                continue
+            } else if(!ids.includes(objProjectIssue.getItem().issue_type_id)) {
+                continue
+            } else {
+                let obj=await BoardSprintIssueService.getItemByExp({
+                    project_issue_id:objProjectIssue.getId(),
+                    board_id:objBoardSprint.getItem().board_id
+                })
+                if(!obj) {
+                    obj=new BoardSprintIssueService
+                    obj.assignItem({
+                        project_issue_id:objProjectIssue.getId(),
+                        board_id:objBoardSprint.getItem().board_id,
+                        board_sprint_id:boardSprintId,
+                    })
+                    arrPromise.push(obj.create())
+                } else if(obj.getItem().board_sprint_id!==objBoardSprint.getId()) {
+                    obj.assignItem({
+                        board_sprint_id:objBoardSprint.getId(),
+                        board_sprint_swimlane_id:null
+                    })
+                    arrPromise.push(obj.update())
+                }
+                let objHistory=new ProjectIssueHistoryService()
+                objHistory.assignItem({
+                    project_issue_id:objProjectIssue.getId(),
+                    type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+                    organization_user_id:user.organizationInfo.organizationUserId,
+                    project_id:objProjectIssue.getItem().project_id,
+                    name:"Sprint",
+                    value:objBoardSprint.getItem().name
+                })
+                objHistory.create()
+            }
+        }
+        await Promise.all(arrPromise)
+        projectIssueIds.forEach(issueId=>{
+            rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ISSUE_ASSIGN_SPRINT,issueId,null,user.organizationInfo.organizationUserId)
+        })
+        return
+    }
+
     @DHttpApi(boardApi.routes.listUnSetWorkflowNode)
     async listUnSetWorkflowNode(@DHttpReqParamRequired("boardId") boardId: string,@DHttpReqParamRequired("issueTypeId") issueTypeId: string): Promise<typeof boardApi.routes.listUnSetWorkflowNode.res> {
         let [objBoard,objIssueType]=await Promise.all([
@@ -355,6 +480,47 @@ class IssueController {
         }
         let arr=await objBoard.listUnSetWorkflowNode(issueTypeId)
         return arr;
+    }
+
+    @DHttpApi(boardApi.routes.listSprintIssue)
+    async listSprintIssue(@DHttpReqParamRequired("boardSprintId") boardSprintId: string): Promise<typeof boardApi.routes.listSprintIssue.res> {
+        let obj=await BoardSprintService.getItemById(boardSprintId)
+        if(!obj) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        let ret=await obj.listIssue()
+        return ret;
+    }
+
+    @DHttpApi(boardApi.routes.checkIssueAction)
+    async checkIssueAction(@DHttpReqParamRequired("projectIssueId") projectIssueId: string,@DHttpReqParamRequired("boardSprintId") boardSprintId: string,@DHttpReqParamRequired("boardColumnId") boardColumnId: string,@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.checkIssueAction.res> {
+        let obj=await BoardSprintService.getItemById(boardSprintId)
+        if(!obj) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        let ret=await obj.checkIssueAction(projectIssueId,boardColumnId,user.organizationInfo.organizationUserId)
+        return ret;
+    }
+
+    @DHttpApi(boardApi.routes.filterSprint)
+    async filterSprint(@DHttpReqParam("projectId") projectId: string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("boardSprintIds") boardSprintIds:string[]): Promise<typeof boardApi.routes.filterSprint.res> {
+        let ret=await BoardSprintService.filter(projectId,page,size,keyword,boardSprintIds)
+        return ret;
+    }
+
+    @DHttpApi(boardApi.routes.getIssueSprint)
+    async getIssueSprint(@DHttpReqParamRequired("projectIssueId") projectIssueId: string): Promise<typeof boardApi.routes.getIssueSprint.res> {
+        let obj=await BoardSprintIssueService.getItemByExp({
+            project_issue_id:projectIssueId
+        })
+        if(!obj) {
+            throw Err.Project.Board.issueSprintNotExists
+        }
+        let objSprint=await BoardSprintService.getItemById(obj.getItem().board_sprint_id)
+        if(!objSprint) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        return objSprint.getItem()
     }
 
 }

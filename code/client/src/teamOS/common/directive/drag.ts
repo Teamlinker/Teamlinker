@@ -175,7 +175,6 @@ export const vDrag:ObjectDirective={
                             from
                         })
                     }
-                    ev.dataTransfer.setDragImage(el,0,0)
                 }
             }
 

@@ -24,6 +24,9 @@
 					<a-form-item label="Fix Versions">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.FIXVERSIONS" :value="releaseList"></FieldEditBasic>
 					</a-form-item>
+					<a-form-item label="Sprint">
+						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.SPRINT" :value="sprintInfo"></FieldEditBasic>
+					</a-form-item>
 				</a-form>
 			</a-collapse-item>
 			<a-collapse-item key="more" header="More">
@@ -34,7 +37,7 @@
 				</a-form>
 			</a-collapse-item>
 		</a-collapse>
-		<a-row style="margin-top: 10px;color: gray;font-size: 12px;line-height: 1.3;padding-left: 5px;margin-bottom: 10px">
+		<a-row style="margin-top: 10px;color: grey;font-size: 12px;line-height: 1.3;padding-left: 5px;margin-bottom: 10px">
 			Created {{moment(info.created_time).format('YYYY-MM-DD HH:mm:ss')}}
 		</a-row>
 	</div>
@@ -46,7 +49,7 @@ import {EClient_Field_Basic_Type} from "../../../../common/component/field/field
 import moment from "moment/moment";
 import FieldEdit from "../../../../common/component/field/fieldEdit.vue";
 import FieldEditBasic from "../../../../common/component/field/fieldEditBasic.vue";
-import {apiIssue, DCSType} from "../../../../common/request/request";
+import {apiBoard, apiIssue, DCSType} from "../../../../common/request/request";
 import {
 	ICommon_Route_Res_ProjectIssue_BasicInfo,
 	ICommon_Route_Res_ProjectIssue_fieldsInfo
@@ -62,8 +65,11 @@ const props=defineProps<{
 	labelList:DCSType<ICommon_Model_Project_Label>[],
 	fieldList:ICommon_Route_Res_ProjectIssue_fieldsInfo[]
 }>()
-const releaseList=ref<DCSType<ICommon_Model_Project_Release[]>>([])
-
+const releaseList=ref<DCSType<ICommon_Model_Project_Release>[]>([])
+const sprintInfo=ref<{
+	id:string,
+	name:string
+}>()
 const getReleaseList=async ()=>{
 	let res=await apiIssue.releaseList({
 		projectIssueId:props.info.id
@@ -73,8 +79,21 @@ const getReleaseList=async ()=>{
 	}
 }
 
+const getSprintInfo=async ()=>{
+	let res=await apiBoard.getIssueSprint({
+		projectIssueId:props.info.id
+	})
+	if(res?.code==0) {
+		sprintInfo.value={
+			id:res.data.id,
+			name:res.data.name
+		}
+	}
+}
+
 onBeforeMount(()=>{
 	getReleaseList()
+	getSprintInfo()
 })
 
 </script>

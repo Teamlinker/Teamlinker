@@ -3,6 +3,7 @@ import {Icon} from "../../../../teamOS/icon/icon";
 import {ITeamOS_Menu} from "../../../../teamOS/common/type";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {
+    apiBoard,
     apiCalendar,
     apiFile,
     apiFinder,
@@ -148,6 +149,11 @@ export class FinderHandle {
                         }
                         case ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE:{
                             icon="project_release_item"
+                            iconColor="green"
+                            break
+                        }
+                        case ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT:{
+                            icon="board_sprint_item"
                             iconColor="green"
                             break
                         }
@@ -402,6 +408,18 @@ export class FinderHandle {
                 }).then(res=>{
                     if(res?.code==0) {
                         eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,res.data.project_id,item.ref_id)
+                    } else {
+                        Message.error(res.msg)
+                    }
+                })
+                break
+            }
+            case ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT:{
+                apiBoard.sprintInfo({
+                    boardSprintId:item.ref_id
+                }).then(res=>{
+                    if(res?.code==0) {
+                        eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_SPRINT_KANBAN_PROFILE,res.data.project.id,res.data.board.id,item.ref_id)
                     } else {
                         Message.error(res.msg)
                     }

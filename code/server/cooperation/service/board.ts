@@ -17,6 +17,10 @@ import {boardSprintIssueModel} from "../../../common/model/board_sprint_issue";
 import {boardSprintSwimLaneModel} from "../../../common/model/board_sprint_swimlane";
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import {workflowMapper} from "../mapper/workflow";
+import {ProjectService} from "./project";
+import {ProjectIssueService} from "./issue";
+import {Err} from "../../../common/status/error";
+import {ICommon_Model_Workflow_Action} from "../../../common/model/workflow_action";
 
 export class BoardService extends Entity<typeof boardModel,typeof boardMapper> {
     constructor() {
@@ -111,6 +115,28 @@ export class BoardService extends Entity<typeof boardModel,typeof boardMapper> {
         let unSetNodeList=nodeList.filter(item=>!setNodeList.find(item1=>item.id===item1.id))
         return unSetNodeList
     }
+
+    async listUnBindIssueType() {
+        let setIssueTypeList=await BoardIssueTypeService.list(this.getId())
+        let ids=setIssueTypeList.map(item=>item.id)
+        let objProject=await ProjectService.getItemById(this.getItem().project_id)
+        let allIssueTypeList=await objProject.issueTypeList()
+        let unSetIssueTypeList=allIssueTypeList.filter(item=>!ids.includes(item.id))
+        return unSetIssueTypeList
+    }
+
+    static async clearByProjectId(projectId:string) {
+        let arr=await BoardService.getItemsByExp({
+            project_id:projectId
+        })
+        await Promise.all(arr.map(item=>{
+            return item.delete()
+        }))
+    }
+
+    static async clearByProjectIds(projectIds:string[]) {
+        await boardMapper.clearByProjects(projectIds)
+    }
 }
 
 
@@ -183,6 +209,11 @@ export class BoardSprintService extends Entity<typeof boardSprintModel,typeof bo
         return ret;
     }
 
+    static async filter(projectId:string,page:number,size:number,keyword?:string,boardSprintIds?:string[]) {
+        let ret=await boardSprintMapper.filter(projectId,page,size,keyword,boardSprintIds)
+        return ret;
+    }
+
     override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
         await super.delete(eventPublish, ...param);
         await BoardSprintIssueService.clear(this.getId())
@@ -190,14 +221,81 @@ export class BoardSprintService extends Entity<typeof boardSprintModel,typeof bo
     }
 
     async info() {
-        let [arrIssue,arrSwimLane]=await Promise.all([
+        let [arrIssue,arrSwimLane,objBoard]=await Promise.all([
             boardSprintIssueMapper.list(this.getId()),
-            boardSprintSwimLaneMapper.list(this.getId())
+            boardSprintSwimLaneMapper.list(this.getId()),
+            BoardService.getItemById(this.getItem().board_id)
         ])
+        let arrApproval=await Promise.all(arrIssue.map(item=>{
+            return ProjectIssueService.getItemById(item.id).then(obj=>{
+                return obj.getApprovalInfo()
+            })
+        }))
+        let objProject=await ProjectService.getItemById(objBoard.getItem().project_id)
         return {
             ...this.getItem(),
             swimLanes:arrSwimLane,
-            issues:arrIssue
+            issues:arrIssue.map((item,index)=>{
+                return {
+                    ...item,
+                    approval:arrApproval[index]
+                }
+            }),
+            board:objBoard.getItem(),
+            project:objProject.getItem()
+        }
+    }
+
+    async listIssue() {
+        let arrIssue=await boardSprintIssueMapper.listWithSwimLane(this.getId())
+        let arrApproval=await Promise.all(arrIssue.map(item=>{
+            return ProjectIssueService.getItemById(item.id).then(obj=>{
+                return obj.getApprovalInfo()
+            })
+        }))
+        return arrIssue.map((item,index)=>{
+            return {
+                ...item,
+                approval:arrApproval[index]
+            }
+        })
+    }
+
+    async listSwimLane() {
+        let arrSwimLane=await boardSprintSwimLaneMapper.list(this.getId())
+        return arrSwimLane
+    }
+
+    async checkIssueAction(projectIssueId:string,boardColumnId:string,organizationUserId:string) {
+        let objProjectIssue=await ProjectIssueService.getItemById(projectIssueId)
+        if(!objProjectIssue) {
+            throw Err.Project.ProjectIssue.projectIssueNotFound
+        }
+        let actionsInfo=await objProjectIssue.actionsInfo(organizationUserId)
+        let actionList:ICommon_Model_Workflow_Action[]=[]
+        for(let obj of actionsInfo) {
+            if(!("isApproval" in obj)) {
+                actionList.push(obj)
+            }
+        }
+        let nodeIdList=actionList.map(item=>item.dest_node_id)
+        let columnWorkflowNodeList=await BoardColumnWorkflowNodeService.list(boardColumnId)
+        let columnWorkflowNodeIdList=columnWorkflowNodeList.map(item=>item.workflowNode.id)
+        let availableNodeIdList=nodeIdList.filter(id=>columnWorkflowNodeIdList.includes(id))
+        let availableActionList=actionList.filter(item=>availableNodeIdList.includes(item.dest_node_id))
+        if(availableActionList.length==1) {
+            let actionId=availableActionList[0].id
+            let fields=await objProjectIssue.getNextNodeFields(actionId)
+            if(fields.length==0) {
+                return {
+                    nextActionList:availableActionList,
+                    isDirect:true
+                }
+            }
+        }
+        return {
+            nextActionList:availableActionList,
+            isDirect:false
         }
     }
 }
@@ -224,6 +322,6 @@ export class BoardSprintSwimLaneService extends Entity<typeof boardSprintSwimLan
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
         await super.delete(eventPublish, ...param);
-        await boardSprintSwimLaneMapper.clear(this.getItem().board_sprint_id,this.getId())
+        await boardSprintSwimLaneMapper.clearIssue(this.getId())
     }
 }

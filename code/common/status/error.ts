@@ -382,6 +382,10 @@ export namespace Err {
             boardNotIncludeIssueType:{
                 code:3904,
                 msg:"board not include issue type"
+            },
+            issueSprintNotExists:{
+                code:3905,
+                msg:"issue sprint not exists"
             }
         }
     }

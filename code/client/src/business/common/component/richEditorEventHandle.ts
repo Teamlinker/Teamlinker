@@ -1,5 +1,6 @@
 import {ECommon_Content_Line_Config_Type, ICommon_Content_Line_Config} from "../../../../../common/model/content";
 import {
+    apiBoard,
     apiCalendar,
     apiFile,
     apiFinder,
@@ -24,6 +25,7 @@ import {SessionStorage} from "../storage/session";
 import {DropParam} from "../../../teamOS/common/directive/drop";
 import {EClient_Drag_Type, IClient_Drag_Element} from "../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../common/model/finder_item";
+import BoardSprintFilter from "@/business/controller/app/wiki/popMenu/boardSprintFilter.vue";
 
 export class RichEditorEventHandle {
     static popMenuList=[
@@ -46,6 +48,10 @@ export class RichEditorEventHandle {
         {
             type: ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
             title: "Project Release"
+        },
+        {
+            type: ECommon_Content_Line_Config_Type.BOARD_SPRINT,
+            title: "Board Sprint"
         },
         {
             type: ECommon_Content_Line_Config_Type.WIKI,
@@ -142,6 +148,17 @@ export class RichEditorEventHandle {
                 }
                 handleFunc(item)
             }
+        } else if(type===ECommon_Content_Line_Config_Type.BOARD_SPRINT) {
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Board Sprint",markRaw(BoardSprintFilter))
+            if(ret) {
+                let item:ICommon_Content_Line_Config={
+                    type:ECommon_Content_Line_Config_Type.BOARD_SPRINT,
+                    value:ret.id,
+                    label:ret.name,
+                    link:ret.project.id+"_"+ret.board.id
+                }
+                handleFunc(item)
+            }
         } else if(type===ECommon_Content_Line_Config_Type.WIKI) {
             let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Wiki Space",markRaw(WikiFilter))
             if(ret) {
@@ -194,6 +211,9 @@ export class RichEditorEventHandle {
             eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,link,value)
         } else if(type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
             eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_RELEASE_PROFILE,link,value)
+        } else if(type===ECommon_Content_Line_Config_Type.BOARD_SPRINT) {
+            let arr=link.split("_")
+            eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_SPRINT_KANBAN_PROFILE,arr[0],arr[1],value)
         } else if(type===ECommon_Content_Line_Config_Type.WIKI) {
             eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_WIKI_PROFILE,value)
         } else if(type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
@@ -352,6 +372,23 @@ export class RichEditorEventHandle {
                                         value:obj.shortcutRefId,
                                         label:["content","entity"].includes(obj.from)?obj.shortcutName:obj.element.title,
                                         link:res.data.project.id
+                                    }
+                                }
+                                return ret;
+                            })
+                            break
+                        }
+                        case ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT:{
+                            return apiBoard.sprintInfo({
+                                boardSprintId:obj.shortcutRefId
+                            }).then(res=>{
+                                let ret:ICommon_Content_Line_Config
+                                if(res?.code==0) {
+                                    ret={
+                                        type:ECommon_Content_Line_Config_Type.BOARD_SPRINT,
+                                        value:obj.shortcutRefId,
+                                        label:["content","entity"].includes(obj.from)?obj.shortcutName:obj.element.title,
+                                        link:res.data.project.id+"_"+res.data.board.id
                                     }
                                 }
                                 return ret;

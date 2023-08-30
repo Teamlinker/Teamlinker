@@ -17,6 +17,10 @@ class UserTaskModel extends RectNodeModel {
         } else if(props.status==ECommon_Model_Workflow_Node_Status.DONE) {
             style.fill="rgb(15,119,72)"
         }
+        if(props.is_all_coming) {
+            style.strokeWidth=4
+            style.stroke="pink"
+        }
         return style
     }
 
@@ -43,6 +47,16 @@ class UserTaskModel extends RectNodeModel {
         this.width=100
         this.height=40
         this.radius=5
+        const circleOnlyAsTarget = {
+            message: "",
+            validate: (sourceNode, targetNode, sourceAnchor, targetAnchor) => {
+                if(targetNode.getProperties().is_all_coming) {
+                    return false
+                }
+                return true
+            }
+        };
+        this.sourceRules.push(circleOnlyAsTarget);
     }
 }
 

@@ -14,6 +14,7 @@ export enum EClient_EVENTBUS_TYPE {
     OPEN_TEAM_PROFILE="open_team_profile",
     OPEN_PROJECT_PROFILE="open_project_profile",
     OPEN_PROJECT_ISSUE_PROFILE="open_project_issue_profile",
+    OPEN_PROJECT_SPRINT_KANBAN_PROFILE="open_project_sprint_kanban_profile",
     OPEN_PROJECT_RELEASE_PROFILE="open_project_release_profile",
     OPEN_WIKI_PROFILE="open_wiki_profile",
     OPEN_WIKI_ITEM="open_wiki_item",
@@ -69,6 +70,7 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.REFRESH_NOTIFICATION_UNREAD]:()=>void
     [EClient_EVENTBUS_TYPE.LOCATE_IM_MESSAGE]:(item:ICommon_Socket_IM_Search_Message_User|ICommon_Socket_IM_Search_Message_Team)=>void
     [EClient_EVENTBUS_TYPE.REFRESH_MISS_CALL_UNREAD]:()=>void
+    [EClient_EVENTBUS_TYPE.OPEN_PROJECT_SPRINT_KANBAN_PROFILE]:(projectId:string,boardId:string,boardSprintId:string)=>void
 }
 
 interface IClient_EventBus_Emit_Func {

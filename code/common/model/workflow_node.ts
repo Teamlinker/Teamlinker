@@ -14,7 +14,8 @@ export interface ICommon_Model_Workflow_Node {
   issue_type_id :string ,
   x:number,
   y:number,
-  is_approval:number
+  is_approval:number,
+  is_all_coming:number
 }
 export const Table_Workflow_Node="workflow_node"
 

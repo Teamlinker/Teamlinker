@@ -8,6 +8,10 @@
     <FieldEditBasicLabel :is-edit="isEdit" :show-value="showValue as ICommon_Model_Project_Label[]" :project-issue-id="projectIssueId" v-if="type==EClient_Field_Basic_Type.LABEL" @update="onUpdate" @cancel="onBlur"></FieldEditBasicLabel>
     <FieldEditBasicModule :is-edit="isEdit" :show-value="showValue as ICommon_Model_Project_Module[]" :project-issue-id="projectIssueId" v-if="type==EClient_Field_Basic_Type.MODULE" @update="onUpdate" @cancel="onBlur"></FieldEditBasicModule>
     <FieldEditBasicFixVersion :is-edit="isEdit" :show-value="showValue as DCSType<ICommon_Model_Project_Release>[]" :project-issue-id="projectIssueId" v-if="type==EClient_Field_Basic_Type.FIXVERSIONS" @update="onUpdate" @cancel="onBlur"></FieldEditBasicFixVersion>
+	  <FieldEditBasicSprint :is-edit="isEdit" :show-value="showValue as {
+			id:string,
+			name:string
+	  }" :project-issue-id="projectIssueId" v-if="type==EClient_Field_Basic_Type.SPRINT" @update="onUpdate" @cancel="onBlur"></FieldEditBasicSprint>
   </span>
 </template>
 
@@ -29,6 +33,7 @@ import FieldEditBasicReporter from "./basic/fieldEditBasicReporter.vue";
 import FieldEditBasicLabel from "./basic/fieldEditBasicLabel.vue";
 import FieldEditBasicModule from "./basic/fieldEditBasicModule.vue";
 import FieldEditBasicFixVersion from "./basic/fieldEditBasicFixVersion.vue";
+import FieldEditBasicSprint from "@/business/common/component/field/basic/fieldEditBasicSprint.vue";
 
 type User={
   id:string,
@@ -45,7 +50,7 @@ type Props={
 		value?:string
 	} | {
 		type:EClient_Field_Basic_Type.PRIORITY,
-		value?:number
+		value?:ECommon_Model_Project_Issue_Priority
 	} | {
 		type:EClient_Field_Basic_Type.ASSIGNER | EClient_Field_Basic_Type.REPORTER,
 		value?:User
@@ -58,7 +63,13 @@ type Props={
 	} | {
 		type:EClient_Field_Basic_Type.FIXVERSIONS,
 		value?:ICommon_Model_Project_Release[]
-  }
+  } | {
+	type:EClient_Field_Basic_Type.SPRINT,
+	value?:{
+		id:string,
+		name:string
+	}
+}
 )
 const props=defineProps<Props>()
 const element=ref<HTMLSpanElement>(null)

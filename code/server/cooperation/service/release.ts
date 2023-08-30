@@ -7,7 +7,8 @@ import {
     projectReleaseModel
 } from './../../../common/model/project_release';
 import {releaseMapper} from './../mapper/release';
-import {ProjectIssueService} from "./issue";
+import {ProjectIssueHistoryService, ProjectIssueService} from "./issue";
+import {ECommon_Model_Project_Issue_History_Type} from "../../../common/model/project_issue_history";
 
 export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typeof releaseMapper> {
     constructor(){
@@ -66,7 +67,7 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
         return ret;
     }
 
-    async addIssue(projectIssueId:string) {
+    async addIssue(projectIssueId:string,organizationUserId:string) {
         let objIssue=await ProjectIssueService.getItemById(projectIssueId)
         if(!objIssue) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
@@ -74,9 +75,19 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
             throw Err.Project.ProjectIssue.issueProjectNotMatch
         }
         await releaseMapper.addIssue(this.getId(),projectIssueId)
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:projectIssueId,
+            type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+            organization_user_id:organizationUserId,
+            project_id:objIssue.getItem().project_id,
+            name:"Fix Version",
+            value:this.getItem().name
+        })
+        objHistory.create()
     }
 
-    async removeIssue(projectIssueId:string) {
+    async removeIssue(projectIssueId:string,organizationUserId:string) {
         let objIssue=await ProjectIssueService.getItemById(projectIssueId)
         if(!objIssue) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
@@ -84,6 +95,15 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
             throw Err.Project.ProjectIssue.issueProjectNotMatch
         }
         await releaseMapper.removeIssue(this.getId(),projectIssueId)
+        let objHistory=new ProjectIssueHistoryService()
+        objHistory.assignItem({
+            project_issue_id:projectIssueId,
+            type:ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD,
+            organization_user_id:organizationUserId,
+            project_id:objIssue.getItem().project_id,
+            name:"Fix Version",
+        })
+        objHistory.create()
     }
 
     async checkIfCanRelease() {

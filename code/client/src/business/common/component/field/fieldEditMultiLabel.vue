@@ -4,13 +4,14 @@
       <UserAvatar v-for="value in showValue" :organization-user-id="value.id" :name="value.name" :photo="value.photo" v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER" :key="value.id"></UserAvatar>
       <ProjectReleasePreview v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE" v-for="value in showValue" :key="value.id" :project-release-id="value.id" :name="value.name"></ProjectReleasePreview>
       <ProjectIssuePreview v-for="value in showValue" :key="value.id" :name="key+'-'+value.uniqueId" :project-issue-id="value.id" v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE"></ProjectIssuePreview>
+	    <BoardSprintPreview v-for="value in showValue" :name="value.name" :board-sprint-id="value.id" v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT"></BoardSprintPreview>
     </a-space>
-    <span v-else style="line-height: 30px;width: 100%;color: gray">None</span>
+    <span v-else style="line-height: 30px;width: 100%;color: grey">None</span>
   </template>
   <template v-else>
     <a-space size="mini" wrap>
       <a-tag v-for="(value,index) in editValue" :closable="true" @close="onClose(index)" :key="value.id">
-        <template v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER || type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE">
+        <template v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER || type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE || type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT">
           {{value.name}}
         </template>
         <template v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE">
@@ -23,6 +24,9 @@
         <a-option v-for="item1 in searchValueList" :value="item1.id" v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE">
           {{projectKey+"-"+item1.uniqueId+" "+item1.name}}
         </a-option>
+	      <a-option v-for="item1 in searchValueList" :label="item1.name" :value="item1.id" v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT">
+		      {{item1.boardName+" -> "+item1.name}}
+	      </a-option>
         <template #label="{data}" v-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE">
           {{data?.label.split(" ")[0]}}
         </template>
@@ -39,16 +43,17 @@
 </template>
 
 <script setup lang="ts">
-import {apiIssue, apiOrganization, apiRelease, apiUser} from "../../request/request";
+import {apiBoard, apiIssue, apiOrganization, apiRelease, apiUser} from "../../request/request";
 import {computed, inject, ref, watchEffect} from "vue";
 import {
-  ECommon_Model_Workflow_Node_Field_Type_Label_Type
+	ECommon_Model_Workflow_Node_Field_Type_Label_Type
 } from "../../../../../../common/model/workflow_node_field_type";
 import {injectProjectInfo} from "../../util/symbol";
 import UserAvatar from "../userAvatar.vue";
 import ProjectIssuePreview from "../../../controller/app/project/issue/projectIssuePreview.vue";
 import ProjectReleasePreview from "../../../controller/app/project/release/projectReleasePreview.vue";
 import {SessionStorage} from "../../storage/session";
+import BoardSprintPreview from "@/business/controller/app/project/board/boardSprintPreview.vue";
 
 const props=defineProps<{
   value:string[],
@@ -77,7 +82,8 @@ const searchValueList=ref<{
   photo?:string,
   name?:string,
   id:string,
-  uniqueId?:string
+  uniqueId?:string,
+	boardName?:string
 }[]>([])
 const addValue=ref("")
 const showInput = ref(false);
@@ -138,6 +144,24 @@ const request=async ()=>{
           editValue.value[i]={...showValue.value[i]}
         }
       }
+    } else if(props.type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT) {
+	    let arr=[]
+	    for(let obj of props.value) {
+		    arr.push(apiBoard.sprintInfo({
+			    boardSprintId:obj
+		    }))
+	    }
+	    let resArr=await Promise.all(arr);
+	    for(let i=0;i<resArr.length;i++) {
+		    let res=resArr[i]
+		    if(res?.code==0) {
+			    showValue.value[i]={
+				    id:res.data.id,
+				    name:res.data.name
+			    }
+			    editValue.value[i]={...showValue.value[i]}
+		    }
+	    }
     }
   } else {
     showValue.value=[]
@@ -206,6 +230,22 @@ const onSearch=async (keyword:string)=>{
         }
       })
     }
+  } else if(props.type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT) {
+	  let res=await apiBoard.filterSprint({
+		  projectId:projectId,
+		  page:0,
+		  size:10,
+		  keyword:keyword
+	  })
+	  if(res?.code==0) {
+		  searchValueList.value=res.data.data.map(item=>{
+			  return {
+				  id:item.id,
+				  name:item.name,
+				  boardName:item.board.name
+			  }
+		  })
+	  }
   }
 }
 </script>
