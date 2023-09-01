@@ -1154,6 +1154,16 @@ export function convertCountSql(sql:{
     }
 }
 
+export async function convertCountAndExecute(sql:{
+    value:string,
+    type:any
+}):Promise<number> {
+    let countSql=convertCountSql(sql);
+    let mysql=getMysqlInstance()
+    let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+    return count
+}
+
 export async function generatePageAndCount(mysql:Mysql,sql:{
     value:string,
     type:any

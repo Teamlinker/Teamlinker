@@ -1,5 +1,5 @@
 import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../common/model/role";
-import {ICommon_Route_Res_Project_List} from "../../../common/routes/response";
+import {ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_Statics} from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
 import {moduleMapper} from "../mapper/module";
@@ -17,11 +17,23 @@ import {WorkflowService} from './workflow';
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import {emitServiceEvent} from "../../common/event/event";
 import {BoardService} from "./board";
+import {REDIS_PROJECT} from "../../common/cache/keys/project";
 
 export class ProjectService extends Entity<typeof projectModel,typeof projectMapper> {
     constructor(){
         super(projectMapper)
     }
+
+    async statics(organizationUserId:string):Promise<ICommon_Route_Res_Project_Statics> {
+        let objRedis=REDIS_PROJECT.statics(this.getId())
+        let value=await objRedis.get()
+        if(!value) {
+            value=await projectMapper.statics(this.getId(),organizationUserId)
+            await objRedis.set(value)
+        }
+        return value
+    }
+
     override async delete(type?:keyof IServer_Common_Event_Types) {
         await Promise.all([
             super.delete("projectDelete"),

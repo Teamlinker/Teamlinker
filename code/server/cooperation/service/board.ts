@@ -12,7 +12,7 @@ import {
 import {boardColumnModel} from "../../../common/model/board_column";
 import {boardColumnWorkflowNodeModel} from "../../../common/model/board_column_workflow_node";
 import {boardIssueTypeModel} from "../../../common/model/board_issue_type";
-import {boardSprintModel} from "../../../common/model/board_sprint";
+import {boardSprintModel, ECommon_Model_Board_Sprint_Status} from "../../../common/model/board_sprint";
 import {boardSprintIssueModel} from "../../../common/model/board_sprint_issue";
 import {boardSprintSwimLaneModel} from "../../../common/model/board_sprint_swimlane";
 import {IServer_Common_Event_Types} from "../../common/event/types";
@@ -204,8 +204,8 @@ export class BoardSprintService extends Entity<typeof boardSprintModel,typeof bo
     constructor() {
         super(boardSprintMapper)
     }
-    static async list(boardId:string,page:number,size:number,keyword?:string) {
-        let ret=await boardSprintMapper.list(boardId,page,size,keyword)
+    static async list(boardId:string,page:number,size:number,keyword?:string,status?:ECommon_Model_Board_Sprint_Status) {
+        let ret=await boardSprintMapper.list(boardId,page,size,keyword,status)
         return ret;
     }
 

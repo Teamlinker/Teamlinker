@@ -601,4 +601,14 @@ class OrganizationController {
         rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ORGANIZATION_USER_QUIT,null,null,null,objOrganizationUser.getItem().nickname)
         return
     }
+
+    @DHttpApi(organizationApi.routes.statics)
+    async statics(@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.statics.res>{
+        let obj=await OrganizationService.getItemById(user.organizationInfo.organizationId)
+        if(!obj) {
+            throw Err.Organization.organizationNotFound
+        }
+        let ret=await obj.statics()
+        return ret;
+    }
 }

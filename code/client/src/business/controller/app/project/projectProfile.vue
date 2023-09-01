@@ -2,6 +2,7 @@
   <a-layout style="height: 100%">
     <a-layout-sider :resize-directions="['right']">
       <a-menu style="width: 100%" @menu-item-click="onSubMenuClick" v-model:selected-keys="menuKey">
+	      <a-menu-item key="home">Home</a-menu-item>
         <a-menu-item key="issue">Issue</a-menu-item>
 	      <a-menu-item key="board">Board</a-menu-item>
         <a-menu-item key="release">Release</a-menu-item>
@@ -31,13 +32,14 @@ import ProjectReleaseProfile from "./release/projectReleaseProfile.vue";
 import {Message} from "@arco-design/web-vue";
 import BoardList from "@/business/controller/app/project/board/boardList.vue";
 import BoardProfile from "@/business/controller/app/project/board/boardProfile.vue";
+import ProjectHome from "@/business/controller/app/project/home/projectHome.vue";
 
 const props=defineProps<{
   projectId:string
 }>()
-const menuKey=ref(['issue'])
+const menuKey=ref(['home'])
 const permission=ref(0)
-let type=ref("issue")
+let type=ref("home")
 const eleNavigator=ref<InstanceType<typeof NavigatorContainer>>(null)
 const navigator=getCurrentNavigator()
 let objComponent={
@@ -47,7 +49,8 @@ let objComponent={
   issueProfile:markRaw(ProjectIssueProfile),
   releaseProfile:markRaw(ProjectReleaseProfile),
 	board:markRaw(BoardList),
-	boardProfile:markRaw(BoardProfile)
+	boardProfile:markRaw(BoardProfile),
+	home:markRaw(ProjectHome)
 }
 const objProvide={
   id:props.projectId,

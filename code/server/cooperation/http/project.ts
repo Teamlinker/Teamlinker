@@ -212,5 +212,15 @@ class ProjectController {
         };
     }
 
+    @DHttpApi(projectApi.routes.statics)
+    async statics(@DHttpReqParamRequired("projectId") projectId:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.statics.res>{
+        let obj=await ProjectService.getItemById(projectId)
+        if(!obj) {
+            throw Err.Project.projectNotFound
+        }
+        let ret=await obj.statics(user.organizationInfo.organizationUserId)
+        return ret
+    }
+
 }
 export default new ProjectController

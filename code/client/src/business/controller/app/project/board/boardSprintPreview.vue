@@ -4,10 +4,19 @@
 		<template #content>
 			<a-row style="width: 250px;padding: 10px">
 				<a-row style="width: 100%;align-items: center">
-					{{info?.name}}&nbsp;
-					<span style="font-size: smaller;color: grey">
-						{{moment(info?.start_time).format("MM-DD")}}&nbsp;-&nbsp;{{moment(info?.end_time).format("MM-DD")}}
+					{{info?.name}}&nbsp;&nbsp;
+					<span :style="{color: info?.status!==ECommon_Model_Board_Sprint_Status.COMPLETED?'dodgerblue':'rgb(0,180,42)'}">
+						{{info?.status===ECommon_Model_Board_Sprint_Status.NOTSTART?"Not Start":info?.status===ECommon_Model_Board_Sprint_Status.STARTING?"Starting":"Completed"}}
 					</span>
+				</a-row>
+				<a-row style="margin-top: 15px;">
+					<a-space>
+						<icon-calendar></icon-calendar>
+						{{moment(info?.start_time).format("YYYY-MM-DD")}}
+						-
+						<icon-calendar></icon-calendar>
+						{{moment(info?.end_time).format("YYYY-MM-DD")}}
+					</a-space>
 				</a-row>
 				<a-row style="width: 100%;margin-top: 15px;justify-content: space-between;align-items: center">
 					<a-space style="color: dodgerblue">
@@ -32,6 +41,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {ICommon_Route_Res_Board_Sprint_Info} from "../../../../../../../common/routes/response";
 import {v4} from "uuid";
 import moment from "moment";
+import {ECommon_Model_Board_Sprint_Status} from "../../../../../../../common/model/board_sprint";
 
 
 const loading=ref(true)

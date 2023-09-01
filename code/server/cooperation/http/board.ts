@@ -19,6 +19,7 @@ import {IUserSession} from "../../user/types/config";
 import rpcNotificationApi from "../../notification/rpc/notification";
 import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 import {ECommon_Model_Project_Issue_History_Type} from "../../../common/model/project_issue_history";
+import {ECommon_Model_Board_Sprint_Status} from "../../../common/model/board_sprint";
 
 @DComponent
 @DHttpController(boardApi)
@@ -229,8 +230,8 @@ class BoardController {
     }
 
     @DHttpApi(boardApi.routes.listSprint)
-    async listSprint(@DHttpReqParamRequired("boardId") boardId: string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string): Promise<typeof boardApi.routes.listSprint.res> {
-        let ret=await BoardSprintService.list(boardId,page,size,keyword)
+    async listSprint(@DHttpReqParamRequired("boardId") boardId: string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("status") status:ECommon_Model_Board_Sprint_Status): Promise<typeof boardApi.routes.listSprint.res> {
+        let ret=await BoardSprintService.list(boardId,page,size,keyword,status)
         return ret;
     }
 
@@ -521,6 +522,32 @@ class BoardController {
             throw Err.Project.Board.boardSprintNotFound
         }
         return objSprint.getItem()
+    }
+
+    @DHttpApi(boardApi.routes.startSprint)
+    async startSprint(@DHttpReqParamRequired("boardSprintId") boardSprintId: string): Promise<typeof boardApi.routes.startSprint.res> {
+        let obj=await BoardSprintService.getItemById(boardSprintId)
+        if(!obj) {
+            throw Err.Project.Board.issueSprintNotExists
+        }
+        obj.assignItem({
+            status:ECommon_Model_Board_Sprint_Status.STARTING
+        })
+        let ret=await obj.update()
+        return ret
+    }
+
+    @DHttpApi(boardApi.routes.completeSprint)
+    async completeSprint(@DHttpReqParamRequired("boardSprintId") boardSprintId: string): Promise<typeof boardApi.routes.completeSprint.res> {
+        let obj=await BoardSprintService.getItemById(boardSprintId)
+        if(!obj) {
+            throw Err.Project.Board.issueSprintNotExists
+        }
+        obj.assignItem({
+            status:ECommon_Model_Board_Sprint_Status.COMPLETED
+        })
+        let ret=await obj.update()
+        return ret
     }
 
 }

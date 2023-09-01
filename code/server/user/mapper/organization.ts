@@ -3,9 +3,12 @@ import {keys} from '../../../common/transform';
 import {getMysqlInstance} from '../../common/db/mysql';
 import {Mapper} from '../../common/entity/mapper';
 import {
+    convertCountAndExecute,
     generateCommonListData,
     generateCreateSql,
     generateDeleteSql,
+    generateGroupLeftJoin2Sql,
+    generateGroupLeftJoinSql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -16,12 +19,251 @@ import {ICommon_Model_Organization_User, organizationUserModel} from './../../..
 import {ICommon_Model_User, userModel} from './../../../common/model/user';
 import {ICommon_Model_Member_Tag, memberTagModel} from "../../../common/model/member_tag";
 import {memberTagMemberModel} from "../../../common/model/member_tag_member";
-import {teamModel} from "../../../common/model/team";
+import {ICommon_Model_Team, teamModel} from "../../../common/model/team";
+import {ICommon_Model_Project, projectModel} from "../../../common/model/project";
+import {projectIssueModel} from "../../../common/model/project_issue";
+import {ICommon_Model_Wiki, wikiModel} from "../../../common/model/wiki";
+import {wikiItemModel} from "../../../common/model/wiki_item";
+import {ICommon_Route_Res_Organization_Statics} from "../../../common/routes/response";
+import {ECommon_Model_Workflow_Node_Status, workflowNodeModel} from "../../../common/model/workflow_node";
+import {teamUserModel} from "../../../common/model/team_user";
 
 class OrganizationMapper extends Mapper<typeof organizationModel> {
     constructor(){
         super(organizationModel)
     }
+
+    async statics(organizationId:string):Promise<ICommon_Route_Res_Organization_Statics> {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql=getMysqlInstance()
+        let [projectCount,issueCount,wikiSpaceCount,wikiItemCount,userCount,teamCount,projectWithIssueList,projectWithUnDoneIssueList,wikiSpaceWithWikiItemList,teamWithUserList]=await Promise.all([
+            convertCountAndExecute(generateQuerySql(projectModel,null,{
+                organization_id:organizationId
+            })),
+            (async ()=>{
+                let sql=generateLeftJoinSql({
+                    model:projectIssueModel,
+                },{
+                    model:projectModel,
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"project_id"
+                        }
+                    }
+                },{
+                    organization_id:{
+                        model:projectModel,
+                        value:organizationId
+                    }
+                })
+                let count=await convertCountAndExecute(sql)
+                return count
+            })(),
+            convertCountAndExecute(generateQuerySql(wikiModel,null,{
+                organization_id:organizationId
+            })),
+            (async ()=>{
+                let sql=generateLeftJoinSql({
+                    model:wikiItemModel,
+                },{
+                    model:wikiModel,
+                    expression:{
+                        id:{
+                            model:wikiItemModel,
+                            field:"wiki_id"
+                        }
+                    }
+                },{
+                    organization_id:{
+                        model:wikiModel,
+                        value:organizationId
+                    }
+                })
+                let count=await convertCountAndExecute(sql)
+                return count
+            })(),
+            convertCountAndExecute(generateQuerySql(organizationUserModel,null,{
+                organization_id:organizationId
+            })),
+            convertCountAndExecute(generateQuerySql(teamModel,null,{
+                organization_id:organizationId
+            })),
+            (async ()=>{
+                let sql=generateGroupLeftJoinSql({
+                    model:projectIssueModel,
+                    columns:{
+                        columns:[],
+                        calcColumns:[{
+                            exp:"count",
+                            value:"id",
+                            rename:"issueCount"
+                        }]
+                    },
+                },{
+                    model:projectModel,
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"project_id"
+                        }
+                    },
+                    columns:{
+                        columns:keys<ICommon_Model_Project>().map(item=>item.name),
+                        calcColumns:[]
+                    },
+                    aggregation:"project"
+                },["project_id"],{
+                    organization_id:{
+                        model:projectModel,
+                        value:organizationId
+                    }
+                },"and",null,"and",{
+                    isVirtualField:true,
+                    field:"issueCount",
+                    model:projectIssueModel,
+                    type:"desc"
+                },0,10)
+                let arr=await mysql.execute(sql)
+                return arr;
+            })(),
+            (async ()=>{
+                let sql=generateGroupLeftJoin2Sql({
+                    model:projectIssueModel,
+                    columns:{
+                        columns:[],
+                        calcColumns:[{
+                            exp:"count",
+                            value:"id",
+                            rename:"issueCount"
+                        }]
+                    },
+                },{
+                    model:projectModel,
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"project_id"
+                        }
+                    },
+                    columns:{
+                        columns:keys<ICommon_Model_Project>().map(item=>item.name),
+                        calcColumns:[]
+                    },
+                    aggregation:"project"
+                },{
+                    model:workflowNodeModel,
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"workflow_node_id"
+                        }
+                    }
+                },["project_id"],{
+                    organization_id:{
+                        model:projectModel,
+                        value:organizationId
+                    },
+                    status:{
+                        model:workflowNodeModel,
+                        value:{
+                            exp:"<>",
+                            value:ECommon_Model_Workflow_Node_Status.DONE
+                        }
+                    }
+                },"and",null,"and",{
+                    isVirtualField:true,
+                    field:"issueCount",
+                    model:projectIssueModel,
+                    type:"desc"
+                },0,10)
+                let arr=await mysql.execute(sql)
+                return arr;
+            })(),
+            (async ()=>{
+                let sql=generateGroupLeftJoinSql({
+                    model:wikiItemModel,
+                    columns:{
+                        columns:[],
+                        calcColumns:[{
+                            exp:"count",
+                            value:"id",
+                            rename:"wikiItemCount"
+                        }]
+                    },
+                },{
+                    model:wikiModel,
+                    expression:{
+                        id:{
+                            model:wikiItemModel,
+                            field:"wiki_id"
+                        }
+                    },
+                    columns:{
+                        columns:keys<ICommon_Model_Wiki>().map(item=>item.name),
+                        calcColumns:[]
+                    },
+                    aggregation:"wikiSpace"
+                },["wiki_id"],{
+                    organization_id:{
+                        model:wikiModel,
+                        value:organizationId
+                    }
+                },"and",null,"and",{
+                    isVirtualField:true,
+                    field:"wikiItemCount",
+                    model:wikiItemModel,
+                    type:"desc"
+                },0,10)
+                let arr=await mysql.execute(sql)
+                return arr;
+            })(),
+            (async ()=>{
+                let sql=generateGroupLeftJoinSql({
+                    model:teamUserModel,
+                    columns:{
+                        columns:[],
+                        calcColumns:[{
+                            exp:"count",
+                            value:"id",
+                            rename:"userCount"
+                        }]
+                    },
+                },{
+                    model:teamModel,
+                    expression:{
+                        id:{
+                            model:teamUserModel,
+                            field:"team_id"
+                        }
+                    },
+                    columns:{
+                        columns:keys<ICommon_Model_Team>().map(item=>item.name),
+                        calcColumns:[]
+                    },
+                    aggregation:"team"
+                },["team_id"],{
+                    organization_id:{
+                        model:teamModel,
+                        value:organizationId
+                    }
+                },"and",null,"and",{
+                    isVirtualField:true,
+                    field:"userCount",
+                    model:teamUserModel,
+                    type:"desc"
+                },0,10)
+                let arr=await mysql.execute(sql)
+                return arr;
+            })()
+        ])
+        return {
+            projectCount,issueCount,wikiSpaceCount,wikiItemCount,userCount,teamCount,projectWithIssueList,projectWithUnDoneIssueList,wikiSpaceWithWikiItemList,teamWithUserList
+        }
+    }
+
     async list(userId:string) {
         if(!userId) {
             throw Err.Organization.ownerNotFound

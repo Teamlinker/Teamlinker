@@ -2,7 +2,14 @@
 	<div>
 		<a-row style="width: 100%;">
 			<a-space>
-				<a-input-search size="small" style="width: 300px" v-model="keyword" @search="onSearch" search-button></a-input-search>
+				Status:
+				<a-select size="small" style="width: 100px;" v-model="status">
+					<a-option :value="-1">All</a-option>
+					<a-option :value="ECommon_Model_Board_Sprint_Status.NOTSTART">Not Start</a-option>
+					<a-option :value="ECommon_Model_Board_Sprint_Status.STARTING">Starting</a-option>
+					<a-option :value="ECommon_Model_Board_Sprint_Status.COMPLETED">Completed</a-option>
+				</a-select>
+				<a-input-search size="small" style="width: 300px" v-model="keyword" @search="onSearch" search-button placeholder="please type sprint name"></a-input-search>
 				<a-button size="small" type="primary" @click="onCreate">
 					Create
 				</a-button>
@@ -20,6 +27,19 @@
 				</template>
 				<template #extra>
 					<a-space>
+						<a-dropdown trigger="hover">
+							<a-button size="mini" type="primary" :status="item.status===ECommon_Model_Board_Sprint_Status.COMPLETED?'success':'normal'" @click="$event.stopPropagation(),$event.preventDefault()">
+								{{item.status===ECommon_Model_Board_Sprint_Status.NOTSTART?"Not Start":item.status===ECommon_Model_Board_Sprint_Status.STARTING?"Starting":"Completed"}}
+							</a-button>
+							<template #content>
+								<a-doption size="mini" type="primary" status="success" @click="onStartSprint(item,$event)" v-if="item.status!==ECommon_Model_Board_Sprint_Status.STARTING">
+									Start
+								</a-doption>
+								<a-doption size="mini" type="outline" status="success" @click="onCompleteSprint(item,$event)" v-else>
+									Complete
+								</a-doption>
+							</template>
+						</a-dropdown>
 						<a-button type="text" @click="onAddIssue(item,$event)">
 							<template #icon>
 								<icon-plus></icon-plus>
@@ -39,7 +59,11 @@
 				</template>
 				<a-list :loading="loading" :bordered="false" size="small" hoverable>
 					<a-list-item v-for="item1 in sprintIssueList">
-						{{item1.name}}
+						<FieldPriority :priority="item1.priority" only-icon></FieldPriority>
+						<a-link @click="onClickIssue(item1)">
+							{{key+"-"+item1.unique_id}}&nbsp;
+							{{item1.name}}
+						</a-link>
 						<template #actions>
 							<a-button type="text" status="danger" size="mini" @click="onRemoveIssue(item1,item)">
 								<template #icon>
@@ -59,7 +83,10 @@
 import {getCurrentInstance, inject, markRaw, reactive, ref} from "vue";
 import {getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
 import {apiBoard, DCSType} from "@/business/common/request/request";
-import {ICommon_Model_Board_Sprint} from "../../../../../../../common/model/board_sprint";
+import {
+	ECommon_Model_Board_Sprint_Status,
+	ICommon_Model_Board_Sprint
+} from "../../../../../../../common/model/board_sprint";
 import {Dialog} from "@/business/common/component/dialog/dialog";
 import BoardSprintEdit from "@/business/controller/app/project/board/boardSprintEdit.vue";
 import {ICommon_Route_Res_Board_Sprint_Issue_Item} from "../../../../../../../common/routes/response";
@@ -67,11 +94,14 @@ import {Message} from "@arco-design/web-vue";
 import moment from "moment/moment";
 import {injectProjectInfo} from "@/business/common/util/symbol";
 import BoardSprintAddIssue from "@/business/controller/app/project/board/boardSprintAddIssue.vue";
+import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
+import FieldPriority from "@/business/common/component/field/fieldPriority.vue";
 
 const props=defineProps<{
 	boardId:string
 }>()
 const keyword=ref("")
+const status=ref<ECommon_Model_Board_Sprint_Status>(-1)
 const pagination=reactive({
 	total:0,
 	current:1,
@@ -84,12 +114,16 @@ const sprintIssueList=ref<DCSType<ICommon_Route_Res_Board_Sprint_Issue_Item>[]>(
 const loading=ref(false)
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
+const key=objInject.key
 const search=async (page:number)=>{
 	let res=await apiBoard.listSprint({
 		boardId:props.boardId,
 		page:page-1,
 		size:10,
-		keyword:keyword.value
+		keyword:keyword.value,
+		...((status.value as number)!==-1 && {
+			status:status.value
+		})
 	})
 	if(res?.code==0) {
 		sprintList.value=res.data.data
@@ -133,7 +167,7 @@ const onCreate=async ()=>{
 	}
 }
 
-const onAddIssue=async (item:ICommon_Model_Board_Sprint,event:MouseEvent)=>{
+const onAddIssue=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
 	event.stopPropagation()
 	let ret=await Dialog.open(root.value,appContext,"Add Issue",markRaw(BoardSprintAddIssue),{
 		boardSprintId:item.id,
@@ -145,7 +179,7 @@ const onAddIssue=async (item:ICommon_Model_Board_Sprint,event:MouseEvent)=>{
 	}
 }
 
-const onEdit=async (item:ICommon_Model_Board_Sprint,event:MouseEvent)=>{
+const onEdit=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
 	event.stopPropagation()
 	let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(BoardSprintEdit),{
 		type:"edit",
@@ -157,7 +191,7 @@ const onEdit=async (item:ICommon_Model_Board_Sprint,event:MouseEvent)=>{
 	}
 }
 
-const onDelete=async (item:ICommon_Model_Board_Sprint,event:MouseEvent)=>{
+const onDelete=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
 	event.stopPropagation()
 	let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this sprint?")
 	if(ret) {
@@ -170,7 +204,33 @@ const onDelete=async (item:ICommon_Model_Board_Sprint,event:MouseEvent)=>{
 	}
 }
 
-const onRemoveIssue=async (issue:DCSType<ICommon_Route_Res_Board_Sprint_Issue_Item>,sprint:ICommon_Model_Board_Sprint)=>{
+const onStartSprint=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
+	event.stopPropagation()
+	let ret=await Dialog.confirm(root.value,appContext,"Do you want to start this sprint?")
+	if(ret) {
+		let res=await apiBoard.startSprint({
+			boardSprintId:item.id
+		})
+		if(res?.code==0) {
+			search(pagination.current)
+		}
+	}
+}
+
+const onCompleteSprint=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
+	event.stopPropagation()
+	let ret=await Dialog.confirm(root.value,appContext,"Do you want to complete this sprint?")
+	if(ret) {
+		let res=await apiBoard.completeSprint({
+			boardSprintId:item.id
+		})
+		if(res?.code==0) {
+			search(pagination.current)
+		}
+	}
+}
+
+const onRemoveIssue=async (issue:DCSType<ICommon_Route_Res_Board_Sprint_Issue_Item>,sprint:DCSType<ICommon_Model_Board_Sprint>)=>{
 	let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this issue from this sprint?")
 	if(ret) {
 		let res=await apiBoard.removeProjectIssue({
@@ -180,6 +240,10 @@ const onRemoveIssue=async (issue:DCSType<ICommon_Route_Res_Board_Sprint_Issue_It
 			onChange([sprint.id])
 		}
 	}
+}
+
+const onClickIssue=(item:DCSType<ICommon_Route_Res_Board_Sprint_Issue_Item>)=>{
+	eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,projectId,item.id)
 }
 
 </script>
@@ -197,7 +261,7 @@ const onRemoveIssue=async (issue:DCSType<ICommon_Route_Res_Board_Sprint_Issue_It
 	font-weight: bold;
 }
 .sprintIssueList :deep .arco-collapse-item-header {
-	background-color: rgb(244, 245, 247);
+	background-color: rgb(247, 247, 247);
 }
 .sprintIssueList :deep .arco-collapse-item-content-box {
 	padding: 0px;

@@ -29,10 +29,21 @@ import {emitServiceEvent} from "../../common/event/event";
 import {ECommon_Model_Meeting_Room_Type} from "../../../common/model/meeting_room";
 import CommonUtil from "../../common/util/common";
 import rpcWikiApi from "../../wiki/rpc/wiki"
+import {ICommon_Route_Res_Organization_Statics} from "../../../common/routes/response";
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
         super(organizationMapper)
+    }
+
+    async statics():Promise<ICommon_Route_Res_Organization_Statics> {
+        let objRedis=REDIS_ORGANIZATION.statics(this.getId())
+        let value=await objRedis.get()
+        if(!value) {
+            value=await organizationMapper.statics(this.getId())
+            await objRedis.set(value)
+        }
+        return value
     }
 
     static async list(userId:string) {

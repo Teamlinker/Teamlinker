@@ -475,4 +475,52 @@ export interface ICommon_Route_Res_Board_Sprint_filter {
     page:number,
 }
 
+export type ICommon_Route_Res_Project_Statics={
+    issueCount:number,
+    issueUnDoneCount:number,
+    releaseCount:number,
+    sprintCount:number,
+    myRecentIssueList:ICommon_Model_Project_Issue[],
+    recentReleaseList:ICommon_Model_Project_Release[],
+    userIssueList:{
+        count:number,
+        user:{
+            organizationUserId:string,
+            name:string,
+            photo:string
+        }
+    }[],
+    userUnDoneIssueList:{
+        count:number,
+        user:{
+            organizationUserId:string,
+            name:string,
+            photo:string
+        }
+    }[]
+}
 
+export type ICommon_Route_Res_Organization_Statics={
+    projectCount:number,
+    issueCount:number,
+    wikiSpaceCount:number,
+    wikiItemCount:number,
+    userCount:number,
+    teamCount:number,
+    projectWithIssueList:{
+       project:ICommon_Model_Project,
+       issueCount:number
+    }[]
+    projectWithUnDoneIssueList:{
+        project:ICommon_Model_Project,
+        issueCount:number
+    }[]
+    wikiSpaceWithWikiItemList:{
+        wikiSpace:ICommon_Model_Wiki,
+        wikiItemCount:number
+    }[],
+    teamWithUserList:{
+        team:ICommon_Model_Team,
+        userCount:number
+    }[]
+}

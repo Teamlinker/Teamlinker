@@ -5,6 +5,7 @@ import {
     ICommon_Route_Res_Member_Tag_Member,
     ICommon_Route_Res_Organization_FilterUserAndTeam,
     ICommon_Route_Res_Organization_List,
+    ICommon_Route_Res_Organization_Statics,
     ICommon_Route_Res_Organization_User,
     ICommon_Route_Res_Organization_User_Item,
     ICommon_Route_Res_Organization_User_List,
@@ -403,7 +404,14 @@ const api={
             req:{},
             res:{},
             permission:[Permission_Types.Organization.READ]
-        }
+        },
+        statics:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/statics",
+            req:{},
+            res:<ICommon_Route_Res_Organization_Statics>{},
+            permission:[Permission_Types.Organization.READ]
+        },
     }
 }
 

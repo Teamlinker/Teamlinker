@@ -4,7 +4,7 @@ import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Model_Board} from "../model/board";
 import {ICommon_Model_Board_Column} from "../model/board_column";
 import {ICommon_Model_Board_Column_Workflow_Node} from "../model/board_column_workflow_node";
-import {ICommon_Model_Board_Sprint} from "../model/board_sprint";
+import {ECommon_Model_Board_Sprint_Status, ICommon_Model_Board_Sprint} from "../model/board_sprint";
 import {
     ICommon_Route_Res_Board_Column_Workflow_Node_Item,
     ICommon_Route_Res_Board_Issue_Action,
@@ -199,6 +199,7 @@ const api= {
                 boardId :string,
                 page:number,
                 size:number,
+                status?:ECommon_Model_Board_Sprint_Status
                 keyword?:string,
             }>{},
             res:<ICommon_Route_Res_Board_Sprint_List>{},
@@ -367,6 +368,24 @@ const api= {
             }>{},
             res:<ICommon_Model_Board_Sprint>{},
             permission:[Permission_Types.Project.READ]
+        },
+        startSprint:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/sprint/start",
+            req:<{
+                boardSprintId :string
+            }>{},
+            res:<ICommon_Model_Board_Sprint>{},
+            permission:[Permission_Types.Project.EDIT]
+        },
+        completeSprint:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/sprint/complete",
+            req:<{
+                boardSprintId :string
+            }>{},
+            res:<ICommon_Model_Board_Sprint>{},
+            permission:[Permission_Types.Project.EDIT]
         }
     }
 }

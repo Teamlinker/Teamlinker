@@ -5,24 +5,305 @@ import {getMysqlInstance} from '../../common/db/mysql';
 import {Mapper} from "../../common/entity/mapper";
 import CommonUtil from "../../common/util/common";
 import {
+    convertCountAndExecute,
     convertCountSql,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
     generateGroupLeftJoin3Sql,
+    generateLeftJoinSql,
     generateQuerySql
 } from '../../common/util/sql';
-import {projectIssueModel} from './../../../common/model/project_issue';
+import {ICommon_Model_Project_Issue, projectIssueModel} from './../../../common/model/project_issue';
 import {ECommon_Model_Workflow_Node_Status} from './../../../common/model/workflow_node';
 import {roleMemberModel, Table_Role_Member} from "../../../common/model/role_member";
 import {Table_Team_User, teamUserModel} from "../../../common/model/team_user";
 import {memberTagMemberModel, Table_Member_Tag_Member} from "../../../common/model/member_tag_member";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
+import {ICommon_Route_Res_Project_Statics} from "../../../common/routes/response";
+import {ECommon_Model_Project_Release_Status, projectReleaseModel} from "../../../common/model/project_release";
+import {boardSprintModel} from "../../../common/model/board_sprint";
+import {boardModel} from "../../../common/model/board";
+import * as moment from "moment";
+import {organizationUserModel} from "../../../common/model/organization_user";
+import {userModel} from "../../../common/model/user";
+import {keys} from "../../../common/transform";
 
 class ProjectMapper extends Mapper<typeof projectModel>{
     constructor(){
         super(projectModel)
     }
 
+    async statics(projectId:string,organizationUserId:string):Promise<ICommon_Route_Res_Project_Statics> {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        let [issueCount,releaseCount,sprintCount,unDoneIssueCount,myRecentIssueList,recentReleaseList,userIssueList,userUnDoneIssueList]=await Promise.all([
+            convertCountAndExecute(generateQuerySql(projectIssueModel,null,{
+                project_id:projectId
+            })),
+            convertCountAndExecute(generateQuerySql(projectReleaseModel,null,{
+                project_id:projectId
+            })),
+            (async ()=>{
+                let sql=generateLeftJoinSql({
+                    model:boardSprintModel,
+                    columns:["id"]
+                },{
+                    model:boardModel,
+                    expression:{
+                        id:{
+                            model:boardSprintModel,
+                            field:"board_id"
+                        }
+                    }
+                },{
+                    project_id:{
+                        model:boardModel,
+                        value:projectId
+                    }
+                })
+                let ret=await convertCountAndExecute(sql)
+                return ret
+            })(),
+            (async ()=>{
+                let sql=generateLeftJoinSql({
+                    model:projectIssueModel,
+                    columns:["id"]
+                },{
+                    model:workflowNodeModel,
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"workflow_node_id"
+                        }
+                    }
+                },{
+                    project_id:{
+                        model:projectIssueModel,
+                        value:projectId
+                    },
+                    status:{
+                        model:workflowNodeModel,
+                        value:{
+                            exp:"<>",
+                            value:ECommon_Model_Workflow_Node_Status.DONE
+                        }
+                    }
+                })
+                let ret=await convertCountAndExecute(sql)
+                return ret
+            })(),
+            (async ()=>{
+                let sql=generateLeftJoinSql({
+                    model:projectIssueModel,
+                    columns:keys<ICommon_Model_Project_Issue>().map(item=>item.name)
+                },{
+                    model:workflowNodeModel,
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"workflow_node_id"
+                        }
+                    }
+                },{
+                    project_id:{
+                        model:projectIssueModel,
+                        value:projectId
+                    },
+                    assigner_id:{
+                        model:projectIssueModel,
+                        value:organizationUserId
+                    },
+                    status:{
+                        model:workflowNodeModel,
+                        value:{
+                            exp:"<>",
+                            value:ECommon_Model_Workflow_Node_Status.DONE
+                        }
+                    }
+                },"and",{
+                    type:"desc",
+                    field:"modified_time",
+                    model:projectIssueModel
+                },0,10)
+                let ret=await mysql.execute(sql)
+                return ret;
+            })(),
+            mysql.execute(generateQuerySql(projectReleaseModel,null,{
+                status:ECommon_Model_Project_Release_Status.UNRELEASE,
+                project_id:projectId,
+                release_time:{
+                    exp:">=",
+                    value:moment().format("YYYY-MM-DD")
+                }
+            },"and",{
+                type:"asc",
+                field:"release_time"
+            },0,10)),
+            (async ()=>{
+                let sql=generateGroupLeftJoin2Sql({
+                    model:projectIssueModel,
+                    columns:{
+                        columns:[],
+                        calcColumns:[
+                            {
+                                exp:"count",
+                                value:"id",
+                                rename:"count"
+                            }
+                        ]
+                    }
+                },{
+                    model:organizationUserModel,
+                    columns:{
+                        columns:["id","nickname"],
+                        calcColumns:[]
+                    },
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"assigner_id"
+                        }
+                    },
+                    aggregation:"organizationUser"
+                },{
+                    model:userModel,
+                    columns:{
+                        columns:["photo"],
+                        calcColumns:[]
+                    },
+                    expression:{
+                        id:{
+                            model:organizationUserModel,
+                            field:"user_id"
+                        }
+                    },
+                    aggregation:"user"
+                },["assigner_id"],{
+                    project_id:{
+                        model:projectIssueModel,
+                        value:projectId
+                    },
+                    assigner_id:{
+                        model:projectIssueModel,
+                        value:{
+                            exp:"is not null"
+                        }
+                    }
+                },"and",null,"and",{
+                    isVirtualField:true,
+                    field:"count",
+                    model:projectIssueModel,
+                    type:"desc"
+                },0,10)
+                let arr=await mysql.execute(sql)
+                return arr.map(item=>{
+                    return {
+                        count:item.count,
+                        user:{
+                            organizationUserId:item.organizationUser.id,
+                            name:item.organizationUser.nickname,
+                            photo:item.user?.photo
+                        }
+                    }
+                })
+            })(),
+            (async ()=>{
+                let sql=generateGroupLeftJoin3Sql({
+                    model:projectIssueModel,
+                    columns:{
+                        columns:[],
+                        calcColumns:[
+                            {
+                                exp:"count",
+                                value:"id",
+                                rename:"count"
+                            }
+                        ]
+                    }
+                },{
+                    model:organizationUserModel,
+                    columns:{
+                        columns:["id","nickname"],
+                        calcColumns:[]
+                    },
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"assigner_id"
+                        }
+                    },
+                    aggregation:"organizationUser"
+                },{
+                    model:userModel,
+                    columns:{
+                        columns:["photo"],
+                        calcColumns:[]
+                    },
+                    expression:{
+                        id:{
+                            model:organizationUserModel,
+                            field:"user_id"
+                        }
+                    },
+                    aggregation:"user"
+                },{
+                    model:workflowNodeModel,
+                    expression:{
+                        id:{
+                            model:projectIssueModel,
+                            field:"workflow_node_id"
+                        }
+                    }
+                },["assigner_id"],{
+                    project_id:{
+                        model:projectIssueModel,
+                        value:projectId
+                    },
+                    status:{
+                        model:workflowNodeModel,
+                        value:{
+                            exp:"<>",
+                            value:ECommon_Model_Workflow_Node_Status.DONE
+                        }
+                    },
+                    assigner_id:{
+                        model:projectIssueModel,
+                        value:{
+                            exp:"is not null"
+                        }
+                    }
+                },"and",null,"and",{
+                    isVirtualField:true,
+                    field:"count",
+                    model:projectIssueModel,
+                    type:"desc"
+                },0,10)
+                let arr=await mysql.execute(sql)
+                return arr.map(item=>{
+                    return {
+                        count:item.count,
+                        user:{
+                            organizationUserId:item.organizationUser.id,
+                            name:item.organizationUser.nickname,
+                            photo:item.user?.photo
+                        }
+                    }
+                })
+            })()
+        ])
+        return {
+            issueCount:issueCount,
+            issueUnDoneCount:unDoneIssueCount,
+            myRecentIssueList:myRecentIssueList,
+            recentReleaseList:recentReleaseList,
+            releaseCount:releaseCount,
+            sprintCount:sprintCount,
+            userIssueList:userIssueList,
+            userUnDoneIssueList:userUnDoneIssueList
+        }
+    }
 
     async list(organizationId:string,page:number,size:number,keyword?:string,organizationUserId?:string):Promise<{
         count:number,

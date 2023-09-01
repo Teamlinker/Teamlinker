@@ -1,7 +1,13 @@
 <template>
   <a-layout style="height: 100%">
     <a-layout-sider :resize-directions="['right']">
-      <a-menu style="width: 100%" @menu-item-click="onSubMenuClick">
+      <a-menu style="width: 100%" v-model:selected-keys="selectedKeys">
+	      <a-menu-item key="home">
+		      <template #icon>
+			      <icon-home></icon-home>
+		      </template>
+		      Home
+	      </a-menu-item>
         <a-sub-menu key="organization">
           <template #icon>
             <sicon size="" color="" name="Ant" type="apartment"></sicon>
@@ -146,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, markRaw, ref} from "vue";
+import {computed, markRaw, onMounted, ref, watch} from "vue";
 import NavigatorContainer from "../../../../teamOS/common/component/navigator/navigatorContainer.vue";
 import IssueIndex from "./issue/issueSolutionList.vue";
 import OrganizationIndex from "./organization/index.vue";
@@ -162,6 +168,7 @@ import TeamIndex from "./user&team/team.vue";
 import UserIndex from "./user&team/user.vue";
 import RoleWikiList from "./role/wiki/wikiList.vue";
 import RoleGlobalWikiIndex from "./role/wiki/wikiRoleList.vue";
+import SettingHome from "@/business/controller/app/setting/home/settingHome.vue";
 
 let objComponent={
   issueSolution:markRaw(IssueIndex),
@@ -178,6 +185,7 @@ let objComponent={
   wikiSpecificRole: markRaw(RoleWikiList),
   wikiGlobalRole:markRaw(RoleGlobalWikiIndex),
   wikiManage:markRaw(WikiIndex),
+	home:markRaw(SettingHome)
 }
 let type=ref("")
 let objCrumb={
@@ -195,7 +203,9 @@ let objCrumb={
   wikiGlobalRole:"Global Wiki Role",
   wikiSpecificRole:"Wiki List",
   wikiManage:"Wiki",
+	home:"Dashboard"
 }
+const selectedKeys=ref(["home"])
 const eleNavigator=ref<InstanceType<typeof NavigatorContainer>>(null)
 let pathList=computed(()=>{
   if(eleNavigator.value) {
@@ -204,10 +214,17 @@ let pathList=computed(()=>{
     return []
   }
 });
-const onSubMenuClick=(key:string)=>{
-  type.value=key;
-  eleNavigator.value.navigator.replaceRoot(key,null,objCrumb[key]);  
+watch(selectedKeys,()=>{
+	locate()
+})
+const locate=()=>{
+	let key=selectedKeys.value[0]
+	type.value=key;
+	eleNavigator.value.navigator.replaceRoot(key,null,objCrumb[key]);
 }
+onMounted(()=>{
+	locate()
+})
 </script>
 
 <style scoped>

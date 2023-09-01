@@ -3,7 +3,11 @@ import {boardModel, ICommon_Model_Board} from "../../../common/model/board";
 import {boardColumnModel, ICommon_Model_Board_Column} from "../../../common/model/board_column";
 import {boardColumnWorkflowNodeModel} from "../../../common/model/board_column_workflow_node";
 import {boardIssueTypeModel} from "../../../common/model/board_issue_type";
-import {boardSprintModel, ICommon_Model_Board_Sprint} from "../../../common/model/board_sprint";
+import {
+    boardSprintModel,
+    ECommon_Model_Board_Sprint_Status,
+    ICommon_Model_Board_Sprint
+} from "../../../common/model/board_sprint";
 import {
     boardSprintSwimLaneModel,
     ICommon_Model_Board_Sprint_SwimLane
@@ -349,7 +353,7 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
     constructor() {
         super(boardSprintModel)
     }
-    async list(boardId:string,page:number,size:number,keyword?:string) {
+    async list(boardId:string,page:number,size:number,keyword?:string,status?:ECommon_Model_Board_Sprint_Status) {
         if(!boardId) {
             throw Err.Project.Board.boardNotFound
         }
@@ -361,6 +365,9 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
                     exp: "%like%",
                     value:keyword
                 }
+            }),
+            ...(status!=null && {
+                status
             })
         },"and",{
             type:"desc",

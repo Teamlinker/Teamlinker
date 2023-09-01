@@ -8,6 +8,7 @@ import {
     ICommon_Route_Res_Project_CreateModule_Data,
     ICommon_Route_Res_Project_List,
     ICommon_Route_Res_Project_ListTag,
+    ICommon_Route_Res_Project_Statics,
     ICommon_Route_Res_recentProjectList_Item,
     ICommon_Route_Res_Role_Item,
     ICommon_Route_Res_Role_List,
@@ -304,7 +305,16 @@ const api={
                 value:number
             }>{},
             permission:[Permission_Types.Project.READ]
-        }
+        },
+        statics:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/statics",
+            req:<{
+                projectId:string
+            }>{},
+            res:<ICommon_Route_Res_Project_Statics>{},
+            permission:[Permission_Types.Project.READ]
+        },
     }
 }
 export default api

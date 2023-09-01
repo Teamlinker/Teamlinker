@@ -24,7 +24,7 @@
 					<a-row style="height: 100%;width: 100%;flex-direction: column;background-color: rgb(249,249,249)">
 						<a-row style="flex: 1 1 0px;width: 100%;padding: 5px 5px;box-sizing: border-box;overflow-y: auto" :style="{borderBottom:index!==swimLaneList.length-1?'1px lightgray solid':''}" v-for="(item,index) in swimLaneList" @dragover="onDragOver(item,props.item.id,$event)" @drop="onDrop(item,props.item.id,$event)">
 							<a-space direction="vertical" style="width: 100%" v-if="issueMap?.[item.id]?.[props.item.id]">
-								<div v-for="item1 in issueMap[item.id][props.item.id]" style="height: 80px;border-radius: 5px;cursor: move;background-color: white;box-shadow: 0 2px 12px 0 rgba(45,45,46,.05), 0 2px 4px 0 rgba(45,45,46,.1);padding: 5px;box-sizing: border-box"  draggable="true" @dragstart="onDragStart(item1,props.item.id,item.id,$event)" @dragend="onDragEnd(item1,props.item.id,item.id,$event)">
+								<div v-for="item1 in issueMap[item.id][props.item.id]" style="height: 80px;border-radius: 5px;background-color: white;box-shadow: 0 2px 12px 0 rgba(45,45,46,.05), 0 2px 4px 0 rgba(45,45,46,.1);padding: 5px;box-sizing: border-box"  :draggable="sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED" @dragstart="onDragStart(item1,props.item.id,item.id,$event)" @dragend="onDragEnd(item1,props.item.id,item.id,$event)" :style="{cursor:sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED?'move':'normal'}">
 									<div style="width: 100%;height: 40px;overflow: hidden;text-overflow: ellipsis;word-break: break-all">
 										<a style="color: dodgerblue;cursor: pointer" @click="onClickIssue(item1.project_id,item1.id)" :title="item1.name">
 											<FieldPriority :priority="item1.priority" only-icon></FieldPriority>
@@ -35,7 +35,7 @@
 									<a-row style="width: 100%;height: 30px;justify-content: space-between;align-items: center">
 										<UserAvatar :organization-user-id="item1.assigner_id.organizationUserId" v-if="item1.assigner_id" only-photo></UserAvatar>
 										<span v-else></span>
-										<a-dropdown-button size="mini" @popupVisibleChange="(visible:boolean)=>{onPopupVisibleChange(item1.id,visible)}" :type="item1.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART?'secondary':'primary'" :status="item1.workflowNode.status===ECommon_Model_Workflow_Node_Status.DONE?'success':'normal'">
+										<a-dropdown-button size="mini" @popupVisibleChange="(visible:boolean)=>{onPopupVisibleChange(item1.id,visible)}" :type="item1.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART?'secondary':'primary'" :status="item1.workflowNode.status===ECommon_Model_Workflow_Node_Status.DONE?'success':'normal'" v-if="sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED">
 											<div style="overflow: hidden;text-overflow: ellipsis;max-width: 120px">
 												{{calculateApprovalName(item1)}}
 											</div>
@@ -47,6 +47,11 @@
 												<a-spin loading v-else></a-spin>
 											</template>
 										</a-dropdown-button>
+										<a-button size="mini" v-else>
+											<div style="overflow: hidden;text-overflow: ellipsis;max-width: 140px">
+												{{calculateApprovalName(item1)}}
+											</div>
+										</a-button>
 									</a-row>
 								</div>
 							</a-space>
@@ -55,8 +60,13 @@
 				</template>
 				<template #pinHeader>
 					<a-row style="height: 100%;display: flex;align-items: center;justify-content: space-between;padding: 0 5px;box-sizing: border-box;">
-						<span style="color: grey">Swim Lane</span>
-						<a-button size="mini" type="text" @click="onAddSwimLane">
+						<a-space>
+							<span style="color: grey">Swim Lane</span>
+							<span :style="{color: sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED?'dodgerblue':'rgb(0,180,42)'}">
+								({{sprintInfo.status===ECommon_Model_Board_Sprint_Status.NOTSTART?"Not Start":sprintInfo.status===ECommon_Model_Board_Sprint_Status.STARTING?"Starting":"Completed"}})
+							</span>
+						</a-space>
+						<a-button size="mini" type="text" @click="onAddSwimLane" v-if="sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED">
 							<template #icon>
 								<icon-plus></icon-plus>
 							</template>
@@ -72,7 +82,7 @@
 									{{item.name}}&nbsp;
 									<span style="color: grey;font-size: smaller">{{moment(item.created_time).format("MM-DD")}}</span>
 								</div>
-								<a-row style="width: 100%;align-items: center;justify-content: space-between">
+								<a-row style="width: 100%;align-items: center;justify-content: space-between" v-if="sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED">
 									<a-space size="mini">
 										<a-button size="mini" type="text" @click="onAddIssue(item)">
 											<template #icon>
@@ -106,7 +116,10 @@
 <script setup lang="ts">
 import {getCurrentInstance, inject, markRaw, onBeforeMount, ref} from "vue";
 import {apiBoard, apiIssue, DCSType} from "@/business/common/request/request";
-import {ICommon_Model_Board_Sprint} from "../../../../../../../common/model/board_sprint";
+import {
+	ECommon_Model_Board_Sprint_Status,
+	ICommon_Model_Board_Sprint
+} from "../../../../../../../common/model/board_sprint";
 import {
 	ICommon_Route_Res_Board_Column_Workflow_Node_Item,
 	ICommon_Route_Res_Board_Sprint_Info,
@@ -344,6 +357,9 @@ const onAddIssue=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>)=>{
 const onDragOver=(item:DCSType<ICommon_Model_Board_Sprint_SwimLane>,columnId:string,event:DragEvent)=>{
 	event.stopPropagation()
 	event.preventDefault()
+	if(sprintInfo.value.status==ECommon_Model_Board_Sprint_Status.COMPLETED) {
+		return
+	}
 	let ele=event.currentTarget as HTMLElement
 	let rect=ele.getBoundingClientRect()
 	if(objDrag.swimLaneId!==item.id || objDrag.columnId!==columnId) {
@@ -373,6 +389,9 @@ const onDragOver=(item:DCSType<ICommon_Model_Board_Sprint_SwimLane>,columnId:str
 const onDrop=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>,columnId:string,event:DragEvent)=>{
 	event.stopPropagation()
 	event.preventDefault()
+	if(sprintInfo.value.status==ECommon_Model_Board_Sprint_Status.COMPLETED) {
+		return
+	}
 	if(objDrag.swimLaneId!==item.id || objDrag.columnId!==columnId) {
 		let objDragCopy=Object.assign({},objDrag)
 		if(objDragCopy.columnId===columnId) {
@@ -446,6 +465,9 @@ const onDrop=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>,columnId:s
 }
 
 const onDragStart=(item:DCSType<ICommon_Route_Res_Board_Sprint_Info_Issue>,columnId:string,swimLaneId:string,event:DragEvent)=>{
+	if(sprintInfo.value.status==ECommon_Model_Board_Sprint_Status.COMPLETED) {
+		return
+	}
 	objDrag={
 		workflowNodeId:item.workflow_node_id,
 		columnId:columnId,
@@ -455,6 +477,9 @@ const onDragStart=(item:DCSType<ICommon_Route_Res_Board_Sprint_Info_Issue>,colum
 }
 
 const onDragEnd=(item:DCSType<ICommon_Route_Res_Board_Sprint_Info_Issue>,columnId:string,swimLaneId:string,event:DragEvent)=>{
+	if(sprintInfo.value.status==ECommon_Model_Board_Sprint_Status.COMPLETED) {
+		return
+	}
 	objDrag=null
 	if(maskElement) {
 		maskElement.remove()

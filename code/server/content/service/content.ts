@@ -23,14 +23,18 @@ export class ContentService extends Entity<typeof contentModel,typeof contentMap
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
-        if(this.getItem().content) {
-            for(let objLine of JSON.parse(this.getItem().content) as ICommon_Content_Line[]) {
-                for(let objConfig of objLine.arr) {
-                    if(objConfig.type===ECommon_Content_Line_Config_Type.FILE || objConfig.type===ECommon_Content_Line_Config_Type.IMAGE) {
-                        emitServiceEvent("fileUnref",objConfig.value)
+        try {
+            if(this.getItem().content) {
+                for(let objLine of JSON.parse(this.getItem().content) as ICommon_Content_Line[]) {
+                    for(let objConfig of objLine.arr) {
+                        if(objConfig.type===ECommon_Content_Line_Config_Type.FILE || objConfig.type===ECommon_Content_Line_Config_Type.IMAGE) {
+                            emitServiceEvent("fileUnref",objConfig.value)
+                        }
                     }
                 }
             }
+        } catch (e) {
+            console.error(e)
         }
     }
 
