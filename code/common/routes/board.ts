@@ -12,7 +12,9 @@ import {
     ICommon_Route_Res_Board_Sprint_filter,
     ICommon_Route_Res_Board_Sprint_Info,
     ICommon_Route_Res_Board_Sprint_Issue_Item,
-    ICommon_Route_Res_Board_Sprint_List
+    ICommon_Route_Res_Board_Sprint_List,
+    ICommon_Route_Res_Global_Search_Board_Item,
+    ICommon_Route_Res_Global_Search_Board_Sprint_Item
 } from "./response";
 import {ECommon_Model_Project_Issue_Priority} from "../model/project_issue";
 import {ICommon_Model_Board_Sprint_SwimLane} from "../model/board_sprint_swimlane";
@@ -386,6 +388,26 @@ const api= {
             }>{},
             res:<ICommon_Model_Board_Sprint>{},
             permission:[Permission_Types.Project.EDIT]
+        },
+        globalSearchBoard:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/global/board",
+            req:<{
+                keyword:string,
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_Global_Search_Board_Item[]>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        globalSearchSprint:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/global/sprint",
+            req:<{
+                keyword:string,
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_Global_Search_Board_Sprint_Item[]>{},
+            permission:[Permission_Types.Organization.READ]
         }
     }
 }

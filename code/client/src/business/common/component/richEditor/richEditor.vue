@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, nextTick, onBeforeUnmount, ref, watch} from "vue";
+import {getCurrentInstance, nextTick, onBeforeUnmount, ref, watch, watchEffect} from "vue";
 import {RichEditorEvent} from "./event";
 import {RichEditorHandle} from "./handle";
 import {
@@ -56,9 +56,11 @@ const root=ref<HTMLElement>()
 const elementList=ref<HTMLElement[]>([])
 let selectStartIndexPath=[0,0,0]
 const objEditor=new RichEditorEvent(root,elementList,getCurrentInstance().appContext)
-if(props.popMenuList) {
-	objEditor.setPopMenuList(props.popMenuList)
-}
+watchEffect(()=>{
+	if(props.popMenuList) {
+		objEditor.setPopMenuList(props.popMenuList)
+	}
+})
 objEditor.onUploadFileFunc=(file, handleFunc) => {
 	emit("uploadFile",file,handleFunc)
 }

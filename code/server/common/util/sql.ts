@@ -975,7 +975,7 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
         value:EXPRVALUE,
         model:T1|T2|T3|T4
     }|{
-        [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{ 
+        [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
             value:EXPRVALUE,
             model:T1|T2|T3|T4
         }
@@ -1103,6 +1103,487 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
     }
     return {
         value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}${orderStr??""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        type:null,
+        aggregation:aggregation
+    }
+}
+
+export function generateLeftJoin4Sql<T1 extends BaseModel,T2 extends BaseModel,T3 extends BaseModel,T4 extends BaseModel,T5 extends BaseModel,K1 extends keyof T1["model"]=null,K2 extends keyof T2["model"]=null,K3 extends keyof T3["model"]=null,K4 extends keyof T4["model"]=null,K5 extends keyof T5["model"]=null,F1 extends string=null,F2 extends string=null,F3 extends string=null,F4 extends string=null,F5 extends string=null,R1 extends K1=null,RR1 extends string=null,R2 extends K2=null,RR2 extends string=null,R3 extends K3=null,RR3 extends string=null,R4 extends K4=null,RR4 extends string=null,R5 extends K5=null,RR5 extends string=null>(mainModel:{
+    model:T1,
+    columns?:K1[],
+    aggregation?:F1,
+    rename?:{
+        fields:R1[],
+        newFields:RR1[]
+    }
+},joinModel:{
+    model:T2,
+    columns?:K2[],
+    rename?:{
+        fields:R2[],
+        newFields:RR2[]
+    }
+    aggregation?:F2,
+    expression:{
+        [key in keyof T2["model"]]?:{
+            model:T1|T3|T4|T5,
+            field:keyof (T1 & T3 & T4 & T5)["model"]
+        }
+    }
+},joinModel2:{
+    model:T3,
+    columns?:K3[],
+    aggregation?:F3,
+    rename?:{
+        fields:R3[],
+        newFields:RR3[]
+    }
+    expression:{
+        [key in keyof T3["model"]]?:{
+            model:T1|T2|T4|T5,
+            field:keyof (T1 & T2 & T4 & T5)["model"]
+        }
+    }
+},joinModel3:{
+    model:T4,
+    columns?:K4[],
+    aggregation?:F4,
+    rename?:{
+        fields:R4[],
+        newFields:RR4[]
+    }
+    expression:{
+        [key in keyof T4["model"]]?:{
+            model:T1|T2|T3|T5,
+            field:keyof (T1 & T2 & T3 & T5)["model"]
+        }
+    }
+},joinModel4:{
+    model:T5,
+    columns?:K5[],
+    aggregation?:F5,
+    rename?:{
+        fields:R5[],
+        newFields:RR5[]
+    }
+    expression:{
+        [key in keyof T5["model"]]?:{
+            model:T1|T2|T3|T4,
+            field:keyof (T1 & T2 & T3 & T4)["model"]
+        }
+    }
+},objExpr?:{
+    [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"])|`${"$and"|"$or"}${number}`)]?:{
+    value:EXPRVALUE,
+    model:T1|T2|T3|T4|T5
+}|{
+    [param in keyof (T1 & T2 & T3 & T4 & T5)["model"]]?:{
+        value:EXPRVALUE,
+        model:T1|T2|T3|T4|T5
+    }
+}
+},exprMode?:"and"|"or",order?:{
+    field:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"] & T5["model"]),
+    model:T1 | T2 | T3 | T4 | T5,
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
+},limit?:number,size?:number):{
+    value:string,
+    type:(F1 extends null ? Rename<{
+        [key in K1]:T1["model"][key]
+    },R1,RR1>:{
+        [key in F1]:Rename<{
+            [key in K1]:T1["model"][key]
+        },R1,RR1>
+    }) & (F2 extends null ? Rename<{
+        [key in K2]:T2["model"][key]
+    },R2,RR2>:{
+        [key in F2]:Rename<{
+            [key in K2]:T2["model"][key]
+        },R2,RR2>
+    }) & (F3 extends null ? Rename<{
+        [key in K3]:T3["model"][key]
+    },R3,RR3>:{
+        [key in F3]:Rename<{
+            [key in K3]:T3["model"][key]
+        },R3,RR3>
+    }) & (F4 extends null ? Rename<{
+        [key in K4]:T4["model"][key]
+    },R4,RR4>:{
+        [key in F4]:Rename<{
+            [key in K4]:T4["model"][key]
+        },R4,RR4>
+    }) & (F5 extends null ? Rename<{
+        [key in K5]:T5["model"][key]
+    },R5,RR5>:{
+        [key in F5]:Rename<{
+            [key in K5]:T5["model"][key]
+        },R5,RR5>
+    }),
+    aggregation:{
+        [key:string]:string
+    }
+} {
+    let expr=generateLeftJoinExp(objExpr,exprMode);
+    let table=mainModel.model.table
+    let joinTable=joinModel.model.table
+    let joinTable2=joinModel2.model.table
+    let joinTable3=joinModel3.model.table
+    let joinTable4=joinModel4.model.table
+    let arrExpression=[]
+    for(let key in joinModel.expression) {
+        let value=joinModel.expression[key]
+        arrExpression.push(`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression=arrExpression.join(" and ")
+    let arrExpression2=[]
+    for(let key in joinModel2.expression) {
+        let value=joinModel2.expression[key]
+        arrExpression2.push(`${joinTable2}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression2=arrExpression2.join(" and ")
+    let arrExpression3=[]
+    for(let key in joinModel3.expression) {
+        let value=joinModel3.expression[key]
+        arrExpression3.push(`${joinTable3}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression3=arrExpression3.join(" and ")
+    let arrExpression4=[]
+    for(let key in joinModel4.expression) {
+        let value=joinModel4.expression[key]
+        arrExpression4.push(`${joinTable4}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression4=arrExpression4.join(" and ")
+    let rename=mainModel.rename
+    let renameJoin=joinModel.rename
+    let renameJoin2=joinModel2.rename
+    let renameJoin3=joinModel3.rename
+    let renameJoin4=joinModel4.rename
+    let aggregation={}
+    let column=""
+    if(mainModel.columns && mainModel.columns.length>0) {
+        let str=mainModel.columns.map((item)=>{
+            return `${table}.${item.toString()} _${table}__${(rename && rename.fields.includes(item as any))?rename.newFields[rename.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=str;
+    }
+    if(joinModel.columns && joinModel.columns.length>0) {
+        let str=joinModel.columns.map((item)=>{
+            return `${joinTable}.${item.toString()} _${joinTable}__${(renameJoin && renameJoin.fields.includes(item as any))?renameJoin.newFields[renameJoin.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel2.columns && joinModel2.columns.length>0) {
+        let str=joinModel2.columns.map((item)=>{
+            return `${joinTable2}.${item.toString()} _${joinTable2}__${(renameJoin2 && renameJoin2.fields.includes(item as any))?renameJoin2.newFields[renameJoin2.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel3.columns && joinModel3.columns.length>0) {
+        let str=joinModel3.columns.map((item)=>{
+            return `${joinTable3}.${item.toString()} _${joinTable3}__${(renameJoin3 && renameJoin3.fields.includes(item as any))?renameJoin3.newFields[renameJoin3.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel4.columns && joinModel4.columns.length>0) {
+        let str=joinModel4.columns.map((item)=>{
+            return `${joinTable4}.${item.toString()} _${joinTable4}__${(renameJoin4 && renameJoin4.fields.includes(item as any))?renameJoin4.newFields[renameJoin4.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    column=column.trim()
+    if(column[0]==",")
+    {
+        column=column.substr(1)
+    }
+    aggregation[table]=mainModel.aggregation??""
+    aggregation[joinTable]=joinModel.aggregation??""
+    aggregation[joinTable2]=joinModel2.aggregation??""
+    aggregation[joinTable3]=joinModel3.aggregation??""
+    aggregation[joinTable4]=joinModel4.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.model.table}.${order.field.toString()} ${order.type}`
+        }
+    }
+    return {
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} left join ${joinTable4} on ${expression4}  ${expr?(" where "+expr):""}${orderStr??""}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        type:null,
+        aggregation:aggregation
+    }
+}
+
+export function generateLeftJoin5Sql<T1 extends BaseModel,T2 extends BaseModel,T3 extends BaseModel,T4 extends BaseModel,T5 extends BaseModel,T6 extends BaseModel,K1 extends keyof T1["model"]=null,K2 extends keyof T2["model"]=null,K3 extends keyof T3["model"]=null,K4 extends keyof T4["model"]=null,K5 extends keyof T5["model"]=null,K6 extends keyof T6["model"]=null,F1 extends string=null,F2 extends string=null,F3 extends string=null,F4 extends string=null,F5 extends string=null,F6 extends string=null,R1 extends K1=null,RR1 extends string=null,R2 extends K2=null,RR2 extends string=null,R3 extends K3=null,RR3 extends string=null,R4 extends K4=null,RR4 extends string=null,R5 extends K5=null,RR5 extends string=null,R6 extends K6=null,RR6 extends string=null>(mainModel:{
+    model:T1,
+    columns?:K1[],
+    aggregation?:F1,
+    rename?:{
+        fields:R1[],
+        newFields:RR1[]
+    }
+},joinModel:{
+    model:T2,
+    columns?:K2[],
+    rename?:{
+        fields:R2[],
+        newFields:RR2[]
+    }
+    aggregation?:F2,
+    expression:{
+        [key in keyof T2["model"]]?:{
+            model:T1|T3|T4|T5|T6,
+            field:keyof (T1 & T3 & T4 & T5 & T6)["model"]
+        }
+    }
+},joinModel2:{
+    model:T3,
+    columns?:K3[],
+    aggregation?:F3,
+    rename?:{
+        fields:R3[],
+        newFields:RR3[]
+    }
+    expression:{
+        [key in keyof T3["model"]]?:{
+            model:T1|T2|T4|T5|T6,
+            field:keyof (T1 & T2 & T4 & T5 & T6)["model"]
+        }
+    }
+},joinModel3:{
+    model:T4,
+    columns?:K4[],
+    aggregation?:F4,
+    rename?:{
+        fields:R4[],
+        newFields:RR4[]
+    }
+    expression:{
+        [key in keyof T4["model"]]?:{
+            model:T1|T2|T3|T5|T6,
+            field:keyof (T1 & T2 & T3 & T5 & T6)["model"]
+        }
+    }
+},joinModel4:{
+    model:T5,
+    columns?:K5[],
+    aggregation?:F5,
+    rename?:{
+        fields:R5[],
+        newFields:RR5[]
+    }
+    expression:{
+        [key in keyof T5["model"]]?:{
+            model:T1|T2|T3|T4|T6,
+            field:keyof (T1 & T2 & T3 & T4 & T6)["model"]
+        }
+    }
+},joinModel5:{
+    model:T6,
+    columns?:K6[],
+    aggregation?:F6,
+    rename?:{
+        fields:R6[],
+        newFields:RR6[]
+    }
+    expression:{
+        [key in keyof T6["model"]]?:{
+            model:T1|T2|T3|T4|T5,
+            field:keyof (T1 & T2 & T3 & T4 & T5)["model"]
+        }
+    }
+},objExpr?:{
+    [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"])|`${"$and"|"$or"}${number}`)]?:{
+    value:EXPRVALUE,
+    model:T1|T2|T3|T4|T5|T6
+}|{
+    [param in keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]]?:{
+        value:EXPRVALUE,
+        model:T1|T2|T3|T4|T5|T6
+    }
+}
+},exprMode?:"and"|"or",order?:{
+    field:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"] & T5["model"] & T6["model"]),
+    model:T1 | T2 | T3 | T4 | T5 | T6,
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
+},limit?:number,size?:number):{
+    value:string,
+    type:(F1 extends null ? Rename<{
+        [key in K1]:T1["model"][key]
+    },R1,RR1>:{
+        [key in F1]:Rename<{
+            [key in K1]:T1["model"][key]
+        },R1,RR1>
+    }) & (F2 extends null ? Rename<{
+        [key in K2]:T2["model"][key]
+    },R2,RR2>:{
+        [key in F2]:Rename<{
+            [key in K2]:T2["model"][key]
+        },R2,RR2>
+    }) & (F3 extends null ? Rename<{
+        [key in K3]:T3["model"][key]
+    },R3,RR3>:{
+        [key in F3]:Rename<{
+            [key in K3]:T3["model"][key]
+        },R3,RR3>
+    }) & (F4 extends null ? Rename<{
+        [key in K4]:T4["model"][key]
+    },R4,RR4>:{
+        [key in F4]:Rename<{
+            [key in K4]:T4["model"][key]
+        },R4,RR4>
+    }) & (F5 extends null ? Rename<{
+        [key in K5]:T5["model"][key]
+    },R5,RR5>:{
+        [key in F5]:Rename<{
+            [key in K5]:T5["model"][key]
+        },R5,RR5>
+    }) & (F6 extends null ? Rename<{
+        [key in K6]:T6["model"][key]
+    },R6,RR6>:{
+        [key in F6]:Rename<{
+            [key in K6]:T6["model"][key]
+        },R6,RR6>
+    }),
+    aggregation:{
+        [key:string]:string
+    }
+} {
+    let expr=generateLeftJoinExp(objExpr,exprMode);
+    let table=mainModel.model.table
+    let joinTable=joinModel.model.table
+    let joinTable2=joinModel2.model.table
+    let joinTable3=joinModel3.model.table
+    let joinTable4=joinModel4.model.table
+    let joinTable5=joinModel4.model.table
+    let arrExpression=[]
+    for(let key in joinModel.expression) {
+        let value=joinModel.expression[key]
+        arrExpression.push(`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression=arrExpression.join(" and ")
+    let arrExpression2=[]
+    for(let key in joinModel2.expression) {
+        let value=joinModel2.expression[key]
+        arrExpression2.push(`${joinTable2}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression2=arrExpression2.join(" and ")
+    let arrExpression3=[]
+    for(let key in joinModel3.expression) {
+        let value=joinModel3.expression[key]
+        arrExpression3.push(`${joinTable3}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression3=arrExpression3.join(" and ")
+    let arrExpression4=[]
+    for(let key in joinModel4.expression) {
+        let value=joinModel4.expression[key]
+        arrExpression4.push(`${joinTable4}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression4=arrExpression4.join(" and ")
+    let arrExpression5=[]
+    for(let key in joinModel5.expression) {
+        let value=joinModel5.expression[key]
+        arrExpression5.push(`${joinTable5}.${key}=${value.model.table}.${value.field.toString()}`)
+    }
+    let expression5=arrExpression5.join(" and ")
+    let rename=mainModel.rename
+    let renameJoin=joinModel.rename
+    let renameJoin2=joinModel2.rename
+    let renameJoin3=joinModel3.rename
+    let renameJoin4=joinModel4.rename
+    let renameJoin5=joinModel4.rename
+    let aggregation={}
+    let column=""
+    if(mainModel.columns && mainModel.columns.length>0) {
+        let str=mainModel.columns.map((item)=>{
+            return `${table}.${item.toString()} _${table}__${(rename && rename.fields.includes(item as any))?rename.newFields[rename.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=str;
+    }
+    if(joinModel.columns && joinModel.columns.length>0) {
+        let str=joinModel.columns.map((item)=>{
+            return `${joinTable}.${item.toString()} _${joinTable}__${(renameJoin && renameJoin.fields.includes(item as any))?renameJoin.newFields[renameJoin.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel2.columns && joinModel2.columns.length>0) {
+        let str=joinModel2.columns.map((item)=>{
+            return `${joinTable2}.${item.toString()} _${joinTable2}__${(renameJoin2 && renameJoin2.fields.includes(item as any))?renameJoin2.newFields[renameJoin2.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel3.columns && joinModel3.columns.length>0) {
+        let str=joinModel3.columns.map((item)=>{
+            return `${joinTable3}.${item.toString()} _${joinTable3}__${(renameJoin3 && renameJoin3.fields.includes(item as any))?renameJoin3.newFields[renameJoin3.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel4.columns && joinModel4.columns.length>0) {
+        let str=joinModel4.columns.map((item)=>{
+            return `${joinTable4}.${item.toString()} _${joinTable4}__${(renameJoin4 && renameJoin4.fields.includes(item as any))?renameJoin4.newFields[renameJoin4.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel5.columns && joinModel5.columns.length>0) {
+        let str=joinModel5.columns.map((item)=>{
+            return `${joinTable5}.${item.toString()} _${joinTable5}__${(renameJoin5 && renameJoin5.fields.includes(item as any))?renameJoin5.newFields[renameJoin5.fields.indexOf(item as any)]:item.toString()}`
+        }).join(",")
+        column+=","+str;
+    }
+    column=column.trim()
+    if(column[0]==",")
+    {
+        column=column.substr(1)
+    }
+    aggregation[table]=mainModel.aggregation??""
+    aggregation[joinTable]=joinModel.aggregation??""
+    aggregation[joinTable2]=joinModel2.aggregation??""
+    aggregation[joinTable3]=joinModel3.aggregation??""
+    aggregation[joinTable4]=joinModel4.aggregation??""
+    aggregation[joinTable5]=joinModel5.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.model.table}.${order.field.toString()} ${order.type}`
+        }
+    }
+    return {
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} left join ${joinTable4} on ${expression4} left join ${joinTable5} on ${expression5} ${expr?(" where "+expr):""}${orderStr??""}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -1887,6 +2368,540 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
     }
     return {
         value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        type:null,
+        aggregation:aggregation
+    }
+}
+
+export function generateGroupLeftJoin4Sql<T1 extends BaseModel,T2 extends BaseModel,T3 extends BaseModel,T4 extends BaseModel,T5 extends BaseModel,K1 extends keyof T1["model"]=null,K2 extends keyof T2["model"]=null,K3 extends keyof T3["model"]=null,K4 extends keyof T4["model"]=null,K5 extends keyof T5["model"]=null,F1 extends string=null,F2 extends string=null,F3 extends string=null,F4 extends string=null,F5 extends string=null,R1 extends keyof T1["model"]=null,RR1 extends string=null,R2 extends keyof T2["model"]=null,RR2 extends string=null,R3 extends keyof T3["model"]=null,RR3 extends string=null,R4 extends keyof T4["model"]=null,RR4 extends string=null,R5 extends keyof T5["model"]=null,RR5 extends string=null,O extends boolean=false>(mainModel:{
+    model:T1,
+    columns?:{
+        columns:K1[],
+        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+    },
+    aggregation?:F1
+},joinModel:{
+    model:T2,
+    columns?:{
+        columns:K2[],
+        calcColumns:COLUMNSVALUETYPE<R2,RR2>[]
+    },
+    aggregation?:F2,
+    expression:{
+        [key in keyof T2["model"]]?:{
+            model:T1|T3|T4|T5,
+            field:keyof (T1 & T3 & T4 & T5)["model"]
+        }
+    }
+},joinModel2:{
+    model:T3,
+    columns?:{
+        columns:K3[],
+        calcColumns:COLUMNSVALUETYPE<R3,RR3>[]
+    },
+    aggregation?:F3,
+    expression:{
+        [key in keyof T3["model"]]?:{
+            model:T1|T2|T4|T5,
+            field:keyof (T1 & T2 & T4 & T5)["model"]
+        }
+    }
+},joinModel3:{
+    model:T4,
+    columns?:{
+        columns:K4[],
+        calcColumns:COLUMNSVALUETYPE<R4,RR4>[]
+    },
+    aggregation?:F4,
+    expression:{
+        [key in keyof T4["model"]]?:{
+            model:T1|T2|T3|T5,
+            field:keyof (T1 & T2 & T3 & T5)["model"]
+        }
+    }
+},joinModel4:{
+    model:T5,
+    columns?:{
+        columns:K5[],
+        calcColumns:COLUMNSVALUETYPE<R5,RR5>[]
+    },
+    aggregation?:F5,
+    expression:{
+        [key in keyof T5["model"]]?:{
+            model:T1|T2|T3|T4,
+            field:keyof (T1 & T2 & T3 & T4)["model"]
+        }
+    }
+},groups:(keyof T1["model"])[],objExpr?: {
+    [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"]) | `${"$and" | "$or"}${number}`)]?: {
+    value: EXPRVALUE,
+    model: T1 | T2 | T3 | T4 | T5
+} | {
+    [param in keyof (T1 & T2 & T3 & T4 & T5)["model"]]?: {
+        value: EXPRVALUE,
+        model: T1 | T2 | T3 | T4 | T5
+    }
+}
+},exprMode?:"and"|"or",having?:{
+    [param in keyof T1["model"]]?:{
+        model:T1,
+        exp:HAVINGEXP
+    }
+},havingMode?:"and"|"or",order?:{
+    field:O extends false?(keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"] & T5["model"])):(RR1|RR2|RR3|RR4|RR5),
+    model:T1 | T2 | T3 | T4 | T5,
+    isVirtualField:O,
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
+},limit?:number,size?:number):{
+    value:string,
+    type:(F1 extends null ? Rename<{
+        [key in K1|R1]:T1["model"][key]
+    },R1,RR1>:{
+        [key in F1]:Rename<{
+            [key in K1|R1]:T1["model"][key]
+        },R1,RR1>
+    }) & (F2 extends null ? Rename<{
+        [key in K2|R2]:T2["model"][key]
+    },R2,RR2>:{
+        [key in F2]:Rename<{
+            [key in K2|R2]:T2["model"][key]
+        },R2,RR2>
+    }) & (F3 extends null ? Rename<{
+        [key in K3|R3]:T3["model"][key]
+    },R3,RR3>:{
+        [key in F3]:Rename<{
+            [key in K3|R3]:T3["model"][key]
+        },R3,RR3>
+    }) & (F4 extends null ? Rename<{
+        [key in K4|R4]:T4["model"][key]
+    },R4,RR4>:{
+        [key in F4]:Rename<{
+            [key in K4|R4]:T4["model"][key]
+        },R4,RR4>
+    }) & (F5 extends null ? Rename<{
+        [key in K5|R5]:T5["model"][key]
+    },R5,RR5>:{
+        [key in F5]:Rename<{
+            [key in K5|R5]:T5["model"][key]
+        },R5,RR5>
+    }),
+    aggregation:{
+        [key:string]:string
+    }
+} {
+    let expr=generateLeftJoinExp(objExpr,exprMode);
+    let table=mainModel.model.table
+    let joinTable=joinModel.model.table
+    let joinTable2=joinModel2.model.table
+    let joinTable3=joinModel3.model.table
+    let joinTable4=joinModel4.model.table
+    let key=Object.keys(joinModel.expression)[0]
+    let value=joinModel.expression[key]
+    let key2=Object.keys(joinModel2.expression)[0]
+    let value2=joinModel2.expression[key2]
+    let key3=Object.keys(joinModel3.expression)[0]
+    let value3=joinModel3.expression[key3]
+    let key4=Object.keys(joinModel4.expression)[0]
+    let value4=joinModel4.expression[key4]
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`
+    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field.toString()}`
+    let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.field.toString()}`
+    let expression4=`${joinTable4}.${key4}=${value4.model.table}.${value4.field.toString()}`
+    let havingExpr=generateLeftJoinHavingExp(having,havingMode);
+    let aggregation={}
+    let column=""
+    if(mainModel.columns) {
+        let arr=[]
+        if(mainModel.columns.columns && mainModel.columns.columns.length>0) {
+            arr=arr.concat(mainModel.columns.columns)
+        }
+        if(mainModel.columns.calcColumns && mainModel.columns.calcColumns.length>0) {
+            arr=arr.concat(mainModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,table)
+            return `${val.exp?"":(table+".")}${val.field} _${table}__${val.rename}`
+        }).join(",")
+        column+=str;
+    }
+    if(joinModel.columns) {
+        let arr=[]
+        if(joinModel.columns.columns && joinModel.columns.columns.length>0) {
+            arr=arr.concat(joinModel.columns.columns)
+        }
+        if(joinModel.columns.calcColumns && joinModel.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable)
+            return `${val.exp?"":(joinTable+".")}${val.field} _${joinTable}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel2.columns) {
+        let arr=[]
+        if(joinModel2.columns.columns && joinModel2.columns.columns.length>0) {
+            arr=arr.concat(joinModel2.columns.columns)
+        }
+        if(joinModel2.columns.calcColumns && joinModel2.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel2.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable2)
+            return `${val.exp?"":(joinTable2+".")}${val.field} _${joinTable2}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel3.columns) {
+        let arr=[]
+        if(joinModel3.columns.columns && joinModel3.columns.columns.length>0) {
+            arr=arr.concat(joinModel3.columns.columns)
+        }
+        if(joinModel3.columns.calcColumns && joinModel3.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel3.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable3)
+            return `${val.exp?"":(joinTable3+".")}${val.field} _${joinTable3}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel4.columns) {
+        let arr=[]
+        if(joinModel4.columns.columns && joinModel4.columns.columns.length>0) {
+            arr=arr.concat(joinModel4.columns.columns)
+        }
+        if(joinModel4.columns.calcColumns && joinModel4.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel4.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable4)
+            return `${val.exp?"":(joinTable4+".")}${val.field} _${joinTable4}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    column=column.trim()
+    if(column[0]==",")
+    {
+        column=column.substr(1)
+    }
+    aggregation[table]=mainModel.aggregation??""
+    aggregation[joinTable]=joinModel.aggregation??""
+    aggregation[joinTable2]=joinModel2.aggregation??""
+    aggregation[joinTable3]=joinModel3.aggregation??""
+    aggregation[joinTable4]=joinModel4.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:("any_value("+order.model.table+"."+order.field.toString()+")")} ${order.type}`
+        }
+    }
+    return {
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} left join ${joinTable4} on ${expression4} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        type:null,
+        aggregation:aggregation
+    }
+}
+
+export function generateGroupLeftJoin5Sql<T1 extends BaseModel,T2 extends BaseModel,T3 extends BaseModel,T4 extends BaseModel,T5 extends BaseModel,T6 extends BaseModel,K1 extends keyof T1["model"]=null,K2 extends keyof T2["model"]=null,K3 extends keyof T3["model"]=null,K4 extends keyof T4["model"]=null,K5 extends keyof T5["model"]=null,K6 extends keyof T6["model"]=null,F1 extends string=null,F2 extends string=null,F3 extends string=null,F4 extends string=null,F5 extends string=null,F6 extends string=null,R1 extends keyof T1["model"]=null,RR1 extends string=null,R2 extends keyof T2["model"]=null,RR2 extends string=null,R3 extends keyof T3["model"]=null,RR3 extends string=null,R4 extends keyof T4["model"]=null,RR4 extends string=null,R5 extends keyof T5["model"]=null,RR5 extends string=null,R6 extends keyof T6["model"]=null,RR6 extends string=null,O extends boolean=false>(mainModel:{
+    model:T1,
+    columns?:{
+        columns:K1[],
+        calcColumns:COLUMNSVALUETYPE<R1,RR1>[]
+    },
+    aggregation?:F1
+},joinModel:{
+    model:T2,
+    columns?:{
+        columns:K2[],
+        calcColumns:COLUMNSVALUETYPE<R2,RR2>[]
+    },
+    aggregation?:F2,
+    expression:{
+        [key in keyof T2["model"]]?:{
+            model:T1|T3|T4|T5|T6,
+            field:keyof (T1 & T3 & T4 & T5 & T6)["model"]
+        }
+    }
+},joinModel2:{
+    model:T3,
+    columns?:{
+        columns:K3[],
+        calcColumns:COLUMNSVALUETYPE<R3,RR3>[]
+    },
+    aggregation?:F3,
+    expression:{
+        [key in keyof T3["model"]]?:{
+            model:T1|T2|T4|T5|T6,
+            field:keyof (T1 & T2 & T4 & T5 & T6)["model"]
+        }
+    }
+},joinModel3:{
+    model:T4,
+    columns?:{
+        columns:K4[],
+        calcColumns:COLUMNSVALUETYPE<R4,RR4>[]
+    },
+    aggregation?:F4,
+    expression:{
+        [key in keyof T4["model"]]?:{
+            model:T1|T2|T3|T5|T6,
+            field:keyof (T1 & T2 & T3 & T5 & T6)["model"]
+        }
+    }
+},joinModel4:{
+    model:T5,
+    columns?:{
+        columns:K5[],
+        calcColumns:COLUMNSVALUETYPE<R5,RR5>[]
+    },
+    aggregation?:F5,
+    expression:{
+        [key in keyof T5["model"]]?:{
+            model:T1|T2|T3|T4|T6,
+            field:keyof (T1 & T2 & T3 & T4 & T6)["model"]
+        }
+    }
+},joinModel5:{
+    model:T6,
+    columns?:{
+        columns:K6[],
+        calcColumns:COLUMNSVALUETYPE<R6,RR6>[]
+    },
+    aggregation?:F6,
+    expression:{
+        [key in keyof T6["model"]]?:{
+            model:T1|T2|T3|T4|T5,
+            field:keyof (T1 & T2 & T3 & T4 & T5)["model"]
+        }
+    }
+},groups:(keyof T1["model"])[],objExpr?: {
+    [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]) | `${"$and" | "$or"}${number}`)]?: {
+    value: EXPRVALUE,
+    model: T1 | T2 | T3 | T4 | T5 | T6
+} | {
+    [param in keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]]?: {
+        value: EXPRVALUE,
+        model: T1 | T2 | T3 | T4 | T5 | T6
+    }
+}
+},exprMode?:"and"|"or",having?:{
+    [param in keyof T1["model"]]?:{
+        model:T1,
+        exp:HAVINGEXP
+    }
+},havingMode?:"and"|"or",order?:{
+    field:O extends false?(keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"] & T5["model"] & T6["model"])):(RR1|RR2|RR3|RR4|RR5|RR6),
+    model:T1 | T2 | T3 | T4 | T5 | T6,
+    isVirtualField:O,
+    type:"asc"|"desc"|"field",
+    value?:(string|number)[]
+},limit?:number,size?:number):{
+    value:string,
+    type:(F1 extends null ? Rename<{
+        [key in K1|R1]:T1["model"][key]
+    },R1,RR1>:{
+        [key in F1]:Rename<{
+            [key in K1|R1]:T1["model"][key]
+        },R1,RR1>
+    }) & (F2 extends null ? Rename<{
+        [key in K2|R2]:T2["model"][key]
+    },R2,RR2>:{
+        [key in F2]:Rename<{
+            [key in K2|R2]:T2["model"][key]
+        },R2,RR2>
+    }) & (F3 extends null ? Rename<{
+        [key in K3|R3]:T3["model"][key]
+    },R3,RR3>:{
+        [key in F3]:Rename<{
+            [key in K3|R3]:T3["model"][key]
+        },R3,RR3>
+    }) & (F4 extends null ? Rename<{
+        [key in K4|R4]:T4["model"][key]
+    },R4,RR4>:{
+        [key in F4]:Rename<{
+            [key in K4|R4]:T4["model"][key]
+        },R4,RR4>
+    }) & (F5 extends null ? Rename<{
+        [key in K5|R5]:T5["model"][key]
+    },R5,RR5>:{
+        [key in F5]:Rename<{
+            [key in K5|R5]:T5["model"][key]
+        },R5,RR5>
+    }) & (F6 extends null ? Rename<{
+        [key in K6|R6]:T6["model"][key]
+    },R6,RR6>:{
+        [key in F6]:Rename<{
+            [key in K6|R6]:T6["model"][key]
+        },R6,RR6>
+    }),
+    aggregation:{
+        [key:string]:string
+    }
+} {
+    let expr=generateLeftJoinExp(objExpr,exprMode);
+    let table=mainModel.model.table
+    let joinTable=joinModel.model.table
+    let joinTable2=joinModel2.model.table
+    let joinTable3=joinModel3.model.table
+    let joinTable4=joinModel4.model.table
+    let joinTable5=joinModel5.model.table
+    let key=Object.keys(joinModel.expression)[0]
+    let value=joinModel.expression[key]
+    let key2=Object.keys(joinModel2.expression)[0]
+    let value2=joinModel2.expression[key2]
+    let key3=Object.keys(joinModel3.expression)[0]
+    let value3=joinModel3.expression[key3]
+    let key4=Object.keys(joinModel4.expression)[0]
+    let value4=joinModel4.expression[key4]
+    let key5=Object.keys(joinModel5.expression)[0]
+    let value5=joinModel5.expression[key5]
+    let expression=`${joinTable}.${key}=${value.model.table}.${value.field.toString()}`
+    let expression2=`${joinTable2}.${key2}=${value2.model.table}.${value2.field.toString()}`
+    let expression3=`${joinTable3}.${key3}=${value3.model.table}.${value3.field.toString()}`
+    let expression4=`${joinTable4}.${key4}=${value4.model.table}.${value4.field.toString()}`
+    let expression5=`${joinTable5}.${key5}=${value5.model.table}.${value5.field.toString()}`
+    let havingExpr=generateLeftJoinHavingExp(having,havingMode);
+    let aggregation={}
+    let column=""
+    if(mainModel.columns) {
+        let arr=[]
+        if(mainModel.columns.columns && mainModel.columns.columns.length>0) {
+            arr=arr.concat(mainModel.columns.columns)
+        }
+        if(mainModel.columns.calcColumns && mainModel.columns.calcColumns.length>0) {
+            arr=arr.concat(mainModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,table)
+            return `${val.exp?"":(table+".")}${val.field} _${table}__${val.rename}`
+        }).join(",")
+        column+=str;
+    }
+    if(joinModel.columns) {
+        let arr=[]
+        if(joinModel.columns.columns && joinModel.columns.columns.length>0) {
+            arr=arr.concat(joinModel.columns.columns)
+        }
+        if(joinModel.columns.calcColumns && joinModel.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable)
+            return `${val.exp?"":(joinTable+".")}${val.field} _${joinTable}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel2.columns) {
+        let arr=[]
+        if(joinModel2.columns.columns && joinModel2.columns.columns.length>0) {
+            arr=arr.concat(joinModel2.columns.columns)
+        }
+        if(joinModel2.columns.calcColumns && joinModel2.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel2.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable2)
+            return `${val.exp?"":(joinTable2+".")}${val.field} _${joinTable2}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel3.columns) {
+        let arr=[]
+        if(joinModel3.columns.columns && joinModel3.columns.columns.length>0) {
+            arr=arr.concat(joinModel3.columns.columns)
+        }
+        if(joinModel3.columns.calcColumns && joinModel3.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel3.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable3)
+            return `${val.exp?"":(joinTable3+".")}${val.field} _${joinTable3}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel4.columns) {
+        let arr=[]
+        if(joinModel4.columns.columns && joinModel4.columns.columns.length>0) {
+            arr=arr.concat(joinModel4.columns.columns)
+        }
+        if(joinModel4.columns.calcColumns && joinModel4.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel4.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable4)
+            return `${val.exp?"":(joinTable4+".")}${val.field} _${joinTable4}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    if(joinModel5.columns) {
+        let arr=[]
+        if(joinModel5.columns.columns && joinModel5.columns.columns.length>0) {
+            arr=arr.concat(joinModel5.columns.columns)
+        }
+        if(joinModel5.columns.calcColumns && joinModel5.columns.calcColumns.length>0) {
+            arr=arr.concat(joinModel5.columns.calcColumns)
+        }
+        let str=arr.map((item)=>{
+            let val=handleLeftJoinEachColumn(item,joinTable5)
+            return `${val.exp?"":(joinTable5+".")}${val.field} _${joinTable5}__${val.rename}`
+        }).join(",")
+        column+=","+str;
+    }
+    column=column.trim()
+    if(column[0]==",")
+    {
+        column=column.substr(1)
+    }
+    aggregation[table]=mainModel.aggregation??""
+    aggregation[joinTable]=joinModel.aggregation??""
+    aggregation[joinTable2]=joinModel2.aggregation??""
+    aggregation[joinTable3]=joinModel3.aggregation??""
+    aggregation[joinTable4]=joinModel4.aggregation??""
+    aggregation[joinTable5]=joinModel5.aggregation??""
+    let orderStr=""
+    if(order) {
+        if(order.type=="field") {
+            let arrValue=[...order.value]
+            for(let i=0;i<arrValue.length;i++) {
+                if(arrValue[i]===null) {
+                    arrValue[i]="null"
+                } else if(arrValue[i]===undefined) {
+                    arrValue[i]="undefined"
+                }
+            }
+            if(typeof arrValue[0]=="string") {
+                let arr=arrValue.map(item=>{
+                    return "'"+item+"'"
+                })
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arr.join(",")})`
+            } else {
+                orderStr=` order by field(${order.model.table}.${order.field.toString()},${arrValue.join(",")})`
+            }
+        } else {
+            orderStr=` order by ${order.isVirtualField?`_${order.model.table}__${order.field.toString()}`:("any_value("+order.model.table+"."+order.field.toString()+")")} ${order.type}`
+        }
+    }
+    return {
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} left join ${joinTable4} on ${expression4} left join ${joinTable5} on ${expression5} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }

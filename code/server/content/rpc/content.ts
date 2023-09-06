@@ -29,19 +29,31 @@ class RpcContentApi {
         await obj.delete()
     }
 
-    async add(refId:string,type:ECommon_Model_Content_Type,createdBy:string,content:string) {
-        let objOrganizationUser=await rpcUserApi.organizationUser(createdBy)
-        let obj=new ContentService
-        obj.assignItem({
-            ref_id:refId,
-            type,
-            created_by:createdBy,
-            modified_by:createdBy,
-            organization_id:objOrganizationUser.organization_id,
-            content
-        })
-        let ret=await obj.create()
-        return ret;
+    async add(refId:string,type:ECommon_Model_Content_Type,createdBy:string,content:string,createdByPure?:string) {
+        if(createdBy) {
+            let objOrganizationUser=await rpcUserApi.organizationUser(createdBy)
+            let obj=new ContentService
+            obj.assignItem({
+                ref_id:refId,
+                type,
+                created_by:createdBy,
+                modified_by:createdBy,
+                organization_id:objOrganizationUser.organization_id,
+                content
+            })
+            let ret=await obj.create()
+            return ret;
+        } else if(createdByPure) {
+            let obj=new ContentService
+            obj.assignItem({
+                ref_id:refId,
+                type,
+                content,
+                created_by_pure:createdByPure
+            })
+            let ret=await obj.create()
+            return ret;
+        }
     }
 
     async edit(contentId:string,modifiedBy:string,content:string) {

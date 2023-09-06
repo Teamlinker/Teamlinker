@@ -3,6 +3,7 @@ import {ECommon_Services} from './../types';
 import {ICommon_Route_Res_User_List, ICommon_Route_Res_User_Profile, ICommon_Route_Res_User_TeamList} from './response';
 import {ECommon_HttpApi_Method} from "./types";
 import {Permission_Types} from "../permission/permission";
+import {ICommon_Model_User_Setting} from "../model/user_setting";
 
 const api={
     baseUrl:"/user",
@@ -194,6 +195,22 @@ const api={
             res:{},
             ignoreValidate:true
         },
+        setting:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/setting",
+            req:{},
+            res:<ICommon_Model_User_Setting>{},
+        },
+        setWallpaper:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/setting/wallpaper",
+            req:<{
+                photo?:string
+            }>{},
+            res:<{
+                path:string
+            }>{},
+        }
     }
 }
 

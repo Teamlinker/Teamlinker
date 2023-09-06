@@ -45,7 +45,8 @@ export enum ECommon_Model_Content_Type {
     WIKI_ITEM,
     MEETING_CHAT,
     CALENDAR_EVENT_AGENDA,
-    PROJECT_ISSUE_REJECT
+    PROJECT_ISSUE_REJECT,
+    STICKY_NOTE
 }
 
 export interface ICommon_Model_Content {
@@ -57,7 +58,8 @@ export interface ICommon_Model_Content {
     created_time:Date,
     modified_time:Date,
     organization_id:string,
-    modified_by:string
+    modified_by:string,
+    created_by_pure:string
 }
 export const Table_Content="content"
 

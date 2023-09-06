@@ -14,7 +14,7 @@
 					<a-row style="align-items: center;height: 100%;background-color: white;border-left:1px lightgray solid;overflow-x: auto;">
 						<a-breadcrumb>
 							<a-breadcrumb-item v-for="item in pathList">
-								<a-button type="text" size="small" style="color: gray" @click="onClickFolder(item)">
+								<a-button type="text" size="small" style="color: grey" @click="onClickFolder(item)">
 									{{item.name}}
 									<template #icon>
 										<icon-folder></icon-folder>
@@ -67,7 +67,7 @@ const pathList=ref<{
 	name:string,
 	id:string
 }[]>([])
-if(props.folderId===undefined) {
+if(props.folderId==null) {
 	pathList.value.push({
 		name:"Desktop",
 		id:""
@@ -164,7 +164,7 @@ const handleDelete=async (finderItemIds:string[])=>{
 
 onBeforeMount(()=>{
 	eventBus.on(EClient_EVENTBUS_TYPE.FINDER_DELETE,handleDelete)
-	if(props.folderId!==undefined && props.folderId!=="") {
+	if(props.folderId!=null && props.folderId!=="") {
 		apiFinder.info({
 			finderItemId:props.folderId
 		}).then(res=>{

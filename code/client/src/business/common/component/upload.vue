@@ -1,7 +1,7 @@
 <template>
-  <a-upload :custom-request="onUpload" :show-file-list="false" :accept="types">
+  <a-upload :custom-request="onUpload" :show-file-list="false" :accept="types" :class="fill?'fill':''">
     <template #upload-button>
-      <div :class="`arco-upload-list-item`">
+      <div :class="`arco-upload-list-item`" style="justify-content: center">
         <div class="arco-upload-list-picture custom-upload-avatar" v-if="uri">
           <img :src="uri" />
           <div class="arco-upload-list-picture-mask">
@@ -26,7 +26,8 @@ import {apiFile} from "../request/request";
 
 const props=defineProps<{
   defaultUri?:string,
-  types?:string
+  types?:string,
+	fill?:boolean
 }>()
 const emit=defineEmits<{
   (e:'upload',id:string):void
@@ -49,5 +50,18 @@ const onUpload=async (option)=>{
 </script>
 
 <style scoped>
-
+.fill :deep span {
+	width: 100%;
+	height: 100%;
+	display: inline-block;
+}
+.fill :deep .arco-upload-list-item {
+	margin: 0;
+	height: 100%;
+}
+.fill :deep .arco-upload-list-picture {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
 </style>

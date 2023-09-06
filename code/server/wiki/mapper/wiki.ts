@@ -1,6 +1,6 @@
 import {Mapper} from "../../common/entity/mapper";
 import {ICommon_Model_Wiki, Table_Wiki, wikiModel} from "../../../common/model/wiki";
-import {wikiItemModel} from "../../../common/model/wiki_item";
+import {ICommon_Model_Wiki_Item, wikiItemModel} from "../../../common/model/wiki_item";
 import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
 import {
@@ -8,6 +8,7 @@ import {
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
     generateGroupLeftJoin3Sql,
+    generateGroupLeftJoin4Sql,
     generateLeftJoinSql,
     generateQuerySql,
     generateUpdateSql
@@ -19,6 +20,7 @@ import {memberTagMemberModel, Table_Member_Tag_Member} from "../../../common/mod
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import CommonUtil from "../../common/util/common";
 import {contentModel} from "../../../common/model/content";
+import {ICommon_Route_Res_Global_Search_Wiki_Item} from "../../../common/routes/response";
 
 class WikiMapper extends Mapper<typeof wikiModel> {
     constructor() {
@@ -302,6 +304,99 @@ export const wikiMapper=new WikiMapper()
 class WikiItemMapper extends Mapper<typeof wikiItemModel> {
     constructor() {
         super(wikiItemModel);
+    }
+
+    async globalSearch(keyword:string,size:number,organizationUserId:string):Promise<ICommon_Route_Res_Global_Search_Wiki_Item[]> {
+        let mysql=getMysqlInstance()
+        let sql=generateGroupLeftJoin4Sql({
+            model:wikiItemModel,
+            columns:{
+                columns:keys<ICommon_Model_Wiki_Item>().map(item=>item.name),
+                calcColumns:[]
+            }
+        },{
+            model:wikiModel,
+            columns:{
+                columns:keys<ICommon_Model_Wiki>().map(item=>item.name),
+                calcColumns:[]
+            },
+            expression:{
+                id:{
+                    model:wikiItemModel,
+                    field:"wiki_id"
+                }
+            },
+            aggregation:"wiki"
+        },{
+            model:roleMemberModel,
+            expression:{
+                item_id:{
+                    model:wikiModel,
+                    field:"id"
+                }
+            }
+        },{
+            model:teamUserModel,
+            expression:{
+                team_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },{
+            model:memberTagMemberModel,
+            expression:{
+                member_tag_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },["id"],{
+            "$or0":{
+                member_id:{
+                    model:roleMemberModel,
+                    value:organizationUserId
+                },
+                member_type:{
+                    model:roleMemberModel,
+                    value:ECommon_Model_Organization_Member_Type.DEFAULT
+                },
+                team_id:{
+                    model:teamUserModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                },
+                member_tag_id: {
+                    model:memberTagMemberModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                }
+            },
+            id:{
+                model:wikiModel,
+                value:{
+                    exp:"is not null"
+                }
+            },
+            ...(keyword && {
+                name:{
+                    model:wikiItemModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
+                    }
+                }
+            }),
+        },"and",null,"and",{
+            field:"name",
+            model:wikiItemModel,
+            type:"asc",
+            isVirtualField:false
+        },0,size)
+        let ret=await mysql.execute(sql)
+        return ret;
     }
 
     async clearWikiItem(wikiItemId:string,parentWikiItemId:string,wikiId:string,weight:number,isChildren:boolean) {

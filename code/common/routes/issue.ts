@@ -8,6 +8,7 @@ import {ICommon_Model_Project_Module} from './../model/project_module';
 import {
     ICommon_Route_Req_ProjectIssue_Field,
     ICommon_Route_Req_ProjectIssue_Field_Value,
+    ICommon_Route_Res_Global_Search_Project_Issue_Item,
     ICommon_Route_Res_Project_Issue_filter,
     ICommon_Route_Res_ProjectIssue_BasicInfo,
     ICommon_Route_Res_ProjectIssue_fieldsInfo,
@@ -444,6 +445,16 @@ const api={
                 count:number
             }>{},
             permission:[Permission_Types.Project.READ]
+        },
+        globalSearchIssue:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/global/issue",
+            req:<{
+                keyword:string,
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_Global_Search_Project_Issue_Item[]>{},
+            permission:[Permission_Types.Organization.READ]
         }
     }
 }

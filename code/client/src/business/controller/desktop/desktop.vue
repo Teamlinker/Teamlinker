@@ -1,6 +1,6 @@
 <template>
   <TeamOS ref="root">
-    <template #topLeft>
+    <template #barLeft>
       <a-dropdown trigger="hover">
         <a-avatar :size="32" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
           T
@@ -8,7 +8,7 @@
             <div style="height: 100%;width: 100%;background-color: #03ad03;border-radius: 6px" v-if="store.status===ECommon_User_Online_Status.ONLINE"></div>
             <icon-stop :stroke-width="5" style="color: darkred" v-else-if="store.status===ECommon_User_Online_Status.BUSY"></icon-stop>
             <icon-video-camera :stroke-width="5" style="color: red" v-else-if="store.status===ECommon_User_Online_Status.MEETING"></icon-video-camera>
-            <div style="height: 100%;width: 100%;background-color: gray;border-radius: 6px" v-else-if="store.status===ECommon_User_Online_Status.OFFLINE"></div>
+            <div style="height: 100%;width: 100%;background-color: grey;border-radius: 6px" v-else-if="store.status===ECommon_User_Online_Status.OFFLINE"></div>
           </template>
         </a-avatar>
         <template #content>
@@ -29,17 +29,28 @@
               </a-doption>
             </template>
           </a-dsubmenu>
+	        <a-dsubmenu trigger="hover">
+		        Tool
+		        <template #content>
+			        <a-doption @click="onAddNote">
+				        Sticky Note
+			        </a-doption>
+			        <a-doption @click="onAddPhoto">
+				       Album
+			        </a-doption>
+		        </template>
+	        </a-dsubmenu>
           <a-doption @click="onAccount">Account</a-doption>
           <a-doption @click="onLogout">Logout</a-doption>
         </template>
       </a-dropdown>
     </template>
-	  <template #topRight>
+	  <template #barRight>
 		  <a-row style="height: 100%;" align="center">
-			  <a-col flex="70px" style="align-items: center;display: flex">
+			  <a-col :flex="menuValue?'60px':'70'" style="align-items: center;display: flex">
 				  <img :src="store.organizationInfo.photo" style="height: 36px;width:80px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
-			  <a-col flex="120px">
+			  <a-col :flex="menuValue?'100px':'120px'">
 				  <a-select style="max-width: 170px;color: white" placeholder="organization" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
 					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
 						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
@@ -56,7 +67,10 @@
 					  Create Organization
 				  </a-button>
 			  </a-col>
-			  <a-col :flex="menuValue?'30px':'60px'" style="justify-content: center;display: flex">
+			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex">
+				  <sicon size="18" color="rgb(241,241,241)" name="Ant" type="search" style="cursor: pointer" @click="isSearch=true"></sicon>
+			  </a-col>
+			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex">
 					<NotificationShow></NotificationShow>
 			  </a-col>
 			  <a-col flex="30px" v-if="menuValue" style="justify-content: center;display: flex">
@@ -81,6 +95,8 @@
 		  <a-image-preview :src="imgUri"
 		                   v-model:visible="imgVisible"
 		  />
+		  <Photo v-for="item in photoList" :item="item" :key="item.id" @update="onUpdatePhoto" @delete="onDeletePhoto"></Photo>
+		  <StickyNote v-for="item in noteList" :item="item" :key="item.id" @update="onUpdateStickyNote" @delete="onDeleteStickyNote"></StickyNote>
 	  </template>
   </TeamOS>
 	<a-skeleton :animation="true" v-if="loading" style="position: absolute;left: 0;top: 0;height: 100%;width: 100%;background-color: white;z-index: 10000">
@@ -90,6 +106,9 @@
 			<a-skeleton-shape />
 		</a-space>
 	</a-skeleton>
+	<teleport to="body">
+		<Search @close="isSearch=false" v-show="isSearch"></Search>
+	</teleport>
 </template>
 
 <script setup lang="ts">
@@ -107,18 +126,25 @@ import {v4} from "uuid";
 import Account from "../app/account/account.vue";
 import {SessionStorage} from "../../common/storage/session";
 import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../../../common/types";
-import {apiFile, apiOrganization, DCSType} from "../../common/request/request";
+import {apiFile, apiOrganization, apiTool, apiUser, DCSType} from "../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../common/event/event";
 import CreateOrganization from "./createOrganization.vue";
 import {ECommon_Model_Finder_Item_Type, ICommon_Model_Finder_Item} from "../../../../../common/model/finder_item";
 import {vSelectable} from "../../../teamOS/common/directive/selectable";
-import {ICommon_Route_Res_Finder_Info} from "../../../../../common/routes/response";
+import {
+	ICommon_Route_Res_Finder_Info,
+	ICommon_Route_Res_Photo_item,
+	ICommon_Route_Res_Sticky_Note_Item
+} from "../../../../../common/routes/response";
 import {IClient_Drag_Shortcut_Value} from "../../../teamOS/common/directive/drag";
 import IconItem from "../../../teamOS/icon/iconItem.vue";
 import {FinderHandle} from "../app/finder/finderHandle";
 import {vDrop} from "../../../teamOS/common/directive/drop";
 import NotificationShow from "./notificationShow.vue";
 import MissCallShow from "./missCallShow.vue";
+import Search from "@/business/controller/desktop/search/search.vue";
+import StickyNote from "@/business/controller/desktop/tool/stickyNote/stickyNote.vue";
+import Photo from "@/business/controller/desktop/tool/photo/photo.vue";
 
 interface ITeamOS_Desktop_Menu {
 	group:string,
@@ -127,13 +153,13 @@ interface ITeamOS_Desktop_Menu {
 		value:string
 	}[]
 }
+const isSearch=ref(false)
 const imgUri=ref("")
 const imgVisible=ref(false)
 let desktop=getDesktopInstance().desktop;
 const root=ref()
 const menu=ref<ITeamOS_Desktop_Menu[]>([])
 const menuValue=ref("")
-desktop.setBackgroundImage(img)
 const store=useDesktopStore()
 const router=useRouter();
 let iconManager=getDesktopInstance().iconManager
@@ -142,6 +168,12 @@ const appContext=getCurrentInstance().appContext
 const loading=ref(true)
 let avatar=ref("")
 const objFinderHandle=new FinderHandle(root,appContext,"")
+const noteList=ref<DCSType<ICommon_Route_Res_Sticky_Note_Item & {
+	isReadOnly:boolean
+}>[]>([])
+const photoList=ref<DCSType<ICommon_Route_Res_Photo_item & {
+	isReadOnly:boolean
+}>[]>([])
 objFinderHandle.onEnterFolderFunc=folderId => {
 	eventBus.emit(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,folderId)
 }
@@ -276,6 +308,81 @@ const onFileDbClick=async (item:DCSType<ICommon_Model_Finder_Item>)=>{
 	}
 }
 
+const onAddNote=async ()=>{
+	let res=await apiTool.addNote({
+		height:"10%",
+		width:"20%",
+		x:60+Math.floor(Math.random() * (-5 - 5)) + 5+"%",
+		y:50+Math.floor(Math.random() * (-5 - 5)) + 5+"%"
+	})
+	if(res?.code==0) {
+		listNote(res.data.id)
+	}
+}
+
+const onUpdateStickyNote=item => {
+	let obj=noteList.value.find(obj=>obj.id===item.id)
+	Object.assign(obj,item)
+}
+
+const onDeleteStickyNote=id => {
+	let index=noteList.value.findIndex(item=>item.id===id)
+	noteList.value.splice(index,1)
+}
+
+const onAddPhoto=async ()=>{
+	let res=await apiTool.addPhoto({
+		height:"40%",
+		width:"30%",
+		x:60+Math.floor(Math.random() * (-5 - 5)) + 5+"%",
+		y:50+Math.floor(Math.random() * (-5 - 5)) + 5+"%"
+	})
+	if(res?.code==0) {
+		listPhoto(res.data.id)
+	}
+}
+
+const onUpdatePhoto=item => {
+	let obj=photoList.value.find(obj=>obj.id===item.id)
+	Object.assign(obj,item)
+}
+
+const onDeletePhoto=id => {
+	let index=photoList.value.findIndex(item=>item.id===id)
+	photoList.value.splice(index,1)
+}
+
+const listNote=async (newNoteId?:string)=>{
+	let res=await apiTool.listNote()
+	if(res?.code==0) {
+		noteList.value=res.data.map(item=>{
+			return {
+				...item,
+				isReadOnly:newNoteId?item.id!==newNoteId:true
+			}
+		})
+	}
+}
+
+const listPhoto=async (newPhotoId?:string)=>{
+	let res=await apiTool.listPhoto()
+	if(res?.code==0) {
+		photoList.value=res.data.map(item=>{
+			return {
+				...item,
+				isReadOnly:newPhotoId?item.id!==newPhotoId:true
+			}
+		})
+	}
+}
+
+const getWallpaper=async ()=>{
+	let res=await apiUser.setting()
+	if(res?.code==0) {
+		desktop.setBackgroundImage(res.data.wallpaper)
+	}
+}
+
 onBeforeMount(async ()=>{
 	objFinderHandle.registerEvents()
   let isAuth=await store.isAuth();
@@ -284,6 +391,9 @@ onBeforeMount(async ()=>{
     return
   }
   await Promise.allSettled([
+		getWallpaper(),
+		listNote(),
+		listPhoto(),
 		store.getOrganizationList(),
 	  objFinderHandle.refresh(),
 	  store.initNotificationSocket()

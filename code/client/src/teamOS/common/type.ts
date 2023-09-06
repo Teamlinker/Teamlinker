@@ -1,6 +1,6 @@
 export interface ITeamOS_Point {
-    left:`${number}%`,
-    top:`${number}%`
+    left:`${number|string}%`,
+    top:`${number|string}%`
 }
 
 export interface ITeamOS_Rect {

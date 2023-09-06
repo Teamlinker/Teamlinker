@@ -288,4 +288,10 @@ class WikiController {
         let ret=await WikiItemService.filterWikiItem(user.organizationInfo.organizationId,wikiId,name,page,size)
         return ret;
     }
+
+    @DHttpApi(wikiApi.routes.globalSearchWikiItem)
+    async globalSearchWikiItem(@DHttpReqParamRequired("keyword") keyword: string,@DHttpReqParamRequired("size") size: number,@DHttpUser user:IUserSession):Promise<typeof wikiApi.routes.globalSearchWikiItem.res>{
+        let ret=await WikiItemService.globalSearch(keyword,size,user.organizationInfo.organizationUserId)
+        return ret;
+    }
 }

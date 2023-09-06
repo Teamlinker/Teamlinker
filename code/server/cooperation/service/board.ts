@@ -32,6 +32,11 @@ export class BoardService extends Entity<typeof boardModel,typeof boardMapper> {
         return ret;
     }
 
+    static async globalSearch(keyword:string,size:number,organizationUserId:string) {
+        let ret=await boardMapper.globalSearch(keyword, size, organizationUserId)
+        return ret;
+    }
+
     override async create(...param): Promise<typeof boardModel["model"]> {
         let ret=await super.create(...param);
         await Promise.all(["To Do","In Progress","Done"].map((name,index)=>{
@@ -204,6 +209,12 @@ export class BoardSprintService extends Entity<typeof boardSprintModel,typeof bo
     constructor() {
         super(boardSprintMapper)
     }
+
+    static async globalSearch(keyword:string,size:number,organizationUserId:string) {
+        let ret=await boardSprintMapper.globalSearch(keyword, size, organizationUserId)
+        return ret;
+    }
+
     static async list(boardId:string,page:number,size:number,keyword?:string,status?:ECommon_Model_Board_Sprint_Status) {
         let ret=await boardSprintMapper.list(boardId,page,size,keyword,status)
         return ret;

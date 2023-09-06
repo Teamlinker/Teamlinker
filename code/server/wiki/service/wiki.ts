@@ -146,6 +146,11 @@ export class WikiItemService extends Entity<typeof wikiItemModel,typeof wikiItem
         super(wikiItemMapper)
     }
 
+    static async globalSearch(keyword:string,size:number,organizationUserId:string) {
+        let ret=await wikiItemMapper.globalSearch(keyword, size, organizationUserId)
+        return ret;
+    }
+
     async remove(isChildren:boolean,eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await wikiItemMapper.clearWikiItem(this.getId(),this.getItem().parent_id,this.getItem().wiki_id,this.getItem().weight,isChildren);

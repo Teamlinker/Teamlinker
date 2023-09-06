@@ -66,8 +66,10 @@ let objMeta=getCurrentNavigatorMeta()?.data as {
 }
 if(objMeta?.projectReleaseId) {
   menuKey.value=["release"]
-} else if(objMeta?.boardSprintId) {
+} else if(objMeta?.boardSprintId || objMeta?.boardId) {
 	menuKey.value=["board"]
+} else if(objMeta?.projectIssueId) {
+	menuKey.value=["issue"]
 }
 onMounted(()=>{
   if(objMeta?.projectIssueId) {
@@ -87,6 +89,11 @@ onMounted(()=>{
 	  });
 	  delete objMeta.boardId
 	  delete objMeta.boardSprintId
+  } else if(objMeta?.boardId) {
+	  eleNavigator.value.navigator.replaceRoot("boardProfile",{
+		  boardId:objMeta?.boardId,
+	  });
+	  delete objMeta.boardId
   } else {
     eleNavigator.value.navigator.replaceRoot(type.value,null);
   }

@@ -12,11 +12,12 @@ import {
     DHttpReqParamRequired,
     DHttpUser
 } from "../../common/http/http";
-import {UserService} from "../service/user";
+import {UserService, UserSettingService} from "../service/user";
 import {IUserSession} from "../types/config";
 import {OrganizationUserService} from "../service/organization";
 import Application from "../../common/app/app";
 import {ECommon_Application_Mode} from "../../../common/types";
+import rpcFileApi from "../../file/rpc/file"
 
 @DComponent
 @DHttpController(userApi)
@@ -236,6 +237,33 @@ class UserController {
             return 
         } else {
             throw Err.Common.interfaceForbidden
+        }
+    }
+
+    @DHttpApi(userApi.routes.setting)
+    async setting(@DHttpUser user:IUserSession):Promise<typeof userApi.routes.setting.res> {
+        let obj=await UserSettingService.getItemByExp({
+            user_id:user.userId
+        })
+        let wallpaper=obj.getItem().wallpaper
+        if(wallpaper) {
+            obj.getItem().wallpaper=await rpcFileApi.getPath(wallpaper)
+        }
+        return obj.getItem()
+    }
+
+    @DHttpApi(userApi.routes.setWallpaper)
+    async setWallpaper(@DHttpReqParam("photo") photo:string,@DHttpUser user:IUserSession):Promise<typeof userApi.routes.setWallpaper.res> {
+        let obj=await UserSettingService.getItemByExp({
+            user_id:user.userId
+        })
+        obj.assignItem({
+            wallpaper:photo??null
+        })
+        await obj.update()
+        let path=photo?(await rpcFileApi.getPath(photo)):null
+        return {
+            path:path
         }
     }
 

@@ -47,6 +47,25 @@ import {Table_Calendar} from "../../../common/model/calendar";
 import {Table_Calendar_Event} from "../../../common/model/calendar_event";
 import {Table_Calendar_Setting} from "../../../common/model/calendar_setting";
 import {Table_Calendar_Event_Guest} from "../../../common/model/calendar_event_guest";
+import {Table_Board} from "../../../common/model/board";
+import {Table_Board_Sprint} from "../../../common/model/board_sprint";
+import {Table_Board_Column} from "../../../common/model/board_column";
+import {Table_Board_Sprint_Issue} from "../../../common/model/board_sprint_issue";
+import {Table_Board_Issue_type} from "../../../common/model/board_issue_type";
+import {Table_Board_Column_Workflow_Node} from "../../../common/model/board_column_workflow_node";
+import {Table_Board_Sprint_SwimLane} from "../../../common/model/board_sprint_swimlane";
+import {Table_Finder_Item} from "../../../common/model/finder_item";
+import {Table_IM_Favorite_Message} from "../../../common/model/im_favorite_message";
+import {Table_IM_Team_Message} from "../../../common/model/im_team_message";
+import {Table_IM_UnRead_Message} from "../../../common/model/im_unread_message";
+import {Table_IM_User_Message} from "../../../common/model/im_user_message";
+import {Table_Meeting_Miss_Call} from "../../../common/model/meeting_miss_call";
+import {Table_User_Setting} from "../../../common/model/user_setting";
+import {Table_Project_Issue_Approval} from "../../../common/model/project_issue_approval";
+import {Table_Project_Issue_History} from "../../../common/model/project_issue_history";
+import {Table_Workflow_Approval} from "../../../common/model/workflow_approval";
+import {Table_Sticky_Note} from "../../../common/model/sticky_note";
+import {Table_Photo} from "../../../common/model/photo";
 
 export async function handleImageFields(data:object,organizationId?:string){
     let arrImage=<{
@@ -167,7 +186,26 @@ async function resetSystem(){
             mysql.execute(`delete from ${Table_Calendar}`),
             mysql.execute(`delete from ${Table_Calendar_Event}`),
             mysql.execute(`delete from ${Table_Calendar_Setting}`),
-            mysql.execute(`delete from ${Table_Calendar_Event_Guest}`)
+            mysql.execute(`delete from ${Table_Calendar_Event_Guest}`),
+            mysql.execute(`delete from ${Table_Board}`),
+            mysql.execute(`delete from ${Table_Board_Sprint}`),
+            mysql.execute(`delete from ${Table_Board_Column}`),
+            mysql.execute(`delete from ${Table_Board_Sprint_Issue}`),
+            mysql.execute(`delete from ${Table_Board_Issue_type}`),
+            mysql.execute(`delete from ${Table_Board_Column_Workflow_Node}`),
+            mysql.execute(`delete from ${Table_Board_Sprint_SwimLane}`),
+            mysql.execute(`delete from ${Table_Finder_Item}`),
+            mysql.execute(`delete from ${Table_IM_Favorite_Message}`),
+            mysql.execute(`delete from ${Table_IM_Team_Message}`),
+            mysql.execute(`delete from ${Table_IM_UnRead_Message}`),
+            mysql.execute(`delete from ${Table_IM_User_Message}`),
+            mysql.execute(`delete from ${Table_Meeting_Miss_Call}`),
+            mysql.execute(`delete from ${Table_User_Setting}`),
+            mysql.execute(`delete from ${Table_Project_Issue_Approval}`),
+            mysql.execute(`delete from ${Table_Project_Issue_History}`),
+            mysql.execute(`delete from ${Table_Workflow_Approval}`),
+            mysql.execute(`delete from ${Table_Sticky_Note}`),
+            mysql.execute(`delete from ${Table_Photo}`)
         ])
 
     } catch (err) {

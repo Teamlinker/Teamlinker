@@ -550,4 +550,16 @@ class BoardController {
         return ret
     }
 
+    @DHttpApi(boardApi.routes.globalSearchBoard)
+    async globalSearchBoard(@DHttpReqParamRequired("keyword") keyword: string,@DHttpReqParamRequired("size") size: number,@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.globalSearchBoard.res> {
+        let ret=await BoardService.globalSearch(keyword,size,user.organizationInfo.organizationUserId)
+        return ret
+    }
+
+    @DHttpApi(boardApi.routes.globalSearchSprint)
+    async globalSearchSprint(@DHttpReqParamRequired("keyword") keyword: string,@DHttpReqParamRequired("size") size: number,@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.globalSearchSprint.res> {
+        let ret=await BoardSprintService.globalSearch(keyword,size,user.organizationInfo.organizationUserId)
+        return ret
+    }
+
 }

@@ -196,8 +196,8 @@ export const vDrag:ObjectDirective={
                 } else {
                     calcTop=(ev.pageY-top)/parentHeight*100;
                 }
-                point.left = `${calcLeft}%`;
-                point.top=`${calcTop}%`
+                point.left = `${calcLeft.toFixed(3)}%`;
+                point.top=`${calcTop.toFixed(3)}%`
             }
 
         }

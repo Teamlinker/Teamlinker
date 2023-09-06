@@ -40,6 +40,11 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         super(projectIssueMapper)
     }
 
+    static async globalSearch(keyword:string,size:number,organizationUserId:string) {
+        let ret=await projectIssueMapper.globalSearch(keyword, size, organizationUserId)
+        return ret;
+    }
+
     async convert(issueTypeId:string,values:ICommon_Route_Req_ProjectIssue_Field[],organizationUserId:string) {
         if(this.getItem().issue_type_id===issueTypeId) {
             return

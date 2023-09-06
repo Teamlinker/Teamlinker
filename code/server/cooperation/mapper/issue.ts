@@ -3,7 +3,10 @@ import {ICommon_Model_Project_Issue, projectIssueModel} from "../../../common/mo
 import {ICommon_Model_Project_Label, projectLabelModel} from "../../../common/model/project_label";
 import {ICommon_Model_Project_Module, projectModuleModel} from "../../../common/model/project_module";
 import {workflowNodeModel} from "../../../common/model/workflow_node";
-import {ICommon_Route_Res_Project_Issue_filter} from "../../../common/routes/response";
+import {
+    ICommon_Route_Res_Global_Search_Project_Issue_Item,
+    ICommon_Route_Res_Project_Issue_filter
+} from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {keys} from "../../../common/transform";
 import {getMysqlInstance} from '../../common/db/mysql';
@@ -15,6 +18,7 @@ import {
     generateCreateSql,
     generateDeleteInnerJoinSql,
     generateDeleteSql,
+    generateGroupLeftJoin4Sql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -48,11 +52,124 @@ import {WorkflowNodeFieldTypeService} from "../service/field";
 import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
 import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../../../common/model/workflow_node_field_type_config";
 import {boardSprintIssueModel} from "../../../common/model/board_sprint_issue";
+import {roleMemberModel} from "../../../common/model/role_member";
+import {teamUserModel} from "../../../common/model/team_user";
+import {memberTagMemberModel} from "../../../common/model/member_tag_member";
+import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 
 class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
         super(projectIssueModel)
     }
+
+    async globalSearch(keyword:string,size:number,organizationUserId:string):Promise<ICommon_Route_Res_Global_Search_Project_Issue_Item[]> {
+        let mysql=getMysqlInstance()
+        let match=keyword.match(/(\w+)\s*\-\s*(\d+)/)
+        let projectKeyword:string,issueUniqueId:string
+        if(match) {
+            projectKeyword=match[1]
+            issueUniqueId=match[2]
+        }
+        let sql=generateGroupLeftJoin4Sql({
+            model:projectIssueModel,
+            columns:{
+                columns:keys<ICommon_Model_Project_Issue>().map(item=>item.name),
+                calcColumns:[]
+            }
+        },{
+            model:projectModel,
+            columns:{
+                columns:keys<ICommon_Model_Project>().map(item=>item.name),
+                calcColumns:[]
+            },
+            expression:{
+                id:{
+                    model:projectIssueModel,
+                    field:"project_id"
+                }
+            },
+            aggregation:"project"
+        },{
+            model:roleMemberModel,
+            expression:{
+                item_id:{
+                    model:projectModel,
+                    field:"id"
+                }
+            }
+        },{
+            model:teamUserModel,
+            expression:{
+                team_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },{
+            model:memberTagMemberModel,
+            expression:{
+                member_tag_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },["id"],{
+            "$or0":{
+                member_id:{
+                    model:roleMemberModel,
+                    value:organizationUserId
+                },
+                member_type:{
+                    model:roleMemberModel,
+                    value:ECommon_Model_Organization_Member_Type.DEFAULT
+                },
+                team_id:{
+                    model:teamUserModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                },
+                member_tag_id: {
+                    model:memberTagMemberModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                }
+            },
+            id:{
+                model:projectModel,
+                value:{
+                    exp:"is not null"
+                }
+            },
+            ...((projectKeyword && issueUniqueId)?{
+                keyword:{
+                    model:projectModel,
+                    value:projectKeyword
+                },
+                unique_id:{
+                    model:projectIssueModel,
+                    value:issueUniqueId
+                }
+            }:{
+                name:{
+                    model:projectIssueModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
+                    }
+                }
+            }),
+        },"and",null,"and",{
+            field:"name",
+            model:projectIssueModel,
+            type:"asc",
+            isVirtualField:false
+        },0,size)
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
+
     async createFieldValues(values:ICommon_Model_Project_Issue_Field_Value[]) {
         if(!Array.isArray(values) || values.length==0) {
             return

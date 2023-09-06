@@ -14,6 +14,12 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
     constructor(){
         super(releaseMapper)
     }
+
+    static async globalSearch(keyword:string,size:number,organizationUserId:string) {
+        let ret=await releaseMapper.globalSearch(keyword, size, organizationUserId)
+        return ret;
+    }
+
     static async list(organizationId:string,projectId:string,page:number,size:number,name?:string,status?:ECommon_Model_Project_Release_Status,projectReleaseIds?:string[]){
         if(page<0 || size<=0){
             throw Err.Project.Release.releaseSizeEmpty

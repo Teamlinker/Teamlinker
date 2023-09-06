@@ -19,6 +19,8 @@ import {
     generateCommonListData,
     generateDeleteInnerJoinSql,
     generateDeleteSql,
+    generateGroupLeftJoin4Sql,
+    generateGroupLeftJoin5Sql,
     generateLeftJoin2Sql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
@@ -30,6 +32,14 @@ import {ICommon_Model_Workflow_Node, workflowNodeModel} from "../../../common/mo
 import {ICommon_Model_Issue_Type, issueTypeModel} from "../../../common/model/issue_type";
 import {ICommon_Model_Project_Issue, projectIssueModel} from "../../../common/model/project_issue";
 import {ICommon_Model_Project, projectModel} from "../../../common/model/project";
+import {roleMemberModel} from "../../../common/model/role_member";
+import {teamUserModel} from "../../../common/model/team_user";
+import {memberTagMemberModel} from "../../../common/model/member_tag_member";
+import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
+import {
+    ICommon_Route_Res_Global_Search_Board_Item,
+    ICommon_Route_Res_Global_Search_Board_Sprint_Item
+} from "../../../common/routes/response";
 
 class BoardMapper extends Mapper<typeof boardModel> {
     constructor() {
@@ -114,6 +124,99 @@ class BoardMapper extends Mapper<typeof boardModel> {
             ])
         }
 
+    }
+
+    async globalSearch(keyword:string,size:number,organizationUserId:string):Promise<ICommon_Route_Res_Global_Search_Board_Item[]> {
+        let mysql=getMysqlInstance()
+        let sql=generateGroupLeftJoin4Sql({
+            model:boardModel,
+            columns:{
+                columns:keys<ICommon_Model_Board>().map(item=>item.name),
+                calcColumns:[]
+            }
+        },{
+            model:projectModel,
+            columns:{
+                columns:keys<ICommon_Model_Project>().map(item=>item.name),
+                calcColumns:[]
+            },
+            expression:{
+                id:{
+                    model:boardModel,
+                    field:"project_id"
+                }
+            },
+            aggregation:"project"
+        },{
+            model:roleMemberModel,
+            expression:{
+                item_id:{
+                    model:projectModel,
+                    field:"id"
+                }
+            }
+        },{
+            model:teamUserModel,
+            expression:{
+                team_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },{
+            model:memberTagMemberModel,
+            expression:{
+                member_tag_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },["id"],{
+            "$or0":{
+                member_id:{
+                    model:roleMemberModel,
+                    value:organizationUserId
+                },
+                member_type:{
+                    model:roleMemberModel,
+                    value:ECommon_Model_Organization_Member_Type.DEFAULT
+                },
+                team_id:{
+                    model:teamUserModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                },
+                member_tag_id: {
+                    model:memberTagMemberModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                }
+            },
+            id:{
+                model:projectModel,
+                value:{
+                    exp:"is not null"
+                }
+            },
+            ...(keyword && {
+                name:{
+                    model:boardModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
+                    }
+                }
+            }),
+        },"and",null,"and",{
+            field:"name",
+            model:boardModel,
+            type:"asc",
+            isVirtualField:false
+        },0,size)
+        let ret=await mysql.execute(sql)
+        return ret;
     }
 }
 
@@ -429,6 +532,111 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
         return ret;
     }
 
+    async globalSearch(keyword:string,size:number,organizationUserId:string):Promise<ICommon_Route_Res_Global_Search_Board_Sprint_Item[]> {
+        let mysql=getMysqlInstance()
+        let sql=generateGroupLeftJoin5Sql({
+            model:boardSprintModel,
+            columns:{
+                columns:keys<ICommon_Model_Board_Sprint>().map(item=>item.name),
+                calcColumns:[]
+            },
+        },{
+            model:boardModel,
+            columns:{
+                columns:keys<ICommon_Model_Board>().map(item=>item.name),
+                calcColumns:[]
+            },
+            expression:{
+                id:{
+                    model:boardSprintModel,
+                    field:"board_id"
+                }
+            },
+            aggregation:"board"
+        },{
+            model:projectModel,
+            columns:{
+                columns:keys<ICommon_Model_Project>().map(item=>item.name),
+                calcColumns:[]
+            },
+            expression:{
+                id:{
+                    model:boardModel,
+                    field:"project_id"
+                }
+            },
+            aggregation:"project"
+        },{
+            model:roleMemberModel,
+            expression:{
+                item_id:{
+                    model:projectModel,
+                    field:"id"
+                }
+            }
+        },{
+            model:teamUserModel,
+            expression:{
+                team_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },{
+            model:memberTagMemberModel,
+            expression:{
+                member_tag_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },["id"],{
+            "$or0":{
+                member_id:{
+                    model:roleMemberModel,
+                    value:organizationUserId
+                },
+                member_type:{
+                    model:roleMemberModel,
+                    value:ECommon_Model_Organization_Member_Type.DEFAULT
+                },
+                team_id:{
+                    model:teamUserModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                },
+                member_tag_id: {
+                    model:memberTagMemberModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                }
+            },
+            id:{
+                model:projectModel,
+                value:{
+                    exp:"is not null"
+                }
+            },
+            ...(keyword && {
+                name:{
+                    model:boardSprintModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
+                    }
+                }
+            }),
+        },"and",null,"and",{
+            field:"name",
+            model:boardSprintModel,
+            type:"asc",
+            isVirtualField:false
+        },0,size)
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
 }
 
 export let boardSprintMapper=new BoardSprintMapper

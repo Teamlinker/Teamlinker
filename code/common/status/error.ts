@@ -81,6 +81,20 @@ export namespace Err {
         timeTooShort:{
             code:1011,
             msg:"time interval is too short"
+        },
+        Tool:{
+            StickyNote:{
+                noteNotFound:{
+                    code:1100,
+                    msg:"note not found"
+                }
+            },
+            Photo:{
+                photoNotFound:{
+                    code:1200,
+                    msg:"photo not found"
+                }
+            }
         }
     }
     export const Http = {

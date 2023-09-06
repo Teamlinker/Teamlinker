@@ -4,7 +4,7 @@ import {Err} from '../../../common/status/error';
 import {REDIS_USER} from "../../common/cache/keys/user";
 import {getConfigInstance} from '../../common/config/config';
 import {Entity} from "../../common/entity/entity";
-import {userMapper} from '../mapper/user';
+import {userMapper, userSettingMapper} from '../mapper/user';
 import rpcFileApi from "../../file/rpc/file";
 import {ECommon_User_Type, ICommon_Model_User, userModel} from './../../../common/model/user';
 import rpcAuthApi from "../../auth/rpc/auth";
@@ -13,6 +13,7 @@ import {ECommon_Model_Role_Reserved} from "../../../common/model/role";
 import {OrganizationUserService} from "./organization";
 import CommonUtil from "../../common/util/common";
 import {getMailInstance} from "../../common/mail/mail";
+import {userSettingModel} from "../../../common/model/user_setting";
 
 
 export class UserService extends Entity<typeof userModel,typeof userMapper> {
@@ -80,6 +81,16 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         })
         await objUser.create()
         objRedis.del()
+    }
+
+    override async create(...param): Promise<typeof userModel["model"]> {
+        let ret=await super.create(...param);
+        let obj=new UserSettingService()
+        obj.assignItem({
+            user_id:ret.id
+        })
+        await obj.create()
+        return ret;
     }
 
     static async getItemByName(name:string):Promise<InstanceType<typeof UserService>>{
@@ -286,5 +297,12 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
             })
         }
         return arr;
+    }
+}
+
+
+export class UserSettingService extends Entity<typeof userSettingModel,typeof userSettingMapper> {
+    constructor() {
+        super(userSettingMapper)
     }
 }

@@ -3,6 +3,7 @@ import {ECommon_HttpApi_Method} from "./types";
 import {Permission_Types} from "../permission/permission";
 import {ICommon_Model_Wiki} from "../model/wiki";
 import {
+    ICommon_Route_Res_Global_Search_Wiki_Item,
     ICommon_Route_Res_Role_Item,
     ICommon_Route_Res_Role_List,
     ICommon_Route_Res_Role_ListMember,
@@ -276,7 +277,17 @@ const api= {
                 page:number
             }>{},
             res: <ICommon_Route_Res_Wiki_Item_Filter>{},
-            permission: [Permission_Types.Wiki.READ]
+            permission: [Permission_Types.Organization.READ]
+        },
+        globalSearchWikiItem:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/global/wikiitem",
+            req:<{
+                keyword:string,
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_Global_Search_Wiki_Item[]>{},
+            permission:[Permission_Types.Organization.READ]
         }
     }
 }

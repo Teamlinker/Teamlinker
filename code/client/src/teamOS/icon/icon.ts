@@ -16,7 +16,8 @@ export const iconGroupMap={
     setting:"setting",
     team:"team",
     wiki:"file-text",
-    finder:"folder-view"
+    finder:"folder-view",
+    account:"setting"
 }
 
 export class Icon extends Base{

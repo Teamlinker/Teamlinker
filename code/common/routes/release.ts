@@ -3,6 +3,7 @@ import {Permission_Types} from '../permission/permission';
 import {ICommon_Model_Project_Release} from './../model/project_release';
 import {ECommon_Services} from './../types';
 import {
+    ICommon_Route_Res_Global_Search_Project_Release_Item,
     ICommon_Route_Res_Release_IfCanRelease,
     ICommon_Route_Res_Release_Info,
     ICommon_Route_Res_Release_List
@@ -25,7 +26,7 @@ const api={
                 size:number       
             }>{},
             res:<ICommon_Route_Res_Release_List>{},
-            permission:[Permission_Types.Project.READ]
+            permission:[Permission_Types.Organization.READ]
         },
         info:{
             method:ECommon_HttpApi_Method.GET,
@@ -109,6 +110,16 @@ const api={
             }>{},
             res:<ICommon_Model_Project_Release>{},
             permission:[Permission_Types.Project.EDIT]
+        },
+        globalSearchRelease:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/global/release",
+            req:<{
+                keyword:string,
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_Global_Search_Project_Release_Item[]>{},
+            permission:[Permission_Types.Organization.READ]
         }
     }
 }

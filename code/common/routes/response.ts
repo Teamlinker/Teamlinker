@@ -32,6 +32,9 @@ import {ICommon_Model_Board_Sprint} from "../model/board_sprint";
 import {ICommon_Model_Board_Sprint_SwimLane} from "../model/board_sprint_swimlane";
 import {ICommon_Model_Board} from "../model/board";
 import {ICommon_Model_Board_Column} from "../model/board_column";
+import {ICommon_Model_Sticky_Note} from "../model/sticky_note";
+import {ICommon_Model_Content} from "../model/content";
+import {ICommon_Model_Photo} from "../model/photo";
 
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -523,4 +526,33 @@ export type ICommon_Route_Res_Organization_Statics={
         team:ICommon_Model_Team,
         userCount:number
     }[]
+}
+
+export type ICommon_Route_Res_Global_Search_Board_Item=ICommon_Model_Board & {
+    project:ICommon_Model_Project
+}
+
+export type ICommon_Route_Res_Global_Search_Board_Sprint_Item=ICommon_Model_Board_Sprint & {
+    project:ICommon_Model_Project,
+    board:ICommon_Model_Board
+}
+
+export type ICommon_Route_Res_Global_Search_Project_Issue_Item=ICommon_Model_Project_Issue & {
+    project:ICommon_Model_Project
+}
+
+export type ICommon_Route_Res_Global_Search_Project_Release_Item=ICommon_Model_Project_Release & {
+    project:ICommon_Model_Project
+}
+
+export type ICommon_Route_Res_Global_Search_Wiki_Item=ICommon_Model_Wiki_Item & {
+    wiki:ICommon_Model_Wiki
+}
+
+export type ICommon_Route_Res_Sticky_Note_Item = ICommon_Model_Sticky_Note & {
+    content:ICommon_Model_Content
+}
+
+export type ICommon_Route_Res_Photo_item =ICommon_Model_Photo & {
+    path:string
 }

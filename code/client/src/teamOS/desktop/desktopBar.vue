@@ -1,7 +1,7 @@
 <template>
   <a-row>
     <a-col flex="80px" style="height: 100%;justify-content: center;align-items: center;display: flex">
-      <slot name="topLeft"></slot>
+      <slot name="barLeft"></slot>
     </a-col>
     <a-col flex="auto" style="height: 100%;padding-left: 30px">
       <a-row style="height: 100%" align="center" justify="start" :wrap="false">
@@ -14,7 +14,7 @@
       </a-row>
     </a-col>
     <a-col flex="250px" style="height: 100%;" id="teamOS-Desktop-Menu">
-	    <slot name="topRight"></slot>
+	    <slot name="barRight"></slot>
     </a-col>
   </a-row>
 </template>

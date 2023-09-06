@@ -9,7 +9,8 @@ let imagefields=[
     "image",
     "img",
     "icon",
-    "file_id"
+    "file_id",
+    "wallpaper"
 ]
 export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
     protected item:T["model"];

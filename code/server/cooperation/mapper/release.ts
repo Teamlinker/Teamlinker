@@ -9,6 +9,7 @@ import {
     generateCreateSql,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
+    generateGroupLeftJoin4Sql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -23,16 +24,115 @@ import {
 } from './../../../common/model/project_release';
 import {projectReleaseIssueModel} from './../../../common/model/project_release_issue';
 import {
+    ICommon_Route_Res_Global_Search_Project_Release_Item,
     ICommon_Route_Res_Release_Info,
     ICommon_Route_Res_Release_Item,
     ICommon_Route_Res_Release_List
 } from './../../../common/routes/response';
-import {projectModel} from "../../../common/model/project";
+import {ICommon_Model_Project, projectModel} from "../../../common/model/project";
+import {roleMemberModel} from "../../../common/model/role_member";
+import {teamUserModel} from "../../../common/model/team_user";
+import {memberTagMemberModel} from "../../../common/model/member_tag_member";
+import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 
 class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
     constructor() {
         super(projectReleaseModel)
     }
+
+    async globalSearch(keyword:string,size:number,organizationUserId:string):Promise<ICommon_Route_Res_Global_Search_Project_Release_Item[]> {
+        let mysql=getMysqlInstance()
+        let sql=generateGroupLeftJoin4Sql({
+            model:projectReleaseModel,
+            columns:{
+                columns:keys<ICommon_Model_Project_Release>().map(item=>item.name),
+                calcColumns:[]
+            }
+        },{
+            model:projectModel,
+            columns:{
+                columns:keys<ICommon_Model_Project>().map(item=>item.name),
+                calcColumns:[]
+            },
+            expression:{
+                id:{
+                    model:projectReleaseModel,
+                    field:"project_id"
+                }
+            },
+            aggregation:"project"
+        },{
+            model:roleMemberModel,
+            expression:{
+                item_id:{
+                    model:projectModel,
+                    field:"id"
+                }
+            }
+        },{
+            model:teamUserModel,
+            expression:{
+                team_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },{
+            model:memberTagMemberModel,
+            expression:{
+                member_tag_id:{
+                    model:roleMemberModel,
+                    field:"member_id"
+                }
+            }
+        },["id"],{
+            "$or0":{
+                member_id:{
+                    model:roleMemberModel,
+                    value:organizationUserId
+                },
+                member_type:{
+                    model:roleMemberModel,
+                    value:ECommon_Model_Organization_Member_Type.DEFAULT
+                },
+                team_id:{
+                    model:teamUserModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                },
+                member_tag_id: {
+                    model:memberTagMemberModel,
+                    value:{
+                        exp:"is not null"
+                    }
+                }
+            },
+            id:{
+                model:projectModel,
+                value:{
+                    exp:"is not null"
+                }
+            },
+            ...(keyword && {
+                name:{
+                    model:projectReleaseModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
+                    }
+                }
+            }),
+        },"and",null,"and",{
+            field:"name",
+            model:projectReleaseModel,
+            type:"asc",
+            isVirtualField:false
+        },0,size)
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
+
     async list(organizationId:string,projectId:string,page:number,size:number,name?:string,status?:ECommon_Model_Project_Release_Status,projectReleaseIds?:string[]):Promise<ICommon_Route_Res_Release_List> {
         if(page===undefined || page<0 || size===undefined || size<=0) {
             throw Err.Common.paramError

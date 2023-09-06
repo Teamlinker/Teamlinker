@@ -14,6 +14,7 @@ import {
 import {organizationUserModel} from './../../../common/model/organization_user';
 import {teamUserModel} from './../../../common/model/team_user';
 import {ECommon_User_Type, ICommon_Model_User, Table_User, userModel} from './../../../common/model/user';
+import {userSettingModel} from "../../../common/model/user_setting";
 
 class UserMapper extends Mapper<typeof userModel> {
     constructor(){
@@ -205,3 +206,11 @@ class UserMapper extends Mapper<typeof userModel> {
     }
 }
 export let userMapper=new UserMapper()
+
+
+class UserSettingMapper extends Mapper<typeof userSettingModel> {
+    constructor() {
+        super(userSettingModel)
+    }
+}
+export let userSettingMapper=new UserSettingMapper()

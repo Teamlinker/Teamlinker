@@ -1,8 +1,8 @@
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import projectIssueApi from "../../../common/routes/issue";
 import {
-    ICommon_Route_Req_ProjectIssue_Field,
-    ICommon_Route_Req_ProjectIssue_Field_Value
+     ICommon_Route_Req_ProjectIssue_Field,
+     ICommon_Route_Req_ProjectIssue_Field_Value
 } from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {DComponent} from "../../common/decorate/component";
@@ -513,6 +513,12 @@ class IssueController {
           return {
                count:ret
           };
+     }
+
+     @DHttpApi(projectIssueApi.routes.globalSearchIssue)
+     async globalSearchIssue(@DHttpReqParamRequired("keyword") keyword: string,@DHttpReqParamRequired("size") size: number,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.globalSearchIssue.res> {
+          let ret=await ProjectIssueService.globalSearch(keyword,size,user.organizationInfo.organizationUserId)
+          return ret;
      }
 
 }

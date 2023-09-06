@@ -102,6 +102,10 @@ class ReleaseController {
        let ret=await obj.update()
        return ret;
      }
-     
-     
+
+    @DHttpApi(releaseApi.routes.globalSearchRelease)
+    async globalSearchRelease(@DHttpReqParamRequired("keyword") keyword: string,@DHttpReqParamRequired("size") size: number,@DHttpUser user:IUserSession):Promise<typeof releaseApi.routes.globalSearchRelease.res> {
+        let ret=await ProjectReleaseService.globalSearch(keyword,size,user.organizationInfo.organizationUserId)
+        return ret;
+    }
 }

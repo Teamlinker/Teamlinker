@@ -98,11 +98,17 @@ export const vDrop:Directive= {
                             if(item.type=="free") {
                                 isDrop=false
                                 return;
-                            } else if(!allowTypeList.includes(item.type as EClient_Drag_Type)) {
+                            } else if(allowTypeList.includes(item.type as EClient_Drag_Type)) {
+                                isDrop=true
+                                break
+                            } else {
                                 isDrop=false
-                                return;
+                                continue
                             }
                         }
+                    }
+                    if(!isDrop) {
+                        return;
                     }
                     if(ev.dataTransfer.items[0].kind!="file") {
                         if(!el.contains(dragElementList[0].element)) {
@@ -147,6 +153,8 @@ export const vDrop:Directive= {
                             if(el===ev.target) {
                                 ev.dataTransfer.dropEffect="copy"
                                 isDrop=true
+                            } else {
+                                isDrop=false
                             }
                             let dragContainer=document.getElementById("dragContainer")
                             if(dragContainer) {
