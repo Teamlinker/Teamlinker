@@ -93,7 +93,10 @@ export default {
         contentNotEmpty:"内容不能为空",
         selectBothDate:"日期都需要选择!",
         notStartNodeNotRemove:"未开始节点不能被删除!!!",
-        typeCode:"输入验证码"
+        typeCode:"输入验证码",
+        accept:"接受",
+        reject:"拒绝",
+        workDay:"工作日"
     },
     placeholder:{
         pleaseSelect:"请选择",
@@ -315,6 +318,11 @@ export default {
         joinDate:"加入日期",
         starting:"进行中",
         completed:"已完成",
+        accept:"接受",
+        reject:"拒绝",
+        workDay:"工作日",
+        commit:"提交",
+        resolve:"撤销"
     },
     "common":{
         "component":{

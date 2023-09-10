@@ -18,11 +18,11 @@
         <a-switch :checked-value="1" :unchecked-value="0" v-model="data.isAllDay" size="small" @change="onChangeAllDay"></a-switch>
         {{$t("controller.app.calendar.calendarEventDateEdit.repeat")}}:
         <a-select style="width: 110px" size="small" v-model="data.recurring">
-          <a-option :value="ECommon_Calendar_Recurring_Type.NONE">No</a-option>
-          <a-option :value="ECommon_Calendar_Recurring_Type.DAY">Day</a-option>
-          <a-option :value="ECommon_Calendar_Recurring_Type.WORKDAY">Workday</a-option>
-          <a-option :value="ECommon_Calendar_Recurring_Type.WEEK">Week</a-option>
-          <a-option :value="ECommon_Calendar_Recurring_Type.MONTH">Month</a-option>
+          <a-option :value="ECommon_Calendar_Recurring_Type.NONE">{{$t("util.none")}}</a-option>
+          <a-option :value="ECommon_Calendar_Recurring_Type.DAY">{{$t("util.day")}}</a-option>
+          <a-option :value="ECommon_Calendar_Recurring_Type.WORKDAY">{{$t("util.workday")}}</a-option>
+          <a-option :value="ECommon_Calendar_Recurring_Type.WEEK">{{$t("util.week")}}</a-option>
+          <a-option :value="ECommon_Calendar_Recurring_Type.MONTH">{{$t("util.month")}}</a-option>
         </a-select>
         <template v-if="data.recurring===ECommon_Calendar_Recurring_Type.WEEK">
 	        {{$t("controller.app.calendar.calendarEventDateEdit.selectWeekday")}}:

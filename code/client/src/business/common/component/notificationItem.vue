@@ -25,16 +25,16 @@
 			ORGANIZATION:organization {{(obj.data as ICommon_Model_Organization)?.name}} is inviting you
 			<template v-if="obj.status===ECommon_Model_Notification_Status.PENDING">
 				&nbsp;
-				<a href="javascript:void(0)" @click="onAcceptOrganizationInvitation">Accept</a>&nbsp;&nbsp;
-				<a href="javascript:void(0)" style="color: red" @click="onRejectOrganizationInvitation">Reject</a>&nbsp;
+				<a href="javascript:void(0)" @click="onAcceptOrganizationInvitation">{{$t("util.accept")}}</a>&nbsp;&nbsp;
+				<a href="javascript:void(0)" style="color: red" @click="onRejectOrganizationInvitation">{{$t("util.reject")}}</a>&nbsp;
 			</template>
 			<template v-else-if="obj.status===ECommon_Model_Notification_Status.RESOLVED">
 				&nbsp;&nbsp;
-				<span style="color: blue">Accepted</span>
+				<span style="color: blue">{{$t("util.accepted")}}</span>
 			</template>
 			<template v-else-if="obj.status===ECommon_Model_Notification_Status.REJECTED">
 				&nbsp;&nbsp;
-				<span style="color: red">Rejected</span>
+				<span style="color: red">{{$t("util.rejected")}}</span>
 			</template>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_COMMENT_AT">

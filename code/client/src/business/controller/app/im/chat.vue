@@ -28,7 +28,7 @@
 									<UserAvatar :organization-user-id="record.id" :name="record.name" :photo="record.photo"></UserAvatar>
 								</template>
 							</a-table>
-							<a-button type="primary" style="margin-top: 10px" size="small" @click="onMeeting">Invite</a-button>
+							<a-button type="primary" style="margin-top: 10px" size="small" @click="onMeeting">{{$t("util.invite")}}</a-button>
 						</a-row>
 					</template>
 				</a-popover>

@@ -27,10 +27,10 @@
 			<template #actions v-if="checkPermission(permission,Permission_Types.Project.ADMIN) || item.value.created_by.id==store.userInfo.id">
 				<template v-if="!item.isEdit">
 					<a-link href="javascript:void(0)" style="color: gray;font-size: 13px;padding: 0px" @click="onEdit(item)">
-						Edit
+						{{$t("util.edit")}}
 					</a-link>
 					<a-link href="javascript:void(0)" style="color: gray;font-size: 13px;padding: 0px" @click="onRemoveComment(index)">
-						Delete
+						{{$t("util.delete")}}
 					</a-link>
 				</template>
 				<template v-else>

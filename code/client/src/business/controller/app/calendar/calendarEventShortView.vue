@@ -54,7 +54,7 @@
 										<UserAvatar :organization-user-id="record.organizationUserId" :name="record.nickname" :photo="record.photo"></UserAvatar>
 									</template>
 								</a-table>
-								<a-button type="primary" style="margin-top: 10px" size="small" @click="onMeeting">Start</a-button>
+								<a-button type="primary" style="margin-top: 10px" size="small" @click="onMeeting">{{$t("util.start")}}</a-button>
 							</a-row>
 						</template>
 					</a-popover>

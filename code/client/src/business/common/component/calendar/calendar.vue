@@ -78,7 +78,7 @@
             <div style="position: absolute;line-height:20px;border-radius: 5px;padding-left: 5px;color: white;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: move" :style="{left:item.left,top:item.top,right:item.right,height:item.height,backgroundColor:objManage.checkCrossEvent(item)?item.color:'',color:objManage.checkCrossEvent(item)?'white':item.color}" :data-id="item.id" :data-index="JSON.stringify(item.index)" data-type="move" v-if="parseInt(item.top)+parseInt(item.height)<monthDayHeight-30">
               {{moment.tz({hour:item.startDate.hour,minute:item.startDate.minute},props.timeZone).format("HH:mm")+" "+item.name}}
             </div>
-            <div class="eventMore" style="position: absolute;line-height:20px;border-radius: 5px;padding-left: 5px;font-weight: bold;color: rgb(3,155,229)" :style="{left:item.left,top:item.top,right:item.right,height:item.height}" v-else-if="check(index,index1)" @click="onMore(index-1,$event)" name="more">more</div>
+            <div class="eventMore" style="position: absolute;line-height:20px;border-radius: 5px;padding-left: 5px;font-weight: bold;color: rgb(3,155,229)" :style="{left:item.left,top:item.top,right:item.right,height:item.height}" v-else-if="check(index,index1)" @click="onMore(index-1,$event)" name="more">{{$t("util.more")}}</div>
           </template>
         </div>
       </div>

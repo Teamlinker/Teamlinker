@@ -22,7 +22,9 @@
               <a-option :label="$t('util.joined')" value="joined"></a-option>
             </a-select>
             <a-input-search style="width: 250px" v-model="keyword" :placeholder="$t('placeholder.typeWikiName')" @search="onSearch"></a-input-search>
-            <a-button type="primary" @click="onAddWiki" v-if="checkPermission(storeOrganization.organizationPermission,Permission_Types.Organization.CREATE_WIKI)">Create</a-button>
+            <a-button type="primary" @click="onAddWiki" v-if="checkPermission(storeOrganization.organizationPermission,Permission_Types.Organization.CREATE_WIKI)">
+	            {{$t("util.create")}}
+            </a-button>
           </a-space>
         </a-row>
         <a-space wrap style="margin-top: 20px" size="large" v-if="list.length>0">

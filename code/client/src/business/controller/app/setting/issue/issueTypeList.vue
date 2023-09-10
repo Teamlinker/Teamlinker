@@ -1,7 +1,7 @@
 <template>
   <div ref="root">
     <a-dropdown-button type="primary" size="small">
-      Add
+	    {{$t("util.add")}}
       <template #icon>
         <icon-down></icon-down>
       </template>

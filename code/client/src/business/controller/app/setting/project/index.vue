@@ -2,7 +2,9 @@
   <div ref="root">
     <a-space>
       <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button :placeholder="$t('placeholder.typeProjectName')"></a-input-search>
-      <a-button type="primary" @click="onCreate">Create</a-button>
+      <a-button type="primary" @click="onCreate">
+	      {{$t("util.create")}}
+      </a-button>
     </a-space>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #name="{record}">

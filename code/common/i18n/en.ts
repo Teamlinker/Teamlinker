@@ -317,6 +317,11 @@ export default {
         joinDate:"Join Date",
         starting:"Starting",
         completed:"Completed",
+        accept:"Accept",
+        reject:"Reject",
+        workDay:"WorkDay",
+        commit:"Commit",
+        resolve:"Resolve"
     },
     "common":{
         "component":{

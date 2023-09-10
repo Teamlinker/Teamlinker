@@ -6,6 +6,13 @@ export enum ECommon_Model_Project_Issue_Approval_Type {
     REJECTED
 }
 
+export enum ECommon_Model_Project_Issue_Approval_Action {
+    RESOLVE,
+    REJECT,
+    REVOKE,
+    COMMIT
+}
+
 export interface ICommon_Model_Project_Issue_Approval {
     id: string,
     project_issue_id:string

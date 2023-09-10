@@ -27,7 +27,7 @@
             <a-button :disabled="actionList.length==0" :type="info?.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART?'secondary':'primary'" :status="info?.approval?.type===ECommon_Model_Project_Issue_Approval_Type.REJECTED?'danger':info?.workflowNode.status===ECommon_Model_Workflow_Node_Status.DONE?'success':'normal'">{{calculateApprovalName}}&nbsp;&nbsp;<icon-down></icon-down>
             </a-button>
             <template #content>
-              <a-doption v-for="item in actionList as any[]" :key="item.isApproval?item.name:item.id" @click="onAction(item)">{{item.name}}</a-doption>
+              <a-doption v-for="item in actionList as any[]" :key="item.isApproval?item.type:item.id" @click="onAction(item)">{{item.isApproval?approvalMap[item.type]:item.name}}</a-doption>
             </template>
           </a-dropdown>
 	        <a-button v-if="!parentIssue" @click="onCreateSubIssue">
@@ -126,7 +126,10 @@ import ProjectIssueComment from "./projectIssueComment.vue";
 import ProjectIssueField from "./projectIssueField.vue";
 import ProjectIssueRelated from "./projectIssueRelated.vue";
 import ProjectIssueHistory from "./projectIssueHistory.vue";
-import {ECommon_Model_Project_Issue_Approval_Type} from "../../../../../../../common/model/project_issue_approval";
+import {
+	ECommon_Model_Project_Issue_Approval_Action,
+	ECommon_Model_Project_Issue_Approval_Type
+} from "../../../../../../../common/model/project_issue_approval";
 import RichEditor from "@/business/common/component/richEditor/richEditor.vue";
 import {ECommon_Content_Line_Config_Type} from "../../../../../../../common/model/content";
 import {RichEditorEventHandle} from "@/business/common/component/richEditorEventHandle";
@@ -152,7 +155,7 @@ const moduleList=ref<DCSType<ICommon_Model_Project_Module>[]>([])
 const	labelList=ref<DCSType<ICommon_Model_Project_Label>[]>([])
 const actionList=ref<DCSType<ICommon_Model_Workflow_Action>[] | {
 	isApproval:true,
-	name:"Resolve"|"Reject"|"Revoke"|"Commit"
+	type:ECommon_Model_Project_Issue_Approval_Action
 }[]>([])
 const fieldList=ref<ICommon_Route_Res_ProjectIssue_fieldsInfo[]>([])
 const store=useDesktopStore()
@@ -170,6 +173,12 @@ const rowSelection=ref<TableRowSelection>({
 	onlyCurrent:false
 })
 const {t}=useI18n()
+const approvalMap={
+	[ECommon_Model_Project_Issue_Approval_Action.COMMIT]:t("util.commit"),
+	[ECommon_Model_Project_Issue_Approval_Action.RESOLVE]:t("util.resolve"),
+	[ECommon_Model_Project_Issue_Approval_Action.REJECT]:t("util.reject"),
+	[ECommon_Model_Project_Issue_Approval_Action.REVOKE]:t("util.revoke")
+}
 const columns = [
 	{
 		title: t("util.name"),
@@ -284,10 +293,10 @@ const getActionList=async ()=>{
 }
 const onAction=async (item:ICommon_Model_Workflow_Action | {
 	isApproval:true,
-	name:"Resolve"|"Reject"|"Revoke"|"Commit"
+	type:ECommon_Model_Project_Issue_Approval_Action
 })=>{
 	if("isApproval" in item) {
-		if(item.name==="Revoke") {
+		if(item.type===ECommon_Model_Project_Issue_Approval_Action.REVOKE) {
 			let res=await apiIssue.revokeApproval({
 				projectIssueId:props.projectIssueId
 			})
@@ -295,7 +304,7 @@ const onAction=async (item:ICommon_Model_Workflow_Action | {
 				Message.error(res.msg)
 				return
 			}
-		} else if(item.name==="Resolve") {
+		} else if(item.type===ECommon_Model_Project_Issue_Approval_Action.RESOLVE) {
 			let res=await apiIssue.resolveApproval({
 				projectIssueId:props.projectIssueId
 			})
@@ -303,7 +312,7 @@ const onAction=async (item:ICommon_Model_Workflow_Action | {
 				Message.error(res.msg)
 				return
 			}
-		} else if(item.name==="Reject") {
+		} else if(item.type===ECommon_Model_Project_Issue_Approval_Action.REJECT) {
 			let ret=await Dialog.inputRich(root.value,appContext,t("tip.rejectReason"))
 			if(ret) {
 				let res=await apiIssue.rejectApproval({
@@ -317,7 +326,7 @@ const onAction=async (item:ICommon_Model_Workflow_Action | {
 			} else {
 				return
 			}
-		} else if(item.name==="Commit") {
+		} else if(item.type===ECommon_Model_Project_Issue_Approval_Action.COMMIT) {
 			let res=await apiIssue.commitApproval({
 				projectIssueId:props.projectIssueId
 			})

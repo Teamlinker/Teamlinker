@@ -35,7 +35,7 @@
         <template #icon>
           <icon-plus />
         </template>
-        Add
+	      {{$t("util.add")}}
       </a-tag>
       <slot :value="commitValue"></slot>
     </a-space>

@@ -27,6 +27,7 @@ import {
 import {ECommon_Model_Workflow_Approval_Type} from "../../../common/model/workflow_approval";
 import rpcUserApi from "../../user/rpc/user"
 import {
+    ECommon_Model_Project_Issue_Approval_Action,
     ECommon_Model_Project_Issue_Approval_Type,
     ICommon_Model_Project_Issue_Approval,
     projectIssueApprovalModel
@@ -605,7 +606,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
 
     async actionsInfo(organizationUserId:string):Promise<ICommon_Model_Workflow_Action[] | {
         isApproval:true,
-        name:"Resolve"|"Reject"|"Revoke"|"Commit"
+        type:ECommon_Model_Project_Issue_Approval_Action
     }[]> {
         let process=await projectIssueMapper.getProcess(this.getId())
         let workflowNode=await WorkflowNodeService.getItemById(process[process.length-1])
@@ -623,18 +624,18 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
                         return [
                             {
                                 isApproval:true,
-                                name:"Resolve"
+                                type:ECommon_Model_Project_Issue_Approval_Action.RESOLVE
                             },
                             {
                                 isApproval:true,
-                                name:"Reject"
+                                type:ECommon_Model_Project_Issue_Approval_Action.REJECT
                             }
                         ]
                     } else {
                         return [
                             {
                                 isApproval:true,
-                                name:"Revoke"
+                                type:ECommon_Model_Project_Issue_Approval_Action.REVOKE
                             }
                         ]
                     }
@@ -642,11 +643,11 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
                     return [
                         {
                             isApproval:true,
-                            name:"Revoke"
+                            type:ECommon_Model_Project_Issue_Approval_Action.REVOKE
                         },
                         {
                             isApproval:true,
-                            name:"Commit"
+                            type:ECommon_Model_Project_Issue_Approval_Action.COMMIT
                         }
                     ]
                 } else if(objApproval.getItem().type===ECommon_Model_Project_Issue_Approval_Type.RESOLVED) {

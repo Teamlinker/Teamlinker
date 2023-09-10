@@ -18,6 +18,7 @@ import {ECommon_HttpApi_Method} from "./types";
 import {ICommon_Model_Project_Issue_Field_Value} from "../model/project_issue_field_value";
 import {ICommon_Model_Project_Release} from "../model/project_release";
 import {ICommon_Model_Project_Issue_History} from "../model/project_issue_history";
+import {ECommon_Model_Project_Issue_Approval_Action} from "../model/project_issue_approval";
 
 const api={
     baseUrl:"/issue",
@@ -147,7 +148,7 @@ const api={
             }>{},
             res:<ICommon_Model_Workflow_Action[] | {
                 isApproval:true,
-                name:"Resolve"|"Reject"|"Revoke"|"Commit"
+                type:ECommon_Model_Project_Issue_Approval_Action
             }[]>{},
             permission:[Permission_Types.Project.READ]
         },

@@ -11,7 +11,7 @@
 				</a-select>
 				<a-input-search size="small" style="width: 300px" v-model="keyword" @search="onSearch" search-button :placeholder="$t('placeholder.typeSprintName')"></a-input-search>
 				<a-button size="small" type="primary" @click="onCreate">
-					Create
+					{{$t("util.create")}}
 				</a-button>
 			</a-space>
 		</a-row>
