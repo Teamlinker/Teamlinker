@@ -1,225 +1,225 @@
 <template>
 	<div style="width: 100%;padding-left: 5px;box-sizing: border-box">
-		<a-descriptions style="margin-top: 10px;" title="Info" :column="1" :value-style="{wordBreak:'break-all'}">
+		<a-descriptions style="margin-top: 10px;" :title="$t('util.info')" :column="1" :value-style="{wordBreak:'break-all'}">
 			<template v-if="!item || !item.id">
-				<a-descriptions-item label="name">Desktop</a-descriptions-item>
+				<a-descriptions-item :label="$t('util.name')">Desktop</a-descriptions-item>
 			</template>
 			<template v-else-if="item.type===ECommon_Model_Finder_Item_Type.FILE">
 				<a-descriptions-item label="name">{{fileInfo?.name}}</a-descriptions-item>
 				<a-descriptions-item label="type">
 					<span style="color: blue">
-						File
+						{{$t("util.file")}}
 					</span>
 				</a-descriptions-item>
-				<a-descriptions-item label="size">{{generateSizeFormat(fileInfo?.file.size)}}</a-descriptions-item>
-				<a-descriptions-item label="date">{{moment(fileInfo?.created_time).format("YYYY-MM-DD HH:mm:ss")}}</a-descriptions-item>
-				<a-descriptions-item label="path">
+				<a-descriptions-item :label="$t('util.size')">{{generateSizeFormat(fileInfo?.file.size)}}</a-descriptions-item>
+				<a-descriptions-item :label="$t('util.date')">{{moment(fileInfo?.created_time).format("YYYY-MM-DD HH:mm:ss")}}</a-descriptions-item>
+				<a-descriptions-item :label="$t('util.path')">
 					{{generatePathFormat(fileInfo?.parentFolderList)}}
 				</a-descriptions-item>
 			</template>
 			<template v-else-if="item.type===ECommon_Model_Finder_Item_Type.FOLDER">
-				<a-descriptions-item label="name">{{folderInfo?.name}}</a-descriptions-item>
-				<a-descriptions-item label="type">
+				<a-descriptions-item :label="$t('util.name')">{{folderInfo?.name}}</a-descriptions-item>
+				<a-descriptions-item :label="$t('util.type')">
 					<span style="color: blue">
-						Folder
+						{{$t("util.folder")}}
 					</span>
 				</a-descriptions-item>
-				<a-descriptions-item label="date">{{moment(folderInfo?.created_time).format("YYYY-MM-DD HH:mm:ss")}}</a-descriptions-item>
-				<a-descriptions-item label="path">
+				<a-descriptions-item :label="$t('util.date')">{{moment(folderInfo?.created_time).format("YYYY-MM-DD HH:mm:ss")}}</a-descriptions-item>
+				<a-descriptions-item :label="$t('util.path')">
 					{{generatePathFormat(folderInfo?.parentFolderList)}}
 				</a-descriptions-item>
 			</template>
 			<template v-else-if="item.type===ECommon_Model_Finder_Item_Type.SHORTCUT">
 				<template v-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.PROJECT">
-					<a-descriptions-item label="name">{{projectInfo?.name}}</a-descriptions-item>
-					<a-descriptions-item label="type">
+					<a-descriptions-item :label="$t('util.name')">{{projectInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.type')">
 						<span style="color: blue">
-							Shortcut
+							{{$t("util.shortcut")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="category">
+					<a-descriptions-item :label="$t('util.category')">
 						<span style="color: green">
-							Project
+							{{$t("util.project")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="key">{{projectInfo?.keyword}}</a-descriptions-item>
-					<a-descriptions-item label="description" v-if="projectInfo?.description">
+					<a-descriptions-item :label="$t('util.key')">{{projectInfo?.keyword}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.description')" v-if="projectInfo?.description">
 						<span style="line-clamp: 4;-webkit-box-orient: vertical;overflow: hidden;display: -webkit-box;-moz-box-orient: vertical;">
 							{{projectInfo?.description}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="create" v-if="projectInfo">
+					<a-descriptions-item :label="$t('util.create')" v-if="projectInfo">
 						<UserAvatar :organization-user-id="projectInfo?.created_by.organizationUserId" :name="projectInfo?.created_by.nickname" :photo="projectInfo?.created_by.photo" :organization-id="projectInfo?.organization_id"></UserAvatar>
 					</a-descriptions-item>
-					<a-descriptions-item label="organization" v-if="organizationInfo">
+					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>
 				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.PROJECT_ISSUE">
-					<a-descriptions-item label="name">{{projectIssueInfo?.name}}</a-descriptions-item>
-					<a-descriptions-item label="type">
+					<a-descriptions-item :label="$t('util.name')">{{projectIssueInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.type')">
 						<span style="color: blue">
-							Shortcut
+							{{$t("util.shortcut")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="category">
+					<a-descriptions-item :label="$t('util.category')">
 						<span style="color: green">
-							Project Issue
+							{{$t("util.projectIssue")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="key">{{projectIssueInfo?.project.keyword+"-"+projectIssueInfo?.unique_id}}</a-descriptions-item>
-					<a-descriptions-item label="priority" v-if="projectIssueInfo">
+					<a-descriptions-item :label="$t('util.key')">{{projectIssueInfo?.project.keyword+"-"+projectIssueInfo?.unique_id}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.priority')" v-if="projectIssueInfo">
 						<FieldPriority :priority="projectIssueInfo?.priority"></FieldPriority>
 					</a-descriptions-item>
-					<a-descriptions-item label="issue type">
+					<a-descriptions-item :label="$t('util.issueType')">
 						{{projectIssueInfo?.issueType.name}}
 					</a-descriptions-item>
-					<a-descriptions-item label="status">
+					<a-descriptions-item :label="$t('util.status')">
 						{{projectIssueInfo?.workflowNode.name}}
 					</a-descriptions-item>
-					<a-descriptions-item label="reporter" v-if="projectIssueInfo?.reporter_id">
+					<a-descriptions-item :label="$t('util.reporter')" v-if="projectIssueInfo?.reporter_id">
 						<UserAvatar :organization-user-id="projectIssueInfo?.reporter_id.organizationUserId" :name="projectIssueInfo?.reporter_id.nickname" :photo="projectIssueInfo?.reporter_id.photo" :organization-id="projectIssueInfo?.project.organization_id"></UserAvatar>
 					</a-descriptions-item>
-					<a-descriptions-item label="assigner" v-if="projectIssueInfo?.assigner_id">
+					<a-descriptions-item :label="$t('util.assigner')" v-if="projectIssueInfo?.assigner_id">
 						<UserAvatar :organization-user-id="projectIssueInfo?.assigner_id.organizationUserId" :name="projectIssueInfo?.assigner_id.nickname" :photo="projectIssueInfo?.assigner_id.photo" :organization-id="projectIssueInfo?.project.organization_id"></UserAvatar>
 					</a-descriptions-item>
-					<a-descriptions-item label="organization" v-if="organizationInfo">
+					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>
 				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE">
-					<a-descriptions-item label="name">{{projectReleaseInfo?.name}}</a-descriptions-item>
-					<a-descriptions-item label="type">
+					<a-descriptions-item :label="$t('util.name')">{{projectReleaseInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.type')">
 						<span style="color: blue">
-							Shortcut
+							{{$t("util.shortcut")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="category">
+					<a-descriptions-item label="$t('util.category')">
 						<span style="color: green">
-							Project Release
+							{{$t("util.projectRelease")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="status">
+					<a-descriptions-item :label="$t('util.status')">
 						{{projectReleaseInfo?.status===ECommon_Model_Project_Release_Status.RELEASE?"Release":projectReleaseInfo?.status===ECommon_Model_Project_Release_Status.ARCHIVED?"Archived":"UnRelease"}}
 					</a-descriptions-item>
-					<a-descriptions-item label="start">
+					<a-descriptions-item :label="$t('util.start')">
 						{{moment(projectReleaseInfo?.created_time).format("YYYY-MM-DD HH:mm:ss")}}
 					</a-descriptions-item>
-					<a-descriptions-item label="release">
+					<a-descriptions-item :label="$t('util.release')">
 						{{moment(projectReleaseInfo?.release_time).format("YYYY-MM-DD HH:mm:ss")}}
 					</a-descriptions-item>
-					<a-descriptions-item label="project">
+					<a-descriptions-item :label="$t('util.project')">
 						{{projectReleaseInfo?.projectName}}
 					</a-descriptions-item>
-					<a-descriptions-item label="organization" v-if="organizationInfo">
+					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>
 				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT">
-					<a-descriptions-item label="name">{{sprintInfo?.name}}</a-descriptions-item>
-					<a-descriptions-item label="issues">{{sprintInfo?.issues.length}}</a-descriptions-item>
-					<a-descriptions-item label="swimLanes">{{sprintInfo?.swimLanes.length}}</a-descriptions-item>
-					<a-descriptions-item label="start">
+					<a-descriptions-item :label="$t('util.name')">{{sprintInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.issues')">{{sprintInfo?.issues.length}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.swimLanes')">{{sprintInfo?.swimLanes.length}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.start')">
 						{{moment(sprintInfo?.start_time).format("YYYY-MM-DD HH:mm:ss")}}
 					</a-descriptions-item>
-					<a-descriptions-item label="end">
+					<a-descriptions-item :label="$t('util.end')">
 						{{moment(sprintInfo?.end_time).format("YYYY-MM-DD HH:mm:ss")}}
 					</a-descriptions-item>
-					<a-descriptions-item label="project">
+					<a-descriptions-item :label="$t('util.project')">
 						{{sprintInfo?.project.name}}
 					</a-descriptions-item>
-					<a-descriptions-item label="organization" v-if="organizationInfo">
+					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>
 				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.WIKI">
-					<a-descriptions-item label="name">{{wikiInfo?.name}}</a-descriptions-item>
-					<a-descriptions-item label="type">
+					<a-descriptions-item :label="$t('util.name')">{{wikiInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.type')">
 						<span style="color: blue">
-							Shortcut
+							{{$t("util.shortcut")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="category">
+					<a-descriptions-item :label="$t('util.category')">
 						<span style="color: green">
-							Wiki Project
+							{{$t("util.wikiProject")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="create" v-if="wikiInfo">
+					<a-descriptions-item :label="$t('util.create')" v-if="wikiInfo">
 						<UserAvatar :organization-user-id="wikiInfo?.created_by.organizationUserId" :name="wikiInfo?.created_by.nickname" :photo="wikiInfo?.created_by.photo" :organization-id="wikiInfo?.organization_id"></UserAvatar>
 					</a-descriptions-item>
-					<a-descriptions-item label="wiki count">
+					<a-descriptions-item :label="$t('util.wikiCount')">
 						{{wikiInfo?.data.length}}
 					</a-descriptions-item>
-					<a-descriptions-item label="organization" v-if="organizationInfo">
+					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>
 				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.WIKI_ITEM">
-					<a-descriptions-item label="name">{{wikiItemInfo?.name}}</a-descriptions-item>
-					<a-descriptions-item label="type">
+					<a-descriptions-item :label="$t('util.name')">{{wikiItemInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.type')">
 						<span style="color: blue">
-							Shortcut
+							{{$t("util.shortcut")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="category">
+					<a-descriptions-item :label="$t('util.category')">
 						<span style="color: green">
-							Wiki Item
+							{{$t("util.wikiItem")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="create" v-if="wikiItemInfo">
+					<a-descriptions-item :label="$t('util.create')" v-if="wikiItemInfo">
 						<UserAvatar :organization-user-id="wikiItemInfo?.created_by.organizationUserId" :name="wikiItemInfo?.created_by.nickname" :photo="wikiItemInfo?.created_by.photo" :organization-id="wikiItemInfo?.wiki.organization_id"></UserAvatar>
 					</a-descriptions-item>
-					<a-descriptions-item label="wiki">
+					<a-descriptions-item :label="$t('util.wiki')">
 						{{wikiItemInfo?.wiki.name}}
 					</a-descriptions-item>
-					<a-descriptions-item label="organization" v-if="organizationInfo">
+					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>
 				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.CALENDAR_EVENT">
-					<a-descriptions-item label="name">{{calendarEventInfo?.name}}</a-descriptions-item>
-					<a-descriptions-item label="type">
+					<a-descriptions-item :label="$t('util.name')">{{calendarEventInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.type')">
 						<span style="color: blue">
-							Shortcut
+							{{$t("util.shortcut")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="category">
+					<a-descriptions-item :label="$t('util.category')">
 						<span style="color: green">
-							Calendar Event
+							{{$t("util.calendarEvent")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="start">
+					<a-descriptions-item :label="$t('util.start')">
 						{{moment(calendarEventInfo?.start_time).format("YYYY-MM-DD HH:mm:ss")}}
 					</a-descriptions-item>
-					<a-descriptions-item label="end">
+					<a-descriptions-item :label="$t('util.end')">
 						{{moment(calendarEventInfo?.end_time).format("YYYY-MM-DD HH:mm:ss")}}
 					</a-descriptions-item>
-					<a-descriptions-item label="calendar">
+					<a-descriptions-item :label="$t('util.calendar')">
 						{{calendarEventInfo?.calendarName}}
 					</a-descriptions-item>
-					<a-descriptions-item label="organization" v-if="organizationInfo">
+					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>
 				<template v-else-if="item.shortcut_type===ECommon_Model_Finder_Shortcut_Type.MEETING_ROOM">
-					<a-descriptions-item label="name">{{meetingRoomInfo?.name}}</a-descriptions-item>
-					<a-descriptions-item label="type">
+					<a-descriptions-item :label="$t('util.name')">{{meetingRoomInfo?.name}}</a-descriptions-item>
+					<a-descriptions-item :label="$t('util.type')">
 						<span style="color: blue">
-							Shortcut
+							{{$t("util.shortcut")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="category">
+					<a-descriptions-item :label="$t('util.category')">
 						<span style="color: green">
-							Meeting
+							{{$t("util.meeting")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="start">
+					<a-descriptions-item :label="$t('util.start')">
 						{{moment(meetingRoomInfo?.start_time).format("YYYY-MM-DD HH:mm:ss")}}
 					</a-descriptions-item>
-					<a-descriptions-item label="end">
+					<a-descriptions-item :label="$t('util.end')">
 						{{moment(meetingRoomInfo?.end_time).format("YYYY-MM-DD HH:mm:ss")}}
 					</a-descriptions-item>
-					<a-descriptions-item label="organization" v-if="organizationInfo">
+					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
 					</a-descriptions-item>
 				</template>

@@ -36,6 +36,7 @@ import {v4} from "uuid";
 import {vDrag} from "@/teamOS/common/directive/drag";
 import {ICommon_Route_Res_Photo_item} from "../../../../../../../common/routes/response";
 import {Dialog} from "@/business/common/component/dialog/dialog";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	item:DCSType<ICommon_Route_Res_Photo_item & {
@@ -51,6 +52,7 @@ const appContext=getCurrentInstance().appContext
 const isReadOnly=ref(props.item.isReadOnly)
 const uploadUriId=ref("")
 const id=v4()
+const {t}=useI18n()
 const rect=ref<{
 	left:string,
 	top:string,
@@ -110,7 +112,7 @@ const onUpdate=(id:string)=>{
 }
 
 const onDelete=async ()=>{
-	let ret=await Dialog.confirm(topEle.value.offsetParent as HTMLElement,appContext,"Do you want to delete this album?")
+	let ret=await Dialog.confirm(topEle.value.offsetParent as HTMLElement,appContext,t("tip.deleteAlbum"))
 	if(ret) {
 		let res=await apiTool.removePhoto({
 			photoId:props.item.id

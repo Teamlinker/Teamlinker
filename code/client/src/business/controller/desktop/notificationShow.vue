@@ -5,14 +5,14 @@
 		</a-badge>
 		<template #content>
 			<a-space style="margin-bottom: 10px">
-				Type:
+				{{$t("util.type")}}:
 				<a-select style="width: 200px" size="small" v-model="type" @change="onChange">
-					<a-option value="all">All</a-option>
-					<a-option value="organization">Organization</a-option>
-					<a-option value="team">Team</a-option>
-					<a-option value="issue">Project Issue</a-option>
-					<a-option value="wiki">Wiki</a-option>
-					<a-option value="calendar">Calendar</a-option>
+					<a-option value="all">{{$t("util.all")}}</a-option>
+					<a-option value="organization">{{$t("util.organization")}}</a-option>
+					<a-option value="team">{{$t("util.team")}}</a-option>
+					<a-option value="issue">{{$t("util.projectIssue")}}</a-option>
+					<a-option value="wiki">{{$t("util.wiki")}}</a-option>
+					<a-option value="calendar">{{$t("util.calendar")}}</a-option>
 				</a-select>
 			</a-space>
 			<a-list @reach-bottom="onReachBottom" :max-height="240" :key="type">

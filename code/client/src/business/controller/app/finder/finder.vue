@@ -25,7 +25,7 @@
 					</a-row>
 				</a-row>
 				<template v-else-if="mode===EClient_Finder_Mode.SEARCH">
-					SEARCH RESULT:
+					{{$t("controller.app.finder.finder.searchResult")}}:
 				</template>
 				<a-row>
 					<a-input-search size="mini" style="background-color: white;border: 1px lightgray solid" @search="onSearch"></a-input-search>

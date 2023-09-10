@@ -1,8 +1,8 @@
 <template>
   <div>
     <a-space>
-      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button placeholder="please type label name"></a-input-search>
-      <a-button type="primary" @click="onAdd">Add</a-button>
+      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button :placeholder="$t('placeholder.typeLabel')"></a-input-search>
+      <a-button type="primary" @click="onAdd">{{$t("util.add")}}</a-button>
     </a-space>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #name="{record}">
@@ -10,8 +10,8 @@
       </template>
       <template #operation="{record}">
         <a-space wrap>
-          <a-button @click="onEdit(record)" size="small">Edit</a-button>
-          <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
+          <a-button @click="onEdit(record)" size="small">{{$t("util.edit")}}</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.remove")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -25,18 +25,19 @@ import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditLabel from "./editLabel.vue";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   projectId:string
 }>()
-
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     slotName:"name"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -99,13 +100,13 @@ const onDelete=async (item:{
   id:string,
   name:string
 })=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this label from this project?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteLabel"))
   if(ret) {
     let res=await apiProject.removeLabel({
       labelId:item.id
     })
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       search(pagination.current)
     }
   }

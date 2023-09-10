@@ -1,7 +1,7 @@
 <template>
   <template v-if="!isEdit">
     <span v-if="showValue">{{showValue}}</span>
-    <span v-else style="line-height: 30px;width: 100%;color: gray">None</span>
+    <span v-else style="line-height: 30px;width: 100%;color: gray">{{$t("util.none")}}</span>
   </template>
   <template v-else>
     <a-space size="mini">

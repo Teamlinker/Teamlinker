@@ -11,7 +11,7 @@
         <div class="arco-upload-picture-card" v-else>
           <div class="arco-upload-picture-card-text">
             <IconPlus />
-            <div style="margin-top: 10px; font-weight: 600">Upload</div>
+            <div style="margin-top: 10px; font-weight: 600">{{$t("util.upload")}}</div>
           </div>
         </div>
       </div>

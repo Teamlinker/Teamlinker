@@ -1,12 +1,12 @@
 <template>
   <div ref="root">
     <a-space>
-      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button placeholder="please type project name"></a-input-search>
-      <a-button type="primary" @click="onBind">Bind</a-button>
+      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button :placeholder="$t('placeholder.typeProjectName')"></a-input-search>
+      <a-button type="primary" @click="onBind">{{$t("util.bind")}}</a-button>
     </a-space>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #operation="{record}" v-if="!reserved">
-        <a-button size="small" type="primary" status="danger" @click="onUnBind(record)">Revoke</a-button>
+        <a-button size="small" type="primary" status="danger" @click="onUnBind(record)">{{$t("util.revoke")}}</a-button>
       </template>
     </a-table>
   </div>
@@ -21,23 +21,24 @@ import {ICommon_Model_Project} from "../../../../../../../common/model/project";
 import EditBindProject from "./editBindProject.vue";
 import ProjectSettingIssueSolutionConvert
 	from "@/business/controller/app/project/setting/projectSettingIssueSolutionConvert.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   issueTypeSolutionId:string,
   reserved:number
 }>()
-
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     dataIndex:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     dataIndex:"description"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -80,7 +81,7 @@ const onBind=async ()=>{
   }
 }
 const onUnBind=async (item:DCSType<ICommon_Model_Project>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to unbind this project with this issue type solution")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.unbindProjectFromIssueSolution"))
   if(ret) {
 	  let res=await apiIssue.count({
 		  projectId:item.id
@@ -91,7 +92,7 @@ const onUnBind=async (item:DCSType<ICommon_Model_Project>)=>{
 				  projectId:item.id
 			  })
 			  if(res?.code==0) {
-				  Message.success("remove success")
+				  Message.success(t("tip.deleteSuccess"))
 				  search(pagination.current)
 			  }
 		  } else {

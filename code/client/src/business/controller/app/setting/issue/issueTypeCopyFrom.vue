@@ -1,9 +1,9 @@
 <template>
   <a-form ref="eleForm" :model="form" style="width: 80%">
-    <a-form-item field="issueTypeId" label="issue type" required>
-      <a-cascader v-model="form.issueTypeId" :field-names="fields" :options="data" placeholder="please select"></a-cascader>
+    <a-form-item field="issueTypeId" :label="$t('util.issueType')" required>
+      <a-cascader v-model="form.issueTypeId" :field-names="fields" :options="data" :placeholder="$t('placeholder.pleaseSelect')"></a-cascader>
     </a-form-item>
-    <a-form-item field="name" label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
   </a-form>

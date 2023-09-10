@@ -1,18 +1,18 @@
 <template>
   <a-form auto-label-width :model="form" ref="formEle">
-      <a-form-item field="name" label="name" required>
+      <a-form-item field="name" :label="$t('util.name')" required>
         <a-input v-model="form.name"></a-input>
       </a-form-item>
-      <a-form-item field="description" label="description">
+      <a-form-item field="description" :label="$t('util.description')">
         <a-textarea v-model="form.description" allow-clear></a-textarea>
       </a-form-item>
-      <a-form-item field="startTime" label="start date" required>
+      <a-form-item field="startTime" :label="$t('util.startDate')" required>
         <a-date-picker show-time v-model="form.startTime"></a-date-picker>
       </a-form-item>
-      <a-form-item field="endTime" label="end date" required>
+      <a-form-item field="endTime" :label="$t('util.endDate')" required>
         <a-date-picker show-time v-model="form.endTime"></a-date-picker>
       </a-form-item>
-      <a-form-item field="password" label="password" required>
+      <a-form-item field="password" :label="$t('util.password')" required>
         <a-input v-model="form.password"></a-input>
       </a-form-item>
   </a-form>

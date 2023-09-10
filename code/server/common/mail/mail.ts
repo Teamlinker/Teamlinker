@@ -23,7 +23,21 @@ export class Mail {
             from:this.config.user,
             to,
             subject,
-            html:content
+            html:`
+<html>
+    <body>
+        <div style="display: flex;flex-direction: column;margin-bottom: 10px">
+             <h2>
+                <a href="https://team-linker.com" target="_blank">
+                    TeamLinker
+                </a>
+             </h2>
+            <span style="font-weight: bold">teamlinker is the connected cloud desktop where better work,faster collaboration</span>
+        </div>
+        ${content}
+    </body>
+</html>
+`
         })
     }
 }

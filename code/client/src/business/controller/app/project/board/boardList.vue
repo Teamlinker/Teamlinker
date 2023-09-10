@@ -2,8 +2,8 @@
 	<div>
 		<a-row>
 			<a-space wrap>
-				<a-input-search v-model="keyword" placeholder="please type board name" style="width: 250px" @search="onSearch"></a-input-search>
-				<a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">Create</a-button>
+				<a-input-search v-model="keyword" :placeholder="$t('placeholder.typeBoardName')" style="width: 250px" @search="onSearch"></a-input-search>
+				<a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">{{$t("util.create")}}</a-button>
 			</a-space>
 		</a-row>
 		<a-table style="margin-top: 10px" :columns="columns" :data="boardList" :pagination="pagination" @pageChange="onPageChange">
@@ -15,8 +15,8 @@
 			</template>
 			<template #operation="{record}">
 				<a-space v-if="checkPermission(permission,Permission_Types.Project.EDIT)" wrap>
-					<a-button size="small" @click="onEdit(record)">Edit</a-button>
-					<a-button size="small" status="danger" @click="onDelete(record)">Delete</a-button>
+					<a-button size="small" @click="onEdit(record)">{{$t("util.edit")}}</a-button>
+					<a-button size="small" status="danger" @click="onDelete(record)">{{$t("util.delete")}}</a-button>
 				</a-space>
 			</template>
 		</a-table>
@@ -38,22 +38,24 @@ import {
 import {Message} from "@arco-design/web-vue";
 import {ICommon_Model_Board} from "../../../../../../../common/model/board";
 import BoardEdit from "@/business/controller/app/project/board/boardEdit.vue";
+import {useI18n} from "vue-i18n";
 
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
 const permission=objInject.permission
 const key=objInject.key
+const {t}=useI18n()
 const columns=[
 	{
-		title:"Name",
+		title:t("util.name"),
 		slotName:"name"
 	},
 	{
-		title:"Description",
+		title:t("util.description"),
 		slotName: "description"
 	},
 	{
-		title:"Operation",
+		title:t("util.operation"),
 		slotName: "operation"
 	}
 ]
@@ -106,13 +108,13 @@ const onEdit=async (item:DCSType<ICommon_Model_Board>)=>{
 	}
 }
 const onDelete=async (item:DCSType<ICommon_Model_Board>)=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this board?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteBoard"))
 	if(ret) {
 		let res=await apiBoard.deleteBoard({
 			boardId:item.id
 		})
 		if(res?.code==0) {
-			Message.success("delete success")
+			Message.success(t("tip.deleteSuccess"))
 			search(pagination.current)
 		}
 	}

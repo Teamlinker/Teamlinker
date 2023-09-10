@@ -78,7 +78,6 @@ export interface ICommon_Socket_ClientToServerEvents {
         all:boolean,
         [param:string]:boolean
     })=>void
-    im_heartbeat:()=>void
     im_favorite_message_list:(organizationUserId:string,size:number,lastTime:number,callback:(list:ICommon_Model_IM_Favorite_Message[])=>void)=>void
     im_favorite_message_add:(organizationUserId:string,type:ECommon_IM_Message_EntityType,entityId:string)=>void
     im_favorite_message_delete:(favoriteMessageId:string)=>void
@@ -95,7 +94,8 @@ export interface ICommon_Socket_ClientToServerEvents {
         type:ECommon_Model_Organization_Member_Type
     }[])=>void
     meeting_message_list:(lastMessageId:string,callback:(list:DCSType<ICommon_Model_Content[]>)=>void)=>void
-    meeting_reject:(fromOrganizationUserId:string,roomId:string)=>void
+    meeting_reject:(fromOrganizationUserId:string,roomId:string)=>void,
+    notification_heartbeat:(token:string,callback:(success:boolean)=>void)=>void
 }
 
 export interface ICommon_Socket_InterServerEvents {

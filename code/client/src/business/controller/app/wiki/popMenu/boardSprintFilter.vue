@@ -1,7 +1,7 @@
 <template>
 	<div style="width: 100%;height: 100%">
 		<a-row>
-			<a-input-search size="small" style="width: 200px" placeholder="type project sprint name" @search="onSearch" v-model="keyword"></a-input-search>
+			<a-input-search size="small" style="width: 200px" :placeholder="$t('placeholder.typeSprintName')" @search="onSearch" v-model="keyword"></a-input-search>
 		</a-row>
 		<a-row style="margin-top: 10px">
 			<a-table style="width: 100%" :pagination="pagination" :row-selection="{
@@ -26,21 +26,24 @@ import {reactive, ref} from "vue";
 import {apiBoard, DCSType} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {ICommon_Route_Res_Board_Sprint_filter_Item} from "../../../../../../../common/routes/response";
+import project from "../../../../../../../common/routes/project";
+import {useI18n} from "vue-i18n";
 
 const data=ref<DCSType<ICommon_Route_Res_Board_Sprint_filter_Item>[]>([])
 const selectedKeys=ref([])
 const keyword=ref("")
+const {t}=useI18n()
 const columns=[
 	{
-		title:"Name",
+		title:t("util.name"),
 		slotName:"name"
 	},
 	{
-		title: "Board",
+		title: t("util.board"),
 		slotName: "board"
 	},
 	{
-		title: "Project",
+		title: t("util.project"),
 		slotName: "project"
 	}
 ]

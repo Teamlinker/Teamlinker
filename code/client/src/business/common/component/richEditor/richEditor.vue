@@ -1,7 +1,7 @@
 <template>
   <div>
     <div ref="root" @mouseover="onMouseOver" @keydown="onKeyDown" style="padding: 10px" @keyup="onKeyUp" :style="{border:border?'border: 1px solid lightgray;':'0px'}" @copy="onCopy" @dragstart="onDragStart">
-      <div v-for="(item,index) in lineList" :key="index" contenteditable="true" @blur="onBlur(item,$event)" ref="elementList" v-html="RichEditorHandle.handle(item)" @keydown.enter="onEnter(item,index,$event)" @keydown.delete="onDelete(index,item,$event)" style="line-height: 1.5" @focus="onFocus(item,$event)" @mousedown="onMouseDown" @mouseup="onMouseUp" @mousemove="onMouseMove" @dblclick="onDbClick" @paste="onPaste" @click="onClick" placeholder="type / for command,@ for quote person or drop what you want" v-if="!readonly">
+      <div v-for="(item,index) in lineList" :key="index" contenteditable="true" @blur="onBlur(item,$event)" ref="elementList" v-html="RichEditorHandle.handle(item)" @keydown.enter="onEnter(item,index,$event)" @keydown.delete="onDelete(index,item,$event)" style="line-height: 1.5" @focus="onFocus(item,$event)" @mousedown="onMouseDown" @mouseup="onMouseUp" @mousemove="onMouseMove" @dblclick="onDbClick" @paste="onPaste" @click="onClick" :placeholder="$t('placeholder.richText')" v-if="!readonly">
       </div>
       <div v-for="(item,index) in lineList" @click="onClick" :key="index+1" v-html="RichEditorHandle.handle(item)" style="line-height: 1.5;min-height: 21px" v-else>
       </div>

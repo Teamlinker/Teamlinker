@@ -1,7 +1,7 @@
 <template>
 	<div style="width: 100%;height: 100%">
 		<a-row>
-			<a-input-search size="small" style="width: 200px" placeholder="type project release name" @search="onSearch" v-model="keyword"></a-input-search>
+			<a-input-search size="small" style="width: 200px" :placeholder="$t('placeholder.typeProjectReleaseName')" @search="onSearch" v-model="keyword"></a-input-search>
 		</a-row>
 		<a-row style="margin-top: 10px">
 			<a-table style="width: 100%" :pagination="pagination" :row-selection="{
@@ -11,9 +11,9 @@
 					{{record.name}}
 				</template>
 				<template #status="{record}">
-					<a-tag color="blue" v-if="record.status===ECommon_Model_Project_Release_Status.UNRELEASE">UNRELEASED</a-tag>
-					<a-tag color="green" v-else-if="record.status===ECommon_Model_Project_Release_Status.RELEASE">RELEASED</a-tag>
-					<a-tag v-else-if="record.status===ECommon_Model_Project_Release_Status.ARCHIVED">ARCHIVED</a-tag>
+					<a-tag color="blue" v-if="record.status===ECommon_Model_Project_Release_Status.UNRELEASE">{{$t("util.unReleased")}}</a-tag>
+					<a-tag color="green" v-else-if="record.status===ECommon_Model_Project_Release_Status.RELEASE">{{$t("util.released")}}</a-tag>
+					<a-tag v-else-if="record.status===ECommon_Model_Project_Release_Status.ARCHIVED">{{$t("util.archived")}}</a-tag>
 				</template>
 				<template #project="{record}">
 					{{record.project.name}}
@@ -29,21 +29,23 @@ import {apiRelease, DCSType} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {ICommon_Route_Res_Release_Item} from "../../../../../../../common/routes/response";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
+import {useI18n} from "vue-i18n";
 
 const data=ref<DCSType<ICommon_Route_Res_Release_Item>[]>([])
 const selectedKeys=ref([])
 const keyword=ref("")
+const {t}=useI18n()
 const columns=[
 	{
-		title:"Name",
+		title:t("util.name"),
 		slotName:"name"
 	},
 	{
-		title: "Status",
+		title: t("util.status"),
 		slotName: "status"
 	},
 	{
-		title: "Project",
+		title: t("util.project"),
 		slotName: "project"
 	}
 ]

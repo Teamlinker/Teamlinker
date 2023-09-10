@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<template v-if="parentIssue">
-			<a-row style="margin-top: 20px;font-weight: bold">Parent Issue</a-row>
+			<a-row style="margin-top: 20px;font-weight: bold">{{$t("controller.app.project.issue.projectIssueRelated.parentIssue")}}</a-row>
 			<a-list style="margin-top: 10px;margin-right: 10px" size="small" hoverable>
 				<a-list-item>
 					<a-space size="large">
@@ -20,7 +20,7 @@
 			</a-list>
 		</template>
 		<template v-if="childIssueList.length>0">
-			<a-row style="margin-top: 20px;font-weight: bold">Child Issues</a-row>
+			<a-row style="margin-top: 20px;font-weight: bold">{{$t("controller.app.project.issue.projectIssueRelated.childIssues")}}</a-row>
 			<a-list style="margin-top: 10px;margin-right: 10px" size="small" hoverable>
 				<a-list-item v-for="(item,index) in childIssueList" :key="item.id">
 					<a-space size="large">
@@ -39,7 +39,7 @@
 			</a-list>
 		</template>
 		<template v-if="relatedIssueList.length>0">
-			<a-row style="margin-top: 20px;font-weight: bold">Related Issues</a-row>
+			<a-row style="margin-top: 20px;font-weight: bold">{{$t("controller.app.project.issue.projectIssueRelated.relatedIssues")}}</a-row>
 			<a-list style="margin-top: 10px;margin-right: 10px" size="small" hoverable>
 				<a-list-item v-for="(item,index) in relatedIssueList" :key="item.id">
 					<a-space size="large">
@@ -70,6 +70,7 @@ import {injectProjectInfo} from "../../../../common/util/symbol";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	parentIssue?:DCSType<ICommon_Model_Project_Issue>,
@@ -84,9 +85,10 @@ const key=inject(injectProjectInfo).key
 const projectId=inject(injectProjectInfo).id
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
+const {t}=useI18n()
 const onRemoveItem=async (type:"parent"|"child"|"related",index:number)=>{
 	if(type==="parent") {
-		let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove parent issue?")
+		let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteParentIssue"))
 		if(ret) {
 			let res=await apiIssue.removeParentIssue({
 				projectIssueId:props.projectIssueId,
@@ -97,7 +99,7 @@ const onRemoveItem=async (type:"parent"|"child"|"related",index:number)=>{
 			}
 		}
 	} else if(type=="child") {
-		let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove child issue?")
+		let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteChildIssue"))
 		if(ret) {
 			let res=await apiIssue.removeChildIssue({
 				projectIssueId:props.projectIssueId,
@@ -108,7 +110,7 @@ const onRemoveItem=async (type:"parent"|"child"|"related",index:number)=>{
 			}
 		}
 	} else if(type=="related") {
-		let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove related issue?")
+		let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteRelatedIssue"))
 		if(ret) {
 			let res=await apiIssue.removeRelatedIssue({
 				projectIssueId:props.projectIssueId,

@@ -1,15 +1,15 @@
 <template>
   <a-form style="width: 80%" :model="form" ref="eleForm">
-    <a-form-item field="status" label="type" required>
+    <a-form-item field="status" :label="$t('util.type')" required>
       <a-select v-model="form.status">
-        <a-option :value="ECommon_Model_Workflow_Node_Status.INPROGRESS">INPROGRESS</a-option>
-        <a-option :value="ECommon_Model_Workflow_Node_Status.DONE">DONE</a-option>
+        <a-option :value="ECommon_Model_Workflow_Node_Status.INPROGRESS">{{$t("util.inProgress")}}</a-option>
+        <a-option :value="ECommon_Model_Workflow_Node_Status.DONE">{{$t("util.done")}}</a-option>
       </a-select>
     </a-form-item>
-    <a-form-item field="name" label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
-    <a-form-item field="description" label="description" required>
+    <a-form-item field="description" :label="$t('util.description')" required>
       <a-textarea v-model="form.description" allow-clear></a-textarea>
     </a-form-item>
   </a-form>

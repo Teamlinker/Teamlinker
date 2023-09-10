@@ -11,7 +11,7 @@
         />
         <a-divider :margin="1"></a-divider>
         <a-row style="display: flex;justify-content: space-between;margin-top: 10px;align-items: center">
-          <span style="font-size: small;color: gray">My Calendars</span>
+          <span style="font-size: small;color: gray">{{$t("controller.app.calendar.calendar.myCalendars")}}</span>
           <a-button size="mini" type="text" @click="onAddCalendar">
             <template #icon>
               <icon-plus style="color: gray"></icon-plus>
@@ -40,7 +40,7 @@
     <a-layout-content style="flex-direction: column;display: flex;padding: 10px;">
       <a-row style="flex: 0 0 40px;display: flex;justify-content: space-between;justify-items: center;flex-wrap: nowrap">
         <a-space size="mini">
-          <a-button type="primary" size="mini" @click="onToday">Today</a-button>
+          <a-button type="primary" size="mini" @click="onToday">{{$t("controller.app.calendar.calendar.today")}}</a-button>
           <a-button type="text" @click="onPrevious">
             <template #icon>
               <icon-left style="color: rgb(95,99,104);font-size: large"></icon-left>
@@ -55,25 +55,25 @@
             {{calendarType=="day"?pickerValue.format("YYYY-MM-DD"):pickerValue.format("YYYY-MM")}}
           </span>
         </a-space>
-	      <a-input style="width: 40%" placeholder="type event name" v-model="searchForm.keyword" allow-clear @input="onSearch">
+	      <a-input style="width: 40%" :placeholder="$t('placeholder.typeEventName')" v-model="searchForm.keyword" allow-clear @input="onSearch">
 					<template #append>
 						<a-popover position="br" @popup-visible-change="visible => !visible && onSearch()">
 							<icon-arrow-down style="margin-left: 10px;cursor: pointer"></icon-arrow-down>
 							<template #content>
 								<a-form :model="{}" layout="vertical">
-									<a-form-item label="calendar">
+									<a-form-item :label="$t('util.calendar')">
 										<a-select size="small" v-model="searchForm.calendarId">
-											<a-option value="all">All</a-option>
+											<a-option value="all">{{$t("util.all")}}</a-option>
 											<a-option v-for="item in calendarList" :value="item.id">{{item.name}}</a-option>
 										</a-select>
 									</a-form-item>
-									<a-form-item label="start date">
+									<a-form-item :label="$t('util.startDate')">
 										<a-date-picker v-model="searchForm.startDate"></a-date-picker>
 									</a-form-item>
-									<a-form-item label="end date">
+									<a-form-item :label="$t('util.endDate')">
 										<a-date-picker v-model="searchForm.endDate"></a-date-picker>
 									</a-form-item>
-									<a-form-item label="location">
+									<a-form-item :label="$t('util.location')">
 										<a-input size="small" v-model="searchForm.location"></a-input>
 									</a-form-item>
 								</a-form>
@@ -83,9 +83,9 @@
 	      </a-input>
         <a-space size="mini">
           <a-radio-group type="button" v-model="calendarType" size="small">
-            <a-radio value="day">Day</a-radio>
-            <a-radio value="week">Week</a-radio>
-            <a-radio value="month">Month</a-radio>
+            <a-radio value="day">{{$t("controller.app.calendar.calendar.day")}}</a-radio>
+            <a-radio value="week">{{$t("controller.app.calendar.calendar.week")}}</a-radio>
+            <a-radio value="month">{{$t("controller.app.calendar.calendar.month")}}</a-radio>
           </a-radio-group>
           <a-button type="text" @click="onShowSetting">
             <template #icon>
@@ -103,17 +103,17 @@
 	      <CalendarEventSearch :list="searchResultList" :timezone="setting.timezone" v-else-if="searchForm.keyword" style="width: 100%;height: 100%" @edit="onEditCalendarEvent" @delete="onDeleteCalendarEvent"></CalendarEventSearch>
       </a-row>
     </a-layout-content>
-    <a-drawer :popup-container="root" :visible="settingVisible" @ok="onSetting" unmount-on-close title="Calendar Global Setting" :closable="false" @cancel="settingVisible=false" :width="400" id="calendarSetting" :drawer-style="{zIndex:100}">
+    <a-drawer :popup-container="root" :visible="settingVisible" @ok="onSetting" unmount-on-close :title="$t('controller.app.calendar.calendar.calendarGlobalSetting')" :closable="false" @cancel="settingVisible=false" :width="400" id="calendarSetting" :drawer-style="{zIndex:100}">
       <a-form :model="{}" layout="vertical">
-        <a-form-item label="follow device timezone">
+        <a-form-item :label="$t('controller.app.calendar.calendar.followDeviceTimeZone')">
           <a-switch v-model="settingEdit.followDevice"></a-switch>
         </a-form-item>
-        <a-form-item label="timezone" v-if="!settingEdit.followDevice">
+        <a-form-item :label="$t('util.timeZone')" v-if="!settingEdit.followDevice">
           <a-select v-model="settingEdit.timezone">
             <a-option v-for="item in timezones" :value="item.id">{{item.label}}</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="start week day">
+        <a-form-item :label="$t('controller.app.calendar.calendar.startWeekDay')">
           <a-select v-model="settingEdit.start_week_day">
             <a-option v-for="item in ECommon_Calendar_WeekDay" :value="item">{{calendarWeekDayName[item]}}</a-option>
           </a-select>
@@ -163,6 +163,8 @@ import {SessionStorage} from "../../../common/storage/session";
 import {ICommon_Route_Res_Calendar_ListEvent_Item} from "../../../../../../common/routes/response";
 import CalendarEventSearch from "./calendarEventSearch.vue";
 import {debounce} from "../../../common/util/helper";
+import calendar from "../../../../../../common/routes/calendar";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	calendarEventId?:string
@@ -197,6 +199,7 @@ const searchForm=reactive({
 })
 const searchResultList=ref<DCSType<ICommon_Route_Res_Calendar_ListEvent_Item>[]>([])
 let searchDebounce=null
+const {t}=useI18n()
 provide(injectCalendarSetting,setting)
 const startDay=computed(()=>{
   let start_week_day=setting.value?.start_week_day
@@ -309,13 +312,13 @@ const onEditCalendar=async (item)=>{
   }
 }
 const onDeleteCalendar=async (item)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"do you want to delete this calendar?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteCalendar"))
   if(ret) {
     let res=await apiCalendar.removeCalendar({
       calendarId:item.id
     })
     if(res?.code==0) {
-      Message.success("delete success")
+      Message.success(t("tip.deleteSuccess"))
       if(selectedCalendar.value.includes(item.id)) {
         selectedCalendar.value=selectedCalendar.value.splice(selectedCalendar.value.indexOf(item.id),1)
       }
@@ -331,7 +334,7 @@ const onSetting=async ()=>{
     startWeekDay:settingEdit.value.start_week_day
   })
   if(res?.code==0) {
-    Message.success("update success")
+    Message.success(t("tip.updateSuccess"))
     settingVisible.value=false
     getSetting()
   }
@@ -392,7 +395,7 @@ const onAddCalendarEvent=async (date:moment.Moment, point:{
 }
 const saveCalendarEvent=async (title:string, dateInfo:CalendarEventModelType, calendarId:string)=>{
   if(dateInfo.end<dateInfo.start) {
-    Message.error("end date can't less than start date")
+    Message.error(t("tip.endDateLess"))
     return
   }
   let res=await apiCalendar.addCalendarEvent({
@@ -476,13 +479,13 @@ const listCalendarEvent=async ()=>{
   }
 }
 const onDeleteCalendarEvent=async (event:IClient_Calendar_Info)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this event?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteEvent"))
   if(ret) {
     let res=await apiCalendar.removeCalendarEvent({
       calendarEventId:event.id
     })
     if(res?.code==0) {
-      Message.success("delete success")
+      Message.success(t("tip.deleteSuccess"))
       listCalendarEvent()
     }
   }

@@ -9,33 +9,33 @@
         })">
           {{info?.name}}
         </span>
-        <a-tag color="blue" v-if="info?.status===ECommon_Model_Project_Release_Status.UNRELEASE">UNRELEASED</a-tag>
-        <a-tag color="green" v-else-if="info?.status===ECommon_Model_Project_Release_Status.RELEASE">RELEASED</a-tag>
-        <a-tag v-else-if="info?.status===ECommon_Model_Project_Release_Status.ARCHIVED">ARCHIVED</a-tag>
+        <a-tag color="blue" v-if="info?.status===ECommon_Model_Project_Release_Status.UNRELEASE">{{$t("util.unReleased")}}</a-tag>
+        <a-tag color="green" v-else-if="info?.status===ECommon_Model_Project_Release_Status.RELEASE">{{$t("util.released")}}</a-tag>
+        <a-tag v-else-if="info?.status===ECommon_Model_Project_Release_Status.ARCHIVED">{{$t("util.archived")}}</a-tag>
       </a-space>
       <a-space>
-        <a-button size="small" @click="onEdit">Edit</a-button>
+        <a-button size="small" @click="onEdit">{{$t("util.edit")}}</a-button>
         <a-dropdown-button size="small">
-          Action
+	        {{$t("util.action")}}
           <template #icon>
             <icon-down />
           </template>
           <template #content>
             <template v-if="info?.status==ECommon_Model_Project_Release_Status.ARCHIVED">
-              <a-doption @click="onUnRelease">UnRelease</a-doption>
-              <a-doption @click="onRelease">Release</a-doption>
+              <a-doption @click="onUnRelease">{{$t("util.unRelease")}}</a-doption>
+              <a-doption @click="onRelease">{{$t("util.release")}}</a-doption>
             </template>
             <template v-else-if="info?.status==ECommon_Model_Project_Release_Status.RELEASE">
-              <a-doption @click="onUnRelease">UnRelease</a-doption>
-              <a-doption @click="onArchive">Archive</a-doption>
+              <a-doption @click="onUnRelease">{{$t("util.unRelease")}}</a-doption>
+              <a-doption @click="onArchive">{{$t("util.archive")}}</a-doption>
             </template>
             <template v-if="info?.status==ECommon_Model_Project_Release_Status.UNRELEASE">
-              <a-doption @click="onRelease">Release</a-doption>
-              <a-doption @click="onArchive">Archive</a-doption>
+              <a-doption @click="onRelease">{{$t("util.release")}}</a-doption>
+              <a-doption @click="onArchive">{{$t("util.archive")}}</a-doption>
             </template>
           </template>
         </a-dropdown-button>
-        <a-button size="small" status="danger" @click="onDelete">Delete</a-button>
+        <a-button size="small" status="danger" @click="onDelete">{{$t("util.delete")}}</a-button>
       </a-space>
     </a-row>
     <a-row style="margin-top: 20px">
@@ -51,8 +51,8 @@
       {{info?.description}}
     </a-row>
     <a-row style="justify-content: space-between;margin-top: 30px">
-      <span style="font-weight: bold">Issues</span>
-      <a-button type="primary" size="small" @click="onAddIssue">Add Issue</a-button>
+      <span style="font-weight: bold">{{$t("util.issues")}}</span>
+      <a-button type="primary" size="small" @click="onAddIssue">{{$t("controller.app.project.release.projectReleaseProfile.addIssue")}}</a-button>
     </a-row>
     <a-table style="margin-top: 10px" :data="info?.issueList" :columns="columns">
       <template #key="{record}">
@@ -74,9 +74,9 @@
         <UserAvatar :organization-user-id="record.reporter_id.organizationUserId" :name="record.reporter_id.nickname" :photo="record.reporter_id.photo" v-if="record.reporter_id"></UserAvatar>
       </template>
       <template #status="{record}">
-        <a-tag color="gray" v-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART">Not Start</a-tag>
-        <a-tag color="blue" v-else-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.INPROGRESS">InProgress</a-tag>
-        <a-tag color="green" v-else-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.DONE">Done</a-tag>
+        <a-tag color="gray" v-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART">{{$t("util.notstart")}}</a-tag>
+        <a-tag color="blue" v-else-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.INPROGRESS">{{$t("util.inProgress")}}</a-tag>
+        <a-tag color="green" v-else-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.DONE">{{$t("util.done")}}</a-tag>
       </template>
       <template #operation="{record}">
         <a-button type="text" @click="onRemoveIssue(record)">
@@ -110,25 +110,27 @@ import ProjectIssueBind from "../issue/projectIssueBind.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {vDrag} from "../../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/model/finder_item";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   projectReleaseId:string
 }>()
+const {t}=useI18n()
 const columns=[
   {
     title:"Key",
     slotName:"key"
   },
   {
-    title:"Name",
+    title:t("util.name"),
     slotName: "name"
   },
   {
-    title:"Issue Type",
+    title:t("util.issueType"),
     slotName: "issueType"
   },
   {
-    title:"Priority",
+    title:t("util.priority"),
     slotName: "priority"
   },
   {
@@ -140,11 +142,11 @@ const columns=[
     slotName: "reporter"
   },
   {
-    title:"Status",
+    title:t("util.status"),
     slotName: "status"
   },
   {
-    title:"Operation",
+    title:t("util.operation"),
     slotName: "operation"
   },
 ]
@@ -164,14 +166,14 @@ const getInfo=async ()=>{
   }
 }
 const onRemoveIssue=async (item:DCSType<ICommon_Route_Res_Release_Info_Issue_Item>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this issue?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.removeIssue"))
   if(ret) {
     let res=await apiRelease.removeIssue({
       projectReleaseId:props.projectReleaseId,
       projectIssueId:item.id
     })
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       getInfo()
     }
   }
@@ -186,13 +188,13 @@ const onEdit=async ()=>{
   }
 }
 const onDelete=async ()=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this release?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteRelease"))
   if(ret) {
     let res=await apiRelease.remove({
       projectReleaseId:info.value.id
     })
     if(res?.code==0) {
-      Message.success("delete success")
+      Message.success(t("tip.deleteSuccess"))
       navigator.pop()
     }
   }
@@ -218,7 +220,7 @@ const onRelease=async ()=>{
         status:ECommon_Model_Project_Release_Status.RELEASE
       })
       if(res?.code==0) {
-        Message.success("release success")
+        Message.success(t("tip.releaseSuccess"))
         getInfo()
       } else {
         Message.error(res.msg)
@@ -234,7 +236,7 @@ const onUnRelease=async ()=>{
     status:ECommon_Model_Project_Release_Status.UNRELEASE
   })
   if(res?.code==0) {
-    Message.success("unrelease success")
+    Message.success(t("tip.unReleaseSuccess"))
     getInfo()
   } else {
     Message.error(res.msg)
@@ -246,7 +248,7 @@ const onArchive=async ()=>{
     status:ECommon_Model_Project_Release_Status.ARCHIVED
   })
   if(res?.code==0) {
-    Message.success("archive success")
+    Message.success(t("tip.archiveSuccess"))
     getInfo()
   } else {
     Message.error(res.msg)
@@ -263,7 +265,7 @@ const onAddIssue=async ()=>{
       projectIssueId:ret as string
     })
     if(res?.code==0) {
-      Message.success("add success")
+      Message.success(t("tip.addSuccess"))
       getInfo()
     }
   }

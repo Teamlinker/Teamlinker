@@ -6,25 +6,25 @@
         <icon-down></icon-down>
       </template>
       <template #content>
-        <a-doption @click="onAdd">Add</a-doption>
-        <a-doption @click="onCopyFrom">Copy From</a-doption>
+        <a-doption @click="onAdd">{{$t("util.add")}}</a-doption>
+        <a-doption @click="onCopyFrom">{{$t("controller.app.setting.issue.filedList.copyFrom")}}</a-doption>
       </template>
     </a-dropdown-button>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="false">
       <template #operation="{record}">
         <a-space wrap>
           <a-dropdown-button size="small">
-            Edit
+	          {{$t("util.edit")}}
             <template #icon>
               <icon-down></icon-down>
             </template>
             <template #content>
-              <a-doption @click="onEditProfile(record)">Profile</a-doption>
-              <a-doption @click="onEditWorkflow(record)">Workflow</a-doption>
+              <a-doption @click="onEditProfile(record)">{{$t("util.profile")}}</a-doption>
+              <a-doption @click="onEditWorkflow(record)">{{$t("util.workflow")}}</a-doption>
             </template>
           </a-dropdown-button>
-          <a-button size="small" @click="onCopy(record)">Copy</a-button>
-          <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
+          <a-button size="small" @click="onCopy(record)">{{$t("util.copy")}}</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.remove")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -42,21 +42,23 @@ import IssueTypeCopyFrom from "./issueTypeCopyFrom.vue";
 import {getCurrentNavigator} from "../../../../../teamOS/common/component/navigator/navigator";
 import Workflow from "./workflow.vue";
 import IssueTypeDeleteConvert from "@/business/controller/app/setting/issue/issueTypeDeleteConvert.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   issueTypeSolutionId:string
 }>()
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     dataIndex:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     dataIndex:"description"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -112,9 +114,9 @@ const onCopyFrom=async ()=>{
 }
 
 const onCopy=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to copy this issue type solution?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.copyIssueType"))
   if(ret) {
-    let name=await Dialog.input(root.value,appContext,"type new issue type solution name")
+    let name=await Dialog.input(root.value,appContext,t("tip.typeNewIssueSolutionName"))
     if(name) {
       let res=await apiIssueType.copy({
         issueTypeId:item.id,
@@ -122,7 +124,7 @@ const onCopy=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
         name
       })
       if(res?.code==0) {
-        Message.success("copy success")
+        Message.success(t("tip.copySuccess"))
         search()
       } else {
         Message.error(res.msg);
@@ -131,7 +133,7 @@ const onCopy=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
   }
 }
 const onDelete=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this issue type from this issue type solution?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteIssueType"))
   if(ret) {
 		let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(IssueTypeDeleteConvert),{
 			issueTypeId:item.id,

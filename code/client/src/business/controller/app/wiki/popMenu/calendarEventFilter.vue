@@ -1,7 +1,7 @@
 <template>
 	<div style="width: 100%;height: 100%">
 		<a-row>
-			<a-input-search size="small" style="width: 200px" placeholder="type wiki space name" @search="onSearch" v-model="keyword"></a-input-search>
+			<a-input-search size="small" style="width: 200px" :placeholder="$t('placeholder.typeWikiSpaceName')" @search="onSearch" v-model="keyword"></a-input-search>
 		</a-row>
 		<a-row style="margin-top: 10px">
 			<a-table style="width: 100%" :pagination="pagination" :row-selection="{
@@ -27,21 +27,23 @@ import {apiCalendar, DCSType} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {ICommon_Route_Res_Calendar_Event_Filter} from "../../../../../../../common/routes/response";
 import moment from "moment";
+import {useI18n} from "vue-i18n";
 
 const data=ref<DCSType<ICommon_Route_Res_Calendar_Event_Filter["data"]>>([])
 const selectedKeys=ref([])
 const keyword=ref("")
+const {t}=useI18n()
 const columns=[
 	{
-		title:"Name",
+		title:t("util.name"),
 		slotName:"name"
 	},
 	{
-		title: "Start Time",
+		title: t("util.startDate"),
 		slotName: "startTime"
 	},
 	{
-		title:"Calendar",
+		title:t("util.calendar"),
 		slotName: "calendar"
 	}
 ]

@@ -1,12 +1,12 @@
 <template>
 	<div style="padding: 0 10px">
 		<a-form layout="vertical" :model="form" ref="eleForm">
-			<a-form-item label="Issue Type" field="issueTypeId" required>
+			<a-form-item :label="$t('util.issueType')" field="issueTypeId" required>
 				<a-select v-model="form.issueTypeId" @change="onIssueTypeChange">
 					<a-option v-for="item in issueTypeList" :label="item.name" :value="item.id"></a-option>
 				</a-select>
 			</a-form-item>
-			<a-divider orientation="left" v-if="valueList.length>0">Convert Fields</a-divider>
+			<a-divider orientation="left" v-if="valueList.length>0">{{$t("controller.app.project.issue.projectIssueConvert.convertFields")}}</a-divider>
 			<a-form-item v-for="value in valueList" :key="value.field.id" :extra="value.field.description" :field="value.field.name" :required="!value.field.optional">
 				<template #label>
 					{{value.field.name}}&nbsp;
@@ -18,7 +18,7 @@
 									<a-list-item v-for="item in originValueList.filter(item=>item.nodeField.fieldType.type===value.fieldType.type)" :key="item.issueFieldValue.id">
 										{{item.nodeField.field.name}}&nbsp;&nbsp;
 										<template #actions>
-											<a-button type="primary" size="mini" @click="onImport(item,value)">Import</a-button>
+											<a-button type="primary" size="mini" @click="onImport(item,value)">{{$t("util.import")}}</a-button>
 										</template>
 									</a-list-item>
 								</a-list>

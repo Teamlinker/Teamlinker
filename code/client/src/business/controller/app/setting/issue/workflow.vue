@@ -1,7 +1,7 @@
 <template>
   <div style="width: 100%;height: 100%;overflow: auto;display: flex;flex-direction:column" ref="root" >
     <a-space style="flex:0 1 auto;margin-bottom: 10px;width: 100%">
-      <a-button type="primary" @click="addNode">Add Node</a-button>
+      <a-button type="primary" @click="addNode">{{$t("controller.app.setting.issue.workflow.addNode")}}</a-button>
     </a-space>
     <a-layout style="flex:1 1 auto;border: 1px solid gainsboro">
       <a-layout-content style="overflow:hidden;">
@@ -10,47 +10,47 @@
       <a-layout-sider :resize-directions="['left']">
         <a-form :model="form" layout="vertical" style="margin:10px 5px 0px 5px;width: 90%" v-if="form.type" @submitSuccess="onSubmit">
           <h3>{{form.type}}</h3>
-          <a-form-item field="status" label="status" v-if="form.type=='node' || form.type=='approval'" required>
+          <a-form-item field="status" :label="$t('util.status')" v-if="form.type=='node' || form.type=='approval'" required>
             <a-select v-model="form.status">
-              <a-option :value="ECommon_Model_Workflow_Node_Status.NOTSTART">NOTSTART</a-option>
-              <a-option :value="ECommon_Model_Workflow_Node_Status.INPROGRESS">INPROGRESS</a-option>
-              <a-option :value="ECommon_Model_Workflow_Node_Status.DONE">DONE</a-option>
+              <a-option :value="ECommon_Model_Workflow_Node_Status.NOTSTART">{{$t("util.notStart")}}</a-option>
+              <a-option :value="ECommon_Model_Workflow_Node_Status.INPROGRESS">{{$t("util.inProgress")}}</a-option>
+              <a-option :value="ECommon_Model_Workflow_Node_Status.DONE">{{$t("util.done")}}</a-option>
             </a-select>
           </a-form-item>
-          <a-form-item field="name" label="name" required>
+          <a-form-item field="name" :label="$t('util.name')" required>
             <a-input v-model="form.name"></a-input>
           </a-form-item>
-          <a-form-item field="description" label="description">
+          <a-form-item field="description" :label="$t('util.description')">
             <a-textarea v-model="form.description"></a-textarea>
           </a-form-item>
 	        <template v-if="(form.status===ECommon_Model_Workflow_Node_Status.INPROGRESS || form.status===ECommon_Model_Workflow_Node_Status.DONE) && (form.type==='node' || form.type==='approval')">
-		        <a-form-item field="approval" label="approval">
+		        <a-form-item field="approval" :label="$t('util.approval')">
 			        <a-switch :checked-value="1" :unchecked-value="0" v-model="form.approval"></a-switch>
 		        </a-form-item>
-		        <a-form-item field="allComing" label="allow all connections" extra="the border of node is pink">
+		        <a-form-item field="allComing" :label="$t('util.allowAllConnections')" extra="the border of node is pink">
 			        <a-switch :checked-value="1" :unchecked-value="0" v-model="form.allComing"></a-switch>
 		        </a-form-item>
-		        <a-form-item field="approvalType" label="approval type" v-if="form.approval">
+		        <a-form-item field="approvalType" :label="$t('util.approvalType')" v-if="form.approval">
 							<a-select v-model="form.approvalType" @change="onApprovalTypeChange">
-								<a-option :value="ECommon_Model_Workflow_Approval_Type.PERSON">Person</a-option>
-								<a-option :value="ECommon_Model_Workflow_Approval_Type.TEAM">Team</a-option>
-								<a-option :value="ECommon_Model_Workflow_Approval_Type.FIELD">Field</a-option>
+								<a-option :value="ECommon_Model_Workflow_Approval_Type.PERSON">{{$t("util.person")}}</a-option>
+								<a-option :value="ECommon_Model_Workflow_Approval_Type.TEAM">{{$t("util.team")}}</a-option>
+								<a-option :value="ECommon_Model_Workflow_Approval_Type.FIELD">{{$t("util.field")}}</a-option>
 							</a-select>
 		        </a-form-item>
 		        <a-form-item field="approvalValue" :label="form.approvalType===ECommon_Model_Workflow_Approval_Type.PERSON?'choose person':form.approvalType===ECommon_Model_Workflow_Approval_Type.TEAM?'choose team':'choose workflow field'" v-if="form.approval">
 							<FieldCommonMultiLabel style="width: 100%" v-model="form.approvalValue" :type="form.approvalType===ECommon_Model_Workflow_Approval_Type.PERSON?'user':'team'" v-if="form.approvalType===ECommon_Model_Workflow_Approval_Type.PERSON || form.approvalType===ECommon_Model_Workflow_Approval_Type.TEAM"></FieldCommonMultiLabel>
 			        <FieldCommonLabel style="width: 100%" v-model="form.approvalValue" type="field" :workflow-node-id="form.id" v-else-if="form.approvalType===ECommon_Model_Workflow_Approval_Type.FIELD"></FieldCommonLabel>
 		        </a-form-item>
-		        <a-form-item field="approvalExtra" label="choose member tag" v-if="form.approval && form.approvalType===ECommon_Model_Workflow_Approval_Type.TEAM">
+		        <a-form-item field="approvalExtra" :label="$t('util.chooseMemberTag')" v-if="form.approval && form.approvalType===ECommon_Model_Workflow_Approval_Type.TEAM">
 			        <FieldCommonLabel style="width: 100%" v-model="form.approvalExtra" type="tag"></FieldCommonLabel>
 		        </a-form-item>
 	        </template>
           <a-form-item>
             <a-space v-if="form.type=='node' || form.type=='approval'" size="medium">
-              <a-button html-type="submit" type="primary">Save</a-button>
-              <a-button html-type="button" type="primary" @click="onEditFields">Edit Fields</a-button>
+              <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
+              <a-button html-type="button" type="primary" @click="onEditFields">{{$t("controller.app.setting.issue.workflow.editFields")}}</a-button>
             </a-space>
-            <a-button html-type="submit" type="primary" v-else>Save</a-button>
+            <a-button html-type="submit" type="primary" v-else>{{$t("util.save")}}</a-button>
           </a-form-item>
         </a-form>
       </a-layout-sider>
@@ -73,6 +73,7 @@ import {flowApproval} from "@/business/common/component/flow/approval";
 import {ECommon_Model_Workflow_Approval_Type} from "../../../../../../../common/model/workflow_approval";
 import FieldCommonMultiLabel from "@/business/common/component/field/common/fieldCommonMultiLabel.vue";
 import FieldCommonLabel from "@/business/common/component/field/common/fieldCommonLabel.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   issueTypeId:string
@@ -81,6 +82,7 @@ const eleWorkflow=ref<HTMLElement>(null);
 const root=ref(null)
 const appContext=getCurrentInstance().appContext
 const navigator=getCurrentNavigator();
+const {t}=useI18n()
 navigator.register("fieldList",markRaw(FieldList))
 const form=reactive({
   id:"",
@@ -107,12 +109,12 @@ const onKeyDelete=async (event:KeyboardEvent)=>{
     name=(<any>elements.nodes[0].text).value;
     id=elements.nodes[0].id
 	  if(elements.nodes[0].properties.status===ECommon_Model_Workflow_Node_Status.NOTSTART) {
-			Message.error("not start node can't be removed !!!")
+			Message.error(t("tip.notStartNodeNotRemove"))
 		  return
 	  }
   }
   if(type) {
-    let ret=await Dialog.confirm(root.value,appContext,`Do you want to delete ${type} ${name}`)
+    let ret=await Dialog.confirm(root.value,appContext,`${t("tip.doYouWantToDelete")}${type} ${name}`)
     if(ret) {
       if(type=="transition") {
         lf.deleteEdge(id)
@@ -142,7 +144,7 @@ const onSubmit=async ()=>{
     description:form.description
   }))
   if(res?.code==0) {
-    Message.success("update success")
+    Message.success(t("tip.updateSuccess"))
     if(form.type=="node" || form.type=="approval") {
       let obj=lf.getNodeModelById(form.id)
       obj.updateText(form.name)

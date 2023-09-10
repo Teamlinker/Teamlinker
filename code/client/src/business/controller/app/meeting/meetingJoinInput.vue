@@ -1,9 +1,9 @@
 <template>
 	<a-form auto-label-width :model="form" ref="formEle">
-		<a-form-item field="id" label="meeting id" required>
+		<a-form-item field="id" :label="$t('util.meetingId')" required>
 			<a-input v-model="form.id"></a-input>
 		</a-form-item>
-		<a-form-item field="password" label="meeting password" required>
+		<a-form-item field="password" :label="$t('util.meetingPassword')" required>
 			<a-input v-model="form.password"></a-input>
 		</a-form-item>
 	</a-form>

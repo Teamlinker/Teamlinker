@@ -13,7 +13,7 @@
       </a-row>
 	    <a-row v-if="info?.approval?.type===ECommon_Model_Project_Issue_Approval_Type.REJECTED" style="align-items: center;margin-top: 10px;">
 		    <UserAvatar :organization-user-id="info.approval.approval_organization_user_id"></UserAvatar>
-		    <span style="color: orange;font-weight: bold">&nbsp;rejected your approval</span>
+		    <span style="color: orange;font-weight: bold">&nbsp;{{$t("controller.app.project.issue.projectIssueHistory.rejectedYourApproval")}}</span>
 		    <a-popover v-if="info.approval.reason" position="right">
 			    <icon-info-circle-fill style="color: orange;margin-left: 10px"></icon-info-circle-fill>
 			    <template #content>
@@ -31,17 +31,17 @@
             </template>
           </a-dropdown>
 	        <a-button v-if="!parentIssue" @click="onCreateSubIssue">
-		        Create Child Issue
+		        {{$t("controller.app.project.issue.projectIssueProfile.createChildIssue")}}
 	        </a-button>
           <a-dropdown-button>
-            Link Issue
+	          {{$t("controller.app.project.issue.projectIssueProfile.linkIssue")}}
             <template #icon>
               <icon-down />
             </template>
             <template #content>
-              <a-doption @click="onAddItem('related')">Related</a-doption>
-              <a-doption @click="onAddItem('child')">Child</a-doption>
-              <a-doption @click="onAddItem('parent')">Parent</a-doption>
+              <a-doption @click="onAddItem('related')">{{$t("controller.app.project.issue.projectIssueProfile.related")}}</a-doption>
+              <a-doption @click="onAddItem('child')">{{$t("controller.app.project.issue.projectIssueProfile.child")}}</a-doption>
+              <a-doption @click="onAddItem('parent')">{{$t("controller.app.project.issue.projectIssueProfile.parent")}}</a-doption>
             </template>
           </a-dropdown-button>
           <a-dropdown>
@@ -52,38 +52,38 @@
             </a-button>
             <template #content>
 	            <a-popover trigger="hover" position="rt" @popup-visible-change="showQuickMeeting">
-		            <a-doption>Quick Meeting</a-doption>
+		            <a-doption>{{$t("controller.app.project.issue.projectIssueProfile.quickMeeting")}}</a-doption>
 		            <template #content>
 			            <a-row style="flex-direction: column;align-items: center">
-				            <a-input size="small" placeholder="type user name" v-model="searchUserKey"></a-input>
+				            <a-input size="small" :placeholder="$t('placeholder.typeUserName')" v-model="searchUserKey"></a-input>
 				            <a-table style="width: 100%;margin-top: 10px" row-key="id" :columns="columns" :data="issueRelatedUserList.filter(item=>(item.id!==organizationUserId && item.name.includes(searchUserKey)))" :row-selection="rowSelection" v-model:selected-keys="selectKeys" :pagination="false">
 					            <template #name="{record}">
 						            <UserAvatar :organization-user-id="record.id" :name="record.name" :photo="record.photo"></UserAvatar>
 					            </template>
 				            </a-table>
-				            <a-button type="primary" style="margin-top: 10px" size="small" @click="onMeeting">Invite</a-button>
+				            <a-button type="primary" style="margin-top: 10px" size="small" @click="onMeeting">{{$t("util.invite")}}</a-button>
 			            </a-row>
 		            </template>
 	            </a-popover>
-	            <a-doption v-if="checkPermission(permission,Permission_Types.Project.EDIT)" @click="onCopy">Copy</a-doption>
-	            <a-doption v-if="checkPermission(permission,Permission_Types.Project.EDIT)" @click="onConvert">Convert</a-doption>
-              <a-doption v-if="checkPermission(permission,Permission_Types.Project.ADMIN) || info?.created_by.id===store.userInfo.id" @click="onDelete" style="color: red">Delete</a-doption>
+	            <a-doption v-if="checkPermission(permission,Permission_Types.Project.EDIT)" @click="onCopy">{{$t("util.copy")}}</a-doption>
+	            <a-doption v-if="checkPermission(permission,Permission_Types.Project.EDIT)" @click="onConvert">{{$t("util.convert")}}</a-doption>
+              <a-doption v-if="checkPermission(permission,Permission_Types.Project.ADMIN) || info?.created_by.id===store.userInfo.id" @click="onDelete" style="color: red">{{$t("util.delete")}}</a-doption>
             </template>
           </a-dropdown>
         </a-space>
       </a-row>
       <a-row style="margin-top: 20px;font-weight: bold">
-        Description
+	      {{$t("util.description")}}
       </a-row>
       <a-row style="margin-top: 10px">
         <FieldEditBasic :project-issue-id="projectIssueId" :type="EClient_Field_Basic_Type.DESCRIPTION" :value="description" style="margin-right: 10px;box-sizing: border-box"></FieldEditBasic>
       </a-row>
 	    <ProjectIssueRelated :project-issue-id="projectIssueId" :child-issue-list="childIssueList" :parent-issue="parentIssue" :related-issue-list="relatedIssueList" @remove-parent="parentIssue=null"></ProjectIssueRelated>
 	    <a-tabs type="rounded" style="margin-top: 50px;" lazy-load size="small">
-		    <a-tab-pane key="comment" title="Comments">
+		    <a-tab-pane key="comment" :title="$t('util.comments')">
 			    <ProjectIssueComment style="margin-top: 10px" :project-issue-id="projectIssueId"></ProjectIssueComment>
 		    </a-tab-pane>
-		    <a-tab-pane key="history" title="History">
+		    <a-tab-pane key="history" :title="$t('util.history')">
 					<ProjectIssueHistory :project-issue-id="projectIssueId"></ProjectIssueHistory>
 		    </a-tab-pane>
 	    </a-tabs>
@@ -132,6 +132,7 @@ import {ECommon_Content_Line_Config_Type} from "../../../../../../../common/mode
 import {RichEditorEventHandle} from "@/business/common/component/richEditorEventHandle";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/model/finder_item";
 import ProjectIssueConvert from "@/business/controller/app/project/issue/projectIssueConvert.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   projectIssueId:string
@@ -168,9 +169,10 @@ const rowSelection=ref<TableRowSelection>({
 	showCheckedAll:true,
 	onlyCurrent:false
 })
+const {t}=useI18n()
 const columns = [
 	{
-		title: 'Name',
+		title: t("util.name"),
 		slotName: 'name',
 	}
 ]
@@ -261,13 +263,13 @@ const onAddItem=async (type:"parent"|"child"|"related")=>{
 }
 
 const onDelete=async ()=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this issue?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteIssue"))
   if(ret) {
     let res=await apiIssue.remove({
       projectIssueId:props.projectIssueId
     })
     if(res?.code==0) {
-      Message.success("delete success")
+      Message.success(t("tip.deleteSuccess"))
       navigator.pop()
     }
   }
@@ -302,7 +304,7 @@ const onAction=async (item:ICommon_Model_Workflow_Action | {
 				return
 			}
 		} else if(item.name==="Reject") {
-			let ret=await Dialog.inputRich(root.value,appContext,"Reject Reason")
+			let ret=await Dialog.inputRich(root.value,appContext,t("tip.rejectReason"))
 			if(ret) {
 				let res=await apiIssue.rejectApproval({
 					projectIssueId:props.projectIssueId,
@@ -367,7 +369,7 @@ const onMeeting=async ()=>{
 }
 
 const onCopy=async ()=>{
-	let ret=await Dialog.input(root.value,appContext,"type the issue's name")
+	let ret=await Dialog.input(root.value,appContext,t("tip.typeIssueName"))
 	if(ret) {
 		let res=await apiIssue.copy({
 			projectIssueId:props.projectIssueId,
@@ -393,7 +395,7 @@ const onConvert=async ()=>{
 }
 
 const onCreateSubIssue=async ()=>{
-	let ret=await Dialog.input(root.value,appContext,"type the issue's name")
+	let ret=await Dialog.input(root.value,appContext,t("tip.typeIssueName"))
 	if(ret) {
 		let res=await apiIssue.createChildIssue({
 			projectIssueId:props.projectIssueId,

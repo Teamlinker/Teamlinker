@@ -3,7 +3,7 @@
     <template v-if="showValue">
       <a-tag>{{showValue}}</a-tag>
     </template>
-    <span v-else style="line-height: 30px;width: 100%;color: gray">None</span>
+    <span v-else style="line-height: 30px;width: 100%;color: gray">{{$t("util.none")}}</span>
   </a-space>
   <template v-else>
     <a-space size="mini">

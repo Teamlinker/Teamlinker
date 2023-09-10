@@ -27,6 +27,7 @@ import {EClient_Drag_Type, IClient_Drag_Element} from "../../../../teamOS/common
 import {DropParam} from "../../../../teamOS/common/directive/drop";
 import {SessionStorage} from "../../../common/storage/session";
 import {Message} from "@arco-design/web-vue";
+import i18n from "@/business/common/i18n/i18n";
 
 export class FinderHandle {
     private itemList=ref<Icon[]>([])
@@ -65,7 +66,8 @@ export class FinderHandle {
             {
                 title:"New Folder",
                 func:async value => {
-                    let ret=await Dialog.input(this.root.value.$el?this.root.value.$el:this.root.value,this.appContext,"please type new folder name");
+                    let {t}=i18n.global
+                    let ret=await Dialog.input(this.root.value.$el?this.root.value.$el:this.root.value,this.appContext,t("tip.typeNewFolderName"));
                     if(ret) {
                         let res=await apiFinder.createFolder({
                             ...(this.folderId && {
@@ -255,7 +257,8 @@ export class FinderHandle {
                                 let valueList=selectedSelectableItems.map(item=>{
                                     return item.getAttribute("dragValue")
                                 })
-                                let ret=await Dialog.confirm(this.root.value.$el?this.root.value.$el:this.root.value,this.appContext,"Do you want to delete these items?")
+                                const {t}=i18n.global
+                                let ret=await Dialog.confirm(this.root.value.$el?this.root.value.$el:this.root.value,this.appContext,t("tip.deleteItems"))
                                 if(ret) {
                                     await Promise.allSettled(valueList.map(value=>{
                                         return apiFinder.delete({
@@ -374,7 +377,8 @@ export class FinderHandle {
 
     private async onOpenShortcut(item:DCSType<ICommon_Model_Finder_Item>) {
         if(item.organization_id!==SessionStorage.get("organizationId")) {
-            Message.error("you should switch to the specific organization")
+            const {t}=i18n.global
+            Message.error(t("tip.switchToSpecificOrganization"))
             return
         }
         switch (item.shortcut_type) {

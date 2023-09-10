@@ -1,9 +1,9 @@
 <template>
   <div ref="root">
     <a-space>
-      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button placeholder="please type username or nickname"></a-input-search>
-      <a-button type="primary" @click="onInvite" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">Invite</a-button>
-	    <a-button type="primary" @click="onCreate" v-else>Create</a-button>
+      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button :placeholder="$t('placeholder.typeUsernameOrNickname')"></a-input-search>
+      <a-button type="primary" @click="onInvite" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">{{$t("util.invite")}}</a-button>
+	    <a-button type="primary" @click="onCreate" v-else>{{$t("util.create")}}</a-button>
     </a-space>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #username="{record}">
@@ -30,17 +30,17 @@
       <template #operation="{record}">
         <a-space wrap>
           <a-dropdown-button size="small">
-            Edit
+	          {{$t("util.edit")}}
             <template #icon>
               <icon-down></icon-down>
             </template>
             <template #content>
-              <a-doption @click="onEditProfile(record)">Profile & Role</a-doption>
-              <a-doption @click="onEditTag(record)">Tag</a-doption>
-	            <a-doption v-if="$deployMode.value===ECommon_Application_Mode.OFFLINE" @click="onResetPassword(record)">Reset Password</a-doption>
+              <a-doption @click="onEditProfile(record)">{{$t("util.profile")}} & {{$t("util.role")}}</a-doption>
+              <a-doption @click="onEditTag(record)">{{$t("util.tag")}}</a-doption>
+	            <a-doption v-if="$deployMode.value===ECommon_Application_Mode.OFFLINE" @click="onResetPassword(record)">{{$t("controller.app.setting.userTeam.user.resetPassword")}}</a-doption>
             </template>
           </a-dropdown-button>
-          <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.remove")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -59,34 +59,36 @@ import {SessionStorage} from "../../../../common/storage/session";
 import {ECommon_Application_Mode} from "../../../../../../../common/types";
 import CreateUserProfileOffline from "./createUserProfileOffline.vue";
 import moment from "moment";
+import {useI18n} from "vue-i18n";
 
+const {t}=useI18n()
 const columns=[
   {
-    title:"username",
+    title:t("util.username"),
     slotName:"username"
   },
   {
-    title:"nickname",
+    title:t("util.nickname"),
     slotName:"nickname"
   },
   {
-    title:"role",
+    title:t("util.role"),
     slotName:"role"
   },
   {
-    title:"enable",
+    title:t("util.enable"),
     slotName:"enable"
   },
   {
-    title:"join date",
+    title:t("util.joinDate"),
     slotName:"joinDate"
   },
   {
-    title:"tag",
+    title:t("util.tag"),
     slotName:"tag"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -149,7 +151,7 @@ const onEditTag=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>
   }
 }
 const onDelete=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this user from this organization?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.removeUser"))
   if(ret) {
     let res=await (appContext.config.globalProperties.$deployMode.value===ECommon_Application_Mode.ONLINE?apiOrganization.deleteUser({
       organizationUserId:item.organizationUser.id
@@ -157,7 +159,7 @@ const onDelete=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
 	    organizationUserId:item.organizationUser.id
     }))
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       search(pagination.current)
     }
   }
@@ -171,14 +173,14 @@ const onCreate=async ()=>{
 }
 
 const onResetPassword=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
-	let ret=await Dialog.input(root.value,appContext,"type new password")
+	let ret=await Dialog.input(root.value,appContext,t("tip.typeNewPassword"))
 	if(ret) {
 		let res=await apiOrganization.resetUserPassword({
 			organizationUserId:item.organizationUser.id,
 			password:ret
 		})
 		if(res?.code==0) {
-			Message.info("reset success")
+			Message.info(t("tip.resetSuccess"))
 		}
 	}
 }

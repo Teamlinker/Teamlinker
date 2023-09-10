@@ -1,12 +1,12 @@
 <template>
   <a-form :model="form" ref="eleForm" style="width: 80%">
-    <a-form-item field="name" label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
-    <a-form-item field="description" label="description">
+    <a-form-item field="description" :label="$t('util.description')">
       <a-textarea v-model="form.description" allow-clear></a-textarea>
     </a-form-item>
-    <a-form-item field="photo" label="photo">
+    <a-form-item field="photo" :label="$t('util.photo')">
       <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="type=='edit'?item.photo:''" @upload="onUpload"></Upload>
     </a-form-item>
   </a-form>
@@ -19,6 +19,7 @@ import {getCurrentInstance, reactive, ref} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {apiTeam} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   type:"edit"|"add"
@@ -28,6 +29,7 @@ const form=reactive({
   name:props.type=="edit"?props.item.name:"",
   description:props.type=="edit"?props.item.description:"",
 })
+const {t}=useI18n()
 const uploadUriId=ref("")
 const onUpload=(id:string)=> {
   uploadUriId.value=id
@@ -52,7 +54,7 @@ onDialogOk(async ()=>{
     })
   }))
   if(res?.code==0){
-    Message.success("operation success");
+    Message.success(t("tip.operationSuccess"));
     return true;
   } else {
     Message.error(res.msg);

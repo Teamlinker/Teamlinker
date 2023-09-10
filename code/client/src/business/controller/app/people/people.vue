@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 10px 20px">
     <a-row>
-      <a-input-search placeholder="please type name" style="width: 400px" v-model="keyword" @search="onSearch"></a-input-search>
+      <a-input-search :placeholder="$t('placeholder.typeName')" style="width: 400px" v-model="keyword" @search="onSearch"></a-input-search>
     </a-row>
     <a-space wrap style="margin-top: 20px" size="large">
       <CardItem v-for="item in userList" :name="item.organizationUser.nickname" :photo="item.user.photo" :description="item.organizationUser.job" @click="showProfile(item.organizationUser)"></CardItem>

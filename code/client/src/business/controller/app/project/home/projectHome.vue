@@ -26,16 +26,16 @@
 								<template #split>
 									|
 								</template>
-								<a-statistic title="Issue Total" :value="staticInfo?.issueCount" show-group-separator :value-style="{
+								<a-statistic :title="$t('controller.app.project.home.projectHome.issueTotal')" :value="staticInfo?.issueCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
-								<a-statistic title="UnResolved Issue Total" :value="staticInfo?.issueUnDoneCount" show-group-separator :value-style="{
+								<a-statistic :title="$t('controller.app.project.home.projectHome.unResolvedIssueTotal')" :value="staticInfo?.issueUnDoneCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
-								<a-statistic title="Release Total" :value="staticInfo?.releaseCount" show-group-separator :value-style="{
+								<a-statistic :title="$t('controller.app.project.home.projectHome.releaseTotal')" :value="staticInfo?.releaseCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
-								<a-statistic title="Sprint Total" :value="staticInfo?.sprintCount" show-group-separator :value-style="{
+								<a-statistic :title="$t('controller.app.project.home.projectHome.sprintTotal')" :value="staticInfo?.sprintCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
 							</a-space>
@@ -105,6 +105,7 @@ import FieldPriority from "@/business/common/component/field/fieldPriority.vue";
 import {ICommon_Model_Project_Issue} from "../../../../../../../common/model/project_issue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
 import {ICommon_Model_Project_Release} from "../../../../../../../common/model/project_release";
+import {useI18n} from "vue-i18n";
 
 echarts.use([
 	TitleComponent,
@@ -123,30 +124,31 @@ let userIssueListChart:EChartsType,userUnDoneIssueChart:EChartsType
 const projectId=inject(injectProjectInfo).id
 const key=inject(injectProjectInfo).key
 const permission=inject(injectProjectInfo).permission
+const {t}=useI18n()
 const data = [
 	{
 		id: "statics",
-		name: "Statics",
+		name: t("controller.app.project.home.projectHome.statics"),
 		data: null
 	},
 	{
 		id: "myRecentIssueList",
-		name: "My Recent Working Issue List",
+		name: t("controller.app.project.home.projectHome.myRecentIssueList"),
 		data: null
 	},
 	{
 		id: "userIssueList",
-		name: "Users' Issue Chart",
+		name: t("controller.app.project.home.projectHome.userIssueList"),
 		data: null
 	},
 	{
 		id: "userUnDoneIssueList",
-		name: "User's UnResolved Issue Chart",
+		name: t("controller.app.project.home.projectHome.userUnDoneIssueList"),
 		data: null
 	},
 	{
 		id: "recentReleaseList",
-		name: "Recent Release List",
+		name: t("controller.app.project.home.projectHome.recentReleaseList"),
 		data: null
 	},
 ]
@@ -174,6 +176,9 @@ const getProjectInfo=async ()=>{
 const initCharts=()=>{
 	userIssueListChart=echarts.init(userIssueListEle.value)
 	userIssueListChart.setOption({
+		grid:{
+			left:60
+		},
 		dataset:{
 			source:[
 				["count","name"],
@@ -189,7 +194,12 @@ const initCharts=()=>{
     },
     yAxis: {
 			name:"User",
-	    type: 'category'
+	    type: 'category',
+	    axisLabel:{
+		    show:true,
+		    overflow:"breakAll",
+		    width:40
+	    }
     },
     series: [
       {
@@ -204,6 +214,9 @@ const initCharts=()=>{
 	})
 	userUnDoneIssueChart=echarts.init(userUnDoneIssueEle.value)
 	userUnDoneIssueChart.setOption({
+		grid:{
+			left:60
+		},
 		dataset:{
 			source:[
 				["count","name"],
@@ -219,7 +232,12 @@ const initCharts=()=>{
 		},
 		yAxis: {
 			name:"User",
-			type: 'category'
+			type: 'category',
+			axisLabel:{
+				show:true,
+				overflow:"breakAll",
+				width:40
+			}
 		},
 		series: [
 			{

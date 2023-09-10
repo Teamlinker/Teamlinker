@@ -1,22 +1,22 @@
 <template>
   <a-form ref="eleForm" :model="form" auto-label-width>
-    <a-form-item field="name" label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name" v-if="type=='add'"></a-input>
       <template v-else>{{form.name}}</template>
     </a-form-item>
-    <a-form-item field="keyword" label="keyword" required>
+    <a-form-item field="keyword" :label="$t('util.keyword')" required>
       <a-input v-model="form.keyword" v-if="type=='add'"></a-input>
       <template v-else>{{form.keyword}}</template>
     </a-form-item>
-    <a-form-item field="description" label="description">
+    <a-form-item field="description" :label="$t('util.description')">
       <a-textarea v-model="form.description" allow-clear></a-textarea>
     </a-form-item>
-	  <a-form-item field="issueTypeSolutionId" label="issue solution" required v-if="type==='add'">
+	  <a-form-item field="issueTypeSolutionId" :label="$t('util.issueSolution')" required v-if="type==='add'">
 		  <a-select v-model="form.issueTypeSolutionId" allow-search>
 			  <a-option v-for="item in issueSolutionList" :label="item.name" :value="item.id"></a-option>
 		  </a-select>
 	  </a-form-item>
-    <a-form-item label="logo">
+    <a-form-item :label="$t('util.logo')">
       <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="type=='edit'?item.photo:''" @upload="onUpload"></Upload>
     </a-form-item>
   </a-form>
@@ -30,6 +30,7 @@ import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {apiIssueType, apiProject, DCSType} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {ICommon_Model_Issue_Type_Solution} from "../../../../../../../common/model/issue_type_solution";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   type:"edit"|"add",
@@ -43,6 +44,7 @@ const form=reactive({
 		issueTypeSolutionId:""
 	})
 })
+const {t}=useI18n()
 const issueSolutionList=ref<DCSType<ICommon_Model_Issue_Type_Solution>[]>([])
 const uploadUriId=ref("")
 const onUpload=(id:string)=> {
@@ -82,7 +84,7 @@ onDialogOk(async ()=>{
     }),
   }))
   if(res?.code==0){
-    Message.success("operation success");
+    Message.success(t("tip.operationSuccess"));
     return true;
   } else {
     Message.error(res.msg);

@@ -1,6 +1,6 @@
 <template>
   <div ref="root">
-    <a-button type="primary" @click="onAdd">Add</a-button>
+    <a-button type="primary" @click="onAdd">{{$t("util.add")}}</a-button>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="false">
       <template #issue="{record}">
         <a-space wrap>
@@ -14,22 +14,22 @@
       <template #operation="{record}">
         <a-space wrap v-if="!record.reserved">
           <a-dropdown-button size="small">
-            Edit
+	          {{$t("util.edit")}}
             <template #icon>
               <icon-down></icon-down>
             </template>
             <template #content>
-              <a-doption @click="onEditProfile(record)">Profile</a-doption>
-              <a-doption @click="onEditIssue(record)">Issue</a-doption>
-              <a-doption @click="onEditBindProject(record)">Bind Project</a-doption>
+              <a-doption @click="onEditProfile(record)">{{$t("util.profile")}}</a-doption>
+              <a-doption @click="onEditIssue(record)">{{$t("util.issue")}}</a-doption>
+              <a-doption @click="onEditBindProject(record)">{{$t("controller.app.setting.issue.issueSolutionList.bindProject")}}</a-doption>
             </template>
           </a-dropdown-button>
-          <a-button size="small" @click="onCopy(record)">Copy</a-button>
-          <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
+          <a-button size="small" @click="onCopy(record)">{{$t("util.copy")}}</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.remove")}}</a-button>
         </a-space>
         <a-space wrap v-else>
-          <a-button size="small" @click="onEditBindProject(record)">Bind Project</a-button>
-          <a-button size="small" @click="onCopy(record)">Copy</a-button>
+          <a-button size="small" @click="onEditBindProject(record)">{{$t("controller.app.setting.issue.issueSolutionList.bindProject")}}</a-button>
+          <a-button size="small" @click="onCopy(record)">{{$t("util.copy")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -47,26 +47,28 @@ import EditIssueSolution from "./editIssueTypeSolution.vue";
 import BindProjectList from "./bindProjectList.vue";
 import IssueTypeList from "./issueTypeList.vue";
 import IssueSolutionDeleteConvert from "@/business/controller/app/setting/issue/issueSolutionDeleteConvert.vue";
+import {useI18n} from "vue-i18n";
 
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     dataIndex:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     dataIndex:"description"
   },
   {
-    title:"issue",
+    title:t("util.issue"),
     slotName:"issue"
   },
   {
-    title:"reserved",
+    title:t("util.reserved"),
     slotName:"reserved"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -116,16 +118,16 @@ const onEditBindProject=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_
   },`${item.name} -> Bind Project`)
 }
 const onCopy=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to copy this issue type solution?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.copyIssueSolution"))
   if(ret) {
-    let name=await Dialog.input(root.value,appContext,"type new issue type solution name")
+    let name=await Dialog.input(root.value,appContext,t("tip.typeNewIssueSolutionName"))
     if(name) {
       let res=await apiIssueType.copySolution({
         issueTypeSolutionId:item.id,
         name
       })
       if(res?.code==0) {
-        Message.success("copy success")
+        Message.success(t("tip.copySuccess"))
         search()
       } else {
         Message.error(res.msg);
@@ -134,7 +136,7 @@ const onCopy=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)
   }
 }
 const onDelete=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this solution from this organization?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteIssueSolution"))
   if(ret) {
 		let res=await apiIssueType.list({
 			issueTypeSolutionId:item.id
@@ -145,7 +147,7 @@ const onDelete=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item
 					issueTypeSolutionId:item.id
 				})
 				if(res?.code==0) {
-					Message.success("remove success")
+					Message.success(t("tip.deleteSuccess"))
 					search()
 				}
 			} else {

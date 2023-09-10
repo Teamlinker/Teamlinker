@@ -15,23 +15,23 @@
           </a-space>
         </a-row>
         <a-row style="color: gray;font-size: smaller;align-items: center">
-          last modified:{{moment(info?.modified_time).format('YYYY-MM-DD HH:mm:ss')}}&nbsp;&nbsp;&nbsp;
+          {{$t("controller.app.wiki.wikiItemContent.lastModified")}}:{{moment(info?.modified_time).format('YYYY-MM-DD HH:mm:ss')}}&nbsp;&nbsp;&nbsp;
           <UserAvatar :organization-user-id="info.modified_by.organizationUserId" :name="info.modified_by.nickname" :photo="info.modified_by.photo" v-if="info"></UserAvatar>
         </a-row>
       </a-row>
       <a-switch v-model="isWrite" v-if="checkPermission(permission,Permission_Types.Wiki.EDIT)">
         <template #checked>
-          Edit
+          {{$t("util.edit")}}
         </template>
         <template #unchecked>
-          Preview
+	        {{$t("util.preview")}}
         </template>
       </a-switch>
     </a-row>
     <a-row style="width: 100%;height: calc(100% - 45px)">
 	    <a-spin :loading="loading" style="width: 100%;height: 100%">
 		    <a-row style="width: 100%;height: 50px;justify-content: center">
-			    <a-input style="width: 80%;margin-top: 10px;border: 0px;background-color: transparent" autofocus placeholder="type you title" :input-attrs="{style:{fontSize:'20px'}}" v-model="title" :readonly="!isWrite"></a-input>
+			    <a-input style="width: 80%;margin-top: 10px;border: 0px;background-color: transparent" autofocus :placeholder="$t('placeholder.typeTitle')" :input-attrs="{style:{fontSize:'20px'}}" v-model="title" :readonly="!isWrite"></a-input>
 		    </a-row>
 		    <a-row style="width: 100%;height: calc(100% - 60px);margin-top: 10px;justify-content: center;overflow-y: auto" v-drop.file.shortcut.disk="onDrop">
 			    <RichEditor v-model="content" :readonly="!isWrite" style="width: 80%" @upload-file="onUploadFile" :pop-menu-list="popMenuList" @pop-menu-click="onPopMenuClick" @custom-anchor-click="onCustomAnchorClick" @quote-list="onQuoteList" ref="objEditor"></RichEditor>
@@ -45,10 +45,10 @@
 import {getCurrentInstance, onBeforeMount, ref, watch} from "vue";
 import {apiFile, apiWiki, DCSType} from "../../../common/request/request";
 import {
-	ECommon_Content_Line_Config_Type,
-	ICommon_Content_Line,
-	ICommon_Content_Line_Config,
-	ICommon_Model_Content
+  ECommon_Content_Line_Config_Type,
+  ICommon_Content_Line,
+  ICommon_Content_Line_Config,
+  ICommon_Model_Content
 } from "../../../../../../common/model/content";
 import UserAvatar from "../../../common/component/userAvatar.vue";
 import RichEditor from "../../../common/component/richEditor/richEditor.vue";

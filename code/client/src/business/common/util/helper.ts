@@ -5,6 +5,7 @@ import {ECommon_Model_Finder_Item_Type} from "../../../../../common/model/finder
 import {EClient_Drag_Type} from "../../../teamOS/common/directive/drag";
 import {ECommon_IM_Message_ContentType} from "../../../../../common/model/im_user_message";
 import {ECommon_Content_Line_Config_Type, ICommon_Content_Line} from "../../../../../common/model/content";
+import i18n from "@/business/common/i18n/i18n";
 
 export function getMemberIdFromRoleMember(item:ICommon_Route_Res_Role_Member_Item){
     if(item.memberType==ECommon_Model_Organization_Member_Type.DEFAULT) {
@@ -45,7 +46,8 @@ export function dialogFuncGenerator({func,form}:{
         let res=await func()
         if(typeof(res)=="object") {
             if(res?.code==0) {
-                Message.success("operation success")
+                const {t}=i18n.global
+                Message.success(t("tip.operationSuccess"))
                 return res
             } else {
                 Message.error(res.msg);

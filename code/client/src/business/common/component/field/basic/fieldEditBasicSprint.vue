@@ -4,7 +4,7 @@
 			<a-space wrap size="mini" v-if="showValue">
 				<BoardSprintPreview :key="showValue.id" :board-sprint-id="showValue.id" :name="showValue.name"></BoardSprintPreview>
 			</a-space>
-			<span v-else style="line-height: 30px;width: 100%;color: grey">None</span>
+			<span v-else style="line-height: 30px;width: 100%;color: grey">{{$t("util.none")}}</span>
 		</template>
 		<a-row style="padding-right: 10px" v-else>
 			<a-space size="mini" wrap>

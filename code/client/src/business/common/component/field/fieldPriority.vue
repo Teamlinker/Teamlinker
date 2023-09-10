@@ -3,27 +3,27 @@
     <span v-if="priority==ECommon_Model_Project_Issue_Priority.LOW">
       <icon-down style="color: lightblue"></icon-down>&nbsp;
       <template v-if="!onlyIcon">
-	      Low
+	      {{$t("util.low")}}
       </template>
     </span>
     <span v-else-if="priority==ECommon_Model_Project_Issue_Priority.MEDIUM">
       <icon-unordered-list style="color: orange"></icon-unordered-list>&nbsp;
 	    <template v-if="!onlyIcon">
-	      Medium
+	      {{$t("util.medium")}}
       </template>
 
     </span>
     <span v-else-if="priority==ECommon_Model_Project_Issue_Priority.HIGH">
       <icon-up style="color: #ea6e41"></icon-up>&nbsp;
 	    <template v-if="!onlyIcon">
-	      High
+	      {{$t("util.high")}}
       </template>
 
     </span>
     <span v-if="priority==ECommon_Model_Project_Issue_Priority.URGENT">
       <icon-double-up style="color: red"></icon-double-up>&nbsp;
 	    <template v-if="!onlyIcon">
-	      Urgent
+	      {{$t("util.urgent")}}
       </template>
 
     </span>

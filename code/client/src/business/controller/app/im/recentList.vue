@@ -33,8 +33,8 @@
           </a-badge>
         </div>
         <template #content>
-          <a-doption @click="onProfile(item)">Profile</a-doption>
-          <a-doption @click="onClose(item,index)">Close</a-doption>
+          <a-doption @click="onProfile(item)">{{$t("util.profile")}}</a-doption>
+          <a-doption @click="onClose(item,index)">{{$t("util.close")}}</a-doption>
         </template>
       </a-dropdown>
     </a-menu-item>

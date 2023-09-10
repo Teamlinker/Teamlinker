@@ -4,11 +4,11 @@
 			<router-link :to="{name:'index'}" style="text-decoration: none;">
 				<h3 style="text-align: center;margin-bottom: 50px">Teamlinker</h3>
 			</router-link>
-			<a-form-item field="username" label="username">
+			<a-form-item field="username" :label="$t('util.username')">
 				<a-input v-model="form.username"></a-input>
 			</a-form-item>
 			<a-form-item>
-				<a-button html-type="submit" type="primary">Submit</a-button>
+				<a-button html-type="submit" type="primary">{{$t("util.submit")}}</a-button>
 			</a-form-item>
 		</a-form>
 	</a-row>

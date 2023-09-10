@@ -40,6 +40,7 @@ import {RichEditorEventHandle} from "@/business/common/component/richEditorEvent
 import {ECommon_Content_Line_Config_Type, ICommon_Content_Line_Config} from "../../../../../../../common/model/content";
 import {DropParam, vDrop} from "@/teamOS/common/directive/drop";
 import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	item:DCSType<ICommon_Route_Res_Sticky_Note_Item & {
@@ -57,6 +58,7 @@ const rect=ref<{
 	height:string
 }>()
 const id=v4()
+const {t}=useI18n()
 const loading=ref(false)
 const objEditorUser=ref<InstanceType<typeof RichEditor>>()
 const content=ref(props.item.content.content?JSON.parse(props.item.content.content):[])
@@ -120,7 +122,7 @@ watch(isReadOnly,async ()=>{
 })
 
 const onDelete=async ()=>{
-	let ret=await Dialog.confirm(topEle.value.offsetParent as HTMLElement,appContext,"Do you want to delete this sticky note?")
+	let ret=await Dialog.confirm(topEle.value.offsetParent as HTMLElement,appContext,t("tip.deleteNote"))
 	if(ret) {
 		let res=await apiTool.removeNote({
 			noteId:props.item.id

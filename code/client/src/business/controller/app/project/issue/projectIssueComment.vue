@@ -7,7 +7,7 @@
 				</a-spin>
 			</template>
 			<template #actions>
-				<a-button type="primary" size="small" @click="onCommentAdd" style="margin-top: 10px">Save</a-button>
+				<a-button type="primary" size="small" @click="onCommentAdd" style="margin-top: 10px">{{$t("util.save")}}</a-button>
 			</template>
 		</a-comment>
 		<a-comment v-for="(item,index) in commentList" :author="item.value.created_by.nickname" :datetime="moment(item.value.created_time).format('YYYY-MM-DD HH:mm:ss')">
@@ -71,6 +71,7 @@ import RichEditor from "../../../../common/component/richEditor/richEditor.vue";
 import {RichEditorEventHandle} from "../../../../common/component/richEditorEventHandle";
 import {DropParam, vDrop} from "../../../../../teamOS/common/directive/drop";
 import UserAvatar from "../../../../common/component/userAvatar.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	projectIssueId:string
@@ -89,6 +90,7 @@ const objEditor=ref<InstanceType<typeof RichEditor>>()
 const objEditorAdd=ref<InstanceType<typeof RichEditor>>()
 const loading=ref(false)
 const popMenuList=ref(RichEditorEventHandle.popMenuList)
+const {t}=useI18n()
 const getCommentList=async ()=>{
 	let res=await apiIssue.commentList({
 		projectIssueId:props.projectIssueId
@@ -133,7 +135,7 @@ const onSave=async (item:DCSType<{
 		}
 	}))
 	if(value.length==0) {
-		Message.error("content can not be empty")
+		Message.error(t("tip.contentNotEmpty"))
 		return
 	}
 	let res=await apiIssue.commentEdit({
@@ -147,7 +149,7 @@ const onSave=async (item:DCSType<{
 }
 const onRemoveComment=async (index:number)=>{
 	let item=commentList.value[index];
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this comment?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteComment"))
 	if(ret) {
 		let res=await apiIssue.commentRemove({
 			contentId:item.value.id

@@ -1,12 +1,12 @@
 <template>
   <a-form layout="inline" :model="form" @submitSuccess="onSubmit">
-    <a-form-item label="issue type solution" field="issueTypeSolutionId" required>
+    <a-form-item :label="$t('util.issueSolution')" field="issueTypeSolutionId" required>
       <a-select v-model="form.issueTypeSolutionId" allow-search>
         <a-option v-for="item in issueSolutionList" :label="item.name" :value="item.id"></a-option>
       </a-select>
     </a-form-item>
     <a-form-item>
-      <a-button html-type="submit" type="primary">Save</a-button>
+      <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
     </a-form-item>
   </a-form>
 </template>
@@ -20,6 +20,7 @@ import {getRootNavigatorRef} from "../../../../../teamOS/common/component/naviga
 import {Message} from "@arco-design/web-vue";
 import ProjectSettingIssueSolutionConvert
 	from "@/business/controller/app/project/setting/projectSettingIssueSolutionConvert.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   projectId:string
@@ -30,9 +31,10 @@ const form=reactive({
 const currentIssueTypeSolutionId=ref("")
 const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()
+const {t}=useI18n()
 const issueSolutionList=ref<DCSType<ICommon_Model_Issue_Type_Solution>[]>([])
 const onSubmit=async ()=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to switch to this issue type solution?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.switchIssueSolution"))
   if(ret) {
 		let res=await apiIssue.count({
 			projectId:props.projectId
@@ -44,7 +46,7 @@ const onSubmit=async ()=>{
 					issueTypeSolutionId:form.issueTypeSolutionId
 				})
 				if(res?.code==0) {
-					Message.success("bind success")
+					Message.success(t("tip.bindSuccess"))
 					currentIssueTypeSolutionId.value=form.issueTypeSolutionId
 				} else {
 					Message.error(res.msg)

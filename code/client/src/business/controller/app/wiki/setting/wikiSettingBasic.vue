@@ -1,16 +1,16 @@
 <template>
   <a-form ref="eleForm" style="width: 80%" :model="form" @submitSuccess="onSubmit">
-    <a-form-item field="name" label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
-    <a-form-item field="description" label="description">
+    <a-form-item field="description" :label="$t('util.description')">
       <a-textarea v-model="form.description" allow-clear></a-textarea>
     </a-form-item>
-    <a-form-item label="logo">
+    <a-form-item :label="$t('util.logo')">
       <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="photo" @upload="onUpload"></Upload>
     </a-form-item>
     <a-form-item>
-      <a-button html-type="submit" type="primary">Save</a-button>
+      <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
     </a-form-item>
   </a-form>
 </template>
@@ -21,6 +21,7 @@ import Upload from "../../../../common/component/upload.vue";
 import {getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
 import {apiWiki} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   wikiId:string
@@ -31,6 +32,7 @@ const form = reactive({
   keyword: "",
   description: "",
 })
+const {t}=useI18n()
 const uploadUriId=ref("")
 const onUpload=(id:string)=> {
   uploadUriId.value=id
@@ -59,7 +61,7 @@ const onSubmit=async ()=>{
     })
   })
   if(res?.code==0) {
-    Message.success("save success")
+    Message.success(t("tip.saveSuccess"))
   } else {
     Message.error(res.msg)
   }

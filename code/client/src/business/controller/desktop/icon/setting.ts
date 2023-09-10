@@ -6,14 +6,16 @@ import {Message} from "@arco-design/web-vue";
 import {windowManager} from "../../../../teamOS/window/windowManager";
 import {markRaw} from "vue";
 import {SessionStorage} from "../../../common/storage/session";
+import i18n from "@/business/common/i18n/i18n";
 
-export const iconSetting=new Icon("Setting",iconGroupMap["setting"])
+const {t}=i18n.global
+export const iconSetting=new Icon(t("util.setting"),iconGroupMap["setting"])
 iconSetting.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
-        Message.error("you must choose organization")
+        Message.error(t("tip.switchToSpecificOrganization"))
         return;
     }
-    const win=new Window("setting",ETeamOS_Window_Type.SIMPLE, "setting",true,[
+    const win=new Window(t("util.setting"),ETeamOS_Window_Type.SIMPLE, "setting",true,[
         {
             id:v4(),
             meta:{
@@ -26,6 +28,6 @@ iconSetting.addEventListener("dbClick",item => {
                 name:"setting"
             }
         }
-    ],"Setting");
+    ],t("util.setting"));
     windowManager.open(win);
 })

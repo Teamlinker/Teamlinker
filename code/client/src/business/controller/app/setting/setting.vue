@@ -6,98 +6,98 @@
 		      <template #icon>
 			      <icon-home></icon-home>
 		      </template>
-		      Home
+		      {{$t("util.home")}}
 	      </a-menu-item>
         <a-sub-menu key="organization">
           <template #icon>
             <sicon size="" color="" name="Ant" type="apartment"></sicon>
           </template>
-          <template #title>Organization</template>
+          <template #title>{{$t("util.organization")}}</template>
           <a-menu-item key="organizationEdit">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
-            Edit
+	          {{$t("util.edit")}}
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="userTeam">
           <template #icon>
             <sicon size="" color="" name="Ant" type="team"></sicon>
           </template>
-          <template #title>User & Team</template>
+          <template #title>{{$t("util.user")}} & {{$t("util.team")}}</template>
           <a-menu-item key="userManage">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
-            User Manage
+            {{$t("controller.app.setting.setting.userManage")}}
           </a-menu-item>
           <a-menu-item key="teamManage">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
-            Team Manage
+	          {{$t("controller.app.setting.setting.teamManage")}}
           </a-menu-item>
           <a-menu-item key="tagManage">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
-            Tag Manage
+	          {{$t("controller.app.setting.setting.tagManage")}}
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="role">
           <template #icon>
             <sicon size="" color="" name="Ant" type="index"></sicon>
           </template>
-          <template #title>Role</template>
+          <template #title>{{$t("util.role")}}</template>
           <a-menu-item key="organizationRole">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
-            Organization
+	          {{$t("util.organization")}}
           </a-menu-item>
           <a-sub-menu key="roleProject">
-            <template #title>Project</template>
+            <template #title>{{$t("util.project")}}</template>
             <a-menu-item key="projectGlobalRole">
               <template #icon>
                 <sicon size="" color="" name="Ant" type="edit"></sicon>
               </template>
-              Global
+	            {{$t("util.global")}}
             </a-menu-item>
             <a-menu-item key="projectSpecificRole">
               <template #icon>
                 <sicon size="" color="" name="Ant" type="edit"></sicon>
               </template>
-              Specific
+	            {{$t("util.specific")}}
             </a-menu-item>
           </a-sub-menu>
           <a-sub-menu key="roleTeam">
-            <template #title>Team</template>
+            <template #title>{{$t("util.team")}}</template>
             <a-menu-item key="teamGlobalRole">
               <template #icon>
                 <sicon size="" color="" name="Ant" type="edit"></sicon>
               </template>
-              Global
+	            {{$t("util.global")}}
             </a-menu-item>
             <a-menu-item key="teamSpecificRole">
               <template #icon>
                 <sicon size="" color="" name="Ant" type="edit"></sicon>
               </template>
-              Specific
+	            {{$t("util.specific")}}
             </a-menu-item>
           </a-sub-menu>
           <a-sub-menu key="roleWiki">
-            <template #title>Wiki</template>
+            <template #title>{{$t("util.wiki")}}</template>
             <a-menu-item key="wikiGlobalRole">
               <template #icon>
                 <sicon size="" color="" name="Ant" type="edit"></sicon>
               </template>
-              Global
+	            {{$t("util.global")}}
             </a-menu-item>
             <a-menu-item key="wikiSpecificRole">
               <template #icon>
                 <sicon size="" color="" name="Ant" type="edit"></sicon>
               </template>
-              Specific
+	            {{$t("util.specific")}}
             </a-menu-item>
           </a-sub-menu>
         </a-sub-menu>
@@ -105,36 +105,36 @@
           <template #icon>
             <sicon size="" color="" name="Ant" type="project"></sicon>
           </template>
-          <template #title>Project</template>
+          <template #title>{{$t("util.project")}}</template>
           <a-menu-item key="projectManage">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
-            Manage
+	          {{$t("util.manage")}}
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="issueSolution">
           <template #icon>
             <sicon size="" color="" name="Ant" type="solution"></sicon>
           </template>
-          <template #title>Issue Solution</template>
+          <template #title>{{$t("util.issueSolution")}}</template>
           <a-menu-item key="issueSolution">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
-            Manage
+	          {{$t("util.manage")}}
           </a-menu-item>
         </a-sub-menu>
         <a-sub-menu key="wiki">
           <template #icon>
             <sicon size="" color="" name="Ant" type="file"></sicon>
           </template>
-          <template #title>Wiki</template>
+          <template #title>{{$t("util.wiki")}}</template>
           <a-menu-item key="wikiManage">
             <template #icon>
               <sicon size="" color="" name="Ant" type="edit"></sicon>
             </template>
-            Manage
+	          {{$t("util.manage")}}
           </a-menu-item>
         </a-sub-menu>
       </a-menu>

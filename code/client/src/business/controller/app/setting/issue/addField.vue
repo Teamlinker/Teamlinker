@@ -1,6 +1,6 @@
 <template>
   <a-form :model="form" style="width: 80%" ref="eleForm">
-    <a-form-item label="fieldTypeId" required>
+    <a-form-item filed="fieldTypeId" :label="$t('util.fieldType')" required>
       <a-select v-model="form.fieldTypeId">
         <a-option label="Switch" :value="ECommon_Field_Type.SWITCH"></a-option>
         <a-option label="Multi Select" :value="ECommon_Field_Type.MULTISELECT"></a-option>
@@ -13,10 +13,10 @@
         <a-option label="Date" :value="ECommon_Field_Type.DATE"></a-option>
       </a-select>
     </a-form-item>
-    <a-form-item label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
-    <a-form-item label="description">
+    <a-form-item field="description" :label="$t('util.description')">
       <a-textarea v-model="form.description"></a-textarea>
     </a-form-item>
   </a-form>

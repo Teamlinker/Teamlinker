@@ -1,6 +1,6 @@
 <template>
   <div ref="root">
-    <a-button @click="onAdd" type="primary" style="margin-bottom: 10px">Add</a-button>
+    <a-button @click="onAdd" type="primary" style="margin-bottom: 10px">{{$t("util.add")}}</a-button>
     <a-table :columns="columns" :data="data" :pagination="false">
       <template #description="{record}">
         {{record.description}}
@@ -17,8 +17,8 @@
       <template #operation="{record}">
         <template v-if="!record.reserved">
           <a-space wrap>
-            <a-button type="primary" size="small" @click="onEdit(record)">manage</a-button>
-            <a-button status="danger" size="small" @click="onDelete(record)">delete</a-button>
+            <a-button type="primary" size="small" @click="onEdit(record)">{{$t("util.manage")}}</a-button>
+            <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.delete")}}</a-button>
           </a-space>
         </template>
       </template>
@@ -33,6 +33,7 @@ import {Dialog} from "../../../../../common/component/dialog/dialog";
 import {Permission_Base, Permission_Types} from "../../../../../../../../common/permission/permission";
 import {Message} from "@arco-design/web-vue";
 import EditWikiRole from "./editWikiRole.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   wikiId?:string
@@ -44,25 +45,26 @@ type Item={
   description:string,
   permissions:Permission_Base[]
 }
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     dataIndex:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     slotName:"description"
   },
   {
-    title:"permission",
+    title:t("util.permission"),
     slotName:"permission"
   },
   {
-    title:"reserved",
+    title:t("util.reserved"),
     slotName: "reserved"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -95,13 +97,13 @@ const onEdit=async (item:Item) =>{
   }
 }
 const onDelete=async (item:Item)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this role?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteRole"))
   if(ret) {
     let res=await apiWiki.removeRole({
       roleId:item.id
     })
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       init()
     } else {
       Message.error(res.msg);

@@ -1,7 +1,7 @@
 <template>
   <a-space wrap>
     <UserAvatar v-for="value in showValue" v-if="showValue && showValue.length>0" :organization-user-id="value.organizationUserId" :name="value.nickname" :photo="value.photo" :key="value.userId" @close="onClose" :closeable="true"></UserAvatar>
-    <span v-else style="line-height: 30px;width: 100%;color: gray">None</span>
+    <span v-else style="line-height: 30px;width: 100%;color: gray">{{$t("util.none")}}</span>
     <a-select v-model="addValue" allow-search @search="onSearch" v-if="showInput" @change="onChange">
       <a-option v-for="item1 in searchValueList" :label="item1.nickname" :value="item1.userId"></a-option>
     </a-select>

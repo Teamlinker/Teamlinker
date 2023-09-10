@@ -1,8 +1,8 @@
 <template>
   <div style="height: 100%;overflow-y: auto;padding: 0px 10px" ref="root">
-    Your Work
+    {{$t("controller.app.project.project.yourWork")}}
     <a-collapse :default-active-key="['recent','all']" style="margin-top: 10px">
-      <a-collapse-item header="Recent Wiki List" key="recent">
+      <a-collapse-item :header="$t('controller.app.wiki.wiki.recentWikiList')" key="recent">
         <a-space wrap style="margin-top: 20px" size="large" v-if="recentList.length>0">
           <CardItem v-for="item in recentList" style="background-color: white" :name="item.name" :description="item.description" :key="item.id" :photo="item.photo" @click="onClickWikiItem(item.id,item.name)" v-drag.shortcut="{
 						shortcutType:ECommon_Model_Finder_Shortcut_Type.WIKI,
@@ -12,16 +12,16 @@
         </a-space>
         <a-empty v-else></a-empty>
       </a-collapse-item>
-      <a-collapse-item header="All Wiki List" key="all">
+      <a-collapse-item :header="$t('controller.app.wiki.wiki.allWikiList')" key="all">
         <a-row>
           <a-space>
-            Type
+	          {{$t("util.type")}}
             <a-select v-model="type" style="width: 100px">
-              <a-option label="All" value="all"></a-option>
-              <a-option label="Created" value="created"></a-option>
-              <a-option label="Joined" value="joined"></a-option>
+              <a-option :label="$t('util.name')" value="all"></a-option>
+              <a-option :label="$t('util.created')" value="created"></a-option>
+              <a-option :label="$t('util.joined')" value="joined"></a-option>
             </a-select>
-            <a-input-search style="width: 250px" v-model="keyword" placeholder="please type wiki name" @search="onSearch"></a-input-search>
+            <a-input-search style="width: 250px" v-model="keyword" :placeholder="$t('placeholder.typeWikiName')" @search="onSearch"></a-input-search>
             <a-button type="primary" @click="onAddWiki" v-if="checkPermission(storeOrganization.organizationPermission,Permission_Types.Organization.CREATE_WIKI)">Create</a-button>
           </a-space>
         </a-row>
@@ -56,8 +56,8 @@ import EditWikiProfile from "../setting/wiki/editWikiProfile.vue";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 
-const recentList=ref<DCSType<ICommon_Model_Wiki[]>>([])
-const list=ref<DCSType<ICommon_Model_Wiki[]>>([])
+const recentList=ref<DCSType<ICommon_Model_Wiki>[]>([])
+const list=ref<DCSType<ICommon_Model_Wiki>[]>([])
 const type=ref<"all"|"created"|"joined">("all")
 const keyword=ref("")
 const storeOrganization=useDesktopStore()

@@ -1,6 +1,6 @@
 <template>
 	<a-form :model="form" ref="eleForm" auto-label-width>
-		<a-form-item field="issues" label="Issues" required>
+		<a-form-item field="issues" :label="$t('util.issues')" required>
 			<a-select multiple allow-search v-model="form.issues" @search="onSearch">
 				<a-optgroup v-for="(_,swimLaneName) in optionMap" :label="swimLaneName">
 					<a-option v-for="item in optionMap[swimLaneName]" :value="item.id" :label="props.projectKey+'-'+item.unique_id">
@@ -23,6 +23,7 @@ import {ICommon_Route_Res_Board_Sprint_Issue_Item} from "../../../../../../../co
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	boardSprintSwimLaneId:string,
@@ -34,6 +35,7 @@ const form=reactive({
 	issues:[]
 })
 const eleForm=ref()
+const {t}=useI18n()
 const issueMap=ref<{
 	[swimLaneName:string]:DCSType<ICommon_Route_Res_Board_Sprint_Issue_Item>[]
 }>()
@@ -87,7 +89,7 @@ onDialogOk(dialogFuncGenerator({
 	},
 	func:()=>{
 		if(form.issues.length==0) {
-			Message.error("issue should not be empty")
+			Message.error(t("tip.issueShouldNotBeEmpty"))
 			return false
 		}
 		return Promise.all(form.issues.map(item=>{

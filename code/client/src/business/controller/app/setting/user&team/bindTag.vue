@@ -1,6 +1,6 @@
 <template>
   <a-form :model="{}">
-    <a-form-item label="tags">
+    <a-form-item :label="$t('util.tags')">
       <a-space wrap>
         <a-tag v-for="item in tagList" bordered color="arcoblue" checkable :checked="item.checked" @check="item.checked=!item.checked">{{item.name}}</a-tag>
       </a-space>
@@ -14,6 +14,7 @@ import {onBeforeMount, ref} from "vue";
 import {apiOrganization} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   tags:ICommon_Model_Member_Tag[],
@@ -24,6 +25,7 @@ const tagList=ref<{
   name:string,
   checked:boolean
 }[]>([])
+const {t}=useI18n()
 onBeforeMount(async ()=>{
   let res=await apiOrganization.listTag({});
   if(res?.code==0) {
@@ -43,7 +45,7 @@ onDialogOk(async ()=>{
     memberTagIds:tagList.value.filter(item=>item.checked).map(item=>item.id).join(",")
   })
   if(res?.code==0) {
-    Message.success("operation success")
+    Message.success(t("tip.operationSuccess"))
     return true
   } else {
     Message.error(res.msg)

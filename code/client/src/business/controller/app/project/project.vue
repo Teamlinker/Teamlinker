@@ -1,8 +1,8 @@
 <template>
   <div style="height: 100%;overflow-y: auto;padding: 0px 10px" ref="root">
-    Your Work
+    {{$t("controller.app.project.project.yourWork")}}
     <a-collapse :default-active-key="['recent','all']" style="margin-top: 10px">
-      <a-collapse-item header="Recent Project List" key="recent">
+      <a-collapse-item :header="$t('controller.app.project.project.recentProjectList')" key="recent">
         <a-space wrap style="margin-top: 20px" size="large" v-if="recentList.length>0">
           <ProjectItem v-for="item in recentList" style="background-color: white" done-title="my done issue" :done-count="item.done" open-title="my open issue" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)" v-drag.shortcut="()=>({
 						shortcutType:ECommon_Model_Finder_Shortcut_Type.PROJECT,
@@ -12,17 +12,17 @@
         </a-space>
         <a-empty v-else></a-empty>
       </a-collapse-item>
-      <a-collapse-item header="All Project List" key="all">
+      <a-collapse-item :header="$t('controller.app.project.project.allProjectList')" key="all">
         <a-row>
           <a-space>
-            Type
+            {{$t("util.type")}}
             <a-select v-model="type" style="width: 100px">
-              <a-option label="All" value="all"></a-option>
-              <a-option label="Created" value="created"></a-option>
-              <a-option label="Joined" value="joined"></a-option>
+              <a-option :label="$t('util.all')" value="all"></a-option>
+              <a-option :label="$t('util.created')" value="created"></a-option>
+              <a-option :label="$t('util.joined')" value="joined"></a-option>
             </a-select>
-            <a-input-search style="width: 250px" v-model="keyword" placeholder="please type project name" @search="onSearch"></a-input-search>
-            <a-button type="primary" @click="onAddProject" v-if="checkPermission(storeOrganization.organizationPermission,Permission_Types.Organization.CREATE_PROJECT)">Create</a-button>
+            <a-input-search style="width: 250px" v-model="keyword" :placeholder="$t('placeholder.typeProjectName')" @search="onSearch"></a-input-search>
+            <a-button type="primary" @click="onAddProject" v-if="checkPermission(storeOrganization.organizationPermission,Permission_Types.Organization.CREATE_PROJECT)">{{$t("util.create")}}</a-button>
           </a-space>
         </a-row>
         <a-space wrap style="margin-top: 20px" size="large" v-if="list.length>0">

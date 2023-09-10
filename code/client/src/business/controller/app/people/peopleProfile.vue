@@ -67,7 +67,7 @@
     </a-layout-sider>
     <a-layout-content style="padding: 0px 10px">
       <h3>
-        Recent Teams
+        {{$t("controller.app.people.peopleProfile.recentTeams")}}
       </h3>
       <a-list>
         <a-list-item v-for="item in info.teamList" :key="item.id">
@@ -78,15 +78,15 @@
           </a-list-item-meta>
           <template #actions>
             <template v-if="organizationUserId===myOrganizationUserId">
-              <a-button type="outline" size="small" @click="onTeamProfile(item.id)">Profile</a-button>
+              <a-button type="outline" size="small" @click="onTeamProfile(item.id)">{{$t("util.profile")}}</a-button>
             </template>
             <template v-else>
-              <a-button type="outline" size="small" style="margin-left: 20px" @click="onTeamProfile(item.id)">Profile</a-button>
+              <a-button type="outline" size="small" style="margin-left: 20px" @click="onTeamProfile(item.id)">{{$t("util.profile")}}</a-button>
               <a-button type="outline" size="small" style="margin-left: 20px;margin-top: 10px" @click="onMessage">
                 <template #icon>
                   <icon-message></icon-message>
                 </template>
-                Message
+	              {{$t("util.message")}}
               </a-button>
             </template>
           </template>

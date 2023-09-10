@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-button @click="onAddRole" type="primary" style="margin-bottom: 10px">Add</a-button>
+    <a-button @click="onAddRole" type="primary" style="margin-bottom: 10px">{{$t("util.add")}}</a-button>
     <a-table :columns="columns" :data="roleList" :pagination="false">
       <template #description="{record}">
         {{record.description}}
@@ -17,8 +17,8 @@
       <template #operation="{record}">
         <template v-if="!record.global">
           <a-space wrap>
-            <a-button type="primary" size="small" @click="onEditRole(record)">manage</a-button>
-            <a-button status="danger" size="small" @click="onDeleteRole(record)">delete</a-button>
+            <a-button type="primary" size="small" @click="onEditRole(record)">{{$t("util.manage")}}</a-button>
+            <a-button status="danger" size="small" @click="onDeleteRole(record)">{{$t("util.delete")}}</a-button>
           </a-space>
         </template>
       </template>
@@ -34,6 +34,7 @@ import {apiProject} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 import EditProjectRole from "../../setting/role/project/editProjectRole.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   projectId:string
@@ -49,25 +50,26 @@ type RoleItem={
   global:boolean,
   permissions:Permission_Base[]
 }
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     dataIndex:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     slotName:"description"
   },
   {
-    title:"permission",
+    title:t("util.permission"),
     slotName:"permission"
   },
   {
-    title:"global",
+    title:t("util.global"),
     slotName: "global"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -103,13 +105,13 @@ const onEditRole=async (item:RoleItem) =>{
   }
 }
 const onDeleteRole=async (item:RoleItem)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this role?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteRole"))
   if(ret) {
     let res=await apiProject.removeRole({
       roleId:item.id
     })
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       listRole()
     } else {
       Message.error(res.msg);

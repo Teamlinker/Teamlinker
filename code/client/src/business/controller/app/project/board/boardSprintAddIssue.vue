@@ -1,13 +1,13 @@
 <template>
 	<a-form :model="form" ref="eleForm" auto-label-width>
-		<a-form-item label="Issue Types">
+		<a-form-item :label="$t('util.issueTypes')">
 			<a-space>
 				<a-tag v-for="item in issueTypeList">
 					{{item.name}}
 				</a-tag>
 			</a-space>
 		</a-form-item>
-		<a-form-item field="issues" label="Issues" required>
+		<a-form-item field="issues" :label="$t('util.issues')" required>
 			<a-select multiple allow-search v-model="form.issues" @search="onSearch">
 				<a-option v-for="item in issueList" :value="item.id">
 					{{item.project.keyword}}-{{item.unique_id}}&nbsp;{{item.name}}
@@ -25,6 +25,7 @@ import {ICommon_Route_Res_Project_Issue_filter_Item} from "../../../../../../../
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	boardSprintId:string,
@@ -35,6 +36,7 @@ const form=reactive({
 	issues:[]
 })
 const eleForm=ref()
+const {t}=useI18n()
 const issueTypeList=ref<DCSType<ICommon_Model_Issue_Type>[]>([])
 const issueList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item>[]>([])
 const getIssueTypeList=async ()=>{
@@ -69,7 +71,7 @@ onDialogOk(dialogFuncGenerator({
 	},
 	func:()=>{
 		if(form.issues.length==0) {
-			Message.error("issue should not be empty")
+			Message.error(t("tip.issueShouldNotBeEmpty"))
 			return false
 		}
 		return apiBoard.addSprintIssues({

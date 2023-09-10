@@ -8,14 +8,16 @@ import Wiki from "../../app/wiki/wiki.vue";
 import WikiProfile from "../../app/wiki/wikiProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
+import i18n from "@/business/common/i18n/i18n";
 
-export const iconWiki=new Icon("Wiki",iconGroupMap["wiki"])
+const {t}=i18n.global
+export const iconWiki=new Icon(t("util.wiki"),iconGroupMap["wiki"])
 iconWiki.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
-        Message.error("you must choose organization")
+        Message.error(t("tip.switchToSpecificOrganization"))
         return;
     }
-    const win=new Window("wiki",ETeamOS_Window_Type.TAB, "wiki",true,[
+    const win=new Window(t("util.wiki"),ETeamOS_Window_Type.TAB, "wiki",true,[
         {
             id:v4(),
             meta:{
@@ -27,10 +29,10 @@ iconWiki.addEventListener("dbClick",item => {
             },
             default:{
                 name:"wiki",
-                title:"wiki"
+                title:t("util.wiki")
             }
         }
-    ],"Wiki");
+    ],t("util.wiki"));
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -43,14 +45,14 @@ iconWiki.addEventListener("dbClick",item => {
             },
             default:{
                 name:"wiki",
-                title:"wiki"
+                title:t("util.wiki")
             }
         }
     })
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_PROFILE,wikiId => {
-    const win=new Window("wiki",ETeamOS_Window_Type.TAB, "wiki",true,[
+    const win=new Window(t("util.wiki"),ETeamOS_Window_Type.TAB, "wiki",true,[
         {
             id:v4(),
             meta:{
@@ -62,13 +64,13 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_PROFILE,wikiId => {
             },
             default:{
                 name:"profile",
-                title:"wiki",
+                title:t("util.wiki"),
                 props:{
                     wikiId:wikiId
                 }
             }
         }
-    ],"Wiki");
+    ],t("util.wiki"));
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -81,14 +83,14 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_PROFILE,wikiId => {
             },
             default:{
                 name:"wiki",
-                title:"wiki"
+                title:t("util.wiki")
             }
         }
     })
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_ITEM,(wikiId, wikiItemId) => {
-    const win=new Window("wiki",ETeamOS_Window_Type.TAB, "wiki",true,[
+    const win=new Window(t("util.wiki"),ETeamOS_Window_Type.TAB, "wiki",true,[
         {
             id:v4(),
             meta:{
@@ -103,13 +105,13 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_ITEM,(wikiId, wikiItemId) => {
             },
             default:{
                 name:"profile",
-                title:"wiki",
+                title:t("util.wiki"),
                 props:{
                     wikiId:wikiId
                 }
             }
         }
-    ],"Wiki");
+    ],t("util.wiki"));
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -122,7 +124,7 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_ITEM,(wikiId, wikiItemId) => {
             },
             default:{
                 name:"wiki",
-                title:"wiki"
+                title:t("util.wiki")
             }
         }
     })

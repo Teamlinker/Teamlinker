@@ -41,13 +41,13 @@
     </a-layout-content>
     <a-layout-sider :resize-directions="['left']" :width="250" id="meetingRight">
 	    <a-tabs size="mini" v-model:active-key="tabValue" style="height: 100%">
-		    <a-tab-pane title="participant" key="participant">
+		    <a-tab-pane :title="$t('util.participant')" key="participant">
 			    <MeetingParticipant :organization-user-list="organizationUserList" :me="me" :meeting-client="meetingClient"></MeetingParticipant>
 		    </a-tab-pane>
 		    <a-tab-pane key="chat">
 			    <template #title>
 				    <a-badge dot :count="unReadCount" :offset="[6,0]">
-					    chat
+					    {{$t("controller.app.meeting.meetingProfile.chat")}}
 				    </a-badge>
 			    </template>
 			    <MeetingChat :meeting-client="meetingClient" @new-message="onNewMessage" ref="meetingChat"></MeetingChat>

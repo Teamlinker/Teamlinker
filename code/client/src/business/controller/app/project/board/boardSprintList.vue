@@ -2,14 +2,14 @@
 	<div>
 		<a-row style="width: 100%;">
 			<a-space>
-				Status:
+				{{$t("util.status")}}:
 				<a-select size="small" style="width: 100px;" v-model="status">
-					<a-option :value="-1">All</a-option>
-					<a-option :value="ECommon_Model_Board_Sprint_Status.NOTSTART">Not Start</a-option>
-					<a-option :value="ECommon_Model_Board_Sprint_Status.STARTING">Starting</a-option>
-					<a-option :value="ECommon_Model_Board_Sprint_Status.COMPLETED">Completed</a-option>
+					<a-option :value="-1">{{$t("util.all")}}</a-option>
+					<a-option :value="ECommon_Model_Board_Sprint_Status.NOTSTART">{{$t("controller.app.project.board.boardSprintList.notStart")}}</a-option>
+					<a-option :value="ECommon_Model_Board_Sprint_Status.STARTING">{{$t("controller.app.project.board.boardSprintList.starting")}}</a-option>
+					<a-option :value="ECommon_Model_Board_Sprint_Status.COMPLETED">{{$t("controller.app.project.board.boardSprintList.completed")}}</a-option>
 				</a-select>
-				<a-input-search size="small" style="width: 300px" v-model="keyword" @search="onSearch" search-button placeholder="please type sprint name"></a-input-search>
+				<a-input-search size="small" style="width: 300px" v-model="keyword" @search="onSearch" search-button :placeholder="$t('placeholder.typeSprintName')"></a-input-search>
 				<a-button size="small" type="primary" @click="onCreate">
 					Create
 				</a-button>
@@ -33,10 +33,10 @@
 							</a-button>
 							<template #content>
 								<a-doption size="mini" type="primary" status="success" @click="onStartSprint(item,$event)" v-if="item.status!==ECommon_Model_Board_Sprint_Status.STARTING">
-									Start
+									{{$t("util.start")}}
 								</a-doption>
 								<a-doption size="mini" type="outline" status="success" @click="onCompleteSprint(item,$event)" v-else>
-									Complete
+									{{$t("util.complete")}}
 								</a-doption>
 							</template>
 						</a-dropdown>
@@ -96,6 +96,7 @@ import {injectProjectInfo} from "@/business/common/util/symbol";
 import BoardSprintAddIssue from "@/business/controller/app/project/board/boardSprintAddIssue.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
 import FieldPriority from "@/business/common/component/field/fieldPriority.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	boardId:string
@@ -115,6 +116,7 @@ const loading=ref(false)
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
 const key=objInject.key
+const {t}=useI18n()
 const search=async (page:number)=>{
 	let res=await apiBoard.listSprint({
 		boardId:props.boardId,
@@ -193,7 +195,7 @@ const onEdit=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>
 
 const onDelete=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
 	event.stopPropagation()
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this sprint?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteSprint"))
 	if(ret) {
 		let res=await apiBoard.deleteSprint({
 			boardSprintId:item.id
@@ -206,7 +208,7 @@ const onDelete=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)
 
 const onStartSprint=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
 	event.stopPropagation()
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to start this sprint?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.startSprint"))
 	if(ret) {
 		let res=await apiBoard.startSprint({
 			boardSprintId:item.id
@@ -219,7 +221,7 @@ const onStartSprint=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseE
 
 const onCompleteSprint=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
 	event.stopPropagation()
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to complete this sprint?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.completeSprint"))
 	if(ret) {
 		let res=await apiBoard.completeSprint({
 			boardSprintId:item.id
@@ -231,7 +233,7 @@ const onCompleteSprint=async (item:DCSType<ICommon_Model_Board_Sprint>,event:Mou
 }
 
 const onRemoveIssue=async (issue:DCSType<ICommon_Route_Res_Board_Sprint_Issue_Item>,sprint:DCSType<ICommon_Model_Board_Sprint>)=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this issue from this sprint?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.removeIssueFromSprint"))
 	if(ret) {
 		let res=await apiBoard.removeProjectIssue({
 			projectIssueId:issue.id

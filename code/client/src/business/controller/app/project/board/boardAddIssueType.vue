@@ -1,6 +1,6 @@
 <template>
 	<a-form :model="form" ref="eleForm">
-		<a-form-item label="Issue Type" field="issueTypeIds" required>
+		<a-form-item :label="$t('util.issueType')" field="issueTypeIds" required>
 			<a-select v-model="form.issueTypeIds" multiple>
 				<a-option v-for="item in issueTypeList" :value="item.id" :label="item.name"></a-option>
 			</a-select>
@@ -15,6 +15,7 @@ import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	boardId:string,
@@ -22,6 +23,7 @@ const props=defineProps<{
 const form=reactive({
 	issueTypeIds:[]
 })
+const {t}=useI18n()
 const eleForm=ref(null)
 const issueTypeList=ref<DCSType<ICommon_Model_Issue_Type>[]>([])
 
@@ -41,7 +43,7 @@ onBeforeMount(()=>{
 onDialogOk(dialogFuncGenerator({
 	func:()=>{
 		if(issueTypeList.value.length==0) {
-			Message.error("issue type can not be empty!")
+			Message.error(t("tip.issueTypeCannotBeEmpty"))
 			return false
 		}
 		return Promise.all(issueTypeList.value.map(item=>{

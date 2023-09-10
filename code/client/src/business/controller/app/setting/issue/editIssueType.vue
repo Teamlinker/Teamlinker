@@ -1,9 +1,9 @@
 <template>
   <a-form ref="eleForm" :model="form" style="width: 80%">
-    <a-form-item field="name" label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
-    <a-form-item field="description" label="description">
+    <a-form-item field="description" :label="$t('util.description')">
       <a-textarea v-model="form.description" allow-clear></a-textarea>
     </a-form-item>
   </a-form>

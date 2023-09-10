@@ -4,17 +4,17 @@
 			<router-link :to="{name:'index'}" style="text-decoration: none;">
 				<h3 style="text-align: center;margin-bottom: 50px">Teamlinker</h3>
 			</router-link>
-			<a-form-item field="username" label="email" required>
-				<a-input v-model="form.username" placeholder="please enter email"></a-input>
+			<a-form-item field="username" :label="$t('util.email')" required>
+				<a-input v-model="form.username" :placeholder="$t('placeholder.typeEmail')"></a-input>
 			</a-form-item>
-			<a-form-item field="password" label="password" required>
-				<a-input v-model="form.password" type="password" placeholder="please enter password"></a-input>
+			<a-form-item field="password" :label="$t('util.password')" required>
+				<a-input v-model="form.password" type="password" :placeholder="$t('placeholder.typePassword')"></a-input>
 			</a-form-item>
-			<a-form-item field="passwordRepeat" label="password confirm" required>
-				<a-input v-model="form.passwordRepeat" type="password" placeholder="please enter password again"></a-input>
+			<a-form-item field="passwordRepeat" :label="$t('util.passwordConfirm')" required>
+				<a-input v-model="form.passwordRepeat" type="password" :placeholder="$t('placeholder.typePasswordAgain')"></a-input>
 			</a-form-item>
 			<a-form-item>
-				<a-button html-type="submit" type="primary">Register</a-button>
+				<a-button html-type="submit" type="primary">{{$t("util.register")}}</a-button>
 			</a-form-item>
 		</a-form>
 	</a-row>
@@ -28,6 +28,7 @@ import {apiUser} from "../../common/request/request";
 import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
 import md5 from "blueimp-md5";
+import {useI18n} from "vue-i18n";
 
 let form=reactive({
 	username:"",
@@ -35,16 +36,16 @@ let form=reactive({
 	passwordRepeat:""
 })
 const router=useRouter()
-
+const {t}=useI18n()
 const onSubmit=async ()=>{
 	if(!form.username) {
-		Message.error("please type username")
+		Message.error(t("tip.typeUsername"))
 		return
 	} else if(!form.password) {
-		Message.error("please type password")
+		Message.error(t("tip.typePassword"))
 		return
 	} else if(form.password!==form.passwordRepeat) {
-		Message.error("twice password not match")
+		Message.error(t("tip.passwordNotMatch"))
 		return
 	}
 	let res=await apiUser.register({

@@ -1,6 +1,6 @@
 <template>
   <a-form :model="form" ref="eleForm">
-    <a-form-item label="issue" field="issueId" required>
+    <a-form-item :label="$t('util.issue')" field="issueId" required>
       <a-select allow-clear allow-search @search="onSearch" v-model="form.issueId">
         <a-option v-for="item in issueList" :label="item.name" :value="item.id">
           {{projectKey+"-"+item.unique_id+" "+item.name}}
@@ -25,7 +25,7 @@ const eleForm=ref(null)
 const form=reactive({
   issueId:""
 })
-const issueList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item[]>>([])
+const issueList=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item>[]>([])
 const onSearch=async (keyword:string)=>{
   let res=await apiIssue.filter({
     name:keyword,

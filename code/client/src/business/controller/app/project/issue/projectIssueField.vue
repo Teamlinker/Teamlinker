@@ -1,35 +1,35 @@
 <template>
 	<div class="issueProfileDetail">
 		<a-collapse :default-active-key="['detail']">
-			<a-collapse-item key="detail" header="Detail">
+			<a-collapse-item key="detail" :header="$t('util.detail')">
 				<a-form layout="vertical" :model="{}">
-					<a-form-item label="Issue Type">
+					<a-form-item :label="$t('util.issueType')">
 						{{info.issueType.name}}
 					</a-form-item>
-					<a-form-item label="Assigner">
+					<a-form-item :label="$t('util.assigner')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.ASSIGNER" :value="info.assigner_id"></FieldEditBasic>
 					</a-form-item>
-					<a-form-item label="Reporter">
+					<a-form-item :label="$t('util.reporter')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.REPORTER" :value="info.reporter_id"></FieldEditBasic>
 					</a-form-item>
-					<a-form-item label="Priority">
+					<a-form-item :label="$t('util.priority')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.PRIORITY" :value="info.priority"></FieldEditBasic>
 					</a-form-item>
-					<a-form-item label="Module">
+					<a-form-item :label="$t('util.module')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.MODULE" :value="moduleList"></FieldEditBasic>
 					</a-form-item>
-					<a-form-item label="Label">
+					<a-form-item :label="$t('util.label')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.LABEL" :value="labelList"></FieldEditBasic>
 					</a-form-item>
-					<a-form-item label="Fix Versions">
+					<a-form-item :label="$t('util.fixVersions')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.FIXVERSIONS" :value="releaseList"></FieldEditBasic>
 					</a-form-item>
-					<a-form-item label="Sprint">
+					<a-form-item :label="$t('util.sprint')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.SPRINT" :value="sprintInfo"></FieldEditBasic>
 					</a-form-item>
 				</a-form>
 			</a-collapse-item>
-			<a-collapse-item key="more" header="More">
+			<a-collapse-item key="more" :header="$t('util.more')">
 				<a-form layout="vertical" :model="{}" v-if="fieldList.length>0">
 					<a-form-item v-for="item in fieldList" :label="item.nodeField.field.name" :key="item.issueFieldValue.id">
 						<FieldEdit :item="item"></FieldEdit>
@@ -38,7 +38,7 @@
 			</a-collapse-item>
 		</a-collapse>
 		<a-row style="margin-top: 10px;color: grey;font-size: 12px;line-height: 1.3;padding-left: 5px;margin-bottom: 10px">
-			Created {{moment(info.created_time).format('YYYY-MM-DD HH:mm:ss')}}
+			{{$t("util.created")}} {{moment(info.created_time).format('YYYY-MM-DD HH:mm:ss')}}
 		</a-row>
 	</div>
 </template>

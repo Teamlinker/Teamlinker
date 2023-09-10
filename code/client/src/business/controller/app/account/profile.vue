@@ -1,22 +1,22 @@
 <template>
   <a-form :model="form" style="width: 80%" @submitSuccess="onSubmit">
-    <a-form-item field="photo" label="avatar">
+    <a-form-item field="photo" :label="$t('util.avatar')">
       <Upload :default-uri="form.photo" types=".png,.jpg,.jpeg,.gif,.bmp,.svg" @upload="onUpload"></Upload>
     </a-form-item>
     <a-form-item label="username">
       {{form.username}}
     </a-form-item>
-    <a-form-item field="password" label="password">
+    <a-form-item field="password" :label="$t('util.password')">
       <a-input-password v-model="form.password"></a-input-password>
     </a-form-item>
-    <a-form-item field="repeatPassword" label="repeat password" v-if="form.password">
+    <a-form-item field="repeatPassword" :label="$t('util.repeatPassword')" v-if="form.password">
       <a-input-password v-model="form.repeatPassword"></a-input-password>
     </a-form-item>
-    <a-form-item field="sign" label="sign">
+    <a-form-item field="sign" :label="$t('util.sign')">
       <a-input v-model="form.sign"></a-input>
     </a-form-item>
     <a-form-item>
-      <a-button html-type="submit" type="primary">Save</a-button>
+      <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
     </a-form-item>
   </a-form>
 </template>
@@ -29,6 +29,7 @@ import {apiUser} from "../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {SessionStorage} from "../../../common/storage/session";
 import md5 from "blueimp-md5";
+import {useI18n} from "vue-i18n";
 
 const store=useDesktopStore()
 const form=reactive({
@@ -39,9 +40,10 @@ const form=reactive({
   repeatPassword:"",
   uploadUriId:""
 })
+const {t}=useI18n()
 const onSubmit=async ()=>{
   if(form.password && form.password!==form.repeatPassword) {
-    Message.error("password not match")
+    Message.error(t("tip.passwordNotMatch"))
     return;
   }
   let arrPromise=[]
@@ -63,7 +65,7 @@ const onSubmit=async ()=>{
   }
   let [res1,res2]=await Promise.all(arrPromise)
   if(res1?.code==0) {
-    Message.success("update success")
+    Message.success(t("tip.updateSuccess"))
     store.$refreshUser();
   } else {
     Message.error(res1.msg)

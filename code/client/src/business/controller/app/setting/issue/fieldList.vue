@@ -1,13 +1,13 @@
 <template>
   <div style="width: 100%;height: 100%;display: flex;flex-direction:column" ref="root" >
     <a-dropdown-button type="primary" size="small">
-      Add
+	    {{$t("util.add")}}
       <template #icon>
         <icon-down></icon-down>
       </template>
       <template #content>
-        <a-doption @click="onAdd">Add</a-doption>
-        <a-doption @click="onCopyFrom">Copy From</a-doption>
+        <a-doption @click="onAdd">{{$t("util.add")}}</a-doption>
+        <a-doption @click="onCopyFrom">{{$t("controller.app.setting.issue.filedList.copyFrom")}}</a-doption>
       </template>
     </a-dropdown-button>
     <a-layout style="flex:1 1 auto;border: 1px solid gainsboro;margin-top: 10px;height: 0">
@@ -40,26 +40,26 @@
       </a-layout-content>
       <a-layout-sider :resize-directions="['left']" :width="250">
         <a-form :model="form" layout="vertical" style="margin:10px 5px 0px 5px;width: 90%" v-if="form.type!==null && form.type!==undefined" @submitSuccess="onEdit" ref="eleForm">
-          <a-form-item label="type">
+          <a-form-item :label="$t('util.type')">
             {{Field_Types[form.type].name.toUpperCase()}}
           </a-form-item>
-          <a-form-item field="name" label="name" required>
+          <a-form-item field="name" :label="$t('util.name')" required>
             <a-input v-model="form.name"></a-input>
           </a-form-item>
-          <a-form-item field="description" label="description">
+          <a-form-item field="description" :label="$t('util.description')">
             <a-textarea v-model="form.description"></a-textarea>
           </a-form-item>
-          <a-form-item field="optional" label="optional">
+          <a-form-item field="optional" :label="$t('util.optional')">
             <a-switch v-model="form.optional" :checked-value="1" :unchecked-value="0"></a-switch>
           </a-form-item>
-          <a-form-item field="default_string_value" label="default" v-if="form.type===ECommon_Field_Type.TEXT || form.type===ECommon_Field_Type.MULTITEXT">
+          <a-form-item field="default_string_value" :label="$t('util.default')" v-if="form.type===ECommon_Field_Type.TEXT || form.type===ECommon_Field_Type.MULTITEXT">
             <a-input v-model="form.default_string_value" v-if="form.type==ECommon_Field_Type.TEXT"></a-input>
             <a-textarea v-model="form.default_string_value" v-if="form.type==ECommon_Field_Type.MULTITEXT" allow-clear></a-textarea>
           </a-form-item>
-          <a-form-item field="default_string_value" label="default" v-if="form.type===ECommon_Field_Type.SWITCH">
+          <a-form-item field="default_string_value" :label="$t('util.default')" v-if="form.type===ECommon_Field_Type.SWITCH">
             <a-switch v-model="form.default_number_value" :checked-value="1" :unchecked-value="0"></a-switch>
           </a-form-item>
-          <a-form-item field="label_type" label="label type" v-if="form.type===ECommon_Field_Type.LABEL || form.type===ECommon_Field_Type.MULTILABEL">
+          <a-form-item field="label_type" :label="$t('util.labelType')" v-if="form.type===ECommon_Field_Type.LABEL || form.type===ECommon_Field_Type.MULTILABEL">
             <a-select v-model="form.label_type">
               <a-option :value="ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER" label="USER"></a-option>
               <a-option :value="ECommon_Model_Workflow_Node_Field_Type_Label_Type.RELEASE" label="RELEASE"></a-option>
@@ -67,7 +67,7 @@
 	            <a-option :value="ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT" label="SPRINT"></a-option>
             </a-select>
           </a-form-item>
-          <a-form-item field="values" label="options" v-if="form.type==ECommon_Field_Type.SELECT || form.type==ECommon_Field_Type.MULTISELECT">
+          <a-form-item field="values" :label="$t('util.options')" v-if="form.type==ECommon_Field_Type.SELECT || form.type==ECommon_Field_Type.MULTISELECT">
             <a-checkbox-group v-model="valueSelected" :max="form.type==ECommon_Field_Type.SELECT?1:100" style="width: 100%">
               <a-table :data="form.values" :draggable="{ type: 'handle', width: 20 }" :columns="columnsValues" :show-header="false" style="width: 100%" :pagination="false" @change="(_data)=>{form.values=_data as any}">
                 <template #name="{record,rowIndex}">
@@ -91,8 +91,8 @@
           </a-form-item>
           <a-form-item>
             <a-space style="width: 100%;display: flex;justify-content: flex-end">
-              <a-button type="primary" html-type="submit">Save</a-button>
-              <a-button status="danger" html-type="button" @click="onDelete">Delete</a-button>
+              <a-button type="primary" html-type="submit">{{$t("util.save")}}</a-button>
+              <a-button status="danger" html-type="button" @click="onDelete">{{$t("util.delete")}}</a-button>
             </a-space>
           </a-form-item>
         </a-form>
@@ -113,6 +113,7 @@ import {
 import AddField from "./addField.vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import FieldCopyFrom from "./FieldCopyFrom.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   workflowNodeId:string
@@ -121,6 +122,7 @@ const eleForm=ref(null)
 const root=ref(null)
 const appContext=getCurrentInstance().appContext
 const data=ref<ICommon_Route_Res_Workflow_Node_Field[]>([])
+const {t}=useI18n()
 const columns = reactive([
   {
     title: "",
@@ -211,7 +213,7 @@ const onEdit=async ()=>{
         return;
       }
     }
-    Message.success("save success")
+    Message.success(t("tip.saveSuccess"))
     for(let obj of data.value) {
       if(obj.field.id===resData.id) {
         Object.assign(obj.field,resData);
@@ -260,13 +262,13 @@ const onAddValue=async ()=>{
   })
 }
 const onDelete=async ()=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this field?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteField"))
   if(ret) {
     let res=await apiField.deleteWorkflowNodeField({
       workflowNodeFieldTypeId:form.id
     })
     if(res?.code==0) {
-      Message.success("delete success")
+      Message.success(t("tip.deleteSuccess"))
       form.id=""
       form.type=null
       requestList();

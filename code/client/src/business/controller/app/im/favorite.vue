@@ -43,11 +43,13 @@ import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {SessionStorage} from "../../../common/storage/session";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../common/component/dialog/dialog";
+import {useI18n} from "vue-i18n";
 
 const appContext=getCurrentInstance().appContext
 const contentRef = ref<HTMLDivElement>()
 const messageList = ref<IClient_Chat_Message_Item[]>([])
 const socket=SocketIOClient.get(ECommon_Socket_Type.IM)
+const {t}=useI18n()
 let myOrganizationUserId=SessionStorage.get("organizationUserId")
 const onWheel = (event: WheelEvent) => {
 	let ele = event.currentTarget as HTMLDivElement
@@ -88,10 +90,10 @@ const getMessageList=async (date?:string)=>{
 }
 
 const onFavoriteDelete=async (item:IClient_Chat_Message_Item)=>{
-	let ret=await Dialog.confirm(document.getElementById("imWindow"),appContext,"Do you want delete this favorite?")
+	let ret=await Dialog.confirm(document.getElementById("imWindow"),appContext,t("tip.deleteFavorite"))
 	if(ret) {
 		socket.getSocket().emit("im_favorite_message_delete",item.messageId)
-		Message.info("delete success")
+		Message.info(t("tip.deleteSuccess"))
 		messageList.value.splice(messageList.value.findIndex(obj=>{
 			if(obj.messageId===item.messageId) {
 				return true

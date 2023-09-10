@@ -8,14 +8,16 @@ import Team from "../../app/team/team.vue";
 import TeamProfile from "../../app/team/teamProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
+import i18n from "@/business/common/i18n/i18n";
 
-export const iconTeam=new Icon("Team",iconGroupMap["team"])
+const {t}=i18n.global
+export const iconTeam=new Icon(t("util.team"),iconGroupMap["team"])
 iconTeam.addEventListener("dbClick", item => {
     if(!SessionStorage.get("organizationId")) {
-        Message.error("you must choose organization")
+        Message.error(t("tip.switchToSpecificOrganization"))
         return;
     }
-    const win=new Window("team",ETeamOS_Window_Type.TAB, "team",true,[
+    const win=new Window(t("util.team"),ETeamOS_Window_Type.TAB, "team",true,[
         {
             id:v4(),
             meta:{
@@ -27,10 +29,10 @@ iconTeam.addEventListener("dbClick", item => {
             },
             default:{
                 name:"team",
-                title: "team"
+                title: t("util.team")
             }
         }
-    ],"Team");
+    ],t("util.team"));
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -43,14 +45,14 @@ iconTeam.addEventListener("dbClick", item => {
             },
             default:{
                 name:"team",
-                title: "team"
+                title: t("util.team")
             }
         }
     })
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_TEAM_PROFILE,teamId => {
-    const win=new Window("team",ETeamOS_Window_Type.TAB, "team",true,[
+    const win=new Window(t("util.team"),ETeamOS_Window_Type.TAB, "team",true,[
         {
             id:v4(),
             meta:{
@@ -62,13 +64,13 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_TEAM_PROFILE,teamId => {
             },
             default:{
                 name:"profile",
-                title: "profile",
+                title:t("util.profile"),
                 props:{
                     teamId:teamId
                 }
             }
         }
-    ],"Team");
+    ],t("util.team"));
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -81,7 +83,7 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_TEAM_PROFILE,teamId => {
             },
             default:{
                 name:"team",
-                title: "team"
+                title: t("util.team")
             }
         }
     })

@@ -142,8 +142,18 @@ export class WindowManager extends Base{
         }
         return arr;
     }
-    clear() {
-        this.windowList.splice(0,this.windowList.length)
+    clear(exceptGroups?:string[]) {
+        if(exceptGroups?.length>0) {
+            for(let i=0;i<this.windowList.length;i++) {
+                let win=this.windowList[i]
+                if(!exceptGroups.includes(win.group)) {
+                    this.windowList.splice(i,1)
+                    i--;
+                }
+            }
+        } else {
+            this.windowList.splice(0,this.windowList.length)
+        }
     }
 }
 

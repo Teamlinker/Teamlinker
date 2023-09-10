@@ -1,6 +1,6 @@
 <template>
   <a-form :model="form" ref="eleForm" style="width: 80%" auto-label-width>
-    <a-form-item field="projectId" label="project" required>
+    <a-form-item field="projectId" :label="$t('util.project')" required>
       <a-select @search="onSearch" v-model="form.projectId" allow-search @change="onChange">
         <a-option v-for="item in projectList" :value="item.id" :label="item.name"></a-option>
       </a-select>

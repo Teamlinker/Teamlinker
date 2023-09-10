@@ -15,22 +15,22 @@
 							<template #split>
 								|
 							</template>
-							<a-statistic title="Project Total" :value="staticInfo?.projectCount" show-group-separator :value-style="{
+							<a-statistic :title="$t('controller.app.setting.home.settingHome.projectTotal')" :value="staticInfo?.projectCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
-							<a-statistic title="Issue Total" :value="staticInfo?.issueCount" show-group-separator :value-style="{
+							<a-statistic :title="$t('controller.app.setting.home.settingHome.issueTotal')" :value="staticInfo?.issueCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
-							<a-statistic title="Wiki Space Total" :value="staticInfo?.wikiSpaceCount" show-group-separator :value-style="{
+							<a-statistic :title="$t('controller.app.setting.home.settingHome.wikiSpaceTotal')" :value="staticInfo?.wikiSpaceCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
-							<a-statistic title="Wiki Item Total" :value="staticInfo?.wikiItemCount" show-group-separator :value-style="{
+							<a-statistic :title="$t('controller.app.setting.home.settingHome.wikiItemTotal')" :value="staticInfo?.wikiItemCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
-							<a-statistic title="User Total" :value="staticInfo?.userCount" show-group-separator :value-style="{
+							<a-statistic :title="$t('controller.app.setting.home.settingHome.userTotal')" :value="staticInfo?.userCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
-							<a-statistic title="Team Total" :value="staticInfo?.teamCount" show-group-separator :value-style="{
+							<a-statistic :title="$t('controller.app.setting.home.settingHome.teamTotal')" :value="staticInfo?.teamCount" show-group-separator :value-style="{
 								color:'blue'
 							}"/>
 						</a-space>
@@ -74,6 +74,7 @@ import {
 } from 'echarts/components';
 import {LabelLayout, UniversalTransition} from 'echarts/features';
 import {CanvasRenderer} from 'echarts/renderers';
+import {useI18n} from "vue-i18n";
 
 echarts.use([
 	TitleComponent,
@@ -89,30 +90,31 @@ echarts.use([
 
 const projectWithIssueEle=ref(),projectWithUnDoneIssueEle=ref(),wikiSpaceWithWikiItemEle=ref(),teamWithUserEle=ref()
 let projectWithIssueChart:EChartsType,projectWithUnDoneIssueChart:EChartsType,wikiSpaceWithWikiItemChart:EChartsType,teamWithUserChart:EChartsType
+const {t}=useI18n()
 const data = [
 	{
 		id: "statics",
-		name: "Statics",
+		name: t("controller.app.setting.home.settingHome.statics"),
 		data: null
 	},
 	{
 		id: "projectWithIssueList",
-		name: "Projects With Issues Chart",
+		name: t("controller.app.setting.home.settingHome.projectWithIssueList"),
 		data: null
 	},
 	{
 		id: "projectWithUnDoneIssueList",
-		name: "Project With UnResolved Issues Chart",
+		name: t("controller.app.setting.home.settingHome.projectWithUnDoneIssueList"),
 		data: null
 	},
 	{
 		id: "wikiSpaceWithWikiItemList",
-		name: "Wiki Space Chart",
+		name: t("controller.app.setting.home.settingHome.wikiSpaceWithWikiItemList"),
 		data: null
 	},
 	{
 		id: "teamWithUserList",
-		name: "Team Chart",
+		name: t("controller.app.setting.home.settingHome.teamWithUserList"),
 		data: null
 	},
 ]
@@ -128,6 +130,9 @@ const getInfo=async ()=>{
 const initCharts=()=>{
 	projectWithIssueChart=echarts.init(projectWithIssueEle.value)
 	projectWithIssueChart.setOption({
+		grid:{
+			left:60
+		},
 		dataset:{
 			source:[
 				["count","name"],
@@ -143,7 +148,12 @@ const initCharts=()=>{
 		},
 		yAxis: {
 			name:"Project",
-			type: 'category'
+			type: 'category',
+			axisLabel:{
+				show:true,
+				overflow:"breakAll",
+				width:40
+			}
 		},
 		series: [
 			{
@@ -158,6 +168,9 @@ const initCharts=()=>{
 	})
 	projectWithUnDoneIssueChart=echarts.init(projectWithUnDoneIssueEle.value)
 	projectWithUnDoneIssueChart.setOption({
+		grid:{
+			left:60
+		},
 		dataset:{
 			source:[
 				["count","name"],
@@ -173,7 +186,12 @@ const initCharts=()=>{
 		},
 		yAxis: {
 			name:"Project",
-			type: 'category'
+			type: 'category',
+			axisLabel:{
+				show:true,
+				overflow:"breakAll",
+				width:40
+			}
 		},
 		series: [
 			{
@@ -188,6 +206,9 @@ const initCharts=()=>{
 	})
 	wikiSpaceWithWikiItemChart=echarts.init(wikiSpaceWithWikiItemEle.value)
 	wikiSpaceWithWikiItemChart.setOption({
+		grid:{
+			left:60
+		},
 		dataset:{
 			source:[
 				["count","name"],
@@ -203,7 +224,12 @@ const initCharts=()=>{
 		},
 		yAxis: {
 			name:"Wiki Space",
-			type: 'category'
+			type: 'category',
+			axisLabel:{
+				show:true,
+				overflow:"breakAll",
+				width:40
+			}
 		},
 		series: [
 			{
@@ -218,6 +244,9 @@ const initCharts=()=>{
 	})
 	teamWithUserChart=echarts.init(teamWithUserEle.value)
 	teamWithUserChart.setOption({
+		grid:{
+			left:60
+		},
 		dataset:{
 			source:[
 				["count","name"],
@@ -233,7 +262,12 @@ const initCharts=()=>{
 		},
 		yAxis: {
 			name:"Team",
-			type: 'category'
+			type: 'category',
+			axisLabel:{
+				show:true,
+				overflow:"breakAll",
+				width:50
+			}
 		},
 		series: [
 			{

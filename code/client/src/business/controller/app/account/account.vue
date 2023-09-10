@@ -2,8 +2,8 @@
   <a-layout style="height: 100%">
     <a-layout-sider :resize-directions="['right']">
       <a-menu style="width: 100%" @menu-item-click="onSubMenuClick" :default-selected-keys="['profile']">
-        <a-menu-item key="profile">Profile</a-menu-item>
-        <a-menu-item key="accountSetting">Account Setting</a-menu-item>
+        <a-menu-item key="profile">{{$t("controller.app.account.account.profile")}}</a-menu-item>
+        <a-menu-item key="accountSetting">{{$t("controller.app.account.account.accountSetting")}}</a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout-content style="flex-direction: column;display: flex;padding: 10px">

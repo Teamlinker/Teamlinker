@@ -50,6 +50,15 @@ export const useDesktopStore=defineStore("desktop",{
             objSocketNotification.getSocket().on("notification_new",notificationId => {
                 eventBus.emit(EClient_EVENTBUS_TYPE.REFRESH_NOTIFICATION_UNREAD)
             })
+            if(this.heartbeatInterval) {
+                clearInterval(this.heartbeatInterval)
+            }
+            this.heartbeatInterval=setInterval(async ()=>{
+                let ret=await objSocketNotification.getSocket().emitWithAck("notification_heartbeat",SessionStorage.get("userToken"))
+                if(!ret) {
+                    eventBus.emit(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED)
+                }
+            },1000*60)
         },
         async getOrganizationList() {
             let ret=await apiOrganization.list()
@@ -115,12 +124,6 @@ export const useDesktopStore=defineStore("desktop",{
             SocketIOClient.getSocket(ECommon_Socket_Type.IM)?.close()
             let objSocketIM=SocketIOClient.create(ECommon_Socket_Type.IM)
             handleIMEvent(objSocketIM.getSocket(),this.status)
-            if(this.heartbeatInterval) {
-                clearInterval(this.heartbeatInterval)
-            }
-            this.heartbeatInterval=setInterval(()=>{
-                objSocketIM.getSocket().emit("im_heartbeat")
-            },1000*60*20)
             SocketIOClient.getSocket(ECommon_Socket_Type.MEETING)?.close()
             let objSocketMeeting=SocketIOClient.create(ECommon_Socket_Type.MEETING)
             handleMeetingEvent(objSocketMeeting.getSocket())
@@ -138,9 +141,8 @@ export const useDesktopStore=defineStore("desktop",{
                 return true
             }
         },
-        async logout() {
-            let res=await apiUser.logout()
-            if(res?.code==0) {
+        async logout(isDirect?:boolean) {
+            if(isDirect || (await apiUser.logout())?.code==0) {
                 SessionStorage.clear();
                 SocketIOClient.clear()
                 clearInterval(this.heartbeatInterval)

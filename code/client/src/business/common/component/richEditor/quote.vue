@@ -1,7 +1,7 @@
 <template>
 	<div style="width: 100%;height: 100%;padding: 5px;box-sizing: border-box" ref="rootEle" @mousedown="onMouseDown">
 		<div style="height: 30px;border-bottom: 1px lightgray solid">
-			<input v-model="keyword" placeholder="type name" style="width: 100%;box-sizing: border-box" @input="onChange">
+			<input v-model="keyword" :placeholder="$t('placeholder.typeName')" style="width: 100%;box-sizing: border-box" @input="onChange">
 		</div>
 		<div class="hover" v-for="item in list" style="height: 40px;display: flex;align-items: center" @click="onClick(item)">
 			<img v-if="item.photo" style="width: 30px;height: 30px;border-radius: 15px" :src="item.photo">&nbsp;

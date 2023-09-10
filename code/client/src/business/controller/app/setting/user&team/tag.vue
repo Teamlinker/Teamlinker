@@ -1,12 +1,12 @@
 <template>
   <div ref="root">
-    <a-button @click="onAdd" type="primary" style="margin-bottom: 10px">Add</a-button>
+    <a-button @click="onAdd" type="primary" style="margin-bottom: 10px">{{$t("util.add")}}</a-button>
     <a-table :columns="columns" :data="data" :pagination="false">
       <template #operation="{record}">
         <template v-if="!record.reserved">
           <a-space wrap>
-            <a-button type="primary" size="small" @click="onEdit(record)">manage</a-button>
-            <a-button status="danger" size="small" @click="onDelete(record)">delete</a-button>
+            <a-button type="primary" size="small" @click="onEdit(record)">{{$t("util.manage")}}</a-button>
+            <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.delete")}}</a-button>
           </a-space>
         </template>
       </template>
@@ -21,18 +21,20 @@ import {apiOrganization} from "../../../../common/request/request";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditTag from "./editTag.vue";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     dataIndex:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     dataIndex:"description"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -63,13 +65,13 @@ const onEdit=async (item:ICommon_Model_Member_Tag)=>{
   }
 }
 const onDelete=async (item:ICommon_Model_Member_Tag)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this tag?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteTag"))
   if(ret) {
     let res=await apiOrganization.removeTag({
       memberTagId:item.id
     })
     if(res?.code==0) {
-      Message.success("delete success")
+      Message.success(t("tip.deleteSuccess"))
       search()
     } else {
       Message.error(res.msg);

@@ -190,6 +190,7 @@ import {ICommon_Model_Organization} from "../../../../../common/model/organizati
 import UserAvatar from "./userAvatar.vue";
 import {Dialog} from "./dialog/dialog";
 import {getCurrentInstance} from "vue";
+import {useI18n} from "vue-i18n";
 
 type ISSUE={
 	issue:DCSType<ICommon_Model_Project_Issue>,
@@ -199,6 +200,7 @@ const props=defineProps<{
 	obj:DCSType<ICommon_Route_Res_Notification_Item>
 }>()
 const appContext=getCurrentInstance().appContext
+const {t}=useI18n()
 const onTeam=()=>{
 	const myOrganizationId=SessionStorage.get("organizationId")
 	if(myOrganizationId===props.obj.organization_id) {
@@ -248,7 +250,7 @@ const onCalendarEvent=()=>{
 }
 
 const onAcceptOrganizationInvitation=async ()=>{
-	let ret=await Dialog.confirm(document.body,appContext,"Do you want accept this invitation?")
+	let ret=await Dialog.confirm(document.body,appContext,t("tip.acceptInvitation"))
 	if(ret) {
 		let res=await apiNotification.setStatus({
 			notificationId:props.obj.id,
@@ -256,7 +258,7 @@ const onAcceptOrganizationInvitation=async ()=>{
 		})
 		if(res?.code==0) {
 			props.obj.status=ECommon_Model_Notification_Status.RESOLVED
-			Message.success("Accepted")
+			Message.success(t("util.accepted"))
 			setTimeout(()=>{
 				eventBus.emit(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST)
 			},1000)
@@ -267,7 +269,7 @@ const onAcceptOrganizationInvitation=async ()=>{
 }
 
 const onRejectOrganizationInvitation=async()=>{
-	let ret=await Dialog.confirm(document.body,appContext,"Do you want reject this invitation?")
+	let ret=await Dialog.confirm(document.body,appContext,t("tip.rejectInvitation"))
 	if(ret) {
 		let res=await apiNotification.setStatus({
 			notificationId:props.obj.id,
@@ -275,7 +277,7 @@ const onRejectOrganizationInvitation=async()=>{
 		})
 		if(res?.code==0) {
 			props.obj.status=ECommon_Model_Notification_Status.REJECTED
-			Message.success("Rejected")
+			Message.success(t("util.rejected"))
 		} else {
 			Message.error(res.msg)
 		}

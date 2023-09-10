@@ -1,12 +1,12 @@
 <template>
 	<a-form :model="form" style="width: 80%;margin-top: 20px" ref="formEle">
-		<a-form-item field="name" label="name" required>
+		<a-form-item field="name" :label="$t('util.name')" required>
 			<a-input v-model="form.name"></a-input>
 		</a-form-item>
-		<a-form-item field="description" label="description">
+		<a-form-item field="description" :label="$t('util.description')">
 			<a-textarea v-model="form.description" allow-clear></a-textarea>
 		</a-form-item>
-		<a-form-item field="photo" label="logo">
+		<a-form-item field="photo" :label="$t('util.logo')">
 			<Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="form.photo" @upload="onUpload"></Upload>
 		</a-form-item>
 	</a-form>

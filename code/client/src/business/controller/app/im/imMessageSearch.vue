@@ -1,13 +1,13 @@
 <template>
 	<div style="height: 100%">
 		<a-row style="width: 100%">
-			<a-input-search placeholder="type your message and at least two characters" v-model="keyword" @search="onSearch" search-button></a-input-search>
+			<a-input-search :placeholder="$t('placeholder.imMessageSearch')" v-model="keyword" @search="onSearch" search-button></a-input-search>
 		</a-row>
 		<a-divider></a-divider>
 		<a-row style="width: 100%;">
 			<a-spin :loading="loading" style="width: 100%;">
 				<a-collapse style="width: 100%" v-model:active-key="activeKeys">
-					<a-collapse-item header="User" key="user">
+					<a-collapse-item :header="$t('util.user')" key="user">
 						<a-collapse style="width: 100%" v-if="userInfoList.length>0" :bordered="false">
 							<a-collapse-item v-for="(value,key) in messageList.users" :key="key">
 								<template #header>
@@ -42,7 +42,7 @@
 						</a-collapse>
 						<a-empty v-else></a-empty>
 					</a-collapse-item>
-					<a-collapse-item header="Team" key="team">
+					<a-collapse-item :header="$t('util.team')" key="team">
 						<a-collapse style="width: 100%" v-if="teamInfoList.length>0" :bordered="false">
 							<a-collapse-item v-for="(value,key) in messageList.teams" :key="key">
 								<template #header>

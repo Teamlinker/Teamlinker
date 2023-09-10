@@ -3,20 +3,20 @@
 		<a-row style="width: 100%;font-size: 30px;align-items: center;justify-content: space-between;padding: 0px 10px;box-sizing: border-box;height: 35px">
 			{{info?.name}}
 			<a-button type="primary" size="small" @click="onEdit">
-				Edit
+				{{$t("util.edit")}}
 			</a-button>
 		</a-row>
 		<a-row style="width: 100%;margin-top: 20px;padding:0px 10px;box-sizing: border-box;height: 20px">
 			{{info?.description}}
 		</a-row>
 		<a-tabs style="width: 100%;margin-top: 20px;height: calc(100% - 95px);" @scroll="$event.currentTarget.scrollTop=0" :default-active-key="boardSprintId?'kanban':'sprint'">
-			<a-tab-pane key="sprint" title="Sprint">
+			<a-tab-pane key="sprint" :title="$t('util.sprint')">
 				<BoardSprintList :board-id="boardId"></BoardSprintList>
 			</a-tab-pane>
-			<a-tab-pane key="kanban" title="Kanban">
+			<a-tab-pane key="kanban" :title="$t('util.kanban')">
 				<BoardKanban :board-id="boardId" :board-sprint-id="boardSprintId"></BoardKanban>
 			</a-tab-pane>
-			<a-tab-pane key="config" title="Config">
+			<a-tab-pane key="config" :title="$t('util.config')">
 				<BoardConfig :board-id="boardId"></BoardConfig>
 			</a-tab-pane>
 		</a-tabs>

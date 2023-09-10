@@ -1,10 +1,10 @@
 <template>
 	<a-form :model="form" ref="eleForm">
-		<a-form-item label="name" field="name" required>
+		<a-form-item :label="$t('util.name')" field="name" required>
 			<a-input v-model="form.name"></a-input>
 		</a-form-item>
-		<a-form-item label="dateRange" field="dateRange" required>
-			<a-range-picker v-model="form.dateRange" :placeholder="['Start Date','End Date']"></a-range-picker>
+		<a-form-item :label="$t('util.dateRange')" field="dateRange" required>
+			<a-range-picker v-model="form.dateRange" :placeholder="[$t('util.startDate'),$t('util.endDate')]"></a-range-picker>
 		</a-form-item>
 	</a-form>
 </template>

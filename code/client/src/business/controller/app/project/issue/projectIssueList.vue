@@ -2,55 +2,55 @@
   <div>
     <a-row>
       <a-space wrap>
-        Filter:
-        <a-input-search v-model="keyword" placeholder="please type name or unique id" style="width: 250px" @search="onSearchIssue"></a-input-search>
+        {{$t("util.filter")}}:
+        <a-input-search v-model="keyword" :placeholder="$t('placeholder.typeNameOrUniqueId')" style="width: 250px" @search="onSearchIssue"></a-input-search>
         <a-select v-model="issueType">
           <template #label="{data}">
-            <span>Issue Type:{{data?.label}}</span>
+            <span>{{$t("util.issueType")}}:{{data?.label}}</span>
           </template>
-          <a-option value="all" label="All"></a-option>
+          <a-option value="all" :label="$t('util.all')"></a-option>
           <a-option v-for="item in issueTypeList" :label="item.name" :value="item.id"></a-option>
         </a-select>
         <a-select style="width: 160px" v-model="priority">
           <template #label="{data}">
-            <span>Priority:{{data?.label}}</span>
+            <span>{{$t("util.priority")}}:{{data?.label}}</span>
           </template>
-          <a-option :value="-1" label="All"></a-option>
-          <a-option :value="ECommon_Model_Project_Issue_Priority.LOW" label="low"></a-option>
-          <a-option :value="ECommon_Model_Project_Issue_Priority.MEDIUM" label="medium"></a-option>
-          <a-option :value="ECommon_Model_Project_Issue_Priority.HIGH" label="high"></a-option>
-          <a-option :value="ECommon_Model_Project_Issue_Priority.URGENT" label="urgent"></a-option>
+          <a-option :value="-1" :label="$t('util.all')"></a-option>
+          <a-option :value="ECommon_Model_Project_Issue_Priority.LOW">{{$t('util.low')}}</a-option>
+          <a-option :value="ECommon_Model_Project_Issue_Priority.MEDIUM">{{$t('util.medium')}}</a-option>
+          <a-option :value="ECommon_Model_Project_Issue_Priority.HIGH">{{$t('util.high')}}</a-option>
+          <a-option :value="ECommon_Model_Project_Issue_Priority.URGENT">{{$t('util.urgent')}}</a-option>
         </a-select>
         <a-select style="width: 170px" v-model="status">
           <template #label="{data}">
-            <span>Status:{{data?.label}}</span>
+            <span>{{$t("util.status")}}:{{data?.label}}</span>
           </template>
-          <a-option :value="-1" label="All"></a-option>
-          <a-option :value="ECommon_Model_Workflow_Node_Status.NOTSTART" label="not start"></a-option>
-          <a-option :value="ECommon_Model_Workflow_Node_Status.INPROGRESS" label="in progress"></a-option>
-          <a-option :value="ECommon_Model_Workflow_Node_Status.DONE" label="done"></a-option>
+          <a-option :value="-1" :label="$t('util.all')"></a-option>
+          <a-option :value="ECommon_Model_Workflow_Node_Status.NOTSTART">{{$t('util.notStart')}}</a-option>
+          <a-option :value="ECommon_Model_Workflow_Node_Status.INPROGRESS">{{$t('util.inProgress')}}</a-option>
+          <a-option :value="ECommon_Model_Workflow_Node_Status.DONE">{{$t('util.done')}}</a-option>
         </a-select>
-        <a-cascader v-model="module" :field-names="fields" :options="moduleList" placeholder="please select" :format-label="format" check-strictly></a-cascader>
-        Label:
-        <a-select v-model="label" @search="onSearchLabel" allow-search placeholder="please type label">
-          <a-option label="All" value="all"></a-option>
+        <a-cascader v-model="module" :field-names="fields" :options="moduleList" :placeholder="$t('placeholder.pleaseSelect')" :format-label="format" check-strictly></a-cascader>
+	      {{$t("util.label")}}:
+        <a-select v-model="label" @search="onSearchLabel" allow-search :placeholder="$t('placeholder.typeLabel')">
+          <a-option :label="$t('util.all')" value="all"></a-option>
           <a-option v-for="item in labelList" :label="item.name" :value="item.id"></a-option>
         </a-select>
-        Assigner:
-        <a-select v-model="assignerId" @search="onSearchAssigner" allow-search placeholder="please type assigner">
-          <a-option label="All" value="all"></a-option>
+	      {{$t("util.assigner")}}:
+        <a-select v-model="assignerId" @search="onSearchAssigner" allow-search :placeholder="$t('placeholder.typeAssigner')">
+          <a-option :label="$t('util.all')" value="all"></a-option>
           <a-option v-for="item in assignerList" :label="item.organizationUser.nickname" :value="item.organizationUser.id"></a-option>
         </a-select>
-        Reporter:
-        <a-select v-model="reporterId" @search="onSearchReporter" allow-search placeholder="please type reporter">
-          <a-option label="All" value="all"></a-option>
+	      {{$t("util.reporter")}}:
+        <a-select v-model="reporterId" @search="onSearchReporter" allow-search :placeholder="$t('placeholder.typeReporter')">
+          <a-option :label="$t('util.all')" value="all"></a-option>
           <a-option v-for="item in reporterList" :label="item.organizationUser.nickname" :value="item.organizationUser.id"></a-option>
         </a-select>
-        <a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">Create</a-button>
+        <a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">{{$t("util.create")}}</a-button>
       </a-space>
     </a-row>
     <a-divider></a-divider>
-	  <span style="font-size: small;color: gray">If you wanna open in a new tab,hold command(Mac) or control(Win) Key,click the link below</span>
+	  <span style="font-size: small;color: gray">{{$t("controller.app.project.issue.projectIssueList.remark")}}</span>
     <a-table style="margin-top: 10px" :columns="columns" :data="issueList" :pagination="pagination" @pageChange="onPageChange">
       <template #type="{record}">
         {{record.issueType.name}}
@@ -73,9 +73,9 @@
         <FieldPriority :priority="record.priority"></FieldPriority>
       </template>
       <template #status="{record}">
-        <a-tag color="gray" v-if="record.status===ECommon_Model_Workflow_Node_Status.NOTSTART">Not Start</a-tag>
-        <a-tag color="blue" v-else-if="record.status===ECommon_Model_Workflow_Node_Status.INPROGRESS">InProgress</a-tag>
-        <a-tag color="green" v-else-if="record.status===ECommon_Model_Workflow_Node_Status.DONE">Done</a-tag>
+        <a-tag color="gray" v-if="record.status===ECommon_Model_Workflow_Node_Status.NOTSTART">{{$t("util.notStart")}}</a-tag>
+        <a-tag color="blue" v-else-if="record.status===ECommon_Model_Workflow_Node_Status.INPROGRESS">{{$t("util.inProgress")}}</a-tag>
+        <a-tag color="green" v-else-if="record.status===ECommon_Model_Workflow_Node_Status.DONE">{{$t("util.done")}}</a-tag>
       </template>
     </a-table>
   </div>
@@ -108,11 +108,13 @@ import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_
 import ProjectIssueProfile from "./projectIssueProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {SessionStorage} from "../../../../common/storage/session";
+import {useI18n} from "vue-i18n";
 
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
 const permission=objInject.permission
 const key=objInject.key
+const {t}=useI18n()
 const fields={
   label:"name",
   value:"id",
@@ -120,7 +122,7 @@ const fields={
 }
 const columns=[
   {
-    title:"Type",
+    title:t("util.type"),
     slotName:"type"
   },
   {
@@ -128,7 +130,7 @@ const columns=[
     slotName: "key"
   },
   {
-    title:"Name",
+    title:t("util.name"),
     slotName: "name"
   },
   {
@@ -140,11 +142,11 @@ const columns=[
     slotName: "reporter"
   },
   {
-    title:"Priority",
+    title:t("util.priority"),
     slotName: "priority"
   },
   {
-    title:"Status",
+    title:t("util.status"),
     slotName: "status"
   }
 ]

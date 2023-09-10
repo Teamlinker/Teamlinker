@@ -6,7 +6,7 @@
 				<a-row style="width: 100%;align-items: center">
 					{{info?.name}}&nbsp;&nbsp;
 					<span :style="{color: info?.status!==ECommon_Model_Board_Sprint_Status.COMPLETED?'dodgerblue':'rgb(0,180,42)'}">
-						{{info?.status===ECommon_Model_Board_Sprint_Status.NOTSTART?"Not Start":info?.status===ECommon_Model_Board_Sprint_Status.STARTING?"Starting":"Completed"}}
+						{{info?.status===ECommon_Model_Board_Sprint_Status.NOTSTART?$t("controller.app.project.board.boardSprintList.notStart"):info?.status===ECommon_Model_Board_Sprint_Status.STARTING?$t("controller.app.project.board.boardSprintList.starting"):$t("controller.app.project.board.boardSprintList.completed")}}
 					</span>
 				</a-row>
 				<a-row style="margin-top: 15px;">
@@ -21,13 +21,13 @@
 				<a-row style="width: 100%;margin-top: 15px;justify-content: space-between;align-items: center">
 					<a-space style="color: dodgerblue">
 						<span>
-							Swim Lanes:{{info?.swimLanes.length}}
+							{{$t("controller.app.project.board.boardSprintList.swimLanes")}}:{{info?.swimLanes.length}}
 						</span>
 						<span>
-							Issues:{{info?.issues.length}}
+							{{$t("util.issues")}}:{{info?.issues.length}}
 						</span>
 					</a-space>
-					<a-button type="outline" size="mini" style="margin-left: 20px" @click="onProfile">Profile</a-button>
+					<a-button type="outline" size="mini" style="margin-left: 20px" @click="onProfile">{{$t("util.profile")}}</a-button>
 				</a-row>
 			</a-row>
 		</template>

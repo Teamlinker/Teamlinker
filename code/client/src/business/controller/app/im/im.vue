@@ -2,8 +2,8 @@
   <a-layout style="height: 100%" id="imWindow">
     <a-layout-sider :resize-directions="['right']">
       <div style="width: 100%;height: 100%;overflow-y: auto;padding: 5px;box-sizing: border-box">
-        <a-select style="width: 100%" placeholder="type user or team" allow-search allow-clear @change="onChange" @search="onSearch">
-          <a-optgroup label="Team" v-if="selectList && selectList.teams && selectList.teams.length>0">
+        <a-select style="width: 100%" :placeholder="$t('placeholder.typeUserOrTeam')" allow-search allow-clear @change="onChange" @search="onSearch">
+          <a-optgroup :label="$t('util.team')" v-if="selectList && selectList.teams && selectList.teams.length>0">
             <a-option v-for="item in selectList.teams" :value="item.id">
               <a-row style="align-items: center">
                 <a-avatar :image-url="item.photo" :size="24"></a-avatar>&nbsp;
@@ -11,7 +11,7 @@
               </a-row>
             </a-option>
           </a-optgroup>
-          <a-optgroup label="User" v-if="selectList && selectList.users && selectList.users.length>0">
+          <a-optgroup :label="$t('util.user')" v-if="selectList && selectList.users && selectList.users.length>0">
             <a-option v-for="item in selectList.users" :value="item.id">
               <a-row style="align-items: center">
                 <a-avatar :image-url="item.photo" :size="24"></a-avatar>&nbsp;
@@ -25,16 +25,16 @@
 			      <template #icon>
 				      <icon-star></icon-star>
 			      </template>
-			      Favorites
+			      {{$t("controller.app.im.im.favorites")}}
 		      </a-menu-item>
 		      <a-menu-item key="messages">
 			      <template #icon>
 				      <icon-search></icon-search>
 			      </template>
-			      Messages
+			      {{$t("controller.app.im.im.messages")}}
 		      </a-menu-item>
 	      </a-menu>
-        <a-divider>Recent</a-divider>
+        <a-divider>{{$t("controller.app.im.im.recent")}}</a-divider>
         <RecentList ref="recentListRef" @select="onSelectChat" :init-data="id?{id,type:chatType}:undefined"></RecentList>
       </div>
     </a-layout-sider>
@@ -42,7 +42,7 @@
       <Chat :data="messageList" :type="selectedChat.type" :info="selectedChat" @send="onSend" v-if="selectedChat && selectedMenuKeys.length==0" ref="chatRef" @update-more="onShowMore" @click-photo="onClickChatPhoto" @favorite="onFavorite" :is-search="!!locateInfo" :teamMemberList="teamMemberList">
         <template #info v-if="selectedChat.type===ECommon_IM_Message_EntityType.TEAM">
           <a-collapse :default-active-key="['members']">
-            <a-collapse-item header="Members" key="members">
+            <a-collapse-item :header="$t('util.members')" key="members">
               <a-space wrap>
                 <UserAvatar v-for="item in teamMemberList" :organization-user-id="item.id" :name="item.name" :photo="item.photo"></UserAvatar>
               </a-space>
@@ -88,11 +88,13 @@ import {ECommon_Content_Line_Config_Type, ICommon_Content_Line} from "../../../.
 import Favorite from "./favorite.vue";
 import ImMessageSearch from "./imMessageSearch.vue";
 import {ICommon_Model_IM_Team_Message} from "../../../../../../common/model/im_team_message";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   id?:string,
   chatType?:ECommon_IM_Message_EntityType
 }>()
+const {t}=useI18n()
 const recentListRef=ref<InstanceType<typeof RecentList>>()
 const selectList=ref<ICommon_Route_Res_Organization_FilterUserAndTeam>()
 const messageList=ref<IClient_Chat_Message_Item[]>([])
@@ -408,7 +410,7 @@ const onClickFavorite=(key:string)=>{
 const onFavorite=async (item:IClient_Chat_Message_Item,type: ECommon_IM_Message_EntityType)=>{
 	let myOrganizationUserId=SessionStorage.get("organizationUserId")
 	socket.getSocket().emit("im_favorite_message_add",myOrganizationUserId,type,item.messageId)
-	Message.info("favorite success")
+	Message.info(t("tip.favoriteSuccess"))
 }
 
 const handleUserInfo = (id: string, info: {

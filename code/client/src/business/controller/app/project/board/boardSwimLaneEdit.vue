@@ -1,14 +1,14 @@
 <template>
 	<a-form :model="form" ref="eleForm">
-		<a-form-item label="name" field="name" required>
+		<a-form-item :label="$t('util.name')" field="name" required>
 			<a-input v-model="form.name"></a-input>
 		</a-form-item>
-		<a-form-item label="priority" field="priority" required>
+		<a-form-item :label="$t('util.priority')" field="priority" required>
 			<a-select v-model="form.priority">
-				<a-option :value="ECommon_Model_Project_Issue_Priority.LOW">Low</a-option>
-				<a-option :value="ECommon_Model_Project_Issue_Priority.MEDIUM">MEDIUM</a-option>
-				<a-option :value="ECommon_Model_Project_Issue_Priority.HIGH">HIGH</a-option>
-				<a-option :value="ECommon_Model_Project_Issue_Priority.URGENT">URGENT</a-option>
+				<a-option :value="ECommon_Model_Project_Issue_Priority.LOW">{{$t("util.low")}}</a-option>
+				<a-option :value="ECommon_Model_Project_Issue_Priority.MEDIUM">{{$t("util.medium")}}</a-option>
+				<a-option :value="ECommon_Model_Project_Issue_Priority.HIGH">{{$t("util.high")}}</a-option>
+				<a-option :value="ECommon_Model_Project_Issue_Priority.URGENT">{{$t("util.urgent")}}</a-option>
 			</a-select>
 		</a-form-item>
 	</a-form>

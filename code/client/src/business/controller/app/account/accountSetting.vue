@@ -1,14 +1,14 @@
 <template>
 	<a-collapse :default-active-key="['wallpaper']">
-		<a-collapse-item key="wallpaper" header="Wallpaper">
+		<a-collapse-item key="wallpaper" :header="$t('util.wallpaper')">
 			<a-form :model="formWallPaper" style="width: 80%" @submitSuccess="onSubmitWallpaper">
-				<a-form-item field="photo" label="wallpaper">
+				<a-form-item field="photo" :label="$t('util.wallpaper')">
 					<Upload :default-uri="formWallPaper.photo" types=".png,.jpg,.jpeg,.gif,.bmp,.svg,.webp" @upload="onUploadWallpaper"></Upload>
 				</a-form-item>
 				<a-form-item>
 					<a-space size="large">
-						<a-button html-type="submit" type="primary">Save</a-button>
-						<a-button html-type="button" status="danger" v-if="formWallPaper.photo" @click="onClearWallpaper">Clear</a-button>
+						<a-button html-type="submit" type="primary">{{$t("util.ok")}}</a-button>
+						<a-button html-type="button" status="danger" v-if="formWallPaper.photo" @click="onClearWallpaper">{{$t("util.clear")}}</a-button>
 					</a-space>
 				</a-form-item>
 			</a-form>

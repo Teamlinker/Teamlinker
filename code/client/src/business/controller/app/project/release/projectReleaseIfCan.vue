@@ -1,7 +1,7 @@
 <template>
   <div>
-    there are still <span style="font-weight: bold;color: blue">{{items.length}}</span> unresolved issues!<br><br>
-    <span style="font-weight: bold;color: red">Do you Still continue to Release?</span>
+    {{$t("controller.app.project.release.projectReleaseIfCan.thereAreStill")}} <span style="font-weight: bold;color: blue">{{items.length}}</span> {{$t("controller.app.project.release.projectReleaseIfCan.unresolvedIssues")}}!<br><br>
+    <span style="font-weight: bold;color: red">{{$t("controller.app.project.release.projectReleaseIfCan.continueToRelease")}}?</span>
     <a-table style="margin-top: 15px" :data="items" :columns="columns">
       <template #key="{record}">
         {{projectKey+"-"+record.unique_id}}
@@ -31,6 +31,7 @@ import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
 import {Message} from "@arco-design/web-vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   projectReleaseId:string,
@@ -38,17 +39,18 @@ const props=defineProps<{
   projectKey:string,
   projectId:string
 }>()
+const {t}=useI18n()
 const columns=[
   {
     title:"Key",
     slotName: "key"
   },
   {
-    title:"Name",
+    title:t("util.name"),
     slotName:"name"
   },
   {
-    title:"Priority",
+    title:t("util.priority"),
     slotName: "priority"
   },
   {
@@ -69,7 +71,7 @@ onDialogOk(async ()=>{
     status:ECommon_Model_Project_Release_Status.RELEASE
   })
   if(res?.code==0) {
-    Message.success("release success")
+    Message.success(t("tip.releaseSuccess"))
     return true;
   } else {
     Message.error(res.msg)

@@ -4,18 +4,18 @@
     <router-link :to="{name:'index'}" style="text-decoration: none;">
 	    <h3 style="text-align: center;margin-bottom: 50px">Teamlinker</h3>
     </router-link>
-    <a-form-item field="username" label="username" required>
-      <a-input v-model="form.username" placeholder="please enter username"></a-input>
+    <a-form-item field="username" :label="$t('util.username')" required>
+      <a-input v-model="form.username" :placeholder="$t('placeholder.enterUsername')"></a-input>
     </a-form-item>
-    <a-form-item field="password" label="password" required>
-      <a-input v-model="form.password" type="password" placeholder="please enter password"></a-input>
+    <a-form-item field="password" :label="$t('util.password')" required>
+      <a-input v-model="form.password" type="password" :placeholder="$t('placeholder.typePassword')"></a-input>
     </a-form-item>
     <a-form-item>
 	    <a-row style="justify-content: space-between;width: 100%">
-		    <a-button html-type="submit" type="primary">Submit</a-button>
+		    <a-button html-type="submit" type="primary">{{$t("util.submit")}}</a-button>
 		    <a-space v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
-			    <a-button html-type="button" type="primary" status="success"  @click="onRegister">Register</a-button>
-			    <a-button html-type="button" type="primary" status="warning"  @click="onReset">Reset</a-button>
+			    <a-button html-type="button" type="primary" status="success"  @click="onRegister">{{$t("util.register")}}</a-button>
+			    <a-button html-type="button" type="primary" status="warning"  @click="onReset">{{$t("util.reset")}}</a-button>
 		    </a-space>
 	    </a-row>
     </a-form-item>

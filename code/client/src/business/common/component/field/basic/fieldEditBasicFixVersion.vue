@@ -4,7 +4,7 @@
 			<a-space wrap size="mini" v-if="(showValue as ICommon_Model_Project_Release[]).length>0">
 				<ProjectReleasePreview v-for="item in (showValue as ICommon_Model_Project_Release[])" :key="item.id" :project-release-id="item.id" :name="item.name"></ProjectReleasePreview>
 			</a-space>
-			<span v-else style="line-height: 30px;width: 100%;color: grey">None</span>
+			<span v-else style="line-height: 30px;width: 100%;color: grey">{{$t("util.none")}}</span>
 		</template>
 		<a-row style="padding-right: 10px" v-else>
 			<a-space size="mini" wrap>
@@ -18,7 +18,7 @@
 					<template #icon>
 						<icon-plus />
 					</template>
-					Add
+					{{$t("util.add")}}
 				</a-tag>
 				<a-button type="text" @click="onClick">
 					<template #icon>

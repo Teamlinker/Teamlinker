@@ -1,6 +1,6 @@
 <template>
   <a-form :model="form" style="width: 80%" ref="eleForm">
-    <a-form-item field="name" label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
   </a-form>
@@ -11,6 +11,7 @@ import {reactive, ref} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {apiProject} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   type:"add"|"edit",
@@ -23,6 +24,7 @@ const props=defineProps<{
 const form=reactive({
   name:props.type=="edit"?props.item.name:""
 })
+const {t}=useI18n()
 const eleForm=ref(null)
 onDialogOk(async ()=>{
   let isError=await eleForm.value.validate()
@@ -37,7 +39,7 @@ onDialogOk(async ()=>{
     name:form.name
   }))
   if(res?.code==0) {
-    Message.success("operation success")
+    Message.success(t("tip.operationSuccess"))
     return true
   } else {
     Message.error(res.msg)

@@ -7,14 +7,16 @@ import {markRaw} from "vue";
 import Im from "../../../controller/app/im/im.vue";
 import {SessionStorage} from "../../../common/storage/session";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import i18n from "@/business/common/i18n/i18n";
 
-export const iconIM=new Icon("IM",iconGroupMap["im"])
+const {t}=i18n.global
+export const iconIM=new Icon(t("util.im"),iconGroupMap["im"])
 iconIM.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
-        Message.error("you must choose organization")
+        Message.error(t("tip.switchToSpecificOrganization"))
         return;
     }
-    const win=new Window("im",ETeamOS_Window_Type.SIMPLE, "im",false,[
+    const win=new Window(t("util.im"),ETeamOS_Window_Type.SIMPLE, "im",false,[
         {
             id:v4(),
             meta:{
@@ -27,11 +29,11 @@ iconIM.addEventListener("dbClick",item => {
                 name:"im"
             }
         }
-    ],"IM");
+    ],t("util.im"));
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,(id, chatType) => {
-    const win=new Window("im",ETeamOS_Window_Type.SIMPLE, "im",false,[
+    const win=new Window(t("util.im"),ETeamOS_Window_Type.SIMPLE, "im",false,[
         {
             id:v4(),
             meta:{
@@ -48,6 +50,6 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,(id, chatType) => {
                 }
             }
         }
-    ],"IM");
+    ],t("util.im"));
     windowManager.open(win);
 })

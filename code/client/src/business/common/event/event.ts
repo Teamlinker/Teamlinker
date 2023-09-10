@@ -35,7 +35,8 @@ export enum EClient_EVENTBUS_TYPE {
     FINDER_OPEN_WINDOW="finder_open_window",
     REFRESH_ORGANIZATION_LIST="refresh_organization_list",
     REFRESH_NOTIFICATION_UNREAD="refresh_notification_unread",
-    REFRESH_MISS_CALL_UNREAD="refresh_miss_call_unread"
+    REFRESH_MISS_CALL_UNREAD="refresh_miss_call_unread",
+    USER_LOGIN_EXPIRED="user_login_expired"
 }
 
 interface IClient_EventBus_Func {
@@ -73,6 +74,7 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.REFRESH_MISS_CALL_UNREAD]:()=>void
     [EClient_EVENTBUS_TYPE.OPEN_PROJECT_SPRINT_KANBAN_PROFILE]:(projectId:string,boardId:string,boardSprintId:string)=>void
     [EClient_EVENTBUS_TYPE.OPEN_PROJECT_BOARD_PROFILE]:(projectId:string,boardId:string)=>void
+    [EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED]:()=>void
 }
 
 interface IClient_EventBus_Emit_Func {

@@ -2,7 +2,7 @@
 	<div>
 		<template v-if="!isEdit">
 			<UserAvatar v-if="showValue" :photo="showValue.photo" :name="showValue.nickname" :organization-user-id="showValue.organizationUserId"></UserAvatar>
-			<span v-else style="line-height: 30px;width: 100%;color: gray">No User</span>
+			<span v-else style="line-height: 30px;width: 100%;color: gray">{{$t("common.component.field.basic.fieldEditBasicAssigner.noUser")}}</span>
 		</template>
 		<a-row style="padding-right: 10px" v-else>
 			<a-select allow-search allow-clear v-model="editValue" @search="onSearchAssigner">

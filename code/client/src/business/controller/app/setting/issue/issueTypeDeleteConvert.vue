@@ -1,6 +1,6 @@
 <template>
 	<a-form :model="form" ref="eleForm" style="width: 80%" auto-label-width>
-		<a-form-item field="issueTypeId" label="Issue Type" required>
+		<a-form-item field="issueTypeId" :label="$t('util.issueType')" required>
 			<a-select v-model="form.issueTypeId">
 				<a-option v-for="item in issueTypeList" :value="item.id" :label="item.name"></a-option>
 			</a-select>

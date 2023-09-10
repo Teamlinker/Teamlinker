@@ -13,7 +13,7 @@
           <template #label>
             <icon-info-circle style="font-size: medium"></icon-info-circle>
           </template>
-          <a-input placeholder="New Event Title" v-model="form.name"></a-input>
+          <a-input :placeholder="$t('placeholder.newEventTitle')" v-model="form.name"></a-input>
         </a-form-item>
         <a-form-item field="dateInfo" required hide-asterisk>
           <template #label>
@@ -33,8 +33,8 @@
     </div>
     <div style="height: 35px">
       <a-space style="float: right;margin-right: 10px">
-        <a-button type="secondary" size="small" @click="emit('more',form.name,form.dateInfo,form.resourceId)">More Option</a-button>
-        <a-button type="primary" size="small" @click="checkValid">Save</a-button>
+        <a-button type="secondary" size="small" @click="emit('more',form.name,form.dateInfo,form.resourceId)">{{$t("controller.app.calendar.calendarEventAddSimple.moreOption")}}</a-button>
+        <a-button type="primary" size="small" @click="checkValid">{{$t("util.save")}}</a-button>
       </a-space>
     </div>
   </div>

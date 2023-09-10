@@ -2,11 +2,11 @@
   <a-layout style="height: 100%">
     <a-layout-sider :resize-directions="['right']">
       <a-menu style="width: 100%" @menu-item-click="onSubMenuClick" v-model:selected-keys="menuKey">
-	      <a-menu-item key="home">Home</a-menu-item>
-        <a-menu-item key="issue">Issue</a-menu-item>
-	      <a-menu-item key="board">Board</a-menu-item>
-        <a-menu-item key="release">Release</a-menu-item>
-        <a-menu-item key="setting" v-if="checkPermission(permission,Permission_Types.Project.ADMIN)">Setting</a-menu-item>
+	      <a-menu-item key="home">{{$t("util.home")}}</a-menu-item>
+        <a-menu-item key="issue">{{$t("util.issue")}}</a-menu-item>
+	      <a-menu-item key="board">{{$t("util.board")}}</a-menu-item>
+        <a-menu-item key="release">{{$t("util.release")}}</a-menu-item>
+        <a-menu-item key="setting" v-if="checkPermission(permission,Permission_Types.Project.ADMIN)">{{$t("util.setting")}}</a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout-content style="flex-direction: column;display: flex;padding: 10px;">

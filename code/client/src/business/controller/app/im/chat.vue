@@ -22,7 +22,7 @@
 					</a-button>
 					<template #content>
 						<a-row style="flex-direction: column;align-items: center">
-							<a-input size="small" placeholder="type user name" v-model="searchUserKey"></a-input>
+							<a-input size="small" :placeholder="$t('placeholder.typeUserName')" v-model="searchUserKey"></a-input>
 							<a-table style="width: 100%;margin-top: 10px" row-key="id" :columns="columns" :data="teamMemberList.filter(item=>(item.id!==organizationUserId && item.name.includes(searchUserKey)))" :row-selection="rowSelection" v-model:selected-keys="selectKeys" :pagination="false">
 								<template #name="{record}">
 									<UserAvatar :organization-user-id="record.id" :name="record.name" :photo="record.photo"></UserAvatar>
@@ -130,6 +130,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {TableRowSelection} from "@arco-design/web-vue/es/table/interface";
 import UserAvatar from "../../../common/component/userAvatar.vue";
+import {useI18n} from "vue-i18n";
 
 const root = ref()
 const appContext=getCurrentInstance().appContext
@@ -177,9 +178,10 @@ const rowSelection=ref<TableRowSelection>({
 	showCheckedAll:true,
 	onlyCurrent:false
 })
+const {t}=useI18n()
 const columns = [
 	{
-		title: 'Name',
+		title: t("util.name"),
 		slotName: 'name',
 	}
 ]

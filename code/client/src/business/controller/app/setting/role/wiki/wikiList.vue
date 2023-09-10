@@ -1,9 +1,9 @@
 <template>
   <div ref="root">
-    <a-input-search style="width: 300px;margin-bottom: 10px" placeholder="please type wiki name" @search="search" search-button></a-input-search>
+    <a-input-search style="width: 300px;margin-bottom: 10px" :placeholder="$t('placeholder.typeWikiName')" @search="search" search-button></a-input-search>
     <a-table :columns="columns" :data="data" @pageChange="onPageChange" :pagination="pagination">
       <template #operation="{record}">
-        <a-button type="primary" size="small" @click="onEdit(record)">manage role</a-button>
+        <a-button type="primary" size="small" @click="onEdit(record)">{{$t("controller.app.setting.role.project.projectList.manageRole")}}</a-button>
       </template>
     </a-table>
   </div>
@@ -14,22 +14,19 @@ import {reactive, ref} from "vue";
 import {apiWiki, DCSType} from "../../../../../common/request/request";
 import {getCurrentNavigator} from "../../../../../../teamOS/common/component/navigator/navigator";
 import {ICommon_Model_Wiki} from "../../../../../../../../common/model/wiki";
-
+import {useI18n} from "vue-i18n";
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     dataIndex:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     dataIndex:"description"
   },
   {
-    title:"keyword",
-    dataIndex:"keyword"
-  },
-  {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]

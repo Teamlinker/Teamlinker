@@ -173,9 +173,6 @@ export default class GateWay extends Application {
                     } else {
                         ctx.body = ret.data;
                     }
-                    if(!ignoreValidate) {
-                        userRpcApi.keepAlive(obj.user.userId)
-                    }
                     await next()
                 } else {
                     await next()

@@ -28,15 +28,15 @@
             </a-list-item-meta>
             <template #actions>
                 <template v-if="organizationUserId===myOrganizationUserId">
-                    <a-button type="outline" size="small" style="margin-left: 20px" @mousedown="onProfile">Profile</a-button>
+                    <a-button type="outline" size="small" style="margin-left: 20px" @mousedown="onProfile">{{$t("util.profile")}}</a-button>
                 </template>
                 <a-row v-else style="flex-direction: column">
-                    <a-button type="outline" size="mini" style="margin-left: 20px" @mousedown="onProfile">Profile</a-button>
+                    <a-button type="outline" size="mini" style="margin-left: 20px" @mousedown="onProfile">{{$t("util.profile")}}</a-button>
                     <a-button type="outline" size="mini" style="margin-left: 20px;margin-top: 10px" @mousedown="onMessage">
                         <template #icon>
                             <icon-message></icon-message>
                         </template>
-                        Message
+	                    {{$t("util.message")}}
                     </a-button>
                 </a-row>
             </template>

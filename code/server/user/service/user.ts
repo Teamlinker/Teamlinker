@@ -37,7 +37,7 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
             sendTime:Date.now()
         })
         let mail=getMailInstance()
-        mail.send(username,"Teamlinker Verification Code",code)
+        mail.send(username,"Teamlinker Verification Code","code: "+code)
     }
 
     static async resendCode(username:string) {
@@ -55,7 +55,7 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         content.sendTime=Date.now()
         await objRedis.set(content)
         let mail=getMailInstance()
-        mail.send(username,"Teamlinker Verification Code",code)
+        mail.send(username,"Teamlinker Verification Code","code: "+code)
     }
 
     static async conformRegister(username:string,code:string) {

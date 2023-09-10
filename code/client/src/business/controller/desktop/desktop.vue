@@ -13,35 +13,35 @@
         </a-avatar>
         <template #content>
           <a-dsubmenu trigger="hover" :disabled="store.status===ECommon_User_Online_Status.MEETING">
-            Status
+            {{$t("util.status")}}
             <template #content>
               <a-doption @click="onChangeStatus(ECommon_User_Online_Status.ONLINE)">
                 <template #icon v-if="store.status===ECommon_User_Online_Status.ONLINE">
                   <icon-check></icon-check>
                 </template>
-                online
+	              {{$t("util.online")}}
               </a-doption>
               <a-doption @click="onChangeStatus(ECommon_User_Online_Status.BUSY)">
                 <template #icon v-if="store.status===ECommon_User_Online_Status.BUSY">
                   <icon-check></icon-check>
                 </template>
-                busy
+	              {{$t("util.busy")}}
               </a-doption>
             </template>
           </a-dsubmenu>
 	        <a-dsubmenu trigger="hover">
-		        Tool
+		        {{$t("util.tool")}}
 		        <template #content>
 			        <a-doption @click="onAddNote">
-				        Sticky Note
+				        {{$t("util.stickyNote")}}
 			        </a-doption>
 			        <a-doption @click="onAddPhoto">
-				       Album
+				        {{$t("util.album")}}
 			        </a-doption>
 		        </template>
 	        </a-dsubmenu>
-          <a-doption @click="onAccount">Account</a-doption>
-          <a-doption @click="onLogout">Logout</a-doption>
+          <a-doption @click="onAccount">{{$t("util.account")}}</a-doption>
+          <a-doption @click="onLogout(false)">{{$t("util.logout")}}</a-doption>
         </template>
       </a-dropdown>
     </template>
@@ -51,20 +51,20 @@
 				  <img :src="store.organizationInfo.photo" style="height: 36px;width:80px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
 			  <a-col :flex="menuValue?'100px':'120px'">
-				  <a-select style="max-width: 170px;color: white" placeholder="organization" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
+				  <a-select style="max-width: 170px;color: white" :placeholder="$t('placeholder.organization')" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
 					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
 						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
 					  </a-optgroup>
 					  <template #footer v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
 						  <a-row style="width: 100%;height: 30px;display: flex;justify-content: center;align-items: center">
 							  <a-button type="text" style="width: 100%;color: black" @click="onCreate">
-								  Create
+								  {{$t("util.create")}}
 							  </a-button>
 						  </a-row>
 					  </template>
 				  </a-select>
 				  <a-button type="primary" status="success" style="float: right;margin-right: 5px" @click="onCreate" v-else>
-					  Create Organization
+					  {{$t("controller.desktop.desktop.createOrganization")}}
 				  </a-button>
 			  </a-col>
 			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex">
@@ -145,6 +145,7 @@ import MissCallShow from "./missCallShow.vue";
 import Search from "@/business/controller/desktop/search/search.vue";
 import StickyNote from "@/business/controller/desktop/tool/stickyNote/stickyNote.vue";
 import Photo from "@/business/controller/desktop/tool/photo/photo.vue";
+import {useI18n} from "vue-i18n";
 
 interface ITeamOS_Desktop_Menu {
 	group:string,
@@ -153,6 +154,7 @@ interface ITeamOS_Desktop_Menu {
 		value:string
 	}[]
 }
+const {t}=useI18n()
 const isSearch=ref(false)
 const imgUri=ref("")
 const imgVisible=ref(false)
@@ -249,12 +251,12 @@ const onAccount=()=>{
   windowManager.open(win);
 }
 
-const onLogout=async ()=>{
-  let ret=await Dialog.confirm(document.body,appContext,"Do you want to log out?")
+const onLogout=async (isDirect?:boolean)=>{
+  let ret=isDirect?isDirect:await Dialog.confirm(document.body,appContext,t("tip.logout"))
   if(ret) {
-    let res=await store.logout();
+    let res=await store.logout(isDirect);
     if(res) {
-      Message.success("logout success")
+      Message.success(t("tip.logoutSuccess"))
       watchStop();
       desktop.clear()
       iconManager.clear()
@@ -277,7 +279,7 @@ const onHandleStatus=(organizationUserId:string,status:ECommon_User_Online_Statu
 }
 
 const onMenuClick=async (value)=>{
-	windowManager.clear()
+	windowManager.clear(["finder"])
 	await store.enterOrganization(value);
 }
 
@@ -310,7 +312,7 @@ const onFileDbClick=async (item:DCSType<ICommon_Model_Finder_Item>)=>{
 
 const onAddNote=async ()=>{
 	let res=await apiTool.addNote({
-		height:"10%",
+		height:"30%",
 		width:"20%",
 		x:60+Math.floor(Math.random() * (-5 - 5)) + 5+"%",
 		y:50+Math.floor(Math.random() * (-5 - 5)) + 5+"%"
@@ -403,6 +405,7 @@ onBeforeMount(async ()=>{
   }
   eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
 	eventBus.on(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
+	eventBus.on(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED,onLogout.bind(null,true))
 	loading.value=false
 })
 
@@ -410,6 +413,7 @@ onBeforeUnmount(()=>{
 	objFinderHandle.unRegisterEvents()
   eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
 	eventBus.off(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
+	eventBus.off(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED,onLogout.bind(null,true))
 })
 
 

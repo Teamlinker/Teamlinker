@@ -1,9 +1,9 @@
 <template>
   <a-form ref="eleForm" style="width: 80%" :model="form">
-    <a-form-item label="name" field="name" required>
+    <a-form-item :label="$t('util.name')" field="name" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
-    <a-form-item label="color" field="color" required>
+    <a-form-item :label="$t('util.color')" field="color" required>
       <a-radio-group v-model="form.color">
         <a-radio v-for="item in ECommon_Calendar_Color" :value="item">
           <div :style="{backgroundColor:item}" style="display: inline-block;width: 14px;height: 14px;margin-top: 3px;border-radius: 2px"></div>

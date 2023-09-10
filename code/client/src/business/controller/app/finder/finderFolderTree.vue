@@ -21,10 +21,10 @@
 			<a-dropdown trigger="hover" position="bl">
 				<icon-more style="color: gray"></icon-more>
 				<template #content>
-					<a-doption @click="onRefresh(nodeData)">Refresh</a-doption>
-					<a-doption @click="onRenameFolder(nodeData)" v-if="nodeData.key">Rename</a-doption>
-					<a-doption @click="onAddFolder(nodeData)">Add Folder</a-doption>
-					<a-doption v-if="nodeData.key" @click="onRemove(nodeData)">Remove</a-doption>
+					<a-doption @click="onRefresh(nodeData)">{{$t("util.refresh")}}</a-doption>
+					<a-doption @click="onRenameFolder(nodeData)" v-if="nodeData.key">{{$t("util.rename")}}</a-doption>
+					<a-doption @click="onAddFolder(nodeData)">{{$t("controller.app.finder.finderFolderTree.addFolder")}}</a-doption>
+					<a-doption v-if="nodeData.key" @click="onRemove(nodeData)">{{$t("util.remove")}}</a-doption>
 				</template>
 			</a-dropdown>
 		</template>
@@ -37,6 +37,7 @@ import {apiFinder} from "../../../common/request/request";
 import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import {useI18n} from "vue-i18n";
 
 interface FolderTree {
 	title:string,
@@ -52,6 +53,7 @@ const rename=ref("")
 const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()
 const expandKeys=ref<string[]>([])
+const {t}=useI18n()
 const folderTree=ref<FolderTree[]>([
 	{
 		title:"Desktop",
@@ -96,7 +98,7 @@ const onConfirmRenameFolder=async (nodeData)=>{
 }
 
 const onAddFolder=async (nodeData)=>{
-	let ret=await Dialog.input(root.value,appContext,"please type folder name")
+	let ret=await Dialog.input(root.value,appContext,t("tip.typeFolderName"))
 	if(ret) {
 		let res=await apiFinder.createFolder({
 			name:ret,
@@ -145,7 +147,7 @@ const findParentNodeData=(key:string,node?)=>{
 }
 
 const onRemove=async (nodeData)=>{
-	let ret=await Dialog.confirm(root.value,appContext,"do you want to delete this folder?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteFolder"))
 	if(ret) {
 		let res=await apiFinder.delete({
 			finderItemId:nodeData.key

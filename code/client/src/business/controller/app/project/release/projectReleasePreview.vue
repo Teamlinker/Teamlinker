@@ -8,9 +8,9 @@
             <span style="font-weight: bold">
               {{info?.name}}
             </span>
-            <a-tag color="gray" v-if="info?.status===ECommon_Model_Project_Release_Status.ARCHIVED">ARCHIVED</a-tag>
-            <a-tag color="blue" v-else-if="info?.status===ECommon_Model_Project_Release_Status.UNRELEASE">UNRELEASED</a-tag>
-            <a-tag color="green" v-else-if="info?.status===ECommon_Model_Project_Release_Status.RELEASE">RELEASED</a-tag>
+            <a-tag color="gray" v-if="info?.status===ECommon_Model_Project_Release_Status.ARCHIVED">{{$t("util.archived")}}</a-tag>
+            <a-tag color="blue" v-else-if="info?.status===ECommon_Model_Project_Release_Status.UNRELEASE">{{$t("util.unReleased")}}</a-tag>
+            <a-tag color="green" v-else-if="info?.status===ECommon_Model_Project_Release_Status.RELEASE">{{$t("util.released")}}</a-tag>
           </a-space>
         </a-row>
         <a-row style="width: 100%;margin-top: 10px">
@@ -25,12 +25,12 @@
         <a-row style="width: 100%;margin-top: 10px">
           <a-col :span="16">
             <span v-if="info?.notstart+info?.inprogress+info?.done==0">
-              No Issues
+              {{$t("controller.app.project.release.projectReleaseList.noIssues")}}
             </span>
             <a-progress v-else :percent="info?.done/(info?.notstart+info?.inprogress+info?.done)" style="width: 100%" color="green"></a-progress>
           </a-col>
           <a-col :span="8" style="text-align: center">
-            <a-button type="outline" size="mini" @click="onProfile">Profile</a-button>
+            <a-button type="outline" size="mini" @click="onProfile">{{$t("util.profile")}}</a-button>
           </a-col>
         </a-row>
       </a-row>

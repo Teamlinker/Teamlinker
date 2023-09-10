@@ -7,10 +7,10 @@
 				</template>
 				<span v-for="item in showValue" style="color: blue">{{item.name}}</span>
 			</a-space>
-			<span v-else style="line-height: 30px;width: 100%;color: gray">None</span>
+			<span v-else style="line-height: 30px;width: 100%;color: gray">{{$t("util.none")}}</span>
 		</template>
 		<a-row style="padding-right: 10px" v-else>
-			<a-cascader v-model="editValue" :field-names="fields" :options="moduleList" placeholder="please select" :format-label="format" check-strictly allow-clear allow-search></a-cascader>
+			<a-cascader v-model="editValue" :field-names="fields" :options="moduleList" :placeholder="$t('placeholder.pleaseSelect')" :format-label="format" check-strictly allow-clear allow-search></a-cascader>
 			<a-button type="text" @click="onClick">
 				<template #icon>
 					<icon-check></icon-check>

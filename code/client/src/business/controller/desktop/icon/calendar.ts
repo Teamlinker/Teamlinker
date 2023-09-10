@@ -7,14 +7,16 @@ import {markRaw} from "vue";
 import Calendar from "../../app/calendar/calendar.vue";
 import {SessionStorage} from "../../../common/storage/session";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import i18n from "@/business/common/i18n/i18n";
 
-export const iconCalendar=new Icon("Calendar",iconGroupMap["calendar"])
+const {t}=i18n.global
+export const iconCalendar=new Icon(t("util.calendar"),iconGroupMap["calendar"])
 iconCalendar.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
-        Message.error("you must choose organization")
+        Message.error(t("tip.switchToSpecificOrganization"))
         return;
     }
-    const win=new Window("calendar",ETeamOS_Window_Type.SIMPLE, "calendar",false,[
+    const win=new Window(t("util.calendar"),ETeamOS_Window_Type.SIMPLE, "calendar",false,[
         {
             id:v4(),
             meta:{
@@ -27,11 +29,11 @@ iconCalendar.addEventListener("dbClick",item => {
                 name:"calendar"
             }
         }
-    ],"Calendar");
+    ],t("util.calendar"));
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,(calendarEventId) => {
-    const win=new Window("calendar",ETeamOS_Window_Type.SIMPLE, "calendar",false,[
+    const win=new Window(t("util.calendar"),ETeamOS_Window_Type.SIMPLE, "calendar",false,[
         {
             id:v4(),
             meta:{
@@ -47,6 +49,6 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,(calendarEventId) => {
                 }
             }
         }
-    ],"Calendar");
+    ],t("util.calendar"));
     windowManager.open(win);
 })

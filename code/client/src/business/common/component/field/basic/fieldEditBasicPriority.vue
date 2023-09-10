@@ -4,10 +4,10 @@
 		<template v-else>
 			<a-space size="mini">
 				<a-select v-model="editValue">
-					<a-option label="low" :value="ECommon_Model_Project_Issue_Priority.LOW"></a-option>
-					<a-option label="medium" :value="ECommon_Model_Project_Issue_Priority.MEDIUM"></a-option>
-					<a-option label="high" :value="ECommon_Model_Project_Issue_Priority.HIGH"></a-option>
-					<a-option label="urgent" :value="ECommon_Model_Project_Issue_Priority.URGENT"></a-option>
+					<a-option :value="ECommon_Model_Project_Issue_Priority.LOW">{{$t("util.low")}}</a-option>
+					<a-option :value="ECommon_Model_Project_Issue_Priority.MEDIUM">{{$t("util.medium")}}</a-option>
+					<a-option :value="ECommon_Model_Project_Issue_Priority.HIGH">{{$t("util.hign")}}</a-option>
+					<a-option :value="ECommon_Model_Project_Issue_Priority.URGENT">{{$t("util.urgent")}}</a-option>
 				</a-select>
 				<a-button type="text" @click="onClick">
 					<template #icon>

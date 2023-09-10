@@ -7,9 +7,9 @@
   }" ref="tree" draggable @drop="onDrop">
       <template #extra="node">
         <a-space style="margin-left: 20px">
-          <a-button type="outline" size="mini" @click="onAdd(node)">Add</a-button>
-          <a-button type="outline" size="mini" @click="onEdit(node)" v-if="node.id">Edit</a-button>
-          <a-button type="outline" status="danger" size="mini" v-if="node.id" @click="onRemove(node)">Remove</a-button>
+          <a-button type="outline" size="mini" @click="onAdd(node)">{{$t("util.add")}}</a-button>
+          <a-button type="outline" size="mini" @click="onEdit(node)" v-if="node.id">{{$t("util.edit")}}</a-button>
+          <a-button type="outline" status="danger" size="mini" v-if="node.id" @click="onRemove(node)">{{$t("util.remove")}}</a-button>
         </a-space>
       </template>
     </a-tree>
@@ -22,12 +22,14 @@ import {ICommon_Route_Res_Project_CreateModule_Data} from "../../../../../../../
 import {apiProject} from "../../../../common/request/request";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   projectId:string
 }>()
 const data=ref<ICommon_Route_Res_Project_CreateModule_Data[]>([])
 const tree=ref(null)
+const {t}=useI18n()
 onBeforeMount(async ()=>{
   let res=await apiProject.listModule({
     projectId:props.projectId
@@ -46,7 +48,7 @@ onBeforeMount(async ()=>{
 const root=getRootNavigatorRef();
 const appContext=getCurrentInstance().appContext
 const onAdd=async (item:ICommon_Route_Res_Project_CreateModule_Data)=>{
-  let name=await Dialog.input(root.value,appContext,"please input module name")
+  let name=await Dialog.input(root.value,appContext,t("tip.typeModuleName"))
   if(name) {
     let res=await apiProject.createModule({
       projectId:props.projectId,
@@ -66,7 +68,7 @@ const onAdd=async (item:ICommon_Route_Res_Project_CreateModule_Data)=>{
   }
 }
 const onEdit=async (item:ICommon_Route_Res_Project_CreateModule_Data)=>{
-  let name=await Dialog.input(root.value,appContext,"please edit module name",item.name)
+  let name=await Dialog.input(root.value,appContext,t("tip.editModuleName"),item.name)
   if(name) {
     let res=await apiProject.editModule({
       moduleId:item.id,
@@ -78,7 +80,7 @@ const onEdit=async (item:ICommon_Route_Res_Project_CreateModule_Data)=>{
   }
 }
 const onRemove=async (item:ICommon_Route_Res_Project_CreateModule_Data)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this module?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteModule"))
   if(ret) {
     let res=await apiProject.removeModule({
       moduleId:item.id

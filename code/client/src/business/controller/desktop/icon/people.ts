@@ -8,14 +8,16 @@ import People from "../../app/people/people.vue";
 import PeopleProfile from "../../app/people/peopleProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
+import i18n from "@/business/common/i18n/i18n";
 
-export const iconPeople=new Icon("People",iconGroupMap["people"])
+const {t}=i18n.global
+export const iconPeople=new Icon(t("util.people"),iconGroupMap["people"])
 iconPeople.addEventListener("dbClick", item => {
     if(!SessionStorage.get("organizationId")) {
-        Message.error("you must choose organization")
+        Message.error(t("tip.switchToSpecificOrganization"))
         return;
     }
-    const win=new Window("people",ETeamOS_Window_Type.TAB, "people",true,[
+    const win=new Window(t("util.people"),ETeamOS_Window_Type.TAB, "people",true,[
         {
             id:v4(),
             meta:{
@@ -27,10 +29,10 @@ iconPeople.addEventListener("dbClick", item => {
             },
             default:{
                 name:"people",
-                title: "people"
+                title: t("util.people")
             }
         }
-    ],"People");
+    ],t("util.people"));
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -43,14 +45,14 @@ iconPeople.addEventListener("dbClick", item => {
             },
             default:{
                 name:"people",
-                title: "people"
+                title: t("util.people")
             }
         }
     })
     windowManager.open(win);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,organizationUserId => {
-    const win=new Window("people",ETeamOS_Window_Type.TAB, "people",true,[
+    const win=new Window(t("util.people"),ETeamOS_Window_Type.TAB, "people",true,[
         {
             id:v4(),
             meta:{
@@ -62,13 +64,13 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,organizationUserId => {
             },
             default:{
                 name:"profile",
-                title: "profile",
+                title: t("util.profile"),
                 props:{
                     organizationUserId:organizationUserId
                 }
             }
         }
-    ],"People");
+    ],t("util.people"));
     win.addEventListener("newTab", async item => {
         return {
             id:v4(),
@@ -81,7 +83,7 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,organizationUserId => {
             },
             default:{
                 name:"people",
-                title: "people"
+                title: t("util.people")
             }
         }
     })

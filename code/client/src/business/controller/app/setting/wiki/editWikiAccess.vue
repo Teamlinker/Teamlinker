@@ -1,21 +1,21 @@
 <template>
   <div>
     <a-space size="medium">
-      <span>name</span>
+      <span>{{$t("controller.app.setting.project.editProjectAccess.name")}}</span>
       <a-input v-model="keyword"></a-input>
-      <span>member type</span>
+      <span>{{$t("controller.app.setting.project.editProjectAccess.memberType")}}</span>
       <a-select  v-model="memberType">
-        <a-option :value="ECommon_Model_Organization_Member_Type.DEFAULT">Default</a-option>
-        <a-option :value="ECommon_Model_Organization_Member_Type.USER">User</a-option>
-        <a-option :value="ECommon_Model_Organization_Member_Type.TEAM">Team</a-option>
-        <a-option :value="ECommon_Model_Organization_Member_Type.MEMBERTAG">Tag</a-option>
+        <a-option :value="ECommon_Model_Organization_Member_Type.DEFAULT">{{$t("util.default")}}</a-option>
+        <a-option :value="ECommon_Model_Organization_Member_Type.USER">{{$t("util.user")}}</a-option>
+        <a-option :value="ECommon_Model_Organization_Member_Type.TEAM">{{$t("util.team")}}</a-option>
+        <a-option :value="ECommon_Model_Organization_Member_Type.MEMBERTAG">{{$t("util.tag")}}</a-option>
       </a-select>
-      <a-button type="primary" @click="onSearch">Search</a-button>
-      <a-button type="primary" @click="onAdd">Add</a-button>
+      <a-button type="primary" @click="onSearch">{{$t("util.search")}}</a-button>
+      <a-button type="primary" @click="onAdd">{{$t("util.add")}}</a-button>
     </a-space>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #name="{record}">
-        <template v-if="record.memberType==ECommon_Model_Organization_Member_Type.DEFAULT">Default</template>
+        <template v-if="record.memberType==ECommon_Model_Organization_Member_Type.DEFAULT">{{$t("util.default")}}</template>
         <template v-else-if="record.memberType==ECommon_Model_Organization_Member_Type.USER">{{ record.member.nickname }}</template>
         <template v-else-if="record.memberType==ECommon_Model_Organization_Member_Type.TEAM">{{record.team.name}}</template>
         <template v-else-if="record.memberType==ECommon_Model_Organization_Member_Type.MEMBERTAG">{{record.tag.name}}</template>
@@ -25,8 +25,8 @@
       </template>
       <template #operation="{record}">
         <a-space wrap>
-          <a-button @click="onEditRole(record)" size="small">Role</a-button>
-          <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
+          <a-button @click="onEditRole(record)" size="small">{{$t("util.role")}}</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.remove")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -42,21 +42,23 @@ import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditWikiAccessRole from "./editWikiAccessRole.vue";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   wikiId:string
 }>()
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     slotName:"name"
   },
   {
-    title:"role",
+    title:t("util.role"),
     slotName:"role"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -112,7 +114,7 @@ const onEditRole=async (item:DCSType<ICommon_Route_Res_Role_Member_Item>)=>{
   }
 }
 const onDelete=async (item:DCSType<ICommon_Route_Res_Role_Member_Item>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this user from this organization?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.removeUser"))
   let memberId:string;
   if(item.memberType==ECommon_Model_Organization_Member_Type.USER)
   {
@@ -131,7 +133,7 @@ const onDelete=async (item:DCSType<ICommon_Route_Res_Role_Member_Item>)=>{
       })
     })
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       search(pagination.current)
     }
   }

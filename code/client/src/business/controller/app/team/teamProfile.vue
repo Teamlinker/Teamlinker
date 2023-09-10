@@ -1,31 +1,31 @@
 <template>
   <div style="padding: 0px 10px;height: 100%;overflow-y: auto" ref="root">
     <a-collapse :default-active-key="['basic']">
-      <a-collapse-item header="Basic" key="basic">
+      <a-collapse-item :header="$t('util.basic')" key="basic">
         <template v-if="checkPermission(permission,Permission_Types.Team.EDIT)">
           <a-form :model="basic" style="width: 400px" @submitSuccess="onSave">
-            <a-form-item label="photo" field="photo">
+            <a-form-item :label="$t('util.photo')" field="photo">
               <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="basic.photo" @upload="onUpload"></Upload>
             </a-form-item>
-            <a-form-item label="name" field="name" required>
+            <a-form-item :label="$t('util.name')" field="name" required>
               <a-input v-model="basic.name" allow-clear></a-input>
             </a-form-item>
-            <a-form-item label="description" field="description">
+            <a-form-item :label="$t('util.description')" field="description">
               <a-textarea v-model="basic.description" allow-clear></a-textarea>
             </a-form-item>
-            <a-form-item label="creator">
+            <a-form-item :label="$t('util.creator')">
               <UserAvatar :organization-user-id="basic.created_by?.organizationUserId" :name="basic.created_by?.nickname" :photo="basic.created_by?.photo" v-if="basic.created_by"></UserAvatar>
             </a-form-item>
             <a-form-item>
               <a-space size="large">
-                <a-button type="primary" html-type="submit">Save</a-button>
-	              <a-button type="primary" status="danger" html-type="button" @click="onQuit">Quit</a-button>
-                <a-button status="danger" html-type="button" v-if="checkPermission(permission,Permission_Types.Team.DELETE)" @click="onDelete">Delete</a-button>
+                <a-button type="primary" html-type="submit">{{$t("util.save")}}</a-button>
+	              <a-button type="primary" status="danger" html-type="button" @click="onQuit">{{$t("util.quit")}}</a-button>
+                <a-button status="danger" html-type="button" v-if="checkPermission(permission,Permission_Types.Team.DELETE)" @click="onDelete">{{$t("util.delete")}}</a-button>
                 <a-button type="outline" size="small" html-type="button" @click="onMessage">
                   <template #icon>
                     <icon-message></icon-message>
                   </template>
-                  Message
+	                {{$t("util.message")}}
                 </a-button>
               </a-space>
             </a-form-item>
@@ -37,12 +37,12 @@
               <a-list-item-meta>
                 <template #title>
                   {{basic.name}}&nbsp;&nbsp;
-	                <a-button type="primary" status="danger" size="mini" html-type="button" @click="onQuit">Quit</a-button>&nbsp;&nbsp;
+	                <a-button type="primary" status="danger" size="mini" html-type="button" @click="onQuit">{{$t("util.quit")}}</a-button>&nbsp;&nbsp;
                   <a-button type="outline" size="mini" html-type="button" @click="onMessage">
                     <template #icon>
                       <icon-message></icon-message>
                     </template>
-                    Message
+	                  {{$t("util.message")}}
                   </a-button>
                 </template>
                 <template #description>
@@ -59,16 +59,16 @@
           </a-list>
         </template>
       </a-collapse-item>
-      <a-collapse-item header="Member" key="member">
+      <a-collapse-item :header="$t('util.member')" key="member">
         <a-row>
           <a-space>
-            <span>Role</span>
+            <span>{{$t("util.role")}}</span>
             <a-select v-model="roleId" style="min-width: 100px">
-              <a-option label="All" value="all"></a-option>
+              <a-option :label="$t('util.all')" value="all"></a-option>
               <a-option v-for="item in roleList" :label="item.name" :value="item.id"></a-option>
             </a-select>
-            <a-input-search placeholder="please type user name" v-model="keyword" @search="listUser(1)"></a-input-search>
-            <a-button type="primary" v-if="checkPermission(permission,Permission_Types.Team.ADMIN)" @click="onAddMember">Add</a-button>
+            <a-input-search :placeholder="$t('placeholder.typeUserName')" v-model="keyword" @search="listUser(1)"></a-input-search>
+            <a-button type="primary" v-if="checkPermission(permission,Permission_Types.Team.ADMIN)" @click="onAddMember">{{$t("util.add")}}</a-button>
           </a-space>
         </a-row>
         <a-space wrap style="margin-top: 20px" size="large">
@@ -76,8 +76,8 @@
         </a-space>
         <a-pagination :page-size="20" :total="pagination.total" style="margin-top: 10px" @change="onPageChange"></a-pagination>
       </a-collapse-item>
-      <a-collapse-item header="Role" key="role" v-if="checkPermission(permission,Permission_Types.Team.ADMIN)">
-        <a-button @click="onAddRole" type="primary" style="margin-bottom: 10px">Add</a-button>
+      <a-collapse-item :header="$t('util.role')" key="role" v-if="checkPermission(permission,Permission_Types.Team.ADMIN)">
+        <a-button @click="onAddRole" type="primary" style="margin-bottom: 10px">{{$t("util.add")}}</a-button>
         <a-table :columns="columns" :data="roleList" :pagination="false">
           <template #description="{record}">
             {{record.description}}
@@ -94,8 +94,8 @@
           <template #operation="{record}">
             <template v-if="!record.global">
               <a-space wrap>
-                <a-button type="primary" size="small" @click="onEditRole(record)">manage</a-button>
-                <a-button status="danger" size="small" @click="onDeleteRole(record)">delete</a-button>
+                <a-button type="primary" size="small" @click="onEditRole(record)">{{$t("util.manage")}}</a-button>
+                <a-button status="danger" size="small" @click="onDeleteRole(record)">{{$t("util.delete")}}</a-button>
               </a-space>
             </template>
           </template>
@@ -121,6 +121,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import EditTeamMemberRole from "../setting/user&team/editTeamMemberRole.vue";
 import EditTeamRole from "../setting/role/team/editTeamRole.vue";
 import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   teamId:string
@@ -140,25 +141,26 @@ type RoleItem={
   global:boolean,
   permissions:Permission_Base[]
 }
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     dataIndex:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     slotName:"description"
   },
   {
-    title:"permission",
+    title:t("util.permission"),
     slotName:"permission"
   },
   {
-    title:"global",
+    title:t("util.global"),
     slotName: "global"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -185,14 +187,14 @@ const action=(item:ICommon_Route_Res_Organization_User_Item)=>{
     {
       name:"remove",
       func:async ()=>{
-        let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this member?")
+        let ret=await Dialog.confirm(root.value,appContext,t("tip.removeMember"))
         if(ret) {
           let res=await apiTeam.removeMember({
             teamId:props.teamId,
             organizationUserId:item.organizationUser.id
           })
           if(res?.code==0) {
-            Message.success("remove success")
+            Message.success(t("tip.deleteSuccess"))
             listUser(1)
           } else {
             Message.error(res.msg)
@@ -230,13 +232,13 @@ const onEditRole=async (item:RoleItem) =>{
   }
 }
 const onDeleteRole=async (item:RoleItem)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this role?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteRole"))
   if(ret) {
     let res=await apiTeam.removeRole({
       roleId:item.id
     })
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       listRole()
     } else {
       Message.error(res.msg);
@@ -335,7 +337,7 @@ const onSave=async ()=>{
     })
   })
   if(res?.code==0) {
-    Message.success("update success")
+    Message.success(t("tip.updateSuccess"))
     basic.value=res.data
     navigator.setCurrentPath(res.data.name)
   } else {
@@ -343,13 +345,13 @@ const onSave=async ()=>{
   }
 }
 const onDelete=async ()=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this team?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteTeam"))
   if(ret) {
     let res=await apiTeam.remove({
       teamId:props.teamId
     })
     if(res?.code==0){
-      Message.success("delete success")
+      Message.success(t("tip.deleteSuccess"))
       navigator.replaceRoot("team",null,"team");
     } else {
       Message.error(res.msg)
@@ -374,13 +376,13 @@ const onMessage=()=>{
 }
 
 const onQuit=async ()=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to quit this team?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.quitTeam"))
 	if(ret) {
 		let res=await apiTeam.quit({
 			teamId:props.teamId
 		})
 		if(res?.code==0){
-			Message.success("quit success")
+			Message.success(t("tip.quitSuccess"))
 			navigator.replaceRoot("team",null,"team");
 		} else {
 			Message.error(res.msg)

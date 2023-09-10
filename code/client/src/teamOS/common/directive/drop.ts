@@ -93,6 +93,9 @@ export const vDrop:Directive= {
                             if(!allowTypeList.includes(EClient_Drag_Type.DISK)) {
                                 isDrop=false
                                 return
+                            } else {
+                                isDrop=true
+                                break
                             }
                         } else if(item.kind=="string") {
                             if(item.type=="free") {

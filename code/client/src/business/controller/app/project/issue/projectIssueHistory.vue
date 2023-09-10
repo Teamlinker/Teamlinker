@@ -6,35 +6,35 @@
 					<template v-if="item.type===ECommon_Model_Project_Issue_History_Type.CREATE_ISSUE">
 						<div style="width: 100%;align-items: center;display: flex">
 							<UserAvatar :organization-user-id="item.organization_user_id"></UserAvatar>&nbsp;
-							created the issue&nbsp;
+							{{$t("controller.app.project.issue.projectIssueHistory.createdTheIssue")}}&nbsp;
 							<span style="color: grey">{{moment(item.created_time).format("YYYY-MM-DD HH:mm:ss")}}</span>
 						</div>
 					</template>
 					<template v-else-if="item.type===ECommon_Model_Project_Issue_History_Type.APPROVAL_RESOLVE">
 						<div style="width: 100%;align-items: center;display: flex">
 							<UserAvatar :organization-user-id="item.organization_user_id"></UserAvatar>&nbsp;
-							resolved your approval&nbsp;
+							{{$t("controller.app.project.issue.projectIssueHistory.resolvedYourApproval")}}&nbsp;
 							<span style="color: grey">{{moment(item.created_time).format("YYYY-MM-DD HH:mm:ss")}}</span>
 						</div>
 					</template>
 					<template v-else-if="item.type===ECommon_Model_Project_Issue_History_Type.APPROVAL_REJECT">
 						<div style="width: 100%;align-items: center;display: flex">
 							<UserAvatar :organization-user-id="item.organization_user_id"></UserAvatar>&nbsp;
-							rejected your approval&nbsp;
+							{{$t("controller.app.project.issue.projectIssueHistory.rejectedYourApproval")}}&nbsp;
 							<span style="color: grey">{{moment(item.created_time).format("YYYY-MM-DD HH:mm:ss")}}</span>
 						</div>
 					</template>
 					<template v-else-if="item.type===ECommon_Model_Project_Issue_History_Type.UPDATE_FIELD">
 						<div style="width: 100%;align-items: center;display: flex">
 							<UserAvatar :organization-user-id="item.organization_user_id"></UserAvatar>&nbsp;
-							updated the field&nbsp;
+							{{$t("controller.app.project.issue.projectIssueHistory.updatedTheField")}}&nbsp;
 							<span style="color: blue">
 								{{item.name}}
 							</span>&nbsp;
 							<span style="color: grey">{{moment(item.created_time).format("YYYY-MM-DD HH:mm:ss")}}</span>
 						</div>
 						<div v-if="item.value" style="display: flex;align-items: center">
-							new value :&nbsp;
+							{{$t("controller.app.project.issue.projectIssueHistory.newValue")}} :&nbsp;
 							<UserAvatar v-if="/\d{19,}/.test(item.value)" :organization-user-id="item.value"></UserAvatar>
 							<span v-else style="color: grey">{{item.value}}</span>
 						</div>
@@ -42,20 +42,20 @@
 					<template v-else-if="item.type===ECommon_Model_Project_Issue_History_Type.UPDATE_NODE">
 						<div style="width: 100%;align-items: center;display: flex">
 							<UserAvatar :organization-user-id="item.organization_user_id"></UserAvatar>&nbsp;
-							updated the workflow&nbsp;
+							{{$t("controller.app.project.issue.projectIssueHistory.updatedTheWorkflow")}}&nbsp;
 							<span style="color: #544646">
 								{{item.name}}
 							</span>&nbsp;
 							<span style="color: grey">{{moment(item.created_time).format("YYYY-MM-DD HH:mm:ss")}}</span>
 						</div>
 						<div>
-							new workflow : <span style="color: grey">{{item.value}}</span>
+							{{$t("controller.app.project.issue.projectIssueHistory.newWorkflow")}} : <span style="color: grey">{{item.value}}</span>
 						</div>
 					</template>
 					<template v-else-if="item.type===ECommon_Model_Project_Issue_History_Type.ISSUE_TYPE_CONVERT">
 						<div style="width: 100%;align-items: center;display: flex">
 							<UserAvatar :organization-user-id="item.organization_user_id"></UserAvatar>&nbsp;
-							convert the issue&nbsp;
+							{{$t("controller.app.project.issue.projectIssueHistory.convertTheIssue")}}&nbsp;
 							<span style="color: grey">{{moment(item.created_time).format("YYYY-MM-DD HH:mm:ss")}}</span>
 						</div>
 					</template>

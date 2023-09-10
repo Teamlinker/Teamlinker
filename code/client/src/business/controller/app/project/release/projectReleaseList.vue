@@ -2,17 +2,17 @@
   <div>
     <a-row>
       <a-space wrap>
-        <a-input-search v-model="keyword" placeholder="please type release name" style="width: 250px" @search="onSearch"></a-input-search>
+        <a-input-search v-model="keyword" :placeholder="$t('placeholder.typeReleaseName')" style="width: 250px" @search="onSearch"></a-input-search>
         <a-select v-model="status">
           <template #label="{data}">
-            <span>Status:{{data?.label}}</span>
+            <span>{{$t("util.status")}}:{{data?.label}}</span>
           </template>
-          <a-option :value="-1">ALL</a-option>
-          <a-option :value="ECommon_Model_Project_Release_Status.ARCHIVED">ARCHIVED</a-option>
-          <a-option :value="ECommon_Model_Project_Release_Status.RELEASE">RELEASED</a-option>
-          <a-option :value="ECommon_Model_Project_Release_Status.UNRELEASE">UNRELEASED</a-option>
+          <a-option :value="-1">{{$t("util.all")}}</a-option>
+          <a-option :value="ECommon_Model_Project_Release_Status.ARCHIVED">{{$t("util.archived")}}</a-option>
+          <a-option :value="ECommon_Model_Project_Release_Status.RELEASE">{{$t("util.released")}}</a-option>
+          <a-option :value="ECommon_Model_Project_Release_Status.UNRELEASE">{{$t("util.unReleased")}}</a-option>
         </a-select>
-        <a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">Create</a-button>
+        <a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">{{$t("util.create")}}</a-button>
       </a-space>
     </a-row>
     <a-table style="margin-top: 10px" :columns="columns" :data="releaseList" :pagination="pagination" @pageChange="onPageChange">
@@ -20,13 +20,13 @@
         <a-link href="javascript:void(0)" @click="onProfile(record,$event)">{{record.name}}</a-link>
       </template>
       <template #status="{record}">
-        <a-tag color="blue" v-if="record.status===ECommon_Model_Project_Release_Status.UNRELEASE">UNRELEASED</a-tag>
-        <a-tag color="green" v-else-if="record.status===ECommon_Model_Project_Release_Status.RELEASE">RELEASED</a-tag>
-        <a-tag v-else-if="record.status===ECommon_Model_Project_Release_Status.ARCHIVED">ARCHIVED</a-tag>
+        <a-tag color="blue" v-if="record.status===ECommon_Model_Project_Release_Status.UNRELEASE">{{$t("util.unReleased")}}</a-tag>
+        <a-tag color="green" v-else-if="record.status===ECommon_Model_Project_Release_Status.RELEASE">{{$t("util.released")}}</a-tag>
+        <a-tag v-else-if="record.status===ECommon_Model_Project_Release_Status.ARCHIVED">{{$t("util.archived")}}</a-tag>
       </template>
       <template #progress="{record}">
         <span v-if="record.notstart+record.inprogress+record.done==0">
-          No Issues
+          {{$t("controller.app.project.release.projectReleaseList.noIssues")}}
         </span>
         <a-progress v-else :percent="record.done/(record.notstart+record.inprogress+record.done)" style="width: 180px" color="green"></a-progress>
       </template>
@@ -41,28 +41,28 @@
       </template>
       <template #operation="{record}">
         <a-space v-if="checkPermission(permission,Permission_Types.Project.EDIT)" wrap>
-          <a-button size="small" @click="onEdit(record)">Edit</a-button>
+          <a-button size="small" @click="onEdit(record)">{{$t("util.edit")}}</a-button>
           <a-dropdown-button size="small">
-            Action
+	          {{$t("util.action")}}
             <template #icon>
               <icon-down />
             </template>
             <template #content>
               <template v-if="record.status==ECommon_Model_Project_Release_Status.ARCHIVED">
-                <a-doption @click="onUnRelease(record)">UnRelease</a-doption>
-                <a-doption @click="onRelease(record)">Release</a-doption>
+                <a-doption @click="onUnRelease(record)">{{$t("util.unRelease")}}</a-doption>
+                <a-doption @click="onRelease(record)">{{$t("util.release")}}</a-doption>
               </template>
               <template v-else-if="record.status==ECommon_Model_Project_Release_Status.RELEASE">
-                <a-doption @click="onUnRelease(record)">UnRelease</a-doption>
-                <a-doption @click="onArchive(record)">Archive</a-doption>
+                <a-doption @click="onUnRelease(record)">{{$t("util.unRelease")}}</a-doption>
+                <a-doption @click="onArchive(record)">{{$t("util.archive")}}</a-doption>
               </template>
               <template v-if="record.status==ECommon_Model_Project_Release_Status.UNRELEASE">
-                <a-doption @click="onRelease(record)">Release</a-doption>
-                <a-doption @click="onArchive(record)">Archive</a-doption>
+                <a-doption @click="onRelease(record)">{{$t("util.release")}}</a-doption>
+                <a-doption @click="onArchive(record)">{{$t("util.archive")}}</a-doption>
               </template>
             </template>
           </a-dropdown-button>
-          <a-button size="small" status="danger" @click="onDelete(record)">Delete</a-button>
+          <a-button size="small" status="danger" @click="onDelete(record)">{{$t("util.delete")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -88,38 +88,40 @@ import {Message} from "@arco-design/web-vue";
 import ProjectReleaseIfCan from "./projectReleaseIfCan.vue";
 import ProjectReleaseProfile from "./projectReleaseProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
+import {useI18n} from "vue-i18n";
 
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
 const permission=objInject.permission
 const key=objInject.key
+const {t}=useI18n()
 const columns=[
   {
-    title:"Name",
+    title:t("util.name"),
     slotName:"name"
   },
   {
-    title:"Status",
+    title:t("util.status"),
     slotName: "status"
   },
   {
-    title:"Progress",
+    title:t("util.progress"),
     slotName: "progress"
   },
   {
-    title:"Start Date",
+    title:t("util.startDate"),
     slotName: "startDate"
   },
   {
-    title:"Release Date",
+    title:t("util.releaseDate"),
     slotName: "releaseDate"
   },
   {
-    title:"Description",
+    title:t("util.description"),
     slotName: "description"
   },
   {
-    title:"Operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -177,13 +179,13 @@ const onEdit=async (item:DCSType<ICommon_Route_Res_Release_Item>)=>{
   }
 }
 const onDelete=async (item:DCSType<ICommon_Route_Res_Release_Item>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this release?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteRelease"))
   if(ret) {
     let res=await apiRelease.remove({
       projectReleaseId:item.id
     })
     if(res?.code==0) {
-      Message.success("delete success")
+      Message.success(t("tip.deleteSuccess"))
       search(pagination.current)
     }
   }
@@ -209,7 +211,7 @@ const onRelease=async (item:DCSType<ICommon_Route_Res_Release_Item>)=>{
         status:ECommon_Model_Project_Release_Status.RELEASE
       })
       if(res?.code==0) {
-        Message.success("release success")
+        Message.success(t("tip.releaseSuccess"))
         search(pagination.current)
       } else {
         Message.error(res.msg)
@@ -225,7 +227,7 @@ const onUnRelease=async (item:DCSType<ICommon_Route_Res_Release_Item>)=>{
     status:ECommon_Model_Project_Release_Status.UNRELEASE
   })
   if(res?.code==0) {
-    Message.success("unrelease success")
+    Message.success(t("tip.unReleaseSuccess"))
     search(pagination.current)
   } else {
     Message.error(res.msg)
@@ -237,7 +239,7 @@ const onArchive=async (item:DCSType<ICommon_Route_Res_Release_Item>)=>{
     status:ECommon_Model_Project_Release_Status.ARCHIVED
   })
   if(res?.code==0) {
-    Message.success("archive success")
+    Message.success(t("tip.archiveSuccess"))
     search(pagination.current)
   } else {
     Message.error(res.msg)

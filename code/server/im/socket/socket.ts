@@ -29,13 +29,6 @@ export async function handleImConnection() {
                 })
             }
         })
-        socket.on("im_heartbeat",()=>{
-            try {
-                rpcUserApi.keepAlive(socket.data.userId)
-            } catch(err) {
-                console.log(err)
-            }
-        })
         socket.on("disconnect",(reason, description) => {
             emitServiceEvent("organizationUserStatusChange",socket.data.organizationId,socket.data.organizationUserId,ECommon_User_Online_Status.OFFLINE)
         })

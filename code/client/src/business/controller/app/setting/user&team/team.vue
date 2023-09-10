@@ -1,8 +1,8 @@
 <template>
   <div ref="root">
     <a-space>
-      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button placeholder="please type username or nickname"></a-input-search>
-      <a-button type="primary" @click="onCreate">Create</a-button>
+      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button :placeholder="$t('placeholder.typeUsernameOrNickname')"></a-input-search>
+      <a-button type="primary" @click="onCreate">{{$t("util.create")}}</a-button>
     </a-space>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #name="{record}">
@@ -17,16 +17,16 @@
       <template #operation="{record}">
         <a-space wrap>
           <a-dropdown-button size="small">
-            Edit
+	          {{$t("util.edit")}}
             <template #icon>
               <icon-down></icon-down>
             </template>
             <template #content>
-              <a-doption @click="onEditProfile(record)">Profile</a-doption>
-              <a-doption @click="onEditMember(record)">Member</a-doption>
+              <a-doption @click="onEditProfile(record)">{{$t("util.profile")}}</a-doption>
+              <a-doption @click="onEditMember(record)">{{$t("util.member")}}</a-doption>
             </template>
           </a-dropdown-button>
-          <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.remove")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -42,22 +42,24 @@ import {ICommon_Model_Team} from "../../../../../../../common/model/team";
 import EditTeamProfile from "./editTeamProfile.vue";
 import {getCurrentNavigator} from "../../../../../teamOS/common/component/navigator/navigator";
 import EditTeamMember from "./editTeamMember.vue";
+import {useI18n} from "vue-i18n";
 
+const {t}=useI18n()
 const columns=[
   {
-    title:"name",
+    title:t("util.name"),
     slotName:"name"
   },
   {
-    title:"description",
+    title:t("util.description"),
     dataIndex:"description"
   },
   {
-    title:"creator",
+    title:t("util.creator"),
     slotName:"creator"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -115,13 +117,13 @@ const onEditMember=async (item:DCSType<ICommon_Model_Team>)=>{
   },`${item.name} -> Members`);
 }
 const onDelete=async (item:DCSType<ICommon_Model_Team>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this user from this organization?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteTeam"))
   if(ret) {
     let res=await apiTeam.remove({
       teamId:item.id
     })
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       search(pagination.current)
     }
   }

@@ -5,10 +5,12 @@ import {windowManager} from "../../../../teamOS/window/windowManager";
 import {markRaw} from "vue";
 import Finder from "../../app/finder/finder.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import i18n from "@/business/common/i18n/i18n";
 
-export const iconFinder=new Icon("Finder",iconGroupMap["finder"])
+const {t}=i18n.global
+export const iconFinder=new Icon(t("util.finder"),iconGroupMap["finder"])
 iconFinder.addEventListener("dbClick",item => {
-    const win=new Window("finder",ETeamOS_Window_Type.SIMPLE, "finder",false,[
+    const win=new Window(t("util.finder"),ETeamOS_Window_Type.SIMPLE, "finder",false,[
         {
             id:v4(),
             meta:{
@@ -21,11 +23,11 @@ iconFinder.addEventListener("dbClick",item => {
                 name:"finder"
             }
         }
-    ],"Finder");
+    ],t("util.finder"));
     windowManager.open(win,true);
 })
 eventBus.on(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,(folderId) => {
-    const win=new Window("finder",ETeamOS_Window_Type.SIMPLE, "finder",false,[
+    const win=new Window(t("util.finder"),ETeamOS_Window_Type.SIMPLE, "finder",false,[
         {
             id:v4(),
             meta:{
@@ -41,6 +43,6 @@ eventBus.on(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,(folderId) => {
                 }
             }
         }
-    ],"Finder");
+    ],t("util.finder"));
     windowManager.open(win,true);
 })

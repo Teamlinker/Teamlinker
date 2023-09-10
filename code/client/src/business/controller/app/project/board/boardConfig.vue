@@ -2,7 +2,7 @@
 	<div style="width: 100%;height: 100%">
 		<a-row style="width: 100%;height: 30px;padding-left: 10px">
 			<a-button type="primary" size="small" @click="onAddColumn">
-				Add Column
+				{{$t("controller.app.project.board.boardConfig.addColumn")}}
 			</a-button>
 		</a-row>
 		<div style="width: 100%;margin-top: 20px;overflow: auto;height: calc(100% - 90px)">
@@ -40,7 +40,7 @@
 				</template>
 				<template #pinHeader>
 					<a-row style="height: 100%;display: flex;align-items: center;justify-content: space-between;padding: 0 5px;box-sizing: border-box;">
-						<span style="color: grey">Issue Type</span>
+						<span style="color: grey">{{$t("util.issueType")}}</span>
 						<a-space size="mini">
 							<a-button type="text" size="mini" @click="onAddIssueType">
 								<template #icon>
@@ -88,6 +88,7 @@ import {ICommon_Route_Res_Board_Column_Workflow_Node_Item} from "../../../../../
 import {Dialog} from "@/business/common/component/dialog/dialog";
 import {getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
 import BoardAddIssueType from "@/business/controller/app/project/board/boardAddIssueType.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	boardId:string
@@ -95,6 +96,7 @@ const props=defineProps<{
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
 const issueTypeList=ref<DCSType<ICommon_Model_Issue_Type>[]>([])
+const {t}=useI18n()
 const workflowUnSetNodeMap=ref<{
 	[issueTypeId:string]:ICommon_Model_Workflow_Node[]
 }>()
@@ -317,7 +319,7 @@ const onColumnChange=async (id:string,index:number)=>{
 }
 
 const onEditColumn=async (id:string,name:string)=>{
-	let ret=await Dialog.input(root.value,appContext,"Edit Column Name",name)
+	let ret=await Dialog.input(root.value,appContext,t("tip.editColumnName"),name)
 	if(ret) {
 		let res=await apiBoard.editColumn({
 			boardColumnId:id,
@@ -332,7 +334,7 @@ const onEditColumn=async (id:string,name:string)=>{
 }
 
 const onDeleteColumn=async (id:string)=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete column?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteColumn"))
 	if(ret) {
 		let res=await apiBoard.deleteColumn({
 			boardColumnId:id
@@ -349,7 +351,7 @@ const onDeleteColumn=async (id:string)=>{
 }
 
 const onAddColumn=async ()=>{
-	let ret=await Dialog.input(root.value,appContext,"New Column Title")
+	let ret=await Dialog.input(root.value,appContext,t("tip.newColumnTitle"))
 	if(ret) {
 		let res=await apiBoard.addColumn({
 			name:ret,
@@ -367,7 +369,7 @@ const onAddColumn=async ()=>{
 }
 
 const onDeleteIssueType=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this issue type?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.removeIssueType"))
 	if(ret) {
 		let res=await apiBoard.unbindIssueType({
 			boardId:props.boardId,

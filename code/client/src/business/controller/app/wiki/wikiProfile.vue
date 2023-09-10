@@ -3,10 +3,10 @@
     <a-layout-sider :resize-directions="['right']">
       <div style="width: 100%;height:100%;overflow: auto;padding: 5px;box-sizing: border-box">
         <a-row>
-          <a-input-search placeholder="type wiki name" v-model="keyword" @search="onSearch"/>
+          <a-input-search :placeholder="$t('placeholder.typeWikiName')" v-model="keyword" @search="onSearch"/>
         </a-row>
         <a-row style="margin-top: 20px;color: gray;font-size: smaller;justify-content: space-between;align-items: center">
-          Workspace pages
+          {{$t("controller.app.wiki.wikiProfile.workspacePages")}}
           <a-space size="mini">
             <a-button size="mini" type="text" v-if="checkPermission(permission,Permission_Types.Wiki.EDIT)" @click="addWikiItem(null)">
               <template #icon>
@@ -41,8 +41,8 @@
                   <a-dropdown trigger="hover" position="bl">
                     <icon-more style="color: gray"></icon-more>
                     <template #content>
-                      <a-doption @click="onDelete(nodeData.id)">Delete</a-doption>
-                      <a-doption v-if="nodeData.data && nodeData.data.length>0" @click="onDeleteAll(nodeData.id)">Delete(Include Children)</a-doption>
+                      <a-doption @click="onDelete(nodeData.id)">{{$t("util.delete")}}</a-doption>
+                      <a-doption v-if="nodeData.data && nodeData.data.length>0" @click="onDeleteAll(nodeData.id)">{{$t("controller.app.wiki.wikiProfile.deleteIncludeChildren")}}</a-doption>
                     </template>
                   </a-dropdown>
                 </a-space>
@@ -73,6 +73,7 @@ import NavigatorContainer from "../../../../teamOS/common/component/navigator/na
 import WikiItemContent from "./wikiItemContent.vue";
 import WikiSetting from "./setting/wikiSetting.vue";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   wikiId:string
@@ -88,6 +89,7 @@ let selectedIdList=[]
 let objMeta=getCurrentNavigatorMeta()?.data as {
   wikiItemId:string
 }
+const {t}=useI18n()
 const itemMap=ref<{
   [key:string]:ICommon_Route_Res_Wiki_Info_Item
 }>({})
@@ -139,7 +141,7 @@ const getPermission=async ()=>{
   }
 }
 const addWikiItem=async (parentWikiItemId:string)=>{
-  let ret=await Dialog.input(root.value,appContext,"type new wiki item name")
+  let ret=await Dialog.input(root.value,appContext,t("tip.typeNewWikiItemName"))
   if(ret) {
     let res=await apiWiki.addWikiItem({
       wikiId:props.wikiId,
@@ -167,7 +169,7 @@ const onItemMouseLeave=(event:MouseEvent)=>{
 }
 
 const onDelete=async (id:string)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this item(the sub items will be appended to current item's parent)?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteWikiItem"))
   if(ret) {
     let res=await apiWiki.deleteWikiItem({
       wikiItemId:id,
@@ -183,7 +185,7 @@ const onDelete=async (id:string)=>{
   }
 }
 const onDeleteAll=async (id:string)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this item(the sub items will also be deleted)?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteAllWikiItem"))
   if(ret) {
     let res=await apiWiki.deleteWikiItem({
       wikiItemId:id,

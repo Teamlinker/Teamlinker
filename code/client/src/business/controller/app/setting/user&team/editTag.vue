@@ -1,9 +1,9 @@
 <template>
   <a-form :model="form">
-    <a-form-item field="name" label="name" required>
+    <a-form-item field="name" :label="$t('util.name')" required>
       <a-input v-model="form.name"></a-input>
     </a-form-item>
-    <a-form-item field="description" label="description">
+    <a-form-item field="description" :label="$t('util.description')">
       <a-textarea v-model="form.description" allow-clear></a-textarea>
     </a-form-item>
   </a-form>
@@ -16,6 +16,7 @@ import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {apiOrganization} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {SessionStorage} from "../../../../common/storage/session";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   type:"edit"|"add"
@@ -26,6 +27,7 @@ let form=reactive<ICommon_Model_Member_Tag>(props.type=="edit"?JSON.parse(JSON.s
   description:"",
   organization_id:SessionStorage.get("organizationId")
 })
+const {t}=useI18n()
 onDialogOk(async ()=>{
   let ret=await (props.type=="edit"?apiOrganization.editTag({
     memberTagId:form.id,
@@ -36,7 +38,7 @@ onDialogOk(async ()=>{
     description:form.description
   }))
   if(ret?.code==0) {
-    Message.success("operation success")
+    Message.success(t("tip.operationSuccess"))
     return true
   } else {
     Message.error(ret.msg)

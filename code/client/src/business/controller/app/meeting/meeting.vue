@@ -4,22 +4,22 @@
 			<a-row style="height: 100%;display: flex;flex-direction: column;justify-content: center;align-items: center">
 				<a-dropdown class="startMeeting" trigger="hover" position="top">
 					<a-button size="large" type="primary" style="width: 300px" status="success" @click="onStartMeeting">
-						Start Meeting
+						{{$t("controller.app.meeting.meeting.startMeeting")}}
 					</a-button>
 					<template #content>
-						<a-doption @click="onPersonalMeetingSetting">Person Meeting Setting</a-doption>
+						<a-doption @click="onPersonalMeetingSetting">{{$t("controller.app.meeting.meeting.personMeetingSetting")}}</a-doption>
 					</template>
 				</a-dropdown>
-				<a-button size="large" type="primary" style="margin-top: 30px;width: 300px" status="warning" @click="onJoinMeeting">Join Meeting</a-button>
-				<a-button size="large" type="primary" style="margin-top: 30px;width: 300px" @click="onScheduleMeeting">Schedule Meeting</a-button>
+				<a-button size="large" type="primary" style="margin-top: 30px;width: 300px" status="warning" @click="onJoinMeeting">{{$t("controller.app.meeting.meeting.joinMeeting")}}</a-button>
+				<a-button size="large" type="primary" style="margin-top: 30px;width: 300px" @click="onScheduleMeeting">{{$t("controller.app.meeting.meeting.scheduleMeeting")}}</a-button>
 			</a-row>
 		</a-layout-content>
 		<a-layout-sider :resize-directions="['left']" :width="300">
 			<a-row style="height: 100%;width: 100%;padding: 5px;box-sizing: border-box">
 				<a-row style="height: 30px;width: 100%;">
 					<a-space>
-						Meeting List:
-						<a-input-search search-button placeholder="type meeting name" size="mini" @search="onSearch" v-model="keyword"></a-input-search>
+						{{$t("controller.app.meeting.meeting.meetingList")}}:
+						<a-input-search search-button :placeholder="$t('placeholder.typeMeetingName')" size="mini" @search="onSearch" v-model="keyword"></a-input-search>
 					</a-space>
 				</a-row>
 				<a-row style="height: calc(100% - 30px);width: 100%;border-top: 1px solid lightgray;overflow-y: auto;flex-direction: column">
@@ -40,12 +40,14 @@
 									</template>
 								</a-list-item-meta>
 								<template #actions>
-									<icon-video-camera style="color: red" @click="onStartScheduleMeeting(item)"></icon-video-camera>
-									<template v-if="item.type===ECommon_Model_Meeting_Room_Type.SCHEDULE">
-										<icon-edit @click="onEditMeeting(item)"></icon-edit>
-										<icon-delete @click="onDeleteMeeting(item)"></icon-delete>
-									</template>
-									<icon-calendar style="color: cornflowerblue" v-else-if="item.type===ECommon_Model_Meeting_Room_Type.CALENDAR" @click="onCalendarEvent(item)"></icon-calendar>
+									<a-space style="height: 100%">
+										<icon-video-camera style="color: red" @click="onStartScheduleMeeting(item)"></icon-video-camera>
+										<template v-if="item.type===ECommon_Model_Meeting_Room_Type.SCHEDULE">
+											<icon-edit @click="onEditMeeting(item)"></icon-edit>
+											<icon-delete style="color: red" @click="onDeleteMeeting(item)"></icon-delete>
+										</template>
+										<icon-calendar style="color: cornflowerblue" v-else-if="item.type===ECommon_Model_Meeting_Room_Type.CALENDAR" @click="onCalendarEvent(item)"></icon-calendar>
+									</a-space>
 								</template>
 							</a-list-item>
 						</a-list>
@@ -76,9 +78,9 @@ import MeetingJoinInput from "./meetingJoinInput.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {useDesktopStore} from "../../desktop/store/desktop";
 import {ECommon_User_Online_Status} from "../../../../../../common/types";
-import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	meetingInitInfo?:{
@@ -93,6 +95,7 @@ const props=defineProps<{
 const store=useDesktopStore()
 const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()
+const {t}=useI18n()
 const roomList=ref<DCSType<ICommon_Model_Meeting_Room>[]>([])
 const pagination=reactive({
 	total:0,
@@ -147,13 +150,13 @@ const onEditMeeting=async (item:DCSType<ICommon_Model_Meeting_Room>)=>{
 }
 
 const onDeleteMeeting=async (item:DCSType<ICommon_Model_Meeting_Room>)=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this meeting?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteMeeting"))
 	if(ret) {
 		let res=await apiMeeting.deleteRoom({
 			meetingRoomId:item.id
 		})
 		if(res?.code==0) {
-			Message.success("delete success")
+			Message.success(t("tip.deleteSuccess"))
 			getMeetingList(pagination.current)
 		}
 	}

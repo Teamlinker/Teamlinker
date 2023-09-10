@@ -5,9 +5,9 @@
       <a-row style="width: 300px;padding: 10px">
         <a-row style="color: gray;width: 100%">
           {{info?.project.keyword+"-"+info?.unique_id}}&nbsp;
-          <a-tag color="gray" v-if="info?.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART">Not Start</a-tag>
-          <a-tag color="blue" v-else-if="info?.workflowNode.status===ECommon_Model_Workflow_Node_Status.INPROGRESS">InProgress</a-tag>
-          <a-tag color="green" v-else-if="info?.workflowNode.status===ECommon_Model_Workflow_Node_Status.DONE">Done</a-tag>
+          <a-tag color="gray" v-if="info?.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART">{{$t("util.notStart")}}</a-tag>
+          <a-tag color="blue" v-else-if="info?.workflowNode.status===ECommon_Model_Workflow_Node_Status.INPROGRESS">{{$t("util.inProgress")}}</a-tag>
+          <a-tag color="green" v-else-if="info?.workflowNode.status===ECommon_Model_Workflow_Node_Status.DONE">{{$t("util.done")}}</a-tag>
         </a-row>
         <a-row style="font-weight: bold;width: 100%;margin-top: 10px">
           {{info?.name}}
@@ -15,14 +15,14 @@
         <a-row style="width: 100%;margin-top: 15px">
           <a-col :span="12">
             <template v-if="info?.assigner_id">
-              Assigner&nbsp;&nbsp;
+	            {{$t("util.assigner")}}&nbsp;&nbsp;
               <a-avatar :image-url="info?.assigner_id.photo" :size="20"></a-avatar>&nbsp;
               {{info?.assigner_id.nickname}}
             </template>
           </a-col>
           <a-col :span="12">
             <template v-if="info?.reporter_id">
-              Reporter&nbsp;&nbsp;
+	            {{$t("util.reporter")}}&nbsp;&nbsp;
               <a-avatar :image-url="info?.reporter_id.photo" :size="20"></a-avatar>&nbsp;
               {{info?.reporter_id.nickname}}
             </template>
@@ -36,7 +36,7 @@
             <FieldPriority :priority="info?.priority" v-if="info"></FieldPriority>
           </a-col>
           <a-col :span="8">
-            <a-button type="outline" size="mini" style="margin-left: 20px" @click="onProfile">Profile</a-button>
+            <a-button type="outline" size="mini" style="margin-left: 20px" @click="onProfile">{{$t("util.profile")}}</a-button>
           </a-col>
         </a-row>
       </a-row>

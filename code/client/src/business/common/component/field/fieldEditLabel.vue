@@ -6,7 +6,7 @@
       <ProjectIssuePreview :name="key+'-'+showValue.uniqueId" :project-issue-id="showValue.id" v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.ISSUE"></ProjectIssuePreview>
 	    <BoardSprintPreview :name="showValue.name" :board-sprint-id="showValue.id" v-else-if="type===ECommon_Model_Workflow_Node_Field_Type_Label_Type.SPRINT"></BoardSprintPreview>
     </template>
-    <span v-else style="line-height: 30px;width: 100%;color: grey">None</span>
+    <span v-else style="line-height: 30px;width: 100%;color: grey">{{$t("util.none")}}</span>
   </template>
   <template v-else>
     <a-space size="mini">

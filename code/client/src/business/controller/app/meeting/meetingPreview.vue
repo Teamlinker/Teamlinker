@@ -1,8 +1,8 @@
 <template>
 	<a-form :model="form" ref="formEle" auto-label-width>
-		<a-form-item field="cameraId" label="select camera">
+		<a-form-item field="cameraId" :label="$t('util.selectCamera')">
 			<div style="width: 80%">
-				<a-select v-model="form.cameraId" placeholder="if you don't choose,we will pick up default">
+				<a-select v-model="form.cameraId" :placeholder="$t('placeholder.meetingPreview')">
 					<a-option v-for="item in cameraList" :value="item.id">{{item.name}}</a-option>
 				</a-select>
 				<div style="width: 100%;margin-top: 10px">
@@ -10,10 +10,10 @@
 				</div>
 			</div>
 		</a-form-item>
-		<a-form-item field="enableVideo" label="video on">
+		<a-form-item field="enableVideo" :label="$t('util.videoOn')">
 			<a-switch v-model="form.enableVideo"></a-switch>
 		</a-form-item>
-		<a-form-item field="enableAudio" label="audio on">
+		<a-form-item field="enableAudio" :label="$t('util.audioOn')">
 			<a-switch v-model="form.enableAudio"></a-switch>
 		</a-form-item>
 	</a-form>

@@ -1,20 +1,20 @@
 <template>
   <a-form :model="form" ref="eleForm" style="width: 80%">
-    <a-form-item field="type" label="type" required :disabled="type=='edit'" @change="onChangeType">
+    <a-form-item field="type" :label="$t('util.type')" required :disabled="type=='edit'" @change="onChangeType">
       <a-select  v-model="form.type">
-        <a-option :value="ECommon_Model_Organization_Member_Type.DEFAULT">Default</a-option>
-        <a-option :value="ECommon_Model_Organization_Member_Type.USER">User</a-option>
-        <a-option :value="ECommon_Model_Organization_Member_Type.TEAM">Team</a-option>
-        <a-option :value="ECommon_Model_Organization_Member_Type.MEMBERTAG">Tag</a-option>
+        <a-option :value="ECommon_Model_Organization_Member_Type.DEFAULT">{{$t("util.default")}}</a-option>
+        <a-option :value="ECommon_Model_Organization_Member_Type.USER">{{$t("util.user")}}</a-option>
+        <a-option :value="ECommon_Model_Organization_Member_Type.TEAM">{{$t("util.team")}}</a-option>
+        <a-option :value="ECommon_Model_Organization_Member_Type.MEMBERTAG">{{$t("util.tag")}}</a-option>
       </a-select>
     </a-form-item>
-    <a-form-item field="memberId" label="name" required v-if="form.type!==ECommon_Model_Organization_Member_Type.DEFAULT">
+    <a-form-item field="memberId" :label="$t('util.name')" required v-if="form.type!==ECommon_Model_Organization_Member_Type.DEFAULT">
       <a-select @search="onSearch" v-model="form.memberId" allow-search v-if="type=='add'">
         <a-option v-for="item in userList" :value="item.value" :label="item.label"></a-option>
       </a-select>
       <template v-else>{{ getNameFromRoleMember(item) }}</template>
     </a-form-item>
-    <a-form-item field="roleId" label="role" required>
+    <a-form-item field="roleId" :label="$t('util.role')" required>
       <a-select v-model="form.roleId">
         <a-option v-for="item in roleList" :value="item.id" :label="item.name"></a-option>
       </a-select>
@@ -32,6 +32,7 @@ import {Message} from "@arco-design/web-vue";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../../common/model/organization";
 import {getMemberIdFromRoleMember, getNameFromRoleMember} from "../../../../common/util/helper";
 import {SessionStorage} from "../../../../common/storage/session";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   type:"edit"|"add"
@@ -49,6 +50,7 @@ const userList=ref<{
   value:string,
   label:string
 }[]>([])
+const {t}=useI18n()
 const onSearch=async (value:string)=>{
   if(form.type==ECommon_Model_Organization_Member_Type.USER) {
     let res=await apiOrganization.listUser({
@@ -116,7 +118,7 @@ onDialogOk(async ()=>{
     ...form
   }))
   if(res?.code==0) {
-    Message.success("operation success")
+    Message.success(t("tip.operationSuccess"))
     return true
   } else {
     Message.error(res.msg)

@@ -1,11 +1,11 @@
 <template>
 	<div style="width: 100%;height: 100%;z-index: 10000;display: flex;align-items: center;justify-content: center;position: absolute;left: 0;top:0" @click="onClose">
 		 <a-row style="width: 500px;border-radius: 5px;background-color: rgb(241,241,241);justify-content: center;box-shadow: 0px 0px 2px 2px rgba(169, 169, 169, 0.2)">
-			 <a-input-search placeholder="type whatever you want" size="large" v-model="keyword" autofocus></a-input-search>
+			 <a-input-search :placeholder="$t('placeholder.search')" size="large" v-model="keyword" autofocus></a-input-search>
 			 <a-row style="width: 500px;max-height: 800px;overflow-y: auto" class="searchList">
 				 <a-empty v-if="isEmpty"></a-empty>
 				 <a-collapse v-else v-model:active-key="expandKeys" style="width: 100%">
-					 <a-collapse-item header="Project" key="project" v-if="data.projectList.length>0">
+					 <a-collapse-item :header="$t('util.project')" key="project" v-if="data.projectList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.projectList" :key="item.id">
 								 <a-link @click="onClickProject(item)">
@@ -14,7 +14,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Project Issue" key="issue" v-if="data.projectIssueList.length>0">
+					 <a-collapse-item :header="$t('util.projectIssue')" key="issue" v-if="data.projectIssueList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.projectIssueList" :key="item.id">
 								 <FieldPriority :priority="item.priority" only-icon></FieldPriority>&nbsp;
@@ -24,7 +24,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Project Release" key="release" v-if="data.projectReleaseList.length>0">
+					 <a-collapse-item :header="$t('util.projectRelease')" key="release" v-if="data.projectReleaseList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.projectReleaseList" :key="item.id">
 								 <a-link @click="onClickProjectRelease(item)">
@@ -36,7 +36,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Project Board" key="board" v-if="data.boardList.length>0">
+					 <a-collapse-item :header="$t('util.projectBoard')" key="board" v-if="data.boardList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.boardList" :key="item.id">
 								 <a-link @click="onClickProjectBoard(item)">
@@ -45,7 +45,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Project Board Sprint" key="sprint" v-if="data.boardSprintList.length>0">
+					 <a-collapse-item :header="$t('util.projectBoardSprint')" key="sprint" v-if="data.boardSprintList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.boardSprintList" :key="item.id">
 								 <a-link @click="onClickProjectBoardSprint(item)">
@@ -57,7 +57,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Wiki Space" key="wiki" v-if="data.wikiSpaceList.length>0">
+					 <a-collapse-item :header="$t('util.wikiSpace')" key="wiki" v-if="data.wikiSpaceList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.wikiSpaceList" :key="item.id">
 								 <a-link @click="onClickWikiSpace(item)">
@@ -66,7 +66,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Wiki Item" key="wikiItem" v-if="data.wikiItemList.length>0">
+					 <a-collapse-item :header="$t('util.wikiItem')" key="wikiItem" v-if="data.wikiItemList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.wikiItemList" :key="item.id">
 								 <a-link @click="onClickWikiItem(item)">
@@ -75,7 +75,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Calendar Event" key="calendarEvent" v-if="data.calendarEventList.length>0">
+					 <a-collapse-item :header="$t('util.calendarEvent')" key="calendarEvent" v-if="data.calendarEventList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.calendarEventList" :key="item.id">
 								 <a-link @click="onClickCalendarEvent(item)">
@@ -84,7 +84,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Meeting Room" key="meetingRoom" v-if="data.meetingRoomList.length>0">
+					 <a-collapse-item :header="$t('util.meetingRoom')" key="meetingRoom" v-if="data.meetingRoomList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.meetingRoomList" :key="item.id">
 								 <a-link @click="onClickMeetingRoom(item)">
@@ -93,7 +93,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="User" key="user" v-if="data.userList.length>0">
+					 <a-collapse-item :header="$t('util.user')" key="user" v-if="data.userList.length>0">
 						 <a-list :bordered="false" size="small" style="width: 100%;">
 							 <a-list-item v-for="item in data.userList" :key="item.organizationUser.id">
 								 <a-space>
@@ -105,7 +105,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Team" key="team" v-if="data.teamList.length>0">
+					 <a-collapse-item :header="$t('util.team')" key="team" v-if="data.teamList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.teamList" :key="item.id">
 								 <a-space>
@@ -117,7 +117,7 @@
 							 </a-list-item>
 						 </a-list>
 					 </a-collapse-item>
-					 <a-collapse-item header="Finder" key="finder" v-if="data.finderList.length>0">
+					 <a-collapse-item :header="$t('util.finder')" key="finder" v-if="data.finderList.length>0">
 						 <a-list :bordered="false" size="small">
 							 <a-list-item v-for="item in data.finderList" :key="item.id">
 								 <a-link @click="onClickFinder(item)">

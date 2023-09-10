@@ -26,7 +26,7 @@
 				</a-button>
 				<a-button size="mini" type="text" v-if="me.permission===ECommon_Meeting_Room_Permission.PRESENTER" @click="onTogglePresenter(item)">
 					<template #icon>
-						<sicon size="15" color="rgb(22, 93, 255)" name="Ant" type="admin" v-if="item.permission===ECommon_Meeting_Room_Permission.PRESENTER" title="presenter"></sicon>
+						<sicon size="15" color="rgb(22, 93, 255)" name="Ant" type="admin" v-if="item.permission===ECommon_Meeting_Room_Permission.PRESENTER" :title="$t('controller.app.meeting.meetingParticipant.presenter')"></sicon>
 						<sicon size="15" color="gray" name="Ant" type="user" v-else></sicon>
 					</template>
 				</a-button>
@@ -34,7 +34,7 @@
 			<template #actions v-else>
 				<a-button size="mini" type="text" :disabled="true">
 					<template #icon>
-						<sicon size="15" color="rgb(22, 93, 255)" name="Ant" type="admin" v-if="me.permission===ECommon_Meeting_Room_Permission.PRESENTER" title="presenter"></sicon>
+						<sicon size="15" color="rgb(22, 93, 255)" name="Ant" type="admin" v-if="me.permission===ECommon_Meeting_Room_Permission.PRESENTER" :title="$t('controller.app.meeting.meetingParticipant.presenter')"></sicon>
 						<sicon size="15" color="gray" name="Ant" type="user" v-else></sicon>
 					</template>
 				</a-button>
@@ -54,6 +54,7 @@ import {getCurrentInstance} from "vue";
 import {MeetingClient} from "../../../common/component/meeting/client";
 import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	organizationUserList:OrganizationUserItem[],
@@ -64,9 +65,10 @@ const myOrganizationUserId=SessionStorage.get("organizationUserId")
 const navigator=getCurrentNavigator()
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
+const {t}=useI18n()
 const socket=SocketIOClient.getSocket(ECommon_Socket_Type.MEETING).getSocket()
 const onKick=async (item:OrganizationUserItem)=>{
-	let ret=await Dialog.confirm(root.value,appContext,`Do you want to kick ${item.name}?`)
+	let ret=await Dialog.confirm(root.value,appContext,`${t("tip.kick")}${item.name}?`)
 	if(ret) {
 		props.meetingClient.kick(item.organizationUserId)
 	}
@@ -74,7 +76,7 @@ const onKick=async (item:OrganizationUserItem)=>{
 
 const onTogglePresenter=async (item:OrganizationUserItem)=>{
 	let promote=item.permission===ECommon_Meeting_Room_Permission.NORMAL;
-	let ret=await Dialog.confirm(root.value,appContext,`Do you want to ${promote?`promote ${item.name} to presenter`:`demote ${item.name} to normal member`}?`)
+	let ret=await Dialog.confirm(root.value,appContext,`${t("tip.doYouWant")}${promote?`${t("tip.promote")}${item.name}${t("tip.toPresenter")}`:`${t("tip.demote")}${item.name}${t("tip.toNormalMember")}`}?`)
 	if(ret) {
 		if(promote) {
 			let ret=await socket.emitWithAck("meeting_change_presenter",item.organizationUserId,ECommon_Meeting_Room_Permission.PRESENTER)

@@ -1,8 +1,8 @@
 <template>
   <div ref="root">
     <a-space>
-      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button placeholder="please type username or nickname"></a-input-search>
-      <a-button type="primary" @click="onAdd">Add</a-button>
+      <a-input-search @search="onSearch" v-model="keyword" style="width: 300px" search-button :placeholder="$t('placeholder.typeUsernameOrNickname')"></a-input-search>
+      <a-button type="primary" @click="onAdd">{{$t("util.add")}}</a-button>
     </a-space>
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #nickname="{record}">
@@ -13,8 +13,8 @@
       </template>
       <template #operation="{record}">
         <a-space wrap>
-          <a-button @click="onEditRole(record)" size="small">Role</a-button>
-          <a-button status="danger" size="small" @click="onDelete(record)">Remove</a-button>
+          <a-button @click="onEditRole(record)" size="small">{{$t("util.role")}}</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.remove")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -28,22 +28,23 @@ import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../com
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditTeamMemberRole from "./editTeamMemberRole.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   teamId:string
 }>()
-
+const {t}=useI18n()
 const columns=[
   {
-    title:"nickname",
+    title:t("util.nickname"),
     slotName:"nickname"
   },
   {
-    title:"role",
+    title:t("util.role"),
     slotName:"role"
   },
   {
-    title:"operation",
+    title:t("util.operation"),
     slotName: "operation"
   }
 ]
@@ -97,14 +98,14 @@ const onEditRole=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=
   }
 }
 const onDelete=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
-  let ret=await Dialog.confirm(root.value,appContext,"Do you want to remove this user from this organization?")
+  let ret=await Dialog.confirm(root.value,appContext,t("tip.removeUser"))
   if(ret) {
     let res=await apiTeam.removeMember({
       organizationUserId:item.organizationUser.id,
       teamId:props.teamId
     })
     if(res?.code==0) {
-      Message.success("remove success")
+      Message.success(t("tip.deleteSuccess"))
       search(pagination.current)
     } else {
       Message.error(res.msg)

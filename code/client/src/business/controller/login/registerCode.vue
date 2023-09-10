@@ -4,14 +4,14 @@
 			<router-link :to="{name:'index'}" style="text-decoration: none;">
 				<h3 style="text-align: center;margin-bottom: 50px">Teamlinker</h3>
 			</router-link>
-			<a-form-item field="code" label="code">
+			<a-form-item field="code" :label="$t('util.code')">
 				<template #extra>
-					if you don't receive verification code email,you can <a href="javascript:void(0)" style="text-decoration: none" @click="onResend">resend</a>
+					{{$t("controller.login.registerCode.receiveCode")}} <a href="javascript:void(0)" style="text-decoration: none" @click="onResend">{{$t("util.resend")}}</a>
 				</template>
 				<a-input v-model="form.code"></a-input>
 			</a-form-item>
 			<a-form-item>
-				<a-button html-type="submit" type="primary">Submit</a-button>
+				<a-button html-type="submit" type="primary">{{$t("util.submit")}}</a-button>
 			</a-form-item>
 		</a-form>
 	</a-row>
@@ -24,6 +24,7 @@ import {reactive} from "vue";
 import {apiUser} from "../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {useRouter} from "vue-router";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	username:string
@@ -32,13 +33,14 @@ const props=defineProps<{
 const form=reactive({
 	code:""
 })
+const {t}=useI18n()
 const router=useRouter()
 const onResend=async ()=>{
 	let res=await apiUser.resendCode({
 		username:props.username
 	})
 	if(res?.code==0) {
-		Message.info("send success")
+		Message.info(t("tip.sendSuccess"))
 	} else {
 		Message.error(res.msg)
 	}
@@ -53,7 +55,7 @@ const onSubmit=async()=>{
 		code:form.code
 	})
 	if(res?.code==0) {
-		Message.info("register success")
+		Message.info(t("tip.registerSuccess"))
 		await router.replace("login")
 	} else {
 		Message.error(res.msg)

@@ -6,7 +6,7 @@
 					<a-option v-for="item in sprintList" :label="item.name" :value="item.id"></a-option>
 				</a-select>
 				<a-button type="primary" size="small" @click="onGo">
-					Go
+					{{$t("util.go")}}
 				</a-button>
 			</a-space>
 		</a-row>
@@ -61,9 +61,9 @@
 				<template #pinHeader>
 					<a-row style="height: 100%;display: flex;align-items: center;justify-content: space-between;padding: 0 5px;box-sizing: border-box;">
 						<a-space>
-							<span style="color: grey">Swim Lane</span>
+							<span style="color: grey">{{$t("util.swimLane")}}</span>
 							<span :style="{color: sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED?'dodgerblue':'rgb(0,180,42)'}">
-								({{sprintInfo.status===ECommon_Model_Board_Sprint_Status.NOTSTART?"Not Start":sprintInfo.status===ECommon_Model_Board_Sprint_Status.STARTING?"Starting":"Completed"}})
+								({{sprintInfo.status===ECommon_Model_Board_Sprint_Status.NOTSTART?$t("util.notStart"):sprintInfo.status===ECommon_Model_Board_Sprint_Status.STARTING?$t("util.starting"):$t("util.completed")}})
 							</span>
 						</a-space>
 						<a-button size="mini" type="text" @click="onAddSwimLane" v-if="sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED">
@@ -143,6 +143,7 @@ import ProjectIssueNext from "@/business/controller/app/project/issue/projectIss
 import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
 import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/model/workflow_node";
 import {ECommon_Model_Project_Issue_Approval_Type} from "../../../../../../../common/model/project_issue_approval";
+import {useI18n} from "vue-i18n";
 
 moment;
 const props=defineProps<{
@@ -154,6 +155,7 @@ const appContext=getCurrentInstance().appContext
 const sprintId=ref("")
 const sprintList=ref<DCSType<ICommon_Model_Board_Sprint>[]>([])
 const sprintInfo=ref<DCSType<ICommon_Route_Res_Board_Sprint_Info>>()
+const {t}=useI18n()
 const cardData=ref<{
 	id:string,
 	name:string,
@@ -196,7 +198,7 @@ const onSearch=async (keyword:string)=>{
 
 const onGo=async ()=>{
 	if(!sprintId.value) {
-		Message.error("you should select a sprint!")
+		Message.error(t("tip.selectSprint"))
 		return
 	}
 	let [resSprintInfo,resListColumn]=await Promise.all([
@@ -331,7 +333,7 @@ const onEditSwimLane=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>)=>
 }
 
 const onDeleteSwimLane=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>)=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you want to delete this swim lane?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteSwimLane"))
 	if(ret) {
 		let res=await apiBoard.deleteSwimLane({
 			boardSprintSwimLaneId:item.id
@@ -457,7 +459,7 @@ const onDrop=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>,columnId:s
 						}
 					}
 				} else if(nextActionList.length==0) {
-					Message.error("this issue can not move to this column!")
+					Message.error(t("tip.notMoveToColumn"))
 				}
 			}
 		}
@@ -520,7 +522,7 @@ const onAction=async (projectIssueId:string,item:ICommon_Model_Workflow_Action |
 				return
 			}
 		} else if(item.name==="Reject") {
-			let ret=await Dialog.inputRich(root.value,appContext,"Reject Reason")
+			let ret=await Dialog.inputRich(root.value,appContext,t("tip.rejectReason"))
 			if(ret) {
 				let res=await apiIssue.rejectApproval({
 					projectIssueId:projectIssueId,

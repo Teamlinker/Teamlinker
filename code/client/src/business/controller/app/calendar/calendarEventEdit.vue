@@ -4,7 +4,7 @@
       <template #label>
         <icon-info-circle style="font-size: medium"></icon-info-circle>
       </template>
-      <a-input placeholder="New Event Title" v-model="form.name" v-if="isSelf"></a-input>
+      <a-input :placeholder="$t('placeholder.newEventTitle')" v-model="form.name" v-if="isSelf"></a-input>
 	    <template v-else>
 		    {{form.name}}
 	    </template>
@@ -16,13 +16,13 @@
       <CalendarEventDateEdit :timezone="timezone" :data="form.date"></CalendarEventDateEdit>
     </a-form-item>
     <a-form-item>
-      <a-divider orientation="left" :margin="1">Advanced</a-divider>
+      <a-divider orientation="left" :margin="1">{{$t("controller.app.calendar.calendarEventEdit.advanced")}}</a-divider>
     </a-form-item>
     <a-form-item field="location">
       <template #label>
         <icon-location style="font-size: medium"></icon-location>
       </template>
-      <a-input placeholder="location" v-model="form.location" v-if="isSelf"></a-input>
+      <a-input :placeholder="$t('placeholder.location')" v-model="form.location" v-if="isSelf"></a-input>
 	    <template v-else>
 		    {{form.location?form.location:"None"}}
 	    </template>
@@ -32,21 +32,21 @@
         <icon-notification style="font-size: medium"></icon-notification>
       </template>
       <a-select v-model="form.reminder" v-if="isSelf">
-        <a-option :value="0">No Reminder</a-option>
-        <a-option :value="5">5 Min Before</a-option>
-        <a-option :value="15">15 Min Before</a-option>
-        <a-option :value="30">30 Min Before</a-option>
-        <a-option :value="60">1 Hour Before</a-option>
-        <a-option :value="600">6 Hour Before</a-option>
+        <a-option :value="0">{{$t("controller.app.calendar.calendarEventEdit.noReminder")}}</a-option>
+        <a-option :value="5">{{$t("controller.app.calendar.calendarEventEdit.fiveMinBefore")}}</a-option>
+        <a-option :value="15">{{$t("controller.app.calendar.calendarEventEdit.fifteenMinBefore")}}</a-option>
+        <a-option :value="30">{{$t("controller.app.calendar.calendarEventEdit.thirtyMinBefore")}}</a-option>
+        <a-option :value="60">{{$t("controller.app.calendar.calendarEventEdit.oneHourBefore")}}</a-option>
+        <a-option :value="600">{{$t("controller.app.calendar.calendarEventEdit.sixHourBefore")}}</a-option>
       </a-select>
 	    <template v-else>
 		    {{({
-		    	"0":"No Reminder",
-		    	"5":"5 Min Before",
-		    	"15":"15 Min Before",
-		    	"30":"30 Min Before",
-		    	"60":"1 Hour Before",
-		    	"600":"6 Hour Before"
+		    	"0":$t("controller.app.calendar.calendarEventEdit.noReminder"),
+		    	"5":$t("controller.app.calendar.calendarEventEdit.fiveMinBefore"),
+		    	"15":$t("controller.app.calendar.calendarEventEdit.fifteenMinBefore"),
+		    	"30":$t("controller.app.calendar.calendarEventEdit.thirtyMinBefore"),
+		    	"60":$t("controller.app.calendar.calendarEventEdit.oneHourBefore"),
+		    	"600":$t("controller.app.calendar.calendarEventEdit.sixHourBefore")
 	    	})[form.reminder]}}
 	    </template>
     </a-form-item>
@@ -73,11 +73,11 @@
 					  <a-switch v-model="form.meeting"></a-switch>
 					  <a-popover position="right" v-if="form.meeting" trigger="click">
 						  <a-button type="primary" status="success" style="margin-left: 20px">
-							  Start Meeting
+							  {{$t("controller.app.calendar.calendarEventEdit.startMeeting")}}
 						  </a-button>
 						  <template #content>
 							  <a-row style="flex-direction: column;align-items: center">
-								  <a-input size="small" placeholder="type user name" v-model="searchUserKey"></a-input>
+								  <a-input size="small" :placeholder="$t('placeholder.typeUserName')" v-model="searchUserKey"></a-input>
 								  <a-table style="width: 100%;margin-top: 10px" row-key="organizationUserId" :columns="columns" :data="(form.guestList as any).filter(item=>(item.organizationUserId!==organizationUserId && item.nickname.includes(searchUserKey)))" :row-selection="rowSelection" v-model:selected-keys="selectKeys" :pagination="false">
 									  <template #name="{record}">
 										  <UserAvatar :organization-user-id="record.organizationUserId" :name="record.nickname" :photo="record.photo"></UserAvatar>
@@ -92,7 +92,7 @@
 			  </template>
 		  </template>
 		  <a-button type="primary" status="success" @click="onMeeting" v-else>
-			  Join Meeting
+			  {{$t("controller.app.calendar.calendarEventEdit.joinMeeting")}}
 		  </a-button>
 	  </a-form-item>
     <a-form-item field="guestList">
@@ -139,6 +139,7 @@ import UserAvatar from "../../../common/component/userAvatar.vue";
 import {TableRowSelection} from "@arco-design/web-vue/es/table/interface";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
   type:"add"|"edit",
@@ -166,9 +167,10 @@ const rowSelection=ref<TableRowSelection>({
 	showCheckedAll:true,
 	onlyCurrent:false
 })
+const {t}=useI18n()
 const columns = [
 	{
-		title: 'Name',
+		title: t("util.name"),
 		slotName: 'name',
 	}
 ]
@@ -264,7 +266,7 @@ onDialogOk(dialogFuncGenerator({
   form:()=>formEle.value,
   func:()=>{
     if(form.date.end<form.date.start) {
-      Message.error("end date can't less than start date")
+      Message.error(t("tip.endDateLess"))
       return false
     }
 		if(isSelf.value) {

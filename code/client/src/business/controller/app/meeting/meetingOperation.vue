@@ -22,7 +22,7 @@
 					</template>
 				</a-button>
 				<template #content>
-					<a-descriptions title="Meeting Info" :data="[
+					<a-descriptions :title="$t('controller.app.meeting.meetingOperation.meetingInfo')" :data="[
 									{
 										label:'Meeting Id',
 										value:currentMeeting.id
@@ -34,9 +34,9 @@
 								]" v-if="currentMeeting"></a-descriptions>
 					<a-divider :margin="10"></a-divider>
 					<a-form :model="form" auto-label-width>
-						<a-form-item field="memberIds" label="Users" required>
-							<a-select style="width: 100%" placeholder="type user or team" multiple allow-search allow-clear v-model="form.memberIds" @search="onSearch">
-								<a-optgroup label="Team" v-if="selectList && selectList.teams && selectList.teams.length>0">
+						<a-form-item field="memberIds" :label="$t('util.users')" required>
+							<a-select style="width: 100%" :placeholder="$t('placeholder.typeUserOrTeam')" multiple allow-search allow-clear v-model="form.memberIds" @search="onSearch">
+								<a-optgroup :label="$t('util.team')" v-if="selectList && selectList.teams && selectList.teams.length>0">
 									<a-option v-for="item in selectList.teams" :value="item.id">
 										<a-row style="align-items: center">
 											<a-avatar :image-url="item.photo" :size="24"></a-avatar>&nbsp;
@@ -44,7 +44,7 @@
 										</a-row>
 									</a-option>
 								</a-optgroup>
-								<a-optgroup label="User" v-if="selectList && selectList.users && selectList.users.length>0">
+								<a-optgroup :label="$t('util.user')" v-if="selectList && selectList.users && selectList.users.length>0">
 									<a-option v-for="item in selectList.users" :value="item.id">
 										<a-row style="align-items: center">
 											<a-avatar :image-url="item.photo" :size="24"></a-avatar>&nbsp;
@@ -55,7 +55,7 @@
 							</a-select>
 						</a-form-item>
 						<a-form-item>
-							<a-button html-type="button" type="primary" @click="onInvite">Invite</a-button>
+							<a-button html-type="button" type="primary" @click="onInvite">{{$t("util.invite")}}</a-button>
 						</a-form-item>
 					</a-form>
 				</template>
@@ -69,10 +69,10 @@
 		</a-space>
 		<a-space>
 			<a-button size="mini" type="primary" @click="onLeave">
-				Leave
+				{{$t("util.leave")}}
 			</a-button>
 			<a-button size="mini" type="primary" status="danger" v-if="me?.permission===ECommon_Meeting_Room_Permission.PRESENTER" @click="onEnd">
-				End
+				{{$t("util.end")}}
 			</a-button>
 		</a-space>
 	</a-row>
@@ -92,6 +92,7 @@ import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {ICommon_Route_Res_Organization_FilterUserAndTeam} from "../../../../../../common/routes/response";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	me:OrganizationUserItem,
@@ -107,6 +108,7 @@ const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
 const socket=SocketIOClient.getSocket(ECommon_Socket_Type.MEETING).getSocket()
 let isScreen=ref(false)
+const {t}=useI18n()
 props.meetingClient.onScreenStopped=() => {
 	isScreen.value=false
 }
@@ -131,7 +133,7 @@ const onToggleVideo=()=>{
 }
 
 const onLeave=async ()=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you leave this meeting?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.leaveMeeting"))
 	if(ret) {
 		await props.meetingClient.leave()
 		navigator.pop()
@@ -139,13 +141,13 @@ const onLeave=async ()=>{
 }
 
 const onEnd=async ()=>{
-	let ret=await Dialog.confirm(root.value,appContext,"Do you end this meeting?")
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.endMeeting"))
 	if(ret) {
 		let res=await props.meetingClient.end()
 		if(res) {
 			navigator.pop()
 		} else {
-			Message.error("operation failed")
+			Message.error(t("tip.operationFailed"))
 		}
 	}
 }
@@ -179,7 +181,7 @@ const onToggleScreen=async ()=>{
 	if(!isScreen.value) {
 		let ret=await props.meetingClient.startShare()
 		if(ret===false) {
-			Message.error("can't share now")
+			Message.error(t("tip.cannotShare"))
 		} else if(ret===true) {
 			isScreen.value=true
 		}

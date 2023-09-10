@@ -18,6 +18,7 @@ import ResetCode from "./business/controller/login/resetCode.vue";
 import {ECommon_Application_Mode} from "../../common/types";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import 'virtual:svg-icons-register'
+import i18n from "@/business/common/i18n/i18n";
 
 const Desktop =()=>import("./business/controller/desktop/desktop.vue")
 const routes=[
@@ -70,6 +71,7 @@ app.use(ArcoVue)
 app.use(ArcoVueIcon)
 app.use(createPinia())
 app.use(router);
+app.use(i18n)
 app.component("sicon",sicon)
 app.component("icon",FontAwesomeIcon)
 app.mount('#app')

@@ -1,13 +1,13 @@
 <template>
 	<div style="padding: 0 10px">
 		<a-form  :model="form" ref="eleForm" auto-label-width>
-			<a-form-item label="Action" field="actionId" required>
+			<a-form-item :label="$t('util.action')" field="actionId" required>
 				<a-select v-model="form.actionId" @change="onChange">
 					<a-option v-for="item in workflowActionList" :label="item.name" :value="item.id"></a-option>
 				</a-select>
 			</a-form-item>
 			<a-divider orientation="left" v-if="valueList.length>0">
-				Fields
+				{{$t("util.fields")}}
 			</a-divider>
 			<a-form-item v-for="value in valueList" :key="value.field.id" :label="value.field.name" :extra="value.field.description" :field="value.field.name" :required="!value.field.optional">
 				<FieldInput :item="value" :project-id="projectId"></FieldInput>

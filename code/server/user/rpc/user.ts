@@ -259,8 +259,12 @@ class RpcUserApi {
         return ret;
     }
 
-    async keepAlive(userId:string) {
-        let objUser=await UserService.getItemById(userId)
+    async keepAlive(token:string) {
+        let check=await this.checkSession(token)
+        if(!check) {
+            throw Err.User.notAuth
+        }
+        let objUser=await UserService.getItemById(check.userId)
         if(!objUser) {
             throw Err.User.userNotFound
         }

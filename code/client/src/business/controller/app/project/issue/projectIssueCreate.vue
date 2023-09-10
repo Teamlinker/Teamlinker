@@ -1,26 +1,26 @@
 <template>
   <div style="padding: 0 10px">
     <a-form layout="vertical" :model="form" ref="eleForm">
-      <a-form-item label="Issue Type" field="issueTypeId" required>
+      <a-form-item :label="$t('util.issueType')" field="issueTypeId" required>
         <a-select v-model="form.issueTypeId" @change="onIssueTypeChange">
           <a-option v-for="item in issueTypeList" :label="item.name" :value="item.id"></a-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="name" field="name" required>
+      <a-form-item :label="$t('util.name')" field="name" required>
         <a-input v-model="form.name"></a-input>
       </a-form-item>
-      <a-form-item label="description" field="description">
+      <a-form-item :label="$t('util.description')" field="description">
         <a-textarea v-model="form.description"></a-textarea>
       </a-form-item>
-      <a-form-item label="priority" field="priority" required>
+      <a-form-item :label="$t('util.priority')" field="priority" required>
         <a-select v-model="form.priority">
-          <a-option label="low" :value="ECommon_Model_Project_Issue_Priority.LOW"></a-option>
-          <a-option label="medium" :value="ECommon_Model_Project_Issue_Priority.MEDIUM"></a-option>
-          <a-option label="high" :value="ECommon_Model_Project_Issue_Priority.HIGH"></a-option>
-          <a-option label="urgent" :value="ECommon_Model_Project_Issue_Priority.URGENT"></a-option>
+          <a-option :value="ECommon_Model_Project_Issue_Priority.LOW">{{$t('util.low')}}</a-option>
+          <a-option :value="ECommon_Model_Project_Issue_Priority.MEDIUM">{{$t('util.medium')}}</a-option>
+          <a-option :value="ECommon_Model_Project_Issue_Priority.HIGH">{{$t('util.high')}}</a-option>
+          <a-option :value="ECommon_Model_Project_Issue_Priority.URGENT">{{$t('util.urgent')}}</a-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="assigner">
+      <a-form-item :label="$t('util.assigner')">
         <a-select allow-search @search="onSearchAssigner" v-model="form.assigner">
           <a-option v-for="item in assignerList" :label="item.organizationUser.nickname" :value="item.organizationUser.id">
             <a-avatar :size="24" :image-url="item.user.photo"></a-avatar>&nbsp;&nbsp;
@@ -28,7 +28,7 @@
           </a-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="reporter">
+      <a-form-item :label="$t('util.reporter')">
         <a-select allow-search @search="onSearchReporter" v-model="form.reporter">
           <a-option v-for="item in reporterList" :label="item.organizationUser.nickname" :value="item.organizationUser.id">
             <a-avatar :size="24" :image-url="item.user.photo"></a-avatar>&nbsp;&nbsp;

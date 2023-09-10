@@ -7,7 +7,7 @@
 			<a-list :loading="loading" :max-height="240">
 				<a-list-item v-for="item in list" :key="item.id">
 					<div style="color: gray;font-size: small;">{{moment(item.created_time).format("MM-DD HH:mm")}}</div>
-					<div style="display: flex;align-items: center">{{item.organizationUser.nickname}} invited you
+					<div style="display: flex;align-items: center">{{item.organizationUser.nickname}} {{$t("controller.desktop.missCallShow.invitedYou")}}
 					<a-button type="text" size="small" @click="onMeeting(item)">
 						<template #icon>
 							<icon-video-camera style="color: red"></icon-video-camera>

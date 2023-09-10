@@ -11,7 +11,7 @@
 					</a-tag>
 				</template>
 			</a-space>
-			<span v-else style="line-height: 30px;width: 100%;color: gray">None</span>
+			<span v-else style="line-height: 30px;width: 100%;color: gray">{{$t("util.none")}}</span>
 		</template>
 		<template v-else>
 			<a-space size="mini" wrap>
@@ -25,7 +25,7 @@
 					<template #icon>
 						<icon-plus />
 					</template>
-					Add
+					{{$t("util.add")}}
 				</a-tag>
 				<a-button type="text" @click="onSubmit">
 					<template #icon>

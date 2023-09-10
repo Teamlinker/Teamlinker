@@ -43,15 +43,15 @@
           </a-list-item-meta>
           <template #actions>
             <template v-if="organizationUserId===myOrganizationUserId">
-              <a-button type="outline" size="small" style="margin-left: 20px" @click="onProfile">Profile</a-button>
+              <a-button type="outline" size="small" style="margin-left: 20px" @click="onProfile">{{$t("util.profile")}}</a-button>
             </template>
             <a-row v-else style="flex-direction: column">
-              <a-button type="outline" size="mini" style="margin-left: 20px" @click="onProfile">Profile</a-button>
+              <a-button type="outline" size="mini" style="margin-left: 20px" @click="onProfile">{{$t("util.profile")}}</a-button>
               <a-button type="outline" size="mini" style="margin-left: 20px;margin-top: 10px" @click="onMessage">
                 <template #icon>
                   <icon-message></icon-message>
                 </template>
-                Message
+	              {{$t("util.message")}}
               </a-button>
             </a-row>
           </template>
@@ -70,6 +70,7 @@ import {SessionStorage} from "../storage/session";
 import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
 import {ECommon_User_Online_Status} from "../../../../../common/types";
 import {Message} from "@arco-design/web-vue";
+import {useI18n} from "vue-i18n";
 
 const loading=ref(true)
 const props=defineProps<{
@@ -89,6 +90,7 @@ const showCloseable=ref(false)
 const root=ref(null);
 const name=ref("")
 const photo=ref("")
+const {t}=useI18n()
 const status=ref(ECommon_User_Online_Status.OFFLINE)
 watch(()=>[props.name,props.photo],()=>{
 	name.value=props.name
@@ -107,7 +109,7 @@ const imgName=computed(()=>{
 const info=ref<DCSType<ICommon_Model_Organization_User>>(null)
 const onProfile=()=>{
 	if(info.value.organization_id!==SessionStorage.get("organizationId")) {
-		Message.error("you should switch to the specific organization")
+		Message.error(t("tip.switchToSpecificOrganization"))
 		return
 	}
   eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,props.organizationUserId);
@@ -144,7 +146,7 @@ const onPopup=async (visible:boolean)=>{
 }
 const onMessage=()=>{
 	if(info.value.organization_id!==SessionStorage.get("organizationId")) {
-		Message.error("you should switch to the specific organization")
+		Message.error(t("tip.switchToSpecificOrganization"))
 		return
 	}
   eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,props.organizationUserId,ECommon_IM_Message_EntityType.USER)

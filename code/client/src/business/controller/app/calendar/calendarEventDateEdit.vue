@@ -14,9 +14,9 @@
     </a-row>
     <a-row style="height: 40px">
       <a-space wrap>
-        All Day:
+        {{$t("controller.app.calendar.calendarEventDateEdit.allDay")}}:
         <a-switch :checked-value="1" :unchecked-value="0" v-model="data.isAllDay" size="small" @change="onChangeAllDay"></a-switch>
-        Repeat:
+        {{$t("controller.app.calendar.calendarEventDateEdit.repeat")}}:
         <a-select style="width: 110px" size="small" v-model="data.recurring">
           <a-option :value="ECommon_Calendar_Recurring_Type.NONE">No</a-option>
           <a-option :value="ECommon_Calendar_Recurring_Type.DAY">Day</a-option>
@@ -25,13 +25,13 @@
           <a-option :value="ECommon_Calendar_Recurring_Type.MONTH">Month</a-option>
         </a-select>
         <template v-if="data.recurring===ECommon_Calendar_Recurring_Type.WEEK">
-          Select Weekday:
+	        {{$t("controller.app.calendar.calendarEventDateEdit.selectWeekday")}}:
           <a-select size="small" style="width: 130px" v-model="recurryingWeekDay" @change="onChangeRecurry">
             <a-option v-for="item in ECommon_Calendar_WeekDay" :value="item">{{calendarWeekDayName[item]}}</a-option>
           </a-select>
         </template>
         <template v-else-if="data.recurring===ECommon_Calendar_Recurring_Type.MONTH">
-          Input Day:
+	        {{$t("controller.app.calendar.calendarEventDateEdit.inputDay")}}:
           <a-input-number :min="1" :max="31" v-model="recurryingMonthDay" style="width: 100px" @change="onChangeRecurry" size="small"></a-input-number>
         </template>
 

@@ -1,7 +1,7 @@
 <template>
   <a-form :model="form" style="width: 80%" ref="eleForm">
-    <a-form-item field="workflowNodeId" label="issue type" required>
-      <a-cascader :options="data" v-model="form.workflowNodeId" :field-names="fields" placeholder="please select" allow-search></a-cascader>
+    <a-form-item field="workflowNodeId" :label="$t('util.issueType')" required>
+      <a-cascader :options="data" v-model="form.workflowNodeId" :field-names="fields" :placeholder="$t('placeholder.pleaseSelect')" allow-search></a-cascader>
     </a-form-item>
   </a-form>
 </template>
