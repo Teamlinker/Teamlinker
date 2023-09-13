@@ -1,22 +1,30 @@
 <template>
-	<a-row align="center" justify="center" style="height: 100%" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
-		<a-form :model="form" style="width: 700px" @submit="onSubmit">
-			<router-link :to="{name:'index'}" style="text-decoration: none;">
-				<h3 style="text-align: center;margin-bottom: 50px">Teamlinker</h3>
-			</router-link>
-			<a-form-item field="username" :label="$t('util.email')" required>
-				<a-input v-model="form.username" :placeholder="$t('placeholder.typeEmail')"></a-input>
-			</a-form-item>
-			<a-form-item field="password" :label="$t('util.password')" required>
-				<a-input v-model="form.password" type="password" :placeholder="$t('placeholder.typePassword')"></a-input>
-			</a-form-item>
-			<a-form-item field="passwordRepeat" :label="$t('util.passwordConfirm')" required>
-				<a-input v-model="form.passwordRepeat" type="password" :placeholder="$t('placeholder.typePasswordAgain')"></a-input>
-			</a-form-item>
-			<a-form-item>
-				<a-button html-type="submit" type="primary">{{$t("util.register")}}</a-button>
-			</a-form-item>
-		</a-form>
+	<a-row align="center" justify="center" style="height: 100%;position: relative;background: radial-gradient(circle at center, rgb(228,232,249), #ffffff);" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
+		<a-space style="position: absolute;left: 20px;top: 20px">
+			<img :src="logo" style="width: 20px;aspect-ratio: 1/1" />
+			<span style="font-size: 24px;font-weight: bolder">
+				<router-link :to="{name:'index'}" style="text-decoration: none;color:rgb(35,110,184)">
+					Teamlinker
+				</router-link>
+			</span>
+		</a-space>
+		<div style="width:40%;box-shadow: rgba(22, 14, 45, 0.02) 0px 0px 40px, rgba(22, 14, 45, 0.06) 0px 0px 104px;padding: 20px;box-sizing: border-box;border: 1px solid rgb(234, 236, 240);border-radius: 10px;background-color: white">
+			<a-form :model="form" auto-label-width @submit="onSubmit">
+				<h1 style="text-align: center;margin-bottom: 50px">{{$t("util.register")}}</h1>
+				<a-form-item field="username" :label="$t('util.email')" required>
+					<a-input v-model="form.username" :placeholder="$t('placeholder.typeEmail')"></a-input>
+				</a-form-item>
+				<a-form-item field="password" :label="$t('util.password')" required>
+					<a-input v-model="form.password" type="password" :placeholder="$t('placeholder.typePassword')"></a-input>
+				</a-form-item>
+				<a-form-item field="passwordRepeat" :label="$t('util.passwordConfirm')" required>
+					<a-input v-model="form.passwordRepeat" type="password" :placeholder="$t('placeholder.typePasswordAgain')"></a-input>
+				</a-form-item>
+				<a-form-item>
+					<a-button html-type="submit" type="primary">{{$t("util.register")}}</a-button>
+				</a-form-item>
+			</a-form>
+		</div>
 	</a-row>
 </template>
 
@@ -29,6 +37,7 @@ import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
 import md5 from "blueimp-md5";
 import {useI18n} from "vue-i18n";
+import logo from "@/assert/logo.png";
 
 let form=reactive({
 	username:"",
@@ -59,6 +68,8 @@ const onSubmit=async ()=>{
 				username:form.username
 			}
 		})
+	} else {
+		Message.error(res.msg)
 	}
 }
 </script>

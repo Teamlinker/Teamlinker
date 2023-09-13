@@ -2,7 +2,7 @@
   <TeamOS ref="root">
     <template #barLeft>
       <a-dropdown trigger="hover">
-        <a-avatar :size="32" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
+        <a-avatar id="myProfile" :size="32" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
           T
           <template #trigger-icon>
             <div style="height: 100%;width: 100%;background-color: #03ad03;border-radius: 6px" v-if="store.status===ECommon_User_Online_Status.ONLINE"></div>
@@ -50,7 +50,7 @@
 			  <a-col :flex="menuValue?'60px':'70'" style="align-items: center;display: flex">
 				  <img :src="store.organizationInfo.photo" style="height: 36px;width:80px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
-			  <a-col :flex="menuValue?'100px':'120px'">
+			  <a-col :flex="menuValue?'100px':'120px'" id="createOrganization">
 				  <a-select style="max-width: 170px;color: white" :placeholder="$t('placeholder.organization')" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
 					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
 						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
@@ -67,10 +67,10 @@
 					  {{$t("controller.desktop.desktop.createOrganization")}}
 				  </a-button>
 			  </a-col>
-			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex">
+			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex" id="search">
 				  <sicon size="18" color="rgb(241,241,241)" name="Ant" type="search" style="cursor: pointer" @click="isSearch=true"></sicon>
 			  </a-col>
-			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex">
+			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex" id="notification">
 					<NotificationShow></NotificationShow>
 			  </a-col>
 			  <a-col flex="30px" v-if="menuValue" style="justify-content: center;display: flex">
@@ -114,7 +114,6 @@
 <script setup lang="ts">
 
 import TeamOS from "../../../teamOS/index.vue";
-import img from "../../../assert/back2.jpg"
 import {getDesktopInstance} from "../../../teamOS/teamOS";
 import {getCurrentInstance, markRaw, nextTick, onBeforeMount, onBeforeUnmount, ref, watchEffect} from "vue";
 import {useDesktopStore} from "./store/desktop";
@@ -146,6 +145,9 @@ import Search from "@/business/controller/desktop/search/search.vue";
 import StickyNote from "@/business/controller/desktop/tool/stickyNote/stickyNote.vue";
 import Photo from "@/business/controller/desktop/tool/photo/photo.vue";
 import {useI18n} from "vue-i18n";
+import {Driver, driver} from "driver.js";
+import "driver.js/dist/driver.css"
+import guide from "@/assert/guide.png"
 
 interface ITeamOS_Desktop_Menu {
 	group:string,
@@ -168,6 +170,7 @@ let iconManager=getDesktopInstance().iconManager
 let windowManager=getDesktopInstance().windowManager
 const appContext=getCurrentInstance().appContext
 const loading=ref(true)
+let objDriver:Driver
 let avatar=ref("")
 const objFinderHandle=new FinderHandle(root,appContext,"")
 const noteList=ref<DCSType<ICommon_Route_Res_Sticky_Note_Item & {
@@ -385,8 +388,105 @@ const getWallpaper=async ()=>{
 	}
 }
 
+const onGuide=()=>{
+	if(SessionStorage.get("firstShow")) {
+		return
+	}
+	objDriver=driver({
+		showProgress:true,
+		nextBtnText:t("util.next"),
+		prevBtnText:t("util.previous"),
+		doneBtnText:t("util.done"),
+		progressText:"{{current}} / {{total}}",
+		steps:[
+			{
+				element:"#createOrganization",
+				popover:{
+					title:t("controller.desktop.guide.createOrganization"),
+					description:t("controller.desktop.guide.organizationDescription")
+				}
+			},
+			{
+				element:"#projectIcon",
+				popover:{
+					title:t("util.project"),
+					description:t("controller.desktop.guide.projectDescription")
+				}
+			},
+			{
+				element:"#wikiIcon",
+				popover:{
+					title:t("util.wiki"),
+					description:t("controller.desktop.guide.wikiDescription")
+				}
+			},
+			{
+				element:"#calendarIcon",
+				popover:{
+					title:t("util.calendar"),
+					description:t("controller.desktop.guide.calendarDescription")
+				}
+			},
+			{
+				element:"#finderIcon",
+				popover:{
+					title:t("util.finder"),
+					description:t("controller.desktop.guide.finderDescription")
+				}
+			},
+			{
+				element:"#imIcon",
+				popover:{
+					title:t("util.im"),
+					description:t("controller.desktop.guide.imDescription")
+				}
+			},
+			{
+				element:"#meetingIcon",
+				popover:{
+					title:t("util.meeting"),
+					description:t("controller.desktop.guide.meetingDescription")
+				}
+			},
+			{
+				element:"#myProfile",
+				popover:{
+					title:t("util.profile"),
+					description:t("controller.desktop.guide.profileDescription")
+				}
+			},
+			{
+				element:"#search",
+				popover:{
+					title:t("util.search"),
+					description:t("controller.desktop.guide.searchDescription")
+				}
+			},
+			{
+				element:"#notification",
+				popover:{
+					title:t("util.notification"),
+					description:t("controller.desktop.guide.notificationDescription")
+				}
+			},
+			{
+				popover:{
+					description: `<img src="${guide}" style="width: 100%;aspect-ratio: auto"/><div style="text-align: center">${t("controller.desktop.guide.doneDescription")}</div>`,
+					align:"center"
+				}
+			}
+		]
+	})
+	objDriver.drive()
+	SessionStorage.set("firstShow","1")
+}
+
 onBeforeMount(async ()=>{
 	objFinderHandle.registerEvents()
+	eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
+	eventBus.on(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
+	eventBus.on(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED,onLogout.bind(null,true))
+	eventBus.on(EClient_EVENTBUS_TYPE.GUIDE,onGuide)
   let isAuth=await store.isAuth();
   if(!isAuth) {
     await router.replace("login");
@@ -403,9 +503,6 @@ onBeforeMount(async ()=>{
   if(SessionStorage.get("organizationId")) {
     await store.initOrganization(SessionStorage.get("organizationId"))
   }
-  eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
-	eventBus.on(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
-	eventBus.on(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED,onLogout.bind(null,true))
 	loading.value=false
 })
 
@@ -414,6 +511,7 @@ onBeforeUnmount(()=>{
   eventBus.off(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
 	eventBus.off(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
 	eventBus.off(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED,onLogout.bind(null,true))
+	eventBus.off(EClient_EVENTBUS_TYPE.GUIDE,onGuide)
 })
 
 

@@ -10,7 +10,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
-export const iconIM=new Icon(t("util.im"),iconGroupMap["im"])
+export const iconIM=new Icon(t("util.im"),iconGroupMap["im"],"im")
 iconIM.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error(t("tip.switchToSpecificOrganization"))

@@ -10,7 +10,8 @@ export interface IClient_SessionStorage_Type {
             type:ECommon_IM_Message_EntityType
         }[]
     }
-    organizationUserId:string
+    organizationUserId:string,
+    firstShow:string
 }
 
 export class SessionStorage {

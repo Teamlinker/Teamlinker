@@ -8,7 +8,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
-export const iconFinder=new Icon(t("util.finder"),iconGroupMap["finder"])
+export const iconFinder=new Icon(t("util.finder"),iconGroupMap["finder"],"finder")
 iconFinder.addEventListener("dbClick",item => {
     const win=new Window(t("util.finder"),ETeamOS_Window_Type.SIMPLE, "finder",false,[
         {

@@ -322,7 +322,14 @@ export default {
         reject:"拒绝",
         workDay:"工作日",
         commit:"提交",
-        resolve:"撤销"
+        resolve:"撤销",
+        resetPassword:"重置密码",
+        explore:"探索",
+        system:"系统",
+        free:"免费",
+        notification:"通知",
+        next:"下一个",
+        previous:"上一个"
     },
     "common":{
         "component":{
@@ -569,9 +576,120 @@ export default {
             },
             missCallShow:{
                 invitedYou:"邀请了你"
+            },
+            guide:{
+                createOrganization:"创建组织",
+                organizationDescription:"首先，你应该创建一个组织，它代表着你的公司或者集团",
+                projectDescription:"处理事务，面板和发布数据",
+                wikiDescription:"读写文档",
+                calendarDescription:"创建日历事件并且安排你的工作",
+                finderDescription:"管理你的文件和快捷方式，以及上传和下载",
+                imDescription:"联系你的同事们",
+                meetingDescription:"加入，创建和安排视频会议",
+                profileDescription:"编辑你的个人信息，更换壁纸以及使用便签和相册",
+                searchDescription:"搜索任何你想要的",
+                notificationDescription:"检索关于事务，项目，日历等任何发给你的通知信息",
+                doneDescription:"一切都已经准备就绪，享受你的工作之旅吧！"
             }
         },
-        "index":{},
+        "index":{
+            home:{
+                product:"产品",
+                resource:"资源",
+                price:"价格",
+                login:"登录",
+                getFree:"免费获取",
+                getDockerEdition:"获取Docker版本",
+                section1:{
+                    1:"致力让团队协作",
+                    2:"更高效",
+                    3:"更简单",
+                    4:"并且",
+                    5:"更强大",
+                    6:"团队协作从未如此轻松",
+                    7:"Teamlinker专门为企业用户提供团队协作解决方案"
+                },
+                section2:{
+                    1:"数据无缝流转",
+                    2:"任务分配，视频会议",
+                    3:"让您轻松掌握项目进度",
+                    4:"Teamlinker让你的工作完成的更好更快，并且所有的工作只需要一个切入口"
+                },
+                project:{
+                    1:"自由的工作流",
+                    2:"支持看板和发布",
+                    3:"事务审批",
+                    4:"自定义字段"
+                },
+                wiki:{
+                    1:"基于块编辑器",
+                    2:"拖拽任何你想要的",
+                    3:"实时保存",
+                    4:"无限目录结构"
+                },
+                calendar:{
+                    1:"支持全天和重复事件",
+                    2:"可以邀请任何人加入事件",
+                    3:"一键加入会议",
+                    4:"时区自由切换"
+                },
+                meeting:{
+                    1:"邀请，加入和创建会议",
+                    2:"桌面和屏幕的分享",
+                    3:"主持人权限管理",
+                    4:"会议聊天窗口"
+                },
+                section3:{
+                    1:"超越传统 降本增效",
+                    2:"线下免费部署,绝对的数据隔离",
+                    3:"线上免费使用,向高效协作进化",
+                    4:"对于线下部署，我们提供docker版本，你只需要一台服务器即可"
+                },
+                im:{
+                    1:"在团队聊天里，你可以{'@'}所有人和指定的人",
+                    2:"团队视频会议",
+                    3:"历史消息搜索",
+                    4:"消息收藏与管理"
+                },
+                finder:{
+                    1:"文件和文件夹的自由拖拽",
+                    2:"对于事务，日历，会议等可以创建快捷方式",
+                    3:"文件快速预览",
+                    4:"上传与下载"
+                },
+                system:{
+                    1:"基于Web OS",
+                    2:"多窗口与任务并行",
+                    3:"强大的搜索功能",
+                    4:"提供便签和相册的小组件"
+                },
+                section4:{
+                    1:"他们都在使用Teamlinker",
+                    2:"TeamLinker极大地帮助我降低了团队成本，真的很棒！",
+                    3:"TeamLinker是一个非常强大的团队协作工具，可以让我随时随地与团队成员进行沟通。",
+                    4:"我喜欢TeamLinker，一旦用了它我就不再购买任何其他工具了！"
+                },
+                section5:{
+                    1:"让我们免费开始使用吧",
+                    2:"首先，让我们在线注册或者获取一个部署版本",
+                    3:"在线注册",
+                    4:"部署线下版本"
+                }
+            },
+            price:{
+                onlineEdition:"在线版本",
+                offlineEdition:"离线版本",
+                1:"没有使用限制",
+                2:"没有功能限制",
+                3:"没有成员限制",
+                4:"单个文件大小",
+                5:"没有文件大小限制"
+            },
+            footer:{
+                contactUs:"联系我们",
+                company:"合肥阿尔方斯科技有限公司"
+            }
+        },
         "login":{
             registerCode:{
                 receiveCode:"如果你没有收到验证码邮件，你可以"

@@ -40,7 +40,10 @@ class UserController {
         }
         if(user.getItem().password===password) {
             let token=await user.startSession()
-            let ret=user.getItem()
+            user.assignItem({
+                count:user.getItem().count+1
+            })
+            let ret=await user.update()
             delete ret.password
             ctx.setHeader("token",token)
             return ret

@@ -321,7 +321,14 @@ export default {
         reject:"Reject",
         workDay:"WorkDay",
         commit:"Commit",
-        resolve:"Resolve"
+        resolve:"Resolve",
+        resetPassword:"Reset Password",
+        explore:"Explore",
+        system:"System",
+        free:"Free",
+        notification:"Notification",
+        next:"Next",
+        previous:"Previous"
     },
     "common":{
         "component":{
@@ -568,9 +575,120 @@ export default {
             },
             missCallShow:{
                 invitedYou:"invited you"
+            },
+            guide:{
+                createOrganization:"Create Organization",
+                organizationDescription:"Firstly,you should create an organization that represents your company,your group or your firm",
+                projectDescription:"you can handle issue,board and release here",
+                wikiDescription:"you can read and write wiki here",
+                calendarDescription:"you can create calendar event and schedule your work here",
+                finderDescription:"you can manage your file and shortcut,upload and download here",
+                imDescription:"you can reach out to any person here",
+                meetingDescription:"you can create,join or schedule meeting here",
+                profileDescription:"you can edit your profile,change background,use sticky note and album here",
+                searchDescription:"search whatever you want",
+                notificationDescription:"you can retrieve your notifications about project,issue,wiki,calendar and so on",
+                doneDescription:"Everything is done! Enjoy your journey!"
             }
         },
-        "index":{},
+        "index":{
+            home:{
+                product:"Product",
+                resource:"Resource",
+                price:"Price",
+                login:"Log In",
+                getFree:"Get Free",
+                getDockerEdition:"Get Docker Edition",
+                section1:{
+                    1:"Collaboration is",
+                    2:"efficient",
+                    3:"simple",
+                    4:"and",
+                    5:"powerful",
+                    6:"Link Every Team Easier And Faster",
+                    7:"Teamlinker is a collaboration solution for enterprise customers"
+                },
+                section2:{
+                    1:"HOW IT WORKS",
+                    2:"One Platform,One Piece Of Data,",
+                    3:"Resolve Basic Online Work Flow",
+                    4:"Teamlinker is a place where better work,faster collaboration.All your work in one entry"
+                },
+                project:{
+                    1:"Workflow Freestyle",
+                    2:"Kanban & Release Support",
+                    3:"Issue Approval",
+                    4:"Custom Fields"
+                },
+                wiki:{
+                    1:"Based On Block Editor",
+                    2:"Drag & Drop Anything",
+                    3:"Realtime Save",
+                    4:"Infinite Structure"
+                },
+                calendar:{
+                    1:"AllDay & Recurring Event",
+                    2:"Invite Anyone",
+                    3:"One-Button Meeting",
+                    4:"Switch Timezone"
+                },
+                meeting:{
+                    1:"Invite,Join,Schedule Meeting",
+                    2:"Desktop & Screen Share",
+                    3:"Presenter Management",
+                    4:"Meeting Chat"
+                },
+                section3:{
+                    1:"Collaboration Evolution",
+                    2:"Free Offline Deployment,Absolutely Security",
+                    3:"Free Online Version Available,Immediately Contact Your Team",
+                    4:"docker edition for offline,only one server is needed"
+                },
+                im:{
+                    1:"{'@'} All & People In Team Chat",
+                    2:"Team Meeting",
+                    3:"Message Search",
+                    4:"Favourite Management"
+                },
+                finder:{
+                    1:"File & Folder Drag And Drop",
+                    2:"Shortcut for Issue,Event,Meeting...",
+                    3:"File Quick Preview",
+                    4:"Upload And Download"
+                },
+                system:{
+                    1:"Based On Web OS",
+                    2:"Multiply Windows And Tasks",
+                    3:"Search Everything You Want",
+                    4:"Widgets:Sticky Note & Album"
+                },
+                section4:{
+                    1:"They Are Using Teamlinker",
+                    2:"TeamLinker has greatly helped me reduce the cost of the team, it is really great!",
+                    3:"TeamLinker is a very powerful team collaboration tool that allows me to communicate with team members anytime, anywhere.",
+                    4:"I like TeamLinker,i no longer buy any other tools once i use it!"
+                },
+                section5:{
+                    1:"Get Started For Free",
+                    2:"Just go ahead! Sign up and create your team.",
+                    3:"Sign Up Online",
+                    4:"Deploy Offline Edition"
+                }
+            },
+            price:{
+                onlineEdition:"Online Edition",
+                offlineEdition:"Offline Edition",
+                1:"No Usage Limit",
+                2:"No Functionality Limit",
+                3:"No Member Limit",
+                4:"Single File Size Limit",
+                5:"No File Size Limit"
+            },
+            footer:{
+                contactUs:"Contact Us",
+                company:"Teamlinker Labs,Inc"
+            }
+        },
         "login":{
             registerCode:{
                 receiveCode:"if you don't receive verification code email,you can"

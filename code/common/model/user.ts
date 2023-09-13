@@ -1,5 +1,5 @@
+import {BaseModel} from "./base"
 
-import { BaseModel } from "./base"
 export enum ECommon_User_Type {
   USER,
   ADMIN
@@ -13,7 +13,8 @@ export interface ICommon_Model_User {
   password :string,
   sign :string,
   active:number,
-  role:ECommon_User_Type
+  role:ECommon_User_Type,
+  count:number
 }
 export const Table_User="user"
 

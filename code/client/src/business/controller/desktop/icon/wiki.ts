@@ -11,7 +11,7 @@ import {SessionStorage} from "../../../common/storage/session";
 import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
-export const iconWiki=new Icon(t("util.wiki"),iconGroupMap["wiki"])
+export const iconWiki=new Icon(t("util.wiki"),iconGroupMap["wiki"],"wiki")
 iconWiki.addEventListener("dbClick",item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error(t("tip.switchToSpecificOrganization"))

@@ -138,6 +138,9 @@ export const useDesktopStore=defineStore("desktop",{
             } else {
                 SessionStorage.set("userId",ret.data.id);
                 this.userInfo=ret.data;
+                if(this.userInfo.count===1) {
+                    eventBus.emit(EClient_EVENTBUS_TYPE.GUIDE)
+                }
                 return true
             }
         },
