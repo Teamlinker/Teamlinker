@@ -84,9 +84,11 @@ const getSprintInfo=async ()=>{
 		projectIssueId:props.info.id
 	})
 	if(res?.code==0) {
-		sprintInfo.value={
-			id:res.data.id,
-			name:res.data.name
+		if(res.data) {
+			sprintInfo.value={
+				id:res.data.id,
+				name:res.data.name
+			}
 		}
 	}
 }

@@ -573,6 +573,10 @@ export namespace Err {
         messageNotFound:{
             code:12002,
             msg:"message not found"
+        },
+        messageAlreadyFavorite:{
+            code:12003,
+            msg:"message already favorite"
         }
     }
 

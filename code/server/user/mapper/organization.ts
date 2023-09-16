@@ -578,6 +578,29 @@ class MemberTagMapper extends Mapper<typeof memberTagModel> {
         }))
     }
 
+    async listMemberTag(memberId:string) {
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:memberTagMemberModel
+        },{
+            model:memberTagModel,
+            columns:keys<ICommon_Model_Member_Tag>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:memberTagMemberModel,
+                    field:"member_tag_id"
+                }
+            }
+        },{
+            organization_user_id:{
+                model:memberTagMemberModel,
+                value:memberId
+            }
+        })
+        let ret=await mysql.execute(sql)
+        return ret;
+    }
+
     async listTagMember(memberTagId:string) {
         let mysql=getMysqlInstance()
         let sql=generateLeftJoin3Sql({

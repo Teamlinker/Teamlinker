@@ -2,6 +2,7 @@ import {DComponent} from '../../common/decorate/component';
 import {PermissionBase} from "./base";
 import {REDIS_AUTH} from "../../common/cache/keys/auth";
 import {ECommon_Model_Role_Type} from "../../../common/model/role";
+import rpcTeamApi from "../../user/rpc/user";
 
 @DComponent
 export class PermissionTeam extends PermissionBase {
@@ -29,6 +30,19 @@ export class PermissionTeam extends PermissionBase {
         }
         await this.unlock()
         return ret
+    }
+
+    override async checkOrganizationId(teamId: string, currentOrganizationId: string): Promise<boolean> {
+        let objRedis=REDIS_AUTH.Resource.resourceOrganization(teamId)
+        let organizationId=await objRedis.get()
+        if(!organizationId) {
+            let obj=await rpcTeamApi.team(teamId)
+            if(obj) {
+                organizationId=obj.organization_id
+                await objRedis.set(organizationId)
+            }
+        }
+        return organizationId===currentOrganizationId
     }
 }
 

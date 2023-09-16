@@ -5,8 +5,8 @@
 				<a-descriptions-item :label="$t('util.name')">Desktop</a-descriptions-item>
 			</template>
 			<template v-else-if="item.type===ECommon_Model_Finder_Item_Type.FILE">
-				<a-descriptions-item label="name">{{fileInfo?.name}}</a-descriptions-item>
-				<a-descriptions-item label="type">
+				<a-descriptions-item :label="$t('util.name')">{{fileInfo?.name}}</a-descriptions-item>
+				<a-descriptions-item :label="$t('util.type')">
 					<span style="color: blue">
 						{{$t("util.file")}}
 					</span>
@@ -94,7 +94,7 @@
 							{{$t("util.shortcut")}}
 						</span>
 					</a-descriptions-item>
-					<a-descriptions-item label="$t('util.category')">
+					<a-descriptions-item :label="$t('util.category')">
 						<span style="color: green">
 							{{$t("util.projectRelease")}}
 						</span>

@@ -1,4 +1,9 @@
-import {IMFavoriteMessageService, IMTeamMessageService, IMUserMessageService} from "../service/im";
+import {
+    IMFavoriteMessageService,
+    IMTeamMessageService,
+    IMUnReadMessageService,
+    IMUserMessageService
+} from "../service/im";
 
 class RpcIMApi  {
     async clearByOrganizationId(orgaizationId:string) {
@@ -7,6 +12,12 @@ class RpcIMApi  {
             IMTeamMessageService.clearByOrganizationId(orgaizationId),
             IMUserMessageService.clearByOrganizationId(orgaizationId),
             IMFavoriteMessageService.clearByOrganizationId(orgaizationId)
+        ])
+    }
+    async clearByOrganizationUserId(organizationUserId:string) {
+        await Promise.all([
+            IMFavoriteMessageService.clearByOrganizationUserId(organizationUserId),
+            IMUnReadMessageService.clearByOrganizationId(organizationUserId)
         ])
     }
 }

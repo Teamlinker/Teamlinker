@@ -3,7 +3,7 @@ import * as FlakeId from 'flake-idgen';
 import {BaseModel} from '../../../common/model/base';
 import * as moment from "moment";
 import CommonUtil from "./common";
-import Mysql, {getMysqlInstance} from "../db/mysql";
+import {getMysqlInstance} from "../db/mysql";
 
 const uid = new FlakeId(); 
 
@@ -1645,10 +1645,11 @@ export async function convertCountAndExecute(sql:{
     return count
 }
 
-export async function generatePageAndCount(mysql:Mysql,sql:{
+export async function generatePageAndCount(sql:{
     value:string,
     type:any
 },size:number) {
+    let mysql=getMysqlInstance()
     let countSql=convertCountSql(sql);
     let count=Number(Object.values(await mysql.executeOne(countSql))[0])
     let totalPage=CommonUtil.pageTotal(count,size)
@@ -2210,11 +2211,11 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
 },groups:(keyof T1["model"])[],objExpr?: {
-    [param in ((keyof (T1 & T2 & T3 & T4)["model"]) | `${"$and" | "$or"}${number}`)]?: {
+    [param in ((keyof (T1 & T2 & T3 & T4)["model"]) | `${"$and" | "$or"}${number}` | `${Exclude<keyof (T1 & T2 & T3 & T4)["model"], symbol>}${" "|"  "|"   "}`)]?: {
         value: EXPRVALUE,
         model: T1 | T2 | T3 | T4
     } | {
-        [param in keyof (T1 & T2 & T3 & T4)["model"]]?: {
+        [param in ((keyof (T1 & T2 & T3 & T4)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4)["model"], symbol>}${" "|"  "|"   "}`)]?: {
             value: EXPRVALUE,
             model: T1 | T2 | T3 | T4
         }
@@ -2433,11 +2434,11 @@ export function generateGroupLeftJoin4Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
 },groups:(keyof T1["model"])[],objExpr?: {
-    [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"]) | `${"$and" | "$or"}${number}`)]?: {
+    [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"]) | `${"$and" | "$or"}${number}` | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5)["model"], symbol>}${" "|"  "|"   "}`)]?: {
     value: EXPRVALUE,
     model: T1 | T2 | T3 | T4 | T5
 } | {
-    [param in keyof (T1 & T2 & T3 & T4 & T5)["model"]]?: {
+    [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5)["model"], symbol>}${" "|"  "|"   "}`)]?: {
         value: EXPRVALUE,
         model: T1 | T2 | T3 | T4 | T5
     }
@@ -2694,11 +2695,11 @@ export function generateGroupLeftJoin5Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
 },groups:(keyof T1["model"])[],objExpr?: {
-    [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]) | `${"$and" | "$or"}${number}`)]?: {
+    [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]) | `${"$and" | "$or"}${number}` | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"], symbol>}${" "|"  "|"   "}`)]?: {
     value: EXPRVALUE,
     model: T1 | T2 | T3 | T4 | T5 | T6
 } | {
-    [param in keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]]?: {
+    [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"], symbol>}${" "|"  "|"   "}`)]?: {
         value: EXPRVALUE,
         model: T1 | T2 | T3 | T4 | T5 | T6
     }
@@ -2910,7 +2911,8 @@ export function generateGroupLeftJoin5Sql<T1 extends BaseModel,T2 extends BaseMo
 export async function generateCommonListData<T extends {value:string,type:any}>(sql:T,page:number,size:number) {
     let mysql=getMysqlInstance()
     let countSql=convertCountSql(sql);
-    let count=Number(Object.values(await mysql.executeOne(countSql))[0])
+    let countRet=await mysql.executeOne(countSql)
+    let count=countRet!=null?Number(Object.values(countRet)[0]):0
     let totalPage=CommonUtil.pageTotal(count,size)
     let ret=await mysql.execute(sql)
     return {

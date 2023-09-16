@@ -408,7 +408,18 @@ const api= {
             }>{},
             res:<ICommon_Route_Res_Global_Search_Board_Sprint_Item[]>{},
             permission:[Permission_Types.Organization.READ]
-        }
+        },
+        count:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/count",
+            req:<{
+                projectId :string
+            }>{},
+            res:<{
+                count:number
+            }>{},
+            permission:[Permission_Types.Project.READ]
+        },
     }
 }
 export default api

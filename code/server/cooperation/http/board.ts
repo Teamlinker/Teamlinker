@@ -504,8 +504,8 @@ class BoardController {
     }
 
     @DHttpApi(boardApi.routes.filterSprint)
-    async filterSprint(@DHttpReqParam("projectId") projectId: string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("boardSprintIds") boardSprintIds:string[]): Promise<typeof boardApi.routes.filterSprint.res> {
-        let ret=await BoardSprintService.filter(projectId,page,size,keyword,boardSprintIds)
+    async filterSprint(@DHttpReqParam("projectId") projectId: string,@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParam("keyword") keyword:string,@DHttpReqParam("boardSprintIds") boardSprintIds:string[],@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.filterSprint.res> {
+        let ret=await BoardSprintService.filter(user.organizationInfo.organizationId,projectId,page,size,keyword,boardSprintIds)
         return ret;
     }
 
@@ -515,7 +515,7 @@ class BoardController {
             project_issue_id:projectIssueId
         })
         if(!obj) {
-            throw Err.Project.Board.issueSprintNotExists
+            return null
         }
         let objSprint=await BoardSprintService.getItemById(obj.getItem().board_sprint_id)
         if(!objSprint) {
@@ -560,6 +560,14 @@ class BoardController {
     async globalSearchSprint(@DHttpReqParamRequired("keyword") keyword: string,@DHttpReqParamRequired("size") size: number,@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.globalSearchSprint.res> {
         let ret=await BoardSprintService.globalSearch(keyword,size,user.organizationInfo.organizationUserId)
         return ret
+    }
+
+    @DHttpApi(boardApi.routes.count)
+    async count(@DHttpReqParamRequired("projectId") projectId: string): Promise<typeof boardApi.routes.count.res> {
+        let count=await BoardService.count(projectId)
+        return {
+            count
+        }
     }
 
 }

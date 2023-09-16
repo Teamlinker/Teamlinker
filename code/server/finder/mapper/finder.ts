@@ -92,6 +92,27 @@ class FinderItemMapper extends Mapper<typeof finderItemModel> {
             organization_id:organizationId
         }))
     }
+
+    async clearByOrganizationAndUserId(organizationId:string,userId:string) {
+        if(!organizationId || !userId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(finderItemModel,{
+            organization_id:organizationId,
+            created_by_pure:userId
+        }))
+    }
+
+    async clearByUserId(userId:string) {
+        if(!userId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(finderItemModel,{
+            created_by_pure:userId
+        }))
+    }
 }
 
 export const finderItemMapper=new FinderItemMapper()

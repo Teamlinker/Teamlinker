@@ -39,7 +39,7 @@ class MeetingRoomMapper extends Mapper<typeof meetingRoomModel> {
             type:"asc",
             field:"start_time"
         },page*size,size)
-        let {count,totalPage}=await generatePageAndCount(mysql,sql,size)
+        let {count,totalPage}=await generatePageAndCount(sql,size)
         let ret=await mysql.execute(sql)
         return {
             data:ret,

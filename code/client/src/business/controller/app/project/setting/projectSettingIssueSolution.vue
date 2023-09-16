@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
-import {apiIssue, apiIssueType, DCSType} from "../../../../common/request/request";
+import {apiBoard, apiIssue, apiIssueType, DCSType} from "../../../../common/request/request";
 import {ICommon_Model_Issue_Type_Solution} from "../../../../../../../common/model/issue_type_solution";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
@@ -34,33 +34,39 @@ const root=getRootNavigatorRef()
 const {t}=useI18n()
 const issueSolutionList=ref<DCSType<ICommon_Model_Issue_Type_Solution>[]>([])
 const onSubmit=async ()=>{
+	if(currentIssueTypeSolutionId.value===form.issueTypeSolutionId) {
+		return
+	}
   let ret=await Dialog.confirm(root.value,appContext,t("tip.switchIssueSolution"))
   if(ret) {
-		let res=await apiIssue.count({
-			projectId:props.projectId
-		})
-	  if(res?.code==0) {
-			if(res.data.count==0) {
-				let res=await apiIssueType.solutionBindProject({
-					projectId:props.projectId,
-					issueTypeSolutionId:form.issueTypeSolutionId
-				})
-				if(res?.code==0) {
-					Message.success(t("tip.bindSuccess"))
-					currentIssueTypeSolutionId.value=form.issueTypeSolutionId
-				} else {
-					Message.error(res.msg)
-				}
-			} else {
-				let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(ProjectSettingIssueSolutionConvert),{
-					originalIssueTypeSolutionId:currentIssueTypeSolutionId.value,
-					newIssueTypeSolutionId:form.issueTypeSolutionId,
-					projectId:props.projectId
-				})
-				if(ret) {
-					currentIssueTypeSolutionId.value=form.issueTypeSolutionId
-				}
-			}
+		let [resIssueCount,resBoardCount]=await Promise.all([
+			apiIssue.count({
+				projectId:props.projectId
+			}),
+			apiBoard.count({
+				projectId:props.projectId
+			})
+		])
+	  if(resIssueCount.data.count==0 && resBoardCount.data.count==0) {
+		  let res=await apiIssueType.solutionBindProject({
+			  projectId:props.projectId,
+			  issueTypeSolutionId:form.issueTypeSolutionId
+		  })
+		  if(res?.code==0) {
+			  Message.success(t("tip.bindSuccess"))
+			  currentIssueTypeSolutionId.value=form.issueTypeSolutionId
+		  } else {
+			  Message.error(res.msg)
+		  }
+	  } else {
+		  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingIssueSolution.issueTypeConvert"),markRaw(ProjectSettingIssueSolutionConvert),{
+			  originalIssueTypeSolutionId:currentIssueTypeSolutionId.value,
+			  newIssueTypeSolutionId:form.issueTypeSolutionId,
+			  projectId:props.projectId
+		  })
+		  if(ret) {
+			  currentIssueTypeSolutionId.value=form.issueTypeSolutionId
+		  }
 	  }
   }
 }

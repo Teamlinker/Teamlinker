@@ -81,7 +81,7 @@ onBeforeMount(async ()=>{
   search()
 })
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditIssueType),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditIssueType),{
     type:"add",
     issueTypeSolutionId:props.issueTypeSolutionId
   })
@@ -90,7 +90,7 @@ const onAdd=async ()=>{
   }
 }
 const onEditProfile=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditIssueType),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(EditIssueType),{
     type:"edit",
     item:item
   })
@@ -101,11 +101,11 @@ const onEditProfile=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
 const onEditWorkflow=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
   navigator.push("workflow",{
     issueTypeId:item.id
-  },`${item.name} -> Workflow`)
+  },`${item.name} -> ${t("util.workflow")}`)
 }
 
 const onCopyFrom=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Copy From",markRaw(IssueTypeCopyFrom),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.setting.issue.filedList.copyFrom"),markRaw(IssueTypeCopyFrom),{
     issueTypeSolutionId:props.issueTypeSolutionId
   })
   if(ret) {
@@ -135,7 +135,7 @@ const onCopy=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
 const onDelete=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
   let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteIssueType"))
   if(ret) {
-		let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(IssueTypeDeleteConvert),{
+		let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingIssueSolution.issueTypeConvert"),markRaw(IssueTypeDeleteConvert),{
 			issueTypeId:item.id,
 			issueTypeSolutionId:props.issueTypeSolutionId
 		})

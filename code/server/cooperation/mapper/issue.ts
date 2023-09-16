@@ -62,6 +62,24 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         super(projectIssueModel)
     }
 
+    async getAvailableUniqueId(projectId:string) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        let obj=await mysql.executeOne(generateQuerySql(projectIssueModel,["unique_id"],{
+            project_id:projectId
+        },"and",{
+            field:"unique_id",
+            type:"desc"
+        }))
+        if(obj) {
+            return obj.unique_id+1
+        } else {
+            return 1
+        }
+    }
+
     async globalSearch(keyword:string,size:number,organizationUserId:string):Promise<ICommon_Route_Res_Global_Search_Project_Issue_Item[]> {
         let mysql=getMysqlInstance()
         let match=keyword.match(/(\w+)\s*\-\s*(\d+)/)
@@ -123,17 +141,13 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     model:roleMemberModel,
                     value:ECommon_Model_Organization_Member_Type.DEFAULT
                 },
-                team_id:{
+                organization_user_id:{
                     model:teamUserModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 },
-                member_tag_id: {
+                "organization_user_id ": {
                     model:memberTagMemberModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 }
             },
             id:{
@@ -952,22 +966,47 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             }
             projectId=obj.id
         }
-        let setId:Set<string>=new Set;
+        let setModuleId:Set<string>=new Set;
+        let setLabelId:Set<string>=new Set;
         if(moduleId) {
-            let arrModuleIssueId=(await mysql.execute(generateQuerySql(projectModuleIssueModel,["id"],{
+            let arrModuleIssueId=(await mysql.execute(generateQuerySql(projectModuleIssueModel,["project_issue_id"],{
                 project_module_id:moduleId
-            }))).map(item=>item.id)
+            }))).map(item=>item.project_issue_id)
+            if(arrModuleIssueId.length==0) {
+                return {
+                    data:[],
+                    count:0,
+                    page:page,
+                    totalPage:0
+                }
+            }
             for(let obj of arrModuleIssueId) {
-                setId.add(obj)
+                setModuleId.add(obj)
             }
         }
         if(labelId) {
-            let arrLabelIssueId=(await mysql.execute(generateQuerySql(projectLabelIssueModel,["id"],{
+            let arrLabelIssueId=(await mysql.execute(generateQuerySql(projectLabelIssueModel,["project_issue_id"],{
                 project_label_id:labelId
-            }))).map(item=>item.id)
-            for(let obj of arrLabelIssueId) {
-                setId.add(obj)
+            }))).map(item=>item.project_issue_id)
+            if(arrLabelIssueId.length==0) {
+                return {
+                    data:[],
+                    count:0,
+                    page:page,
+                    totalPage:0
+                }
             }
+            for(let obj of arrLabelIssueId) {
+                setLabelId.add(obj)
+            }
+        }
+        let setId:Set<string>
+        if(moduleId && labelId) {
+            setId=new Set([...setModuleId].filter(x => setLabelId.has(x)));
+        } else if(moduleId && !labelId) {
+            setId=setModuleId
+        } else if(!moduleId && labelId) {
+            setId=setLabelId
         }
         let sql=generateLeftJoin3Sql({
             model:projectIssueModel,
@@ -1035,7 +1074,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     },
                     unique_id:{
                         model:projectIssueModel,
-                        value:name
+                        value:name.includes("-")?name.split("-")[1]:name
                     }
                 }
             }),
@@ -1057,7 +1096,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     value:reporterId
                 }
             }),
-            ...(status && {
+            ...(Number.isInteger(status) && {
                 status:{
                     model:workflowNodeModel,
                     value:status
@@ -1279,8 +1318,11 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 }
             })(),
             (async ()=>{
-                await mysql.execute(`select JSON_REMOVE(workflow_node_process,JSON_UNQUOTE(JSON_SEARCH(workflow_node_process,'one','${workflowNodeId}'))) from ${Table_Project_Issue_Process} where JSON_SEARCH(workflow_node_process,'one','${workflowNodeId}') IS NOT NULL`)
-            })()
+                await mysql.execute(`update ${Table_Project_Issue_Process}  set workflow_node_process=JSON_REMOVE(workflow_node_process,JSON_UNQUOTE(JSON_SEARCH(workflow_node_process,'one','${workflowNodeId}'))) where JSON_SEARCH(workflow_node_process,'one','${workflowNodeId}') IS NOT NULL`)
+            })(),
+            mysql.executeOne(generateDeleteSql(projectIssueApprovalModel,{
+                workflow_node_id:workflowNodeId
+            }))
         ])
     }
 

@@ -32,6 +32,14 @@ import {boardSprintSwimLaneModel} from "../../../../common/model/board_sprint_sw
 import {boardColumnModel} from "../../../../common/model/board_column";
 
 export namespace REDIS_AUTH {
+    export namespace Resource {
+        let RESOURCE_ORGANIZATION=`resource:{0}:organization`
+        export function resourceOrganization(resourceId:string)
+        {
+            let obj=new RedisStringKey(StringUtil.format(RESOURCE_ORGANIZATION,resourceId),cacheRedisType<string>().String,3600)
+            return obj
+        }
+    }
     export namespace Permission {
         export namespace Project {
             export function calPermission(projectId:string,organizationUserId:string)

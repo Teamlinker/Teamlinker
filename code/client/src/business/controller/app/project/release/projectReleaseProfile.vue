@@ -74,7 +74,7 @@
         <UserAvatar :organization-user-id="record.reporter_id.organizationUserId" :name="record.reporter_id.nickname" :photo="record.reporter_id.photo" v-if="record.reporter_id"></UserAvatar>
       </template>
       <template #status="{record}">
-        <a-tag color="gray" v-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART">{{$t("util.notstart")}}</a-tag>
+        <a-tag color="gray" v-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.NOTSTART">{{$t("util.notStart")}}</a-tag>
         <a-tag color="blue" v-else-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.INPROGRESS">{{$t("util.inProgress")}}</a-tag>
         <a-tag color="green" v-else-if="record.workflowNode.status===ECommon_Model_Workflow_Node_Status.DONE">{{$t("util.done")}}</a-tag>
       </template>
@@ -179,7 +179,7 @@ const onRemoveIssue=async (item:DCSType<ICommon_Route_Res_Release_Info_Issue_Ite
   }
 }
 const onEdit=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(ProjectReleaseEdit),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(ProjectReleaseEdit),{
     type:"edit",
     item:info.value
   })
@@ -205,7 +205,7 @@ const onRelease=async ()=>{
   })
   if(res?.code==0) {
     if(!res.data.result) {
-      let ret=await Dialog.open(root.value,appContext,"UnResolved Issues",markRaw(ProjectReleaseIfCan),{
+      let ret=await Dialog.open(root.value,appContext,t("controller.app.project.release.projectReleaseIfCan.unresolvedIssues"),markRaw(ProjectReleaseIfCan),{
         projectReleaseId:info.value.id,
         items:res.data.unDoneIssueList,
         projectKey:key.value,
@@ -255,7 +255,7 @@ const onArchive=async ()=>{
   }
 }
 const onAddIssue=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add Issue",markRaw(ProjectIssueBind),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.board.boardKanban.addIssue"),markRaw(ProjectIssueBind),{
     projectId:projectId,
     projectKey:key.value
   })

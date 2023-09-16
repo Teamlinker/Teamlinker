@@ -26,6 +26,8 @@ import {DropParam} from "../../../teamOS/common/directive/drop";
 import {EClient_Drag_Type, IClient_Drag_Element} from "../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../common/model/finder_item";
 import BoardSprintFilter from "@/business/controller/app/wiki/popMenu/boardSprintFilter.vue";
+import i18n from "@/business/common/i18n/i18n";
+import {Message} from "@arco-design/web-vue";
 
 export class RichEditorEventHandle {
     static popMenuList=[
@@ -79,6 +81,7 @@ export class RichEditorEventHandle {
         }
     }
     static async onPopMenuClick(type:ECommon_Content_Line_Config_Type,root:Ref<any>,appContext:AppContext,loading:Ref<boolean>,handleFunc:(item:ICommon_Content_Line_Config)=>void) {
+        const {t}=i18n.global
         if(type===ECommon_Content_Line_Config_Type.IMAGE || type===ECommon_Content_Line_Config_Type.FILE) {
             let input = document.createElement('input');
             input.type = 'file';
@@ -117,7 +120,7 @@ export class RichEditorEventHandle {
             }
             input.click();
         } else if(type===ECommon_Content_Line_Config_Type.PROJECT) {
-            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Project",markRaw(ProjectFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,t("util.project"),markRaw(ProjectFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.PROJECT,
@@ -127,7 +130,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
-            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Project Issue",markRaw(ProjectIssueFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,t("util.issue"),markRaw(ProjectIssueFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.PROJECT_ISSUE,
@@ -138,7 +141,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
-            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Project Release",markRaw(ProjectReleaseFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,t("util.release"),markRaw(ProjectReleaseFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.PROJECT_RELEASE,
@@ -149,7 +152,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.BOARD_SPRINT) {
-            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Board Sprint",markRaw(BoardSprintFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,t("util.sprint"),markRaw(BoardSprintFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.BOARD_SPRINT,
@@ -160,7 +163,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.WIKI) {
-            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Wiki Space",markRaw(WikiFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,t("util.wikiSpace"),markRaw(WikiFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.WIKI,
@@ -170,7 +173,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
-            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Wiki Item",markRaw(WikiItemFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,t("util.wikiItem"),markRaw(WikiItemFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.WIKI_ITEM,
@@ -181,7 +184,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
-            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Calendar Event",markRaw(CalendarEventFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,t("util.calendarEvent"),markRaw(CalendarEventFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.CALENDAR_EVENT,
@@ -191,7 +194,7 @@ export class RichEditorEventHandle {
                 handleFunc(item)
             }
         } else if(type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
-            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,"Meeting Room",markRaw(MeetingRoomFilter))
+            let ret:any=await Dialog.open(root.value.$el?root.value.$el:root.value,appContext,t("util.meeting"),markRaw(MeetingRoomFilter))
             if(ret) {
                 let item:ICommon_Content_Line_Config={
                     type:ECommon_Content_Line_Config_Type.MEETING_ROOM,
@@ -221,7 +224,14 @@ export class RichEditorEventHandle {
         } else if(type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
             eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,value)
         } else if(type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
-            eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,value,link)
+            let res=await apiMeeting.getRoom({
+                meetingRoomId:value
+            })
+            if(res?.code==0) {
+                eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,value,res.data.password)
+            } else {
+                Message.error(res.msg)
+            }
         }
     }
 

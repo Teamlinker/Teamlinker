@@ -103,6 +103,9 @@ class ProjectController {
         if(!obj) {
             throw Err.Project.projectNotFound
         }
+        if(obj.getItem().created_by===memberId) {
+            throw Err.Common.requestForbidden
+        }
         await obj.removeMember(memberId,type)
         return
     }

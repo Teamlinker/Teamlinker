@@ -169,7 +169,7 @@ const valueSelected=computed({
   }
 })
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(AddField),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(AddField),{
     workflowNodeId:props.workflowNodeId
   })
   if(ret) {
@@ -177,7 +177,7 @@ const onAdd=async ()=>{
   }
 }
 const onCopyFrom=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Copy",markRaw(FieldCopyFrom),{
+  let ret=await Dialog.open(root.value,appContext,t("util.copy"),markRaw(FieldCopyFrom),{
     workflowNodeId:props.workflowNodeId
   })
   if(ret) {

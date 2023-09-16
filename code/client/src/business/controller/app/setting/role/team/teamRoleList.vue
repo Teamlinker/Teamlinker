@@ -72,7 +72,7 @@ const data=ref<Item[]>([])
 const root=ref(null)
 const appContext=getCurrentInstance().appContext
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add Role",markRaw(EditTeamRole),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingRole.addRole"),markRaw(EditTeamRole),{
     type:"add",
     ...(props.teamId && {
       teamId:props.teamId
@@ -83,7 +83,7 @@ const onAdd=async ()=>{
   }
 }
 const onEdit=async (item:Item) =>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Role",markRaw(EditTeamRole),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingRole.editRole"),markRaw(EditTeamRole),{
     type:"edit",
     item:{
       name:item.name,

@@ -12,7 +12,8 @@
           </template>
         </a-avatar>
         <template #content>
-          <a-dsubmenu trigger="hover" :disabled="store.status===ECommon_User_Online_Status.MEETING">
+	        <a-doption @click="onEditOrganizationProfile" v-if="store.organizationUserInfo">{{store.organizationUserInfo?.nickname}}</a-doption>
+          <a-dsubmenu trigger="hover" :disabled="store.status===ECommon_User_Online_Status.MEETING" v-if="store.organizationInfo">
             {{$t("util.status")}}
             <template #content>
               <a-doption @click="onChangeStatus(ECommon_User_Online_Status.ONLINE)">
@@ -47,8 +48,8 @@
     </template>
 	  <template #barRight>
 		  <a-row style="height: 100%;" align="center">
-			  <a-col :flex="menuValue?'60px':'70'" style="align-items: center;display: flex">
-				  <img :src="store.organizationInfo.photo" style="height: 36px;width:80px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
+			  <a-col :flex="menuValue?'60px':'40px'" style="align-items: center;display: flex">
+				  <img :src="store.organizationInfo.photo" style="height: 30px;width:60px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
 			  <a-col :flex="menuValue?'100px':'120px'" id="createOrganization">
 				  <a-select style="max-width: 170px;color: white" :placeholder="$t('placeholder.organization')" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
@@ -67,13 +68,13 @@
 					  {{$t("controller.desktop.desktop.createOrganization")}}
 				  </a-button>
 			  </a-col>
-			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex" id="search">
+			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex;align-items: center;height: 100%" id="search">
 				  <sicon size="18" color="rgb(241,241,241)" name="Ant" type="search" style="cursor: pointer" @click="isSearch=true"></sicon>
 			  </a-col>
-			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex" id="notification">
+			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex;align-items: center;height: 100%" id="notification">
 					<NotificationShow></NotificationShow>
 			  </a-col>
-			  <a-col flex="30px" v-if="menuValue" style="justify-content: center;display: flex">
+			  <a-col flex="30px" v-if="menuValue" style="justify-content: center;display: flex;align-items: center;height: 100%">
 					<MissCallShow></MissCallShow>
 			  </a-col>
 		  </a-row>
@@ -148,6 +149,7 @@ import {useI18n} from "vue-i18n";
 import {Driver, driver} from "driver.js";
 import "driver.js/dist/driver.css"
 import guide from "@/assert/guide.png"
+import EditOrganizationUserProfile from "@/business/controller/desktop/editOrganizationUserProfile.vue";
 
 interface ITeamOS_Desktop_Menu {
 	group:string,
@@ -237,7 +239,7 @@ const setMenu=(menu1:ITeamOS_Desktop_Menu[],defaultValue?:string) => {
 }
 
 const onAccount=()=>{
-  const win=new Window("account",ETeamOS_Window_Type.SIMPLE, "account",true,[
+  const win=new Window(t("util.account"),ETeamOS_Window_Type.SIMPLE, "account",true,[
     {
       id:v4(),
       meta:{
@@ -250,7 +252,7 @@ const onAccount=()=>{
         name:"account"
       }
     }
-  ],"account");
+  ],t("util.account"));
   windowManager.open(win);
 }
 
@@ -287,7 +289,7 @@ const onMenuClick=async (value)=>{
 }
 
 const onCreate=async ()=>{
-	let ret=await Dialog.open(document.body,appContext,"Create Organization",markRaw(CreateOrganization))
+	let ret=await Dialog.open(document.body,appContext,t("controller.desktop.desktop.createOrganization"),markRaw(CreateOrganization))
 	if(ret) {
 		store.$update()
 	}
@@ -355,6 +357,10 @@ const onUpdatePhoto=item => {
 const onDeletePhoto=id => {
 	let index=photoList.value.findIndex(item=>item.id===id)
 	photoList.value.splice(index,1)
+}
+
+const onEditOrganizationProfile=()=>{
+	Dialog.open(document.body,appContext,t("controller.desktop.desktop.editOrganizationUserProfile"),markRaw(EditOrganizationUserProfile))
 }
 
 const listNote=async (newNoteId?:string)=>{

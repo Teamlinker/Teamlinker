@@ -132,7 +132,7 @@ const findNodeData=(key:string,children?)=>{
 }
 
 const findParentNodeData=(key:string,node?)=>{
-	if(node && node.children?.length>0) {
+	if(node?.children?.length>0) {
 		for(let obj of node.children) {
 			if(obj.key===key) {
 				return node
@@ -141,7 +141,7 @@ const findParentNodeData=(key:string,node?)=>{
 				return findParentNodeData(key,obj)
 			}
 		}
-	} else {
+	} else if(!node) {
 		return findParentNodeData(key,folderTree.value[0])
 	}
 }

@@ -123,7 +123,7 @@ const onSearch=()=>{
   search(1)
 }
 const onInvite=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Invite",markRaw(EditUserProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.invite"),markRaw(EditUserProfile),{
     type:"add"
   })
   if(ret) {
@@ -131,7 +131,7 @@ const onInvite=async ()=>{
   }
 }
 const onEditProfile=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditUserProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(EditUserProfile),{
     type:"edit",
     item:item.organizationUser,
     username:item.user.username,
@@ -142,7 +142,7 @@ const onEditProfile=async (item:DCSType<ICommon_Route_Res_Organization_User_Item
   }
 }
 const onEditTag=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(BindTag),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(BindTag),{
     tags:item.tag,
     organizationUserId:item.organizationUser.id
   })
@@ -166,7 +166,7 @@ const onDelete=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
 }
 
 const onCreate=async ()=>{
-	let ret=await Dialog.open(root.value,appContext,"Create",markRaw(CreateUserProfileOffline))
+	let ret=await Dialog.open(root.value,appContext,t("util.create"),markRaw(CreateUserProfileOffline))
 	if(ret) {
 		search(pagination.current)
 	}

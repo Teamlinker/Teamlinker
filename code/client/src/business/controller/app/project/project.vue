@@ -55,6 +55,7 @@ import {
 } from "../../../../teamOS/common/component/navigator/navigator";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
+import {useI18n} from "vue-i18n";
 
 const recentList=ref<ICommon_Route_Res_recentProjectList_Item[]>([])
 const list=ref<ICommon_Route_Res_recentProjectList_Item[]>([])
@@ -64,6 +65,7 @@ const storeOrganization=useDesktopStore()
 const root=ref(null);
 const appContext=getCurrentInstance().appContext
 const navigator=getCurrentNavigator()
+const {t}=useI18n()
 const pagination=reactive({
   total:0,
   current:1,
@@ -99,7 +101,7 @@ const onSearch=async ()=>{
   listAllProject(1)
 }
 const onAddProject=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditProjectProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditProjectProfile),{
     type:"add"
   })
   if(ret) {

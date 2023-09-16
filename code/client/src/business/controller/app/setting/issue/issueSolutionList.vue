@@ -90,7 +90,7 @@ onBeforeMount(async ()=>{
   search()
 })
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditIssueSolution),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditIssueSolution),{
     type:"add"
   })
   if(ret) {
@@ -98,7 +98,7 @@ const onAdd=async ()=>{
   }
 }
 const onEditProfile=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditIssueSolution),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(EditIssueSolution),{
     type:"edit",
     item:item
   })
@@ -109,13 +109,13 @@ const onEditProfile=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List
 const onEditIssue=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)=>{
   navigator.push("issueTypeList",{
     issueTypeSolutionId:item.id
-  },`${item.name} -> IssueType List`)
+  },`${item.name} -> ${t("util.issueTypeList")}`)
 }
 const onEditBindProject=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)=>{
   navigator.push("bindProjectList",{
     issueTypeSolutionId:item.id,
     reserved:item.reserved
-  },`${item.name} -> Bind Project`)
+  },`${item.name} -> ${t("controller.app.setting.issue.issueSolutionList.bindProject")}`)
 }
 const onCopy=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item>)=>{
   let ret=await Dialog.confirm(root.value,appContext,t("tip.copyIssueSolution"))
@@ -151,7 +151,7 @@ const onDelete=async (item:DCSType<ICommon_Route_Res_IssueTypeSolution_List_Item
 					search()
 				}
 			} else {
-				let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(IssueSolutionDeleteConvert),{
+				let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingIssueSolution.issueTypeConvert"),markRaw(IssueSolutionDeleteConvert),{
 					issueTypeSolutionId:item.id
 				})
 				if(ret) {

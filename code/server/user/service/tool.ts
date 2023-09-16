@@ -50,6 +50,10 @@ export class StickyNoteService extends Entity<typeof stickyNoteModel,typeof stic
         }
         return ret;
     }
+
+    static async clear(userId:string) {
+        await stickyNoteMapper.clear(userId)
+    }
 }
 
 export class PhotoService extends Entity<typeof photoModel,typeof photoMapper> {
@@ -70,5 +74,9 @@ export class PhotoService extends Entity<typeof photoModel,typeof photoMapper> {
             }
         }
         return ret;
+    }
+
+    static async clear(userId:string) {
+        await photoMapper.clear(userId)
     }
 }

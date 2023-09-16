@@ -56,6 +56,9 @@ const getList=async ()=>{
 			if(!obj.data) {
         res.data.splice(i,1)
         i--
+				apiNotification.remove({
+					notificationId:obj.id
+				})
 			}
 		}
 		list.value.push(...res.data)

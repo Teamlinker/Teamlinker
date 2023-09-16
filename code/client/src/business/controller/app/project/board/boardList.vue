@@ -2,8 +2,8 @@
 	<div>
 		<a-row>
 			<a-space wrap>
-				<a-input-search v-model="keyword" :placeholder="$t('placeholder.typeBoardName')" style="width: 250px" @search="onSearch"></a-input-search>
-				<a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">{{$t("util.create")}}</a-button>
+				<a-input-search v-model="keyword" :placeholder="$t('placeholder.typeBoardName')" style="width: 250px" @search="onSearch" v-if="checkPermission(permission,Permission_Types.Project.READ)"></a-input-search>
+				<a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.CREATE)">{{$t("util.create")}}</a-button>
 			</a-space>
 		</a-row>
 		<a-table style="margin-top: 10px" :columns="columns" :data="boardList" :pagination="pagination" @pageChange="onPageChange">
@@ -89,7 +89,7 @@ const onPageChange=(page:number)=>{
 	search(page)
 }
 const onCreate=async ()=>{
-	let ret=await Dialog.open(root.value,appContext,"Add",markRaw(BoardEdit),{
+	let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(BoardEdit),{
 		type:"add",
 		projectId:projectId
 	})
@@ -98,7 +98,7 @@ const onCreate=async ()=>{
 	}
 }
 const onEdit=async (item:DCSType<ICommon_Model_Board>)=>{
-	let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(BoardEdit),{
+	let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(BoardEdit),{
 		type:"edit",
 		projectId:projectId,
 		item:item

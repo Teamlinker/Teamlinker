@@ -335,6 +335,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
             throw Err.Project.Workflow.workflowNodeNotFound
         }
         this.item.workflow_node_id=info.id
+        this.item.unique_id=await projectIssueMapper.getAvailableUniqueId(this.item.project_id)
         let obj=await super.create()
         await projectIssueMapper.handleProcess(obj.id,info.id)
         await rpcContentApi.save(obj.id,ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION, obj.created_by,"")
@@ -665,11 +666,19 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
 
     override async copy(deletedFields?: (keyof ICommon_Model_Project_Issue)[]): Promise<this> {
         let obj=await super.copy(["unique_id"])
-        await projectIssueMapper.copyIssue(this.getId(),obj.getId())
-        let objDescription=await rpcContentApi.get(this.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION)
-        if(objDescription) {
-            await rpcContentApi.save(obj.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION, objDescription.created_by,objDescription.content)
-        }
+        obj.assignItem({
+            unique_id:await projectIssueMapper.getAvailableUniqueId(this.item.project_id)
+        })
+        await Promise.all([
+            obj.update(),
+            projectIssueMapper.copyIssue(this.getId(),obj.getId()),
+            (async ()=>{
+                let objDescription=await rpcContentApi.get(this.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION)
+                if(objDescription) {
+                    await rpcContentApi.save(obj.getId(),ECommon_Model_Content_Type.PROJECT_ISSUE_DESCRIPTION, objDescription.created_by,objDescription.content)
+                }
+            })()
+        ])
         let objHistory=new ProjectIssueHistoryService()
         objHistory.assignItem({
             project_issue_id:obj.getItem().id,
@@ -840,7 +849,7 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         })
         await Promise.allSettled(arr.map(obj=>{
             return projectIssueMapper.getProcess(obj.getId()).then(process=>{
-                let index=process.indexOf(obj.getId())
+                let index=process.indexOf(workflowNodeId)
                 let lastWorkflowNodeId=process[index-1]
                 return obj.handleConfirmNextNode(lastWorkflowNodeId,null)
             })

@@ -174,7 +174,7 @@ const action=(item:ICommon_Route_Res_Organization_User_Item)=>{
     {
       name:"role",
       func:async ()=>{
-        let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditTeamMemberRole),{
+        let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditTeamMemberRole),{
           type:"edit",
           teamId:props.teamId,
           item:item
@@ -207,7 +207,7 @@ const action=(item:ICommon_Route_Res_Organization_User_Item)=>{
 const navigator=getCurrentNavigator()
 const roleList=ref<RoleItem[]>([])
 const onAddRole=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add Role",markRaw(EditTeamRole),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingRole.addRole"),markRaw(EditTeamRole),{
     type:"add",
     ...(props.teamId && {
       teamId:props.teamId
@@ -218,7 +218,7 @@ const onAddRole=async ()=>{
   }
 }
 const onEditRole=async (item:RoleItem) =>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Role",markRaw(EditTeamRole),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingRole.addRole"),markRaw(EditTeamRole),{
     type:"edit",
     item:{
       name:item.name,
@@ -362,7 +362,7 @@ const showUserProfile=(organizationUserId:string)=>{
   eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PEOPLE_PROFILE,organizationUserId);
 }
 const onAddMember=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditTeamMemberRole),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditTeamMemberRole),{
     type:"add",
     teamId:props.teamId
   })

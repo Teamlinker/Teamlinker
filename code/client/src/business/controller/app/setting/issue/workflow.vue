@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 100%;height: 100%;overflow: auto;display: flex;flex-direction:column" ref="root" >
+  <div style="width: 100%;height: 100%;display: flex;flex-direction:column" ref="root" >
     <a-space style="flex:0 1 auto;margin-bottom: 10px;width: 100%">
       <a-button type="primary" @click="addNode">{{$t("controller.app.setting.issue.workflow.addNode")}}</a-button>
     </a-space>
@@ -27,7 +27,7 @@
 		        <a-form-item field="approval" :label="$t('util.approval')">
 			        <a-switch :checked-value="1" :unchecked-value="0" v-model="form.approval"></a-switch>
 		        </a-form-item>
-		        <a-form-item field="allComing" :label="$t('util.allowAllConnections')" extra="the border of node is pink">
+		        <a-form-item field="allComing" :label="$t('util.allowAllConnections')" :extra="$t('controller.app.setting.issue.workflow.border')">
 			        <a-switch :checked-value="1" :unchecked-value="0" v-model="form.allComing"></a-switch>
 		        </a-form-item>
 		        <a-form-item field="approvalType" :label="$t('util.approvalType')" v-if="form.approval">
@@ -37,7 +37,7 @@
 								<a-option :value="ECommon_Model_Workflow_Approval_Type.FIELD">{{$t("util.field")}}</a-option>
 							</a-select>
 		        </a-form-item>
-		        <a-form-item field="approvalValue" :label="form.approvalType===ECommon_Model_Workflow_Approval_Type.PERSON?'choose person':form.approvalType===ECommon_Model_Workflow_Approval_Type.TEAM?'choose team':'choose workflow field'" v-if="form.approval">
+		        <a-form-item field="approvalValue" :label="form.approvalType===ECommon_Model_Workflow_Approval_Type.PERSON?$t('controller.app.setting.issue.workflow.choosePerson'):form.approvalType===ECommon_Model_Workflow_Approval_Type.TEAM?$t('controller.app.setting.issue.workflow.chooseTeam'):$t('controller.app.setting.issue.workflow.chooseWorkflowField')" v-if="form.approval">
 							<FieldCommonMultiLabel style="width: 100%" v-model="form.approvalValue" :type="form.approvalType===ECommon_Model_Workflow_Approval_Type.PERSON?'user':'team'" v-if="form.approvalType===ECommon_Model_Workflow_Approval_Type.PERSON || form.approvalType===ECommon_Model_Workflow_Approval_Type.TEAM"></FieldCommonMultiLabel>
 			        <FieldCommonLabel style="width: 100%" v-model="form.approvalValue" type="field" :workflow-node-id="form.id" v-else-if="form.approvalType===ECommon_Model_Workflow_Approval_Type.FIELD"></FieldCommonLabel>
 		        </a-form-item>
@@ -114,7 +114,7 @@ const onKeyDelete=async (event:KeyboardEvent)=>{
 	  }
   }
   if(type) {
-    let ret=await Dialog.confirm(root.value,appContext,`${t("tip.doYouWantToDelete")}${type} ${name}`)
+    let ret=await Dialog.confirm(root.value,appContext,`${t("tip.doYouWantToDelete")}${type}:${name}`)
     if(ret) {
       if(type=="transition") {
         lf.deleteEdge(id)
@@ -159,9 +159,6 @@ const onSubmit=async ()=>{
 				let arr=[...lf.getNodeIncomingEdge(form.id)]
 				for(let obj of arr) {
 					lf.deleteEdge(obj.id)
-					apiWorkflow.deleteAction({
-						workflowActionId:obj.id
-					})
 				}
 			}
     } else {
@@ -177,7 +174,7 @@ const onSubmit=async ()=>{
 const onEditFields=()=>{
   navigator.push("fieldList",{
     workflowNodeId:form.id
-  },`${form.name} -> Fields`)
+  },`${form.name} -> ${t("util.fields")}`)
 }
 
 const onApprovalTypeChange=()=> {
@@ -226,7 +223,7 @@ const requestNodes=async ()=>{
   }
 }
 const addNode=async ()=>{
-  let ret:any=await Dialog.open(root.value,appContext,"Add Node" ,markRaw(AddWorkflowNode),{
+  let ret:any=await Dialog.open(root.value,appContext,t("controller.app.setting.issue.workflow.addNode") ,markRaw(AddWorkflowNode),{
     issueTypeId:props.issueTypeId
   })
   if(ret) {

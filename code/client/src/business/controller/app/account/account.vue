@@ -23,6 +23,7 @@ import {computed, markRaw, onMounted, ref} from "vue";
 import NavigatorContainer from "../../../../teamOS/common/component/navigator/navigatorContainer.vue";
 import Profile from "./profile.vue";
 import AccountSetting from "./accountSetting.vue";
+import {useI18n} from "vue-i18n";
 
 let type=ref("profile")
 const eleNavigator=ref<InstanceType<typeof NavigatorContainer>>(null)
@@ -30,9 +31,10 @@ let objComponent={
   profile:markRaw(Profile),
   accountSetting:markRaw(AccountSetting)
 }
+const {t}=useI18n()
 let objCrumb={
-  profile:"Profile",
-  accountSetting: "Account Setting"
+  profile:t("util.profile"),
+  accountSetting: t("controller.app.account.account.accountSetting")
 }
 let pathList=computed(()=>{
   if(eleNavigator.value) {

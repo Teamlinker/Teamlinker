@@ -81,6 +81,7 @@ import {ECommon_User_Online_Status} from "../../../../../../common/types";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";
+import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 
 const props=defineProps<{
 	meetingInitInfo?:{
@@ -123,7 +124,7 @@ const onStartMeeting=async ()=>{
 }
 
 const onPersonalMeetingSetting=async()=>{
-	Dialog.open(root.value,appContext,"edit setting",markRaw(PersonalMeetingSetting))
+	Dialog.open(root.value,appContext,t("controller.app.meeting.meeting.editSetting"),markRaw(PersonalMeetingSetting))
 }
 
 const onChangePage=(page:number)=>{
@@ -131,7 +132,7 @@ const onChangePage=(page:number)=>{
 }
 
 const onScheduleMeeting=async ()=>{
-    let ret=await Dialog.open(root.value,appContext,"shcedule meeting",markRaw(EditScheduleMeeting),{
+    let ret=await Dialog.open(root.value,appContext,t("controller.app.meeting.meeting.scheduleMeeting"),markRaw(EditScheduleMeeting),{
 			type:"add"
     })
 		if(ret) {
@@ -140,7 +141,7 @@ const onScheduleMeeting=async ()=>{
 }
 
 const onEditMeeting=async (item:DCSType<ICommon_Model_Meeting_Room>)=>{
-	let ret=await Dialog.open(root.value,appContext,"Edit Meeting",markRaw(EditScheduleMeeting),{
+	let ret=await Dialog.open(root.value,appContext,t("controller.app.meeting.meeting.editMeeting"),markRaw(EditScheduleMeeting),{
 		type:"edit",
 		data:item
 	})
@@ -171,7 +172,7 @@ const onSearch=async ()=>{
 }
 
 const onJoinMeeting=async ()=>{
-	let ret:any=await Dialog.open(root.value,appContext,"Join Meeting",markRaw(MeetingJoinInput))
+	let ret:any=await Dialog.open(root.value,appContext,t("controller.app.meeting.meeting.joinMeeting"),markRaw(MeetingJoinInput))
 	if(ret) {
 		navigator.push("meetingProfile",{
 			meetingId:ret.data.meetingRoomId,

@@ -1,7 +1,7 @@
 <template>
   <a-form ref="eleForm" style="width: 80%" :model="form" @submitSuccess="onSubmit">
     <a-form-item field="name" :label="$t('util.name')" required>
-      {{form.name}}
+      <a-input v-model="form.name"></a-input>
     </a-form-item>
     <a-form-item field="keyword" :label="$t('util.keyword')" required>
       {{form.keyword}}
@@ -13,7 +13,10 @@
       <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="photo" @upload="onUpload"></Upload>
     </a-form-item>
     <a-form-item>
-      <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
+	    <a-space>
+		    <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
+		    <a-button html-type="button" type="primary" status="danger" @click="onDelete">{{$t("util.delete")}}</a-button>
+	    </a-space>
     </a-form-item>
   </a-form>
 </template>
@@ -25,6 +28,8 @@ import {getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
 import {apiProject} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
+import {Dialog} from "@/business/common/component/dialog/dialog";
+import {getCurrentNavigator, getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
 
 const props=defineProps<{
   projectId:string
@@ -41,6 +46,8 @@ const onUpload=(id:string)=> {
   uploadUriId.value=id
 }
 const eleForm=ref(null);
+const navigator=getCurrentNavigator()
+const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext;
 const getProjectInfo=async ()=>{
   let res=await apiProject.basic({
@@ -69,6 +76,18 @@ const onSubmit=async ()=>{
   } else {
     Message.error(res.msg)
   }
+}
+
+const onDelete=async ()=>{
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteProject"))
+	if(ret) {
+		let res=await apiProject.remove({
+			projectId:props.projectId
+		})
+		if(res?.code==0) {
+			navigator.replace("project")
+		}
+	}
 }
 </script>
 <style scoped>

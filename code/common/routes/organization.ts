@@ -106,7 +106,7 @@ const api={
             method:ECommon_HttpApi_Method.PUT,
             path:"/user",
             req:<{
-                organizationUserId:string,
+                organizationUserId?:string,
                 roleId?:string,
                 nickname?:string,
                 active?:number,
@@ -118,7 +118,7 @@ const api={
                 remark?:string
             }>{},
             res:<ICommon_Route_Res_Organization_User_Item>{},
-            permission:[Permission_Types.Organization.ADMIN]
+            permission:[Permission_Types.Organization.READ]
         },
         deleteUser:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -277,6 +277,15 @@ const api={
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]
+        },
+        listMemberTag:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/member/tag/list",
+            req:<{
+                memberId:string
+            }>{},
+            res:<ICommon_Model_Member_Tag[]>{},
+            permission:[Permission_Types.Organization.READ]
         },
         getPermission:{
             method:ECommon_HttpApi_Method.GET,

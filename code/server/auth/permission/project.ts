@@ -4,6 +4,7 @@ import {PermissionBase} from './base';
 import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../common/model/role";
 import {Err} from "../../../common/status/error";
 import {Permission_Types} from "../../../common/permission/permission";
+import rpcCooperationApi from "../../cooperation/rpc/cooperation"
 
 @DComponent
 class PermissionProject extends PermissionBase {
@@ -107,7 +108,7 @@ class PermissionProject extends PermissionBase {
                         }
                     })())
                 }
-                await Promise.all([arrPromise]);
+                await Promise.all(arrPromise);
             })(),(async ()=>{
                 let tags=await objProjectTags.getValue();
                 let arrPromise=[];
@@ -127,7 +128,7 @@ class PermissionProject extends PermissionBase {
                         }
                     })())
                 }
-                await Promise.all([arrPromise]);
+                await Promise.all(arrPromise);
             })()])
         } catch (err) {
             if(err.code===Err.Common.admin.code) {
@@ -144,6 +145,19 @@ class PermissionProject extends PermissionBase {
         let obj=REDIS_AUTH.Permission.Project.calPermission(projectId,organizationUserId)
         await obj.set(ret);
         return ret;
+    }
+
+    override async checkOrganizationId(projectId: string, currentOrganizationId: string): Promise<boolean> {
+        let objRedis=REDIS_AUTH.Resource.resourceOrganization(projectId)
+        let organizationId=await objRedis.get()
+        if(!organizationId) {
+            let obj=await rpcCooperationApi.project(projectId)
+            if(obj) {
+                organizationId=obj.organization_id
+                await objRedis.set(organizationId)
+            }
+        }
+        return organizationId===currentOrganizationId
     }
 
 }

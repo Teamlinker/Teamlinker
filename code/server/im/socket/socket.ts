@@ -55,7 +55,7 @@ export async function handleImConnection() {
                 obj.assignItem({
                     team_id: teamId,
                     from_organization_user_id:socket.data.organizationUserId,
-                    content:typeof content==="object"?JSON.stringify(content):content,
+                    content:typeof content==="object"?JSON.stringify(content).replaceAll("\\","\\\\"):content,
                     content_type:type,
                     organization_id:socket.data.organizationId
                 })
@@ -99,7 +99,7 @@ export async function handleImConnection() {
                 let obj=new IMUserMessageService()
                 obj.assignItem({
                     from_organization_user_id: socket.data.organizationUserId,
-                    content:typeof content==="object"?JSON.stringify(content):content,
+                    content:typeof content==="object"?JSON.stringify(content).replaceAll("\\","\\\\"):content,
                     content_type:ECommon_IM_Message_ContentType.RICH_TEXT,
                     to_organization_user_id: toOrganizationUserId,
                     organization_id:socket.data.organizationId
@@ -217,6 +217,13 @@ export async function handleImConnection() {
         socket.on("im_favorite_message_add",async (organizationUserId, type, entityId) => {
             try {
                 let conteType:ECommon_IM_Message_ContentType,content:string,name:string
+                let obj=await IMFavoriteMessageService.getItemByExp({
+                    organization_user_id:organizationUserId,
+                    ref_id:entityId
+                })
+                if(obj) {
+                    throw Err.IM.messageAlreadyFavorite
+                }
                 if(type===ECommon_IM_Message_EntityType.TEAM) {
                     let obj=await IMTeamMessageService.getItemById(entityId)
                     if(!obj) {
@@ -247,7 +254,8 @@ export async function handleImConnection() {
                         content,
                         content_type:conteType,
                         from_name:name,
-                        organization_id:socket.data.organizationId
+                        organization_id:socket.data.organizationId,
+                        ref_id:entityId
                     })
                     await obj.create()
                     if(conteType===ECommon_IM_Message_ContentType.RICH_TEXT) {
@@ -354,5 +362,6 @@ export async function handleImConnection() {
         teamIdList.forEach(id=>{
             socket.join(id)
         })
+        emitServiceEvent("organizationUserStatusChange",socket.data.organizationId,socket.data.organizationUserId,ECommon_User_Online_Status.ONLINE)
     })
 }

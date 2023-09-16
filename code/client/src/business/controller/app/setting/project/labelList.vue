@@ -75,7 +75,7 @@ const onSearch=()=>{
   search(1)
 }
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditLabel),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditLabel),{
     type:"add",
     projectId:props.projectId
   })
@@ -87,7 +87,7 @@ const onEdit=async (item:{
   id:string,
   name:string
 })=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditLabel),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(EditLabel),{
     type:"edit",
     item:item,
     projectId:props.projectId

@@ -88,7 +88,7 @@ const onSearch=()=>{
   search(1)
 }
 const onCreate=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditWikiProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditWikiProfile),{
     type:"add"
   })
   if(ret) {
@@ -96,7 +96,7 @@ const onCreate=async ()=>{
   }
 }
 const onEditProfile=async (item:DCSType<ICommon_Model_Wiki>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Profile",markRaw(EditWikiProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.editProfile"),markRaw(EditWikiProfile),{
     type:"edit",
     item:item
   })
@@ -107,7 +107,7 @@ const onEditProfile=async (item:DCSType<ICommon_Model_Wiki>)=>{
 const onEditAccess=async (item:DCSType<ICommon_Model_Wiki>)=>{
   navigator.push("editWikiAccess",{
     wikiId:item.id
-  },`${item.name} -> Access`);
+  },`${item.name} -> ${t("util.access")}`);
 }
 const onDelete=async (item:DCSType<ICommon_Model_Wiki>)=>{
   let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteWikiSpace"))

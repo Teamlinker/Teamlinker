@@ -220,6 +220,14 @@ class RpcNotificationApi  {
             }
         }
     }
+
+    async clearByOrganizationId(organizationId:string) {
+        await NotificationService.clearByOrganizationId(organizationId)
+    }
+
+    async clearByUserId(userId:string) {
+        await NotificationService.clearByUserId(userId)
+    }
 }
 
 export default new RpcNotificationApi()

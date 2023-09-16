@@ -133,7 +133,7 @@ const api={
                 }
             }>{},
             res:{},
-            permission:[Permission_Types.Organization.ADMIN]
+            permission:[Permission_Types.Project.ADMIN]
         },
         solutionUnbindProject:{
             method:ECommon_HttpApi_Method.DELETE,

@@ -10,15 +10,39 @@ import {ECommon_User_Type, ICommon_Model_User, userModel} from './../../../commo
 import rpcAuthApi from "../../auth/rpc/auth";
 import {ICommon_Model_Team} from "../../../common/model/team";
 import {ECommon_Model_Role_Reserved} from "../../../common/model/role";
-import {OrganizationUserService} from "./organization";
+import {OrganizationService, OrganizationUserService} from "./organization";
 import CommonUtil from "../../common/util/common";
 import {getMailInstance} from "../../common/mail/mail";
 import {userSettingModel} from "../../../common/model/user_setting";
-
+import {IServer_Common_Event_Types} from "../../common/event/types";
+import rpcFinderApi from "../../finder/rpc/finder"
+import rpcNotificationApi from "../../notification/rpc/notification"
+import {PhotoService, StickyNoteService} from "./tool";
 
 export class UserService extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
         super(userMapper)
+    }
+
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
+        await super.delete(eventPublish, ...param);
+        let arrOrganizationUser=await OrganizationUserService.getItemsByExp({
+            user_id:this.getId()
+        })
+        for(let objOrganizationUser of arrOrganizationUser) {
+            let objOrganization=await OrganizationService.getItemById(objOrganizationUser.getItem().organization_id)
+            if(objOrganization) {
+                objOrganization.removeUser(objOrganizationUser.getId())
+            }
+        }
+        rpcFinderApi.clearByUserId(this.getId())
+        rpcNotificationApi.clearByUserId(this.getId())
+        let objSetting=await UserSettingService.getItemByExp({
+            user_id:this.getId()
+        })
+        objSetting?.delete()
+        StickyNoteService.clear(this.getId())
+        PhotoService.clear(this.getId())
     }
 
     static async register(username:string,password:string) {

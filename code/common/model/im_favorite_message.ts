@@ -8,7 +8,8 @@ export interface ICommon_Model_IM_Favorite_Message {
     content:string,
     content_type:ECommon_IM_Message_ContentType,
     from_name:string,
-    organization_id:string
+    organization_id:string,
+    ref_id:string
 }
 export const Table_IM_Favorite_Message="im_favorite_message"
 

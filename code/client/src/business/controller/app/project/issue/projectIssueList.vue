@@ -3,7 +3,7 @@
     <a-row>
       <a-space wrap>
         {{$t("util.filter")}}:
-        <a-input-search v-model="keyword" :placeholder="$t('placeholder.typeNameOrUniqueId')" style="width: 250px" @search="onSearchIssue"></a-input-search>
+        <a-input-search v-model="keyword" :placeholder="$t('placeholder.typeNameOrUniqueId')" style="width: 250px" @search="onSearchIssue" v-if="checkPermission(permission,Permission_Types.Project.READ)"></a-input-search>
         <a-select v-model="issueType">
           <template #label="{data}">
             <span>{{$t("util.issueType")}}:{{data?.label}}</span>
@@ -46,7 +46,7 @@
           <a-option :label="$t('util.all')" value="all"></a-option>
           <a-option v-for="item in reporterList" :label="item.organizationUser.nickname" :value="item.organizationUser.id"></a-option>
         </a-select>
-        <a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">{{$t("util.create")}}</a-button>
+        <a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.CREATE)">{{$t("util.create")}}</a-button>
       </a-space>
     </a-row>
     <a-divider></a-divider>
@@ -272,7 +272,7 @@ const onPageChange=(page:number)=>{
   search(page)
 }
 const onCreate=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Create",markRaw(ProjectIssueCreate),{
+  let ret=await Dialog.open(root.value,appContext,t("util.create"),markRaw(ProjectIssueCreate),{
     projectId:projectId
   });
   if(ret) {

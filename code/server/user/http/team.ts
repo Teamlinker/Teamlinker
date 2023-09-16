@@ -135,15 +135,12 @@ class TeamController {
         if(!team) {
             throw Err.Team.teamNotFound
         }
-        let [arr,objOrganization]=await Promise.all([
-            OrganizationUserService.organizationUserInfos(organizationUserId),
-            OrganizationService.getItemById(team.getItem().organization_id)
-        ])
+        let arr=await OrganizationUserService.organizationUserInfos(organizationUserId)
         if(!arr || arr.length==0) {
             throw Err.Organization.userNotFound
         }
-        if(objOrganization.getItem().created_by_pure===arr[0].id) {
-            throw Err.Organization.ownerDeleteForbidden
+        if(team.getItem().created_by===arr[0].organizationUserId) {
+            throw Err.Role.roleChangeForbidden
         }
         let ret=await team.changeRole(organizationUserId,roleId)
         if(roleId) {

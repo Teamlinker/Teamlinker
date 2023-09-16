@@ -67,7 +67,7 @@
 	            </a-popover>
 	            <a-doption v-if="checkPermission(permission,Permission_Types.Project.EDIT)" @click="onCopy">{{$t("util.copy")}}</a-doption>
 	            <a-doption v-if="checkPermission(permission,Permission_Types.Project.EDIT)" @click="onConvert">{{$t("util.convert")}}</a-doption>
-              <a-doption v-if="checkPermission(permission,Permission_Types.Project.ADMIN) || info?.created_by.id===store.userInfo.id" @click="onDelete" style="color: red">{{$t("util.delete")}}</a-doption>
+              <a-doption v-if="checkPermission(permission,Permission_Types.Project.DELETE) || info?.created_by.id===store.userInfo.id" @click="onDelete" style="color: red">{{$t("util.delete")}}</a-doption>
             </template>
           </a-dropdown>
         </a-space>
@@ -221,7 +221,7 @@ const getOtherInfo=async ()=>{
 
 const onAddItem=async (type:"parent"|"child"|"related")=>{
   if(type=="parent") {
-    let ret=await Dialog.open(root.value,appContext,"Parent",markRaw(ProjectIssueBind),{
+    let ret=await Dialog.open(root.value,appContext,t("controller.app.project.issue.projectIssueProfile.parent"),markRaw(ProjectIssueBind),{
       projectId:projectId,
       projectKey:key.value
     })
@@ -237,7 +237,7 @@ const onAddItem=async (type:"parent"|"child"|"related")=>{
       }
     }
   } else if(type=="child") {
-    let ret=await Dialog.open(root.value,appContext,"Child",markRaw(ProjectIssueBind),{
+    let ret=await Dialog.open(root.value,appContext,t("controller.app.project.issue.projectIssueProfile.child"),markRaw(ProjectIssueBind),{
       projectId:projectId,
       projectKey:key.value
     })
@@ -253,7 +253,7 @@ const onAddItem=async (type:"parent"|"child"|"related")=>{
       }
     }
   } else if(type=="related") {
-    let ret=await Dialog.open(root.value,appContext,"Related",markRaw(ProjectIssueBind),{
+    let ret=await Dialog.open(root.value,appContext,t("controller.app.project.issue.projectIssueProfile.related"),markRaw(ProjectIssueBind),{
       projectId:projectId,
       projectKey:key.value
     })
@@ -391,7 +391,7 @@ const onCopy=async ()=>{
 }
 
 const onConvert=async ()=>{
-	let ret=await Dialog.open(root.value,appContext,"Convert",markRaw(ProjectIssueConvert),{
+	let ret=await Dialog.open(root.value,appContext,t("util.convert"),markRaw(ProjectIssueConvert),{
 		projectId:projectId,
 		projectIssueId:props.projectIssueId,
 		issueTypeId:info.value.issueType.id
@@ -412,6 +412,7 @@ const onCreateSubIssue=async ()=>{
 		})
 		if(res?.code==0) {
 			getOtherInfo()
+			eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,projectId,res.data.id)
 		}
 	}
 }
@@ -438,11 +439,11 @@ const calculateApprovalName=computed(()=>{
 	if(info.value) {
 		if(info.value.approval) {
 			if(info.value.approval.type===ECommon_Model_Project_Issue_Approval_Type.PENDING) {
-				return `${info.value.approval.workflowNode.name}(Wait For Approval)`
+				return `${info.value.approval.workflowNode.name}(${t("util.waitForApproval")})`
 			} else if(info.value.approval.type===ECommon_Model_Project_Issue_Approval_Type.RESOLVED) {
 				return info.value.workflowNode.name
 			} else if(info.value.approval.type===ECommon_Model_Project_Issue_Approval_Type.REJECTED) {
-				return `${info.value.approval.workflowNode.name}(Rejected)`
+				return `${info.value.approval.workflowNode.name}(${t("util.rejected")})`
 			}
 		} else {
 			return info.value.workflowNode.name

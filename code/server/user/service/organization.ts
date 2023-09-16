@@ -30,6 +30,7 @@ import {ECommon_Model_Meeting_Room_Type} from "../../../common/model/meeting_roo
 import CommonUtil from "../../common/util/common";
 import rpcWikiApi from "../../wiki/rpc/wiki"
 import {ICommon_Route_Res_Organization_Statics} from "../../../common/routes/response";
+import rpcNotificationApi from "../../notification/rpc/notification"
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -102,7 +103,8 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             rpcCalendarApi.clearCalendarByOrganizationId(this.getId()),
             rpcMeetingApi.clearMeetingRoomByOrganizationId(this.getId()),
             rpcIMApi.clearByOrganizationId(this.getId()),
-            rpcFinderApi.clearByOrganizationId(this.getId())
+            rpcFinderApi.clearByOrganizationId(this.getId()),
+            rpcNotificationApi.clearByOrganizationId(this.getId())
         ])
     }
 
@@ -269,9 +271,6 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         })
         let objUser=await obj.update();
         if(roleId) {
-            if(this.getItem().created_by_pure==obj.getItem().user_id) {
-                throw Err.Role.roleChangeForbidden
-            }
             await rpcAuthApi.changeRoleMember(this.getId(),roleId,ECommon_Model_Organization_Member_Type.USER,objUser.id )
         }
         emitServiceEvent("organizationUserEdit",this.getId(),objUser.id)
@@ -288,7 +287,10 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             TeamService.clearMember(organizationUserId),
             MemberTagService.clearMember(organizationUserId),
             rpcCalendarApi.clearCalendar(organizationUserId),
-            rpcMeetingApi.clearMeetingRoom(organizationUserId)
+            rpcMeetingApi.clearMeetingRoom(organizationUserId),
+            rpcIMApi.clearByOrganizationUserId(organizationUserId),
+            rpcFinderApi.clearByOrganizationAndUserId(objUser.getItem().organization_id,objUser.getItem().user_id),
+            rpcAuthApi.clearMember(organizationUserId)
         ])
         emitServiceEvent("organizationUserDelete",this.getId(),organizationUserId)
     }
@@ -457,6 +459,11 @@ export class MemberTagService extends Entity<typeof memberTagModel,typeof member
 
     async listTagMember() {
         let ret=await memberTagMapper.listTagMember(this.getId());
+        return ret;
+    }
+
+    static async listMemberTag(memberId:string) {
+        let ret=await memberTagMapper.listMemberTag(memberId)
         return ret;
     }
 

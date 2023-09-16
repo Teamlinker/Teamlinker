@@ -48,7 +48,7 @@ const search=async ()=>{
   }
 }
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add Tag",markRaw(EditTag),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.setting.userTeam.tag.addTag"),markRaw(EditTag),{
     type:"add"
   })
   if(ret) {
@@ -56,7 +56,7 @@ const onAdd=async ()=>{
   }
 }
 const onEdit=async (item:ICommon_Model_Member_Tag)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Tag",markRaw(EditTag),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.setting.userTeam.tag.editTag"),markRaw(EditTag),{
     type:"edit",
     item:item
   })

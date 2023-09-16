@@ -2,8 +2,11 @@
   <a-form :model="form" ref="eleForm">
     <a-form-item :label="$t('util.issue')" field="issueId" required>
       <a-select allow-clear allow-search @search="onSearch" v-model="form.issueId">
-        <a-option v-for="item in issueList" :label="item.name" :value="item.id">
-          {{projectKey+"-"+item.unique_id+" "+item.name}}
+        <a-option v-for="item in issueList" :value="item.id">
+	        <a-space>
+		        {{projectKey+"-"+item.unique_id}}
+		        {{item.name}}
+	        </a-space>
         </a-option>
       </a-select>
     </a-form-item>

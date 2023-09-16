@@ -291,11 +291,11 @@ const getData=async ()=>{
 						data.value.boardSprintList=res.data
 					}
 				}),
-				apiWiki.list({
-					organizationUserId,
+				apiWiki.userWikiList({
 					size:10,
 					keyword:keyword.value,
-					page:0
+					page:0,
+					type:"all"
 				}).then(res=>{
 					if(res?.code==0) {
 						data.value.wikiSpaceList=res.data.data

@@ -9,10 +9,16 @@ import {
 import {releaseMapper} from './../mapper/release';
 import {ProjectIssueHistoryService, ProjectIssueService} from "./issue";
 import {ECommon_Model_Project_Issue_History_Type} from "../../../common/model/project_issue_history";
+import {IServer_Common_Event_Types} from "../../common/event/types";
 
 export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typeof releaseMapper> {
     constructor(){
         super(releaseMapper)
+    }
+
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
+        await super.delete(eventPublish, ...param);
+        await releaseMapper.clearIssue(this.getId())
     }
 
     static async globalSearch(keyword:string,size:number,organizationUserId:string) {

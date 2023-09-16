@@ -31,6 +31,7 @@ import EditTeamProfile from "../setting/user&team/editTeamProfile.vue";
 import {getCurrentNavigator} from "../../../../teamOS/common/component/navigator/navigator";
 import {useDesktopStore} from "../../desktop/store/desktop";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
+import {useI18n} from "vue-i18n";
 
 const keyword=ref("")
 const root=ref(null);
@@ -40,6 +41,7 @@ const info=ref<DCSType<ICommon_Route_Res_User_TeamList>>({
   manage:[],
   join:[]
 })
+const {t}=useI18n()
 const storeOrganization=useDesktopStore()
 const search=async ()=>{
   let res=await apiUser.teamList({
@@ -56,7 +58,7 @@ const onSearch=()=>{
   search()
 }
 const onAddTeam=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditTeamProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditTeamProfile),{
     type:"add"
   })
   if(ret) {

@@ -100,7 +100,7 @@ const onSearch=()=>{
   search(1)
 }
 const onCreate=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditProjectProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditProjectProfile),{
     type:"add"
   })
   if(ret) {
@@ -108,7 +108,7 @@ const onCreate=async ()=>{
   }
 }
 const onEditProfile=async (item:DCSType<ICommon_Model_Project>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Profile",markRaw(EditProjectProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.editProfile"),markRaw(EditProjectProfile),{
     type:"edit",
     item:item
   })
@@ -119,17 +119,17 @@ const onEditProfile=async (item:DCSType<ICommon_Model_Project>)=>{
 const onEditAccess=async (item:DCSType<ICommon_Model_Project>)=>{
   navigator.push("editProjectAccess",{
     projectId:item.id
-  },`${item.name} -> Access`);
+  },`${item.name} -> ${t("util.access")}`);
 }
 const onEditLabel=async (item:DCSType<ICommon_Model_Project>)=>{
   navigator.push("labelList",{
     projectId:item.id
-  },`${item.name} -> Label`)
+  },`${item.name} -> ${t("util.label")}`)
 }
 const onEditModule=async (item:DCSType<ICommon_Model_Project>)=>{
   navigator.push("moduleList",{
     projectId:item.id
-  },`${item.name} -> Module`)
+  },`${item.name} -> ${t("util.module")}`)
 }
 const onDelete=async (item:DCSType<ICommon_Model_Project>)=>{
   let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteProject"))

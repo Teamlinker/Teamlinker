@@ -73,8 +73,8 @@ const onClick=async (item:{
 	nextTick(()=>{
 		let selection=window.getSelection()
 		let range=document.createRange()
-		range.setStartAfter(eleLine.childNodes[objFix.startIndex])
-		range.setEndAfter(eleLine.childNodes[objFix.startIndex])
+		range.setStartAfter(eleLine.childNodes[objFix.startIndex]??eleLine.lastChild)
+		range.setEndAfter(eleLine.childNodes[objFix.startIndex]??eleLine.lastChild)
 		selection.removeAllRanges()
 		selection.addRange(range)
 	})

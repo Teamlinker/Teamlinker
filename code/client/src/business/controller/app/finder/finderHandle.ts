@@ -135,7 +135,12 @@ export class FinderHandle {
                     icon="folder"
                     iconColor="rgb(252,218,115)"
                 } else if(value.type===ECommon_Model_Finder_Item_Type.FILE) {
-                    icon="file"
+                    let ext=value.name.split(".").at(-1)
+                    if(ext && ["jpg","jpeg","png","bmp","gif","webp","svg"].includes(ext.toLowerCase())) {
+                        icon="file-image"
+                    } else {
+                        icon="file"
+                    }
                     iconColor="gray"
                 } else if(value.type===ECommon_Model_Finder_Item_Type.SHORTCUT) {
                     switch (value.shortcut_type) {
@@ -200,6 +205,7 @@ export class FinderHandle {
                         })
                         if(res?.code==0) {
                             item.name=name
+                            eventBus.emit(EClient_EVENTBUS_TYPE.FINDER_REFRESH,this.folderId)
                         }
                     }
                 }
@@ -370,7 +376,9 @@ export class FinderHandle {
                             })
                         }
                     })
-                }))
+                })).then(()=>{
+                    eventBus.emit(EClient_EVENTBUS_TYPE.FINDER_REFRESH,destId)
+                })
             })
         })
     }

@@ -131,7 +131,7 @@ export class ContentService extends Entity<typeof contentModel,typeof contentMap
             [param:string]:number
         }={}
         if(content) {
-            let arr=JSON.parse(decodeURIComponent(content)) as ICommon_Content_Line[]
+            let arr=JSON.parse(content) as ICommon_Content_Line[]
             for(let obj of arr) {
                 for(let obj1 of obj.arr) {
                     if(obj1.type===ECommon_Content_Line_Config_Type.FILE || obj1.type===ECommon_Content_Line_Config_Type.IMAGE) {

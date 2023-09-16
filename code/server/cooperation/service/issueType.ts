@@ -9,6 +9,7 @@ import {WorkflowService} from "./workflow";
 import {projectIssueMapper} from "../mapper/issue";
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import {ProjectIssueService} from "./issue";
+import {boardMapper} from "../mapper/board";
 
 export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issueTypeMapper> {
     constructor(){
@@ -149,6 +150,9 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
                 projectIssueMapper.updateConvertIssueType(relationship,projectId)
             ])
         }
+        if(relationship) {
+            await boardMapper.updateIssueType(relationship,projectId)
+        }
         let objExist=await IssueTypeSolutionService.getObjByProjectId(projectId)
         if(objExist) {
             await issueTypeSolutionMapper.updateProject(this.getId(),projectId)
@@ -173,6 +177,9 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
                 projectIssueMapper.clearBeforeConvertByProjectId(projectId),
                 projectIssueMapper.updateConvertIssueType(relationship,projectId)
             ])
+        }
+        if(relationship) {
+            await boardMapper.updateIssueType(relationship,projectId)
         }
         await issueTypeSolutionMapper.unbindProject(this.getId(),projectId,this.getItem().organization_id)
     }

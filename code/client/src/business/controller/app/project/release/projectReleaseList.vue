@@ -2,7 +2,7 @@
   <div>
     <a-row>
       <a-space wrap>
-        <a-input-search v-model="keyword" :placeholder="$t('placeholder.typeReleaseName')" style="width: 250px" @search="onSearch"></a-input-search>
+        <a-input-search v-model="keyword" :placeholder="$t('placeholder.typeReleaseName')" style="width: 250px" @search="onSearch" v-if="checkPermission(permission,Permission_Types.Project.READ)"></a-input-search>
         <a-select v-model="status">
           <template #label="{data}">
             <span>{{$t("util.status")}}:{{data?.label}}</span>
@@ -12,7 +12,7 @@
           <a-option :value="ECommon_Model_Project_Release_Status.RELEASE">{{$t("util.released")}}</a-option>
           <a-option :value="ECommon_Model_Project_Release_Status.UNRELEASE">{{$t("util.unReleased")}}</a-option>
         </a-select>
-        <a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.EDIT)">{{$t("util.create")}}</a-button>
+        <a-button type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.CREATE)">{{$t("util.create")}}</a-button>
       </a-space>
     </a-row>
     <a-table style="margin-top: 10px" :columns="columns" :data="releaseList" :pagination="pagination" @pageChange="onPageChange">
@@ -160,7 +160,7 @@ const onPageChange=(page:number)=>{
   search(page)
 }
 const onCreate=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(ProjectReleaseEdit),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(ProjectReleaseEdit),{
     type:"add",
     projectId:projectId
   })
@@ -169,7 +169,7 @@ const onCreate=async ()=>{
   }
 }
 const onEdit=async (item:DCSType<ICommon_Route_Res_Release_Item>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(ProjectReleaseEdit),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(ProjectReleaseEdit),{
     type:"edit",
     projectId:projectId,
     item:item
@@ -196,7 +196,7 @@ const onRelease=async (item:DCSType<ICommon_Route_Res_Release_Item>)=>{
   })
   if(res?.code==0) {
     if(!res.data.result) {
-      let ret=await Dialog.open(root.value,appContext,"UnResolved Issues",markRaw(ProjectReleaseIfCan),{
+      let ret=await Dialog.open(root.value,appContext,t("controller.app.project.release.projectReleaseIfCan.unresolvedIssues"),markRaw(ProjectReleaseIfCan),{
         releaseId:item.id,
         items:res.data.unDoneIssueList,
         projectKey:key.value,

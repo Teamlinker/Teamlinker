@@ -16,6 +16,7 @@ import {
 } from './../../../common/model/workflow_node';
 import {ICommon_Model_Workflow_Approval, workflowApprovalModel} from "../../../common/model/workflow_approval";
 import {keys} from "../../../common/transform";
+import {WorkflowApprovalService} from "../service/workflow";
 
 class WorkflowMapper  {
     async nodeList(issueTypeId:string) {
@@ -65,8 +66,15 @@ class WorkflowMapper  {
             this.nodeList(issueTypeId),
             this.actionList(issueTypeId)
         ])
+        let arrApproval=await Promise.all(nodeList.map(item=>{
+            return WorkflowApprovalService.getItemByExp({
+                workflow_node_id:item.id
+            })
+        }))
+        let approvalList=arrApproval.filter(item=>item!==null).map(item=>item.getItem())
         let newIds:string[]=[],oldIds=nodeList.map(item=>item.id);
         for(let obj of nodeList) {
+            delete obj.approval
             let oldId=obj.id;
             obj.id=await generateSnowId()
             newIds.push(obj.id)
@@ -78,6 +86,13 @@ class WorkflowMapper  {
                     action.source_node_id=obj.id
                 }
             }
+            if(obj.is_approval) {
+                let objApproval=approvalList.find(item=>item.workflow_node_id===oldId)
+                if(objApproval) {
+                    objApproval.workflow_node_id=obj.id
+                    objApproval.id=await generateSnowId()
+                }
+            }
         }
         for(let obj of actionList) {
             obj.id=await generateSnowId()
@@ -85,7 +100,8 @@ class WorkflowMapper  {
         }
         await Promise.all([
             mysql.execute(generateBatchCreateSql(workflowNodeModel,nodeList)),
-            mysql.execute(generateBatchCreateSql(workflowActionModel,actionList))
+            mysql.execute(generateBatchCreateSql(workflowActionModel,actionList)),
+            mysql.execute(generateBatchCreateSql(workflowApprovalModel,approvalList))
         ])
         return {
             workflowNodes:oldIds,

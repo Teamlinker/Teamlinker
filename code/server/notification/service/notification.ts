@@ -155,4 +155,12 @@ export class NotificationService extends Entity<typeof notificationModel,typeof 
         }
         return ret;
     }
+
+    static async clearByOrganizationId(organizationId:string) {
+        await notificationMapper.clearByOrganizationId(organizationId)
+    }
+
+    static async clearByUserId(userId:string) {
+        await notificationMapper.clearByUserId(userId)
+    }
 }

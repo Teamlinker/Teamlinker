@@ -11,6 +11,129 @@ import {renderComponent} from "../../../../teamOS/common/util/component";
 import PopMenu from "./popMenu.vue";
 import Quote from "./quote.vue";
 
+let g_activeEditor:RichEditorEvent
+function onDeleteCrossLine(event:KeyboardEvent) {
+    let range=window.getSelection()?.getRangeAt(0)
+    if(event.key==="Backspace" && g_activeEditor && range && g_activeEditor.getRoot().value?.contains(range.commonAncestorContainer)) {
+        if(g_activeEditor.getSelectElementList().length>0 && !window.getSelection().getRangeAt(0)?.collapsed) {
+            event.preventDefault()
+            event.stopPropagation()
+            let list=g_activeEditor.getSelectionItemList()
+            let objStartInfo={
+                startItem:null,
+                startIndex:0
+            }
+            if(list.length==1) {
+                let line=list[0].line
+                let startItem=line.arr[line.selectStartIndexPath[0]]
+                let endItem=line.arr[line.selectEndIndexPath[0]]
+                if(startItem===endItem) {
+                    if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                        let start=startItem.value.substring(0,line.selectStartIndexPath[1])
+                        let end=startItem.value.substring(line.selectEndIndexPath[1])
+                        startItem.value=start+end
+                    } else {
+                        line.arr.splice(line.selectStartIndexPath[0],1)
+                    }
+                    objStartInfo.startItem=startItem
+                    objStartInfo.startIndex=line.selectStartIndexPath[1]
+                } else {
+                    for(let obj of list[0].data) {
+                        if(obj===startItem) {
+                            if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                                startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
+                            } else {
+                                line.arr.splice(line.arr.indexOf(startItem),1)
+                            }
+                            objStartInfo.startItem=startItem
+                            objStartInfo.startIndex=line.selectStartIndexPath[1]
+                        } else if(obj===endItem) {
+                            if(endItem.type===ECommon_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                                endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
+                            } else {
+                                line.arr.splice(line.arr.indexOf(endItem),1)
+                            }
+                        } else {
+                            line.arr.splice(line.arr.indexOf(obj),1)
+                        }
+                    }
+                }
+                RichEditorHandle.fixLine(line,objStartInfo)
+            } else {
+                let startLine:ICommon_Content_Line
+                for(let i=0;i<list.length;i++) {
+                    let obj=list[i]
+                    let line=obj.line
+                    if(i==0 || i==list.length-1) {
+                        if(i==0) {
+                            startLine=line
+                            for(let i=0;i<obj.data.length;i++) {
+                                let startItem=obj.data[i]
+                                if(i==0) {
+                                    if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                                        startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
+                                    } else {
+                                        line.arr.splice(line.arr.indexOf(startItem),1)
+                                    }
+                                } else {
+                                    line.arr.splice(line.arr.indexOf(startItem),1)
+                                }
+                            }
+                        } else {
+                            for(let i=0;i<obj.data.length;i++) {
+                                let endItem=obj.data[i]
+                                if(i==obj.data.length-1) {
+                                    if(endItem.type===ECommon_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                                        endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
+                                    } else {
+                                        line.arr.splice(line.arr.indexOf(endItem),1)
+                                    }
+                                } else {
+                                    line.arr.splice(line.arr.indexOf(endItem),1)
+                                }
+                            }
+                            startLine.arr=startLine.arr.concat(line.arr)
+                            g_activeEditor.getLineList().splice(g_activeEditor.getLineList().indexOf(line),1)
+                            RichEditorHandle.fixLine(startLine)
+                        }
+                    } else {
+                        g_activeEditor.getLineList().splice(g_activeEditor.getLineList().indexOf(line),1)
+                    }
+                }
+            }
+            nextTick(()=>{
+                let selection=window.getSelection()
+                let range=document.createRange()
+                let index=g_activeEditor.getLineList().indexOf(list[0].line)
+                let ele=g_activeEditor.getRoot().value.children[index].childNodes[list[0].line.selectStartIndexPath[0]] as HTMLElement
+                if(!ele) {
+                    return
+                }
+                if(ele.nodeType===Node.TEXT_NODE || ele.tagName==="SPAN") {
+                    let text=ele.tagName==="SPAN"?ele.innerText:ele.textContent
+                    if(list[0].line.selectStartIndexPath[1]>=text.length) {
+                        range.setStartAfter(ele)
+                        range.setEndAfter(ele)
+                    } else {
+                        range.setStart(ele,list[0].line.selectStartIndexPath[1])
+                        range.setEnd(ele,list[0].line.selectStartIndexPath[1])
+                    }
+                } else {
+                    range.setStartAfter(ele)
+                    range.setEndAfter(ele)
+                }
+                selection.removeAllRanges()
+                selection.addRange(range)
+                for(let ele of g_activeEditor.getSelectElementList()) {
+                    ele.contentEditable="true"
+                }
+                g_activeEditor.setSelectElementList([])
+            })
+        }
+    }
+}
+
+
 export class RichEditorEvent {
     private selectElementList:HTMLElement[]=[]
     private isMouseDown=false
@@ -42,6 +165,9 @@ export class RichEditorEvent {
         label:string,
         photo:string
     }[])=>void)=>void
+    setSelectElementList(list:HTMLElement[]) {
+        this.selectElementList=list
+    }
     clear() {
         this.destroyFunc?.()
         this.destroyQuoteFunc?.()
@@ -92,6 +218,7 @@ export class RichEditorEvent {
         this.lineList.push(line)
     }
     onFocus(item:ICommon_Content_Line, event:MouseEvent){
+        g_activeEditor=this
         if(this.selectElementList.length==0) {
             this.selectElementList=[event.currentTarget as HTMLElement]
         }
@@ -111,6 +238,10 @@ export class RichEditorEvent {
             this.imageHelperElement.style.display="none"
             this.resizeObserver.unobserve(this.imageHelperElement)
             this.resizeImage=null;
+        }
+        if(this.popMenuElement) {
+            this.popMenuElement.remove()
+            this.popMenuElement=null
         }
     }
 
@@ -1052,7 +1183,8 @@ export class RichEditorEvent {
                 this.popMenuElement.style.backgroundColor="white";
                 this.popMenuElement.style.outlineWidth="0"
                 this.popMenuElement.tabIndex=-1;
-                (event.target as HTMLElement).offsetParent.appendChild(this.popMenuElement)
+                this.popMenuElement.style.zIndex="10000";
+                document.body.appendChild(this.popMenuElement)
                 this.popMenuElement.addEventListener("mousedown",ev => {
                     this.popMenuElement.style.display="none"
                 })
@@ -1060,6 +1192,7 @@ export class RichEditorEvent {
                     objEditor:this,
                     popMenuList:this.popMenuList
                 });
+
             }
             let selection=window.getSelection()
             let range=selection.getRangeAt(0)
@@ -1071,20 +1204,18 @@ export class RichEditorEvent {
                 }
                 rect=(range.startContainer as HTMLElement).getBoundingClientRect()
             }
-            let parent=(event.target as HTMLElement).offsetParent
-            let rectParent=parent.getBoundingClientRect()
-            let right=rectParent.right-rect.right+rect.width
-            let bottom=rectParent.bottom-rect.bottom
+            let right=rect.right+rect.width
+            let bottom=rect.bottom
             let left:number,top:number
             if(right>160) {
-                left=rect.left-rectParent.left
+                left=rect.left
             } else {
-                left=rect.left-rectParent.left-150
+                left=rect.left-150
             }
             if(bottom>210) {
-                top=rect.top-rectParent.top+rect.height
+                top=rect.top+rect.height
             } else {
-                top=rect.top-rectParent.top-200
+                top=rect.top-200
             }
             this.popMenuElement.style.left=left+"px"
             this.popMenuElement.style.top=top+"px"
@@ -1147,197 +1278,80 @@ export class RichEditorEvent {
         } else {
             this.clearQuote()
         }
+        if(event.key=="ArrowDown") {
+            let selection=window.getSelection()
+            let range=selection.getRangeAt(0)
+            let startOffset=range.startOffset
+            let startContainer=range.startContainer
+            let selectStartIndexPath=[]
+            selectStartIndexPath.unshift(startOffset)
+            let parentElement=startContainer.parentElement
+            if((startContainer as HTMLElement).tagName=="DIV") {
+                selectStartIndexPath.unshift(0)
+            } else {
+                if(parentElement.tagName=="DIV") {
+                    startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
+                    selectStartIndexPath.unshift(startOffset)
+                    startContainer=parentElement
+                } else {
+                    startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
+                    selectStartIndexPath.unshift(startOffset)
+                    startContainer=parentElement.parentElement
+                }
+            }
+            if(range.collapsed && (startContainer.childNodes.length==0 || (selectStartIndexPath[0]==startContainer.childNodes.length-1 && selectStartIndexPath[1]==startContainer.lastChild.textContent.length))) {
+                event.stopPropagation()
+                event.preventDefault()
+                let index=Array.from(this.root.value.children).indexOf(startContainer as HTMLElement)
+                if(index<this.lineList.length-1) {
+                    let r=document.createRange()
+                    r.selectNodeContents(this.root.value.children[index+1])
+                    r.collapse(true)
+                    selection.removeAllRanges()
+                    selection.addRange(r)
+                }
+            }
+        } else if(event.key=="ArrowUp") {
+            let selection=window.getSelection()
+            let range=selection.getRangeAt(0)
+            let startOffset=range.startOffset
+            let startContainer=range.startContainer
+            let selectStartIndexPath=[]
+            selectStartIndexPath.unshift(startOffset)
+            if((startContainer as HTMLElement).tagName=="DIV") {
+                selectStartIndexPath.unshift(0)
+            } else {
+                let parentElement=startContainer.parentElement
+                if(parentElement.tagName=="DIV") {
+                    startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
+                    selectStartIndexPath.unshift(startOffset)
+                    startContainer=parentElement
+                } else {
+                    startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
+                    selectStartIndexPath.unshift(startOffset)
+                    startContainer=parentElement.parentElement
+                }
+            }
+            if(range.collapsed && selectStartIndexPath[0]==0 && selectStartIndexPath[1]==0) {
+                event.stopPropagation()
+                event.preventDefault()
+                let index=Array.from(this.root.value.children).indexOf(startContainer as HTMLElement)
+                if(index>0) {
+                    let r=document.createRange()
+                    r.selectNodeContents(this.root.value.children[index-1])
+                    r.collapse(false)
+                    selection.removeAllRanges()
+                    selection.addRange(r)
+                }
+            }
+        }
     }
 
     constructor(root:Ref<HTMLElement>,elementList:Ref<HTMLElement[]>,appContext:AppContext){
         this.appContext=appContext
         this.root=root;
         this.elementList=elementList
-        document.addEventListener("keydown",(event:KeyboardEvent)=>{
-            if(event.key=="Backspace") {
-                if(this.selectElementList.length>0 && !window.getSelection().getRangeAt(0)?.collapsed) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    let list=this.getSelectionItemList()
-                    let objStartInfo={
-                        startItem:null,
-                        startIndex:0
-                    }
-                    if(list.length==1) {
-                        let line=list[0].line
-                        let startItem=line.arr[line.selectStartIndexPath[0]]
-                        let endItem=line.arr[line.selectEndIndexPath[0]]
-                        if(startItem===endItem) {
-                            if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
-                                let start=startItem.value.substring(0,line.selectStartIndexPath[1])
-                                let end=startItem.value.substring(line.selectEndIndexPath[1])
-                                startItem.value=start+end
-                            } else {
-                                line.arr.splice(line.selectStartIndexPath[0],1)
-                            }
-                            objStartInfo.startItem=startItem
-                            objStartInfo.startIndex=line.selectStartIndexPath[1]
-                        } else {
-                            for(let obj of list[0].data) {
-                                if(obj===startItem) {
-                                    if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
-                                        startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
-                                    } else {
-                                        line.arr.splice(line.arr.indexOf(startItem),1)
-                                    }
-                                    objStartInfo.startItem=startItem
-                                    objStartInfo.startIndex=line.selectStartIndexPath[1]
-                                } else if(obj===endItem) {
-                                    if(endItem.type===ECommon_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Content_Line_Config_Type.LINK) {
-                                        endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
-                                    } else {
-                                        line.arr.splice(line.arr.indexOf(endItem),1)
-                                    }
-                                } else {
-                                    line.arr.splice(line.arr.indexOf(obj),1)
-                                }
-                            }
-                        }
-                        RichEditorHandle.fixLine(line,objStartInfo)
-                    } else {
-                        let startLine:ICommon_Content_Line
-                        for(let i=0;i<list.length;i++) {
-                            let obj=list[i]
-                            let line=obj.line
-                            if(i==0 || i==list.length-1) {
-                                if(i==0) {
-                                    startLine=line
-                                    for(let i=0;i<obj.data.length;i++) {
-                                        let startItem=obj.data[i]
-                                        if(i==0) {
-                                            if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
-                                                startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
-                                            } else {
-                                                line.arr.splice(line.arr.indexOf(startItem),1)
-                                            }
-                                        } else {
-                                            line.arr.splice(line.arr.indexOf(startItem),1)
-                                        }
-                                    }
-                                } else {
-                                    for(let i=0;i<obj.data.length;i++) {
-                                        let endItem=obj.data[i]
-                                        if(i==obj.data.length-1) {
-                                            if(endItem.type===ECommon_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Content_Line_Config_Type.LINK) {
-                                                endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
-                                            } else {
-                                                line.arr.splice(line.arr.indexOf(endItem),1)
-                                            }
-                                        } else {
-                                            line.arr.splice(line.arr.indexOf(endItem),1)
-                                        }
-                                    }
-                                    startLine.arr=startLine.arr.concat(line.arr)
-                                    this.lineList.splice(this.lineList.indexOf(line),1)
-                                    RichEditorHandle.fixLine(startLine)
-                                }
-                            } else {
-                                this.lineList.splice(this.lineList.indexOf(line),1)
-                            }
-                        }
-                    }
-                    nextTick(()=>{
-                        let selection=window.getSelection()
-                        let range=document.createRange()
-                        let index=this.lineList.indexOf(list[0].line)
-                        let ele=this.root.value.children[index].childNodes[list[0].line.selectStartIndexPath[0]] as HTMLElement
-                        if(!ele) {
-                            return
-                        }
-                        if(ele.nodeType===Node.TEXT_NODE || ele.tagName==="SPAN") {
-                            let text=ele.tagName==="SPAN"?ele.innerText:ele.textContent
-                            if(list[0].line.selectStartIndexPath[1]>=text.length) {
-                                range.setStartAfter(ele)
-                                range.setEndAfter(ele)
-                            } else {
-                                range.setStart(ele,list[0].line.selectStartIndexPath[1])
-                                range.setEnd(ele,list[0].line.selectStartIndexPath[1])
-                            }
-                        } else {
-                            range.setStartAfter(ele)
-                            range.setEndAfter(ele)
-                        }
-                        selection.removeAllRanges()
-                        selection.addRange(range)
-                        for(let ele of this.selectElementList) {
-                            ele.contentEditable="true"
-                        }
-                        this.selectElementList=[]
-                    })
-                }
-            } else if(event.key=="ArrowDown") {
-                let selection=window.getSelection()
-                let range=selection.getRangeAt(0)
-                let startOffset=range.startOffset
-                let startContainer=range.startContainer
-                let selectStartIndexPath=[]
-                selectStartIndexPath.unshift(startOffset)
-                let parentElement=startContainer.parentElement
-                if((startContainer as HTMLElement).tagName=="DIV") {
-                    selectStartIndexPath.unshift(0)
-                } else {
-                    if(parentElement.tagName=="DIV") {
-                        startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
-                        selectStartIndexPath.unshift(startOffset)
-                        startContainer=parentElement
-                    } else {
-                        startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
-                        selectStartIndexPath.unshift(startOffset)
-                        startContainer=parentElement.parentElement
-                    }
-                }
-                if(range.collapsed && (startContainer.childNodes.length==0 || (selectStartIndexPath[0]==startContainer.childNodes.length-1 && selectStartIndexPath[1]==startContainer.lastChild.textContent.length))) {
-                    event.stopPropagation()
-                    event.preventDefault()
-                    let index=Array.from(root.value.children).indexOf(startContainer as HTMLElement)
-                    if(index<this.lineList.length-1) {
-                        let r=document.createRange()
-                        r.selectNodeContents(root.value.children[index+1])
-                        r.collapse(true)
-                        selection.removeAllRanges()
-                        selection.addRange(r)
-                    }
-                }
-            } else if(event.key=="ArrowUp") {
-                let selection=window.getSelection()
-                let range=selection.getRangeAt(0)
-                let startOffset=range.startOffset
-                let startContainer=range.startContainer
-                let selectStartIndexPath=[]
-                selectStartIndexPath.unshift(startOffset)
-                if((startContainer as HTMLElement).tagName=="DIV") {
-                    selectStartIndexPath.unshift(0)
-                } else {
-                    let parentElement=startContainer.parentElement
-                    if(parentElement.tagName=="DIV") {
-                        startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
-                        selectStartIndexPath.unshift(startOffset)
-                        startContainer=parentElement
-                    } else {
-                        startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
-                        selectStartIndexPath.unshift(startOffset)
-                        startContainer=parentElement.parentElement
-                    }
-                }
-                if(range.collapsed && selectStartIndexPath[0]==0 && selectStartIndexPath[1]==0) {
-                    event.stopPropagation()
-                    event.preventDefault()
-                    let index=Array.from(root.value.children).indexOf(startContainer as HTMLElement)
-                    if(index>0) {
-                        let r=document.createRange()
-                        r.selectNodeContents(root.value.children[index-1])
-                        r.collapse(false)
-                        selection.removeAllRanges()
-                        selection.addRange(r)
-                    }
-                }
-            }
-        })
+        document.addEventListener("keydown",onDeleteCrossLine)
     }
     getSelectionItemList():{
         line:ICommon_Content_Line,

@@ -392,7 +392,7 @@ const onDeleteIssueType=async (item:DCSType<ICommon_Model_Issue_Type>)=>{
 }
 
 const onAddIssueType=async ()=>{
-	let ret=await Dialog.open(root.value,appContext,"Add Issue Type",markRaw(BoardAddIssueType),{
+	let ret=await Dialog.open(root.value,appContext,t("controller.app.project.board.boardConfig.addIssueType"),markRaw(BoardAddIssueType),{
 		boardId:props.boardId
 	})
 	if(ret) {

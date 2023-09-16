@@ -57,6 +57,7 @@ import {ICommon_Model_Wiki} from "../../../../../../common/model/wiki";
 import EditWikiProfile from "../setting/wiki/editWikiProfile.vue";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
+import {useI18n} from "vue-i18n";
 
 const recentList=ref<DCSType<ICommon_Model_Wiki>[]>([])
 const list=ref<DCSType<ICommon_Model_Wiki>[]>([])
@@ -66,6 +67,7 @@ const storeOrganization=useDesktopStore()
 const root=ref(null);
 const appContext=getCurrentInstance().appContext
 const navigator=getCurrentNavigator()
+const {t}=useI18n()
 const pagination=reactive({
   total:0,
   current:1,
@@ -101,7 +103,7 @@ const onSearch=async ()=>{
   listAllWiki(1)
 }
 const onAddWiki=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditWikiProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditWikiProfile),{
     type:"add"
   })
   if(ret) {

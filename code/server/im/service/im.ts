@@ -83,6 +83,10 @@ export class IMUnReadMessageService extends Entity<typeof iMUnReadMessageModel,t
     static async clearByOrganizationId(organizationId:string) {
         await iMUnReadMessageMapper.clearByOrganizationId(organizationId)
     }
+
+    static async clearByOrganizationUserId(organizationUserId:string) {
+        await iMUnReadMessageMapper.clearByOrganizationUserId(organizationUserId)
+    }
 }
 
 export class IMFavoriteMessageService extends Entity<typeof iMFavoriteMessageModel,typeof iMFavoriteMessageMapper> {
@@ -96,5 +100,9 @@ export class IMFavoriteMessageService extends Entity<typeof iMFavoriteMessageMod
 
     static async clearByOrganizationId(organizationId:string) {
         await iMFavoriteMessageMapper.clearByOrganizationId(organizationId)
+    }
+
+    static async clearByOrganizationUserId(organizationUserId:string) {
+        await iMFavoriteMessageMapper.clearByOrganizationUserId(organizationUserId)
     }
 }

@@ -131,10 +131,12 @@ export default abstract class Application{
         })
         this.app.use(async (ctx, next) => {
             if (ctx.headers['content-type'] && ctx.headers['content-type'].split(';')[0] === 'multipart/form-data') {
-                const maxLength = 1024 * 1024 * 5;
-                if (ctx.headers && ctx.headers['content-length'] && Number(ctx.headers['content-length']) > maxLength) {
-                    ctx.body = generateHttpErrorResponse(Err.Http.overFileSize)
-                    return;
+                if(Application.mode===ECommon_Application_Mode.ONLINE) {
+                    const maxLength = 1024 * 1024 * 5;
+                    if (ctx.headers && ctx.headers['content-length'] && Number(ctx.headers['content-length']) > maxLength) {
+                        ctx.body = generateHttpErrorResponse(Err.Http.overFileSize)
+                        return;
+                    }
                 }
                 let stream = new PassThrough()
                 let ret = await pipe(ctx.req, stream)

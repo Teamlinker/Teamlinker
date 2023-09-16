@@ -95,7 +95,7 @@ const onSearch=()=>{
   search(1)
 }
 const onCreate=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add",markRaw(EditTeamProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditTeamProfile),{
     type:"add"
   })
   if(ret) {
@@ -103,7 +103,7 @@ const onCreate=async ()=>{
   }
 }
 const onEditProfile=async (item:DCSType<ICommon_Model_Team>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditTeamProfile),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(EditTeamProfile),{
     type:"edit",
     item:item
   })
@@ -114,7 +114,7 @@ const onEditProfile=async (item:DCSType<ICommon_Model_Team>)=>{
 const onEditMember=async (item:DCSType<ICommon_Model_Team>)=>{
   navigator.push("editTeamMember",{
     teamId:item.id
-  },`${item.name} -> Members`);
+  },`${item.name} -> ${t("util.members")}`);
 }
 const onDelete=async (item:DCSType<ICommon_Model_Team>)=>{
   let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteTeam"))

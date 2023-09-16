@@ -56,7 +56,6 @@ class FinderController {
             name,
             parent_folder_id:parentFolderId,
             created_by_pure:user.userId,
-            organization_id:user.organizationInfo.organizationId,
             shortcut_type:shortcutType
         })
         let ret=await obj.create()

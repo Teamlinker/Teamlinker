@@ -95,17 +95,13 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                     model:roleMemberModel,
                     value:ECommon_Model_Organization_Member_Type.DEFAULT
                 },
-                team_id:{
+                organization_user_id:{
                     model:teamUserModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 },
-                member_tag_id: {
+                "organization_user_id ": {
                     model:memberTagMemberModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 }
             },
             id:{
@@ -529,6 +525,16 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
                 }
             }))
         }
+    }
+
+    async clearIssue(projectReleaseId:string) {
+        if(!projectReleaseId) {
+            throw Err.Project.Release.releaseNotFound
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
+            project_release_id:projectReleaseId
+        }))
     }
 
     async clearByProjectIds(projectIds:string[]) {

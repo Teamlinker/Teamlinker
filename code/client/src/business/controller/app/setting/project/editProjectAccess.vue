@@ -4,7 +4,7 @@
       <span>{{$t("controller.app.setting.project.editProjectAccess.name")}}</span>
       <a-input v-model="keyword"></a-input>
       <span>{{$t("controller.app.setting.project.editProjectAccess.memberType")}}</span>
-      <a-select  v-model="memberType">
+      <a-select  v-model="memberType" style="width: 100px">
         <a-option :value="ECommon_Model_Organization_Member_Type.DEFAULT">{{$t("util.default")}}</a-option>
         <a-option :value="ECommon_Model_Organization_Member_Type.USER">{{$t("util.user")}}</a-option>
         <a-option :value="ECommon_Model_Organization_Member_Type.TEAM">{{$t("util.team")}}</a-option>
@@ -26,7 +26,7 @@
       <template #operation="{record}">
         <a-space wrap>
           <a-button @click="onEditRole(record)" size="small">{{$t("util.role")}}</a-button>
-          <a-button status="danger" size="small" @click="onDelete(record)">{{$t("util.remove")}}</a-button>
+          <a-button status="danger" size="small" @click="onDelete(record)" v-if="projectInfo.created_by.organizationUserId!==record.member?.id">{{$t("util.remove")}}</a-button>
         </a-space>
       </template>
     </a-table>
@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../../common/model/organization.js";
-import {getCurrentInstance, markRaw, reactive, ref} from "vue";
+import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {apiProject, DCSType} from "../../../../common/request/request";
 import {ICommon_Route_Res_Role_Member_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
@@ -43,6 +43,7 @@ import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditProjectAccessRole from "./editProjectAccessRole.vue";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 import {useI18n} from "vue-i18n";
+import {ICommon_Model_Project} from "../../../../../../../common/model/project";
 
 const props=defineProps<{
   projectId:string
@@ -72,6 +73,7 @@ const pagination=reactive({
 })
 const keyword=ref("");
 const memberType=ref(ECommon_Model_Organization_Member_Type.DEFAULT)
+const projectInfo=ref<DCSType<ICommon_Model_Project>>()
 const search=async (page:number)=>{
   let res=await apiProject.listMember({
     projectId:props.projectId,
@@ -95,7 +97,7 @@ const onSearch=()=>{
   search(1)
 }
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Invite",markRaw(EditProjectAccessRole),{
+  let ret=await Dialog.open(root.value,appContext,t("util.invite"),markRaw(EditProjectAccessRole),{
     type:"add",
     projectId:props.projectId
   })
@@ -104,7 +106,7 @@ const onAdd=async ()=>{
   }
 }
 const onEditRole=async (item:DCSType<ICommon_Route_Res_Role_Member_Item>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditProjectAccessRole),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(EditProjectAccessRole),{
     type:"edit",
     item:item,
     projectId:props.projectId
@@ -138,6 +140,19 @@ const onDelete=async (item:DCSType<ICommon_Route_Res_Role_Member_Item>)=>{
     }
   }
 }
+
+const getProjectInfo=async ()=>{
+	let res=await apiProject.basic({
+		projectId:props.projectId
+	})
+	if(res?.code==0) {
+		projectInfo.value=res.data
+	}
+}
+
+onBeforeMount(()=>{
+	getProjectInfo()
+})
 </script>
 
 <style scoped>

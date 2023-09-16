@@ -1,5 +1,6 @@
 export default {
     tip:{
+        archiveSuccess:"归档成功",
         acceptInvitation:"你是否接受邀请?",
         rejectInvitation:"你是否拒绝邀请?",
         deleteCalendar:"你要删除这个日历吗?",
@@ -81,7 +82,7 @@ export default {
         favoriteSuccess:"收藏成功",
         sendSuccess:"发送成功",
         registerSuccess:"注册成功",
-        switchToSpecificOrganization:"你需要选择组织",
+        switchToSpecificOrganization:"你需要选择到与之匹配组织",
         passwordNotMatch:"密码不匹配",
         endDateLess:"结束时间不能小于开始时间",
         operationFailed:"操作失败",
@@ -152,7 +153,7 @@ export default {
         wikiItem:"文档",
         calendarEvent:"日历事件",
         meeting:"会议",
-        profile:"主页",
+        profile:"详情",
         close:"关闭",
         invite:"邀请",
         leave:"离开",
@@ -216,7 +217,7 @@ export default {
         tag:"用户标签",
         role:"角色",
         user:"用户",
-        access:"访问",
+        access:"访问权限",
         module:"模块",
         member:"成员",
         organization:"组织",
@@ -291,14 +292,14 @@ export default {
         optional:"可选",
         labelType:"标签类型",
         options:"选项",
-        approval:"批准",
+        approval:"审批",
         allowAllConnections:"允许所有连接",
-        approvalType:"批准类型",
+        approvalType:"审批类型",
         chooseMemberTag:"选择用户成员标签",
         permissions:"权限",
         tags:"用户标签",
         nickname:"昵称",
-        job:"工作",
+        job:"职位",
         email:"Email",
         phone:"电话",
         department:"部门",
@@ -322,14 +323,20 @@ export default {
         reject:"拒绝",
         workDay:"工作日",
         commit:"提交",
-        resolve:"撤销",
+        resolve:"批准",
         resetPassword:"重置密码",
         explore:"探索",
         system:"系统",
         free:"免费",
         notification:"通知",
         next:"下一个",
-        previous:"上一个"
+        previous:"上一个",
+        dashboard:"仪表盘",
+        editProfile:"编辑详情",
+        accepted:"已接受",
+        rejected:"已拒绝",
+        issueTypeList:"事务类型列表",
+        waitForApproval:"等待审批"
     },
     "common":{
         "component":{
@@ -359,7 +366,11 @@ export default {
                     month:"月",
                     calendarGlobalSetting:"日历全局设置",
                     followDeviceTimeZone:"跟随当前时区",
-                    startWeekDay:"开始于周几"
+                    startWeekDay:"开始于周几",
+                    addCalendar:"添加日历",
+                    editCalendar:"编辑日历",
+                    addEvent:"添加日历事件",
+                    editEvent:"编辑日历事件"
                 },
                 calendarEventAddSimple:{
                     moreOption:"更多选项"
@@ -406,10 +417,13 @@ export default {
                     personMeetingSetting:"个人会议设置",
                     joinMeeting:"加入会议",
                     scheduleMeeting:"安排会议",
-                    meetingList:"会议列表"
+                    meetingList:"会议列表",
+                    editSetting:"设置",
+                    editMeeting:"编辑会议"
                 },
                 meetingProfile:{
-                    chat:"聊天"
+                    chat:"聊天",
+                    meetingPreview:"会议预览"
                 },
                 meetingOperation:{
                     meetingInfo:"会议信息"
@@ -439,13 +453,20 @@ export default {
                 },
                 board:{
                     boardConfig:{
-                        addColumn:"添加列"
+                        addColumn:"添加列",
+                        addIssueType:"添加事务类型"
                     },
                     boardSprintList:{
                         notStart:"未开始",
                         starting:"进行中",
                         completed:"已完成",
                         swimLanes:"泳道"
+                    },
+                    boardKanban:{
+                        addSwimLane:"添加泳道",
+                        editSwimLane:"编辑泳道",
+                        addIssue:"添加事务",
+                        selectAction:"操作"
                     }
                 },
                 issue:{
@@ -496,6 +517,15 @@ export default {
                     yourWork:"你的工作",
                     recentProjectList:"最近项目列表",
                     allProjectList:"所有项目列表"
+                },
+                setting:{
+                    projectSettingIssueSolution:{
+                        issueTypeConvert:"事务类型转换"
+                    },
+                    projectSettingRole:{
+                        addRole:"添加角色",
+                        editRole:"编辑角色"
+                    }
                 }
             },
             setting:{
@@ -523,7 +553,11 @@ export default {
                     },
                     workflow:{
                         addNode:"添加节点",
-                        editFields:"编辑字段"
+                        editFields:"编辑字段",
+                        choosePerson:"选择人员",
+                        chooseTeam:"选择团队",
+                        chooseWorkflowField:"选择字段",
+                        border:"节点的边框是粉色的"
                     }
                 },
                 project:{
@@ -542,12 +576,24 @@ export default {
                 userTeam:{
                     user:{
                         resetPassword:"重置密码"
+                    },
+                    tag:{
+                        addTag:"添加用户标签",
+                        editTag:"编辑用户标签"
                     }
                 },
                 setting:{
                     userManage:"用户管理",
                     teamManage:"团队管理",
-                    tagManage:"用户标签管理"
+                    tagManage:"用户标签管理",
+                    organizationEdit:"编辑组织",
+                    organizationRole:"组织角色",
+                    globalProjectRole:"项目全局角色",
+                    projectList:"项目列表",
+                    teamRole:"团队角色",
+                    teamList:"团队列表",
+                    globalWikiRole:"文档集合全局角色",
+                    wikiList:"文档集合列表"
                 }
             },
             wiki:{
@@ -572,7 +618,8 @@ export default {
         },
         "desktop":{
             desktop:{
-                createOrganization:"创建组织"
+                createOrganization:"创建组织",
+                editOrganizationUserProfile:"编辑组织成员信息"
             },
             missCallShow:{
                 invitedYou:"邀请了你"

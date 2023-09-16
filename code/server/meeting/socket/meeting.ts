@@ -145,6 +145,12 @@ export async function handleMeetingConnection() {
                     roomName:null,
                     error:"password wrong"
                 }
+            } else if(objRoom.getItem().organization_id!==socketData.organizationId) {
+                return {
+                    businessId:null,
+                    roomName:null,
+                    error:"access forbidden"
+                }
             } else {
                 return {
                     businessId:socketData.organizationUserId,

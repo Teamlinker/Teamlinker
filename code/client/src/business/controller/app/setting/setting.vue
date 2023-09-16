@@ -139,7 +139,7 @@
         </a-sub-menu>
       </a-menu>
     </a-layout-sider>
-    <a-layout-content style="flex-direction: column;display: flex;padding: 10px">
+    <a-layout-content style="flex-direction: column;display: flex;padding: 10px;box-sizing: border-box">
       <a-breadcrumb style="margin: 10px 0;flex: 0 1 auto">
         <a-breadcrumb-item v-for="item in pathList">{{item}}</a-breadcrumb-item>
       </a-breadcrumb>
@@ -169,6 +169,7 @@ import UserIndex from "./user&team/user.vue";
 import RoleWikiList from "./role/wiki/wikiList.vue";
 import RoleGlobalWikiIndex from "./role/wiki/wikiRoleList.vue";
 import SettingHome from "@/business/controller/app/setting/home/settingHome.vue";
+import {useI18n} from "vue-i18n";
 
 let objComponent={
   issueSolution:markRaw(IssueIndex),
@@ -188,22 +189,23 @@ let objComponent={
 	home:markRaw(SettingHome)
 }
 let type=ref("")
+const {t}=useI18n()
 let objCrumb={
-  organizationEdit:"Organization Edit",
-  userManage:"User",
-  teamManage:"Team",
-  tagManage:"Tag",
-  projectManage:"Project",
-  issueSolution:"Issue Solution",
-  organizationRole:"Organization Role",
-  projectGlobalRole:"Global Project Role",
-  projectSpecificRole:"Project List",
-  teamGlobalRole:"Team Role",
-  teamSpecificRole:"Team List",
-  wikiGlobalRole:"Global Wiki Role",
-  wikiSpecificRole:"Wiki List",
-  wikiManage:"Wiki",
-	home:"Dashboard"
+  organizationEdit:t("controller.app.setting.setting.organizationEdit"),
+  userManage:t("util.user"),
+  teamManage:t("util.team"),
+  tagManage:t("util.tag"),
+  projectManage:t("util.project"),
+  issueSolution:t("util.issueSolution"),
+  organizationRole:t("controller.app.setting.setting.organizationRole"),
+  projectGlobalRole:t("controller.app.setting.setting.globalProjectRole"),
+  projectSpecificRole:t("controller.app.setting.setting.projectList"),
+  teamGlobalRole:t("controller.app.setting.setting.teamRole"),
+  teamSpecificRole:t("controller.app.setting.setting.teamRole"),
+  wikiGlobalRole:t("controller.app.setting.setting.globalWikiRole"),
+  wikiSpecificRole:t("controller.app.setting.setting.wikiList"),
+  wikiManage:t("util.wiki"),
+	home:t("util.dashboard")
 }
 const selectedKeys=ref(["home"])
 const eleNavigator=ref<InstanceType<typeof NavigatorContainer>>(null)

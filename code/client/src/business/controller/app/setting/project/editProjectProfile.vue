@@ -1,8 +1,7 @@
 <template>
   <a-form ref="eleForm" :model="form" auto-label-width>
     <a-form-item field="name" :label="$t('util.name')" required>
-      <a-input v-model="form.name" v-if="type=='add'"></a-input>
-      <template v-else>{{form.name}}</template>
+      <a-input v-model="form.name"></a-input>
     </a-form-item>
     <a-form-item field="keyword" :label="$t('util.keyword')" required>
       <a-input v-model="form.keyword" v-if="type=='add'"></a-input>

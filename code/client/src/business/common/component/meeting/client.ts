@@ -126,6 +126,10 @@ export class MeetingClient {
         let ret=await this.socket.emitWithAck("joinRoom",roomId,extraData)
         if(ret) {
             this.roomInfo=ret;
+        } else {
+            return {
+                success:false
+            }
         }
         if(!this.device) {
             const data = await this.socket.emitWithAck('getRouterRtpCapabilities');
@@ -133,7 +137,7 @@ export class MeetingClient {
         }
         await this.publish()
         return {
-            success:ret?true:false
+            success:true
         }
     }
     async leave():Promise<boolean> {

@@ -7,6 +7,7 @@ import CommonUtil from "../../common/util/common";
 import {
     convertCountAndExecute,
     convertCountSql,
+    generateCommonListData,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
     generateGroupLeftJoin3Sql,
@@ -15,9 +16,9 @@ import {
 } from '../../common/util/sql';
 import {ICommon_Model_Project_Issue, projectIssueModel} from './../../../common/model/project_issue';
 import {ECommon_Model_Workflow_Node_Status} from './../../../common/model/workflow_node';
-import {roleMemberModel, Table_Role_Member} from "../../../common/model/role_member";
-import {Table_Team_User, teamUserModel} from "../../../common/model/team_user";
-import {memberTagMemberModel, Table_Member_Tag_Member} from "../../../common/model/member_tag_member";
+import {roleMemberModel} from "../../../common/model/role_member";
+import {teamUserModel} from "../../../common/model/team_user";
+import {memberTagMemberModel} from "../../../common/model/member_tag_member";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import {ICommon_Route_Res_Project_Statics} from "../../../common/routes/response";
 import {ECommon_Model_Project_Release_Status, projectReleaseModel} from "../../../common/model/project_release";
@@ -456,9 +457,6 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             throw Err.User.userIdNotExists
         }
         let mysql=getMysqlInstance();
-        let calcCount=await mysql.executeOne<number>(`select count(1) from (select rm.item_id from ${Table_Role_Member} rm left join ${Table_Project} p on p.id=rm.item_id left join ${Table_Team_User} tu on tu.team_id=rm.member_id left join ${Table_Member_Tag_Member} mtm on mtm.member_tag_id=rm.member_id  where (rm.member_id='${organizationUserId}' or rm.member_type =${ECommon_Model_Organization_Member_Type.DEFAULT} or not isnull(tu.team_id) || not isnull(mtm.member_tag_id)) and not isnull(p.id)  ${type=="all"?``:type=="created"?`and p.created_by='${organizationUserId}'`:`and p.created_by<>'${organizationUserId}'`} ${keyword?` and p.name like '%${keyword}%'`:''} GROUP BY rm.item_id) as Z`)
-        let count=Number(Object.values(calcCount)[0]);
-        let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateGroupLeftJoin3Sql({
             model:roleMemberModel,
             columns:{
@@ -499,17 +497,13 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                     model:roleMemberModel,
                     value:ECommon_Model_Organization_Member_Type.DEFAULT
                 },
-                team_id:{
+                organization_user_id:{
                     model:teamUserModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 },
-                member_tag_id: {
+                "organization_user_id ": {
                     model:memberTagMemberModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 }
             },
             id:{
@@ -542,8 +536,8 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             type:"asc",
             isVirtualField:false
         },page*size,size)
-        let arr=await mysql.execute(sql);
-        let arrProjectId=arr.map(item=>item.item_id);
+        let objPage=await generateCommonListData(sql,page,size)
+        let arrProjectId=objPage.data.map(item=>item.item_id);
         if(arrProjectId.length>0) {
             let sql=generateGroupLeftJoin2Sql({
                 model:projectModel,
@@ -624,15 +618,15 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             })
             return {
                 page:page,
-                count:count,
-                totalPage:totalPage,
+                count:objPage.count,
+                totalPage:objPage.totalPage,
                 data:ret
             }
         } else {
             return {
                 page:page,
-                count:count,
-                totalPage:totalPage,
+                count:objPage.count,
+                totalPage:objPage.totalPage,
                 data:[]
             }
         }

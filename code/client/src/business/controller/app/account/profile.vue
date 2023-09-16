@@ -3,7 +3,7 @@
     <a-form-item field="photo" :label="$t('util.avatar')">
       <Upload :default-uri="form.photo" types=".png,.jpg,.jpeg,.gif,.bmp,.svg" @upload="onUpload"></Upload>
     </a-form-item>
-    <a-form-item label="username">
+    <a-form-item :label="$t('util.username')">
       {{form.username}}
     </a-form-item>
     <a-form-item field="password" :label="$t('util.password')">

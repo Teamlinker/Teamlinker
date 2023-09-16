@@ -258,7 +258,7 @@ const onAcceptOrganizationInvitation=async ()=>{
 		})
 		if(res?.code==0) {
 			props.obj.status=ECommon_Model_Notification_Status.RESOLVED
-			Message.success(t("util.accepted"))
+			Message.success(t("tip.accepted"))
 			setTimeout(()=>{
 				eventBus.emit(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST)
 			},1000)
@@ -277,7 +277,7 @@ const onRejectOrganizationInvitation=async()=>{
 		})
 		if(res?.code==0) {
 			props.obj.status=ECommon_Model_Notification_Status.REJECTED
-			Message.success(t("util.rejected"))
+			Message.success(t("tip.rejected"))
 		} else {
 			Message.error(res.msg)
 		}

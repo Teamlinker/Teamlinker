@@ -204,7 +204,7 @@ class RpcAuthApi {
                 let objComponent:any=getComponent("PermissionWiki")
                 ret=await objComponent.generatorValue({
                     organizationUserId: memberId,
-                    wikiId:itemId
+                    wikiId:itemId,
                 })
             }
             return ret;

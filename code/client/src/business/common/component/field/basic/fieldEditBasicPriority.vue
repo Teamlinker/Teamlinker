@@ -6,7 +6,7 @@
 				<a-select v-model="editValue">
 					<a-option :value="ECommon_Model_Project_Issue_Priority.LOW">{{$t("util.low")}}</a-option>
 					<a-option :value="ECommon_Model_Project_Issue_Priority.MEDIUM">{{$t("util.medium")}}</a-option>
-					<a-option :value="ECommon_Model_Project_Issue_Priority.HIGH">{{$t("util.hign")}}</a-option>
+					<a-option :value="ECommon_Model_Project_Issue_Priority.HIGH">{{$t("util.high")}}</a-option>
 					<a-option :value="ECommon_Model_Project_Issue_Priority.URGENT">{{$t("util.urgent")}}</a-option>
 				</a-select>
 				<a-button type="text" @click="onClick">

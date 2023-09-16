@@ -233,7 +233,6 @@ export class RichEditorHandle {
                 ele.setAttribute("href","javascript:void(0)")
                 ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.MEETING_ROOM))
                 ele.setAttribute("value",obj.value)
-                ele.setAttribute("link",obj.link)
                 ele.style.margin="0 2px 0 2px"
                 ele.style.padding="0 5px 0 5px"
                 ele.style.cursor="pointer"
@@ -355,10 +354,8 @@ export class RichEditorHandle {
                                 obj.label=ele.innerText??""
                             } else if(configType===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
                                 let meetingRoomId=ele.getAttribute("value")
-                                let password=ele.getAttribute("link")
                                 obj.type=ECommon_Content_Line_Config_Type.MEETING_ROOM
                                 obj.value=meetingRoomId
-                                obj.link=password
                                 obj.label=ele.innerText??""
                             } else if(configType===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
                                 let organizationUserId=ele.getAttribute("value")

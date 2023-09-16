@@ -73,7 +73,7 @@ const onSearch=()=>{
   search(1)
 }
 const onBind=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Bind",markRaw(EditBindProject),{
+  let ret=await Dialog.open(root.value,appContext,t("util.bind"),markRaw(EditBindProject),{
     issueTypeSolutionId:props.issueTypeSolutionId
   })
   if(ret) {
@@ -96,7 +96,7 @@ const onUnBind=async (item:DCSType<ICommon_Model_Project>)=>{
 				  search(pagination.current)
 			  }
 		  } else {
-			  let ret=await Dialog.open(root.value,appContext,"Issue Type Convert",markRaw(ProjectSettingIssueSolutionConvert),{
+			  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingIssueSolution.issueTypeConvert"),markRaw(ProjectSettingIssueSolutionConvert),{
 				  projectId:item.id,
 				  originalIssueTypeSolutionId:props.issueTypeSolutionId
 			  })

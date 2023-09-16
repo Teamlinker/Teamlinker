@@ -239,6 +239,8 @@ const onGo=async ()=>{
 			workflowNodeMap.value[objColumn.id]=arr[i].data
 		}
 		handleIssue(resSprintInfo.data.issues)
+	} else {
+		Message.error(resSprintInfo.msg || resListColumn.msg)
 	}
 }
 
@@ -322,7 +324,7 @@ const handleSwimLaneList=(list:DCSType<ICommon_Model_Board_Sprint_SwimLane>[])=>
 }
 
 const onAddSwimLane=async ()=>{
-	let ret=await Dialog.open(root.value,appContext,"Add Swim Lane",markRaw(BoardSwimLaneEdit),{
+	let ret=await Dialog.open(root.value,appContext,t("controller.app.project.board.boardKanban.addSwimLane"),markRaw(BoardSwimLaneEdit),{
 		type:"add",
 		boardSprintId:sprintId.value
 	})
@@ -332,7 +334,7 @@ const onAddSwimLane=async ()=>{
 }
 
 const onEditSwimLane=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>)=>{
-	let ret=await Dialog.open(root.value,appContext,"Edit Swim Lane",markRaw(BoardSwimLaneEdit),{
+	let ret=await Dialog.open(root.value,appContext,t("controller.app.project.board.boardKanban.editSwimLane"),markRaw(BoardSwimLaneEdit),{
 		type:"edit",
 		item:item
 	})
@@ -355,7 +357,7 @@ const onDeleteSwimLane=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>)
 }
 
 const onAddIssue=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>)=>{
-	let ret=await Dialog.open(root.value,appContext,"Add Issue",markRaw(BoardSwimLaneAddIssue),{
+	let ret=await Dialog.open(root.value,appContext,t("controller.app.project.board.boardKanban.addIssue"),markRaw(BoardSwimLaneAddIssue),{
 		boardSprintSwimLaneId:item.id,
 		boardSprintId:item.board_sprint_id,
 		projectKey:key.value
@@ -446,7 +448,7 @@ const onDrop=async (item:DCSType<ICommon_Model_Board_Sprint_SwimLane>,columnId:s
 						}
 					}
 				} else if(nextActionList.length>0) {
-					let ret=await Dialog.open(root.value,appContext,"Select Action",markRaw(BoardIssueFields),{
+					let ret=await Dialog.open(root.value,appContext,t("controller.app.project.board.boardKanban.selectAction"),markRaw(BoardIssueFields),{
 						projectId:projectId,
 						projectIssueId :objDragCopy.projectIssueId,
 						workflowActionList:nextActionList
@@ -621,7 +623,9 @@ onBeforeMount(async ()=>{
 	if(props.boardSprintId) {
 		sprintId.value=props.boardSprintId
 		await onGo()
-		sprintList.value=[sprintInfo.value]
+		if(sprintInfo.value) {
+			sprintList.value=[sprintInfo.value]
+		}
 	}
 })
 </script>

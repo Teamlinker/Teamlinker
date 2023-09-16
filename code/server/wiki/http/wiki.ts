@@ -263,6 +263,9 @@ class WikiController {
         if(!obj) {
             throw Err.Wiki.wikiNotFound
         }
+        if(obj.getItem().created_by===memberId) {
+            throw Err.Common.requestForbidden
+        }
         await obj.removeMember(memberId,type)
         return
     }

@@ -237,6 +237,9 @@ const onSearch=()=>{
 }
 onBeforeMount(()=>{
   getInfo().then(()=>{
+		if(!info.value) {
+			return
+		}
     if(objMeta?.wikiItemId) {
       selectedKeys.value=[objMeta.wikiItemId]
       expandedKeys.value=[]

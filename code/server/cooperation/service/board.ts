@@ -27,6 +27,11 @@ export class BoardService extends Entity<typeof boardModel,typeof boardMapper> {
         super(boardMapper)
     }
 
+    static async count(projectId:string) {
+        let ret=await boardMapper.count(projectId)
+        return ret;
+    }
+
     static async list(projectId:string,page:number,size:number,keyword?:string) {
         let ret=await boardMapper.list(projectId,page,size,keyword)
         return ret;
@@ -210,6 +215,11 @@ export class BoardSprintService extends Entity<typeof boardSprintModel,typeof bo
         super(boardSprintMapper)
     }
 
+    static async boardAndProject(boardSprintId:string) {
+        let ret=await boardSprintMapper.boardAndProject(boardSprintId)
+        return ret;
+    }
+
     static async globalSearch(keyword:string,size:number,organizationUserId:string) {
         let ret=await boardSprintMapper.globalSearch(keyword, size, organizationUserId)
         return ret;
@@ -220,8 +230,8 @@ export class BoardSprintService extends Entity<typeof boardSprintModel,typeof bo
         return ret;
     }
 
-    static async filter(projectId:string,page:number,size:number,keyword?:string,boardSprintIds?:string[]) {
-        let ret=await boardSprintMapper.filter(projectId,page,size,keyword,boardSprintIds)
+    static async filter(organizationId:string,projectId:string,page:number,size:number,keyword?:string,boardSprintIds?:string[]) {
+        let ret=await boardSprintMapper.filter(organizationId,projectId,page,size,keyword,boardSprintIds)
         return ret;
     }
 

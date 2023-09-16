@@ -53,7 +53,7 @@ const emit=defineEmits<{
 	(e:"update:modelValue",value:string[]):void
 }>()
 const props=defineProps<{
-	modelValue:string[],
+	modelValue?:string[],
 	type:"user"|"team"|"release"|"label"|"tag"|"issue",
 	projectId?:string
 }>()

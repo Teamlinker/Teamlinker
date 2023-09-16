@@ -22,10 +22,12 @@ import {handleMeetingEvent} from "../../app/meeting/event";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {iconFinder} from "../icon/finder";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import {ICommon_Model_Organization_User} from "../../../../../../common/model/organization_user";
 
 export const useDesktopStore=defineStore("desktop",{
     state:()=>({
         organizationInfo:null as DCSType<ICommon_Model_Organization>,
+        organizationUserInfo:null as DCSType<ICommon_Model_Organization_User>,
         organizationList:null as DCSType<ICommon_Route_Res_Organization_List>,
         organizationPermission:0,
         appList:[
@@ -82,7 +84,6 @@ export const useDesktopStore=defineStore("desktop",{
             }
         },
         async initOrganization(organizationId:string) {
-            SocketIOClient.getSocket(ECommon_Socket_Type.CALENDAR)?.close()
             await Promise.all([
                 this.requestStatus(),
                 (async ()=>{
@@ -92,6 +93,14 @@ export const useDesktopStore=defineStore("desktop",{
                     if(retOrganization?.code==0) {
                         this.organizationInfo=retOrganization.data
                         SessionStorage.set("organizationId",retOrganization.data.id);
+                    }
+                })(),
+                (async ()=>{
+                    let res=await apiOrganization.user({
+                        organizationUserId:SessionStorage.get("organizationUserId")
+                    })
+                    if(res?.code==0) {
+                        this.organizationUserInfo=res.data
                     }
                 })(),
                 (async ()=>{

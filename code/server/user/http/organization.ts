@@ -147,7 +147,7 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.updateUser)
-    async updateUser(@DHttpReqParamRequired("organizationUserId") organizationUserId:string,
+    async updateUser(@DHttpReqParam("organizationUserId") organizationUserId:string,
     @DHttpReqParam("roleId") roleId:string,
     @DHttpReqParam("nickname") nickname:string,
     @DHttpReqParam("active") active:number,
@@ -160,7 +160,7 @@ class OrganizationController {
         if(nickname === "") {
             throw Err.Organization.nicknameEmpty
         }
-        let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId);
+        let objOrganizationUser=await OrganizationUserService.getItemById(organizationUserId || userInfo.organizationInfo.organizationUserId);
         if(!objOrganizationUser) {
             throw Err.Organization.userNotFound
         }
@@ -195,12 +195,12 @@ class OrganizationController {
                 return objRole;
             }):null
         ])
-        if(roleId && organization.getItem().created_by_pure==user.getItem().id) {
+        if(organizationUserId && objOrganizationUser.getItem().user_id===organization.getItem().created_by_pure && roleId && objOriginalRole.getId()!==roleId) {
             throw Err.Common.requestForbidden
         }
         let retUser=await organization.updateUser(roleId,objOrganizationUser.getId(),nickname,active,department,job,email,phone,location,remark)
         if(roleId!==objOriginalRole.getId()) {
-            rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ORGANIZATION_USER_ROLE_CHANGE,organization.getId(),organizationUserId,userInfo.organizationInfo.organizationUserId)
+            rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ORGANIZATION_USER_ROLE_CHANGE,organization.getId(),organizationUserId || userInfo.organizationInfo.organizationUserId,userInfo.organizationInfo.organizationUserId)
         }
         return {
             organizationUser:retUser,
@@ -391,6 +391,12 @@ class OrganizationController {
     async setTagMember(@DHttpReqParamRequired("memberTagIds") memberTagIds:string,@DHttpReqParamRequired("memberId") memberId:string) :Promise<typeof organizationApi.routes.setTagMember.res>{
         await MemberTagService.setTagMember(memberTagIds,memberId)
         return;
+    }
+
+    @DHttpApi(organizationApi.routes.listMemberTag)
+    async listMemberTag(@DHttpReqParamRequired("memberId") memberId:string) :Promise<typeof organizationApi.routes.listMemberTag.res>{
+        let ret=await MemberTagService.listMemberTag(memberId)
+        return ret;
     }
 
 

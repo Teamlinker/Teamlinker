@@ -5,6 +5,7 @@ import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
 import {
     convertCountSql,
+    generateCommonListData,
     generateDeleteSql,
     generateGroupLeftJoin2Sql,
     generateGroupLeftJoin3Sql,
@@ -14,9 +15,9 @@ import {
     generateUpdateSql
 } from "../../common/util/sql";
 import {keys} from "../../../common/transform";
-import {roleMemberModel, Table_Role_Member} from "../../../common/model/role_member";
-import {Table_Team_User, teamUserModel} from "../../../common/model/team_user";
-import {memberTagMemberModel, Table_Member_Tag_Member} from "../../../common/model/member_tag_member";
+import {roleMemberModel} from "../../../common/model/role_member";
+import {teamUserModel} from "../../../common/model/team_user";
+import {memberTagMemberModel} from "../../../common/model/member_tag_member";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import CommonUtil from "../../common/util/common";
 import {contentModel} from "../../../common/model/content";
@@ -73,9 +74,6 @@ class WikiMapper extends Mapper<typeof wikiModel> {
             throw Err.User.userIdNotExists
         }
         let mysql=getMysqlInstance();
-        let calcCount=await mysql.executeOne<number>(`select count(1) from (select rm.item_id from ${Table_Role_Member} rm left join ${Table_Wiki} w on w.id=rm.item_id left join ${Table_Team_User} tu on tu.team_id=rm.member_id left join ${Table_Member_Tag_Member} mtm on mtm.member_tag_id=rm.member_id  where (rm.member_id='${organizationUserId}' or rm.member_type =${ECommon_Model_Organization_Member_Type.DEFAULT} or not isnull(tu.team_id) || not isnull(mtm.member_tag_id)) and not isnull(w.id)  ${type=="all"?``:type=="created"?`and w.created_by='${organizationUserId}'`:`and w.created_by<>'${organizationUserId}'`} ${keyword?` and w.name like '%${keyword}%'`:''} and organization_id='${organizationId}' GROUP BY rm.item_id) as Z`)
-        let count=Number(Object.values(calcCount)[0]);
-        let totalPage=CommonUtil.pageTotal(count,size)
         let sql=generateGroupLeftJoin3Sql({
             model:roleMemberModel,
         },{
@@ -116,17 +114,13 @@ class WikiMapper extends Mapper<typeof wikiModel> {
                     model:roleMemberModel,
                     value:ECommon_Model_Organization_Member_Type.DEFAULT
                 },
-                team_id:{
+                organization_user_id:{
                     model:teamUserModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 },
-                member_tag_id: {
+                "organization_user_id ": {
                     model:memberTagMemberModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 }
             },
             id:{
@@ -163,13 +157,8 @@ class WikiMapper extends Mapper<typeof wikiModel> {
             type:"asc",
             isVirtualField:false
         },page*size,size)
-        let arr=await mysql.execute(sql);
-        return {
-            page:page,
-            count:count,
-            totalPage:totalPage,
-            data:arr
-        };
+        let ret=await generateCommonListData(sql,page,size)
+        return ret
     }
 
     async list(organizationId:string,page:number,size:number,keyword?:string,organizationUserId?:string):Promise<{
@@ -361,17 +350,13 @@ class WikiItemMapper extends Mapper<typeof wikiItemModel> {
                     model:roleMemberModel,
                     value:ECommon_Model_Organization_Member_Type.DEFAULT
                 },
-                team_id:{
+                organization_user_id:{
                     model:teamUserModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 },
-                member_tag_id: {
+                "organization_user_id ": {
                     model:memberTagMemberModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 }
             },
             id:{

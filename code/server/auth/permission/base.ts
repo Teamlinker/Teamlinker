@@ -3,6 +3,9 @@ import {Permission_Base, Permission_Types} from "../../../common/permission/perm
 import {getRedisInstance} from "../../common/cache/redis";
 import {getComponent} from "../../common/decorate/component";
 import type {PermissionOrganization} from "./organization";
+import {REDIS_AUTH} from "../../common/cache/keys/auth";
+import rpcCalendarApi from "../../calendar/rpc/calendar";
+import rpcMeetingApi from "../../meeting/rpc/meeting"
 
 export abstract class PermissionBase {
     static Lock:InstanceType<typeof Redlock>
@@ -18,6 +21,7 @@ export abstract class PermissionBase {
         isAdmin?:boolean,
         [param:string]:any
     }):Promise<number>
+    abstract checkOrganizationId(businessId:string,currentOrganizationId:string):Promise<boolean>
     async tryLock(keys:string[]){
         if(!PermissionBase.Lock) {
             PermissionBase.Lock=new Redlock([getRedisInstance().getIORedis()],{
@@ -56,11 +60,8 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
         }={}
         let organizationId:string=objContent["organizationId"];
         let objOrganization=getComponent<PermissionOrganization>("PermissionOrganization");
-        let value = await objOrganization.generatorValue(Object.assign({},objContent,{organizationId}))
-        if(value===Permission_Types.Organization.ADMIN.value) {
-            return true;
-        }
-        permissionMap["PermissionOrganization"]=value
+        let organizationValue = await objOrganization.generatorValue(Object.assign({},objContent,{organizationId}))
+        permissionMap["PermissionOrganization"]=organizationValue
         for(let obj of arrPermission) {
             let permissionName="Permission"+obj.constructor.name
             if(obj===Permission_Types.Common.SELF) {
@@ -74,11 +75,28 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
                     if(field===undefined || field===null) {
                         return false;
                     }
+                    let ret=await checkOrganization(objPermission,field,organizationId,permissionName,objContent)
+                    if(!ret) {
+                        return false
+                    }
+                    if(organizationValue===Permission_Types.Organization.ADMIN.value) {
+                        return true
+                    }
                     objContent=Object.assign({},objContent,{[objPermission.fieldName]:field})
+                } else if(objPermission.fieldName && objContent[objPermission.fieldName]) {
+                    let ret=await checkOrganization(objPermission,objContent[objPermission.fieldName],organizationId,permissionName,objContent)
+                    if(!ret) {
+                        return false
+                    }
                 }
                 value = await objPermission.generatorValue(objContent)
                 permissionMap[permissionName] = value;
                 if (value === null || value===undefined) {
+                    return false
+                }
+            } else {
+                let ret=await checkOrganization(null,null,organizationId,permissionName,objContent)
+                if(!ret) {
                     return false
                 }
             }
@@ -93,4 +111,70 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
         return false
     }
     
+}
+
+async function checkOrganization(objPermission:PermissionBase,field:string,organizationId:string,permissionName:string,objContent:any) {
+    if(permissionName==="PermissionOrganization") {
+        if(objContent["calendarId"] || objContent["calendarEventId"] || objContent["meetingRoomId"]) {
+            let ret:boolean
+            if(objContent["calendarId"]) {
+                ret=await checkCalendarOrganizationId(objContent["calendarId"],organizationId)
+            } else if(objContent["calendarEventId"]) {
+                ret=await checkCalendarEventOrganizationId(objContent["calendarEventId"],organizationId)
+            } else if(objContent["meetingRoomId"]) {
+                ret=await checkMeetingRoomOrganizationId(objContent["meetingRoomId"],organizationId)
+            }
+            if(!ret) {
+                return false
+            }
+        }
+    } else if(objPermission && field) {
+        let ret=await objPermission.checkOrganizationId(field,organizationId)
+        if(!ret) {
+            return false
+        }
+    }
+    return true
+}
+
+async function checkCalendarOrganizationId(calendarId: string, currentOrganizationId: string): Promise<boolean> {
+    let objRedis=REDIS_AUTH.Resource.resourceOrganization(calendarId)
+    let organizationId=await objRedis.get()
+    if(!organizationId) {
+        let obj=await rpcCalendarApi.calendar(calendarId)
+        if(obj) {
+            organizationId=obj.organization_id
+            await objRedis.set(organizationId)
+        }
+    }
+    return organizationId===currentOrganizationId
+}
+
+async function checkCalendarEventOrganizationId(calendarEventId: string, currentOrganizationId: string): Promise<boolean> {
+    let objRedis=REDIS_AUTH.Resource.resourceOrganization(calendarEventId)
+    let organizationId=await objRedis.get()
+    if(!organizationId) {
+        let obj=await rpcCalendarApi.calendarEvent(calendarEventId)
+        if(obj) {
+            let objCalendarEvent=await rpcCalendarApi.calendar(obj.calendar_id)
+            if(objCalendarEvent) {
+                organizationId=objCalendarEvent.organization_id
+                await objRedis.set(organizationId)
+            }
+        }
+    }
+    return organizationId===currentOrganizationId
+}
+
+async function checkMeetingRoomOrganizationId(meetingRoomId: string, currentOrganizationId: string): Promise<boolean> {
+    let objRedis=REDIS_AUTH.Resource.resourceOrganization(meetingRoomId)
+    let organizationId=await objRedis.get()
+    if(!organizationId) {
+        let obj=await rpcMeetingApi.meetingRoom(meetingRoomId)
+        if(obj) {
+            organizationId=obj.organization_id
+            await objRedis.set(organizationId)
+        }
+    }
+    return organizationId===currentOrganizationId
 }

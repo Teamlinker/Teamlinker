@@ -80,7 +80,7 @@ const pagination=reactive({
 })
 const roleList=ref<RoleItem[]>([])
 const onAddRole=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add Role",markRaw(EditProjectRole),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingRole.addRole"),markRaw(EditProjectRole),{
     type:"add",
     ...(props.projectId && {
       projectId:props.projectId
@@ -91,7 +91,7 @@ const onAddRole=async ()=>{
   }
 }
 const onEditRole=async (item:RoleItem) =>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Role",markRaw(EditProjectRole),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.project.setting.projectSettingRole.editRole"),markRaw(EditProjectRole),{
     type:"edit",
     item:{
       name:item.name,

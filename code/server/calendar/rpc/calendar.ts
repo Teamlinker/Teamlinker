@@ -77,6 +77,14 @@ class RpcCalendarApi {
         return obj.getItem()
     }
 
+    async calendar(calendarId:string) {
+        let obj=await CalendarService.getItemById(calendarId)
+        if(!obj) {
+            throw Err.Calendar.calendarNotFound
+        }
+        return obj.getItem()
+    }
+
     async searchEvent(organizationUserId:string,calendarId?:string,start?:number,end?:number,keyword?:string,location?:string) {
         let ret=await CalendarEventService.searchEvent(organizationUserId,calendarId,start,end,keyword,location)
         return ret;

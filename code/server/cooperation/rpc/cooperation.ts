@@ -5,7 +5,10 @@ import {ProjectIssueService} from "../service/issue";
 import {ProjectReleaseService} from "../service/release";
 import rpcContentApi from "../../content/rpc/content"
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
-import {BoardSprintService} from "../service/board";
+import {BoardService, BoardSprintService} from "../service/board";
+import {ICommon_Model_Board_Sprint} from "../../../common/model/board_sprint";
+import {ICommon_Model_Board} from "../../../common/model/board";
+import {ICommon_Model_Project} from "../../../common/model/project";
 
 class RpcCooperationApi  {
     
@@ -104,6 +107,22 @@ class RpcCooperationApi  {
             throw Err.Project.Board.boardSprintNotFound
         }
         return obj.getItem()
+    }
+
+    async board(boardId:string) {
+        let obj=await BoardService.getItemById(boardId)
+        if(!obj) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        return obj.getItem()
+    }
+
+    async boardSprintAndProject(boardSprintId:string):Promise<ICommon_Model_Board_Sprint & {
+        board:ICommon_Model_Board,
+        project:ICommon_Model_Project
+    }> {
+        let obj=await BoardSprintService.boardAndProject(boardSprintId)
+        return obj;
     }
     
 }

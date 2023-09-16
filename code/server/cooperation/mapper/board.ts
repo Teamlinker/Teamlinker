@@ -16,6 +16,7 @@ import {boardSprintIssueModel} from "../../../common/model/board_sprint_issue";
 import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
 import {
+    convertCountAndExecute,
     generateCommonListData,
     generateDeleteInnerJoinSql,
     generateDeleteSql,
@@ -45,6 +46,17 @@ class BoardMapper extends Mapper<typeof boardModel> {
     constructor() {
         super(boardModel)
     }
+
+    async count(projectId:string) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let count=await convertCountAndExecute(generateQuerySql(boardModel,null,{
+            project_id:projectId
+        }))
+        return count
+    }
+
     async list(projectId:string,page:number,size:number,keyword?:string) {
         if(!projectId) {
             throw Err.Project.projectNotFound
@@ -181,17 +193,13 @@ class BoardMapper extends Mapper<typeof boardModel> {
                     model:roleMemberModel,
                     value:ECommon_Model_Organization_Member_Type.DEFAULT
                 },
-                team_id:{
+                organization_user_id:{
                     model:teamUserModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 },
-                member_tag_id: {
+                "organization_user_id ": {
                     model:memberTagMemberModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 }
             },
             id:{
@@ -217,6 +225,37 @@ class BoardMapper extends Mapper<typeof boardModel> {
         },0,size)
         let ret=await mysql.execute(sql)
         return ret;
+    }
+
+    async updateIssueType(relationship:{
+        [id:string]:string
+    },projectId:string) {
+        if(!projectId) {
+            throw Err.Project.projectNotFound
+        }
+        let mysql=getMysqlInstance()
+        let arrBoard=await mysql.execute(generateQuerySql(boardModel,null,{
+            project_id:projectId
+        }))
+        if(arrBoard.length>0) {
+            await Promise.all(Object.keys(relationship).map(originId=>{
+                return mysql.execute(generateUpdateSql(boardIssueTypeModel,{
+                    issue_type_id:relationship[originId]
+                },{
+                    issue_type_id:originId,
+                    board_id:{
+                        exp:"in",
+                        value:arrBoard.map(item=>item.id)
+                    }
+                }))
+            }))
+            await mysql.execute(generateDeleteSql(boardColumnWorkflowNodeModel,{
+                board_id:{
+                    exp:"in",
+                    value:arrBoard.map(item=>item.id)
+                }
+            }))
+        }
     }
 }
 
@@ -480,10 +519,7 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
         return ret;
     }
 
-    async filter(projectId:string,page:number,size:number,keyword?:string,boardSprintIds?:string[]) {
-        if(!projectId) {
-            throw Err.Project.projectNotFound
-        }
+    async filter(organizationId:string,projectId:string,page:number,size:number,keyword?:string,boardSprintIds?:string[]) {
         let sql=generateLeftJoin2Sql({
             model:boardSprintModel,
             columns:keys<ICommon_Model_Board_Sprint>().map(item=>item.name)
@@ -508,6 +544,10 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
             },
             aggregation:"project"
         },{
+            organization_id:{
+                model:projectModel,
+                value:organizationId
+            },
             ...(projectId && {
                 project_id:{
                     model:boardModel,
@@ -520,6 +560,15 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
                     value:{
                         exp:"in",
                         value:boardSprintIds
+                    }
+                }
+            }),
+            ...(keyword && {
+                name:{
+                    model:boardSprintModel,
+                    value:{
+                        exp:"%like%",
+                        value:keyword
                     }
                 }
             })
@@ -600,17 +649,13 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
                     model:roleMemberModel,
                     value:ECommon_Model_Organization_Member_Type.DEFAULT
                 },
-                team_id:{
+                organization_user_id:{
                     model:teamUserModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 },
-                member_tag_id: {
+                "organization_user_id ": {
                     model:memberTagMemberModel,
-                    value:{
-                        exp:"is not null"
-                    }
+                    value:organizationUserId
                 }
             },
             id:{
@@ -636,6 +681,44 @@ class BoardSprintMapper extends Mapper<typeof boardSprintModel> {
         },0,size)
         let ret=await mysql.execute(sql)
         return ret;
+    }
+
+    async boardAndProject(boardSprintId:string) {
+        if(!boardSprintId) {
+            throw Err.Project.Board.boardSprintNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoin2Sql({
+            model:boardSprintModel,
+            columns:keys<ICommon_Model_Board_Sprint>().map(item=>item.name),
+        },{
+            model:boardModel,
+            columns:keys<ICommon_Model_Board>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:boardSprintModel,
+                    field:"board_id"
+                }
+            },
+            aggregation:"board"
+        },{
+            model:projectModel,
+            columns:keys<ICommon_Model_Project>().map(item=>item.name),
+            expression:{
+                id:{
+                    model:boardModel,
+                    field:"project_id"
+                }
+            },
+            aggregation:"project"
+        },{
+            id:{
+                model:boardSprintModel,
+                value:boardSprintId
+            }
+        })
+        let obj=await mysql.executeOne(sql)
+        return obj
     }
 }
 

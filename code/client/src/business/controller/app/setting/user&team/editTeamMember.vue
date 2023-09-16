@@ -79,7 +79,7 @@ const onSearch=()=>{
   search(1)
 }
 const onAdd=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Invite",markRaw(EditTeamMemberRole),{
+  let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditTeamMemberRole),{
     type:"add",
     teamId:props.teamId
   })
@@ -88,7 +88,7 @@ const onAdd=async ()=>{
   }
 }
 const onEditRole=async (item:DCSType<ICommon_Route_Res_Organization_User_Item>)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(EditTeamMemberRole),{
+  let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(EditTeamMemberRole),{
     type:"edit",
     item:item,
     teamId:props.teamId

@@ -2,7 +2,7 @@ import {Mapper} from "../../common/entity/mapper";
 import {ECommon_Model_Notification_Type, notificationModel} from "../../../common/model/notification";
 import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
-import {generateCommonListData, generateLeftJoin3Sql, generateQuerySql} from "../../common/util/sql";
+import {generateCommonListData, generateDeleteSql, generateLeftJoin3Sql, generateQuerySql} from "../../common/util/sql";
 import {keys} from "../../../common/transform";
 import {organizationUserModel} from "../../../common/model/organization_user";
 import {userModel} from "../../../common/model/user";
@@ -136,6 +136,26 @@ class NotificationMapper extends Mapper<typeof notificationModel> {
         })
         let obj=await mysql.executeOne(sql)
         return obj
+    }
+
+    async clearByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(notificationModel,{
+            organization_id:organizationId
+        }))
+    }
+
+    async clearByUserId(userId:string) {
+        if(!userId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(notificationModel,{
+            user_id:userId
+        }))
     }
 }
 

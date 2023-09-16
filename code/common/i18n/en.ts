@@ -1,5 +1,6 @@
 export default {
     tip:{
+        archiveSuccess:"Archive Success",
         acceptInvitation:"Do you want accept this invitation?",
         rejectInvitation:"Do you want reject this invitation?",
         deleteCalendar:"Do you want to delete this calendar?",
@@ -328,7 +329,13 @@ export default {
         free:"Free",
         notification:"Notification",
         next:"Next",
-        previous:"Previous"
+        previous:"Previous",
+        dashboard:"DashBoard",
+        editProfile:"Edit Profile",
+        accepted:"Accepted",
+        rejected:"Rejected",
+        issueTypeList:"IssueType List",
+        waitForApproval:"Wait For Approval"
     },
     "common":{
         "component":{
@@ -358,7 +365,11 @@ export default {
                     month:"Month",
                     calendarGlobalSetting:"Calendar Global Setting",
                     followDeviceTimeZone:"Follow Device TimeZone",
-                    startWeekDay:"Start Week Day"
+                    startWeekDay:"Start Week Day",
+                    addCalendar:"Add Calendar",
+                    editCalendar:"Edit Calendar",
+                    addEvent:"Add Event",
+                    editEvent:"Edit Event"
                 },
                 calendarEventAddSimple:{
                     moreOption:"More Option"
@@ -405,10 +416,13 @@ export default {
                     personMeetingSetting:"Person Meeting Setting",
                     joinMeeting:"Join Meeting",
                     scheduleMeeting:"Schedule Meeting",
-                    meetingList:"Meeting List"
+                    meetingList:"Meeting List",
+                    editSetting:"Edit Setting",
+                    editMeeting:"Edit Meeting"
                 },
                 meetingProfile:{
-                    chat:"chat"
+                    chat:"chat",
+                    meetingPreview:"Meeting Preview"
                 },
                 meetingOperation:{
                     meetingInfo:"Meeting Info"
@@ -438,13 +452,20 @@ export default {
                 },
                 board:{
                     boardConfig:{
-                        addColumn:"Add Column"
+                        addColumn:"Add Column",
+                        addIssueType:"Add Issue Type"
                     },
                     boardSprintList:{
                         notStart:"Not Start",
                         starting:"Starting",
                         completed:"Completed",
                         swimLanes:"Swim Lanes"
+                    },
+                    boardKanban:{
+                        addSwimLane:"Add Swim Lane",
+                        editSwimLane:"Edit Swim Lane",
+                        addIssue:"Add Issue",
+                        selectAction:"Select Action"
                     }
                 },
                 issue:{
@@ -495,6 +516,15 @@ export default {
                     yourWork:"Your Work",
                     recentProjectList:"Recent Project List",
                     allProjectList:"All Project List"
+                },
+                setting:{
+                    projectSettingIssueSolution:{
+                        issueTypeConvert:"Issue Type Convert"
+                    },
+                    projectSettingRole:{
+                        addRole:"Add Role",
+                        editRole:"Edit Role"
+                    }
                 }
             },
             setting:{
@@ -522,7 +552,11 @@ export default {
                     },
                     workflow:{
                         addNode:"Add Node",
-                        editFields:"Edit Fields"
+                        editFields:"Edit Fields",
+                        choosePerson:"Choose Person",
+                        chooseTeam:"Choose Team",
+                        chooseWorkflowField:"Choose Workflow Field",
+                        border:"the border of node is pink"
                     }
                 },
                 project:{
@@ -541,12 +575,24 @@ export default {
                 userTeam:{
                     user:{
                         resetPassword:"Reset Password"
+                    },
+                    tag:{
+                        addTag:"Add Tag",
+                        editTag:"Edit Tag"
                     }
                 },
                 setting:{
                     userManage:"User Manage",
                     teamManage:"Team Manage",
-                    tagManage:"Tag Manage"
+                    tagManage:"Tag Manage",
+                    organizationEdit:"Organization Edit",
+                    organizationRole:"Organization Role",
+                    globalProjectRole:"Global Project Role",
+                    projectList:"Project List",
+                    teamRole:"Team Role",
+                    teamList:"Team List",
+                    globalWikiRole:"Global Wiki Role",
+                    wikiList:"Wiki Space List"
                 }
             },
             wiki:{
@@ -571,7 +617,8 @@ export default {
         },
         "desktop":{
             desktop:{
-                createOrganization:"Create Organization"
+                createOrganization:"Create Organization",
+                editOrganizationUserProfile:"Edit Organization User Profile"
             },
             missCallShow:{
                 invitedYou:"invited you"

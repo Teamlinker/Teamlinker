@@ -36,4 +36,8 @@ export class PermissionSelf extends PermissionBase {
             return Permission_Types.Common.SELF.value
         }
     }
+
+    override async checkOrganizationId(businessId: string, currentOrganizationId: string): Promise<boolean> {
+        return true
+    }
 }

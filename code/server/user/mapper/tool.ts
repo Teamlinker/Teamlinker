@@ -2,7 +2,7 @@ import {Mapper} from "../../common/entity/mapper";
 import {stickyNoteModel} from "../../../common/model/sticky_note";
 import {Err} from "../../../common/status/error";
 import {getMysqlInstance} from "../../common/db/mysql";
-import {generateQuerySql} from "../../common/util/sql";
+import {generateDeleteSql, generateQuerySql} from "../../common/util/sql";
 import {photoModel} from "../../../common/model/photo";
 
 class StickyNoteMapper extends Mapper<typeof stickyNoteModel> {
@@ -19,6 +19,16 @@ class StickyNoteMapper extends Mapper<typeof stickyNoteModel> {
             user_id:userId
         }))
         return ret;
+    }
+
+    async clear(userId:string) {
+        if(!userId) {
+            throw Err.User.userNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateDeleteSql(stickyNoteModel,{
+            user_id:userId
+        }))
     }
 }
 
@@ -38,6 +48,16 @@ class PhotoMapper extends Mapper<typeof photoModel> {
             user_id:userId
         }))
         return ret;
+    }
+
+    async clear(userId:string) {
+        if(!userId) {
+            throw Err.User.userNotFound
+        }
+        let mysql=getMysqlInstance()
+        let ret=await mysql.execute(generateDeleteSql(photoModel,{
+            user_id:userId
+        }))
     }
 }
 

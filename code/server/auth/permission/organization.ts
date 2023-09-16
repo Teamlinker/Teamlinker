@@ -26,4 +26,8 @@ export class PermissionOrganization extends PermissionBase {
         await this.unlock()
         return ret
     }
+
+    override async checkOrganizationId(businessId: string, currentOrganizationId: string): Promise<boolean> {
+        return businessId===currentOrganizationId
+    }
 }

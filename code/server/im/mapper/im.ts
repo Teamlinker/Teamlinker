@@ -256,6 +256,16 @@ class IMUnReadMessageMapper extends Mapper<typeof iMUnReadMessageModel> {
         }))
     }
 
+    async clearByOrganizationUserId(organizationUserId:string) {
+        if(!organizationUserId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(iMUnReadMessageModel,{
+            organization_user_id:organizationUserId
+        }))
+    }
+
 }
 
 export const iMUnReadMessageMapper=new IMUnReadMessageMapper
@@ -289,6 +299,16 @@ class IMFavoriteMessageMapper extends Mapper<typeof iMFavoriteMessageModel> {
         let mysql=getMysqlInstance()
         await mysql.execute(generateDeleteSql(iMFavoriteMessageModel,{
             organization_id:organizationId
+        }))
+    }
+
+    async clearByOrganizationUserId(organizationUserId:string) {
+        if(!organizationUserId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(iMFavoriteMessageModel,{
+            organization_user_id:organizationUserId
         }))
     }
 }

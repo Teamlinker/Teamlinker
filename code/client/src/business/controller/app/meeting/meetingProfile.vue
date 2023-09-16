@@ -77,6 +77,7 @@ import MeetingChat from "./meetingChat.vue";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import MeetingPreview from "./meetingPreview.vue";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	meetingId:string,
@@ -101,6 +102,7 @@ const me=ref<OrganizationUserItem>({
 	video:true,
 	audio:true
 })
+const {t}=useI18n()
 const meetingChat=ref<InstanceType<typeof MeetingChat>>(null)
 const socket=SocketIOClient.get(ECommon_Socket_Type.MEETING)
 const navigator=getCurrentNavigator()
@@ -230,7 +232,7 @@ meetingClient.onLocalProducerStart=kind => {
   }
 }
 const initMeeting=async ()=>{
-	let preview:any=await Dialog.open(root.value,appContext,"Meeting Preview",markRaw(MeetingPreview))
+	let preview:any=await Dialog.open(root.value,appContext,t("controller.app.meeting.meetingProfile.meetingPreview"),markRaw(MeetingPreview))
 	if(preview) {
 		let ret=await meetingClient.join(props.meetingId,props.password,preview.enableVideo,preview.enableAudio,preview.cameraId)
 		if(!ret?.success) {

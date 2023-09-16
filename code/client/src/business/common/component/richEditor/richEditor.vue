@@ -114,6 +114,7 @@ watch(()=>props.modelValue,(value, oldValue, onCleanup)=>{
   deep:true,
   immediate:true
 })
+
 const onFocus=(item:ICommon_Content_Line, event:MouseEvent)=>{
   objEditor.onFocus(item,event)
 }

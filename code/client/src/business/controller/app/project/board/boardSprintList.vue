@@ -9,8 +9,8 @@
 					<a-option :value="ECommon_Model_Board_Sprint_Status.STARTING">{{$t("controller.app.project.board.boardSprintList.starting")}}</a-option>
 					<a-option :value="ECommon_Model_Board_Sprint_Status.COMPLETED">{{$t("controller.app.project.board.boardSprintList.completed")}}</a-option>
 				</a-select>
-				<a-input-search size="small" style="width: 300px" v-model="keyword" @search="onSearch" search-button :placeholder="$t('placeholder.typeSprintName')"></a-input-search>
-				<a-button size="small" type="primary" @click="onCreate">
+				<a-input-search size="small" style="width: 300px" v-model="keyword" @search="onSearch" search-button :placeholder="$t('placeholder.typeSprintName')" v-if="checkPermission(permission,Permission_Types.Project.READ)"></a-input-search>
+				<a-button size="small" type="primary" @click="onCreate" v-if="checkPermission(permission,Permission_Types.Project.CREATE)">
 					{{$t("util.create")}}
 				</a-button>
 			</a-space>
@@ -97,6 +97,7 @@ import BoardSprintAddIssue from "@/business/controller/app/project/board/boardSp
 import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
 import FieldPriority from "@/business/common/component/field/fieldPriority.vue";
 import {useI18n} from "vue-i18n";
+import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 
 const props=defineProps<{
 	boardId:string
@@ -115,6 +116,7 @@ const sprintIssueList=ref<DCSType<ICommon_Route_Res_Board_Sprint_Issue_Item>[]>(
 const loading=ref(false)
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
+const permission=objInject.permission
 const key=objInject.key
 const {t}=useI18n()
 const search=async (page:number)=>{
@@ -160,7 +162,7 @@ const onChange=async (keys:string[])=>{
 }
 
 const onCreate=async ()=>{
-	let ret=await Dialog.open(root.value,appContext,"Add",markRaw(BoardSprintEdit),{
+	let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(BoardSprintEdit),{
 		type:"add",
 		boardId:props.boardId
 	})
@@ -171,7 +173,7 @@ const onCreate=async ()=>{
 
 const onAddIssue=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
 	event.stopPropagation()
-	let ret=await Dialog.open(root.value,appContext,"Add Issue",markRaw(BoardSprintAddIssue),{
+	let ret=await Dialog.open(root.value,appContext,t("controller.app.project.board.boardKanban.addIssue"),markRaw(BoardSprintAddIssue),{
 		boardSprintId:item.id,
 		boardId:item.board_id,
 		projectId:projectId
@@ -183,7 +185,7 @@ const onAddIssue=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEven
 
 const onEdit=async (item:DCSType<ICommon_Model_Board_Sprint>,event:MouseEvent)=>{
 	event.stopPropagation()
-	let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(BoardSprintEdit),{
+	let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(BoardSprintEdit),{
 		type:"edit",
 		boardId:props.boardId,
 		item

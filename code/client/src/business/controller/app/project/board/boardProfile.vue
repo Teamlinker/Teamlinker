@@ -34,6 +34,7 @@ import {injectProjectInfo} from "@/business/common/util/symbol";
 import BoardConfig from "@/business/controller/app/project/board/boardConfig.vue";
 import BoardSprintList from "@/business/controller/app/project/board/boardSprintList.vue";
 import BoardKanban from "@/business/controller/app/project/board/boardKanban.vue";
+import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	boardId:string,
@@ -45,6 +46,7 @@ const info=ref<DCSType<ICommon_Model_Board>>()
 const navigator=getCurrentNavigator()
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
+const {t}=useI18n()
 const getBoardInfo=async ()=>{
 	let res=await apiBoard.board({
 		boardId:props.boardId
@@ -56,7 +58,7 @@ const getBoardInfo=async ()=>{
 }
 
 const onEdit=async ()=>{
-	let ret=await Dialog.open(root.value,appContext,"Edit",markRaw(BoardEdit),{
+	let ret=await Dialog.open(root.value,appContext,t("util.edit"),markRaw(BoardEdit),{
 		type:"edit",
 		projectId:projectId,
 		item:info.value

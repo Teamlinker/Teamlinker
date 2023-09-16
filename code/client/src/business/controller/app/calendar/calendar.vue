@@ -11,10 +11,10 @@
         />
         <a-divider :margin="1"></a-divider>
         <a-row style="display: flex;justify-content: space-between;margin-top: 10px;align-items: center">
-          <span style="font-size: small;color: gray">{{$t("controller.app.calendar.calendar.myCalendars")}}</span>
+          <span style="font-size: small;color: grey">{{$t("controller.app.calendar.calendar.myCalendars")}}</span>
           <a-button size="mini" type="text" @click="onAddCalendar">
             <template #icon>
-              <icon-plus style="color: gray"></icon-plus>
+              <icon-plus style="color: grey"></icon-plus>
             </template>
           </a-button>
         </a-row>
@@ -22,14 +22,14 @@
           <a-checkbox v-for="item in calendarList" :value="item.id" @mouseenter="$event.currentTarget.querySelector('[name=\'setting\']').style.visibility='visible'" @mouseleave="$event.currentTarget.querySelector('[name=\'setting\']').style.visibility='hidden'">
             <span :style="{color:item.color}">{{item.name}}</span>&nbsp;&nbsp;
             <div size="mini" name="setting" style="visibility: hidden;display: inline-block">
-              <a-button type="text" size="mini" @click="onEditCalendar(item)">
+              <a-button type="text" size="mini" @click="onEditCalendar($event,item)">
                 <template #icon>
-                  <icon-edit style="color: gray"></icon-edit>
+                  <icon-edit style="color: grey"></icon-edit>
                 </template>
               </a-button>
-              <a-button type="text" size="mini" @click="onDeleteCalendar(item)">
+              <a-button type="text" size="mini" @click="onDeleteCalendar($event,item)">
                 <template #icon>
-                  <icon-delete style="color: gray"></icon-delete>
+                  <icon-delete style="color: grey"></icon-delete>
                 </template>
               </a-button>
             </div>
@@ -89,13 +89,13 @@
           </a-radio-group>
           <a-button type="text" @click="onShowSetting">
             <template #icon>
-              <icon-settings style="color: gray;font-size: large"></icon-settings>
+              <icon-settings style="color: grey;font-size: large"></icon-settings>
             </template>
           </a-button>
         </a-space>
       </a-row>
       <a-row style="flex: 1 1 auto;border-top: 1px solid lightgray;overflow-y: auto;position: relative">
-        <Calendar :mode="calendarType=='month'?'month':'day'" :start-date="startDay" :end-date="endDay" :month="month" :utc-offset="timezoneOffset" :time-zone="setting.timezone" :event-list="calendarEventList" @blank-click="onAddCalendarEvent" @change-event-date="onChangeCalendarEventDate"  v-if="(setting?.timezone && !searchForm.keyword)">
+        <Calendar :mode="calendarType=='month'?'month':'day'" :start-date="startDay" :end-date="endDay" :month="month" :utc-offset="timezoneOffset" :time-zone="setting.timezone" :event-list="calendarEventList" @blank-click="onAddCalendarEvent" @change-event-date="onChangeCalendarEventDate"  v-if="setting?.timezone && !searchForm.keyword && selectedCalendar.length>0">
 	        <template #shortView="{timeZone,selectedEvent,maskInfoTop,maskInfoLeft,onClose}">
 		        <CalendarEventShortView :time-zone="timeZone" :selected-event="selectedEvent" :mask-info-left="maskInfoLeft" :mask-info-top="maskInfoTop" @edit="(event)=>{onClose();onEditCalendarEvent(event)}" @delete="(event)=>{onClose();onDeleteCalendarEvent(event)}" @close="onClose"></CalendarEventShortView>
 	        </template>
@@ -238,6 +238,11 @@ const month=computed(()=>{
 const getSetting=async ()=>{
   let res=await apiCalendar.getCalendarSetting()
   if(res?.code==0) {
+	  moment.updateLocale("en",{
+		  week:{
+			  dow:res.data.start_week_day
+		  }
+	  })
     setting.value={
       ...res.data,
       followDevice:res.data.timezone?false:true
@@ -245,15 +250,8 @@ const getSetting=async ()=>{
     if(setting.value.followDevice) {
       setting.value.timezone=moment.tz.guess()
     }
-
-    //moment.tz.setDefault(setting.value.timezone)
 	  pickerValue.value=moment().tz(setting.value.timezone)
     timezoneOffset.value=moment.tz(setting.value.timezone).utcOffset()/60
-    moment.updateLocale("en",{
-      week:{
-        dow:setting.value.start_week_day
-      }
-    })
   }
 }
 const timezones=ref(moment.tz.names().map(item=>{
@@ -295,15 +293,17 @@ const listCalendar=async ()=>{
   }
 }
 const onAddCalendar=async ()=>{
-  let ret=await Dialog.open(root.value,appContext,"Add Calendar",markRaw(CalendarEdit),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.calendar.calendar.addCalendar"),markRaw(CalendarEdit),{
     type:"add"
   })
   if(ret) {
     listCalendar()
   }
 }
-const onEditCalendar=async (item)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Calendar",markRaw(CalendarEdit),{
+const onEditCalendar=async (event:MouseEvent,item)=>{
+	event.stopPropagation()
+	event.preventDefault()
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.calendar.calendar.editCalendar"),markRaw(CalendarEdit),{
     type:"edit",
     item
   })
@@ -311,7 +311,9 @@ const onEditCalendar=async (item)=>{
     listCalendar()
   }
 }
-const onDeleteCalendar=async (item)=>{
+const onDeleteCalendar=async (event:MouseEvent,item)=>{
+	event.stopPropagation()
+	event.preventDefault()
   let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteCalendar"))
   if(ret) {
     let res=await apiCalendar.removeCalendar({
@@ -511,7 +513,7 @@ const onChangeCalendarEventDate=async (event:IClient_Calendar_Info, originalDate
   }
 }
 const onEditCalendarEvent=async (event:IClient_Calendar_Info)=>{
-  let ret=await Dialog.open(root.value,appContext,"Edit Event",markRaw(CalendarEventEdit),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.calendar.calendar.editEvent"),markRaw(CalendarEventEdit),{
     type:"edit",
     calendarEventId:event.id,
     resourceList:calendarList.value.map(item=>({id:item.id,name:item.name})).filter(item=>selectedCalendar.value.includes(item.id)),
@@ -523,7 +525,7 @@ const onEditCalendarEvent=async (event:IClient_Calendar_Info)=>{
 }
 const onShowCalendarEventDetail=async (title:string,dateInfo:CalendarEventModelType,calendarId:string)=>{
   isCalendarEventAddSimple.value=false
-  let ret=await Dialog.open(root.value,appContext,"Add Event",markRaw(CalendarEventEdit),{
+  let ret=await Dialog.open(root.value,appContext,t("controller.app.calendar.calendar.addEvent"),markRaw(CalendarEventEdit),{
     type:"add",
     calendarId:calendarId,
     resourceList:calendarList.value.map(item=>({id:item.id,name:item.name})).filter(item=>selectedCalendar.value.includes(item.id)),
@@ -581,6 +583,8 @@ const handlePropsCalendarEventId=async (calendarEventId:string)=>{
 		selectedCalendar.value=[res.data.calendar_id]
 		datePickerModel.value=res.data.start_time
 		calendarType.value="day"
+	} else {
+		Message.error(res.msg)
 	}
 }
 onBeforeUnmount(()=>{
