@@ -132,8 +132,10 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
         return arr;
     }
 
-    static async workflowFieldsCopy(workflowNodeId:string,newWorkflowNodeId:string) {
-        await workflowNodeFieldTypeMapper.clearFieldByWorkflowNodeId(newWorkflowNodeId)
+    static async workflowFieldsCopy(workflowNodeId:string,newWorkflowNodeId:string,overwrite:number) {
+        if(overwrite) {
+            await workflowNodeFieldTypeMapper.clearFieldByWorkflowNodeId(newWorkflowNodeId)
+        }
         await workflowNodeFieldTypeMapper.workflowFieldsCopy(workflowNodeId,newWorkflowNodeId)
     }
 

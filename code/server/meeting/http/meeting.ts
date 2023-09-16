@@ -136,12 +136,16 @@ class MeetingController {
     }
 
     @DHttpApi(meetingApi.routes.getRoom)
-    async getRoom(@DHttpReqParamRequired("meetingRoomId") meetingRoomId:string): Promise<typeof meetingApi.routes.getRoom.res> {
+    async getRoom(@DHttpReqParamRequired("meetingRoomId") meetingRoomId:string,@DHttpUser user:IUserSession): Promise<typeof meetingApi.routes.getRoom.res> {
         let obj=await MeetingRoomService.getItemById(meetingRoomId)
         if(!obj) {
             throw Err.Meeting.roomNotFound
         }
-        return obj.getItem()
+        let ret=obj.getItem()
+        if(user.organizationInfo?.fake) {
+            delete ret.password
+        }
+        return ret
     }
 
     @DHttpApi(meetingApi.routes.listMissCall)
@@ -173,5 +177,22 @@ class MeetingController {
         })
         await obj.create()
         return
+    }
+
+    @DHttpApi(meetingApi.routes.checkOwner)
+    async checkOwner(@DHttpReqParamRequired("meetingRoomId") meetingRoomId:string,@DHttpUser user:IUserSession): Promise<typeof meetingApi.routes.checkOwner.res> {
+        let obj=await MeetingRoomService.getItemById(meetingRoomId)
+        if(!obj) {
+            throw Err.Meeting.roomNotFound
+        }
+        if(obj.getItem().created_by===user.organizationInfo.organizationUserId) {
+            return {
+                owner:true,
+                password:obj.getItem().password
+            }
+        }
+        return {
+            owner:false
+        }
     }
 }

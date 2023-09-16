@@ -81,7 +81,7 @@ import {useI18n} from "vue-i18n";
 
 const props=defineProps<{
 	meetingId:string,
-	password:string,
+	password?:string,
 	inviteBusinessIds?:{
 		id:string,
 		type:ECommon_Model_Organization_Member_Type
@@ -232,11 +232,19 @@ meetingClient.onLocalProducerStart=kind => {
   }
 }
 const initMeeting=async ()=>{
+	let password=props.password
+	if(password==null) {
+		password=await Dialog.input(root.value,appContext,t("placeholder.typeMeetingPassword"))
+		if(!password) {
+			Message.error(t("tip.joinMeetingFailed"))
+			return
+		}
+	}
 	let preview:any=await Dialog.open(root.value,appContext,t("controller.app.meeting.meetingProfile.meetingPreview"),markRaw(MeetingPreview))
 	if(preview) {
-		let ret=await meetingClient.join(props.meetingId,props.password,preview.enableVideo,preview.enableAudio,preview.cameraId)
+		let ret=await meetingClient.join(props.meetingId,password,preview.enableVideo,preview.enableAudio,preview.cameraId)
 		if(!ret?.success) {
-			Message.error(ret.msg)
+			Message.error(t("tip.joinMeetingFailed"))
 			navigator.pop()
 		}
 	} else {

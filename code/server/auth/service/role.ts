@@ -3,10 +3,23 @@ import {Entity} from "../../common/entity/entity";
 import {roleMapper} from "../mapper/role";
 import {getAllPermissions, Permission_Base, Permission_Types} from "../../../common/permission/permission";
 import {ICommon_Route_Res_Role_Item} from "../../../common/routes/response";
+import {IServer_Common_Event_Types} from "../../common/event/types";
+import {emitServiceEvent} from "../../common/event/event";
 
 export class RoleService extends Entity<typeof roleModel,typeof roleMapper> {
     constructor(){
         super(roleMapper)
+    }
+
+    override async update(...param): Promise<typeof roleModel["model"]> {
+        let ret=await super.update(...param);
+        emitServiceEvent("roleChange",this.getId())
+        return ret;
+    }
+
+    override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
+        await super.delete(eventPublish, ...param);
+        emitServiceEvent("roleChange",this.getId())
     }
 
     static async clearRoleByItemId(itemId:string) {

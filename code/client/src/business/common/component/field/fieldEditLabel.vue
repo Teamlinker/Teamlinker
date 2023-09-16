@@ -42,7 +42,7 @@ import {SessionStorage} from "../../storage/session";
 import BoardSprintPreview from "@/business/controller/app/project/board/boardSprintPreview.vue";
 
 const props=defineProps<{
-  value:string[],
+  value?:string[],
   isEdit:boolean,
   type:ECommon_Model_Workflow_Node_Field_Type_Label_Type
 }>()

@@ -10,7 +10,10 @@
       <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="photo" @upload="onUpload"></Upload>
     </a-form-item>
     <a-form-item>
-      <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
+	    <a-space>
+		    <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
+		    <a-button html-type="button" type="primary" status="danger" @click="onDelete">{{$t("util.delete")}}</a-button>
+	    </a-space>
     </a-form-item>
   </a-form>
 </template>
@@ -22,6 +25,8 @@ import {getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
 import {apiWiki} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
+import {Dialog} from "@/business/common/component/dialog/dialog";
+import {getCurrentNavigator, getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
 
 const props=defineProps<{
   wikiId:string
@@ -37,7 +42,9 @@ const uploadUriId=ref("")
 const onUpload=(id:string)=> {
   uploadUriId.value=id
 }
+const navigator=getCurrentNavigator()
 const eleForm=ref(null);
+const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext;
 const getWikiInfo=async ()=>{
   let res=await apiWiki.wikiInfo({
@@ -49,9 +56,7 @@ const getWikiInfo=async ()=>{
     photo.value=res.data.photo
   }
 }
-onBeforeMount(async ()=>{
-  getWikiInfo()
-})
+
 const onSubmit=async ()=>{
   let res=await apiWiki.editWiki({
     wikiId:props.wikiId,
@@ -66,6 +71,24 @@ const onSubmit=async ()=>{
     Message.error(res.msg)
   }
 }
+
+const onDelete=async ()=>{
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteWikiSpace"))
+	if(ret) {
+		let res=await apiWiki.deleteWiki({
+			wikiId:props.wikiId
+		})
+		if(res?.code==0) {
+			navigator.replace("wiki")
+		} else {
+			Message.error(res.msg)
+		}
+	}
+}
+
+onBeforeMount(async ()=>{
+	getWikiInfo()
+})
 </script>
 <style scoped>
 

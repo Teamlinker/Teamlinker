@@ -1212,7 +1212,7 @@ export class RichEditorEvent {
             } else {
                 left=rect.left-150
             }
-            if(bottom>210) {
+            if(document.body.clientHeight-bottom>210) {
                 top=rect.top+rect.height
             } else {
                 top=rect.top-200

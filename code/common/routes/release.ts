@@ -70,7 +70,8 @@ const api={
                 projectReleaseId:string 
             }>{},
             res:{},
-            permission:[Permission_Types.Project.DELETE]
+            permission:[Permission_Types.Project.DELETE,Permission_Types.Common.SELF],
+            permissionOr:true
         },
         addIssue:{
             method:ECommon_HttpApi_Method.POST,

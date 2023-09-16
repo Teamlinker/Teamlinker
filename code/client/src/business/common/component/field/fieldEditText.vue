@@ -15,14 +15,14 @@
 import {ref, watchEffect} from "vue";
 
 const props=defineProps<{
-  value:string,
+  value?:string,
   isEdit:boolean
 }>()
 const showValue=ref();
 const editValue=ref();
 watchEffect(()=>{
-  showValue.value=props.value
-  editValue.value=props.value
+  showValue.value=props.value??""
+  editValue.value=props.value??""
 })
 </script>
 

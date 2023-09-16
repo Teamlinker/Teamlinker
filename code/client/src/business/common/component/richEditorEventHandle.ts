@@ -224,7 +224,7 @@ export class RichEditorEventHandle {
         } else if(type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
             eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,value)
         } else if(type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
-            let res=await apiMeeting.getRoom({
+            let res=await apiMeeting.checkOwner({
                 meetingRoomId:value
             })
             if(res?.code==0) {

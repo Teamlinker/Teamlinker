@@ -487,10 +487,6 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
                     }
                 }
             }, {
-                calendar_id: {
-                    model: calendarEventModel,
-                    value: calendarId
-                },
                 recurring: {
                     model: calendarEventModel,
                     value: {

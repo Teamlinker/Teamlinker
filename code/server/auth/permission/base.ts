@@ -53,7 +53,7 @@ export async function deletePermission(objKey:object) {
     }
 }
 
-export async function processPermission (arrPermission:Permission_Base[],objContent:any):Promise<boolean> {
+export async function processPermission (permissionOr:boolean,arrPermission:Permission_Base[],objContent:any):Promise<boolean> {
     try {
         let permissionMap:{
             [keys:string]:number
@@ -62,7 +62,9 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
         let objOrganization=getComponent<PermissionOrganization>("PermissionOrganization");
         let organizationValue = await objOrganization.generatorValue(Object.assign({},objContent,{organizationId}))
         permissionMap["PermissionOrganization"]=organizationValue
+        let res=true
         for(let obj of arrPermission) {
+            res=true;
             let permissionName="Permission"+obj.constructor.name
             if(obj===Permission_Types.Common.SELF) {
                 permissionName="PermissionSelf"
@@ -73,10 +75,21 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
                 if(objPermission.fieldName && !objContent[objPermission.fieldName]) {
                     let field=await objPermission.translateToField(objContent)
                     if(field===undefined || field===null) {
+                        if(organizationValue===Permission_Types.Organization.ADMIN.value) {
+                            return true
+                        }
+                        if(permissionOr) {
+                            res=false
+                            continue;
+                        }
                         return false;
                     }
                     let ret=await checkOrganization(objPermission,field,organizationId,permissionName,objContent)
                     if(!ret) {
+                        if(permissionOr) {
+                            res=false
+                            continue;
+                        }
                         return false
                     }
                     if(organizationValue===Permission_Types.Organization.ADMIN.value) {
@@ -86,26 +99,47 @@ export async function processPermission (arrPermission:Permission_Base[],objCont
                 } else if(objPermission.fieldName && objContent[objPermission.fieldName]) {
                     let ret=await checkOrganization(objPermission,objContent[objPermission.fieldName],organizationId,permissionName,objContent)
                     if(!ret) {
+                        if(permissionOr) {
+                            res=false
+                            continue;
+                        }
                         return false
+                    }
+                    if(organizationValue===Permission_Types.Organization.ADMIN.value) {
+                        return true
                     }
                 }
                 value = await objPermission.generatorValue(objContent)
                 permissionMap[permissionName] = value;
                 if (value === null || value===undefined) {
+                    if(permissionOr) {
+                        res=false
+                        continue;
+                    }
                     return false
                 }
             } else {
                 let ret=await checkOrganization(null,null,organizationId,permissionName,objContent)
                 if(!ret) {
+                    if(permissionOr) {
+                        res=false
+                        continue;
+                    }
                     return false
                 }
             }
             let isCheck = (value & obj.value) && value>=obj.value
             if (!isCheck) {
+                if(permissionOr) {
+                    res=false
+                    continue;
+                }
                 return false
+            } else if(permissionOr) {
+                return true
             }
         }
-        return true
+        return res;
     } catch (err) {
         console.error(err)
         return false

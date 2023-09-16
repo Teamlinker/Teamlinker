@@ -56,14 +56,14 @@ export class FinderItemService extends Entity<typeof finderItemModel,typeof find
                     break
                 }
                 case ECommon_Model_Finder_Shortcut_Type.MEETING_ROOM:{
-                    let obj=await rpcMeetingApi.meetingRoom(this.item.id)
+                    let obj=await rpcMeetingApi.meetingRoom(this.item.ref_id)
                     if(obj) {
                         organizationId=obj.organization_id
                     }
                     break
                 }
                 case ECommon_Model_Finder_Shortcut_Type.CALENDAR_EVENT:{
-                    let obj=await rpcCalendarApi.calendarEvent(this.item.id)
+                    let obj=await rpcCalendarApi.calendarEvent(this.item.ref_id)
                     if(obj) {
                         let objCalendar=await rpcCalendarApi.calendar(obj.calendar_id)
                         if(objCalendar) {
@@ -73,7 +73,7 @@ export class FinderItemService extends Entity<typeof finderItemModel,typeof find
                     break
                 }
                 case ECommon_Model_Finder_Shortcut_Type.PROJECT_ISSUE:{
-                    let obj=await rpcCooperationApi.projectIssue(this.item.id)
+                    let obj=await rpcCooperationApi.projectIssue(this.item.ref_id)
                     if(obj) {
                         let objProject=await rpcCooperationApi.project(obj.project_id)
                         if(objProject) {
@@ -83,7 +83,7 @@ export class FinderItemService extends Entity<typeof finderItemModel,typeof find
                     break
                 }
                 case ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE:{
-                    let obj=await rpcCooperationApi.projectRelease(this.item.id)
+                    let obj=await rpcCooperationApi.projectRelease(this.item.ref_id)
                     if(obj) {
                         let objProject=await rpcCooperationApi.project(obj.project_id)
                         if(objProject) {

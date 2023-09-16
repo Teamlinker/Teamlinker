@@ -108,7 +108,7 @@ export class WorkflowService  {
         let {workflowNodes,newWorkflowNodes}=await workflowMapper.copyItem(issueTypeId,newIssueTypeId);
         let arr=[];
         for(let i=0;i<workflowNodes.length;i++) {
-            arr.push(WorkflowNodeFieldTypeService.workflowFieldsCopy(workflowNodes[i],newWorkflowNodes[i]));
+            arr.push(WorkflowNodeFieldTypeService.workflowFieldsCopy(workflowNodes[i],newWorkflowNodes[i],1));
         }
         await Promise.all(arr);
     }

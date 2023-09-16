@@ -136,7 +136,8 @@ const api={
             path:"/copy",
             req:<{
                 workflowNodeId:string,
-                newWorkflowNodeId:string
+                newWorkflowNodeId:string,
+                overwrite:number
             }>{},
             res:{},
             permission:[Permission_Types.Organization.ADMIN]

@@ -122,7 +122,7 @@ class FieldController {
     }
 
     @DHttpApi(fieldApi.routes.editWorkflowNodeFieldConfig)
-    async addWorkflowNodeFieldConfig(@DHttpReqParamRequired("workflowNodeFieldTypeId") workflowNodeFieldTypeId:string,
+    async editWorkflowNodeFieldConfig(@DHttpReqParamRequired("workflowNodeFieldTypeId") workflowNodeFieldTypeId:string,
     @DHttpReqParamRequired("data") data:{
         id?:string,
         value :string,
@@ -138,8 +138,8 @@ class FieldController {
 
     @DHttpApi(fieldApi.routes.workflowFieldsCopy)
     async workflowFieldsCopy(@DHttpReqParamRequired("workflowNodeId") workflowNodeId:string,
-    @DHttpReqParamRequired("newWorkflowNodeId") newWorkflowNodeId:string): Promise<typeof fieldApi.routes.workflowFieldsCopy.res> {
-        await WorkflowNodeFieldTypeService.workflowFieldsCopy(workflowNodeId,newWorkflowNodeId)
+    @DHttpReqParamRequired("newWorkflowNodeId") newWorkflowNodeId:string,@DHttpReqParamRequired("overwrite") overwrite:number): Promise<typeof fieldApi.routes.workflowFieldsCopy.res> {
+        await WorkflowNodeFieldTypeService.workflowFieldsCopy(workflowNodeId,newWorkflowNodeId,overwrite)
         return
     }
 

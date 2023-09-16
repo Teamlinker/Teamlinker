@@ -46,7 +46,7 @@ export default {
         deleteLabel:"Do you want to remove this label from this project?",
         deleteModule:"Do you want to remove this module?",
         deleteTag:"Do you want to delete this tag?",
-        deleteWikiSpace:"Do you want to delete this wiki space",
+        deleteWikiSpace:"Do you want to delete this wiki space?",
         deleteTeam:"Do you want to delete this team?",
         removeMember:"Do you want to remove this member?",
         quitTeam:"Do you want to quit this team?",
@@ -95,7 +95,11 @@ export default {
         contentNotEmpty:"content can not be empty",
         selectBothDate:"you must select both date!",
         notStartNodeNotRemove:"not start node can't be removed !!!",
-        typeCode:"type code"
+        typeCode:"type code",
+        accept:"Accept",
+        reject:"Reject",
+        workDay:"WorkDay",
+        joinMeetingFailed:"Join Meeting Failed"
     },
     placeholder:{
         pleaseSelect:"Please Select",
@@ -130,7 +134,8 @@ export default {
         enterUsername:"Enter Username",
         typePassword:"Type Password",
         typeEmail:"Type Email",
-        typePasswordAgain:"Type Password Again"
+        typePasswordAgain:"Type Password Again",
+        typeMeetingPassword:"Type Meeting Password"
     },
     "util":{
         "ok":"Ok",
@@ -335,7 +340,8 @@ export default {
         accepted:"Accepted",
         rejected:"Rejected",
         issueTypeList:"IssueType List",
-        waitForApproval:"Wait For Approval"
+        waitForApproval:"Wait For Approval",
+        addItem:"Add Item"
     },
     "common":{
         "component":{
@@ -557,6 +563,9 @@ export default {
                         chooseTeam:"Choose Team",
                         chooseWorkflowField:"Choose Workflow Field",
                         border:"the border of node is pink"
+                    },
+                    fieldCopyFrom:{
+                        overwrite:"OverWrite Current Fields"
                     }
                 },
                 project:{

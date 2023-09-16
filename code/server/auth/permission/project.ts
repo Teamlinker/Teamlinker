@@ -28,7 +28,7 @@ class PermissionProject extends PermissionBase {
             projectId=await obj.getValue();
             return projectId;
         } else if(projectReleaseId) {
-            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssue(projectReleaseId);
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectRelease(projectReleaseId);
             projectId=await obj.getValue();
             return projectId;
         } else if(roleId) {

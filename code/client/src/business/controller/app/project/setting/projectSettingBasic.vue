@@ -86,6 +86,8 @@ const onDelete=async ()=>{
 		})
 		if(res?.code==0) {
 			navigator.replace("project")
+		} else {
+			Message.error(res.msg)
 		}
 	}
 }

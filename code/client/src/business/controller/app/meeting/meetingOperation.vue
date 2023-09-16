@@ -34,7 +34,7 @@
 								]" v-if="currentMeeting"></a-descriptions>
 					<a-divider :margin="10"></a-divider>
 					<a-form :model="form" auto-label-width>
-						<a-form-item field="memberIds" :label="$t('util.users')" required>
+						<a-form-item field="memberIds" :label="$t('util.invite')" required>
 							<a-select style="width: 100%" :placeholder="$t('placeholder.typeUserOrTeam')" multiple allow-search allow-clear v-model="form.memberIds" @search="onSearch">
 								<a-optgroup :label="$t('util.team')" v-if="selectList && selectList.teams && selectList.teams.length>0">
 									<a-option v-for="item in selectList.teams" :value="item.id">

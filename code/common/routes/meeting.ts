@@ -129,6 +129,18 @@ const api= {
             res:{},
             permission: [Permission_Types.Organization.READ]
         },
+        checkOwner:{
+            method: ECommon_HttpApi_Method.GET,
+            path: "/checkowner",
+            req:  <{
+                meetingRoomId:string
+            }>{},
+            res:<{
+                owner:boolean,
+                password?:string
+            }>{},
+            permission: [Permission_Types.Organization.READ]
+        }
     }
 }
 

@@ -71,8 +71,8 @@ class RpcAuthApi {
     }
 
     
-    async processPermission(permissions: Permission_Base[], obj: any): Promise<boolean> {
-        let isCheck=await processPermission(permissions,obj);
+    async processPermission(permissionOr:boolean,permissions: Permission_Base[], obj: any): Promise<boolean> {
+        let isCheck=await processPermission(permissionOr,permissions,obj);
         return isCheck
     }
 

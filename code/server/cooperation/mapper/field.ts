@@ -20,6 +20,11 @@ import {
     generateUpdateSql
 } from '../../common/util/sql';
 import {ECommon_Field_Type, Field_Types, ICommon_Field_Type} from "../../../common/field/type";
+import {projectIssueProcessModel} from "../../../common/model/project_issue_process";
+import {
+    ICommon_Model_Project_Issue_Field_Value,
+    projectIssueFieldValueModel
+} from "../../../common/model/project_issue_field_value";
 
 class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeModel> {
     constructor() {
@@ -129,6 +134,27 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
                 label_type:ECommon_Model_Workflow_Node_Field_Type_Label_Type.USER
             })
         }))
+        let arr=await mysql.execute(generateQuerySql(projectIssueProcessModel,["project_issue_id"],{
+            workflow_node_process:{
+                exp:"json_array_contain",
+                value:workflowNodeId
+            }
+        }))
+        if(arr.length>0) {
+            let arrCreate:ICommon_Model_Project_Issue_Field_Value[]=[]
+            for(let obj of arr) {
+                arrCreate.push({
+                    id:await generateSnowId(),
+                    workflow_node_field_type_id:id,
+                    project_issue_id:obj.project_issue_id,
+                    field_config_ids:null,
+                    ref_values:null,
+                    number_value:null,
+                    string_value:null
+                })
+            }
+            await mysql.execute(generateBatchCreateSql(projectIssueFieldValueModel,arrCreate))
+        }
         let ret=await mysql.executeOne(generateQuerySql(workflowNodeFieldTypeModel,[],{
             id:id
         }))
@@ -390,6 +416,29 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
         }
         if(arrFields && arrFields.length>0) {
             await mysql.execute(generateBatchCreateSql(workflowNodeFieldTypeModel,arrFields))
+            let arr=await mysql.execute(generateQuerySql(projectIssueProcessModel,["project_issue_id"],{
+                workflow_node_process:{
+                    exp:"json_array_contain",
+                    value:newWorkflowNodeId
+                }
+            }))
+            if(arr.length>0) {
+                let arrCreate:ICommon_Model_Project_Issue_Field_Value[]=[]
+                for(let obj of arrFields) {
+                    for(let objProjectIssue of arr) {
+                        arrCreate.push({
+                            id:await generateSnowId(),
+                            workflow_node_field_type_id:obj.id,
+                            project_issue_id:objProjectIssue.project_issue_id,
+                            field_config_ids:null,
+                            ref_values:null,
+                            number_value:null,
+                            string_value:null
+                        })
+                    }
+                }
+                await mysql.execute(generateBatchCreateSql(projectIssueFieldValueModel,arrCreate))
+            }
         }
         let arr:ICommon_Model_Workflow_Node_Field_Type_Config[]=[]
         for(let id in objConfigValue) {

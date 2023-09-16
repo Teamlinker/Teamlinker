@@ -66,6 +66,7 @@ export default class GateWay extends Application {
                     service:string,
                     ignoreValidate:boolean,
                     permission:Permission_Base[],
+                    permissionOr?:boolean
                 }
             }
         }>{}
@@ -82,6 +83,7 @@ export default class GateWay extends Application {
                     service:obj.service,
                     ignoreValidate:!!objApi.ignoreValidate,
                     permission:objApi.permission??[],
+                    permissionOr:!!objApi.permissionOr
                 };
             }
         }
@@ -95,6 +97,7 @@ export default class GateWay extends Application {
                 if (apiMap[baseUrl] && apiMap[baseUrl][method + " " + apiPath]) {
                     let ignoreValidate = apiMap[baseUrl][method + " " + apiPath].ignoreValidate
                     let permission=apiMap[baseUrl][method + " " + apiPath].permission
+                    let permissionOr=apiMap[baseUrl][method + " " + apiPath].permissionOr
                     if(!ignoreValidate) {
                         let authorization = ctx.get("Authorization")
                         if(!authorization) {
@@ -131,11 +134,12 @@ export default class GateWay extends Application {
                                     if(obj.data["organizationId"]) {
                                         obj.user.organizationInfo={
                                             organizationId:obj.data["organizationId"],
-                                            organizationUserId:await userRpcApi.getOrganizationUserId(obj.data["organizationId"],obj.user.userId)
+                                            organizationUserId:await userRpcApi.getOrganizationUserId(obj.data["organizationId"],obj.user.userId),
+                                            fake:true
                                         }
                                     }
                                 }
-                                let isCheck =await authRpcApi.processPermission(permission,Object.assign({},obj.data,{
+                                let isCheck =await authRpcApi.processPermission(permissionOr,permission,Object.assign({},obj.data,{
                                     userId:obj.user?obj.user.userId:undefined,
                                     organizationId:obj.user.organizationInfo.organizationId,
                                     organizationUserId:obj.user.organizationInfo.organizationUserId
@@ -166,7 +170,7 @@ export default class GateWay extends Application {
                             ctx.body = generateHttpErrorResponse(ret.data);
                         } else {
                             if(typeof(ret.data)=="object" && obj.user) {
-                                await handleImageFields(ret.data,obj.user.organizationInfo?.organizationId);
+                                await handleImageFields(ret.data,obj.data["organizationId"]?obj.data["organizationId"]:obj.user.organizationInfo?.organizationId);
                             }
                             ctx.body = generateHttpOkResponse(ret.data);
                         }

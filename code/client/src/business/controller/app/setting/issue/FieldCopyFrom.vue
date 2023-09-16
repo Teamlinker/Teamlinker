@@ -1,8 +1,11 @@
 <template>
-  <a-form :model="form" style="width: 80%" ref="eleForm">
+  <a-form :model="form" auto-label-width ref="eleForm">
     <a-form-item field="workflowNodeId" :label="$t('util.issueType')" required>
       <a-cascader :options="data" v-model="form.workflowNodeId" :field-names="fields" :placeholder="$t('placeholder.pleaseSelect')" allow-search></a-cascader>
     </a-form-item>
+	  <a-form-item field="overwrite" :label="$t('controller.app.setting.issue.fieldCopyFrom.overwrite')" required>
+		  <a-switch v-model="form.overwrite" :unchecked-value="0" :checked-value="1"></a-switch>
+	  </a-form-item>
   </a-form>
 </template>
 
@@ -17,7 +20,8 @@ const props=defineProps<{
   workflowNodeId:string
 }>()
 const form=reactive({
-  workflowNodeId:""
+  workflowNodeId:"",
+	overwrite:0
 })
 const eleForm=ref(null)
 const fields={
@@ -36,7 +40,8 @@ onDialogOk(dialogFuncGenerator({
   func:()=>{
     return apiField.workflowFieldsCopy({
       workflowNodeId:form.workflowNodeId,
-      newWorkflowNodeId:props.workflowNodeId
+      newWorkflowNodeId:props.workflowNodeId,
+	    overwrite:form.overwrite
     })
   },
   form:()=>{

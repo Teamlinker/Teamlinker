@@ -475,7 +475,7 @@ export class FinderHandle {
                 break
             }
             case ECommon_Model_Finder_Shortcut_Type.MEETING_ROOM:{
-                apiMeeting.getRoom({
+                apiMeeting.checkOwner({
                     meetingRoomId:item.ref_id
                 }).then(res=>{
                     if(res?.code==0) {

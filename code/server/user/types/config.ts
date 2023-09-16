@@ -7,7 +7,8 @@ export interface IServer_User_Config extends IServer_Common_Config_Base {
 
 export interface IServer_Common_RPC_User_CheckSession_Organization {
     organizationId:string,
-    organizationUserId?:string
+    organizationUserId?:string,
+    fake?:boolean
 }
 
 export interface IServer_Common_RPC_User_CheckSession {

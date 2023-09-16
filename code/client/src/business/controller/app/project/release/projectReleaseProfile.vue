@@ -35,7 +35,7 @@
             </template>
           </template>
         </a-dropdown-button>
-        <a-button size="small" status="danger" @click="onDelete">{{$t("util.delete")}}</a-button>
+        <a-button size="small" status="danger" @click="onDelete" v-if="checkPermission(permission,Permission_Types.Project.DELETE) || info?.created_by.id===myOrganizationUserId">{{$t("util.delete")}}</a-button>
       </a-space>
     </a-row>
     <a-row style="margin-top: 20px">
@@ -111,6 +111,8 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {vDrag} from "../../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/model/finder_item";
 import {useI18n} from "vue-i18n";
+import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
+import {SessionStorage} from "@/business/common/storage/session";
 
 const props=defineProps<{
   projectReleaseId:string
@@ -152,6 +154,8 @@ const columns=[
 ]
 const key=inject(injectProjectInfo).key
 const projectId=inject(injectProjectInfo).id
+const permission=inject(injectProjectInfo).permission
+const myOrganizationUserId=SessionStorage.get("organizationUserId")
 const info=ref<DCSType<ICommon_Route_Res_Release_Info>>()
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext

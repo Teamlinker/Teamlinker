@@ -97,7 +97,8 @@ export default {
         typeCode:"输入验证码",
         accept:"接受",
         reject:"拒绝",
-        workDay:"工作日"
+        workDay:"工作日",
+        joinMeetingFailed:"会议加入失败"
     },
     placeholder:{
         pleaseSelect:"请选择",
@@ -131,7 +132,8 @@ export default {
         enterUsername:"输入用户名",
         typePassword:"输入密码",
         typeEmail:"输入Email",
-        typePasswordAgain:"再次输入密码"
+        typePasswordAgain:"再次输入密码",
+        typeMeetingPassword:"输入会议密码"
     },
     "util":{
         "ok":"确认",
@@ -336,7 +338,8 @@ export default {
         accepted:"已接受",
         rejected:"已拒绝",
         issueTypeList:"事务类型列表",
-        waitForApproval:"等待审批"
+        waitForApproval:"等待审批",
+        addItem:"添加项"
     },
     "common":{
         "component":{
@@ -558,6 +561,9 @@ export default {
                         chooseTeam:"选择团队",
                         chooseWorkflowField:"选择字段",
                         border:"节点的边框是粉色的"
+                    },
+                    fieldCopyFrom:{
+                        overwrite:"覆盖现有字段"
                     }
                 },
                 project:{

@@ -16,7 +16,7 @@
 			<template #operation="{record}">
 				<a-space v-if="checkPermission(permission,Permission_Types.Project.EDIT)" wrap>
 					<a-button size="small" @click="onEdit(record)">{{$t("util.edit")}}</a-button>
-					<a-button size="small" status="danger" @click="onDelete(record)">{{$t("util.delete")}}</a-button>
+					<a-button size="small" status="danger" @click="onDelete(record)" v-if="checkPermission(permission,Permission_Types.Project.DELETE) || record?.created_by.id===myOrganizationUserId">{{$t("util.delete")}}</a-button>
 				</a-space>
 			</template>
 		</a-table>
@@ -39,11 +39,13 @@ import {Message} from "@arco-design/web-vue";
 import {ICommon_Model_Board} from "../../../../../../../common/model/board";
 import BoardEdit from "@/business/controller/app/project/board/boardEdit.vue";
 import {useI18n} from "vue-i18n";
+import {SessionStorage} from "@/business/common/storage/session";
 
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id
 const permission=objInject.permission
 const key=objInject.key
+const myOrganizationUserId=SessionStorage.get("organizationUserId")
 const {t}=useI18n()
 const columns=[
 	{

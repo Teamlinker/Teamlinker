@@ -265,6 +265,7 @@ import {
 import moment from "moment";
 import UserAvatar from "../../../common/component/userAvatar.vue";
 import FieldPriority from "../../../common/component/field/fieldPriority.vue";
+import {Message} from "@arco-design/web-vue";
 
 const props=defineProps<{
 	item:DCSType<ICommon_Model_Finder_Item>
@@ -307,6 +308,11 @@ const refresh=async ()=>{
 		}).then(res=>{
 			if(res?.code==0) {
 				organizationInfo.value=res.data
+			} else {
+				organizationInfo.value={
+					name:"UnKnown",
+					id:null,
+				} as any
 			}
 		})
 		switch (props.item.shortcut_type) {
@@ -319,6 +325,8 @@ const refresh=async ()=>{
 				}).then(res=>{
 					if(res?.code==0) {
 						projectInfo.value=res.data
+					} else {
+						Message.error(res?.msg)
 					}
 				})
 				break
@@ -332,6 +340,8 @@ const refresh=async ()=>{
 				}).then(res=>{
 					if(res?.code==0) {
 						projectIssueInfo.value=res.data
+					} else {
+						Message.error(res?.msg)
 					}
 				})
 				break
@@ -353,6 +363,8 @@ const refresh=async ()=>{
 								}
 							})).data.name
 						}
+					} else {
+						Message.error(res?.msg)
 					}
 				})
 				break
@@ -366,6 +378,8 @@ const refresh=async ()=>{
 				}).then(async res=>{
 					if(res?.code==0) {
 						sprintInfo.value=res.data
+					} else {
+						Message.error(res?.msg)
 					}
 				})
 				break
@@ -379,6 +393,8 @@ const refresh=async ()=>{
 				}).then(res=>{
 					if(res?.code==0) {
 						wikiInfo.value=res.data
+					} else {
+						Message.error(res?.msg)
 					}
 				})
 				break
@@ -392,6 +408,8 @@ const refresh=async ()=>{
 				}).then(res=>{
 					if(res?.code==0) {
 						wikiItemInfo.value=res.data
+					} else {
+						Message.error(res?.msg)
 					}
 				})
 				break
@@ -413,6 +431,8 @@ const refresh=async ()=>{
 								}
 							})).data.name
 						}
+					} else {
+						Message.error(res?.msg)
 					}
 				})
 				break
@@ -426,6 +446,8 @@ const refresh=async ()=>{
 				}).then(res=>{
 					if(res?.code==0) {
 						meetingRoomInfo.value=res.data
+					} else {
+						Message.error(res?.msg)
 					}
 				})
 				break

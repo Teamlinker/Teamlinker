@@ -188,14 +188,11 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             description,
             value:value
         });
-        emitServiceEvent("roleChange",roleId)
         return ret;
     }
 
     async removeRole(roleId:string){
-        let ret=await rpcAuthApi.removeRole(roleId);
-        emitServiceEvent("roleChange",roleId)
-        return ret;
+        await rpcAuthApi.removeRole(roleId);
     }
 
     async memberInfo(organizationUserId:string):Promise<{

@@ -14,6 +14,7 @@ export interface ICommon_Http_Route {
     res:any,
     ignoreValidate?:boolean,
     permission?:Permission_Base[],
+    permissionOr?:boolean
 }
 
 export interface ICommon_Http_Route_List {

@@ -84,7 +84,9 @@
                   </a-space>
                 </template>
                 <template #footer>
-                  <a-button size="mini" html-type="button" type="primary" @click="onAddValue">add item</a-button>
+                  <a-button size="mini" html-type="button" type="primary" @click="onAddValue">
+	                  {{$t("util.addItem")}}
+                  </a-button>
                 </template>
               </a-table>
             </a-checkbox-group>

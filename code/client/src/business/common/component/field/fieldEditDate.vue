@@ -15,7 +15,7 @@
 import {ref, watchEffect} from "vue";
 
 const props=defineProps<{
-  value:string,
+  value?:string,
   isEdit:boolean
 }>()
 const showValue=ref();

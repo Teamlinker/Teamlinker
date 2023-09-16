@@ -23,7 +23,7 @@ import {
 
 const props=defineProps<{
   isEdit:boolean,
-  value:string[],
+  value?:string[],
   list:ICommon_Model_Workflow_Node_Field_Type_Config[]
 }>()
 const showValue=ref();

@@ -77,7 +77,8 @@ const api= {
                 boardId :string,
             }>{},
             res:{},
-            permission:[Permission_Types.Project.EDIT]
+            permission:[Permission_Types.Project.DELETE,Permission_Types.Common.SELF],
+            permissionOr:true
         },
         bindIssueType:{
             method:ECommon_HttpApi_Method.POST,
