@@ -38,10 +38,11 @@ import FieldEditMultiSelect from "./fieldEditMultiSelect.vue";
 import FieldEditLabel from "./fieldEditLabel.vue";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {inject, markRaw, ref} from "vue";
-import {apiIssue, DCSType} from "../../request/request";
+import {apiIssue} from "../../request/request";
 import {Message} from "@arco-design/web-vue";
 import {injectProjectInfo} from "../../util/symbol";
 import {ICommon_Model_Project_Issue_Field_Value} from "../../../../../../common/model/project_issue_field_value";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
   item:DCSType<ICommon_Route_Res_ProjectIssue_fieldsInfo>

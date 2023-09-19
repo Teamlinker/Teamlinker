@@ -23,12 +23,13 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
-import {apiTeam, DCSType} from "../../../../common/request/request";
+import {apiTeam} from "../../../../common/request/request";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditTeamMemberRole from "./editTeamMemberRole.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   teamId:string

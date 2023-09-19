@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../../common/model/organization.js";
 import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
-import {apiProject, DCSType} from "../../../../common/request/request";
+import {apiProject} from "../../../../common/request/request";
 import {ICommon_Route_Res_Role_Member_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
@@ -44,6 +44,7 @@ import EditProjectAccessRole from "./editProjectAccessRole.vue";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 import {useI18n} from "vue-i18n";
 import {ICommon_Model_Project} from "../../../../../../../common/model/project";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   projectId:string

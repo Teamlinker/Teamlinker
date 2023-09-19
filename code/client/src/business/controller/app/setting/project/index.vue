@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
-import {apiProject, DCSType} from "../../../../common/request/request";
+import {apiProject} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getCurrentNavigator} from "../../../../../teamOS/common/component/navigator/navigator";
@@ -46,6 +46,7 @@ import EditProjectAccess from "./editProjectAccess.vue";
 import LabelList from "./labelList.vue";
 import ModuleList from "./moduleList.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const {t}=useI18n()
 const columns=[

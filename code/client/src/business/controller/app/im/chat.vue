@@ -131,6 +131,8 @@ import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/m
 import {TableRowSelection} from "@arco-design/web-vue/es/table/interface";
 import UserAvatar from "../../../common/component/userAvatar.vue";
 import {useI18n} from "vue-i18n";
+import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
+import {ECommon_User_Online_Status} from "../../../../../../common/types";
 
 const root = ref()
 const appContext=getCurrentInstance().appContext
@@ -169,6 +171,7 @@ const popMenuList=ref(RichEditorEventHandle.popMenuList)
 const objEditorUser=ref<InstanceType<typeof RichEditor>>()
 const objEditorTeam=ref<InstanceType<typeof RichEditor>>()
 const searchUserKey=ref("")
+const store=useDesktopStore()
 let topElement:HTMLElement
 let isWheel = false
 let isManualSend=false
@@ -308,13 +311,23 @@ const onFavorite=(item:IClient_Chat_Message_Item)=>{
 const onMeeting=async ()=>{
 	let res=await apiMeeting.getPersonalRoom()
 	if(res?.code===0) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,props.type===ECommon_IM_Message_EntityType.USER?[{
-			id:props.info.id,
-			type:ECommon_Model_Organization_Member_Type.USER
-		}]:selectKeys.value.map(item=>({
-			id:item,
-			type:ECommon_Model_Organization_Member_Type.USER
-		})))
+		if(store.status===ECommon_User_Online_Status.MEETING) {
+			eventBus.emit(EClient_EVENTBUS_TYPE.MEETING_INVITE,props.type===ECommon_IM_Message_EntityType.USER?[{
+				id:props.info.id,
+				type:ECommon_Model_Organization_Member_Type.USER
+			}]:selectKeys.value.map(item=>({
+				id:item,
+				type:ECommon_Model_Organization_Member_Type.USER
+			})))
+		} else {
+			eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,props.type===ECommon_IM_Message_EntityType.USER?[{
+				id:props.info.id,
+				type:ECommon_Model_Organization_Member_Type.USER
+			}]:selectKeys.value.map(item=>({
+				id:item,
+				type:ECommon_Model_Organization_Member_Type.USER
+			})))
+		}
 	}
 }
 

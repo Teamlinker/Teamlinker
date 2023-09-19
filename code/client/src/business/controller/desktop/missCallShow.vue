@@ -22,16 +22,18 @@
 
 <script setup lang="ts">
 import {onBeforeMount, onBeforeUnmount, ref} from "vue";
-import {apiMeeting, DCSType} from "../../common/request/request";
+import {apiMeeting} from "../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../common/event/event";
 import {ICommon_Route_Res_Meeting_Miss_Call} from "../../../../../common/routes/response";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../common/model/organization";
-import moment from "moment";
 import {SessionStorage} from "../../common/storage/session";
+import {DCSType, ECommon_User_Online_Status} from "../../../../../common/types";
+import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
 
 const loading=ref(false)
 const list=ref<DCSType<ICommon_Route_Res_Meeting_Miss_Call>[]>([])
 const unreadCount=ref(0)
+const store=useDesktopStore()
 const getList=async ()=>{
 	let res=await apiMeeting.listMissCall()
 	if(res?.code==0) {
@@ -42,12 +44,22 @@ const getList=async ()=>{
 const onMeeting=async (item:DCSType<ICommon_Route_Res_Meeting_Miss_Call>)=>{
 	let res=await apiMeeting.getPersonalRoom()
 	if(res?.code==0) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,[
-			{
-				id:item.from_organization_user_id,
-				type:ECommon_Model_Organization_Member_Type.USER
-			}
-		])
+		if(store.status===ECommon_User_Online_Status.MEETING) {
+			eventBus.emit(EClient_EVENTBUS_TYPE.MEETING_INVITE,[
+				{
+					id:item.from_organization_user_id,
+					type:ECommon_Model_Organization_Member_Type.USER
+				}
+			])
+		} else {
+			eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,[
+				{
+					id:item.from_organization_user_id,
+					type:ECommon_Model_Organization_Member_Type.USER
+				}
+			])
+		}
+
 	}
 }
 

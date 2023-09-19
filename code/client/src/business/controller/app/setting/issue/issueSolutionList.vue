@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, ref} from "vue";
-import {apiIssueType, DCSType} from "../../../../common/request/request";
+import {apiIssueType} from "../../../../common/request/request";
 import {ICommon_Route_Res_IssueTypeSolution_List_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
@@ -48,6 +48,7 @@ import BindProjectList from "./bindProjectList.vue";
 import IssueTypeList from "./issueTypeList.vue";
 import IssueSolutionDeleteConvert from "@/business/controller/app/setting/issue/issueSolutionDeleteConvert.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const {t}=useI18n()
 const columns=[

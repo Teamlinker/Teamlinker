@@ -96,7 +96,7 @@ import {
 	ICommon_Route_Res_Release_Info,
 	ICommon_Route_Res_Release_Info_Issue_Item
 } from "../../../../../../../common/routes/response";
-import {apiRelease, DCSType} from "../../../../common/request/request";
+import {apiRelease} from "../../../../common/request/request";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
 import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/model/workflow_node";
 import {Dialog} from "../../../../common/component/dialog/dialog";
@@ -113,6 +113,7 @@ import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/mo
 import {useI18n} from "vue-i18n";
 import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 import {SessionStorage} from "@/business/common/storage/session";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   projectReleaseId:string

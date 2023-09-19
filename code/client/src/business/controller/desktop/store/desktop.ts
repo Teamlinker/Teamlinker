@@ -1,6 +1,6 @@
 import {defineStore} from "pinia";
 import {ICommon_Model_Organization} from "../../../../../../common/model/organization";
-import {apiOrganization, apiUser, DCSType} from "../../../common/request/request";
+import {apiOrganization, apiUser} from "../../../common/request/request";
 import {ICommon_Route_Res_Organization_List} from "../../../../../../common/routes/response";
 import {Icon} from "../../../../teamOS/icon/icon";
 import {iconSetting} from "../icon/setting";
@@ -17,7 +17,7 @@ import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {NotificationType, NotificationWrapper} from "../../../common/component/notification/notification";
 import {SessionStorage} from "../../../common/storage/session";
 import {handleIMEvent} from "../../app/im/event";
-import {ECommon_User_Online_Status} from "../../../../../../common/types";
+import {DCSType, ECommon_User_Online_Status} from "../../../../../../common/types";
 import {handleMeetingEvent} from "../../app/meeting/event";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {iconFinder} from "../icon/finder";

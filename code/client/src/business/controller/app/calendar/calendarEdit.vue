@@ -14,11 +14,12 @@
 </template>
 
 <script setup lang="ts">
-import {apiCalendar, DCSType} from "../../../common/request/request";
+import {apiCalendar} from "../../../common/request/request";
 import {ECommon_Calendar_Color, ICommon_Model_Calendar} from "../../../../../../common/model/calendar";
 import {reactive, ref} from "vue";
 import {onDialogOk} from "../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../common/util/helper";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
   type:"edit"|"add",

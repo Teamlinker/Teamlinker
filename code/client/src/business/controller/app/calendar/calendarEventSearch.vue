@@ -13,13 +13,13 @@
 </template>
 
 <script setup lang="ts">
-import {DCSType} from "../../../common/request/request";
 import {ICommon_Route_Res_Calendar_ListEvent_Item} from "../../../../../../common/routes/response";
 import CalendarEventShortView from "./calendarEventShortView.vue";
 import {ref} from "vue";
 import {IClient_Calendar_Info} from "../../../common/component/calendar/type";
 import moment from "moment";
 import "moment-timezone"
+import {DCSType} from "../../../../../../common/types";
 
 const emit=defineEmits<{
 	edit:[event:IClient_Calendar_Info],

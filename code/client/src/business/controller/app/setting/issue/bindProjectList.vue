@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
-import {apiIssue, apiIssueType, DCSType} from "../../../../common/request/request";
+import {apiIssue, apiIssueType} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {ICommon_Model_Project} from "../../../../../../../common/model/project";
@@ -22,6 +22,7 @@ import EditBindProject from "./editBindProject.vue";
 import ProjectSettingIssueSolutionConvert
 	from "@/business/controller/app/project/setting/projectSettingIssueSolutionConvert.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   issueTypeSolutionId:string,

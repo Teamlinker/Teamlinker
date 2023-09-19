@@ -49,14 +49,14 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
-import {apiOrganization, DCSType} from "../../../../common/request/request";
+import {apiOrganization} from "../../../../common/request/request";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import EditUserProfile from "./editUserProfile.vue";
 import BindTag from "./bindTag.vue";
 import {SessionStorage} from "../../../../common/storage/session";
-import {ECommon_Application_Mode} from "../../../../../../../common/types";
+import {DCSType, ECommon_Application_Mode} from "../../../../../../../common/types";
 import CreateUserProfileOffline from "./createUserProfileOffline.vue";
 import moment from "moment";
 import {useI18n} from "vue-i18n";

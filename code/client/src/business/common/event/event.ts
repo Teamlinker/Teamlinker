@@ -25,6 +25,7 @@ export enum EClient_EVENTBUS_TYPE {
     LOCATE_IM_MESSAGE="locate_im_message",
     UPDATE_ORGANIZATION_USER_STATUS="update_organization_user_status",
     OPEN_MEETING="open_meeting",
+    MEETING_INVITE="meeting_invite",
     LEAVE_MEETING="leave_meeting",
     OPEN_CALENDAR_EVENT="open_calendar_event",
     FINDER_NEW_FOLDER="finder_new_folder",
@@ -58,6 +59,10 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.OPEN_IM_CHAT]:(id:string,chatType:ECommon_IM_Message_EntityType)=>void
     [EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS]:(organizationUserId:string,status:ECommon_User_Online_Status)=>void
     [EClient_EVENTBUS_TYPE.OPEN_MEETING]:(meetingId:string,password:string,inviteBusinessIds?:{
+        id:string,
+        type:ECommon_Model_Organization_Member_Type
+    }[])=>void
+    [EClient_EVENTBUS_TYPE.MEETING_INVITE]:(inviteBusinessIds:{
         id:string,
         type:ECommon_Model_Organization_Member_Type
     }[])=>void

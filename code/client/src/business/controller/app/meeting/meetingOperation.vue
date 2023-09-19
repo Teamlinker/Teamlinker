@@ -55,7 +55,7 @@
 							</a-select>
 						</a-form-item>
 						<a-form-item>
-							<a-button html-type="button" type="primary" @click="onInvite">{{$t("util.invite")}}</a-button>
+							<a-button html-type="button" type="primary" @click="onInvite()">{{$t("util.invite")}}</a-button>
 						</a-form-item>
 					</a-form>
 				</template>
@@ -87,13 +87,14 @@ import {Dialog} from "../../../common/component/dialog/dialog";
 import {Message} from "@arco-design/web-vue";
 import {getCurrentNavigator, getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import {MeetingClient} from "../../../common/component/meeting/client";
-import {getCurrentInstance, reactive, ref} from "vue";
+import {getCurrentInstance, onBeforeMount, onBeforeUnmount, reactive, ref} from "vue";
 import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {ICommon_Route_Res_Organization_FilterUserAndTeam} from "../../../../../../common/routes/response";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";
 import {DCSType} from "../../../../../../common/types";
+import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
 
 const props=defineProps<{
 	me:OrganizationUserItem,
@@ -166,8 +167,13 @@ const onSearch=async (keyword:string)=>{
 	}
 }
 
-const onInvite=async()=>{
-	if(form.memberIds.length>0) {
+const onInvite=async (inviteBusinessIds?:{
+	id:string,
+	type:ECommon_Model_Organization_Member_Type
+}[])=>{
+	if(inviteBusinessIds?.length>0) {
+		socket.emit("meeting_invite",inviteBusinessIds)
+	} else if(form.memberIds.length>0) {
 		socket.emit("meeting_invite",form.memberIds.map(item=>{
 			return {
 				id:item,
@@ -191,6 +197,14 @@ const onToggleScreen=async ()=>{
 		isScreen.value=false
 	}
 }
+
+onBeforeMount(()=>{
+	eventBus.on(EClient_EVENTBUS_TYPE.MEETING_INVITE,onInvite)
+})
+
+onBeforeUnmount(()=>{
+	eventBus.off(EClient_EVENTBUS_TYPE.MEETING_INVITE,onInvite)
+})
 
 </script>
 

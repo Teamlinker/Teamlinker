@@ -20,9 +20,10 @@ import {onBeforeMount, reactive, ref} from "vue";
 import {ICommon_Model_Role} from "../../../../../../../common/model/role";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../common/routes/response";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
-import {apiOrganization, apiTeam, DCSType} from "../../../../common/request/request";
+import {apiOrganization, apiTeam} from "../../../../common/request/request";
 import {SessionStorage} from "../../../../common/storage/session";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   type:"edit"|"add"

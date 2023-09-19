@@ -491,7 +491,7 @@ export class MeetingServer {
                                 if(obj) {
                                     let kinds={}
                                     obj.send.producer.forEach(item=>{
-                                        if(item instanceof Producer)
+                                        if(item instanceof Producer && !item.appData.screen)
                                             kinds[item.kind]=!item.paused
                                     })
                                     arr=[...arr,{

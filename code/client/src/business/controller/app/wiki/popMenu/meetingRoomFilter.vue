@@ -20,11 +20,12 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {apiMeeting, DCSType} from "../../../../common/request/request";
+import {apiMeeting} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import moment from "moment";
 import {ICommon_Model_Meeting_Room} from "../../../../../../../common/model/meeting_room";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const data=ref<DCSType<ICommon_Model_Meeting_Room[]>>([])
 const selectedKeys=ref([])

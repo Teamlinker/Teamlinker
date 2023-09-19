@@ -122,6 +122,7 @@ import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_u
 import {DCSType, ECommon_User_Online_Status} from "../../../../../../common/types";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {ICommon_Model_Member_Tag} from "../../../../../../common/model/member_tag";
+import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
 
 const props=defineProps<{
   organizationUserId:string
@@ -135,7 +136,7 @@ const tagList=ref<DCSType<ICommon_Model_Member_Tag>[]>([])
 const navigator=getCurrentNavigator()
 const myOrganizationUserId=SessionStorage.get("organizationUserId")
 const status=ref(ECommon_User_Online_Status.OFFLINE)
-
+const store=useDesktopStore()
 const imgName=computed(()=>{
   if(info.value.organizationUser?.nickname.includes(" ")) {
     let arr=info.value.organizationUser.nickname.split(" ")
@@ -157,12 +158,21 @@ const onTeamMessage=(id:string)=>{
 const onMeeting=async ()=>{
 	let res=await apiMeeting.getPersonalRoom()
 	if(res?.code===0) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,[
-			{
-				id:props.organizationUserId,
-				type:ECommon_Model_Organization_Member_Type.USER
-			}
-		])
+		if(store.status===ECommon_User_Online_Status.MEETING) {
+			eventBus.emit(EClient_EVENTBUS_TYPE.MEETING_INVITE,[
+				{
+					id:props.organizationUserId,
+					type:ECommon_Model_Organization_Member_Type.USER
+				}
+			])
+		} else {
+			eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,[
+				{
+					id:props.organizationUserId,
+					type:ECommon_Model_Organization_Member_Type.USER
+				}
+			])
+		}
 	}
 }
 

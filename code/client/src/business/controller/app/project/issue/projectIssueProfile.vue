@@ -97,7 +97,7 @@
 <script setup lang="ts">
 import {computed, getCurrentInstance, inject, markRaw, onBeforeMount, ref, watch} from "vue";
 import {injectProjectInfo} from "../../../../common/util/symbol";
-import {apiIssue, apiMeeting, DCSType} from "../../../../common/request/request";
+import {apiIssue, apiMeeting} from "../../../../common/request/request";
 import {
 	ICommon_Route_Res_ProjectIssue_BasicInfo,
 	ICommon_Route_Res_ProjectIssue_fieldsInfo
@@ -136,6 +136,7 @@ import {RichEditorEventHandle} from "@/business/common/component/richEditorEvent
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../../common/model/finder_item";
 import ProjectIssueConvert from "@/business/controller/app/project/issue/projectIssueConvert.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType, ECommon_User_Online_Status} from "../../../../../../../common/types";
 
 const props=defineProps<{
   projectIssueId:string
@@ -370,10 +371,17 @@ const onAction=async (item:ICommon_Model_Workflow_Action | {
 const onMeeting=async ()=>{
 	let res=await apiMeeting.getPersonalRoom()
 	if(res?.code===0) {
-		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,selectKeys.value.map(item=>({
-			id:item,
-			type:ECommon_Model_Organization_Member_Type.USER
-		})))
+		if(store.status===ECommon_User_Online_Status.MEETING) {
+			eventBus.emit(EClient_EVENTBUS_TYPE.MEETING_INVITE,selectKeys.value.map(item=>({
+				id:item,
+				type:ECommon_Model_Organization_Member_Type.USER
+			})))
+		} else {
+			eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_MEETING,res.data.id,res.data.password,selectKeys.value.map(item=>({
+				id:item,
+				type:ECommon_Model_Organization_Member_Type.USER
+			})))
+		}
 	}
 }
 

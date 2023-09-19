@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, ref} from "vue";
-import {apiIssueType, DCSType} from "../../../../common/request/request";
+import {apiIssueType} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
@@ -43,6 +43,7 @@ import {getCurrentNavigator} from "../../../../../teamOS/common/component/naviga
 import Workflow from "./workflow.vue";
 import IssueTypeDeleteConvert from "@/business/controller/app/setting/issue/issueTypeDeleteConvert.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   issueTypeSolutionId:string

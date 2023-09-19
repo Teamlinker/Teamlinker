@@ -26,10 +26,11 @@ import {ICommon_Model_Project} from "../../../../../../../common/model/project";
 import Upload from "../../../../common/component/upload.vue";
 import {getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
-import {apiIssueType, apiProject, DCSType} from "../../../../common/request/request";
+import {apiIssueType, apiProject} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {ICommon_Model_Issue_Type_Solution} from "../../../../../../../common/model/issue_type_solution";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   type:"edit"|"add",

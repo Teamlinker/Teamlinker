@@ -238,8 +238,7 @@ import {
 	apiOrganization,
 	apiProject,
 	apiRelease,
-	apiWiki,
-	DCSType
+	apiWiki
 } from "../../../common/request/request";
 import {
 	ECommon_Model_Finder_Item_Type,
@@ -266,6 +265,7 @@ import moment from "moment";
 import UserAvatar from "../../../common/component/userAvatar.vue";
 import FieldPriority from "../../../common/component/field/fieldPriority.vue";
 import {Message} from "@arco-design/web-vue";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
 	item:DCSType<ICommon_Model_Finder_Item>

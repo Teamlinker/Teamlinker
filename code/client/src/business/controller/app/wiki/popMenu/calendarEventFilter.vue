@@ -23,11 +23,12 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {apiCalendar, DCSType} from "../../../../common/request/request";
+import {apiCalendar} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {ICommon_Route_Res_Calendar_Event_Filter} from "../../../../../../../common/routes/response";
 import moment from "moment";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const data=ref<DCSType<ICommon_Route_Res_Calendar_Event_Filter["data"]>>([])
 const selectedKeys=ref([])
