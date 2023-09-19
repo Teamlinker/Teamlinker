@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, ref} from "vue";
-import {apiUser, DCSType} from "../../../common/request/request";
+import {apiUser} from "../../../common/request/request";
 import {ICommon_Route_Res_User_TeamList} from "../../../../../../common/routes/response";
 import CardItem from "../../../common/component/cardItem.vue";
 import {Dialog} from "../../../common/component/dialog/dialog";
@@ -32,6 +32,7 @@ import {getCurrentNavigator} from "../../../../teamOS/common/component/navigator
 import {useDesktopStore} from "../../desktop/store/desktop";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const keyword=ref("")
 const root=ref(null);

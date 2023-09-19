@@ -7,13 +7,154 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+
+--
+-- Table structure for table `board`
+--
+
+DROP TABLE IF EXISTS `board`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `board` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `project_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `project_id` (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `board_column`
+--
+
+DROP TABLE IF EXISTS `board_column`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `board_column` (
+  `id` bigint(20) NOT NULL,
+  `board_id` bigint(20) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `weight` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `board_id` (`board_id`),
+  KEY `weight` (`weight`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `board_column_workflow_node`
+--
+
+DROP TABLE IF EXISTS `board_column_workflow_node`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `board_column_workflow_node` (
+  `id` bigint(20) NOT NULL,
+  `board_column_id` bigint(20) NOT NULL,
+  `workflow_node_id` bigint(20) NOT NULL,
+  `issue_type_id` bigint(20) NOT NULL,
+  `board_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `board_column_id` (`board_column_id`),
+  KEY `workflow_node_id` (`workflow_node_id`),
+  KEY `issue_type_id` (`issue_type_id`),
+  KEY `board_id` (`board_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `board_issue_type`
+--
+
+DROP TABLE IF EXISTS `board_issue_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `board_issue_type` (
+  `id` bigint(20) NOT NULL,
+  `board_id` bigint(20) NOT NULL,
+  `issue_type_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `board_id` (`board_id`),
+  KEY `issue_type_id` (`issue_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `board_sprint`
+--
+
+DROP TABLE IF EXISTS `board_sprint`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `board_sprint` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `start_time` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `end_time` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `board_id` bigint(20) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `board_id` (`board_id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `board_sprint_issue`
+--
+
+DROP TABLE IF EXISTS `board_sprint_issue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `board_sprint_issue` (
+  `id` bigint(20) NOT NULL,
+  `board_sprint_swimlane_id` bigint(20) DEFAULT NULL,
+  `project_issue_id` bigint(20) NOT NULL,
+  `board_sprint_id` bigint(20) NOT NULL,
+  `board_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `board_sprint_swimlane_id` (`board_sprint_swimlane_id`),
+  KEY `project_issue_id` (`project_issue_id`),
+  KEY `board_sprint_id` (`board_sprint_id`),
+  KEY `board_id` (`board_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `board_sprint_swimlane`
+--
+
+DROP TABLE IF EXISTS `board_sprint_swimlane`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `board_sprint_swimlane` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `board_sprint_id` bigint(20) NOT NULL,
+  `board_id` bigint(20) NOT NULL,
+  `priority` tinyint(4) NOT NULL,
+  `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `board_sprint_id` (`board_sprint_id`),
+  KEY `board_id` (`board_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `calendar`
@@ -29,10 +170,12 @@ CREATE TABLE `calendar` (
   `reserved` tinyint(4) NOT NULL DEFAULT '0',
   `organization_user_id` bigint(20) NOT NULL,
   `type` tinyint(4) NOT NULL,
+  `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `organization_user_id` (`organization_user_id`),
-  KEY `reserved` (`reserved`)
+  KEY `reserved` (`reserved`),
+  KEY `organization_id` (`organization_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -46,7 +189,6 @@ DROP TABLE IF EXISTS `calendar_event`;
 CREATE TABLE `calendar_event` (
   `id` bigint(20) NOT NULL,
   `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `agenda` text COLLATE utf8mb4_general_ci,
   `start_time` timestamp NOT NULL,
   `end_time` timestamp NULL DEFAULT NULL,
   `all_day` tinyint(4) NOT NULL DEFAULT '0',
@@ -57,10 +199,12 @@ CREATE TABLE `calendar_event` (
   `location` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `unique_id` bigint(20) NOT NULL,
   `is_reminder` tinyint(4) NOT NULL DEFAULT '0',
+  `created_by` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `calendar_id` (`calendar_id`),
-  KEY `unique_id` (`unique_id`)
+  KEY `unique_id` (`unique_id`),
+  KEY `created_by` (`created_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -94,31 +238,39 @@ CREATE TABLE `calendar_setting` (
   `timezone` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `start_week_day` tinyint(4) NOT NULL,
   `organization_user_id` bigint(20) NOT NULL,
+  `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `organization_user_id` (`organization_user_id`)
+  KEY `organization_user_id` (`organization_user_id`),
+  KEY `organization_id` (`organization_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `comment`
+-- Table structure for table `content`
 --
 
-DROP TABLE IF EXISTS `comment`;
+DROP TABLE IF EXISTS `content`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `comment` (
+CREATE TABLE `content` (
   `id` bigint(20) NOT NULL,
   `type` tinyint(4) DEFAULT NULL,
-  `type_id` bigint(20) DEFAULT NULL,
-  `created_by` bigint(20) NOT NULL,
-  `content` text,
+  `ref_id` bigint(20) DEFAULT NULL,
+  `created_by` bigint(20) DEFAULT NULL,
+  `content` text COLLATE utf8mb4_general_ci,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `organization_id` bigint(20) DEFAULT NULL,
+  `modified_by` bigint(20) DEFAULT NULL,
+  `created_by_pure` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `type_id` (`type_id`),
-  KEY `user_id` (`created_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `user_id` (`created_by`),
+  KEY `created_time` (`created_time`),
+  KEY `organization_id` (`organization_id`),
+  KEY `ref_id` (`ref_id`),
+  KEY `created_by_pure` (`created_by_pure`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -134,16 +286,68 @@ CREATE TABLE `file` (
   `size` int(11) DEFAULT NULL,
   `type` tinyint(4) DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `path` varchar(255) DEFAULT NULL,
+  `path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ref` int(11) NOT NULL DEFAULT '0',
-  `md5` varchar(64) DEFAULT NULL,
+  `md5` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_file_user1_idx` (`created_by_pure`),
   KEY `created_time` (`created_time`),
   KEY `ref` (`ref`),
   KEY `md5` (`md5`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `finder_item`
+--
+
+DROP TABLE IF EXISTS `finder_item`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `finder_item` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(80) COLLATE utf8mb4_general_ci NOT NULL,
+  `type` tinyint(4) NOT NULL,
+  `parent_folder_id` bigint(20) DEFAULT NULL,
+  `created_by_pure` bigint(20) NOT NULL,
+  `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ref_id` bigint(20) DEFAULT NULL,
+  `organization_id` bigint(20) DEFAULT NULL,
+  `file_id` bigint(20) DEFAULT NULL,
+  `shortcut_type` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `parent_folder_id` (`parent_folder_id`),
+  KEY `created_by_pure` (`created_by_pure`),
+  KEY `ref_id` (`ref_id`),
+  KEY `file_id` (`file_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `im_favorite_message`
+--
+
+DROP TABLE IF EXISTS `im_favorite_message`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `im_favorite_message` (
+  `id` bigint(20) NOT NULL,
+  `organization_user_id` bigint(20) NOT NULL,
+  `created_time` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `content` mediumtext COLLATE utf8mb4_general_ci NOT NULL,
+  `from_name` varchar(65) COLLATE utf8mb4_general_ci NOT NULL,
+  `content_type` tinyint(4) NOT NULL,
+  `organization_id` bigint(20) NOT NULL,
+  `ref_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `organization_user_id` (`organization_user_id`),
+  KEY `organization_id` (`organization_id`),
+  KEY `ref_id` (`ref_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -161,11 +365,13 @@ CREATE TABLE `im_team_message` (
   `content` text COLLATE utf8mb4_general_ci,
   `content_type` tinyint(4) NOT NULL,
   `file_id` bigint(20) DEFAULT NULL,
+  `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `team_id` (`team_id`),
   KEY `from_user_id` (`from_organization_user_id`),
-  KEY `send_time` (`created_time`)
+  KEY `send_time` (`created_time`),
+  KEY `organization_id` (`organization_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -184,12 +390,15 @@ CREATE TABLE `im_unread_message` (
   `entity_type` tinyint(4) NOT NULL,
   `count` int(11) NOT NULL DEFAULT '1',
   `unique_id` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `at` tinyint(4) DEFAULT '0',
+  `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `unique_id_UNIQUE` (`unique_id`),
   KEY `organization_user_id` (`organization_user_id`),
   KEY `last_message_time` (`modified_time`),
-  KEY `entity_id` (`entity_id`)
+  KEY `entity_id` (`entity_id`),
+  KEY `organization_id` (`organization_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -208,11 +417,13 @@ CREATE TABLE `im_user_message` (
   `content` text COLLATE utf8mb4_general_ci,
   `content_type` tinyint(4) NOT NULL,
   `file_id` bigint(20) DEFAULT NULL,
+  `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `from_user_id` (`from_organization_user_id`),
   KEY `to_user_id` (`to_organization_user_id`),
-  KEY `send_time` (`created_time`)
+  KEY `send_time` (`created_time`),
+  KEY `organization_id` (`organization_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -225,9 +436,9 @@ DROP TABLE IF EXISTS `issue_type`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `issue_type` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(45) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
   `icon` bigint(20) DEFAULT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `issue_type_solution_id` bigint(20) NOT NULL,
@@ -236,7 +447,7 @@ CREATE TABLE `issue_type` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `issue_type_solution_id` (`issue_type_solution_id`),
   KEY `reserved` (`reserved`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -248,8 +459,8 @@ DROP TABLE IF EXISTS `issue_type_solution`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `issue_type_solution` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(45) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `reserved` tinyint(4) NOT NULL DEFAULT '0',
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -258,7 +469,28 @@ CREATE TABLE `issue_type_solution` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `system` (`reserved`),
   KEY `organization_id` (`organization_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `meeting_miss_call`
+--
+
+DROP TABLE IF EXISTS `meeting_miss_call`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `meeting_miss_call` (
+  `id` bigint(20) NOT NULL,
+  `from_organization_user_id` bigint(20) NOT NULL,
+  `to_organization_user_id` bigint(20) NOT NULL,
+  `created_time` timestamp(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `is_read` tinyint(4) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `from_organization_user_id` (`from_organization_user_id`),
+  KEY `to_organization_user_id` (`to_organization_user_id`),
+  KEY `is_read` (`is_read`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -278,12 +510,14 @@ CREATE TABLE `meeting_room` (
   `start_time` timestamp NULL DEFAULT NULL,
   `end_time` timestamp NULL DEFAULT NULL,
   `password` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `created_by` (`created_by`),
   KEY `type` (`type`),
   KEY `start_time` (`start_time`),
-  KEY `end_time` (`end_time`)
+  KEY `end_time` (`end_time`),
+  KEY `organization_id` (`organization_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -324,6 +558,34 @@ CREATE TABLE `member_tag_member` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `notification`
+--
+
+DROP TABLE IF EXISTS `notification`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `notification` (
+  `id` bigint(20) NOT NULL,
+  `type` tinyint(4) NOT NULL,
+  `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `ref_id` bigint(20) DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `operation_organization_user_id` bigint(20) DEFAULT NULL,
+  `is_read` tinyint(4) NOT NULL DEFAULT '0',
+  `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `organization_id` bigint(20) NOT NULL,
+  `extra` mediumtext COLLATE utf8mb4_general_ci,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `is_read` (`is_read`),
+  KEY `modified_time` (`modified_time`),
+  KEY `organization_id` (`organization_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `organization`
 --
 
@@ -357,7 +619,7 @@ CREATE TABLE `organization_user` (
   `organization_id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,
   `nickname` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `department` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `department` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `job` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -372,6 +634,27 @@ CREATE TABLE `organization_user` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `photo`
+--
+
+DROP TABLE IF EXISTS `photo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `photo` (
+  `id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `file_id` bigint(20) DEFAULT NULL,
+  `x` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `y` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `width` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `height` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `project`
 --
 
@@ -380,20 +663,19 @@ DROP TABLE IF EXISTS `project`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project` (
   `id` bigint(20) NOT NULL,
-  `keyword` varchar(45) NOT NULL,
-  `name` varchar(45) NOT NULL,
+  `keyword` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(65) COLLATE utf8mb4_general_ci NOT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `photo` bigint(20) DEFAULT NULL,
   `created_by` bigint(20) NOT NULL,
-  `description` varchar(256) DEFAULT NULL,
+  `description` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `keyword_UNIQUE` (`keyword`),
-  UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `created_by` (`created_by`),
-  KEY `organization_id` (`organization_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `organization_id` (`organization_id`),
+  KEY `keyword` (`keyword`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -410,39 +692,41 @@ CREATE TABLE `project_issue` (
   `created_by` bigint(20) DEFAULT NULL,
   `project_id` bigint(20) NOT NULL,
   `issue_type_id` bigint(20) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `priority` tinyint(4) DEFAULT NULL,
   `assigner_id` bigint(20) DEFAULT NULL,
   `reporter_id` bigint(20) DEFAULT NULL,
   `workflow_node_id` bigint(20) NOT NULL,
-  `unique_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `unique_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  UNIQUE KEY `unique_id_UNIQUE` (`unique_id`),
   KEY `project` (`project_id`),
   KEY `issue_type` (`issue_type_id`),
   KEY `assigner` (`assigner_id`),
   KEY `reporter` (`reporter_id`),
   KEY `workflow_node` (`workflow_node_id`),
   KEY `unique_id` (`unique_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=147 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `project_issue_description`
+-- Table structure for table `project_issue_approval`
 --
 
-DROP TABLE IF EXISTS `project_issue_description`;
+DROP TABLE IF EXISTS `project_issue_approval`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `project_issue_description` (
-  `id` bigint(20) unsigned NOT NULL,
+CREATE TABLE `project_issue_approval` (
+  `id` bigint(20) NOT NULL,
   `project_issue_id` bigint(20) NOT NULL,
-  `content` text,
+  `workflow_node_id` bigint(20) NOT NULL,
+  `type` tinyint(4) NOT NULL,
+  `approval_organization_user_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `project_issue_id` (`project_issue_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `project_issue_id_UNIQUE` (`project_issue_id`),
+  KEY `workflow_node_id` (`workflow_node_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -458,13 +742,37 @@ CREATE TABLE `project_issue_field_value` (
   `workflow_node_field_type_id` bigint(20) NOT NULL,
   `number_value` int(11) DEFAULT NULL,
   `field_config_ids` json DEFAULT NULL,
-  `string_value` text,
+  `string_value` text COLLATE utf8mb4_general_ci,
   `ref_values` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project_issue` (`project_issue_id`),
   KEY `workflow_node_field_type_id` (`workflow_node_field_type_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `project_issue_history`
+--
+
+DROP TABLE IF EXISTS `project_issue_history`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `project_issue_history` (
+  `id` bigint(20) NOT NULL,
+  `type` tinyint(4) NOT NULL,
+  `project_issue_id` bigint(20) NOT NULL,
+  `organization_user_id` bigint(20) NOT NULL,
+  `project_id` bigint(20) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `value` varchar(65) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `project_issue_id` (`project_issue_id`),
+  KEY `organization_user_id` (`organization_user_id`),
+  KEY `project_id` (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -482,7 +790,7 @@ CREATE TABLE `project_issue_parent` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `parent` (`parent_id`),
   KEY `child` (`child_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -499,7 +807,7 @@ CREATE TABLE `project_issue_process` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `project_issue_id_UNIQUE` (`project_issue_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -517,7 +825,7 @@ CREATE TABLE `project_issue_related` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project_issue_1` (`project_issue_1_id`),
   KEY `project_issue_2` (`project_issue_2_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -536,7 +844,7 @@ CREATE TABLE `project_issue_type_solution` (
   UNIQUE KEY `project_id_UNIQUE` (`project_id`),
   KEY `project` (`project_id`),
   KEY `issue_solution` (`issue_type_solution_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -548,13 +856,13 @@ DROP TABLE IF EXISTS `project_label`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project_label` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(45) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
   `project_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `name` (`name`),
   KEY `project_id` (`project_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -572,7 +880,7 @@ CREATE TABLE `project_label_issue` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project_label_id` (`project_label_id`),
   KEY `project_issue_id` (`project_issue_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -584,7 +892,7 @@ DROP TABLE IF EXISTS `project_module`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project_module` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `project_id` bigint(20) NOT NULL,
   `parent_module_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -592,7 +900,7 @@ CREATE TABLE `project_module` (
   KEY `name` (`name`),
   KEY `project_id` (`project_id`),
   KEY `parent_module_id` (`parent_module_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -611,7 +919,7 @@ CREATE TABLE `project_module_issue` (
   UNIQUE KEY `project_issue_id_UNIQUE` (`project_issue_id`),
   KEY `project_module_id` (`project_module_id`),
   KEY `project_issue_id` (`project_issue_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -623,10 +931,10 @@ DROP TABLE IF EXISTS `project_release`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project_release` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `start_time` varchar(64) DEFAULT NULL,
-  `release_time` varchar(64) DEFAULT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `start_time` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `release_time` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_by` bigint(20) NOT NULL,
@@ -635,7 +943,7 @@ CREATE TABLE `project_release` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project` (`project_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -653,7 +961,7 @@ CREATE TABLE `project_release_issue` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project_release` (`project_release_id`),
   KEY `project_issue` (`project_issue_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -665,10 +973,10 @@ DROP TABLE IF EXISTS `role`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `role` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(45) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `description` varchar(255) DEFAULT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `item_id` bigint(20) DEFAULT NULL,
   `organization_id` bigint(20) DEFAULT NULL,
   `type` tinyint(4) NOT NULL,
@@ -681,7 +989,7 @@ CREATE TABLE `role` (
   KEY `item_id` (`item_id`),
   KEY `reserved` (`reserved`),
   KEY `value` (`value`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -705,6 +1013,27 @@ CREATE TABLE `role_member` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `sticky_note`
+--
+
+DROP TABLE IF EXISTS `sticky_note`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sticky_note` (
+  `id` bigint(20) NOT NULL,
+  `content_id` bigint(20) DEFAULT NULL,
+  `user_id` bigint(20) DEFAULT NULL,
+  `x` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `y` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `width` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `height` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `content` (`content_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `team`
 --
 
@@ -713,19 +1042,19 @@ DROP TABLE IF EXISTS `team`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `team` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) NOT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_by` bigint(20) DEFAULT NULL,
   `photo` bigint(20) DEFAULT NULL,
   `organization_id` bigint(20) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `name` (`name`),
   KEY `organization_id` (`organization_id`),
   KEY `created_by` (`created_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -743,7 +1072,7 @@ CREATE TABLE `team_user` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_user_has_group_user1_idx` (`organization_user_id`),
   KEY `team_id` (`team_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -755,17 +1084,35 @@ DROP TABLE IF EXISTS `user`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
   `id` bigint(20) NOT NULL,
-  `username` varchar(45) DEFAULT NULL,
+  `username` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `password` varchar(256) DEFAULT NULL,
-  `sign` varchar(255) DEFAULT NULL,
+  `password` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sign` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `active` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `photo` bigint(20) DEFAULT NULL,
   `role` tinyint(4) NOT NULL DEFAULT '0',
+  `count` int(11) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username_UNIQUE` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `user_setting`
+--
+
+DROP TABLE IF EXISTS `user_setting`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_setting` (
+  `id` bigint(20) NOT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `wallpaper` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `user_id_UNIQUE` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -776,9 +1123,9 @@ DROP TABLE IF EXISTS `version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `version` (
-  `version` varchar(45) NOT NULL,
+  `version` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -829,27 +1176,6 @@ CREATE TABLE `wiki_item` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `wiki_item_content`
---
-
-DROP TABLE IF EXISTS `wiki_item_content`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `wiki_item_content` (
-  `id` bigint(20) NOT NULL,
-  `wiki_item_id` bigint(20) NOT NULL,
-  `content` text COLLATE utf8mb4_general_ci,
-  `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `modified_by` bigint(20) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  UNIQUE KEY `wiki_item_id_UNIQUE` (`wiki_item_id`),
-  KEY `wiki_item_id` (`wiki_item_id`),
-  KEY `modified_by` (`modified_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `workflow_action`
 --
 
@@ -858,17 +1184,38 @@ DROP TABLE IF EXISTS `workflow_action`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `workflow_action` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `source_node_id` bigint(20) NOT NULL,
   `dest_node_id` bigint(20) NOT NULL,
   `issue_type_id` bigint(20) NOT NULL,
+  `source_anchor_point` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `end_anchor_point` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `source_node` (`source_node_id`),
   KEY `dest_node` (`dest_node_id`),
   KEY `issue_type_id` (`issue_type_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `workflow_approval`
+--
+
+DROP TABLE IF EXISTS `workflow_approval`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `workflow_approval` (
+  `id` bigint(20) NOT NULL,
+  `workflow_node_id` bigint(20) NOT NULL,
+  `type` tinyint(4) NOT NULL,
+  `value` json DEFAULT NULL,
+  `extra` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `workflow_node_id_UNIQUE` (`workflow_node_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -880,17 +1227,20 @@ DROP TABLE IF EXISTS `workflow_node`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `workflow_node` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0',
   `issue_type_id` bigint(20) NOT NULL,
   `x` int(11) NOT NULL DEFAULT '0',
   `y` int(11) NOT NULL DEFAULT '0',
+  `is_approval` tinyint(4) NOT NULL DEFAULT '0',
+  `is_all_coming` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `status` (`status`),
-  KEY `issue_type_id` (`issue_type_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `issue_type_id` (`issue_type_id`),
+  KEY `is_all_coming` (`is_all_coming`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -905,9 +1255,9 @@ CREATE TABLE `workflow_node_field_type` (
   `workflow_node_id` bigint(20) NOT NULL,
   `field_type_id` tinyint(4) NOT NULL,
   `optional` tinyint(4) NOT NULL DEFAULT '0',
-  `default_string_value` varchar(255) DEFAULT NULL,
-  `name` varchar(45) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `default_string_value` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `label_type` tinyint(4) DEFAULT NULL,
   `weight` tinyint(4) NOT NULL DEFAULT '50',
   `default_number_value` tinyint(4) DEFAULT '0',
@@ -915,7 +1265,7 @@ CREATE TABLE `workflow_node_field_type` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `workflow_node` (`workflow_node_id`),
   KEY `weight` (`weight`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -928,14 +1278,14 @@ DROP TABLE IF EXISTS `workflow_node_field_type_config`;
 CREATE TABLE `workflow_node_field_type_config` (
   `id` bigint(20) unsigned NOT NULL,
   `workflow_node_field_type_id` bigint(20) NOT NULL,
-  `value` varchar(255) NOT NULL,
+  `value` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `selected` tinyint(4) DEFAULT '0',
   `weight` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `field` (`workflow_node_field_type_id`),
   KEY `weight` (`weight`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -947,4 +1297,4 @@ CREATE TABLE `workflow_node_field_type_config` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-05-31 10:15:26
+-- Dump completed on 2023-09-17 22:05:18

@@ -69,7 +69,7 @@ import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_u
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {getCurrentNavigator, getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import {Message} from "@arco-design/web-vue";
-import {apiMeeting, DCSType} from "../../../common/request/request";
+import {apiMeeting} from "../../../common/request/request";
 import {OrganizationUserItem} from "./type";
 import MeetingParticipant from "./meetingParticipant.vue";
 import MeetingOperation from "./meetingOperation.vue";
@@ -78,6 +78,7 @@ import {Dialog} from "../../../common/component/dialog/dialog";
 import MeetingPreview from "./meetingPreview.vue";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
 	meetingId:string,

@@ -13,7 +13,7 @@
 								</div>
 							</div>
 							<div style="flex: 1 1 auto;display: flex;align-items: center;">
-								{{ item.id === myOrganizationUserId ? "Me" : item.created_by.nickname }}&nbsp;
+								{{ item.id === myOrganizationUserId ? $t("util.me") : item.created_by.nickname }}&nbsp;
 								<span style="color: gray;font-size: smaller">{{ moment(item.created_time).format("HH:mm") }}</span>&nbsp;
 							</div>
 						</div>
@@ -51,7 +51,7 @@
 import {MeetingClient} from "../../../common/component/meeting/client";
 import RichEditor from "../../../common/component/richEditor/richEditor.vue";
 import {getCurrentInstance, onBeforeMount, ref} from "vue";
-import {apiFile, DCSType} from "../../../common/request/request";
+import {apiFile} from "../../../common/request/request";
 import {
 	ECommon_Content_Line_Config_Type,
 	ICommon_Content_Line,
@@ -66,6 +66,7 @@ import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {calculateShortName} from "../../../common/util/helper";
 import moment from "moment";
 import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
+import {DCSType} from "../../../../../../common/types";
 
 const emit=defineEmits<{
 	newMessage:[]

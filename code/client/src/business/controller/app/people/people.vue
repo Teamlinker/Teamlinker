@@ -14,11 +14,12 @@
 import {onBeforeMount, reactive, ref} from "vue";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../common/routes/response";
 import CardItem from "../../../common/component/cardItem.vue";
-import {apiOrganization, DCSType} from "../../../common/request/request";
+import {apiOrganization} from "../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {getCurrentNavigator} from "../../../../teamOS/common/component/navigator/navigator";
 import {ICommon_Model_Organization_User} from "../../../../../../common/model/organization_user";
 import {SessionStorage} from "../../../common/storage/session";
+import {DCSType} from "../../../../../../common/types";
 
 let userList=ref<DCSType<ICommon_Route_Res_Organization_User_Item[]>>([])
 const keyword=ref("")

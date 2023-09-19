@@ -11,14 +11,15 @@
 <script setup lang="ts">
 
 import {reactive, ref, toRef} from "vue";
-import {apiIssue, DCSType} from "../../../../common/request/request";
+import {apiIssue} from "../../../../common/request/request";
 import {
-  ICommon_Route_Req_ProjectIssue_Field,
-  ICommon_Route_Res_Workflow_Node_Field
+	ICommon_Route_Req_ProjectIssue_Field,
+	ICommon_Route_Res_Workflow_Node_Field
 } from "../../../../../../../common/routes/response";
 import FieldInput from "../../../../common/component/field/fieldInput.vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   projectId:string,

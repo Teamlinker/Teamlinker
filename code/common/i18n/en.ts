@@ -341,7 +341,8 @@ export default {
         rejected:"Rejected",
         issueTypeList:"IssueType List",
         waitForApproval:"Wait For Approval",
-        addItem:"Add Item"
+        addItem:"Add Item",
+        me:"Me"
     },
     "common":{
         "component":{

@@ -13,13 +13,14 @@
 </template>
 
 <script setup lang="ts">
-import {apiRelease, DCSType} from "../../../../common/request/request";
+import {apiRelease} from "../../../../common/request/request";
 import {ICommon_Route_Res_Release_Item} from "../../../../../../../common/routes/response";
 import {reactive, ref} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   type:"add"|"edit",

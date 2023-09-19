@@ -73,7 +73,7 @@
 import {getCurrentInstance, inject, markRaw, reactive, ref} from "vue";
 import {injectProjectInfo} from "../../../../common/util/symbol";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
-import {apiRelease, DCSType} from "../../../../common/request/request";
+import {apiRelease} from "../../../../common/request/request";
 import {ICommon_Route_Res_Release_Item} from "../../../../../../../common/routes/response";
 import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 import {Dialog} from "../../../../common/component/dialog/dialog";
@@ -90,6 +90,7 @@ import ProjectReleaseProfile from "./projectReleaseProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {useI18n} from "vue-i18n";
 import {SessionStorage} from "@/business/common/storage/session";
+import {DCSType} from "../../../../../../../common/types";
 
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id

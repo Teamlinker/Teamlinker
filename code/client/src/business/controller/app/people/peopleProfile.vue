@@ -113,13 +113,13 @@
 
 <script setup lang="ts">
 import {computed, onBeforeMount, ref} from "vue";
-import {apiMeeting, apiOrganization, DCSType} from "../../../common/request/request";
+import {apiMeeting, apiOrganization} from "../../../common/request/request";
 import {ICommon_Route_Res_Organization_User_Profile} from "../../../../../../common/routes/response";
 import {getCurrentNavigator} from "../../../../teamOS/common/component/navigator/navigator";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {SessionStorage} from "../../../common/storage/session";
 import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
-import {ECommon_User_Online_Status} from "../../../../../../common/types";
+import {DCSType, ECommon_User_Online_Status} from "../../../../../../common/types";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {ICommon_Model_Member_Tag} from "../../../../../../common/model/member_tag";
 

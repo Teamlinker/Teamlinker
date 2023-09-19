@@ -13,7 +13,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
-import {apiBoard, apiIssue, apiIssueType, DCSType} from "../../../../common/request/request";
+import {apiBoard, apiIssue, apiIssueType} from "../../../../common/request/request";
 import {ICommon_Model_Issue_Type_Solution} from "../../../../../../../common/model/issue_type_solution";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
@@ -21,6 +21,7 @@ import {Message} from "@arco-design/web-vue";
 import ProjectSettingIssueSolutionConvert
 	from "@/business/controller/app/project/setting/projectSettingIssueSolutionConvert.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   projectId:string

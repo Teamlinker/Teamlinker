@@ -49,12 +49,13 @@
 <script setup lang="ts">
 import FinderFolderTree from "./finderFolderTree.vue";
 import {onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
-import {apiFinder, DCSType} from "../../../common/request/request";
+import {apiFinder} from "../../../common/request/request";
 import FinderContent from "./finderContent.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import FinderItemInfo from "./finderItemInfo.vue";
 import {ECommon_Model_Finder_Item_Type, ICommon_Model_Finder_Item} from "../../../../../../common/model/finder_item";
 import FinderSearchContent from "./finderSearchContent.vue";
+import {DCSType} from "../../../../../../common/types";
 
 enum EClient_Finder_Mode {
 	NORMAL,

@@ -1,4 +1,3 @@
-import * as fs from "fs-extra";
 import * as Importer from "@pivvenit/mysql-import";
 import * as path from "path";
 import {Table_Project} from '../../../common/model/project';
@@ -39,7 +38,6 @@ import {Table_Content} from "../../../common/model/content";
 import {Table_File} from "../../../common/model/file";
 import {Table_Member_Tag} from "../../../common/model/member_tag";
 import {Table_Meeting_Room} from "../../../common/model/meeting_room";
-import {ECommon_Application_Mode} from "../../../common/types";
 import {Table_Notification} from "../../../common/model/notification";
 import {Table_Wiki} from "../../../common/model/wiki";
 import {Table_Wiki_Item} from "../../../common/model/wiki_item";
@@ -66,6 +64,8 @@ import {Table_Project_Issue_History} from "../../../common/model/project_issue_h
 import {Table_Workflow_Approval} from "../../../common/model/workflow_approval";
 import {Table_Sticky_Note} from "../../../common/model/sticky_note";
 import {Table_Photo} from "../../../common/model/photo";
+import {patchList} from "../../patch/patch";
+
 
 export async function handleImageFields(data:object,organizationId?:string){
     let arrImage=<{
@@ -249,40 +249,14 @@ export async function checkIfNeedInit() {
 }
 
 async function checkIfNeedPatch() {
-    if(Application.mode==ECommon_Application_Mode.ONLINE) {
-        return;
-    }
     let curVersion = getConfigInstance().version;
-    var stat = fs.pathExistsSync(Application.debug?path.join(__dirname, "../../patch/dist"):path.join(__dirname, "../../../../../patch/dist"));
-    if (!stat) {
-        return;
-    }
-    let files = fs.readdirSync(Application.debug?path.join(__dirname, "../../patch/dist"):path.join(__dirname, "../../../../../patch/dist"));
-    files = files.filter(function (obj) {
-        if (obj != "." && obj != ".." && obj.endsWith(".js")) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }).sort(function (obj1, obj2) {
-        let ret= CommonUtil.versionDiff(obj1, obj2);
-        if(ret) {
-            return 1
-        } else {
-            return -1
-        }
-    })
-    if(files.length==0) {
-        return;
-    }
     let version = "0.0.0";
     let mysql=getMysqlInstance()
     let ret=await mysql.executeOne(generateQuerySql(versionModel,[]))
     version=ret.version
     let index = -1;
-    for (let i = 0; i < files.length; i++) {
-        let bMax = CommonUtil.versionDiff(files[i], version);
+    for (let i = 0; i < patchList.length; i++) {
+        let bMax = CommonUtil.versionDiff(patchList[i].version, version);
         if (bMax) {
             index = i;
             break;
@@ -290,8 +264,8 @@ async function checkIfNeedPatch() {
     }
     if (index > -1) {
         console.log("patch start");
-        for (let i = index; i < files.length; i++) {
-            await (require(path.join(Application.debug?path.join(__dirname, "../../patch/dist"):path.join(__dirname, "../../../../../patch/dist") , files[i]))());
+        for (let i = index; i < patchList.length; i++) {
+            await patchList[i].func();
         }
         console.log("patch end");
     }

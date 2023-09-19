@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, onBeforeUnmount, onMounted, reactive, ref} from "vue";
-import {apiMeeting, DCSType} from "../../../common/request/request";
+import {apiMeeting} from "../../../common/request/request";
 import {ECommon_Model_Meeting_Room_Type, ICommon_Model_Meeting_Room} from "../../../../../../common/model/meeting_room";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {
@@ -77,7 +77,7 @@ import {Message} from "@arco-design/web-vue";
 import MeetingJoinInput from "./meetingJoinInput.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {useDesktopStore} from "../../desktop/store/desktop";
-import {ECommon_User_Online_Status} from "../../../../../../common/types";
+import {DCSType, ECommon_User_Online_Status} from "../../../../../../common/types";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";

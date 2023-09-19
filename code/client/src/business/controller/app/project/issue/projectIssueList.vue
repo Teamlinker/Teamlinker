@@ -86,7 +86,7 @@
 import {ECommon_Model_Project_Issue_Priority} from "../../../../../../../common/model/project_issue";
 import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/model/workflow_node";
 import {getCurrentInstance, inject, markRaw, onBeforeMount, reactive, ref} from "vue";
-import {apiIssue, apiOrganization, apiProject, DCSType} from "../../../../common/request/request";
+import {apiIssue, apiOrganization, apiProject} from "../../../../common/request/request";
 import {
 	ICommon_Route_Res_Organization_User_Item,
 	ICommon_Route_Res_Project_CreateModule_Data,
@@ -109,6 +109,7 @@ import ProjectIssueProfile from "./projectIssueProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {SessionStorage} from "../../../../common/storage/session";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id

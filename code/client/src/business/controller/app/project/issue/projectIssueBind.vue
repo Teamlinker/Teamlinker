@@ -16,9 +16,10 @@
 <script setup lang="ts">
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {reactive, ref} from "vue";
-import {apiIssue, DCSType} from "../../../../common/request/request";
+import {apiIssue} from "../../../../common/request/request";
 import {ICommon_Route_Res_Project_Issue_filter_Item} from "../../../../../../../common/routes/response";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   projectId:string,

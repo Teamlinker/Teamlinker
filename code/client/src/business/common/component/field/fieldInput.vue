@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import {apiBoard, apiIssue, apiOrganization, apiRelease, DCSType} from "../../request/request";
+import {apiBoard, apiIssue, apiOrganization, apiRelease} from "../../request/request";
 import {
 	ICommon_Route_Req_ProjectIssue_Field,
 	ICommon_Route_Res_Project_Issue_filter_Item,
@@ -38,6 +38,7 @@ import {
 	ICommon_Model_Workflow_Node_Field_Type_Config
 } from "../../../../../../common/model/workflow_node_field_type_config";
 import {ICommon_Model_Board_Sprint} from "../../../../../../common/model/board_sprint";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
   item:DCSType<ICommon_Route_Res_Workflow_Node_Field & {

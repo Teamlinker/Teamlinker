@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import {ECommon_Model_Project_Issue_Priority} from "../../../../../../common/model/project_issue";
-import {DCSType} from "@/business/common/request/request";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
   priority:ECommon_Model_Project_Issue_Priority|DCSType<ECommon_Model_Project_Issue_Priority>,

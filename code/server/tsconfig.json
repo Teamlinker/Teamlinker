@@ -15,6 +15,9 @@
       { "transform": "../common/transform/transformer.js" }
     ]
   },
+  "files": [
+    "./patch/1.2.0.ts"
+  ],
   "include": [
     "./**/*"
   ],

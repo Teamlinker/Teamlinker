@@ -82,7 +82,7 @@
 <script setup lang="ts">
 import {ECommon_Meeting_Room_Permission, ICommon_Model_Meeting_Room} from "../../../../../../common/model/meeting_room";
 import {OrganizationUserItem} from "./type";
-import {apiOrganization, DCSType} from "../../../common/request/request";
+import {apiOrganization} from "../../../common/request/request";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {Message} from "@arco-design/web-vue";
 import {getCurrentNavigator, getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
@@ -93,6 +93,7 @@ import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {ICommon_Route_Res_Organization_FilterUserAndTeam} from "../../../../../../common/routes/response";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
 	me:OrganizationUserItem,

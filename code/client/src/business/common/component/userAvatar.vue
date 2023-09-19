@@ -64,11 +64,11 @@
 <script setup lang="ts">
 import {computed, onBeforeMount, ref, watch} from "vue";
 import {ICommon_Model_Organization_User} from "../../../../../common/model/organization_user";
-import {apiOrganization, DCSType} from "../request/request";
+import {apiOrganization} from "../request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../event/event";
 import {SessionStorage} from "../storage/session";
 import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
-import {ECommon_User_Online_Status} from "../../../../../common/types";
+import {DCSType, ECommon_User_Online_Status} from "../../../../../common/types";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
 

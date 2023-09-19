@@ -11,8 +11,7 @@ import {
     apiMeeting,
     apiProject,
     apiRelease,
-    apiWiki,
-    DCSType
+    apiWiki
 } from "../../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {useDesktopStore} from "../../desktop/store/desktop";
@@ -28,6 +27,7 @@ import {DropParam} from "../../../../teamOS/common/directive/drop";
 import {SessionStorage} from "../../../common/storage/session";
 import {Message} from "@arco-design/web-vue";
 import i18n from "@/business/common/i18n/i18n";
+import {DCSType} from "../../../../../../common/types";
 
 export class FinderHandle {
     private itemList=ref<Icon[]>([])

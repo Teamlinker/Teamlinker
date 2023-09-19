@@ -20,7 +20,7 @@ import {EClient_Field_Basic_Type} from "./fieldBasicType";
 import {ICommon_Model_Project_Label} from "../../../../../../common/model/project_label";
 import {ICommon_Model_Project_Module} from "../../../../../../common/model/project_module";
 import {inject, ref, watch} from "vue";
-import {DCSType} from "../../request/request";
+
 import {ECommon_Model_Project_Issue_Priority} from "../../../../../../common/model/project_issue";
 import {injectProjectInfo} from "../../util/symbol";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
@@ -34,6 +34,7 @@ import FieldEditBasicLabel from "./basic/fieldEditBasicLabel.vue";
 import FieldEditBasicModule from "./basic/fieldEditBasicModule.vue";
 import FieldEditBasicFixVersion from "./basic/fieldEditBasicFixVersion.vue";
 import FieldEditBasicSprint from "@/business/common/component/field/basic/fieldEditBasicSprint.vue";
+import {DCSType} from "../../../../../../common/types";
 
 type User={
   id:string,

@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
-import {apiTeam, DCSType} from "../../../common/request/request";
+import {apiTeam} from "../../../common/request/request";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../common/routes/response";
 import {ICommon_Model_Team} from "../../../../../../common/model/team";
 import {checkPermission, Permission_Base, Permission_Types} from "../../../../../../common/permission/permission";
@@ -122,6 +122,7 @@ import EditTeamMemberRole from "../setting/user&team/editTeamMemberRole.vue";
 import EditTeamRole from "../setting/role/team/editTeamRole.vue";
 import {ECommon_IM_Message_EntityType} from "../../../../../../common/model/im_unread_message";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
   teamId:string

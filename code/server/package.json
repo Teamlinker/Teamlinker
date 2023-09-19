@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "rm -rf ./dist && ttsc ./gateway/index.ts && mkdir -p ./dist/client && cp -r ../client/dist/* ./dist/client && cp ./teamlinker.config.json ./dist/server && cp ./init.sql ./dist/server && cp ./package.json ./dist/server && zip -q -r ./dist/teamlinker.zip ./dist && cp ./dist/teamlinker.zip ../docker"
+    "compile": "rm -rf ./dist && ttsc ./gateway/index.ts && mkdir -p ./dist/client && cp -r ../client/dist/* ./dist/client && cp ./teamlinker.config.json ./dist/server && cp ./init.sql ./dist/server && cp ./package.json ./dist/server && cp ./patch/*.sql ./dist/server/patch>/dev/null || : && zip -q -r ./dist/teamlinker.zip ./dist && cp ./dist/teamlinker.zip ../docker"
   },
   "pkg": {
     "scripts": [],

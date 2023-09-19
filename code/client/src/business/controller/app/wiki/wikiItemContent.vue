@@ -43,12 +43,12 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, onBeforeMount, ref, watch} from "vue";
-import {apiFile, apiWiki, DCSType} from "../../../common/request/request";
+import {apiFile, apiWiki} from "../../../common/request/request";
 import {
-  ECommon_Content_Line_Config_Type,
-  ICommon_Content_Line,
-  ICommon_Content_Line_Config,
-  ICommon_Model_Content
+	ECommon_Content_Line_Config_Type,
+	ICommon_Content_Line,
+	ICommon_Content_Line_Config,
+	ICommon_Model_Content
 } from "../../../../../../common/model/content";
 import UserAvatar from "../../../common/component/userAvatar.vue";
 import RichEditor from "../../../common/component/richEditor/richEditor.vue";
@@ -59,6 +59,7 @@ import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator
 import {DropParam, vDrop} from "../../../../teamOS/common/directive/drop";
 import moment from "moment";
 import {RichEditorEventHandle} from "../../../common/component/richEditorEventHandle";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
   wikiItemId:string,

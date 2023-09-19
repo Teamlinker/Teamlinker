@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../../common/model/organization.js";
 import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
-import {apiWiki, DCSType} from "../../../../common/request/request";
+import {apiWiki} from "../../../../common/request/request";
 import {ICommon_Route_Res_Role_Member_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
@@ -44,6 +44,7 @@ import EditWikiAccessRole from "./editWikiAccessRole.vue";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 import {useI18n} from "vue-i18n";
 import {ICommon_Model_Wiki} from "../../../../../../../common/model/wiki";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   wikiId:string

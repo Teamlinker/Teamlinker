@@ -46,11 +46,12 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import {apiIssue, DCSType} from "../../../../common/request/request";
+import {apiIssue} from "../../../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {ICommon_Route_Res_ProjectIssue_BasicInfo} from "../../../../../../../common/routes/response";
 import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/model/workflow_node";
 import FieldPriority from "../../../../common/component/field/fieldPriority.vue";
+import {DCSType} from "../../../../../../../common/types";
 
 
 const loading=ref(true)

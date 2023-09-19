@@ -19,13 +19,14 @@
 </template>
 
 <script setup lang="ts">
-import {apiMeeting, DCSType} from "../../../common/request/request";
+import {apiMeeting} from "../../../common/request/request";
 import {ICommon_Model_Meeting_Room} from "../../../../../../common/model/meeting_room";
 import {reactive, ref} from "vue";
 import moment from "moment";
 import {onDialogOk} from "../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../common/util/helper";
 import {SessionStorage} from "../../../common/storage/session";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
     type:"add"|"edit",

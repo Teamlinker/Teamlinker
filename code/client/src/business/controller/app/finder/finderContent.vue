@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
-import {apiFile, DCSType} from "../../../common/request/request";
+import {apiFile} from "../../../common/request/request";
 import {ECommon_Model_Finder_Item_Type, ICommon_Model_Finder_Item} from "../../../../../../common/model/finder_item";
 import {vDrop} from "../../../../teamOS/common/directive/drop";
 import {vSelect} from "../../../../teamOS/common/directive/select";
@@ -32,6 +32,7 @@ import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator
 import {ICommon_Route_Res_Finder_Info} from "../../../../../../common/routes/response";
 import {IClient_Drag_Shortcut_Value} from "../../../../teamOS/common/directive/drag";
 import {FinderHandle} from "./finderHandle";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
 	folderId:string

@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import {ICommon_Model_Project_Issue} from "../../../../../../../common/model/project_issue";
-import {apiRelease, DCSType} from "../../../../common/request/request";
+import {apiRelease} from "../../../../common/request/request";
 import FieldPriority from "../../../../common/component/field/fieldPriority.vue";
 import UserAvatar from "../../../../common/component/userAvatar.vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
@@ -32,6 +32,7 @@ import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/
 import {Message} from "@arco-design/web-vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   projectReleaseId:string,

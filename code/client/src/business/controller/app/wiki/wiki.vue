@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
-import {apiWiki, DCSType} from "../../../common/request/request";
+import {apiWiki} from "../../../common/request/request";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {useDesktopStore} from "../../desktop/store/desktop";
 import {Dialog} from "../../../common/component/dialog/dialog";
@@ -58,6 +58,7 @@ import EditWikiProfile from "../setting/wiki/editWikiProfile.vue";
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const recentList=ref<DCSType<ICommon_Model_Wiki>[]>([])
 const list=ref<DCSType<ICommon_Model_Wiki>[]>([])

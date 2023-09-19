@@ -49,7 +49,7 @@
 import {ECommon_Model_Project_Issue_Priority} from "../../../../../../../common/model/project_issue";
 import {onBeforeMount, reactive, ref, toRef} from "vue";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
-import {apiIssue, apiOrganization, apiProject, DCSType} from "../../../../common/request/request";
+import {apiIssue, apiOrganization, apiProject} from "../../../../common/request/request";
 import {
 	ICommon_Route_Req_ProjectIssue_Field,
 	ICommon_Route_Res_Organization_User_Item,
@@ -59,6 +59,7 @@ import FieldInput from "../../../../common/component/field/fieldInput.vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
 import {SessionStorage} from "../../../../common/storage/session";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   projectId:string

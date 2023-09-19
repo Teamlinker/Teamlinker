@@ -12,9 +12,11 @@
 <script setup lang="ts">
 import {reactive, ref} from "vue";
 import {ICommon_Model_Project} from "../../../../../../../../common/model/project";
-import {apiProject, DCSType} from "../../../../../common/request/request";
+import {apiProject} from "../../../../../common/request/request";
 import {getCurrentNavigator} from "../../../../../../teamOS/common/component/navigator/navigator";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../../common/types";
+
 const {t}=useI18n()
 const columns=[
   {

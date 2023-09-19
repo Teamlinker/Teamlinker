@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, ref} from "vue";
-import {apiWiki, DCSType} from "../../../common/request/request";
+import {apiWiki} from "../../../common/request/request";
 import {ICommon_Route_Res_Wiki_Info, ICommon_Route_Res_Wiki_Info_Item} from "../../../../../../common/routes/response";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {Dialog} from "../../../common/component/dialog/dialog";
@@ -74,6 +74,7 @@ import WikiItemContent from "./wikiItemContent.vue";
 import WikiSetting from "./setting/wikiSetting.vue";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
   wikiId:string

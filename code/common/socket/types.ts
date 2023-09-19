@@ -1,11 +1,10 @@
 import {ECommon_IM_Message_EntityType, ICommon_Model_IM_UnRead_Message} from "../model/im_unread_message";
 import {ECommon_IM_Message_ContentType, ICommon_Model_IM_User_Message} from "../model/im_user_message";
 import {ICommon_Model_IM_Team_Message} from "../model/im_team_message";
-import {ECommon_User_Online_Status} from "../types";
+import {DCSType, ECommon_User_Online_Status} from "../types";
 import {ECommon_Meeting_Room_Permission} from "../model/meeting_room";
 import {ICommon_Content_Line, ICommon_Model_Content} from "../model/content";
 import {ICommon_Model_IM_Favorite_Message} from "../model/im_favorite_message";
-import {DCSType} from "../../client/src/business/common/request/request";
 import {ECommon_Model_Organization_Member_Type} from "../model/organization";
 
 export enum ECommon_Socket_Type {
@@ -93,7 +92,7 @@ export interface ICommon_Socket_ClientToServerEvents {
         id:string,
         type:ECommon_Model_Organization_Member_Type
     }[])=>void
-    meeting_message_list:(lastMessageId:string,callback:(list:DCSType<ICommon_Model_Content[]>)=>void)=>void
+    meeting_message_list:(lastMessageId:string,callback:(list:DCSType<ICommon_Model_Content>[])=>void)=>void
     meeting_reject:(fromOrganizationUserId:string,roomId:string)=>void,
     notification_heartbeat:(token:string,callback:(success:boolean)=>void)=>void
 }

@@ -20,7 +20,7 @@
 											</div>
 										</div>
 										<div style="flex: 1 1 auto;display: flex;align-items: center;">
-											{{ key === myOrganizationUserId ? "Me" : userInfoList.find(item=>item.id===key)?.name }}&nbsp;
+											{{ key === myOrganizationUserId ? $t("util.me") : userInfoList.find(item=>item.id===key)?.name }}&nbsp;
 											+{{value.length}}
 										</div>
 									</div>

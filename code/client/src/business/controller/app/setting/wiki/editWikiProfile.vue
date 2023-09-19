@@ -17,10 +17,11 @@
 import Upload from "../../../../common/component/upload.vue";
 import {getCurrentInstance, reactive, ref} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
-import {apiWiki, DCSType} from "../../../../common/request/request";
+import {apiWiki} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {ICommon_Model_Wiki} from "../../../../../../../common/model/wiki";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   type:"edit"|"add",

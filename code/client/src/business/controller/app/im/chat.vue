@@ -64,7 +64,7 @@
 									</div>
 								</div>
 								<div style="flex: 1 1 auto;display: flex;align-items: center;">
-									{{ item.id === organizationUserId ? "Me" : item.name }}&nbsp;
+									{{ item.id === organizationUserId ? $t("util.me") : item.name }}&nbsp;
 									<span style="color: gray;font-size: smaller">{{ moment(item.date).format("HH:mm") }}</span>&nbsp;
 									<a-button size="mini" type="text" style="display: none"  name="star" @click="onFavorite(item)">
 										<template #icon>
@@ -204,6 +204,10 @@ watch(() => props.data, () => {
 		nextTick(()=>{
 			contentRef.value.scrollTop = contentRef.value.scrollHeight
 		})
+	} else if(contentRef.value && Math.abs(contentRef.value.offsetHeight + contentRef.value.scrollTop - contentRef.value.scrollHeight)<20) {
+		nextTick(()=>{
+			contentRef.value.scrollTop = contentRef.value.scrollHeight
+		})
 	}
 }, {
 	deep: true,
@@ -224,9 +228,9 @@ watch(() => props.info, () => {
 	immediate:true
 })
 const onWheel = (event: WheelEvent) => {
-	isWheel = true;
 	let ele = event.currentTarget as HTMLDivElement
 	if (event.deltaY < 0 && ele.scrollTop <= 0) {
+		isWheel = true;
 		topElement=contentRef.value.children[0] as HTMLElement
 		emit("updateMore", messageList.value[0], props.type, props.info)
 	}

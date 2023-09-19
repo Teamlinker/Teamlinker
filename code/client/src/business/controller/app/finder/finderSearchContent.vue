@@ -20,7 +20,6 @@ import {ECommon_Model_Finder_Item_Type, ICommon_Model_Finder_Item} from "../../.
 import {ICommon_Route_Res_Finder_Info} from "../../../../../../common/routes/response";
 import {IClient_Drag_Shortcut_Value} from "../../../../teamOS/common/directive/drag";
 import IconItem from "../../../../teamOS/icon/iconItem.vue";
-import {DCSType} from "../../../common/request/request";
 import {getCurrentInstance, onBeforeMount, onBeforeUnmount, watch} from "vue";
 import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import {FinderHandle} from "./finderHandle";
@@ -29,6 +28,7 @@ import {vMenu} from "../../../../teamOS/common/directive/menu";
 import {vSelect} from "../../../../teamOS/common/directive/select";
 import {vSelectable} from "../../../../teamOS/common/directive/selectable";
 import {vDrop} from "../../../../teamOS/common/directive/drop";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
 	folderId?:string,

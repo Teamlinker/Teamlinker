@@ -26,13 +26,14 @@
 import {ICommon_Route_Res_Role_Member_Item} from "../../../../../../../common/routes/response";
 import {onBeforeMount, reactive, ref} from "vue";
 import {ICommon_Model_Role} from "../../../../../../../common/model/role";
-import {apiOrganization, apiTeam, apiWiki, DCSType} from "../../../../common/request/request";
+import {apiOrganization, apiTeam, apiWiki} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {Message} from "@arco-design/web-vue";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../../common/model/organization";
 import {getMemberIdFromRoleMember, getNameFromRoleMember} from "../../../../common/util/helper";
 import {SessionStorage} from "../../../../common/storage/session";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
   type:"edit"|"add"

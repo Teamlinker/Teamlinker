@@ -40,10 +40,11 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import {apiRelease, DCSType} from "../../../../common/request/request";
+import {apiRelease} from "../../../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {ICommon_Route_Res_Release_Info} from "../../../../../../../common/routes/response";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
+import {DCSType} from "../../../../../../../common/types";
 
 
 const loading=ref(true)

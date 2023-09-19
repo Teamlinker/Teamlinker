@@ -339,7 +339,8 @@ export default {
         rejected:"已拒绝",
         issueTypeList:"事务类型列表",
         waitForApproval:"等待审批",
-        addItem:"添加项"
+        addItem:"添加项",
+        me:"我"
     },
     "common":{
         "component":{

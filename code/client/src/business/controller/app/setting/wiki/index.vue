@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
-import {apiWiki, DCSType} from "../../../../common/request/request";
+import {apiWiki} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getCurrentNavigator} from "../../../../../teamOS/common/component/navigator/navigator";
@@ -40,6 +40,7 @@ import EditWikiProfile from "./editWikiProfile.vue";
 import EditWikiAccess from "./editWikiAccess.vue";
 import {ICommon_Model_Wiki} from "../../../../../../../common/model/wiki";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const {t}=useI18n()
 const columns=[
