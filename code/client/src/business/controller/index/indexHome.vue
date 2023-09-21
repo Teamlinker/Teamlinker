@@ -52,7 +52,7 @@
 				<span style="color: #434A88;font-weight: bold;font-size: 1.2rem">
 					{{$t("util.project")}}
 				</span>
-				<ul style="color: #333333;font-size: 1rem;line-height: 2">
+				<ul style="color: #333333;font-size: 1.2rem;line-height: 2">
 					<li>{{$t("controller.index.home.project.1")}}</li>
 					<li>{{$t("controller.index.home.project.2")}}</li>
 					<li>{{$t("controller.index.home.project.3")}}</li>
@@ -80,7 +80,7 @@
 				<span style="color: #815477;font-weight: bold;font-size: 1.2rem">
 					{{$t("util.wiki")}}
 				</span>
-				<ul style="color: #333333;font-size: 1rem;line-height: 2">
+				<ul style="color: #333333;font-size: 1.2rem;line-height: 2">
 					<li>{{$t("controller.index.home.wiki.1")}}</li>
 					<li>{{$t("controller.index.home.wiki.2")}}</li>
 					<li>{{$t("controller.index.home.wiki.3")}}</li>
@@ -98,7 +98,7 @@
 				<span style="color: #455e83;font-weight: bold;font-size: 1.2rem">
 					{{$t("util.calendar")}}
 				</span>
-				<ul style="color: #333333;font-size: 1rem;line-height: 2">
+				<ul style="color: #333333;font-size: 1.2rem;line-height: 2">
 					<li>{{$t("controller.index.home.calendar.1")}}</li>
 					<li>{{$t("controller.index.home.calendar.2")}}</li>
 					<li>{{$t("controller.index.home.calendar.3")}}</li>
@@ -123,7 +123,7 @@
 				<span style="color: #815477;font-weight: bold;font-size: 1.2rem">
 					{{$t("util.meeting")}}
 				</span>
-				<ul style="color: #333333;font-size: 1rem;line-height: 2">
+				<ul style="color: #333333;font-size: 1.2rem;line-height: 2">
 					<li>{{$t("controller.index.home.meeting.1")}}</li>
 					<li>{{$t("controller.index.home.meeting.2")}}</li>
 					<li>{{$t("controller.index.home.meeting.3")}}</li>
@@ -173,7 +173,7 @@
 				<span style="color: #e1111f;font-weight: bold;font-size: 1.2rem">
 					{{$t("util.im")}}
 				</span>
-				<ul style="color: #333333;font-size: 1rem;line-height: 2">
+				<ul style="color: #333333;font-size: 1.2rem;line-height: 2">
 					<li>{{$t("controller.index.home.im.1")}}</li>
 					<li>{{$t("controller.index.home.im.2")}}</li>
 					<li>{{$t("controller.index.home.im.3")}}</li>
@@ -191,7 +191,7 @@
 				<span style="color: #5561e3;font-weight: bold;font-size: 1.2rem">
 					{{$t("util.finder")}}
 				</span>
-				<ul style="color: #333333;font-size: 1rem;line-height: 2">
+				<ul style="color: #333333;font-size: 1.2rem;line-height: 2">
 					<li>{{$t("controller.index.home.finder.1")}}</li>
 					<li>{{$t("controller.index.home.finder.2")}}</li>
 					<li>{{$t("controller.index.home.finder.3")}}</li>
@@ -209,7 +209,7 @@
 				<span style="color: #326f53;font-weight: bold;font-size: 1.2rem">
 					{{$t("util.system")}}
 				</span>
-				<ul style="color: #333333;font-size: 1rem;line-height: 2">
+				<ul style="color: #333333;font-size: 1.2rem;line-height: 2">
 					<li>{{$t("controller.index.home.system.1")}}</li>
 					<li>{{$t("controller.index.home.system.2")}}</li>
 					<li>{{$t("controller.index.home.system.3")}}</li>
