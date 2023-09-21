@@ -29,7 +29,7 @@ class RpcUserApi {
                     let session=REDIS_USER.token((decoded as JwtPayload).userId)
                     let tokenFromCache = await session.get()
                     if(token==tokenFromCache) {
-                        await session.setTTL(3600);
+                        await session.setTTL(300);
                         resolve({
                             userId:(decoded as JwtPayload).userId,
                             type:(decoded as JwtPayload).type

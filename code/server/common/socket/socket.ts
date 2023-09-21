@@ -76,17 +76,17 @@ export class SocketIO {
             }
         })
         io.on("connection",async (socket)=>{
-            let set=io.adapter.rooms.get(socket.data.organizationUserId)
-            if(set) {
-                for(let socketId of set.values()) {
-                    if(socketId!==socket.id) {
-                        g_emitter.of(io.adapter.nsp.name).disconnectSockets(true)
-                    }
-                }
-            }
             if(io.adapter.nsp.name==="/"+ECommon_Socket_Type.NOTIFICATION) {
+                let set=io.adapter.rooms.get(socket.data.userId)
+                if(set) {
+                    g_emitter.of(io.adapter.nsp.name).to(socket.data.userId).except(socket.id).emit("notification_logout")
+                }
                 socket.join(socket.data.userId)
             } else {
+                let set=io.adapter.rooms.get(socket.data.organizationUserId)
+                if(set) {
+                    g_emitter.of(io.adapter.nsp.name).to(socket.data.organizationUserId).except(socket.id).disconnectSockets()
+                }
                 socket.join(socket.data.organizationUserId)
                 socket.join(socket.data.organizationId)
             }

@@ -14,6 +14,8 @@ export interface IClient_SessionStorage_Type {
     firstShow:string
 }
 
+let keys:(keyof IClient_SessionStorage_Type)[]=["organizationId","userId","userToken","imRecentList","organizationUserId","firstShow"]
+
 export class SessionStorage {
     static get<T extends keyof IClient_SessionStorage_Type>(name:T):IClient_SessionStorage_Type[T] {
         let val=sessionStorage.getItem(name)
@@ -42,7 +44,11 @@ export class SessionStorage {
     static remove<T extends keyof IClient_SessionStorage_Type>(name:T) {
         sessionStorage.removeItem(name)
     }
-    static clear() {
-        sessionStorage.clear()
+    static clear(excepts?:(keyof IClient_SessionStorage_Type)[]) {
+        keys.forEach(name=>{
+            if(!excepts?.includes(name)) {
+                sessionStorage.removeItem(name)
+            }
+        })
     }
 }

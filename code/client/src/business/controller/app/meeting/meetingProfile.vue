@@ -227,7 +227,7 @@ meetingClient.onLocalProducerInit=async stream => {
   organizationUserList.value.unshift(me.value)
 }
 meetingClient.onLocalProducerStart=kind => {
-  if(kind=="video") {
+  if(kind=="video" || kind=="audio") {
     handleState()
     loading.value=false
   }

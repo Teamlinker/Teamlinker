@@ -20,17 +20,27 @@ export async function handleImConnection() {
     let io=getSocketIOInstance().of("/"+ECommon_Socket_Type.IM)
     let emit=getSocketEmitterInstance().of("/"+ECommon_Socket_Type.IM);
     SocketIO.initSocket(io,async socket => {
-        let objPreStatus=REDIS_ORGANIZATION.preStatus(socket.data.organizationUserId)
-        let objStatus=REDIS_ORGANIZATION.status(socket.data.organizationUserId)
-        objPreStatus.get().then(value => {
-            if(value!==ECommon_User_Online_Status.OFFLINE) {
-                objStatus.get().then(value1 => {
-                    emitServiceEvent("organizationUserStatusChange",socket.data.organizationId,socket.data.organizationUserId,value1)
-                })
-            }
-        })
-        socket.on("disconnect",(reason, description) => {
+        socket.on("disconnect",async (reason, description) => {
             emitServiceEvent("organizationUserStatusChange",socket.data.organizationId,socket.data.organizationUserId,ECommon_User_Online_Status.OFFLINE)
+            let objPreStatus=REDIS_ORGANIZATION.preStatus(socket.data.organizationUserId)
+            let objStatus=REDIS_ORGANIZATION.status(socket.data.organizationUserId)
+            let valueStatus=await objStatus.get()
+            if(valueStatus===ECommon_User_Online_Status.MEETING) {
+                valueStatus=ECommon_User_Online_Status.ONLINE
+            }
+            objStatus.set(ECommon_User_Online_Status.OFFLINE)
+            objPreStatus.set(valueStatus)
+        })
+        socket.on("error",async err => {
+            emitServiceEvent("organizationUserStatusChange",socket.data.organizationId,socket.data.organizationUserId,ECommon_User_Online_Status.OFFLINE)
+            let objPreStatus=REDIS_ORGANIZATION.preStatus(socket.data.organizationUserId)
+            let objStatus=REDIS_ORGANIZATION.status(socket.data.organizationUserId)
+            let valueStatus=await objStatus.get()
+            if(valueStatus===ECommon_User_Online_Status.MEETING) {
+                valueStatus=ECommon_User_Online_Status.ONLINE
+            }
+            objStatus.set(ECommon_User_Online_Status.OFFLINE)
+            objPreStatus.set(valueStatus)
         })
         socket.on("im_unread_message_list",async (callback) => {
             try {
@@ -362,6 +372,18 @@ export async function handleImConnection() {
         teamIdList.forEach(id=>{
             socket.join(id)
         })
-        emitServiceEvent("organizationUserStatusChange",socket.data.organizationId,socket.data.organizationUserId,ECommon_User_Online_Status.ONLINE)
+        let objPreStatus=REDIS_ORGANIZATION.preStatus(socket.data.organizationUserId)
+        let objStatus=REDIS_ORGANIZATION.status(socket.data.organizationUserId)
+        let valueStatus=await objStatus.get()
+        let valuePreStatus=await objPreStatus.get()
+        if(valueStatus===ECommon_User_Online_Status.OFFLINE && valuePreStatus!==ECommon_User_Online_Status.OFFLINE && valuePreStatus!==null) {
+            emitServiceEvent("organizationUserStatusChange",socket.data.organizationId,socket.data.organizationUserId,valuePreStatus)
+            objPreStatus.set(ECommon_User_Online_Status.OFFLINE)
+            objStatus.set(valuePreStatus)
+        } else {
+            emitServiceEvent("organizationUserStatusChange",socket.data.organizationId,socket.data.organizationUserId,ECommon_User_Online_Status.ONLINE)
+            objPreStatus.set(ECommon_User_Online_Status.OFFLINE)
+            objStatus.set(ECommon_User_Online_Status.ONLINE)
+        }
     })
 }

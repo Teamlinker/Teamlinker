@@ -55,6 +55,9 @@ export const useDesktopStore=defineStore("desktop",{
             if(this.heartbeatInterval) {
                 clearInterval(this.heartbeatInterval)
             }
+            objSocketNotification.getSocket().on("notification_logout",() => {
+                eventBus.emit(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED)
+            })
             this.heartbeatInterval=setInterval(async ()=>{
                 let ret=await objSocketNotification.getSocket().emitWithAck("notification_heartbeat",SessionStorage.get("userToken"))
                 if(!ret) {
@@ -155,7 +158,7 @@ export const useDesktopStore=defineStore("desktop",{
         },
         async logout(isDirect?:boolean) {
             if(isDirect || (await apiUser.logout())?.code==0) {
-                SessionStorage.clear();
+                SessionStorage.clear(["imRecentList"]);
                 SocketIOClient.clear()
                 clearInterval(this.heartbeatInterval)
                 this.heartbeatInterval=null;

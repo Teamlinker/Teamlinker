@@ -21,22 +21,22 @@ export namespace REDIS_USER {
     let USER_RESET_CODE_KEY=`${ECommon_Services.User}:user:{0}:reset`
     export function token(userId:string)
     {
-        let obj=new RedisStringKey(StringUtil.format(USER_TOKEN_KEY,userId),cacheRedisType<string>().String,3600)
+        let obj=new RedisStringKey(StringUtil.format(USER_TOKEN_KEY,userId),cacheRedisType<string>().String,300)
         return obj
     }
     export function info(userId:string)
     {
-        let obj=new RedisStringKey(StringUtil.format(USER_INFO_KEY,userId),cacheRedisType<ICommon_Model_User>().Object,3600)
+        let obj=new RedisStringKey(StringUtil.format(USER_INFO_KEY,userId),cacheRedisType<ICommon_Model_User>().Object,300)
         return obj
     }
     export function adminInfo(userId:string)
     {
-        let obj=new RedisStringKey(StringUtil.format(ADMIN_INFO_KEY,userId),cacheRedisType<ICommon_Model_User>().Object,3600)
+        let obj=new RedisStringKey(StringUtil.format(ADMIN_INFO_KEY,userId),cacheRedisType<ICommon_Model_User>().Object,300)
         return obj
     }
     export function organizationInfo(userId:string)
     {
-        let obj=new RedisStringKey(StringUtil.format(USER_ORGANIZATION_KEY,userId),cacheRedisType<IServer_Common_RPC_User_CheckSession_Organization>().Object,-1)
+        let obj=new RedisStringKey(StringUtil.format(USER_ORGANIZATION_KEY,userId),cacheRedisType<IServer_Common_RPC_User_CheckSession_Organization>().Object,300)
         return obj
     }
     export function registerCacheInfo(username:string)

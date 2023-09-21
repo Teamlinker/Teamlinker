@@ -55,6 +55,7 @@ export interface ICommon_Socket_ServerToClientEvents {
     meeting_rejected:(rejectOrganizationUserId:string,rejectOrganizationUserName:string,roomId:string)=>void
     //notification
     notification_new:(notificationId:string)=>void
+    notification_logout:()=>void
 }
 
 export interface ICommon_Socket_ClientToServerEvents {

@@ -18,6 +18,7 @@ import {IServer_Common_Event_Types} from "../../common/event/types";
 import rpcFinderApi from "../../finder/rpc/finder"
 import rpcNotificationApi from "../../notification/rpc/notification"
 import {PhotoService, StickyNoteService} from "./tool";
+import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 
 export class UserService extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
@@ -189,7 +190,14 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
                     let sessionInfo=REDIS_USER.info(this.item.id)
                     await sessionInfo.set(this.item);
                     let sessionOrganization=REDIS_USER.organizationInfo(this.item.id)
+                    let objSessionOrganization=await sessionOrganization.get()
                     await sessionOrganization.del();
+                    if(objSessionOrganization) {
+                        let objOrganizationUser=await OrganizationUserService.getItemById(objSessionOrganization.organizationUserId)
+                        if(objOrganizationUser) {
+                            await objOrganizationUser.clearStatus()
+                        }
+                    }
                     resolve(token)
                 }
             })
@@ -197,11 +205,42 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
     }
 
     async keepAlive() {
-        let obj=REDIS_USER.token(this.getId())
-        let exist=await obj.exists()
-        if(exist) {
-            await obj.setTTL(3600)
-        }
+        await Promise.allSettled([
+            (async ()=>{
+                let obj=REDIS_USER.token(this.getId())
+                let exist=await obj.exists()
+                if(exist) {
+                    await obj.setTTL(300)
+                }
+            })(),
+            (async ()=>{
+                let obj=REDIS_USER.info(this.getId())
+                let exist=await obj.exists()
+                if(exist) {
+                    await obj.setTTL(300)
+                }
+            })(),
+            (async ()=>{
+                let obj=REDIS_USER.organizationInfo(this.getId())
+                let value=await obj.get()
+                if(value) {
+                    await obj.setTTL(300)
+                    if(value.organizationUserId) {
+                        let objStatus=REDIS_ORGANIZATION.status(value.organizationUserId)
+                        let exist=await objStatus.exists()
+                        if(exist) {
+                            await objStatus.setTTL(300)
+                        }
+                        let objPreStatus=REDIS_ORGANIZATION.preStatus(value.organizationUserId)
+                        exist=await objPreStatus.exists()
+                        if(exist) {
+                            await objPreStatus.setTTL(300)
+                        }
+                    }
+                }
+            })(),
+        ])
+
     }
 
     async stopSession() {

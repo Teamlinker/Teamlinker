@@ -12,12 +12,12 @@ export namespace REDIS_ORGANIZATION {
     let STATICS="organization:{0}:statics"
     export function status(organizationUserId:string)
     {
-        let obj=new RedisStringKey(StringUtil.format(USER_STATUS_KEY,organizationUserId),cacheRedisType<number>().Number,-1)
+        let obj=new RedisStringKey(StringUtil.format(USER_STATUS_KEY,organizationUserId),cacheRedisType<number>().Number,300)
         return obj
     }
     export function preStatus(organizationUserId:string)
     {
-        let obj=new RedisStringKey(StringUtil.format(USER_PRE_STATUS_KEY,organizationUserId),cacheRedisType<number>().Number,-1)
+        let obj=new RedisStringKey(StringUtil.format(USER_PRE_STATUS_KEY,organizationUserId),cacheRedisType<number>().Number,300)
         return obj
     }
 
