@@ -29,7 +29,7 @@ export class SocketIO {
             cors: {
                 origin: ["http://localhost:63342","https://admin.socket.io"],
                 credentials: true
-            }
+            },
         })
         instrument(SocketIO.io, {
             auth: false

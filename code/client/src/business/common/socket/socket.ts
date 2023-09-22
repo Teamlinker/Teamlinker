@@ -25,7 +25,8 @@ export class SocketIOClient {
             auth:{
                 userId:SessionStorage.get("userId"),
                 token:SessionStorage.get("userToken")
-            }
+            },
+            withCredentials:true
         })
         this.socket.on("disconnect", reason => {
             SocketIOClient.map.delete(this.name)

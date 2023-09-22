@@ -71,6 +71,7 @@ const onSubmit=async ()=>{
 	  }
   }
 }
+
 const getIssueSolutionList=async ()=>{
   let res=await apiIssueType.solutionList();
   if(res?.code==0) {
