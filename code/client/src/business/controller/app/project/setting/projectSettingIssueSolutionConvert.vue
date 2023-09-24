@@ -10,11 +10,12 @@
 
 <script setup lang="ts">
 import {onBeforeMount, reactive, ref} from "vue";
-import {apiIssueType, DCSType} from "@/business/common/request/request";
+import {apiIssueType} from "@/business/common/request/request";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
 import {Message} from "@arco-design/web-vue";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	originalIssueTypeSolutionId?:string,

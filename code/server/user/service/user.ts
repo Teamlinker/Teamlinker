@@ -361,6 +361,11 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         }
         return arr;
     }
+
+    static async getDeletedUser() {
+        let ret=await userMapper.getDeletedUser()
+        return ret;
+    }
 }
 
 

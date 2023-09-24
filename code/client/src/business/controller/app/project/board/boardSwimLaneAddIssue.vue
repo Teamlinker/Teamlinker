@@ -18,12 +18,13 @@
 <script setup lang="ts">
 
 import {onBeforeMount, reactive, ref} from "vue";
-import {apiBoard, DCSType} from "@/business/common/request/request";
+import {apiBoard} from "@/business/common/request/request";
 import {ICommon_Route_Res_Board_Sprint_Issue_Item} from "../../../../../../../common/routes/response";
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	boardSprintSwimLaneId:string,

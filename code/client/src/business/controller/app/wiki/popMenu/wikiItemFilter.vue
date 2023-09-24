@@ -20,11 +20,12 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {apiWiki, DCSType} from "../../../../common/request/request";
+import {apiWiki} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {ICommon_Route_Res_Wiki_Item_Info} from "../../../../../../../common/routes/response";
 import wiki from "../../../../../../../common/routes/wiki";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const data=ref<DCSType<ICommon_Route_Res_Wiki_Item_Info>[]>([])
 const selectedKeys=ref([])

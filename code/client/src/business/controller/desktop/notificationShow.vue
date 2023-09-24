@@ -30,13 +30,14 @@
 
 <script setup lang="ts">
 import {onBeforeMount, onBeforeUnmount, ref} from "vue";
-import {apiNotification, DCSType} from "../../common/request/request";
+import {apiNotification} from "../../common/request/request";
 import {ICommon_Route_Res_Notification_Item} from "../../../../../common/routes/response";
 import NotificationItem from "../../common/component/notificationItem.vue";
 import {ECommon_Model_Notification_Type} from "../../../../../common/model/notification";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../common/event/event";
 import {type} from "os";
 import moment from "moment";
+import {DCSType} from "../../../../../common/types";
 
 let page=0
 const bottom=ref(false)

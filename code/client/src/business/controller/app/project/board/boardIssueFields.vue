@@ -20,13 +20,14 @@
 import {ICommon_Model_Workflow_Action} from "../../../../../../../common/model/workflow_action";
 import FieldInput from "@/business/common/component/field/fieldInput.vue";
 import {reactive, ref, toRef} from "vue";
-import {apiIssue, DCSType} from "@/business/common/request/request";
+import {apiIssue} from "@/business/common/request/request";
 import {
 	ICommon_Route_Req_ProjectIssue_Field,
 	ICommon_Route_Res_Workflow_Node_Field
 } from "../../../../../../../common/routes/response";
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	projectId:string,

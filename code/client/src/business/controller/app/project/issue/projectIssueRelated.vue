@@ -63,7 +63,7 @@
 <script setup lang="ts">
 
 import FieldPriority from "../../../../common/component/field/fieldPriority.vue";
-import {apiIssue, DCSType} from "../../../../common/request/request";
+import {apiIssue} from "../../../../common/request/request";
 import {ICommon_Model_Project_Issue} from "../../../../../../../common/model/project_issue";
 import {getCurrentInstance, inject} from "vue";
 import {injectProjectInfo} from "../../../../common/util/symbol";
@@ -71,6 +71,7 @@ import {Dialog} from "../../../../common/component/dialog/dialog";
 import {getRootNavigatorRef} from "../../../../../teamOS/common/component/navigator/navigator";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	parentIssue?:DCSType<ICommon_Model_Project_Issue>,

@@ -47,11 +47,11 @@
 <script setup lang="ts">
 import {calculateShortName} from "../util/helper";
 import {ref, watch} from "vue";
-import {apiOrganization, DCSType} from "../request/request";
+import {apiOrganization} from "../request/request";
 import {SessionStorage} from "../storage/session";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../event/event";
 import {ECommon_IM_Message_EntityType} from "../../../../../common/model/im_unread_message";
-import {ECommon_User_Online_Status} from "../../../../../common/types";
+import {DCSType, ECommon_User_Online_Status} from "../../../../../common/types";
 import {ICommon_Route_Res_Organization_User} from "../../../../../common/routes/response";
 
 const props=defineProps<{

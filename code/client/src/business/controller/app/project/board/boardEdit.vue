@@ -15,12 +15,13 @@
 </template>
 
 <script setup lang="ts">
-import {apiBoard, apiProject, DCSType} from "../../../../common/request/request";
+import {apiBoard, apiProject} from "../../../../common/request/request";
 import {onBeforeMount, reactive, ref} from "vue";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
 import {ICommon_Model_Board} from "../../../../../../../common/model/board";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	type:"add"|"edit",

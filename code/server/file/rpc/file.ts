@@ -32,5 +32,9 @@ class RpcFileApi  {
             path:"/file"+obj.getItem().path
         }
     }
+
+    async clearMember(userId:string) {
+        await FileService.clearMember(userId)
+    }
 }
 export default new RpcFileApi;

@@ -8,6 +8,8 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {generateDeleteSql, generateQuerySql} from "../../common/util/sql";
 import {Err} from "../../../common/status/error";
 import {emitServiceEvent} from "../../common/event/event";
+import Application from "../../common/app/app";
+import {ECommon_Application_Mode} from "../../../common/types";
 
 class FinderItemMapper extends Mapper<typeof finderItemModel> {
     constructor() {
@@ -98,10 +100,16 @@ class FinderItemMapper extends Mapper<typeof finderItemModel> {
             return
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(finderItemModel,{
-            organization_id:organizationId,
-            created_by_pure:userId
-        }))
+        if(Application.mode===ECommon_Application_Mode.OFFLINE) {
+            await mysql.execute(generateDeleteSql(finderItemModel,{
+                created_by_pure:userId
+            }))
+        } else {
+            await mysql.execute(generateDeleteSql(finderItemModel,{
+                organization_id:organizationId,
+                created_by_pure:userId
+            }))
+        }
     }
 
     async clearByUserId(userId:string) {

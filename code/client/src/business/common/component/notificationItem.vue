@@ -40,7 +40,7 @@
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_COMMENT_AT">
 			ISSUE:you are mentioned by
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
 			in issue
 			&nbsp;&nbsp;
@@ -53,7 +53,7 @@
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_REMOVE">
 			TEAM:you have been removed by
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
 			in team
 			&nbsp;&nbsp;
@@ -67,12 +67,12 @@
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_REMOVE">
 			ISSUE:{{obj.extra}} has been removed by
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_QUIT">
 			TEAM:
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
 			quit the team
 			&nbsp;&nbsp;
@@ -81,7 +81,7 @@
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN">
 			ISSUE:
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
 			assign the reporter of issue
 			&nbsp;&nbsp;
@@ -96,12 +96,12 @@
 			&nbsp;&nbsp;
 			has been changed by
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_COMMENT_ADD">
 			ISSUE:
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
 			add a comment in issue
 			&nbsp;&nbsp;
@@ -119,12 +119,12 @@
 			&nbsp;&nbsp;
 			has been changed by
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN">
 			ISSUE:
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
 			assign the assigner of issue
 			&nbsp;&nbsp;
@@ -139,7 +139,7 @@
 			&nbsp;&nbsp;
 			has been changed by
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGN_SPRINT">
 			ISSUE:the sprint of issue
@@ -148,12 +148,12 @@
 			&nbsp;&nbsp;
 			has been changed by
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE">
 			ISSUE:
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
 			resolved the approval of issue
 			&nbsp;&nbsp;
@@ -162,7 +162,7 @@
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT">
 			ISSUE:
 			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser.id" :name="obj.operationOrganizationUser.name" :photo="obj.operationOrganizationUser.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
 			rejected the approval of issue
 			&nbsp;&nbsp;
@@ -172,7 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import {apiNotification, DCSType} from "../request/request";
+import {apiNotification} from "../request/request";
 import {ICommon_Route_Res_Notification_Item} from "../../../../../common/routes/response";
 import {
 	ECommon_Model_Notification_Status,
@@ -191,6 +191,7 @@ import UserAvatar from "./userAvatar.vue";
 import {Dialog} from "./dialog/dialog";
 import {getCurrentInstance} from "vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../common/types";
 
 type ISSUE={
 	issue:DCSType<ICommon_Model_Project_Issue>,

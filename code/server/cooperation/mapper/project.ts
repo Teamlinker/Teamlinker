@@ -12,7 +12,8 @@ import {
     generateGroupLeftJoin2Sql,
     generateGroupLeftJoin3Sql,
     generateLeftJoinSql,
-    generateQuerySql
+    generateQuerySql,
+    generateUpdateSql
 } from '../../common/util/sql';
 import {ICommon_Model_Project_Issue, projectIssueModel} from './../../../common/model/project_issue';
 import {ECommon_Model_Workflow_Node_Status} from './../../../common/model/workflow_node';
@@ -28,6 +29,10 @@ import * as moment from "moment";
 import {organizationUserModel} from "../../../common/model/organization_user";
 import {userModel} from "../../../common/model/user";
 import {keys} from "../../../common/transform";
+import {projectIssueHistoryModel} from "../../../common/model/project_issue_history";
+import {projectIssueApprovalModel} from "../../../common/model/project_issue_approval";
+import {Table_Project_Issue_Field_Value} from "../../../common/model/project_issue_field_value";
+import {Table_Workflow_Approval} from "../../../common/model/workflow_approval";
 
 class ProjectMapper extends Mapper<typeof projectModel>{
     constructor(){
@@ -668,6 +673,54 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         }))
         let count=Number(Object.values(await mysql.executeOne(sql))[0])
         return count
+    }
+
+    async updateMember(organizationUserId:string,updatedOrganizationUserId:string) {
+        if(!organizationUserId || !updatedOrganizationUserId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await Promise.all([
+            mysql.execute(generateUpdateSql(projectModel,{
+                created_by:updatedOrganizationUserId
+            },{
+                created_by:organizationUserId
+            })),
+            (async ()=>{
+                await mysql.execute(generateUpdateSql(projectIssueModel,{
+                    created_by:updatedOrganizationUserId
+                },{
+                    created_by:organizationUserId
+                }))
+                await mysql.execute(generateUpdateSql(projectIssueModel,{
+                    assigner_id:updatedOrganizationUserId
+                },{
+                    assigner_id:organizationUserId
+                }))
+                await mysql.execute(generateUpdateSql(projectIssueModel,{
+                    reporter_id:updatedOrganizationUserId
+                },{
+                    reporter_id:organizationUserId
+                }))
+            })(),
+            mysql.execute(generateUpdateSql(projectReleaseModel,{
+                created_by:updatedOrganizationUserId
+            },{
+                created_by:organizationUserId
+            })),
+            mysql.execute(generateUpdateSql(projectIssueHistoryModel,{
+                organization_user_id:updatedOrganizationUserId
+            },{
+                organization_user_id:organizationUserId
+            })),
+            mysql.execute(generateUpdateSql(projectIssueApprovalModel,{
+                approval_organization_user_id:updatedOrganizationUserId
+            },{
+                approval_organization_user_id:organizationUserId
+            })),
+            mysql.execute(`update ${Table_Project_Issue_Field_Value}  set ref_values=JSON_REMOVE(ref_values,JSON_UNQUOTE(JSON_SEARCH(ref_values,'one','${organizationUserId}'))) where JSON_SEARCH(ref_values,'one','${organizationUserId}') IS NOT NULL`),
+            mysql.execute(`update ${Table_Workflow_Approval}  set value=JSON_REMOVE(value,JSON_UNQUOTE(JSON_SEARCH(value,'one','${organizationUserId}'))) where JSON_SEARCH(value,'one','${organizationUserId}') IS NOT NULL`)
+        ])
     }
 }
 export let projectMapper=new ProjectMapper

@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import {getCurrentInstance, inject, markRaw, reactive, ref} from "vue";
 import {injectProjectInfo} from "../../../../common/util/symbol";
-import {apiBoard, DCSType} from "../../../../common/request/request";
+import {apiBoard} from "../../../../common/request/request";
 import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 import {Dialog} from "../../../../common/component/dialog/dialog";
 import {
@@ -40,6 +40,7 @@ import {ICommon_Model_Board} from "../../../../../../../common/model/board";
 import BoardEdit from "@/business/controller/app/project/board/boardEdit.vue";
 import {useI18n} from "vue-i18n";
 import {SessionStorage} from "@/business/common/storage/session";
+import {DCSType} from "../../../../../../../common/types";
 
 const objInject=inject(injectProjectInfo)
 const projectId=objInject.id

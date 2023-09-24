@@ -41,7 +41,8 @@ import {ICommon_Model_Project_Release} from "../../../../../../../common/model/p
 import ProjectReleasePreview from "../../../../controller/app/project/release/projectReleasePreview.vue";
 import {inject, ref, watch} from "vue";
 import {injectProjectInfo} from "../../../util/symbol";
-import {apiIssue, apiRelease, DCSType} from "../../../request/request";
+import {apiIssue, apiRelease} from "../../../request/request";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	isEdit:boolean,

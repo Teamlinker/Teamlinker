@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, onBeforeMount, ref} from "vue";
-import {apiBoard, DCSType} from "@/business/common/request/request";
+import {apiBoard} from "@/business/common/request/request";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
 import {
 	ECommon_Model_Workflow_Node_Status,
@@ -89,6 +89,7 @@ import {Dialog} from "@/business/common/component/dialog/dialog";
 import {getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
 import BoardAddIssueType from "@/business/controller/app/project/board/boardAddIssueType.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	boardId:string

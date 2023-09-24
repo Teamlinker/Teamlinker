@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import FieldInput from "@/business/common/component/field/fieldInput.vue";
 import {onBeforeMount, reactive, ref, toRef} from "vue";
-import {apiIssue, apiProject, DCSType} from "@/business/common/request/request";
+import {apiIssue, apiProject} from "@/business/common/request/request";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
 import {
 	ICommon_Route_Req_ProjectIssue_Field,
@@ -45,6 +45,7 @@ import {
 import {ECommon_Field_Type} from "../../../../../../../common/field/type";
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	projectId:string,

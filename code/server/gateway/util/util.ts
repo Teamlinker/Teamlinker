@@ -281,13 +281,14 @@ export async function initSystem() {
     let mysql=getMysqlInstance()
     let ret=await mysql.execute<any[]>(`select * from ${Table_Version}`)
     if(ret===null || ret.length==0){
-        let [adminIds,userIds,_,__]=await Promise.all([
+        let [adminIds,userIds,deletedUserId,_,__]=await Promise.all([
             rpcUserApi.initAdmin(),
             rpcUserApi.initUser(),
+            rpcUserApi.initDeletedUser(),
             initVersion(),
             rpcAuthApi.initRole()
         ])
-        let organizationId=await rpcUserApi.initOrganization(adminIds,userIds);
+        let organizationId=await rpcUserApi.initOrganization(adminIds,userIds,deletedUserId);
         let organizationUserId=await rpcUserApi.getOrganizationUserId(organizationId,adminIds[0])
         await Promise.all([
             rpcUserApi.initTeam(organizationUserId,organizationId),

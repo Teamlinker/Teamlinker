@@ -82,7 +82,7 @@
 <script setup lang="ts">
 import {getCurrentInstance, inject, markRaw, reactive, ref} from "vue";
 import {getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
-import {apiBoard, DCSType} from "@/business/common/request/request";
+import {apiBoard} from "@/business/common/request/request";
 import {
 	ECommon_Model_Board_Sprint_Status,
 	ICommon_Model_Board_Sprint
@@ -98,6 +98,7 @@ import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
 import FieldPriority from "@/business/common/component/field/fieldPriority.vue";
 import {useI18n} from "vue-i18n";
 import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	boardId:string

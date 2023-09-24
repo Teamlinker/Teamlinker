@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, inject, markRaw, onBeforeMount, ref} from "vue";
-import {apiBoard, DCSType} from "@/business/common/request/request";
+import {apiBoard} from "@/business/common/request/request";
 import {ICommon_Model_Board} from "../../../../../../../common/model/board";
 import {getCurrentNavigator, getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
 import {Dialog} from "@/business/common/component/dialog/dialog";
@@ -35,6 +35,7 @@ import BoardConfig from "@/business/controller/app/project/board/boardConfig.vue
 import BoardSprintList from "@/business/controller/app/project/board/boardSprintList.vue";
 import BoardKanban from "@/business/controller/app/project/board/boardKanban.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	boardId:string,

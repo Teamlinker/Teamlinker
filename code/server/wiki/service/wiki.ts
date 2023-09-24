@@ -11,6 +11,7 @@ import {IServer_Common_Event_Types} from "../../common/event/types";
 import rpcContentApi from "../../content/rpc/content"
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import {emitServiceEvent} from "../../common/event/event";
+import rpcUserApi from "../../user/rpc/user";
 
 export class WikiService extends Entity<typeof wikiModel,typeof wikiMapper> {
     constructor() {
@@ -138,6 +139,12 @@ export class WikiService extends Entity<typeof wikiModel,typeof wikiMapper> {
         let ret=await rpcAuthApi.changeRoleMember(this.item.id,roleId,type,memberId)
         emitServiceEvent("wikiMemberEdit",this.getId(),memberId)
         return ret;
+    }
+
+    static async clearMember(organizationUserId:string) {
+        let objOrganization=await rpcUserApi.organizationUser(organizationUserId)
+        let objDeletedUser=await rpcUserApi.getDeletedOrganizationUser(objOrganization.organization_id)
+        await wikiMapper.updateMember(organizationUserId,objDeletedUser.id)
     }
 }
 

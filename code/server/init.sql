@@ -14,7 +14,6 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-
 --
 -- Table structure for table `board`
 --
@@ -24,8 +23,8 @@ DROP TABLE IF EXISTS `board`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `board` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `project_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -43,7 +42,7 @@ DROP TABLE IF EXISTS `board_column`;
 CREATE TABLE `board_column` (
   `id` bigint(20) NOT NULL,
   `board_id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `weight` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -101,9 +100,9 @@ DROP TABLE IF EXISTS `board_sprint`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `board_sprint` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `start_time` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `end_time` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `start_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `end_time` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `board_id` bigint(20) NOT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -144,7 +143,7 @@ DROP TABLE IF EXISTS `board_sprint_swimlane`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `board_sprint_swimlane` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `board_sprint_id` bigint(20) NOT NULL,
   `board_id` bigint(20) NOT NULL,
   `priority` tinyint(4) NOT NULL,
@@ -165,8 +164,8 @@ DROP TABLE IF EXISTS `calendar`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `calendar` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `color` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `reserved` tinyint(4) NOT NULL DEFAULT '0',
   `organization_user_id` bigint(20) NOT NULL,
   `type` tinyint(4) NOT NULL,
@@ -188,7 +187,7 @@ DROP TABLE IF EXISTS `calendar_event`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `calendar_event` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `start_time` timestamp NOT NULL,
   `end_time` timestamp NULL DEFAULT NULL,
   `all_day` tinyint(4) NOT NULL DEFAULT '0',
@@ -196,7 +195,7 @@ CREATE TABLE `calendar_event` (
   `recurring_day` tinyint(4) DEFAULT NULL,
   `reminder_minutes` tinyint(4) DEFAULT NULL,
   `calendar_id` bigint(20) NOT NULL,
-  `location` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `location` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `unique_id` bigint(20) NOT NULL,
   `is_reminder` tinyint(4) NOT NULL DEFAULT '0',
   `created_by` bigint(20) NOT NULL,
@@ -235,7 +234,7 @@ DROP TABLE IF EXISTS `calendar_setting`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `calendar_setting` (
   `id` bigint(20) NOT NULL,
-  `timezone` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `timezone` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `start_week_day` tinyint(4) NOT NULL,
   `organization_user_id` bigint(20) NOT NULL,
   `organization_id` bigint(20) NOT NULL,
@@ -258,7 +257,7 @@ CREATE TABLE `content` (
   `type` tinyint(4) DEFAULT NULL,
   `ref_id` bigint(20) DEFAULT NULL,
   `created_by` bigint(20) DEFAULT NULL,
-  `content` text COLLATE utf8mb4_general_ci,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `organization_id` bigint(20) DEFAULT NULL,
@@ -286,9 +285,9 @@ CREATE TABLE `file` (
   `size` int(11) DEFAULT NULL,
   `type` tinyint(4) DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ref` int(11) NOT NULL DEFAULT '0',
-  `md5` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `md5` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `fk_file_user1_idx` (`created_by_pure`),
@@ -307,7 +306,7 @@ DROP TABLE IF EXISTS `finder_item`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `finder_item` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(80) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(80) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `type` tinyint(4) NOT NULL,
   `parent_folder_id` bigint(20) DEFAULT NULL,
   `created_by_pure` bigint(20) NOT NULL,
@@ -315,7 +314,7 @@ CREATE TABLE `finder_item` (
   `ref_id` bigint(20) DEFAULT NULL,
   `organization_id` bigint(20) DEFAULT NULL,
   `file_id` bigint(20) DEFAULT NULL,
-  `shortcut_type` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `shortcut_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -337,8 +336,8 @@ CREATE TABLE `im_favorite_message` (
   `id` bigint(20) NOT NULL,
   `organization_user_id` bigint(20) NOT NULL,
   `created_time` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `content` mediumtext COLLATE utf8mb4_general_ci NOT NULL,
-  `from_name` varchar(65) COLLATE utf8mb4_general_ci NOT NULL,
+  `content` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `from_name` varchar(65) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `content_type` tinyint(4) NOT NULL,
   `organization_id` bigint(20) NOT NULL,
   `ref_id` bigint(20) NOT NULL,
@@ -362,7 +361,7 @@ CREATE TABLE `im_team_message` (
   `team_id` bigint(20) NOT NULL,
   `from_organization_user_id` bigint(20) NOT NULL,
   `created_time` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `content` text COLLATE utf8mb4_general_ci,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `content_type` tinyint(4) NOT NULL,
   `file_id` bigint(20) DEFAULT NULL,
   `organization_id` bigint(20) NOT NULL,
@@ -389,7 +388,7 @@ CREATE TABLE `im_unread_message` (
   `entity_id` bigint(20) NOT NULL,
   `entity_type` tinyint(4) NOT NULL,
   `count` int(11) NOT NULL DEFAULT '1',
-  `unique_id` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `unique_id` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `at` tinyint(4) DEFAULT '0',
   `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
@@ -414,7 +413,7 @@ CREATE TABLE `im_user_message` (
   `from_organization_user_id` bigint(20) NOT NULL,
   `to_organization_user_id` bigint(20) NOT NULL,
   `created_time` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `content` text COLLATE utf8mb4_general_ci,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `content_type` tinyint(4) NOT NULL,
   `file_id` bigint(20) DEFAULT NULL,
   `organization_id` bigint(20) NOT NULL,
@@ -436,9 +435,9 @@ DROP TABLE IF EXISTS `issue_type`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `issue_type` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `icon` bigint(20) DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `issue_type_solution_id` bigint(20) NOT NULL,
@@ -459,8 +458,8 @@ DROP TABLE IF EXISTS `issue_type_solution`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `issue_type_solution` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `reserved` tinyint(4) NOT NULL DEFAULT '0',
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -502,14 +501,14 @@ DROP TABLE IF EXISTS `meeting_room`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `meeting_room` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_by` bigint(20) NOT NULL,
   `type` tinyint(4) NOT NULL,
   `related_id` bigint(20) NOT NULL,
   `start_time` timestamp NULL DEFAULT NULL,
   `end_time` timestamp NULL DEFAULT NULL,
-  `password` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -530,8 +529,8 @@ DROP TABLE IF EXISTS `member_tag`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `member_tag` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -575,7 +574,7 @@ CREATE TABLE `notification` (
   `is_read` tinyint(4) NOT NULL DEFAULT '0',
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `organization_id` bigint(20) NOT NULL,
-  `extra` mediumtext COLLATE utf8mb4_general_ci,
+  `extra` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `is_read` (`is_read`),
@@ -627,7 +626,7 @@ CREATE TABLE `organization_user` (
   `phone` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `active` tinyint(4) NOT NULL DEFAULT '1',
   `location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `remark` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -644,10 +643,10 @@ CREATE TABLE `photo` (
   `id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,
   `file_id` bigint(20) DEFAULT NULL,
-  `x` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `y` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `width` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `height` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `x` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `y` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `width` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `height` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `user_id` (`user_id`)
@@ -663,13 +662,13 @@ DROP TABLE IF EXISTS `project`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project` (
   `id` bigint(20) NOT NULL,
-  `keyword` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `name` varchar(65) COLLATE utf8mb4_general_ci NOT NULL,
+  `keyword` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(65) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `photo` bigint(20) DEFAULT NULL,
   `created_by` bigint(20) NOT NULL,
-  `description` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `organization_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `created_by` (`created_by`),
@@ -692,7 +691,7 @@ CREATE TABLE `project_issue` (
   `created_by` bigint(20) DEFAULT NULL,
   `project_id` bigint(20) NOT NULL,
   `issue_type_id` bigint(20) NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `priority` tinyint(4) DEFAULT NULL,
   `assigner_id` bigint(20) DEFAULT NULL,
   `reporter_id` bigint(20) DEFAULT NULL,
@@ -742,7 +741,7 @@ CREATE TABLE `project_issue_field_value` (
   `workflow_node_field_type_id` bigint(20) NOT NULL,
   `number_value` int(11) DEFAULT NULL,
   `field_config_ids` json DEFAULT NULL,
-  `string_value` text COLLATE utf8mb4_general_ci,
+  `string_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `ref_values` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -764,9 +763,9 @@ CREATE TABLE `project_issue_history` (
   `project_issue_id` bigint(20) NOT NULL,
   `organization_user_id` bigint(20) NOT NULL,
   `project_id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `value` varchar(65) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `value` varchar(65) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project_issue_id` (`project_issue_id`),
@@ -856,7 +855,7 @@ DROP TABLE IF EXISTS `project_label`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project_label` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `project_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
@@ -892,7 +891,7 @@ DROP TABLE IF EXISTS `project_module`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project_module` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `project_id` bigint(20) NOT NULL,
   `parent_module_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -931,10 +930,10 @@ DROP TABLE IF EXISTS `project_release`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project_release` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `start_time` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `release_time` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `start_time` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `release_time` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_by` bigint(20) NOT NULL,
@@ -973,10 +972,10 @@ DROP TABLE IF EXISTS `role`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `role` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `item_id` bigint(20) DEFAULT NULL,
   `organization_id` bigint(20) DEFAULT NULL,
   `type` tinyint(4) NOT NULL,
@@ -1023,10 +1022,10 @@ CREATE TABLE `sticky_note` (
   `id` bigint(20) NOT NULL,
   `content_id` bigint(20) DEFAULT NULL,
   `user_id` bigint(20) DEFAULT NULL,
-  `x` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `y` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `width` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `height` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `x` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `y` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `width` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `height` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `content` (`content_id`),
   KEY `user_id` (`user_id`)
@@ -1042,13 +1041,13 @@ DROP TABLE IF EXISTS `team`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `team` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `created_by` bigint(20) DEFAULT NULL,
   `photo` bigint(20) DEFAULT NULL,
   `organization_id` bigint(20) NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `name` (`name`),
@@ -1084,11 +1083,11 @@ DROP TABLE IF EXISTS `user`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user` (
   `id` bigint(20) NOT NULL,
-  `username` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `username` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `password` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `sign` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `sign` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `active` tinyint(3) unsigned NOT NULL DEFAULT '1',
   `photo` bigint(20) DEFAULT NULL,
   `role` tinyint(4) NOT NULL DEFAULT '0',
@@ -1123,7 +1122,7 @@ DROP TABLE IF EXISTS `version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `version` (
-  `version` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `version` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`version`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1137,9 +1136,9 @@ DROP TABLE IF EXISTS `wiki`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `wiki` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `photo` bigint(20) DEFAULT NULL,
-  `description` varchar(256) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `description` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `organization_id` bigint(20) NOT NULL,
   `created_by` bigint(20) NOT NULL,
   `created_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1161,7 +1160,7 @@ DROP TABLE IF EXISTS `wiki_item`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `wiki_item` (
   `id` bigint(20) NOT NULL,
-  `name` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `wiki_id` bigint(20) NOT NULL,
   `parent_id` bigint(20) DEFAULT NULL,
   `created_by` bigint(20) NOT NULL,
@@ -1184,13 +1183,13 @@ DROP TABLE IF EXISTS `workflow_action`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `workflow_action` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `source_node_id` bigint(20) NOT NULL,
   `dest_node_id` bigint(20) NOT NULL,
   `issue_type_id` bigint(20) NOT NULL,
-  `source_anchor_point` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `end_anchor_point` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `source_anchor_point` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `end_anchor_point` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `source_node` (`source_node_id`),
@@ -1211,7 +1210,7 @@ CREATE TABLE `workflow_approval` (
   `workflow_node_id` bigint(20) NOT NULL,
   `type` tinyint(4) NOT NULL,
   `value` json DEFAULT NULL,
-  `extra` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `extra` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `workflow_node_id_UNIQUE` (`workflow_node_id`)
@@ -1227,8 +1226,8 @@ DROP TABLE IF EXISTS `workflow_node`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `workflow_node` (
   `id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` tinyint(4) NOT NULL DEFAULT '0',
   `issue_type_id` bigint(20) NOT NULL,
   `x` int(11) NOT NULL DEFAULT '0',
@@ -1255,9 +1254,9 @@ CREATE TABLE `workflow_node_field_type` (
   `workflow_node_id` bigint(20) NOT NULL,
   `field_type_id` tinyint(4) NOT NULL,
   `optional` tinyint(4) NOT NULL DEFAULT '0',
-  `default_string_value` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `name` varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-  `description` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `default_string_value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `name` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `label_type` tinyint(4) DEFAULT NULL,
   `weight` tinyint(4) NOT NULL DEFAULT '50',
   `default_number_value` tinyint(4) DEFAULT '0',
@@ -1278,7 +1277,7 @@ DROP TABLE IF EXISTS `workflow_node_field_type_config`;
 CREATE TABLE `workflow_node_field_type_config` (
   `id` bigint(20) unsigned NOT NULL,
   `workflow_node_field_type_id` bigint(20) NOT NULL,
-  `value` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `selected` tinyint(4) DEFAULT '0',
   `weight` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1297,4 +1296,4 @@ CREATE TABLE `workflow_node_field_type_config` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-09-17 22:05:18
+-- Dump completed on 2023-09-24 21:24:18

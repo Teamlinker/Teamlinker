@@ -144,7 +144,7 @@ import {
 	ECommon_Calendar_WeekDay,
 	ICommon_Model_Calendar_Setting
 } from "../../../../../../common/model/calendar_setting";
-import {apiCalendar, DCSType} from "../../../common/request/request";
+import {apiCalendar} from "../../../common/request/request";
 import {ICommon_Model_Calendar} from "../../../../../../common/model/calendar";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
@@ -165,6 +165,7 @@ import CalendarEventSearch from "./calendarEventSearch.vue";
 import {debounce} from "../../../common/util/helper";
 import calendar from "../../../../../../common/routes/calendar";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
 	calendarEventId?:string

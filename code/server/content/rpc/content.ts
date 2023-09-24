@@ -2,6 +2,7 @@ import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import {ContentService} from "../service/content";
 import {Err} from "../../../common/status/error";
 import rpcUserApi from "../../user/rpc/user"
+import {ICommon_Model_Organization_User} from "../../../common/model/organization_user";
 
 class RpcContentApi {
     async list(refId:string,type:ECommon_Model_Content_Type,isAsc:boolean,lastMessageId?:string) {
@@ -113,6 +114,10 @@ class RpcContentApi {
 
     async clearByOrganizationId(organizationId:string) {
         await ContentService.clearByOrganizationId(organizationId)
+    }
+
+    async updateUserInfo(organizationId:string,organizationUserId:string,userId:string,organizationUser:ICommon_Model_Organization_User) {
+        await ContentService.updateUserInfo(organizationId, organizationUserId, userId, organizationUser)
     }
 }
 

@@ -86,7 +86,7 @@
 import {inject, onBeforeMount, onBeforeUnmount, ref} from "vue";
 import {injectProjectInfo} from "@/business/common/util/symbol";
 import Card from "@/business/common/component/card/card.vue";
-import {apiProject, DCSType} from "@/business/common/request/request";
+import {apiProject} from "@/business/common/request/request";
 import {ICommon_Route_Res_Project_Statics} from "../../../../../../../common/routes/response";
 import {ICommon_Model_Project} from "../../../../../../../common/model/project";
 import * as echarts from 'echarts/core';
@@ -106,6 +106,7 @@ import {ICommon_Model_Project_Issue} from "../../../../../../../common/model/pro
 import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
 import {ICommon_Model_Project_Release} from "../../../../../../../common/model/project_release";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 echarts.use([
 	TitleComponent,

@@ -34,13 +34,14 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {apiIssue, DCSType} from "../../../../common/request/request";
+import {apiIssue} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import FieldPriority from "../../../../common/component/field/fieldPriority.vue";
 import {ICommon_Route_Res_Project_Issue_filter_Item} from "../../../../../../../common/routes/response";
 import {ECommon_Model_Workflow_Node_Status} from "../../../../../../../common/model/workflow_node";
 import project from "../../../../../../../common/routes/project";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const data=ref<DCSType<ICommon_Route_Res_Project_Issue_filter_Item>[]>([])
 const selectedKeys=ref([])

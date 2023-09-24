@@ -23,7 +23,7 @@ import {TeamService} from "./team";
 import {UserService} from "./user";
 import {ECommon_Calendar_Color} from "../../../common/model/calendar";
 import {IServer_Common_Event_Types} from "../../common/event/types";
-import {ECommon_User_Online_Status} from "../../../common/types";
+import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../common/types";
 import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 import {emitServiceEvent} from "../../common/event/event";
 import {ECommon_Model_Meeting_Room_Type} from "../../../common/model/meeting_room";
@@ -33,6 +33,8 @@ import {ICommon_Route_Res_Organization_Statics} from "../../../common/routes/res
 import rpcNotificationApi from "../../notification/rpc/notification"
 import {getSocketEmitterInstance} from "../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../common/socket/types";
+import rpcContentApi from "../../content/rpc/content"
+import Application from "../../common/app/app";
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -66,7 +68,9 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
                 let defaultOrganizationRole=await rpcAuthApi.getSystemDefaultRole(ECommon_Model_Role_Type.ORGANIZATION);
                 defaultOrganizationRole.organization_id=ret.id
                 delete defaultOrganizationRole.id;
-                await rpcAuthApi.createRole(defaultOrganizationRole)
+                let role=await rpcAuthApi.createRole(defaultOrganizationRole)
+                let deletedUser=await UserService.getDeletedUser()
+                await this.addUser(role.id,deletedUser.id,"deleted",0)
             })(),
             (async ()=>{
                 let defaultProjectRole=await rpcAuthApi.getSystemDefaultRole(ECommon_Model_Role_Type.PROJECT);
@@ -122,7 +126,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         await rpcAuthApi.clearRoleByItemIds(ids)
     }
 
-    static async init(adminIds:string[],userIds:string[]) {
+    static async init(adminIds:string[],userIds:string[],deletedUserId:string) {
         let organization=new OrganizationService()
         organization.assignItem({
             name:"default",
@@ -138,6 +142,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         for(let i=0;i<userIds.length;i++) {
             arr.push(organization.addUser(role.users[0].id,userIds[i],"user",1))
         }
+        arr.push(organization.addUser(role.users[0].id,deletedUserId,"deleted",0))
         await Promise.all(arr)
         return organization.getId();
     }
@@ -282,6 +287,11 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         if(!objUser) {
             throw Err.Organization.userNotFound
         }
+        let deletedUser=await UserService.getDeletedUser()
+        let objOrganizationDeletedUser=await OrganizationUserService.getItemByExp({
+            organization_id:this.getId(),
+            user_id:deletedUser.id
+        })
         await Promise.all([
             objUser.delete(),
             TeamService.clearMember(organizationUserId),
@@ -290,7 +300,12 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             rpcMeetingApi.clearMeetingRoom(organizationUserId),
             rpcIMApi.clearByOrganizationUserId(organizationUserId),
             rpcFinderApi.clearByOrganizationAndUserId(objUser.getItem().organization_id,objUser.getItem().user_id),
-            rpcAuthApi.clearMember(organizationUserId)
+            rpcAuthApi.clearMember(organizationUserId),
+            rpcContentApi.updateUserInfo(this.getId(),objUser.getId(),objUser.getItem().user_id,objOrganizationDeletedUser.getItem()),
+            rpcCooperationApi.clearMember(organizationUserId),
+            rpcWikiApi.clearMember(organizationUserId),
+            Application.mode===ECommon_Application_Mode.OFFLINE?rpcFileApi.clearMember(objUser.getItem().user_id):null,
+            rpcNotificationApi.clearMember(organizationUserId)
         ])
         emitServiceEvent("organizationUserDelete",this.getId(),organizationUserId)
         let emit=getSocketEmitterInstance().of("/"+ECommon_Socket_Type.IM)

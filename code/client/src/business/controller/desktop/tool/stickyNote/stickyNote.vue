@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import {ICommon_Model_Sticky_Note} from "../../../../../../../common/model/sticky_note";
-import {apiFile, apiTool, DCSType} from "@/business/common/request/request";
+import {apiFile, apiTool} from "@/business/common/request/request";
 import {vDrag} from "@/teamOS/common/directive/drag";
 import {v4} from "uuid";
 import {computed, getCurrentInstance, onBeforeUnmount, onMounted, ref, watch} from "vue";
@@ -41,6 +41,7 @@ import {ECommon_Content_Line_Config_Type, ICommon_Content_Line_Config} from "../
 import {DropParam, vDrop} from "@/teamOS/common/directive/drop";
 import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	item:DCSType<ICommon_Route_Res_Sticky_Note_Item & {

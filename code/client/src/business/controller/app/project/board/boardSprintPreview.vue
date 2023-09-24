@@ -36,12 +36,13 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import {apiBoard, DCSType} from "../../../../common/request/request";
+import {apiBoard} from "../../../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../../common/event/event";
 import {ICommon_Route_Res_Board_Sprint_Info} from "../../../../../../../common/routes/response";
 import {v4} from "uuid";
 import moment from "moment";
 import {ECommon_Model_Board_Sprint_Status} from "../../../../../../../common/model/board_sprint";
+import {DCSType} from "../../../../../../../common/types";
 
 
 const loading=ref(true)

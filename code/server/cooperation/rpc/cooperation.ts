@@ -124,6 +124,9 @@ class RpcCooperationApi  {
         let obj=await BoardSprintService.boardAndProject(boardSprintId)
         return obj;
     }
-    
+
+    async clearMember(organizationUserId:string) {
+        await ProjectService.clearMember(organizationUserId)
+    }
 }
 export default new RpcCooperationApi;

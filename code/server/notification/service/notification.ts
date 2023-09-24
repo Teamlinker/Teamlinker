@@ -163,4 +163,10 @@ export class NotificationService extends Entity<typeof notificationModel,typeof 
     static async clearByUserId(userId:string) {
         await notificationMapper.clearByUserId(userId)
     }
+
+    static async clearMember(organizationUserId:string) {
+        let objOrganization=await rpcUserApi.organizationUser(organizationUserId)
+        let objDeletedUser=await rpcUserApi.getDeletedOrganizationUser(objOrganization.organization_id)
+        await notificationMapper.updateMember(organizationUserId,objDeletedUser.id)
+    }
 }

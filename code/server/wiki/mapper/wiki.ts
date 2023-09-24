@@ -286,6 +286,25 @@ class WikiMapper extends Mapper<typeof wikiModel> {
         }
         return ret;
     }
+
+    async updateMember(organizationUserId:string,updatedOrganizationUserId:string) {
+        if(!organizationUserId || !updatedOrganizationUserId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await Promise.all([
+            mysql.execute(generateUpdateSql(wikiModel,{
+                created_by:updatedOrganizationUserId
+            },{
+                created_by:organizationUserId
+            })),
+            mysql.execute(generateUpdateSql(wikiItemModel,{
+                created_by:updatedOrganizationUserId
+            },{
+                created_by:organizationUserId
+            }))
+        ])
+    }
 }
 
 export const wikiMapper=new WikiMapper()

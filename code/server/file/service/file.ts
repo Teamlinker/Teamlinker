@@ -5,6 +5,7 @@ import {fileModel} from './../../../common/model/file';
 import {fileMapper} from './../mapper/file';
 import {IServer_Common_Http_Req_File} from "../../common/types/http";
 import {emitServiceEvent} from "../../common/event/event";
+import rpcUserApi from "../../user/rpc/user"
 import path = require("path");
 
 export default class File extends Entity<typeof fileModel,typeof fileMapper> {
@@ -56,5 +57,10 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
             }
         }
         return arrId;
+    }
+
+    static async clearMember(userId:string) {
+        let deletedUser=await rpcUserApi.getDeletedUser()
+        await fileMapper.updateMember(userId,deletedUser.id)
     }
 }

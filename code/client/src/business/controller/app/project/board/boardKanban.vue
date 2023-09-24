@@ -115,7 +115,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, inject, markRaw, onBeforeMount, ref} from "vue";
-import {apiBoard, apiIssue, DCSType} from "@/business/common/request/request";
+import {apiBoard, apiIssue} from "@/business/common/request/request";
 import {
 	ECommon_Model_Board_Sprint_Status,
 	ICommon_Model_Board_Sprint
@@ -147,6 +147,7 @@ import {
 	ECommon_Model_Project_Issue_Approval_Type
 } from "../../../../../../../common/model/project_issue_approval";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 moment;
 const props=defineProps<{

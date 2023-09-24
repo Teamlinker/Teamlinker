@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import {onBeforeMount, onBeforeUnmount, ref} from "vue";
 import Card from "@/business/common/component/card/card.vue";
-import {apiOrganization, DCSType} from "@/business/common/request/request";
+import {apiOrganization} from "@/business/common/request/request";
 import {ICommon_Route_Res_Organization_Statics} from "../../../../../../../common/routes/response";
 import * as echarts from 'echarts/core';
 import {EChartsType} from 'echarts/core';
@@ -75,6 +75,7 @@ import {
 import {LabelLayout, UniversalTransition} from 'echarts/features';
 import {CanvasRenderer} from 'echarts/renderers';
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 echarts.use([
 	TitleComponent,

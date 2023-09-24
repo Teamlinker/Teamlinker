@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import {apiTool, DCSType} from "@/business/common/request/request";
+import {apiTool} from "@/business/common/request/request";
 import Upload from "@/business/common/component/upload.vue";
 import {getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {v4} from "uuid";
@@ -37,6 +37,7 @@ import {vDrag} from "@/teamOS/common/directive/drag";
 import {ICommon_Route_Res_Photo_item} from "../../../../../../../common/routes/response";
 import {Dialog} from "@/business/common/component/dialog/dialog";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	item:DCSType<ICommon_Route_Res_Photo_item & {

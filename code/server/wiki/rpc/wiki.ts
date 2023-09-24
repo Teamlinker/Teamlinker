@@ -26,6 +26,10 @@ class RpcCooperationApi  {
             return item.delete()
         }))
     }
+
+    async clearMember(organizationUserId:string) {
+        await WikiService.clearMember(organizationUserId)
+    }
 }
 
 export default new RpcCooperationApi()

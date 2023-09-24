@@ -2,7 +2,8 @@ import {BaseModel} from "./base"
 
 export enum ECommon_User_Type {
   USER,
-  ADMIN
+  ADMIN,
+  DELETED
 }
 export interface ICommon_Model_User {
     id :string,

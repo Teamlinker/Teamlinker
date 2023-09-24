@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import {apiIssue, DCSType} from "../../../../common/request/request";
+import {apiIssue} from "../../../../common/request/request";
 import {onBeforeMount, ref} from "vue";
 import {
 	ECommon_Model_Project_Issue_History_Type,
@@ -74,6 +74,7 @@ import {
 } from "../../../../../../../common/model/project_issue_history";
 import UserAvatar from "../../../../common/component/userAvatar.vue";
 import moment from "moment";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	projectIssueId:string

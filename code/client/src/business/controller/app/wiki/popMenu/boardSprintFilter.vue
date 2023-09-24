@@ -23,11 +23,12 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {apiBoard, DCSType} from "../../../../common/request/request";
+import {apiBoard} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {ICommon_Route_Res_Board_Sprint_filter_Item} from "../../../../../../../common/routes/response";
 import project from "../../../../../../../common/routes/project";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const data=ref<DCSType<ICommon_Route_Res_Board_Sprint_filter_Item>[]>([])
 const selectedKeys=ref([])

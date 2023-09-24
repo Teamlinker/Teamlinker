@@ -12,6 +12,7 @@ import {Err} from "../../../common/status/error";
 import {ECommon_User_Online_Status} from "../../../common/types";
 import CommonUtil from "../../common/util/common";
 import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
+import {ECommon_User_Type} from "../../../common/model/user";
 
 
 class RpcUserApi {
@@ -140,6 +141,17 @@ class RpcUserApi {
         return [obj1.getId()]
     }
 
+    async initDeletedUser():Promise<string> {
+        let obj=new UserService()
+        obj.assignItem({
+            username:"deleted",
+            password:"1",
+            active:0,
+            role:ECommon_User_Type.DELETED
+        })
+        let ret=await obj.create()
+        return ret.id
+    }
     
     async initUser():Promise<string[]> {
         let obj1=new UserService
@@ -152,8 +164,8 @@ class RpcUserApi {
     }
 
     
-    async initOrganization(adminIds: string[], userIds: string[]): Promise<string> {
-        let ret=await OrganizationService.init(adminIds,userIds)
+    async initOrganization(adminIds: string[], userIds: string[],deletedUserId:string): Promise<string> {
+        let ret=await OrganizationService.init(adminIds,userIds,deletedUserId)
         return ret;
     }
 
@@ -309,6 +321,20 @@ class RpcUserApi {
         }
         let ret=await obj.members(0,10000)
         return ret;
+    }
+
+    async getDeletedOrganizationUser(organizationId:string) {
+        let objUser=await UserService.getDeletedUser()
+        let objOrganizationUser=await OrganizationUserService.getItemByExp({
+            organization_id:organizationId,
+            user_id:objUser.id
+        })
+        return objOrganizationUser.getItem()
+    }
+
+    async getDeletedUser() {
+        let objUser=await UserService.getDeletedUser()
+        return objUser
     }
 }
 export default new RpcUserApi;

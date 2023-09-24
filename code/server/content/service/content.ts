@@ -10,6 +10,7 @@ import {emitServiceEvent} from "../../common/event/event";
 import rpcNotificationApi from "../../notification/rpc/notification"
 import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import {ICommon_Model_Organization_User} from "../../../common/model/organization_user";
 
 export class ContentService extends Entity<typeof contentModel,typeof contentMapper> {
     constructor(){
@@ -196,6 +197,10 @@ export class ContentService extends Entity<typeof contentModel,typeof contentMap
             arrPromise.push(obj.delete())
         }
         await Promise.all(arrPromise)
+    }
+
+    static async updateUserInfo(organizationId:string,organizationUserId:string,userId:string,organizationUser:ICommon_Model_Organization_User) {
+        await contentMapper.updateUserInfo(organizationId, organizationUserId, userId, organizationUser)
     }
 
 }

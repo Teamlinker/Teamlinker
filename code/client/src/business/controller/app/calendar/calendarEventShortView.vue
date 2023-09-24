@@ -90,12 +90,13 @@ import "moment-timezone"
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {SessionStorage} from "../../../common/storage/session";
 import UserAvatar from "../../../common/component/userAvatar.vue";
-import {apiCalendar, apiMeeting, DCSType} from "../../../common/request/request";
+import {apiCalendar, apiMeeting} from "../../../common/request/request";
 import {ICommon_Route_Res_Calendar_Event_Info} from "../../../../../../common/routes/response";
 import {TableRowSelection} from "@arco-design/web-vue/es/table/interface";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const emit=defineEmits<{
 	edit:[event:IClient_Calendar_Info],

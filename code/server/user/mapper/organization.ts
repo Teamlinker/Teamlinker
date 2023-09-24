@@ -16,7 +16,7 @@ import {
 } from '../../common/util/sql';
 import {ICommon_Model_Organization, organizationModel} from './../../../common/model/organization';
 import {ICommon_Model_Organization_User, organizationUserModel} from './../../../common/model/organization_user';
-import {ICommon_Model_User, userModel} from './../../../common/model/user';
+import {ECommon_User_Type, ICommon_Model_User, userModel} from './../../../common/model/user';
 import {ICommon_Model_Member_Tag, memberTagModel} from "../../../common/model/member_tag";
 import {memberTagMemberModel} from "../../../common/model/member_tag_member";
 import {ICommon_Model_Team, teamModel} from "../../../common/model/team";
@@ -404,6 +404,13 @@ class OrganizationMapper extends Mapper<typeof organizationModel> {
             },
             aggregation:"user"
         },{
+            role:{
+                model:userModel,
+                value:{
+                    exp:"<>",
+                    value:ECommon_User_Type.DELETED
+                }
+            },
             organization_id:{
                 model:organizationUserModel,
                 value:organizationId
@@ -481,7 +488,14 @@ class OrganizationMapper extends Mapper<typeof organizationModel> {
                         value:keyword
                     }
                 }
-            })
+            }),
+            role:{
+                model:userModel,
+                value:{
+                    exp:"<>",
+                    value:ECommon_User_Type.DELETED
+                }
+            }
         },"and",{
             field:"nickname",
             model:organizationUserModel,

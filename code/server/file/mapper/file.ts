@@ -1,7 +1,7 @@
 import {Err} from '../../../common/status/error';
 import {getMysqlInstance} from '../../common/db/mysql';
 import {Mapper} from '../../common/entity/mapper';
-import {generateQuerySql} from '../../common/util/sql';
+import {generateQuerySql, generateUpdateSql} from '../../common/util/sql';
 import {fileModel} from './../../../common/model/file';
 
 class FileMapper extends Mapper<typeof fileModel> {
@@ -35,6 +35,18 @@ class FileMapper extends Mapper<typeof fileModel> {
             value:ids
         }))
         return ret;
+    }
+
+    async updateMember(userId:string,updatedUserId:string) {
+        if(!userId || !updatedUserId) {
+            return
+        }
+        var mysql=getMysqlInstance()
+        await mysql.execute(generateUpdateSql(fileModel,{
+            created_by_pure:updatedUserId
+        },{
+            created_by_pure:userId
+        }))
     }
 }
 

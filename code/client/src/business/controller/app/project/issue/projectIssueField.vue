@@ -49,7 +49,7 @@ import {EClient_Field_Basic_Type} from "../../../../common/component/field/field
 import moment from "moment/moment";
 import FieldEdit from "../../../../common/component/field/fieldEdit.vue";
 import FieldEditBasic from "../../../../common/component/field/fieldEditBasic.vue";
-import {apiBoard, apiIssue, DCSType} from "../../../../common/request/request";
+import {apiBoard, apiIssue} from "../../../../common/request/request";
 import {
 	ICommon_Route_Res_ProjectIssue_BasicInfo,
 	ICommon_Route_Res_ProjectIssue_fieldsInfo
@@ -58,6 +58,7 @@ import {onBeforeMount, ref} from "vue";
 import {ICommon_Model_Project_Label} from "../../../../../../../common/model/project_label";
 import {ICommon_Model_Project_Module} from "../../../../../../../common/model/project_module";
 import {ICommon_Model_Project_Release} from "../../../../../../../common/model/project_release";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	info:DCSType<ICommon_Route_Res_ProjectIssue_BasicInfo>,

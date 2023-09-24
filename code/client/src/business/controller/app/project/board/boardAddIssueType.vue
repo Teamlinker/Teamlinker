@@ -9,13 +9,14 @@
 </template>
 
 <script setup lang="ts">
-import {apiBoard, DCSType} from "@/business/common/request/request";
+import {apiBoard} from "@/business/common/request/request";
 import {onBeforeMount, reactive, ref} from "vue";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	boardId:string,

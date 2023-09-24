@@ -15,12 +15,13 @@
 
 <script setup lang="ts">
 import {onBeforeMount, reactive, ref} from "vue";
-import {apiIssueType, apiProject, DCSType} from "../../../../common/request/request";
+import {apiIssueType, apiProject} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
 import projectList from "@/business/controller/app/setting/role/project/projectList.vue";
 import {ICommon_Model_Issue_Type_Solution} from "../../../../../../../common/model/issue_type_solution";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	issueTypeSolutionId:string

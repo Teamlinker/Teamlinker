@@ -38,6 +38,9 @@ class UserController {
         if(!user) {
             throw  Err.User.userNotFound
         }
+        if(!user.getItem().active) {
+            throw Err.User.accessDenied
+        }
         if(user.getItem().password===password) {
             let token=await user.startSession()
             user.assignItem({

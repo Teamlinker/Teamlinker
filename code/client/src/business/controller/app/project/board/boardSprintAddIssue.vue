@@ -19,13 +19,14 @@
 
 <script setup lang="ts">
 import {onBeforeMount, reactive, ref} from "vue";
-import {apiBoard, apiIssue, DCSType} from "@/business/common/request/request";
+import {apiBoard, apiIssue} from "@/business/common/request/request";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
 import {ICommon_Route_Res_Project_Issue_filter_Item} from "../../../../../../../common/routes/response";
 import {onDialogOk} from "@/business/common/component/dialog/dialog";
 import {dialogFuncGenerator} from "@/business/common/util/helper";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	boardSprintId:string,

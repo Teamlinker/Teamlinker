@@ -25,11 +25,12 @@
 
 <script setup lang="ts">
 import {reactive, ref} from "vue";
-import {apiRelease, DCSType} from "../../../../common/request/request";
+import {apiRelease} from "../../../../common/request/request";
 import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {ICommon_Route_Res_Release_Item} from "../../../../../../../common/routes/response";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const data=ref<DCSType<ICommon_Route_Res_Release_Item>[]>([])
 const selectedKeys=ref([])

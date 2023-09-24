@@ -55,7 +55,7 @@
 import moment from "moment/moment";
 import {checkPermission, Permission_Types} from "../../../../../../../common/permission/permission";
 import {getCurrentInstance, inject, onBeforeMount, ref} from "vue";
-import {apiFile, apiIssue, DCSType} from "../../../../common/request/request";
+import {apiFile, apiIssue} from "../../../../common/request/request";
 import {
 	ECommon_Content_Line_Config_Type,
 	ICommon_Content_Line,
@@ -72,6 +72,7 @@ import {RichEditorEventHandle} from "../../../../common/component/richEditorEven
 import {DropParam, vDrop} from "../../../../../teamOS/common/directive/drop";
 import UserAvatar from "../../../../common/component/userAvatar.vue";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	projectIssueId:string

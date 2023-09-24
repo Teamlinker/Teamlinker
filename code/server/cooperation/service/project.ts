@@ -18,6 +18,7 @@ import {IServer_Common_Event_Types} from "../../common/event/types";
 import {emitServiceEvent} from "../../common/event/event";
 import {BoardService} from "./board";
 import {REDIS_PROJECT} from "../../common/cache/keys/project";
+import rpcUserApi from "../../user/rpc/user"
 
 export class ProjectService extends Entity<typeof projectModel,typeof projectMapper> {
     constructor(){
@@ -235,5 +236,11 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
     async issueCount() {
         let ret=await projectMapper.issueCount(this.getId())
         return ret;
+    }
+
+    static async clearMember(organizationUserId:string) {
+        let objOrganization=await rpcUserApi.organizationUser(organizationUserId)
+        let objDeletedUser=await rpcUserApi.getDeletedOrganizationUser(objOrganization.organization_id)
+        await projectMapper.updateMember(organizationUserId,objDeletedUser.id)
     }
 }

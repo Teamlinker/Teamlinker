@@ -13,7 +13,7 @@ import {
 } from "../../common/util/sql";
 import {organizationUserModel} from './../../../common/model/organization_user';
 import {teamUserModel} from './../../../common/model/team_user';
-import {ICommon_Model_User, Table_User, userModel} from './../../../common/model/user';
+import {ECommon_User_Type, ICommon_Model_User, Table_User, userModel} from './../../../common/model/user';
 import {userSettingModel} from "../../../common/model/user_setting";
 
 class UserMapper extends Mapper<typeof userModel> {
@@ -68,6 +68,10 @@ class UserMapper extends Mapper<typeof userModel> {
                 exp:"%like%",
                 value:keyword
             }}),
+            role:{
+                exp:"<>",
+                value:ECommon_User_Type.DELETED
+            }
         },"and",{
             field:"username",
             type:"asc"
@@ -199,12 +203,24 @@ class UserMapper extends Mapper<typeof userModel> {
             username:{
                 exp:"%like%",
                 value:name
+            },
+            role:{
+                exp:"<>",
+                value:ECommon_User_Type.DELETED
             }
         },"and",{
             field:"username",
             type:"asc"
         },0,size))
         return ret;
+    }
+
+    async getDeletedUser() {
+        let mysql=getMysqlInstance()
+        let obj=await mysql.executeOne(generateQuerySql(userModel,null,{
+            role:ECommon_User_Type.DELETED
+        }))
+        return obj;
     }
 }
 export let userMapper=new UserMapper()
