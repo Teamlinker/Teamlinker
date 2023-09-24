@@ -102,8 +102,8 @@ const request=async ()=>{
         if(res?.code==0) {
           showValue.value[i]={
             photo:res.data.info.photo,
-            name:res.data.organizationUser.nickname,
-            id:res.data.organizationUser.id
+            name:res.data.organizationUser?.nickname,
+            id:res.data.organizationUser?.id
           }
           editValue.value[i]={...showValue.value[i]}
         }

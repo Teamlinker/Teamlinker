@@ -10,19 +10,25 @@
       <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="data.form.photo" @upload="onUpload"></Upload>
     </a-form-item>
     <a-form-item>
-      <a-button html-type="submit" :loading="loading">{{$t("util.submit")}}</a-button>
+	    <a-space>
+		    <a-button html-type="submit" type="primary" :loading="loading">{{$t("util.submit")}}</a-button>
+		    <a-button html-type="button" type="primary" status="danger" @click="onDelete" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">{{$t("util.delete")}}</a-button>
+	    </a-space>
     </a-form-item>
   </a-form>
 </template>
 
 <script setup lang="ts">
 import {apiOrganization} from "../../../../common/request/request";
-import {onBeforeMount, reactive, ref} from "vue";
+import {getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
 import Upload from "../../../../common/component/upload.vue";
 import {Message} from "@arco-design/web-vue";
 import {useDesktopStore} from "../../../desktop/store/desktop";
 import {SessionStorage} from "../../../../common/storage/session";
 import {useI18n} from "vue-i18n";
+import {Dialog} from "@/business/common/component/dialog/dialog";
+import {getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
+import {ECommon_Application_Mode} from "../../../../../../../common/types";
 
 const storeDesktop=useDesktopStore()
 const data=reactive({
@@ -36,6 +42,8 @@ const uploadUriId=ref("")
 const onUpload=(id:string)=> {
   uploadUriId.value=id
 }
+const root=getRootNavigatorRef()
+const appContext=getCurrentInstance().appContext
 const loading=ref(false)
 const {t}=useI18n()
 const onSubmit=async ()=>{
@@ -55,6 +63,23 @@ const onSubmit=async ()=>{
     Message.error(ret?.msg??"unknown error")
   }
 
+}
+
+const onDelete=async ()=>{
+	let ret=await Dialog.confirm(root.value,appContext,t("tip.deleteOrganization"))
+	if(ret) {
+		let ret=await Dialog.input(root.value,appContext,t("placeholder.typeOrganizationName"))
+		if(ret===storeDesktop.organizationInfo?.name) {
+			let res=await apiOrganization.remove({
+				organizationId:storeDesktop.organizationInfo.id
+			})
+			if(res?.code==0) {
+				Message.success(t("tip.operationSuccess"))
+			}
+		} else {
+			Message.error(t("tip.notMatch"))
+		}
+	}
 }
 
 onBeforeMount(async ()=>{

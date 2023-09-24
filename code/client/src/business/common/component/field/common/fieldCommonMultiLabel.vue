@@ -207,8 +207,8 @@ const onSearch=async (keyword:string)=>{
 			if(res?.code==0) {
 				searchValueList.value=res.data.data.map(item=>{
 					return {
-						id:item.organizationUser.id,
-						name:item.organizationUser.nickname
+						id:item.organizationUser?.id,
+						name:item.organizationUser?.nickname
 					}
 				})
 			}

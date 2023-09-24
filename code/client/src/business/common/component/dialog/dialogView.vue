@@ -6,7 +6,7 @@
       </div>
       <div style="display: flex;overflow: auto;box-sizing: border-box;padding: 10px;flex: 0 1 auto;height: calc(100% - 80px);width: 100%">
         <div style="width: 100%;flex: 1">
-          <component :is="component" v-bind="props.props" v-if="component"></component>
+          <component :is="component" v-bind="Object.assign(props.props??{},{onClose:onClose})" v-if="component"></component>
           <a-input v-else-if="input" v-model="inputValue" :placeholder="title" style="width: 80%"></a-input>
           <div v-else style="min-height: 60px;padding: 10px;font-size: medium">
             {{title}}

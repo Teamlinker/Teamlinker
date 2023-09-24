@@ -288,7 +288,7 @@ export async function initSystem() {
             rpcAuthApi.initRole()
         ])
         let organizationId=await rpcUserApi.initOrganization(adminIds,userIds);
-        let organizationUserId=await rpcUserApi.getOrganizationUserId(organizationId,userIds[0])
+        let organizationUserId=await rpcUserApi.getOrganizationUserId(organizationId,adminIds[0])
         await Promise.all([
             rpcUserApi.initTeam(organizationUserId,organizationId),
             rpcCooperationApi.initProject(organizationUserId,organizationId)

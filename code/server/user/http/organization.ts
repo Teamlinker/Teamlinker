@@ -73,6 +73,9 @@ class OrganizationController {
 
     @DHttpApi(organizationApi.routes.remove)
     async remove(@DHttpReqParamRequired("organizationId") organizationId:string) :Promise<typeof organizationApi.routes.remove.res>{
+        if(Application.mode===ECommon_Application_Mode.OFFLINE) {
+            throw Err.Common.interfaceForbidden
+        }
         let obj=await OrganizationService.getItemById(organizationId)
         if(!obj) {
             throw Err.Organization.organizationNotFound
@@ -597,12 +600,15 @@ class OrganizationController {
     }
 
     @DHttpApi(organizationApi.routes.quit)
-    async quit(@DHttpReqParamRequired("organizationUserId") organizationUserId:string,@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.quit.res>{
-        if(Application.mode!==ECommon_Application_Mode.OFFLINE) {
+    async quit(@DHttpUser user:IUserSession) :Promise<typeof organizationApi.routes.quit.res>{
+        if(Application.mode!==ECommon_Application_Mode.ONLINE) {
             throw Err.Common.interfaceForbidden
         }
         let objOrganizationUser=await OrganizationUserService.getItemById(user.organizationInfo.organizationUserId)
         let obj=await OrganizationService.getItemById(user.organizationInfo.organizationId)
+        if(obj.getItem().created_by_pure===user.userId) {
+            throw Err.Organization.ownerQuitForbidden
+        }
         await obj.removeUser(user.organizationInfo.organizationUserId)
         rpcNotificationApi.createNotification(ECommon_Model_Notification_Type.ORGANIZATION_USER_QUIT,null,null,null,objOrganizationUser.getItem().nickname)
         return

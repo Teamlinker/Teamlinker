@@ -111,4 +111,8 @@ export class RoleService extends Entity<typeof roleModel,typeof roleMapper> {
         return ret;
     }
 
+    static async clearByOrganizationId(organizationId:string) {
+        await roleMapper.clearByOrganizationId(organizationId)
+    }
+
 }

@@ -495,7 +495,7 @@ export function generateDeleteSql<T extends BaseModel>(model:T,objExpr?:{
     }
 }
 
-export function generateDeleteInnerJoinSql<T1 extends BaseModel, T2 extends BaseModel>(mainModel: T1, joinModel: {
+export function generateDeleteLeftJoinSql<T1 extends BaseModel, T2 extends BaseModel>(mainModel: T1, joinModel: {
     model: T2,
     expression: {
         [key in keyof T2["model"]]?: {
@@ -525,12 +525,12 @@ export function generateDeleteInnerJoinSql<T1 extends BaseModel, T2 extends Base
     }
     let expression = arrExpression.join(" and ")
     return {
-        value: `delete ${table}${joinModel.isDelete?`,${joinTable}`:""} from ${table} inner join ${joinTable} on ${expression} ${expr?(" where "+expr):""}`,
+        value: `delete ${table}${joinModel.isDelete?`,${joinTable}`:""} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""}`,
         type: null,
     }
 }
 
-export function generateDeleteInnerJoin2Sql<T1 extends BaseModel, T2 extends BaseModel,T3 extends BaseModel>(mainModel: T1, joinModel: {
+export function generateDeleteLeftJoin2Sql<T1 extends BaseModel, T2 extends BaseModel,T3 extends BaseModel>(mainModel: T1, joinModel: {
     model: T2,
     expression: {
         [key in keyof T2["model"]]?:{
@@ -548,7 +548,7 @@ export function generateDeleteInnerJoin2Sql<T1 extends BaseModel, T2 extends Bas
         }
     },
     isDelete:boolean
-},objExpr?: {
+}, objExpr?: {
     [param in ((keyof (T1 & T2 & T3)["model"])|`${"$and"|"$or"}${number}`)]?:{
     value:EXPRVALUE,
     model:T1|T2|T3
@@ -576,12 +576,12 @@ export function generateDeleteInnerJoin2Sql<T1 extends BaseModel, T2 extends Bas
     }
     let expression2 = arrExpression2.join(" and ")
     return {
-        value: `delete ${table}${joinModel.isDelete?`,${joinTable}`:""}${joinModel2.isDelete?`,${joinTable2}`:""} from ${table} inner join ${joinTable} on ${expression} inner join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}`,
+        value: `delete ${table}${joinModel.isDelete?`,${joinTable}`:""}${joinModel2.isDelete?`,${joinTable2}`:""} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""}`,
         type: null,
     }
 }
 
-export function generateDeleteInnerJoin3Sql<T1 extends BaseModel, T2 extends BaseModel,T3 extends BaseModel,T4 extends BaseModel>(mainModel: T1, joinModel: {
+export function generateDeleteLeftJoin3Sql<T1 extends BaseModel, T2 extends BaseModel,T3 extends BaseModel,T4 extends BaseModel>(mainModel: T1, joinModel: {
     model: T2,
     expression: {
         [key in keyof T2["model"]]?:{
@@ -597,7 +597,7 @@ export function generateDeleteInnerJoin3Sql<T1 extends BaseModel, T2 extends Bas
             field:keyof (T1 & T2 & T4)["model"]
         }
     }
-},joinModel3: {
+}, joinModel3: {
     model:T4,
     expression:{
         [key in keyof T4["model"]]?:{
@@ -605,7 +605,7 @@ export function generateDeleteInnerJoin3Sql<T1 extends BaseModel, T2 extends Bas
             field:keyof (T1 & T2 & T3)["model"]
         }
     }
-},objExpr?: {
+}, objExpr?: {
     [param in ((keyof (T1 & T2 & T3 & T4)["model"])|`${"$and"|"$or"}${number}`)]?:{
     value:EXPRVALUE,
     model:T1|T2|T3|T4
@@ -640,7 +640,7 @@ export function generateDeleteInnerJoin3Sql<T1 extends BaseModel, T2 extends Bas
     }
     let expression3 = arrExpression3.join(" and ")
     return {
-        value: `delete ${table},${joinTable},${joinTable2},${joinTable3} from ${table} inner join ${joinTable} on ${expression} inner join ${joinTable2} on ${expression2} inner join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}`,
+        value: `delete ${table},${joinTable},${joinTable2},${joinTable3} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""}`,
         type: null,
     }
 }

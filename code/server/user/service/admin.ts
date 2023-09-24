@@ -5,6 +5,7 @@ import {getConfigInstance} from '../../common/config/config';
 import {Entity} from "../../common/entity/entity";
 import {ECommon_User_Type, userModel} from './../../../common/model/user';
 import {adminMapper} from './../mapper/admin';
+import {UserSettingService} from "./user";
 
 export class AdminService extends Entity<typeof userModel,typeof adminMapper> {
     constructor(){
@@ -19,6 +20,16 @@ export class AdminService extends Entity<typeof userModel,typeof adminMapper> {
         } else {
             return null;
         }
+    }
+
+    override async create(...param): Promise<typeof userModel["model"]> {
+        let ret=await super.create(...param);
+        let obj=new UserSettingService()
+        obj.assignItem({
+            user_id:ret.id
+        })
+        await obj.create()
+        return ret;
     }
 
     async startSession():Promise<string>{

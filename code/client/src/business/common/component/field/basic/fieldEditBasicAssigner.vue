@@ -6,9 +6,9 @@
 		</template>
 		<a-row style="padding-right: 10px" v-else>
 			<a-select allow-search allow-clear v-model="editValue" @search="onSearchAssigner">
-				<a-option v-for="item in assignerList" :label="item.organizationUser.nickname" :value="item.organizationUser.id">
+				<a-option v-for="item in assignerList" :label="item.organizationUser?.nickname" :value="item.organizationUser?.id">
 					<a-avatar :size="24" :image-url="item.user.photo"></a-avatar>&nbsp;&nbsp;
-					{{ item.organizationUser.nickname }}
+					{{ item.organizationUser?.nickname }}
 				</a-option>
 			</a-select>
 			<a-button type="text" @click="onClick">
@@ -29,9 +29,10 @@
 
 import UserAvatar from "../../userAvatar.vue";
 import {ref, watch} from "vue";
-import {apiIssue, apiOrganization, DCSType} from "../../../request/request";
+import {apiIssue, apiOrganization} from "../../../request/request";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../common/routes/response";
 import {SessionStorage} from "../../../storage/session";
+import {DCSType} from "../../../../../../../common/types";
 
 const props=defineProps<{
 	isEdit:boolean,

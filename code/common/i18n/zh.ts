@@ -98,7 +98,10 @@ export default {
         accept:"接受",
         reject:"拒绝",
         workDay:"工作日",
-        joinMeetingFailed:"会议加入失败"
+        joinMeetingFailed:"会议加入失败",
+        deleteOrganization:"你是否想删除该组织？",
+        notMatch:"输入不匹配",
+        quitOrganization:"你确定要退出当前组织吗?"
     },
     placeholder:{
         pleaseSelect:"请选择",
@@ -133,7 +136,8 @@ export default {
         typePassword:"输入密码",
         typeEmail:"输入Email",
         typePasswordAgain:"再次输入密码",
-        typeMeetingPassword:"输入会议密码"
+        typeMeetingPassword:"输入会议密码",
+        typeOrganizationName:"输入组织名称"
     },
     "util":{
         "ok":"确认",

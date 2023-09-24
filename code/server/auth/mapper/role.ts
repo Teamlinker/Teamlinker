@@ -7,7 +7,7 @@ import {
 import {Err} from '../../../common/status/error';
 import {getMysqlInstance} from '../../common/db/mysql';
 import {Mapper} from "../../common/entity/mapper";
-import {generateDeleteSql, generateQuerySql} from '../../common/util/sql';
+import {generateDeleteLeftJoinSql, generateDeleteSql, generateQuerySql} from '../../common/util/sql';
 import {projectModel} from './../../../common/model/project';
 import {roleMemberModel} from './../../../common/model/role_member';
 import {teamModel} from './../../../common/model/team';
@@ -180,6 +180,29 @@ class RoleMapper extends Mapper<typeof roleModel> {
             value:value
         }))
         return obj;
+    }
+
+    async clearByOrganizationId(organizationId:string) {
+        if(!organizationId) {
+            throw Err.Organization.organizationNotFound
+        }
+        let mysql=getMysqlInstance()
+        let sql=generateDeleteLeftJoinSql(roleModel,{
+            model:roleMemberModel,
+            expression:{
+                role_id:{
+                    model:roleModel,
+                    field:"id"
+                }
+            },
+            isDelete:true
+        },{
+            organization_id:{
+                model:roleModel,
+                value:organizationId
+            }
+        })
+        await mysql.execute(sql)
     }
 }
 

@@ -168,13 +168,27 @@ export const useDesktopStore=defineStore("desktop",{
                 return false
             }
         },
+        leaveOrganization() {
+            SessionStorage.remove("organizationId")
+            SessionStorage.remove("organizationUserId")
+            let imRecentList=SessionStorage.get("imRecentList")
+            delete imRecentList[this.organizationInfo.id]
+            SessionStorage.set("imRecentList",imRecentList)
+            let index=this.appList.indexOf(iconSetting)
+            if(index>-1) {
+                this.appList.splice(index,1)
+            }
+            SocketIOClient.clear([ECommon_Socket_Type.NOTIFICATION])
+        },
         async $update() {
             await this.getOrganizationList();
-            let retOrganization=await apiOrganization.info({
-                organizationId:SessionStorage.get("organizationId")
-            })
-            if(retOrganization?.code==0) {
-                this.organizationInfo=retOrganization.data
+            if(SessionStorage.get("organizationId")) {
+                let retOrganization=await apiOrganization.info({
+                    organizationId:SessionStorage.get("organizationId")
+                })
+                if(retOrganization?.code==0) {
+                    this.organizationInfo=retOrganization.data
+                }
             }
         },
         async $refreshUser() {

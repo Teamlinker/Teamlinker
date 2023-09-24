@@ -16,7 +16,7 @@ import {
     generateBatchCreateOnUpdateSql,
     generateBatchCreateSql,
     generateCreateSql,
-    generateDeleteInnerJoinSql,
+    generateDeleteLeftJoinSql,
     generateDeleteSql,
     generateGroupLeftJoin4Sql,
     generateLeftJoin3Sql,
@@ -395,7 +395,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }
         let mysql=getMysqlInstance()
         await Promise.all([
-            mysql.execute(generateDeleteInnerJoinSql(projectIssueFieldValueModel,{
+            mysql.execute(generateDeleteLeftJoinSql(projectIssueFieldValueModel,{
                 model:projectIssueModel,
                 expression:{
                     id:{
@@ -410,7 +410,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     value:projectId
                 }
             })),
-            mysql.execute(generateDeleteInnerJoinSql(projectIssueProcessModel,{
+            mysql.execute(generateDeleteLeftJoinSql(projectIssueProcessModel,{
                 model:projectIssueModel,
                 expression:{
                     id:{
@@ -425,7 +425,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     value:projectId
                 }
             })),
-            mysql.execute(generateDeleteInnerJoinSql(projectIssueApprovalModel,{
+            mysql.execute(generateDeleteLeftJoinSql(projectIssueApprovalModel,{
                 model:projectIssueModel,
                 expression:{
                     id:{
@@ -449,7 +449,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         }
         let mysql=getMysqlInstance()
         await Promise.all([
-            mysql.execute(generateDeleteInnerJoinSql(projectIssueFieldValueModel,{
+            mysql.execute(generateDeleteLeftJoinSql(projectIssueFieldValueModel,{
                 model:projectIssueModel,
                 expression:{
                     id:{
@@ -464,7 +464,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     value:issueTypeId
                 }
             })),
-            mysql.execute(generateDeleteInnerJoinSql(projectIssueProcessModel,{
+            mysql.execute(generateDeleteLeftJoinSql(projectIssueProcessModel,{
                 model:projectIssueModel,
                 expression:{
                     id:{
@@ -479,7 +479,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                     value:issueTypeId
                 }
             })),
-            mysql.execute(generateDeleteInnerJoinSql(projectIssueApprovalModel,{
+            mysql.execute(generateDeleteLeftJoinSql(projectIssueApprovalModel,{
                 model:projectIssueModel,
                 expression:{
                     id:{

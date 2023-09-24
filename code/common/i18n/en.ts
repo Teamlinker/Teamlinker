@@ -99,7 +99,10 @@ export default {
         accept:"Accept",
         reject:"Reject",
         workDay:"WorkDay",
-        joinMeetingFailed:"Join Meeting Failed"
+        joinMeetingFailed:"Join Meeting Failed",
+        deleteOrganization:"Do you want to delete this organization?",
+        notMatch:"input not match",
+        quitOrganization:"do you want to quit this organization?"
     },
     placeholder:{
         pleaseSelect:"Please Select",
@@ -135,7 +138,8 @@ export default {
         typePassword:"Type Password",
         typeEmail:"Type Email",
         typePasswordAgain:"Type Password Again",
-        typeMeetingPassword:"Type Meeting Password"
+        typeMeetingPassword:"Type Meeting Password",
+        typeOrganizationName:"Type Organization Name"
     },
     "util":{
         "ok":"Ok",

@@ -49,7 +49,7 @@
 						</span>
 					</a-descriptions-item>
 					<a-descriptions-item :label="$t('util.create')" v-if="projectInfo">
-						<UserAvatar :organization-user-id="projectInfo?.created_by.organizationUserId" :name="projectInfo?.created_by.nickname" :photo="projectInfo?.created_by.photo" :organization-id="projectInfo?.organization_id"></UserAvatar>
+						<UserAvatar :organization-user-id="projectInfo?.created_by?.organizationUserId" :name="projectInfo?.created_by.nickname" :photo="projectInfo?.created_by.photo" :organization-id="projectInfo?.organization_id"></UserAvatar>
 					</a-descriptions-item>
 					<a-descriptions-item :label="$t('util.organization')" v-if="organizationInfo">
 						{{organizationInfo.name}}
@@ -145,7 +145,7 @@
 						</span>
 					</a-descriptions-item>
 					<a-descriptions-item :label="$t('util.create')" v-if="wikiInfo">
-						<UserAvatar :organization-user-id="wikiInfo?.created_by.organizationUserId" :name="wikiInfo?.created_by.nickname" :photo="wikiInfo?.created_by.photo" :organization-id="wikiInfo?.organization_id"></UserAvatar>
+						<UserAvatar :organization-user-id="wikiInfo?.created_by?.organizationUserId" :name="wikiInfo?.created_by.nickname" :photo="wikiInfo?.created_by.photo" :organization-id="wikiInfo?.organization_id"></UserAvatar>
 					</a-descriptions-item>
 					<a-descriptions-item :label="$t('util.wikiCount')">
 						{{wikiInfo?.data.length}}

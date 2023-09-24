@@ -12,7 +12,7 @@
         </a-space>
       </template>
       <template #creator="{record}">
-        {{record.created_by.nickname}}
+        {{record.created_by?.nickname}}
       </template>
       <template #operation="{record}">
         <a-space wrap>

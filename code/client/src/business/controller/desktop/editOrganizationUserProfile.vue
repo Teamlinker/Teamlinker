@@ -13,21 +13,29 @@
 			<a-form-item field="phone" :label="$t('util.phone')">
 				<a-input v-model="form.phone"></a-input>
 			</a-form-item>
+			<a-form-item v-if="store.organizationInfo.created_by_pure.id!==userId">
+				<a-button html-type="button" type="primary" status="danger" @click="onQuit">{{$t("util.quit")}}</a-button>
+			</a-form-item>
 		</a-form>
 	</div>
 </template>
 
 <script setup lang="ts">
-import {reactive, ref} from "vue";
+import {getCurrentInstance, reactive, ref} from "vue";
 import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
 import {apiOrganization} from "@/business/common/request/request";
 import {SessionStorage} from "@/business/common/storage/session";
-import {onDialogOk} from "@/business/common/component/dialog/dialog";
+import {Dialog, onDialogOk} from "@/business/common/component/dialog/dialog";
 import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
 
+const props=defineProps<{
+	onClose:()=>void
+}>()
 const eleForm=ref(null)
 const store=useDesktopStore()
+const userId=SessionStorage.get("userId")
+const appContext=getCurrentInstance().appContext
 const form=reactive({
 	nickname:store.organizationUserInfo.nickname,
 	email:store.organizationUserInfo.email,
@@ -36,6 +44,20 @@ const form=reactive({
 })
 
 const {t}=useI18n()
+
+const onQuit=async ()=>{
+	let ret=await Dialog.confirm(document.body,appContext,t("tip.quitOrganization"))
+	if(ret) {
+		let res=await apiOrganization.quit()
+		if(res?.code==0) {
+			Message.success(t("tip.operationSuccess"))
+			props.onClose()
+		} else {
+			Message.error(res.msg)
+		}
+	}
+}
+
 onDialogOk(async ()=>{
 	let ret=await eleForm.value.validate()
 	if(ret) {

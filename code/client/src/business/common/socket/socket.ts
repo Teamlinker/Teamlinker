@@ -13,11 +13,13 @@ export class SocketIOClient {
     static getSocket(name:ECommon_Socket_Type) {
         return this.map.get(name)
     }
-    static clear() {
+    static clear(exceptList?:ECommon_Socket_Type[]) {
         for(let obj of this.map.values()) {
-            obj.close()
+            if(!exceptList?.includes(obj.name)) {
+                obj.close()
+                this.map.delete(obj.name)
+            }
         }
-        this.map.clear()
     }
     constructor(name:ECommon_Socket_Type) {
         this.name=name

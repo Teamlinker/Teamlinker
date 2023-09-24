@@ -44,18 +44,19 @@ export type ICommon_Socket_IM_Search_Message = {
 
 export interface ICommon_Socket_ServerToClientEvents {
     //calendar
-    calendar_event_reminder: (id: string, name: string, start_time: number) => void
+    calendar_event_reminder: (id: string, name: string, start_time: number) => void,
     //im
-    im_user_relay_message: (fromOrganizationUserId: string, toOrganizationUserId: string, content: ICommon_Content_Line[],type:ECommon_IM_Message_ContentType,date:Date,messageId:string) => void
-    im_team_relay_message: (organizationUserId: string, teamId: string, content: ICommon_Content_Line[],type:ECommon_IM_Message_ContentType,date:Date,messageId:string) => void
-    im_organization_user_status_change:(organizationUserId:string, status:ECommon_User_Online_Status)=>void
+    im_user_relay_message: (fromOrganizationUserId: string, toOrganizationUserId: string, content: ICommon_Content_Line[],type:ECommon_IM_Message_ContentType,date:Date,messageId:string) => void,
+    im_team_relay_message: (organizationUserId: string, teamId: string, content: ICommon_Content_Line[],type:ECommon_IM_Message_ContentType,date:Date,messageId:string) => void,
+    im_organization_user_status_change:(organizationUserId:string, status:ECommon_User_Online_Status)=>void,
+    im_organization_quit:(organizationId:string)=>void,
     //meeting
-    meeting_presenter_change:(organizationUserId:string,permission:ECommon_Meeting_Room_Permission)=>void
+    meeting_presenter_change:(organizationUserId:string,permission:ECommon_Meeting_Room_Permission)=>void,
     meeting_invite:(fromOrganizationUserId:string,fromOrganizationUserName:string,roomId:string,password:string)=>void,
-    meeting_rejected:(rejectOrganizationUserId:string,rejectOrganizationUserName:string,roomId:string)=>void
+    meeting_rejected:(rejectOrganizationUserId:string,rejectOrganizationUserName:string,roomId:string)=>void,
     //notification
-    notification_new:(notificationId:string)=>void
-    notification_logout:()=>void
+    notification_new:(notificationId:string)=>void,
+    notification_logout:()=>void,
 }
 
 export interface ICommon_Socket_ClientToServerEvents {

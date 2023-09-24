@@ -40,4 +40,7 @@ export function handleIMEvent(socket:SocketIOClient["socket"],statue:ECommon_Use
     socket.on("im_organization_user_status_change",(organizationUserId, status) => {
         eventBus.emit(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,organizationUserId,status)
     })
+    socket.on("im_organization_quit", organizationId => {
+        eventBus.emit(EClient_EVENTBUS_TYPE.ORGANIZATION_REMOVE,organizationId)
+    })
 }

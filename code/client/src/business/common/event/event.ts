@@ -38,7 +38,8 @@ export enum EClient_EVENTBUS_TYPE {
     REFRESH_NOTIFICATION_UNREAD="refresh_notification_unread",
     REFRESH_MISS_CALL_UNREAD="refresh_miss_call_unread",
     USER_LOGIN_EXPIRED="user_login_expired",
-    GUIDE="guide"
+    GUIDE="guide",
+    ORGANIZATION_REMOVE="organization_remove"
 }
 
 interface IClient_EventBus_Func {
@@ -82,6 +83,7 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.OPEN_PROJECT_BOARD_PROFILE]:(projectId:string,boardId:string)=>void
     [EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED]:()=>void
     [EClient_EVENTBUS_TYPE.GUIDE]:()=>void
+    [EClient_EVENTBUS_TYPE.ORGANIZATION_REMOVE]:(organizationId:string)=>void
 }
 
 interface IClient_EventBus_Emit_Func {

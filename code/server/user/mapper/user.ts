@@ -13,7 +13,7 @@ import {
 } from "../../common/util/sql";
 import {organizationUserModel} from './../../../common/model/organization_user';
 import {teamUserModel} from './../../../common/model/team_user';
-import {ECommon_User_Type, ICommon_Model_User, Table_User, userModel} from './../../../common/model/user';
+import {ICommon_Model_User, Table_User, userModel} from './../../../common/model/user';
 import {userSettingModel} from "../../../common/model/user_setting";
 
 class UserMapper extends Mapper<typeof userModel> {
@@ -36,7 +36,9 @@ class UserMapper extends Mapper<typeof userModel> {
             throw  Err.User.userNameNotExists
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{username:name,role:ECommon_User_Type.USER}))
+        let ret=await mysql.executeOne(generateQuerySql(userModel,[],{
+            username:name
+        }))
         return ret
     }
 

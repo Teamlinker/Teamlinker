@@ -31,6 +31,8 @@ import CommonUtil from "../../common/util/common";
 import rpcWikiApi from "../../wiki/rpc/wiki"
 import {ICommon_Route_Res_Organization_Statics} from "../../../common/routes/response";
 import rpcNotificationApi from "../../notification/rpc/notification"
+import {getSocketEmitterInstance} from "../../common/socket/socket";
+import {ECommon_Socket_Type} from "../../../common/socket/types";
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -91,10 +93,11 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete()
         await this.clearData()
+        let emit=getSocketEmitterInstance().of("/"+ECommon_Socket_Type.IM)
+        emit.to(this.getId()).emit("im_organization_quit",this.getId())
     }
-
     async clearData() {
-        await Promise.all([
+        await Promise.allSettled([
             this.clearUser(),
             this.clearTeam(),
             rpcCooperationApi.clearProject(this.getId()),
@@ -104,7 +107,8 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             rpcMeetingApi.clearMeetingRoomByOrganizationId(this.getId()),
             rpcIMApi.clearByOrganizationId(this.getId()),
             rpcFinderApi.clearByOrganizationId(this.getId()),
-            rpcNotificationApi.clearByOrganizationId(this.getId())
+            rpcNotificationApi.clearByOrganizationId(this.getId()),
+            rpcAuthApi.clearByOrganizationId(this.getId())
         ])
     }
 
@@ -129,10 +133,9 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         let role=await rpcAuthApi.listRole(organization.getId(),ECommon_Model_Role_Type.ORGANIZATION);
         let arr=[];
         for(let obj of arrAdmin) {
-            arr.push(organization.addUser(role.admin.id,obj,"www",1))
+            arr.push(organization.addUser(role.admin.id,obj,"admin",1))
         }
-        arr.push(organization.addUser(role.admin.id,userIds[0],"sx",1))
-        for(let i=1;i<userIds.length;i++) {
+        for(let i=0;i<userIds.length;i++) {
             arr.push(organization.addUser(role.users[0].id,userIds[i],"user",1))
         }
         await Promise.all(arr)
@@ -290,6 +293,8 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             rpcAuthApi.clearMember(organizationUserId)
         ])
         emitServiceEvent("organizationUserDelete",this.getId(),organizationUserId)
+        let emit=getSocketEmitterInstance().of("/"+ECommon_Socket_Type.IM)
+        emit.to(objUser.getId()).emit("im_organization_quit",this.getId())
     }
 
     async listTag(keyword?:string) {
@@ -306,9 +311,24 @@ export class OrganizationUserService extends Entity<typeof organizationUserModel
         super(organizationUserMapper)
     }
 
+
+    async clearCache() {
+        let objStatusKey=REDIS_ORGANIZATION.status(this.getId())
+        objStatusKey.del()
+        let objPreStatusKey=REDIS_ORGANIZATION.preStatus(this.getId())
+        objPreStatusKey.del()
+        let objMeeting=REDIS_ORGANIZATION.meetingId(this.getId())
+        objMeeting.del()
+        let objTeamList=REDIS_ORGANIZATION.teamList(this.getId())
+        objTeamList.del()
+        let objOrganization=REDIS_USER.organizationInfo(this.getItem().user_id)
+        objOrganization.del()
+    }
+
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
         await rpcAuthApi.clearMember(this.getId())
+        await this.clearCache()
     }
 
     static async organizationUserInfos(organizationUserIds:string,isGetPhoto:boolean=true,isGetStatus:boolean=false):Promise<(Omit<ICommon_Model_User,"password"> & {nickname:string,organizationUserId:string,status?:ECommon_User_Online_Status})[]>{

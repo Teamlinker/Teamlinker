@@ -6,7 +6,7 @@ import * as yargs from "yargs";
 import * as util from "util";
 
 (async function (){
-    //(<any>process).pkg=true;
+    ///(<any>process).pkg=true;
     const exec = util.promisify(require('child_process').exec);
     let argv=yargs.argv
     if(!argv["debug"] && (<any>process).pkg) {

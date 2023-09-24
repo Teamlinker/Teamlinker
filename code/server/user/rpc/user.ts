@@ -118,6 +118,11 @@ class RpcUserApi {
             }
         }
         let arrImage=await rpcFileApi.getPaths(arrUser.map(item=>{return item?item.photo:null}))
+        for(let i=0;i<arrUser.length;i++) {
+            if(arrUser[i]==null) {
+                arrUser[i]={}
+            }
+        }
         arrUser.forEach((item,index)=>{
             item.photo=arrImage[index]
         })
@@ -132,42 +137,18 @@ class RpcUserApi {
             password:CommonUtil.md5("teamlinker")
         })
         await obj1.create()
-        let obj2=new AdminService
-        obj2.assignItem({
-            username:"wgq_admin",
-            password:CommonUtil.md5("123456")
-        })
-        await obj2.create()
-        let obj3=new AdminService
-        obj3.assignItem({
-            username:"hxx_admin",
-            password:CommonUtil.md5("123456")
-        })
-        await obj3.create()
-        return [obj1.getId(),obj2.getId(),obj3.getId()]
+        return [obj1.getId()]
     }
 
     
     async initUser():Promise<string[]> {
         let obj1=new UserService
         obj1.assignItem({
-            username:"sx",
-            password:CommonUtil.md5("sx")
+            username:"user",
+            password:CommonUtil.md5("user")
         })
         await obj1.create()
-        let obj2=new UserService
-        obj2.assignItem({
-            username:"wgq",
-            password:CommonUtil.md5("wgq")
-        })
-        await obj2.create()
-        let obj3=new UserService
-        obj3.assignItem({
-            username:"hxx",
-            password:CommonUtil.md5("hxx")
-        })
-        await obj3.create()
-        return [obj1.getId(),obj2.getId(),obj3.getId()]
+        return [obj1.getId()]
     }
 
     

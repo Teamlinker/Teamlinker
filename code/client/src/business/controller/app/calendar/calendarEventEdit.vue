@@ -58,7 +58,7 @@
         <a-option v-for="item in resourceList" :value="item.id" :label="item.name"></a-option>
       </a-select>
 	    <template v-else>
-		    <UserAvatar v-if="calendarEventInfo" :organization-user-id="calendarEventInfo.created_by.organizationUserId" :name="calendarEventInfo.created_by.nickname" :photo="calendarEventInfo.created_by.photo"></UserAvatar>
+		    <UserAvatar v-if="calendarEventInfo" :organization-user-id="calendarEventInfo.created_by?.organizationUserId" :name="calendarEventInfo.created_by.nickname" :photo="calendarEventInfo.created_by.photo"></UserAvatar>
 		    &nbsp;invited you
 	    </template>
     </a-form-item>
@@ -118,7 +118,7 @@
 <script setup lang="ts">
 import CalendarEventDateEdit, {CalendarEventModelType} from "./calendarEventDateEdit.vue";
 import {getCurrentInstance, onBeforeMount, reactive, ref} from "vue";
-import {apiCalendar, apiFile, apiMeeting, DCSType} from "../../../common/request/request";
+import {apiCalendar, apiFile, apiMeeting} from "../../../common/request/request";
 import {ICommon_Route_Res_Calendar_Event_Info} from "../../../../../../common/routes/response";
 import moment from "moment";
 import {ECommon_Calendar_Recurring_Type} from "../../../../../../common/model/calendar_event";
@@ -140,6 +140,7 @@ import {TableRowSelection} from "@arco-design/web-vue/es/table/interface";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";
+import {DCSType} from "../../../../../../common/types";
 
 const props=defineProps<{
   type:"add"|"edit",
@@ -195,7 +196,7 @@ const getCalendarEventInfo=async ()=>{
   })
   if(res?.code==0) {
     calendarEventInfo.value=res.data
-	  isSelf.value=calendarEventInfo.value.created_by.organizationUserId===SessionStorage.get("organizationUserId")
+	  isSelf.value=calendarEventInfo.value.created_by?.organizationUserId===SessionStorage.get("organizationUserId")
   }
 }
 

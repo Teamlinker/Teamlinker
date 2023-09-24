@@ -473,7 +473,7 @@ const listCalendarEvent=async ()=>{
             },
             name:item.name,
 	          created_by:item.created_by,
-	          fixed:item.created_by.organizationUserId!=organizationUserId
+	          fixed:item.created_by?.organizationUserId!=organizationUserId
           }
         }))
       }

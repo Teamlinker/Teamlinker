@@ -16,7 +16,7 @@
     <a-table style="margin-top: 10px" :columns="columns" :data="data" :pagination="pagination" @pageChange="onPageChange">
       <template #name="{record}">
         <template v-if="record.memberType==ECommon_Model_Organization_Member_Type.DEFAULT">{{$t("util.default")}}</template>
-        <template v-else-if="record.memberType==ECommon_Model_Organization_Member_Type.USER">{{ record.member.nickname }}</template>
+        <template v-else-if="record.memberType==ECommon_Model_Organization_Member_Type.USER">{{ record.member?.nickname }}</template>
         <template v-else-if="record.memberType==ECommon_Model_Organization_Member_Type.TEAM">{{record.team.name}}</template>
         <template v-else-if="record.memberType==ECommon_Model_Organization_Member_Type.MEMBERTAG">{{record.tag.name}}</template>
       </template>
@@ -121,7 +121,7 @@ const onDelete=async (item:DCSType<ICommon_Route_Res_Role_Member_Item>)=>{
   let memberId:string;
   if(item.memberType==ECommon_Model_Organization_Member_Type.USER)
   {
-    memberId=item.member.id
+    memberId=item.member?.id
   } else if(item.memberType==ECommon_Model_Organization_Member_Type.TEAM) {
     memberId=item.team.id
   } else if(item.memberType==ECommon_Model_Organization_Member_Type.MEMBERTAG) {

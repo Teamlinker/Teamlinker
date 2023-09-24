@@ -4,7 +4,7 @@
       <a-select @search="onSearch" v-model="form.organizationUserId" allow-search v-if="type=='add'">
         <a-option v-for="item in userList" :value="item.value" :label="item.label"></a-option>
       </a-select>
-      <template v-else>{{item.organizationUser.nickname}}</template>
+      <template v-else>{{item.organizationUser?.nickname}}</template>
     </a-form-item>
     <a-form-item field="roleId" :label="$t('util.role')" required>
       <a-select v-model="form.roleId">
@@ -32,7 +32,7 @@ const props=defineProps<{
 }>()
 const eleForm=ref(null)
 const form=reactive({
-  organizationUserId:props.type=="edit"?props.item.organizationUser.id:"",
+  organizationUserId:props.type=="edit"?props.item.organizationUser?.id:"",
   roleId:props.type=="edit"?props.item.role.id:""
 })
 const {t}=useI18n()
@@ -51,8 +51,8 @@ const onSearch=async (value:string)=>{
   if(res?.code==0) {
     userList.value=res.data.data.map(item=>{
       return {
-        value:item.organizationUser.id,
-        label:item.organizationUser.nickname
+        value:item.organizationUser?.id,
+        label:item.organizationUser?.nickname
       }
     })
   }

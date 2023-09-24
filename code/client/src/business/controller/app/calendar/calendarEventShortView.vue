@@ -72,7 +72,7 @@
 						{{selectedEvent.resource.name}}
 					</template>
 					<template v-else>
-						<UserAvatar :organization-user-id="selectedEvent.created_by.organizationUserId" :name="selectedEvent.created_by.nickname" :photo="selectedEvent.created_by.photo"></UserAvatar>
+						<UserAvatar :organization-user-id="selectedEvent.created_by?.organizationUserId" :name="selectedEvent.created_by.nickname" :photo="selectedEvent.created_by.photo"></UserAvatar>
 						&nbsp;{{$t("controller.app.calendar.calendarEventShortView.invitedYou")}}
 					</template>
 				</div>
@@ -109,7 +109,7 @@ const props=defineProps<{
 	maskInfoTop:string
 }>()
 const calendarEventInfo=ref<DCSType<ICommon_Route_Res_Calendar_Event_Info>>()
-const isSelf=ref(props.selectedEvent.created_by.organizationUserId===SessionStorage.get("organizationUserId"))
+const isSelf=ref(props.selectedEvent.created_by?.organizationUserId===SessionStorage.get("organizationUserId"))
 const searchUserKey=ref("")
 const organizationUserId=SessionStorage.get("organizationUserId")
 const selectKeys=ref([])

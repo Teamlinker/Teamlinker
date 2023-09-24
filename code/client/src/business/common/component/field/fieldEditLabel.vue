@@ -72,8 +72,8 @@ const request=async ()=>{
       if(res?.code==0) {
         showValue.value={
           photo:res.data.info.photo,
-          name:res.data.organizationUser.nickname,
-          id:res.data.organizationUser.id
+          name:res.data.organizationUser?.nickname,
+          id:res.data.organizationUser?.id
         }
         editValue.value=""
       }
@@ -130,8 +130,8 @@ const onSearch=async (keyword:string)=>{
     if(res?.code==0) {
       searchValueList.value=res.data.data.map(item=>{
         return {
-          id:item.organizationUser.id,
-          name:item.organizationUser.nickname,
+          id:item.organizationUser?.id,
+          name:item.organizationUser?.nickname,
           photo:item.user.photo
         }
       })

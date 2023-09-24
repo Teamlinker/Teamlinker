@@ -18,7 +18,7 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {
     convertCountAndExecute,
     generateCommonListData,
-    generateDeleteInnerJoinSql,
+    generateDeleteLeftJoinSql,
     generateDeleteSql,
     generateGroupLeftJoin4Sql,
     generateGroupLeftJoin5Sql,
@@ -828,7 +828,7 @@ class BoardSprintIssueMapper extends Mapper<typeof boardSprintIssueModel> {
             return
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteInnerJoinSql(boardSprintIssueModel,{
+        await mysql.execute(generateDeleteLeftJoinSql(boardSprintIssueModel,{
             model:projectIssueModel,
             expression:{
                 id:{

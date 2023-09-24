@@ -5,7 +5,7 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {Mapper} from "../../common/entity/mapper";
 import {
     generateCreateSql,
-    generateDeleteInnerJoinSql,
+    generateDeleteLeftJoinSql,
     generateDeleteSql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -293,7 +293,7 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
                                 value:workflowNodeIds
                             }
                         })),
-                        mysql.execute(generateDeleteInnerJoinSql(workflowNodeFieldTypeModel,{
+                        mysql.execute(generateDeleteLeftJoinSql(workflowNodeFieldTypeModel,{
                             model:workflowNodeFieldTypeConfigModel,
                             expression:{
                                 workflow_node_field_type_id:{

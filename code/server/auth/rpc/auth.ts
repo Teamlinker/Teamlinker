@@ -340,5 +340,9 @@ class RpcAuthApi {
         })
         return ret.getItem();
     }
+
+    async clearByOrganizationId(organizationId:string) {
+        await RoleService.clearByOrganizationId(organizationId)
+    }
 }
 export default new RpcAuthApi;

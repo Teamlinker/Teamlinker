@@ -509,7 +509,11 @@ export namespace Err {
         memberTagAlreadyExists:{
             code:8008,
             msg:"member tag already exists"
-        }
+        },
+        ownerQuitForbidden:{
+            code:8009,
+            msg:"owner quit forbidden"
+        },
     }
 
     export const Auth = {

@@ -48,10 +48,10 @@
     </template>
 	  <template #barRight>
 		  <a-row style="height: 100%;" align="center">
-			  <a-col :flex="menuValue?'60px':'40px'" style="align-items: center;display: flex">
+			  <a-col :flex="menuValue?'60px':'0px'" style="align-items: center;display: flex">
 				  <img :src="store.organizationInfo.photo" style="height: 30px;width:60px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
-			  <a-col :flex="menuValue?'100px':'120px'" id="createOrganization">
+			  <a-col :flex="menuValue?'100px':'170px'" id="createOrganization" style="align-items: center;display: flex">
 				  <a-select style="max-width: 170px;color: white" :placeholder="$t('placeholder.organization')" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
 					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
 						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
@@ -64,14 +64,14 @@
 						  </a-row>
 					  </template>
 				  </a-select>
-				  <a-button type="primary" status="success" style="float: right;margin-right: 5px" @click="onCreate" v-else>
+				  <a-button type="primary" status="success" @click="onCreate" v-else>
 					  {{$t("controller.desktop.desktop.createOrganization")}}
 				  </a-button>
 			  </a-col>
-			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex;align-items: center;height: 100%" id="search">
+			  <a-col :flex="menuValue?'30px':'40px'" style="justify-content: center;display: flex;align-items: center;height: 100%" id="search">
 				  <sicon size="18" color="rgb(241,241,241)" name="Ant" type="search" style="cursor: pointer" @click="isSearch=true"></sicon>
 			  </a-col>
-			  <a-col :flex="menuValue?'30px':'45px'" style="justify-content: center;display: flex;align-items: center;height: 100%" id="notification">
+			  <a-col :flex="menuValue?'30px':'40px'" style="justify-content: center;display: flex;align-items: center;height: 100%" id="notification">
 					<NotificationShow></NotificationShow>
 			  </a-col>
 			  <a-col flex="30px" v-if="menuValue" style="justify-content: center;display: flex;align-items: center;height: 100%">
@@ -125,8 +125,8 @@ import {ETeamOS_Window_Type, Window} from "../../../teamOS/window/window";
 import {v4} from "uuid";
 import Account from "../app/account/account.vue";
 import {SessionStorage} from "../../common/storage/session";
-import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../../../common/types";
-import {apiFile, apiOrganization, apiTool, apiUser, DCSType} from "../../common/request/request";
+import {DCSType, ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../../../common/types";
+import {apiFile, apiOrganization, apiTool, apiUser} from "../../common/request/request";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../common/event/event";
 import CreateOrganization from "./createOrganization.vue";
 import {ECommon_Model_Finder_Item_Type, ICommon_Model_Finder_Item} from "../../../../../common/model/finder_item";
@@ -487,12 +487,23 @@ const onGuide=()=>{
 	SessionStorage.set("firstShow","1")
 }
 
+const onRemoveOrganization=async (organizationId:string)=>{
+	if(organizationId!==store.organizationInfo?.id) {
+		return
+	}
+	windowManager.clear(["finder"])
+	store.leaveOrganization()
+	menuValue.value=""
+	store.getOrganizationList()
+}
+
 onBeforeMount(async ()=>{
 	objFinderHandle.registerEvents()
 	eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
 	eventBus.on(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
 	eventBus.on(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED,onLogout.bind(null,true))
 	eventBus.on(EClient_EVENTBUS_TYPE.GUIDE,onGuide)
+	eventBus.on(EClient_EVENTBUS_TYPE.ORGANIZATION_REMOVE, onRemoveOrganization)
   let isAuth=await store.isAuth();
   if(!isAuth) {
     await router.replace("login");
@@ -518,6 +529,7 @@ onBeforeUnmount(()=>{
 	eventBus.off(EClient_EVENTBUS_TYPE.REFRESH_ORGANIZATION_LIST,store.getOrganizationList)
 	eventBus.off(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED,onLogout.bind(null,true))
 	eventBus.off(EClient_EVENTBUS_TYPE.GUIDE,onGuide)
+	eventBus.off(EClient_EVENTBUS_TYPE.ORGANIZATION_REMOVE, onRemoveOrganization)
 })
 
 

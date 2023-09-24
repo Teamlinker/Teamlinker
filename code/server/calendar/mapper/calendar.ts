@@ -6,8 +6,8 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {
     convertCountSql,
     generateBatchCreateSql,
-    generateDeleteInnerJoin2Sql,
-    generateDeleteInnerJoin3Sql,
+    generateDeleteLeftJoin2Sql,
+    generateDeleteLeftJoin3Sql,
     generateDeleteSql,
     generateLeftJoin2Sql,
     generateLeftJoinSql,
@@ -43,7 +43,7 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
             throw Err.Calendar.calendarNotFound
         }
         let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteInnerJoin2Sql(calendarEventModel,{
+        await mysql.execute(generateDeleteLeftJoin2Sql(calendarEventModel,{
             model:calendarEventGuestModel,
             expression:{
                 calendar_event_id:{
@@ -75,7 +75,7 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
         }
         let mysql=getMysqlInstance()
         await Promise.all([
-            mysql.execute(generateDeleteInnerJoin3Sql(calendarModel,{
+            mysql.execute(generateDeleteLeftJoin3Sql(calendarModel,{
                 model:calendarEventModel,
                 expression:{
                     calendar_id:{
@@ -117,7 +117,7 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
         }
         let mysql=getMysqlInstance()
         await Promise.all([
-            mysql.execute(generateDeleteInnerJoin3Sql(calendarModel,{
+            mysql.execute(generateDeleteLeftJoin3Sql(calendarModel,{
                 model:calendarEventModel,
                 expression:{
                     calendar_id:{
