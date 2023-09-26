@@ -99,9 +99,9 @@ class WorkflowMapper  {
             obj.issue_type_id=newIssueTypeId
         }
         await Promise.all([
-            mysql.execute(generateBatchCreateSql(workflowNodeModel,nodeList)),
-            mysql.execute(generateBatchCreateSql(workflowActionModel,actionList)),
-            mysql.execute(generateBatchCreateSql(workflowApprovalModel,approvalList))
+            nodeList.length>0?mysql.execute(generateBatchCreateSql(workflowNodeModel,nodeList)):null,
+            actionList.length>0?mysql.execute(generateBatchCreateSql(workflowActionModel,actionList)):null,
+            approvalList.length>0?mysql.execute(generateBatchCreateSql(workflowApprovalModel,approvalList)):null
         ])
         return {
             workflowNodes:oldIds,

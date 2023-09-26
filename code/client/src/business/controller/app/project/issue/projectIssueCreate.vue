@@ -37,9 +37,11 @@
         </a-select>
       </a-form-item>
       <a-divider orientation="left" v-if="valueList.length>0">Custom Fields</a-divider>
-      <a-form-item v-for="value in valueList" :key="value.field.id" :label="value.field.name" :extra="value.field.description" :field="value.field.name" :required="!value.field.optional">
-        <FieldInput :item="value" :project-id="projectId"></FieldInput>
-      </a-form-item>
+	    <a-form v-if="valueList.length>0" :model="formCustom" ref="eleFormCustom" layout="vertical">
+		    <a-form-item v-for="value in valueList" :key="value.field.id" :label="value.field.name" :extra="value.field.description" :field="value.field.name" :required="!value.field.optional">
+			    <FieldInput :item="value" :project-id="projectId"></FieldInput>
+		    </a-form-item>
+	    </a-form>
     </a-form>
   </div>
 </template>
@@ -65,6 +67,7 @@ const props=defineProps<{
   projectId:string
 }>()
 const eleForm=ref(null);
+const eleFormCustom=ref(null)
 const issueTypeList=ref<DCSType<ICommon_Model_Issue_Type>[]>([])
 const assignerList=ref<DCSType<ICommon_Route_Res_Organization_User_Item>[]>([])
 const reporterList=ref<DCSType<ICommon_Route_Res_Organization_User_Item>[]>([])
@@ -79,6 +82,7 @@ const form=reactive({
   assigner:"",
   reporter:""
 })
+const formCustom=reactive({})
 const getIssueTypeList=async ()=>{
   let res=await apiProject.issueTypeList({
     projectId:props.projectId
@@ -128,7 +132,7 @@ const onIssueTypeChange=async ()=>{
       }
     })
     valueList.value.forEach(item=>{
-      form[item.field.name]=toRef(item.fieldValue,"value")
+	    formCustom[item.field.name]=toRef(item.fieldValue,"value")
     })
   }
 }
@@ -154,7 +158,7 @@ onDialogOk(dialogFuncGenerator({
     return res;
   },
   form:()=>{
-    return eleForm.value
+    return [eleForm.value,eleFormCustom.value]
   }
 }))
 </script>

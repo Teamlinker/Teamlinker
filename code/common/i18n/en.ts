@@ -1,5 +1,7 @@
 export default {
     tip:{
+        typePassword:"Type Password",
+        emailNotMatch:"email not match",
         archiveSuccess:"Archive Success",
         acceptInvitation:"Do you want accept this invitation?",
         rejectInvitation:"Do you want reject this invitation?",
@@ -169,6 +171,7 @@ export default {
         message:"Message",
         issueType:"Issue Type",
         fields:"Fields",
+        field:"Field",
         go:"Go",
         create:"Create",
         edit:"Edit",
@@ -218,7 +221,6 @@ export default {
         workflow:"Workflow",
         person:"Person",
         team:"Team",
-        filed:"Field",
         submit:"Submit",
         search:"Search",
         default:"Default",

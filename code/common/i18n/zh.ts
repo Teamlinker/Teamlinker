@@ -1,5 +1,7 @@
 export default {
     tip:{
+        typePassword:"请输入密码",
+        emailNotMatch:"email不匹配",
         archiveSuccess:"归档成功",
         acceptInvitation:"你是否接受邀请?",
         rejectInvitation:"你是否拒绝邀请?",

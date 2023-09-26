@@ -23,8 +23,8 @@
           <a-form-item field="description" :label="$t('util.description')">
             <a-textarea v-model="form.description"></a-textarea>
           </a-form-item>
-	        <template v-if="(form.status===ECommon_Model_Workflow_Node_Status.INPROGRESS || form.status===ECommon_Model_Workflow_Node_Status.DONE) && (form.type==='node' || form.type==='approval')">
-		        <a-form-item field="approval" :label="$t('util.approval')">
+	        <template v-if="form.type==='node' || form.type==='approval'">
+		        <a-form-item field="approval" :label="$t('util.approval')" v-if="form.status===ECommon_Model_Workflow_Node_Status.INPROGRESS || form.status===ECommon_Model_Workflow_Node_Status.DONE">
 			        <a-switch :checked-value="1" :unchecked-value="0" v-model="form.approval"></a-switch>
 		        </a-form-item>
 		        <a-form-item field="allComing" :label="$t('util.allowAllConnections')" :extra="$t('controller.app.setting.issue.workflow.border')">

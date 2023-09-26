@@ -38,9 +38,18 @@ export function dialogFuncGenerator({func,form}:{
     return async function () {
         if(form) {
             let value=form();
-            let ret=await value.validate()
-            if(ret) {
-                return false;
+            if(value instanceof Array) {
+                for(let obj of value) {
+                    let ret=await obj.validate()
+                    if(ret) {
+                        return false;
+                    }
+                }
+            } else {
+                let ret=await value.validate()
+                if(ret) {
+                    return false;
+                }
             }
         }
         let res=await func()

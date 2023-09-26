@@ -11,7 +11,10 @@
 		<div style="width:40%;box-shadow: rgba(22, 14, 45, 0.02) 0px 0px 40px, rgba(22, 14, 45, 0.06) 0px 0px 104px;padding: 20px;box-sizing: border-box;border: 1px solid rgb(234, 236, 240);border-radius: 10px;background-color: white">
 			<a-form :model="form" auto-label-width @submit="onSubmit">
 				<h1 style="text-align: center;margin-bottom: 50px">{{$t("util.register")}}</h1>
-				<a-form-item field="username" :label="$t('util.email')" required>
+				<a-form-item field="username" :label="$t('util.email')" :rules="[{
+					match:/^[A-Za-z0-9\u4e00-\u9fa5_\-\.]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/,
+					message:$t('tip.emailNotMatch')
+				}]" required>
 					<a-input v-model="form.username" :placeholder="$t('placeholder.typeEmail')"></a-input>
 				</a-form-item>
 				<a-form-item field="password" :label="$t('util.password')" required>

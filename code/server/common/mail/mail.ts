@@ -19,11 +19,12 @@ export class Mail {
         })
     }
     async send(to:string,subject:string,content:string) {
-        await this.transporter.sendMail({
-            from:this.config.user,
-            to,
-            subject,
-            html:`
+        try {
+            await this.transporter.sendMail({
+                from:this.config.user,
+                to,
+                subject,
+                html:`
 <html>
     <body>
         <div style="display: flex;flex-direction: column;margin-bottom: 10px">
@@ -38,7 +39,11 @@ export class Mail {
     </body>
 </html>
 `
-        })
+            })
+        } catch (err) {
+            console.error(err)
+        }
+
     }
 }
 

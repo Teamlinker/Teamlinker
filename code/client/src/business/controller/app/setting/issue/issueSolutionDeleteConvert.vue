@@ -80,7 +80,7 @@ onBeforeMount(()=>{
 onDialogOk(dialogFuncGenerator({
 	func:()=>{
 		return apiIssueType.solutionDelete({
-			issueTypeSolutionId:form.issueTypeSolutionId,
+			issueTypeSolutionId:props.issueTypeSolutionId,
 			relationship:Object.fromEntries(Object.entries(form).filter(value=>{
 				if(value[0]!="issueTypeSolutionId") {
 					return true
