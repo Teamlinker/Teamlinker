@@ -15,9 +15,9 @@
 						{{$t("controller.index.home.resource")}}
 					</a-button>
 					<template #content>
-						<a-doption>Doc</a-doption>
-						<a-doption>Docker</a-doption>
-						<a-doption>Github</a-doption>
+						<a-doption @click="onManual">{{$t("controller.index.home.doc")}}</a-doption>
+						<a-doption @click="onDocker">Docker</a-doption>
+						<a-doption @click="onGithub">Github</a-doption>
 					</template>
 				</a-dropdown>
 				<a-button type="text" style="color: #050505;font-size: medium" @click="emit('change','price')">
@@ -43,10 +43,12 @@
 
 <script setup lang="ts">
 import {useRouter} from "vue-router";
+import {useI18n} from "vue-i18n";
 
 const emit=defineEmits<{
 	change:[name:string]
 }>()
+const {t}=useI18n()
 const router=useRouter()
 const onLogin=async () =>{
 	await router.push("login")
@@ -54,6 +56,18 @@ const onLogin=async () =>{
 
 const onRegister=async()=>{
 	await router.push("register")
+}
+
+const onDocker=()=>{
+	window.open('https://hub.docker.com/r/teamlinkeroffical/teamlinker','_blank')
+}
+
+const onGithub=()=>{
+	window.open('https://github.com/teamlinker','_blank')
+}
+
+const onManual=()=>{
+	window.open(t("controller.index.home.docLink"),"_blank")
 }
 </script>
 

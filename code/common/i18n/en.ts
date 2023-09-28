@@ -659,6 +659,8 @@ export default {
         },
         "index":{
             home:{
+                docLink:"https://team-linker.com/doc/en/",
+                doc:"Manual",
                 product:"Product",
                 resource:"Resource",
                 price:"Price",

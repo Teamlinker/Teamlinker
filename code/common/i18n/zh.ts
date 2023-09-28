@@ -657,6 +657,8 @@ export default {
         },
         "index":{
             home:{
+                docLink:"https://team-linker.com/doc/zh/",
+                doc:"用户手册",
                 product:"产品",
                 resource:"资源",
                 price:"价格",

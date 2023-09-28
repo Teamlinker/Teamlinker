@@ -150,7 +150,7 @@
 				<span style="font-size: 1.2rem;color: #455e83;margin-top: 40px;text-align: center">
 					{{$t("controller.index.home.section3.4")}}
 				</span>
-				<a-button style="color: white;font-size: medium;background-color:rgb(50,164,196);margin-top: 30px;font-weight: bold" shape="round" @click="onRegister">
+				<a-button style="color: white;font-size: medium;background-color:rgb(50,164,196);margin-top: 30px;font-weight: bold" shape="round" @click="onDocker">
 					{{$t("controller.index.home.getDockerEdition")}}
 				</a-button>
 			</a-col>
@@ -259,7 +259,7 @@
 					<a-button style="background-color: rgb(94, 121, 190);color: white" @click="onRegister">
 						{{$t("controller.index.home.section5.3")}}
 					</a-button>
-					<a-button style="color :rgb(94, 121, 190)">
+					<a-button style="color :rgb(94, 121, 190)" @click="onDocker">
 						{{$t("controller.index.home.section5.4")}}
 					</a-button>
 				</a-space>
@@ -313,6 +313,10 @@ const onLogin=async () =>{
 
 const onRegister=async()=>{
 	await router.push("register")
+}
+
+const onDocker=()=>{
+	window.open('https://hub.docker.com/r/teamlinkeroffical/teamlinker','_blank')
 }
 </script>
 
