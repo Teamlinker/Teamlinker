@@ -245,7 +245,7 @@ const initMeeting=async ()=>{
 	if(preview) {
 		let ret=await meetingClient.join(props.meetingId,password,preview.enableVideo,preview.enableAudio,preview.cameraId)
 		if(!ret?.success) {
-			Message.error(t("tip.joinMeetingFailed"))
+			Message.error(ret.msg)
 			navigator.pop()
 		}
 	} else {

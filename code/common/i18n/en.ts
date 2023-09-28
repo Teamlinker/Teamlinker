@@ -442,6 +442,9 @@ export default {
                 },
                 meetingParticipant:{
                     presenter:"Presenter"
+                },
+                meetingPreview:{
+                    tip:"Tip: Meeting functionality needs camera permission,if camera permission prompt pop up,please click allow!"
                 }
             },
             people:{

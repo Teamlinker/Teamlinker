@@ -36,13 +36,13 @@
           </a-option>
         </a-select>
       </a-form-item>
-      <a-divider orientation="left" v-if="valueList.length>0">Custom Fields</a-divider>
-	    <a-form v-if="valueList.length>0" :model="formCustom" ref="eleFormCustom" layout="vertical">
-		    <a-form-item v-for="value in valueList" :key="value.field.id" :label="value.field.name" :extra="value.field.description" :field="value.field.name" :required="!value.field.optional">
-			    <FieldInput :item="value" :project-id="projectId"></FieldInput>
-		    </a-form-item>
-	    </a-form>
     </a-form>
+	  <a-divider orientation="left" v-if="valueList.length>0">Custom Fields</a-divider>
+	  <a-form v-if="valueList.length>0" :model="formCustom" ref="eleFormCustom" layout="vertical">
+		  <a-form-item v-for="value in valueList" :key="value.field.id" :label="value.field.name" :extra="value.field.description" :field="value.field.name" :required="!value.field.optional">
+			  <FieldInput :item="value" :project-id="projectId"></FieldInput>
+		  </a-form-item>
+	  </a-form>
   </div>
 </template>
 

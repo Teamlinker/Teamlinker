@@ -13,7 +13,8 @@ import {
     generateBatchCreateOnUpdateSql,
     generateDeleteSql,
     generateQuerySql,
-    generateSnowId
+    generateSnowId,
+    generateUpdateSql
 } from "../../common/util/sql";
 import * as moment from "moment";
 import {ICommon_Model_IM_Favorite_Message, iMFavoriteMessageModel} from "../../../common/model/im_favorite_message";
@@ -99,6 +100,17 @@ class IMUserMessageMapper extends Mapper<typeof iMUserMessageModel> {
             organization_id:organizationId
         }))
     }
+
+    async clearByOrganizationUserId(organizationUserId:string) {
+        if(!organizationUserId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateDeleteSql(iMUserMessageModel,{
+            from_organization_user_id:organizationUserId,
+            to_organization_user_id:organizationUserId
+        },"or"))
+    }
 }
 
 export const iMUserMessageMapper=new IMUserMessageMapper
@@ -128,7 +140,7 @@ class IMTeamMessageMapper extends Mapper<typeof iMTeamMessageModel> {
 
     async search(teamIds:string[],keyword:string):Promise<ICommon_Model_IM_Team_Message[]> {
         if(!teamIds || teamIds.length==0) {
-            throw Err.IM.teamNotFound
+            return []
         }
         let mysql=getMysqlInstance()
         let sql=generateQuerySql(iMTeamMessageModel,null,{
@@ -168,6 +180,18 @@ class IMTeamMessageMapper extends Mapper<typeof iMTeamMessageModel> {
         let mysql=getMysqlInstance()
         await mysql.execute(generateDeleteSql(iMTeamMessageModel,{
             organization_id:organizationId
+        }))
+    }
+
+    async clearByOrganizationUserId(organizationUserId:string,deletedOrganizationUserId:string) {
+        if(!organizationUserId) {
+            return
+        }
+        let mysql=getMysqlInstance()
+        await mysql.execute(generateUpdateSql(iMTeamMessageModel,{
+            from_organization_user_id:deletedOrganizationUserId,
+        },{
+            from_organization_user_id:organizationUserId
         }))
     }
 }

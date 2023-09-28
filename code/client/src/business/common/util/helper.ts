@@ -34,7 +34,7 @@ export function getNameFromRoleMember(item:ICommon_Route_Res_Role_Member_Item){
 export function dialogFuncGenerator({func,form}:{
     func:()=>any,
     form?:()=>any
-}) {
+},disableSuccessTip?:boolean) {
     return async function () {
         if(form) {
             let value=form();
@@ -56,7 +56,9 @@ export function dialogFuncGenerator({func,form}:{
         if(typeof(res)=="object") {
             if(res?.code==0) {
                 const {t}=i18n.global
-                Message.success(t("tip.operationSuccess"))
+                if(!disableSuccessTip) {
+                    Message.success(t("tip.operationSuccess"))
+                }
                 return res
             } else {
                 Message.error(res.msg);

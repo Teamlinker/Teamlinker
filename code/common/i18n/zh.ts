@@ -440,6 +440,9 @@ export default {
                 },
                 meetingParticipant:{
                     presenter:"主持人"
+                },
+                meetingPreview:{
+                    tip:"注意:视频会议功能需要浏览器的摄像头权限,如果有浏览器有需要权限的弹出框弹出,请点击允许!"
                 }
             },
             people:{

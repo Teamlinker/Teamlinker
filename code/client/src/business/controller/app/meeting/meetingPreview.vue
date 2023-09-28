@@ -16,6 +16,9 @@
 		<a-form-item field="enableAudio" :label="$t('util.audioOn')">
 			<a-switch v-model="form.enableAudio"></a-switch>
 		</a-form-item>
+		<a-form-item style="color: red">
+			{{$t("controller.app.meeting.meetingPreview.tip")}}
+		</a-form-item>
 	</a-form>
 </template>
 
@@ -42,7 +45,7 @@ watch(()=>form.cameraId,async ()=>{
 	}
 })
 const getCameraList=async ()=>{
-	cameraList.value=await MeetingClient.enumVideoDevice()
+	cameraList.value=(await MeetingClient.enumVideoDevice()).filter(item=>item.id!=="")
 }
 onBeforeMount(()=>{
 	getCameraList()
@@ -56,7 +59,7 @@ onDialogOk(dialogFuncGenerator({
 		code:0,
 		...form
 	})
-}))
+},true))
 </script>
 
 <style scoped>

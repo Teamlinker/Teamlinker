@@ -31,6 +31,9 @@ export class IMUserMessageService extends Entity<typeof iMUserMessageModel,typeo
     static async clearByOrganizationId(organizationId:string) {
         await iMUserMessageMapper.clearByOrganizationId(organizationId)
     }
+    static async clearByOrganizationUserId(organizationUserId:string) {
+        await iMUserMessageMapper.clearByOrganizationUserId(organizationUserId)
+    }
 }
 
 export class IMTeamMessageService extends Entity<typeof iMTeamMessageModel,typeof iMTeamMessageMapper> {
@@ -56,6 +59,10 @@ export class IMTeamMessageService extends Entity<typeof iMTeamMessageModel,typeo
 
     static async clearByOrganizationId(organizationId:string) {
         await iMTeamMessageMapper.clearByOrganizationId(organizationId)
+    }
+
+    static async clearByOrganizationUserId(organizationUserId:string,deletedOrganizationUserId:string) {
+        await iMTeamMessageMapper.clearByOrganizationUserId(organizationUserId,deletedOrganizationUserId)
     }
 }
 

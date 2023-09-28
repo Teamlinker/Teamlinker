@@ -298,7 +298,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
             MemberTagService.clearMember(organizationUserId),
             rpcCalendarApi.clearCalendar(organizationUserId),
             rpcMeetingApi.clearMeetingRoom(organizationUserId),
-            rpcIMApi.clearByOrganizationUserId(organizationUserId),
+            rpcIMApi.clearByOrganizationUserId(organizationUserId,objOrganizationDeletedUser.getId()),
             rpcFinderApi.clearByOrganizationAndUserId(objUser.getItem().organization_id,objUser.getItem().user_id),
             rpcAuthApi.clearMember(organizationUserId),
             rpcContentApi.updateUserInfo(this.getId(),objUser.getId(),objUser.getItem().user_id,objOrganizationDeletedUser.getItem()),

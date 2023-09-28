@@ -6,18 +6,20 @@ import {
 } from "../service/im";
 
 class RpcIMApi  {
-    async clearByOrganizationId(orgaizationId:string) {
+    async clearByOrganizationId(organizationId:string) {
         await Promise.all([
-            IMUserMessageService.clearByOrganizationId(orgaizationId),
-            IMTeamMessageService.clearByOrganizationId(orgaizationId),
-            IMUserMessageService.clearByOrganizationId(orgaizationId),
-            IMFavoriteMessageService.clearByOrganizationId(orgaizationId)
+            IMUserMessageService.clearByOrganizationId(organizationId),
+            IMTeamMessageService.clearByOrganizationId(organizationId),
+            IMUserMessageService.clearByOrganizationId(organizationId),
+            IMFavoriteMessageService.clearByOrganizationId(organizationId)
         ])
     }
-    async clearByOrganizationUserId(organizationUserId:string) {
+    async clearByOrganizationUserId(organizationUserId:string,deletedOrganizationUserId:string) {
         await Promise.all([
             IMFavoriteMessageService.clearByOrganizationUserId(organizationUserId),
-            IMUnReadMessageService.clearByOrganizationId(organizationUserId)
+            IMUnReadMessageService.clearByOrganizationId(organizationUserId),
+            IMUserMessageService.clearByOrganizationUserId(organizationUserId),
+            IMTeamMessageService.clearByOrganizationUserId(organizationUserId, deletedOrganizationUserId)
         ])
     }
 }

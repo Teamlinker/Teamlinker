@@ -135,9 +135,16 @@ export class MeetingClient {
             const data = await this.socket.emitWithAck('getRouterRtpCapabilities');
             await this.loadDevice(data);
         }
-        await this.publish()
-        return {
-            success:true
+        let retPublic=await this.publish()
+        if(retPublic!==true) {
+            return {
+                success:false,
+                msg:retPublic as string
+            }
+        } else {
+            return {
+                success:true
+            }
         }
     }
     async leave():Promise<boolean> {
@@ -437,101 +444,104 @@ export class MeetingClient {
         return {consumer,businessId:data.businessId};
     }
 
-    private async publish() {
-        const data = await this.socket.emitWithAck('createProducerTransport');
-        if (!data) {
-            return;
-        }
-        this.transportSend = this.device.createSendTransport({...data, iceServers : []});
-        this.transportSend.on('connect', async ({ dtlsParameters }, callback, errback) => {
-            this.socket.emitWithAck('connectProducerTransport', { dtlsParameters })
-                .then(callback)
-                .catch(errback);
-        });
-        this.transportSend.on('produce', async ({ kind, rtpParameters,appData }, callback, errback) => {
-            try {
-                const { id, producersExist } = await this.socket.emitWithAck('produce', {
-                    kind,
-                    rtpParameters,
-                    appData
-                });
-                if(this.onLocalProducerStart) {
-                    this.onLocalProducerStart(kind)
-                }
-                if (producersExist){
-                    this.getProducers()
-                }
-                callback({ id });
-            } catch (err) {
-                errback(err);
+    private async publish():Promise<boolean|string> {
+        return new Promise(async (resolve, reject)=>{
+            const data = await this.socket.emitWithAck('createProducerTransport');
+            if (!data) {
+                resolve("createProducerTransport failed");
             }
-        });
-        this.transportSend.on('connectionstatechange', (state) => {
-            switch (state) {
-                case 'connecting':
-                    console.log("Connecting to publish")
-                    break;
-                case 'connected':
-                    console.log("Connected")
-                    if (this.onJoinedRoom) {
-                        this.onJoinedRoom(this.roomInfo)
+            this.transportSend = this.device.createSendTransport({...data, iceServers : []});
+            this.transportSend.on('connect', async ({ dtlsParameters }, callback, errback) => {
+                this.socket.emitWithAck('connectProducerTransport', { dtlsParameters })
+                    .then(callback)
+                    .catch(errback);
+            });
+            this.transportSend.on('produce', async ({ kind, rtpParameters,appData }, callback, errback) => {
+                try {
+                    const { id, producersExist } = await this.socket.emitWithAck('produce', {
+                        kind,
+                        rtpParameters,
+                        appData
+                    });
+                    if(this.onLocalProducerStart) {
+                        this.onLocalProducerStart(kind)
                     }
-                    break;
-                case 'failed':
-                    this.transportSend.close();
-                    console.log("Failed connection")
-                    break;
-                default: break;
-            }
-        });
-        let ret=await navigator.mediaDevices.enumerateDevices()
-        let isVideo=false
-        for(let obj of ret) {
-            if(obj.kind==="videoinput") {
-                isVideo=true
-            }
-        }
-        const mediaConstraints:MediaStreamConstraints = {
-            audio: {
-                echoCancellation:true,
-                noiseSuppression:true
-            },
-            video: (isVideo && this.defaultCameraId)?{
-                deviceId:this.defaultCameraId
-            }:isVideo,
-        }
-        navigator.mediaDevices.getUserMedia(mediaConstraints).then( async (stream) => {
-            if(this.onLocalProducerInit) {
-                this.onLocalProducerInit(stream)
-            }
-            let track = stream.getAudioTracks()[0];
-            if(track) {
-                let params:ProducerOptions = {
-                    track,
-                    appData:{
-                        paused:!this.defaultAudio
+                    if (producersExist){
+                        this.getProducers()
                     }
-                };
-                params.codecOptions = {
-                    opusStereo: true,
-                    opusDtx: true,
+                    callback({ id });
+                } catch (err) {
+                    errback(err);
                 }
-                this.producerAudio =await this.transportSend.produce(params);
+            });
+            this.transportSend.on('connectionstatechange', (state) => {
+                switch (state) {
+                    case 'connecting':
+                        console.log("Connecting to publish")
+                        break;
+                    case 'connected':
+                        console.log("Connected")
+                        if (this.onJoinedRoom) {
+                            this.onJoinedRoom(this.roomInfo)
+                        }
+                        break;
+                    case 'failed':
+                        this.transportSend.close();
+                        console.log("Failed connection")
+                        break;
+                    default: break;
+                }
+            });
+            let ret=await navigator.mediaDevices.enumerateDevices()
+            let isVideo=false
+            for(let obj of ret) {
+                if(obj.kind==="videoinput") {
+                    isVideo=true
+                }
             }
-            track=stream.getVideoTracks()[0]
-            if(track) {
-                let params:ProducerOptions={
-                    track,
-                    appData:{
-                        paused:!this.defaultVideo
+            const mediaConstraints:MediaStreamConstraints = {
+                audio: {
+                    echoCancellation:true,
+                    noiseSuppression:true
+                },
+                video: (isVideo && this.defaultCameraId)?{
+                    deviceId:this.defaultCameraId
+                }:isVideo,
+            }
+            navigator.mediaDevices.getUserMedia(mediaConstraints).then( async (stream) => {
+                if(this.onLocalProducerInit) {
+                    this.onLocalProducerInit(stream)
+                }
+                let track = stream.getAudioTracks()[0];
+                if(track) {
+                    let params:ProducerOptions = {
+                        track,
+                        appData:{
+                            paused:!this.defaultAudio
+                        }
+                    };
+                    params.codecOptions = {
+                        opusStereo: true,
+                        opusDtx: true,
                     }
+                    this.producerAudio =await this.transportSend.produce(params);
                 }
-                this.producerVideo=await this.transportSend.produce(params)
-            }
-        },reason => {
-            console.log(reason)
-        }).catch(reason => {
-            console.log(reason)
+                track=stream.getVideoTracks()[0]
+                if(track) {
+                    let params:ProducerOptions={
+                        track,
+                        appData:{
+                            paused:!this.defaultVideo
+                        }
+                    }
+                    this.producerVideo=await this.transportSend.produce(params)
+                }
+                resolve(true)
+            },reason => {
+                resolve(reason.message)
+            }).catch(reason => {
+                resolve(reason.message)
+            })
         })
     }
 
