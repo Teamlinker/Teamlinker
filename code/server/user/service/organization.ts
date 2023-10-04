@@ -445,9 +445,6 @@ export class OrganizationUserService extends Entity<typeof organizationUserModel
     async endMeetingStatus() {
         let sessionStatus=REDIS_ORGANIZATION.status(this.getId())
         let status=await sessionStatus.get()
-        if(status!==ECommon_User_Online_Status.MEETING) {
-            throw Err.User.notInMeeting
-        }
         let preSessionStatus=REDIS_ORGANIZATION.preStatus(this.getId())
         let preStatus=await preSessionStatus.get()
         await sessionStatus.set(preStatus)

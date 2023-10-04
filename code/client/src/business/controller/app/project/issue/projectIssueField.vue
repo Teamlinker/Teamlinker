@@ -21,7 +21,7 @@
 					<a-form-item :label="$t('util.label')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.LABEL" :value="labelList"></FieldEditBasic>
 					</a-form-item>
-					<a-form-item :label="$t('util.fixVersions')">
+					<a-form-item :label="$t('util.release')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.FIXVERSIONS" :value="releaseList"></FieldEditBasic>
 					</a-form-item>
 					<a-form-item :label="$t('util.sprint')">

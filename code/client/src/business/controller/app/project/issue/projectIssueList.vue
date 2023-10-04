@@ -183,7 +183,7 @@ const getModuleList=async ()=>{
   })
   if(res?.code==0) {
     moduleList.value=[{
-      name:"All",
+      name:t("util.all"),
       id:"all",
       data:[]
     },...res.data]
@@ -228,7 +228,7 @@ onBeforeMount(async ()=>{
 })
 const format = (options) => {
   const labels = options.map(option => option.name)
-  return "Module:"+labels.join('/')
+  return `${t("util.module")}:`+labels.join('/')
 }
 const search=async (page:number)=>{
   let res = await apiIssue.filter({

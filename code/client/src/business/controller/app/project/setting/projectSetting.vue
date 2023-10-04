@@ -6,7 +6,7 @@
     <a-collapse-item :header="$t('util.module')" key="module">
       <ModuleList :project-id="projectId"></ModuleList>
     </a-collapse-item>
-    <a-collapse-item :header="$t('util.tag')" key="tag">
+    <a-collapse-item :header="$t('util.label')" key="label">
       <LabelList :project-id="projectId"></LabelList>
     </a-collapse-item>
     <a-collapse-item :header="$t('util.access')" key="access">
@@ -30,7 +30,6 @@ import LabelList from "../../setting/project/labelList.vue";
 import EditProjectAccess from "../../setting/project/editProjectAccess.vue";
 import ProjectSettingRole from "./projectSettingRole.vue";
 import ProjectSettingIssueSolution from "./projectSettingIssueSolution.vue";
-import {Err} from "../../../../../../../common/status/error";
 
 
 const projectId=inject(injectProjectInfo).id;

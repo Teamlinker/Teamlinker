@@ -40,9 +40,11 @@ export function dialogFuncGenerator({func,form}:{
             let value=form();
             if(value instanceof Array) {
                 for(let obj of value) {
-                    let ret=await obj.validate()
-                    if(ret) {
-                        return false;
+                    if(obj) {
+                        let ret=await obj.validate()
+                        if(ret) {
+                            return false;
+                        }
                     }
                 }
             } else {

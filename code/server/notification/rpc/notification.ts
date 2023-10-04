@@ -175,6 +175,9 @@ class RpcNotificationApi  {
                     ref_id:refId,
                     user_id:id,
                 })
+                if(obj && obj.getItem().type===ECommon_Model_Notification_Type.ORGANIZATION_INVITATION && obj.getItem().status!==ECommon_Model_Notification_Status.PENDING) {
+                    obj=null
+                }
                 if(obj) {
                     if(obj.getItem().status===ECommon_Model_Notification_Status.PENDING || obj.getItem().status===ECommon_Model_Notification_Status.PENDING) {
                         obj.assignItem({

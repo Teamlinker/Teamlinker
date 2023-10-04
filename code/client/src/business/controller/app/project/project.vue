@@ -4,7 +4,7 @@
     <a-collapse :default-active-key="['recent','all']" style="margin-top: 10px">
       <a-collapse-item :header="$t('controller.app.project.project.recentProjectList')" key="recent">
         <a-space wrap style="margin-top: 20px" size="large" v-if="recentList.length>0">
-          <ProjectItem v-for="item in recentList" style="background-color: white" done-title="my done issue" :done-count="item.done" open-title="my open issue" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)" v-drag.shortcut="()=>({
+          <ProjectItem v-for="item in recentList" style="background-color: white" :done-title="$t('controller.app.project.project.myDoneIssue')" :done-count="item.done" :open-title="$t('controller.app.project.project.myOpenIssue')" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)" v-drag.shortcut="()=>({
 						shortcutType:ECommon_Model_Finder_Shortcut_Type.PROJECT,
 						shortcutRefId:item.id,
 						shortcutName:item.name
@@ -26,7 +26,7 @@
           </a-space>
         </a-row>
         <a-space wrap style="margin-top: 20px" size="large" v-if="list.length>0">
-          <ProjectItem v-for="item in list" style="background-color: white" done-title="done issue" :done-count="item.done" open-title="open issue" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)" v-drag.shortcut="()=>({
+          <ProjectItem v-for="item in list" style="background-color: white" :done-title="$t('controller.app.project.project.doneIssue')" :done-count="item.done" :open-title="$t('controller.app.project.project.openIssue')" :open-count="item.notstart+item.inprogress" :name="item.name" :project-id="item.id" :photo="item.photo" @click="onClickProjectItem(item.id,item.name)" v-drag.shortcut="()=>({
 						shortcutType:ECommon_Model_Finder_Shortcut_Type.PROJECT,
 						shortcutRefId:item.id,
 						shortcutName:item.name

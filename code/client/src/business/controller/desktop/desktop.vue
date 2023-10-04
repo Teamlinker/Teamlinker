@@ -13,7 +13,7 @@
         </a-avatar>
         <template #content>
 	        <a-doption @click="onEditOrganizationProfile" v-if="store.organizationUserInfo">{{store.organizationUserInfo?.nickname}}</a-doption>
-          <a-dsubmenu trigger="hover" :disabled="store.status===ECommon_User_Online_Status.MEETING" v-if="store.organizationInfo">
+          <a-dsubmenu trigger="hover" v-if="store.organizationInfo && store.status!==ECommon_User_Online_Status.MEETING">
             {{$t("util.status")}}
             <template #content>
               <a-doption @click="onChangeStatus(ECommon_User_Online_Status.ONLINE)">
@@ -192,7 +192,7 @@ const watchStop=watchEffect(()=>{
     let arr=[]
     if(store.organizationList.create.length>0) {
       arr.push({
-        group:"Create",
+        group:t("util.created"),
         data:store.organizationList.create.map(item=>{
           return {
             name:item.name,
@@ -203,7 +203,7 @@ const watchStop=watchEffect(()=>{
     }
     if(store.organizationList.join.length>0) {
       arr.push({
-        group:"Join",
+        group:t("util.joined"),
         data:store.organizationList.join.map(item=>{
           return {
             name:item.name,

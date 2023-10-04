@@ -139,6 +139,7 @@ meetingClient.onProducerStateChange=async (state, kind, businessId,type, stream,
 					audio:kind==="audio"?true:false,
 					video:kind==="video"?true:false,
 				})
+				objOrganizationUser=organizationUserList.value.at(-1);
 			} else {
 				if(kind=="video") {
 					objOrganizationUser.videoStream=stream
@@ -147,6 +148,9 @@ meetingClient.onProducerStateChange=async (state, kind, businessId,type, stream,
 					objOrganizationUser.audioStream=stream
 					objOrganizationUser.audio=true
 				}
+			}
+			if(!speaker.value) {
+				speaker.value=objOrganizationUser
 			}
 		} else if(type==="screen") {
 			if(!screenShareInfo.value) {
@@ -208,7 +212,10 @@ meetingClient.onLeavedRoom=roomInfo => {
 
 }
 meetingClient.onSpeaker=async businessId => {
-  speaker.value=organizationUserList.value.find(item=>item.organizationUserId===businessId)
+  let obj=organizationUserList.value.find(item=>item.organizationUserId===businessId)
+	if(obj && obj.organizationUserId!==myOrganizationUserId) {
+		speaker.value=obj
+	}
 }
 meetingClient.onLocalProducerInit=async stream => {
   let obj=userTeamInfoPick.getInfos([{

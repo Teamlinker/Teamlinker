@@ -56,17 +56,17 @@ export class FinderHandle {
         this.folderId=folderId
     }
     contextMenuFunc():ITeamOS_Menu[] {
+        let {t}=i18n.global
         let ret:ITeamOS_Menu[]=[
             {
-                title:"Refresh",
+                title:t("util.refresh"),
                 func:value => {
                     this.refresh()
                 }
             },
             {
-                title:"New Folder",
+                title:t("util.newFolder"),
                 func:async value => {
-                    let {t}=i18n.global
                     let ret=await Dialog.input(this.root.value.$el?this.root.value.$el:this.root.value,this.appContext,t("tip.typeNewFolderName"));
                     if(ret) {
                         let res=await apiFinder.createFolder({
@@ -82,7 +82,7 @@ export class FinderHandle {
                 }
             },
             {
-                title:"Upload",
+                title:t("util.upload"),
                 func:value => {
                     let input = document.createElement('input');
                     input.type = 'file';
@@ -97,7 +97,7 @@ export class FinderHandle {
         ]
         if(this.store.copyItemList.length>0) {
             ret.push({
-                title:"Paste",
+                title:t("util.paste"),
                 func:async value => {
                     await Promise.allSettled(this.store.copyItemList.map(item=>{
                         return apiFinder.copy({
@@ -218,12 +218,13 @@ export class FinderHandle {
                     }
                 })
                 obj.addEventListener("contextmenu",async item => {
+                    const {t}=i18n.global
                     let data=item.meta as ICommon_Model_Finder_Item
                     let menu:ITeamOS_Menu[]=[]
                     if(selectedSelectableItems.length==1) {
                         if(data.type===ECommon_Model_Finder_Item_Type.FILE) {
                             menu.push({
-                                title:"Download",
+                                title:t("util.download"),
                                 func:async value => {
                                     let res=await apiFinder.getFullPath({
                                         finderItemId:data.id
@@ -240,7 +241,7 @@ export class FinderHandle {
                             })
                         }
                         menu.push({
-                            title:"Rename",
+                            title:t("util.rename"),
                             func:value1 => {
                                 item.rename=true
                             }
@@ -250,7 +251,7 @@ export class FinderHandle {
                     }
                     menu.push(
                         {
-                            title:"Copy",
+                            title:t("util.copy"),
                             func:value1 => {
                                 this.store.copyItemList=selectedSelectableItems.map(item=>{
                                     return item.getAttribute("dragvalue")
@@ -258,7 +259,7 @@ export class FinderHandle {
                             }
                         },
                         {
-                            title:"Delete",
+                            title:t("util.delete"),
                             func:async value => {
                                 let valueList=selectedSelectableItems.map(item=>{
                                     return item.getAttribute("dragValue")

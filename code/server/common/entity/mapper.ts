@@ -34,7 +34,10 @@ export abstract class Mapper<T extends BaseModel> {
             throw  Err.Common.itemNotFound
         }
         var mysql=getMysqlInstance();
-        let ret=await mysql.executeOne(generateQuerySql(this.model,[],exp))
+        let ret=await mysql.executeOne(generateQuerySql(this.model,[],exp,"and",{
+            field:"id",
+            type:"desc"
+        }))
         return ret
     }
 

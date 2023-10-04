@@ -29,7 +29,22 @@
 
 		</a-col>
 		<a-col :span="4" style="align-items: center;justify-content: center;display: flex;height: 100%">
-			<a-space>
+			<a-space v-if="userId" size="mini">
+				<a-avatar :size="30" :image-url="userInfo?.photo">
+					{{imgName}}
+				</a-avatar>
+				<a-dropdown trigger="hover">
+					<a-button type="text" style="color: rgb(35, 110, 184)">
+						{{userInfo?.username}}
+						<icon-caret-down></icon-caret-down>
+					</a-button>
+					<template #content>
+						<a-doption @click="onConsole">{{$t("util.console")}}</a-doption>
+						<a-doption @click="onLogout">{{$t("util.logout")}}</a-doption>
+					</template>
+				</a-dropdown>
+			</a-space>
+			<a-space v-else>
 				<a-button type="text" style="color: #050505;font-size: medium" @click="onLogin">
 					{{$t("controller.index.home.login")}}
 				</a-button>
@@ -44,12 +59,30 @@
 <script setup lang="ts">
 import {useRouter} from "vue-router";
 import {useI18n} from "vue-i18n";
+import {SessionStorage} from "@/business/common/storage/session";
+import {computed, onBeforeMount, ref} from "vue";
+import {DCSType} from "../../../../../common/types";
+import {ICommon_Model_User} from "../../../../../common/model/user";
+import {apiUser} from "@/business/common/request/request";
+import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
 
 const emit=defineEmits<{
 	change:[name:string]
 }>()
 const {t}=useI18n()
+const store=useDesktopStore()
+const userId=ref(SessionStorage.get("userId"))
+const userInfo = ref<Omit<DCSType<ICommon_Model_User>,"password">>();
 const router=useRouter()
+
+const imgName=computed(()=>{
+	if(userInfo.value?.username?.includes(" ")) {
+		let arr=userInfo.value.username.split(" ")
+		return arr[0][0].toUpperCase()+arr[1][0].toUpperCase()
+	} else {
+		return userInfo.value?.username?userInfo.value?.username[0].toUpperCase():""
+	}
+})
 const onLogin=async () =>{
 	await router.push("login")
 }
@@ -69,6 +102,32 @@ const onGithub=()=>{
 const onManual=()=>{
 	window.open(t("controller.index.home.docLink"),"_blank")
 }
+
+const onConsole=async ()=>{
+	await router.push("desktop")
+}
+
+const onLogout=async ()=>{
+	await store.logout()
+	userId.value=null
+	userInfo.value=null
+}
+
+const getUserInfo=async ()=>{
+	let res=await apiUser.refresh()
+	if(res?.code==0) {
+		userInfo.value=res.data
+	}
+}
+
+onBeforeMount(()=>{
+	if(userId) {
+		getUserInfo()
+		if(store.userInfo) {
+			store.initNotificationSocket()
+		}
+	}
+})
 </script>
 
 <style scoped>

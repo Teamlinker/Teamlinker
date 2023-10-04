@@ -1,4 +1,91 @@
 export default {
+    notification:{
+        teamUserAdd:{
+            0:"团队:",
+            1:"添加了你"
+        },
+        wikiItemAt:{
+            0:"文档:你被提及:"
+        },
+        organizationUserRoleChange:{
+            0:"组织:你在组织中的权限被更改了:"
+        },
+        organizationUserRemove:{
+            0:"组织:你已经被移除组织:"
+        },
+        organizationUserQuit:{
+            0:"组织: ",
+            1:"退出了组织"
+        },
+        organizationInvitation:{
+            0:"组织:",
+            1:"正在邀请你"
+        },
+        issueCommentAt:{
+            0:"事务:你被",
+            1:"在事务评论中提及了:"
+        },
+        teamDismiss:{
+            0:"团队:",
+            1:"已经被解散了"
+        },
+        teamUserRemove:{
+            0:"团队:你被",
+            1:"移出了团队："
+        },
+        teamUserRoleChange:{
+            0:"团队:你在团队中的权限被更改："
+        },
+        issueRemove:{
+            0:"事务:",
+            1:"已经被删除，删除人："
+        },
+        teamUserQuit:{
+            0:"团队:",
+            1:"退出了团队："
+        },
+        issueReporterAssign:{
+            0:"事务:",
+            1:"将",
+            2:"的reporter移交给你了"
+        },
+        issueWorkflowChange:{
+            0:"事务:",
+            1:"的工作流已经被改变了,修改人："
+        },
+        issueCommentAdd:{
+            0:"事务:",
+            1:"添加了一条评论，事务"
+        },
+        calendarEventInvitation:{
+            0:"日历:你被邀请了："
+        },
+        issueFieldChange:{
+            0:"事务:",
+            1:"的字段被修改了，修改人："
+        },
+        issueAssignerAssign:{
+            0:"事务:",
+            1:"将",
+            2:"的assigner移交给你了"
+        },
+        issueAssignRelease:{
+            0:"事务:",
+            1:"的发布已经被更改，修改人："
+        },
+        issueAssignSprint:{
+            0:"事务:",
+            1:"的冲刺已经被更改，修改人："
+        },
+        issueApprovalResolve:{
+            0:"事务:",
+            1:"批准了事务"
+        },
+        issueApprovalReject:{
+            0:"事务:",
+            1:"驳回了事务"
+        }
+    },
     tip:{
         typePassword:"请输入密码",
         emailNotMatch:"email不匹配",
@@ -103,7 +190,8 @@ export default {
         joinMeetingFailed:"会议加入失败",
         deleteOrganization:"你是否想删除该组织？",
         notMatch:"输入不匹配",
-        quitOrganization:"你确定要退出当前组织吗?"
+        quitOrganization:"你确定要退出当前组织吗?",
+        switchToOrganization:"你应该切换到组织"
     },
     placeholder:{
         pleaseSelect:"请选择",
@@ -346,7 +434,11 @@ export default {
         issueTypeList:"事务类型列表",
         waitForApproval:"等待审批",
         addItem:"添加项",
-        me:"我"
+        me:"我",
+        newFolder:"新建文件夹",
+        paste:"粘贴",
+        download:"下载",
+        console:"控制台"
     },
     "common":{
         "component":{
@@ -529,7 +621,11 @@ export default {
                 project:{
                     yourWork:"你的工作",
                     recentProjectList:"最近项目列表",
-                    allProjectList:"所有项目列表"
+                    allProjectList:"所有项目列表",
+                    myDoneIssue:"我完成的事务",
+                    myOpenIssue:"我未开始的事务",
+                    doneIssue:"完成的事务",
+                    openIssue:"未开始的事务"
                 },
                 setting:{
                     projectSettingIssueSolution:{
@@ -723,7 +819,7 @@ export default {
                     4:"上传与下载"
                 },
                 system:{
-                    1:"基于Web OS",
+                    1:"基于网页操作系统",
                     2:"多窗口与任务并行",
                     3:"强大的搜索功能",
                     4:"提供便签和相册的小组件"

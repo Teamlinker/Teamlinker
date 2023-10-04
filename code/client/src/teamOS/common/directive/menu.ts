@@ -45,9 +45,9 @@ const onContextMenu=async (binding,vnode,event:MouseEvent)=>{
 }
 export const vMenu:Directive={
 
-    // mounted(el:HTMLElement, binding, vnode:VNode, prevVnode){
-    //     el.oncontextmenu=onContextMenu.bind(null,binding,vnode)
-    // },
+    mounted(el:HTMLElement, binding, vnode:VNode, prevVnode){
+        el.oncontextmenu=onContextMenu.bind(null,binding,vnode)
+    },
     updated(el:HTMLElement, binding, vnode:VNode, prevVnode) {
         el.oncontextmenu=onContextMenu.bind(null,binding,vnode)
     }

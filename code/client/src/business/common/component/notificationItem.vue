@@ -1,28 +1,28 @@
 <template>
 	<div style="display: flex;align-items: center;">
 		<template v-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_ADD">
-			TEAM:team
+			{{$t("notification.teamUserAdd.0")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
 			&nbsp;&nbsp;
-			has added you
+			{{$t("notification.teamUserAdd.1")}}
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.WIKI_ITEM_AT">
-			WIKI:you are mentioned in wiki item
+			{{$t("notification.wikiItemAt.0")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onWiki">{{(obj.data as ICommon_Model_Wiki_Item)?.name}}</a>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ORGANIZATION_USER_ROLE_CHANGE">
-			ORGANIZATION:your organization role has been changed in organization {{(obj.data as ICommon_Model_Organization)?.name}}
+			{{$t("notification.organizationUserRoleChange.0")}}{{(obj.data as ICommon_Model_Organization)?.name}}
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ORGANIZATION_USER_REMOVE">
-			ORGANIZATION:you has been removed in organization {{(obj.data as ICommon_Model_Organization)?.name}}
+			{{$t("notification.organizationUserRemove.0")}}{{(obj.data as ICommon_Model_Organization)?.name}}
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ORGANIZATION_USER_QUIT">
-			ORGANIZATION: {{obj.extra}} quit the organization {{(obj.data as ICommon_Model_Organization)?.name}}
+			{{$t("notification.organizationUserQuit.0")}}{{obj.extra}}{{$t("notification.organizationUserQuit.1")}}{{(obj.data as ICommon_Model_Organization)?.name}}
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ORGANIZATION_INVITATION">
-			ORGANIZATION:organization {{(obj.data as ICommon_Model_Organization)?.name}} is inviting you
+			{{$t("notification.organizationInvitation.0")}}{{(obj.data as ICommon_Model_Organization)?.name}}{{$t("notification.organizationInvitation.1")}}
 			<template v-if="obj.status===ECommon_Model_Notification_Status.PENDING">
 				&nbsp;
 				<a href="javascript:void(0)" @click="onAcceptOrganizationInvitation">{{$t("util.accept")}}</a>&nbsp;&nbsp;
@@ -38,133 +38,133 @@
 			</template>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_COMMENT_AT">
-			ISSUE:you are mentioned by
+			{{$t("notification.issueCommentAt.0")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
-			in issue
+			{{$t("notification.issueCommentAt.1")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 			&nbsp;&nbsp;
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_DISMISS">
-			TEAM:team {{obj.extra}} has been dismissed
+			{{$t("notification.teamDismiss.0")}}{{obj.extra}}{{$t("notification.teamDismiss.1")}}
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_REMOVE">
-			TEAM:you have been removed by
+			{{$t("notification.teamUserRemove.0")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
-			in team
+			{{$t("notification.teamUserRemove.1")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_ROLE_CHANGE">
-			TEAM:your team role has been changed in team
+			{{$t("notification.teamUserRoleChange.0")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_REMOVE">
-			ISSUE:{{obj.extra}} has been removed by
+			{{$t("notification.issueRemove.0")}}{{obj.extra}}{{$t("notification.issueRemove.1")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_QUIT">
-			TEAM:
+			{{$t("notification.teamUserQuit.0")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
-			quit the team
+			{{$t("notification.teamUserQuit.1")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN">
-			ISSUE:
+			{{$t("notification.issueReporterAssign.0")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
-			assign the reporter of issue
+			{{$t("notification.issueReporterAssign.1")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 			&nbsp;&nbsp;
-			to you
+			{{$t("notification.issueReporterAssign.2")}}
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_WORKFLOW_CHANGE">
-			ISSUE:the workflow of issue
+			{{$t("notification.issueWorkflowChange.0")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 			&nbsp;&nbsp;
-			has been changed by
+			{{$t("notification.issueWorkflowChange.1")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_COMMENT_ADD">
-			ISSUE:
+			{{$t("notification.issueCommentAdd.0")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
-			add a comment in issue
+			{{$t("notification.issueCommentAdd.1")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.CALENDAR_EVENT_INVITATION">
-			CALENDAR:you are invited in calendar event
+			{{$t("notification.calendarEventInvitation.0")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onCalendarEvent">{{(obj.data as ICommon_Model_Calendar_Event)?.name}}</a>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE">
-			ISSUE:the field of issue
+			{{$t("notification.issueFieldChange.0")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 			&nbsp;&nbsp;
-			has been changed by
+			{{$t("notification.issueFieldChange.1")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN">
-			ISSUE:
+			{{$t("notification.issueAssignerAssign.0")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
-			assign the assigner of issue
+			{{$t("notification.issueAssignerAssign.1")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 			&nbsp;&nbsp;
-			to you
+			{{$t("notification.issueAssignerAssign.2")}}
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGN_RELEASE">
-			ISSUE:the release of issue
+			{{$t("notification.issueAssignRelease.0")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 			&nbsp;&nbsp;
-			has been changed by
+			{{$t("notification.issueAssignRelease.1")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGN_SPRINT">
-			ISSUE:the sprint of issue
+			{{$t("notification.issueAssignSprint.0")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 			&nbsp;&nbsp;
-			has been changed by
+			{{$t("notification.issueAssignSprint.1")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE">
-			ISSUE:
+			{{$t("notification.issueApprovalResolve.0")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
-			resolved the approval of issue
+			{{$t("notification.issueApprovalResolve.1")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT">
-			ISSUE:
+			{{$t("notification.issueApprovalReject.0")}}
 			&nbsp;&nbsp;
 			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
 			&nbsp;&nbsp;
-			rejected the approval of issue
+			{{$t("notification.issueApprovalReject.1")}}
 			&nbsp;&nbsp;
 			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
 		</template>
@@ -208,7 +208,7 @@ const onTeam=()=>{
 		let teamId=(props.obj.data as DCSType<ICommon_Model_Team>).id
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_TEAM_PROFILE,teamId)
 	} else {
-		Message.error(`you should switch to organization ${props.obj.organization.name}`)
+		Message.error(`${t("tip.switchToOrganization")}${props.obj.organization.name}`)
 	}
 }
 
@@ -225,7 +225,7 @@ const onIssue=()=>{
 		}).project.id
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,projectId,projectIssueId)
 	} else {
-		Message.error(`you should switch to organization ${props.obj.organization.name}`)
+		Message.error(`${t("tip.switchToOrganization")}${props.obj.organization.name}`)
 	}
 }
 
@@ -236,7 +236,7 @@ const onWiki=()=>{
 		let wikiId=(props.obj.data as DCSType<ICommon_Model_Wiki_Item>).wiki_id
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_WIKI_ITEM,wikiId,wikiItemId)
 	} else {
-		Message.error(`you should switch to organization ${props.obj.organization.name}`)
+		Message.error(`${t("tip.switchToOrganization")}${props.obj.organization.name}`)
 	}
 }
 
@@ -246,7 +246,7 @@ const onCalendarEvent=()=>{
 		let calendarEventId=(props.obj.data as DCSType<ICommon_Model_Calendar_Event>).id
 		eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,calendarEventId)
 	} else {
-		Message.error(`you should switch to organization ${props.obj.organization.name}`)
+		Message.error(`${t("tip.switchToOrganization")}${props.obj.organization.name}`)
 	}
 }
 

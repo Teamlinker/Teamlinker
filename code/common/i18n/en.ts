@@ -1,4 +1,91 @@
 export default {
+    notification:{
+        teamUserAdd:{
+            0:"TEAM:team",
+            1:"has added you"
+        },
+        wikiItemAt:{
+            0:"WIKI:you are mentioned in wiki item"
+        },
+        organizationUserRoleChange:{
+            0:"ORGANIZATION:your organization role has been changed in organization "
+        },
+        organizationUserRemove:{
+            0:"ORGANIZATION:you has been removed in organization "
+        },
+        organizationUserQuit:{
+            0:"ORGANIZATION: ",
+            1:" quit the organization "
+        },
+        organizationInvitation:{
+            0:"ORGANIZATION:organization ",
+            1:" is inviting you"
+        },
+        issueCommentAt:{
+            0:"ISSUE:you are mentioned by",
+            1:"in issue"
+        },
+        teamDismiss:{
+            0:"TEAM:team ",
+            1:" has been dismissed"
+        },
+        teamUserRemove:{
+            0:"TEAM:you have been removed by",
+            1:"in team"
+        },
+        teamUserRoleChange:{
+            0:"TEAM:your team role has been changed in team"
+        },
+        issueRemove:{
+            0:"ISSUE:",
+            1:" has been removed by"
+        },
+        teamUserQuit:{
+            0:"TEAM:",
+            1:"quit the team"
+        },
+        issueReporterAssign:{
+            0:"ISSUE:",
+            1:"assign the reporter of issue",
+            2:"to you"
+        },
+        issueWorkflowChange:{
+            0:"ISSUE:the workflow of issue",
+            1:"has been changed by"
+        },
+        issueCommentAdd:{
+            0:"ISSUE:",
+            1:"add a comment in issue"
+        },
+        calendarEventInvitation:{
+            0:"CALENDAR:you are invited in calendar event"
+        },
+        issueFieldChange:{
+            0:"ISSUE:the field of issue",
+            1:"has been changed by"
+        },
+        issueAssignerAssign:{
+            0:"ISSUE:",
+            1:"assign the assigner of issue",
+            2:"to you"
+        },
+        issueAssignRelease:{
+            0:"ISSUE:the release of issue",
+            1:"has been changed by"
+        },
+        issueAssignSprint:{
+            0:"ISSUE:the sprint of issue",
+            1:"has been changed by"
+        },
+        issueApprovalResolve:{
+            0:"ISSUE:",
+            1:"resolved the approval of issue"
+        },
+        issueApprovalReject:{
+            0:"ISSUE:",
+            1:"rejected the approval of issue"
+        }
+    },
     tip:{
         typePassword:"Type Password",
         emailNotMatch:"email not match",
@@ -104,7 +191,8 @@ export default {
         joinMeetingFailed:"Join Meeting Failed",
         deleteOrganization:"Do you want to delete this organization?",
         notMatch:"input not match",
-        quitOrganization:"do you want to quit this organization?"
+        quitOrganization:"do you want to quit this organization?",
+        switchToOrganization:"you should switch to organization "
     },
     placeholder:{
         pleaseSelect:"Please Select",
@@ -348,7 +436,11 @@ export default {
         issueTypeList:"IssueType List",
         waitForApproval:"Wait For Approval",
         addItem:"Add Item",
-        me:"Me"
+        me:"Me",
+        newFolder:"New Folder",
+        paste:"Paste",
+        download:"Download",
+        console:"Console"
     },
     "common":{
         "component":{
@@ -531,7 +623,11 @@ export default {
                 project:{
                     yourWork:"Your Work",
                     recentProjectList:"Recent Project List",
-                    allProjectList:"All Project List"
+                    allProjectList:"All Project List",
+                    myDoneIssue:"My Done Issue",
+                    myOpenIssue:"My Open Issue",
+                    doneIssue:"Done issue",
+                    openIssue:"Open Issue"
                 },
                 setting:{
                     projectSettingIssueSolution:{
@@ -725,7 +821,7 @@ export default {
                     4:"Upload And Download"
                 },
                 system:{
-                    1:"Based On Web OS",
+                    1:"Based On Web Operating System",
                     2:"Multiply Windows And Tasks",
                     3:"Search Everything You Want",
                     4:"Widgets:Sticky Note & Album"
