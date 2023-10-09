@@ -8,6 +8,13 @@
 			<span style="font-size: medium">
 				{{$t("controller.index.footer.contactUs")}}:teamlinkeronline@gmail.com
 			</span>
+			<a-popover>
+				<icon-qq style="font-size: larger"></icon-qq>
+				<template #content>
+					<img :src="qq" style="width: 250px;height: auto"/>
+				</template>
+			</a-popover>
+			<a href="https://discord.gg/Yj94qwF8AX" target="_blank"><img :src="discord" style="height: 20px;transform: translateY(3px);"/></a>
 		</a-space>
 		<a-space>
 			© 2022-2023 {{$t("controller.index.footer.company")}}&nbsp;
@@ -18,6 +25,8 @@
 
 <script setup lang="ts">
 import {ref, watch} from "vue";
+import qq from "@/assert/qq.jpg"
+import discord from "@/assert/discord.png"
 
 const getLang=()=>{
 	let lang=localStorage.getItem("lang")

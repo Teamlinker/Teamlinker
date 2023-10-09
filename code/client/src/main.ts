@@ -6,15 +6,9 @@ import ArcoVue, {Message} from '@arco-design/web-vue';
 import sicon from "./icon/sicon.vue"
 import ArcoVueIcon from '@arco-design/web-vue/es/icon';
 import {createPinia} from "pinia";
-import Login from "./business/controller/login/login.vue";
 import {createRouter, createWebHashHistory} from "vue-router";
 import "@logicflow/core/dist/style/index.css";
-import Index from "./business/controller/index/index.vue";
 import {apiGateway} from "./business/common/request/request";
-import Register from "./business/controller/login/register.vue";
-import RegisterCode from "./business/controller/login/registerCode.vue";
-import Reset from "./business/controller/login/reset.vue";
-import ResetCode from "./business/controller/login/resetCode.vue";
 import {ECommon_Application_Mode} from "../../common/types";
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import 'virtual:svg-icons-register'
@@ -25,7 +19,7 @@ const routes=[
     {
         name:"login",
         path:"/login",
-        component:Login
+        component:()=>import("./business/controller/login/login.vue")
     },
     {
         name:"desktop",
@@ -35,28 +29,28 @@ const routes=[
     {
         name:"index",
         path:"/",
-        component: Index
+        component: ()=>import("./business/controller/index/index.vue")
     },
     {
         name:"register",
         path:"/register",
-        component: Register
+        component: ()=>import("./business/controller/login/register.vue")
     },
     {
         name:"registerCode",
         path:"/registerCode",
-        component: RegisterCode,
+        component: ()=>import("./business/controller/login/registerCode.vue"),
         props:route=>({username:route.query.username})
     },
     {
         name:"reset",
         path:"/reset",
-        component: Reset
+        component: ()=>import("./business/controller/login/reset.vue")
     },
     {
         name:"resetCode",
         path:"/resetCode",
-        component: ResetCode,
+        component: ()=>import("./business/controller/login/resetCode.vue"),
         props:route=>({username:route.query.username})
     }
 ]

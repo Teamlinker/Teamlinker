@@ -1,15 +1,12 @@
-import {AppContext, markRaw, nextTick, reactive, Ref} from "vue";
+import {nextTick, reactive, Ref} from "vue";
 import {RichEditorHandle} from "./handle";
 import {RichEditorFunc} from "./func";
 import {
-    ECommon_Content_Line_Config_Type,
-    ICommon_Content_Line,
-    ICommon_Content_Line_Config,
-    ICommon_Content_Line_Style
-} from "../../../../../../common/model/content";
-import {renderComponent} from "../../../../teamOS/common/util/component";
-import PopMenu from "./popMenu.vue";
-import Quote from "./quote.vue";
+    EEditor_Content_Line_Config_Type,
+    IEditor_Content_Line,
+    IEditor_Content_Line_Config,
+    IEditor_Content_Line_Style
+} from "./types";
 
 let g_activeEditor:RichEditorEvent
 function onDeleteCrossLine(event:KeyboardEvent) {
@@ -28,7 +25,7 @@ function onDeleteCrossLine(event:KeyboardEvent) {
                 let startItem=line.arr[line.selectStartIndexPath[0]]
                 let endItem=line.arr[line.selectEndIndexPath[0]]
                 if(startItem===endItem) {
-                    if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                    if(startItem.type===EEditor_Content_Line_Config_Type.TEXT || startItem.type===EEditor_Content_Line_Config_Type.LINK) {
                         let start=startItem.value.substring(0,line.selectStartIndexPath[1])
                         let end=startItem.value.substring(line.selectEndIndexPath[1])
                         startItem.value=start+end
@@ -40,7 +37,7 @@ function onDeleteCrossLine(event:KeyboardEvent) {
                 } else {
                     for(let obj of list[0].data) {
                         if(obj===startItem) {
-                            if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                            if(startItem.type===EEditor_Content_Line_Config_Type.TEXT || startItem.type===EEditor_Content_Line_Config_Type.LINK) {
                                 startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
                             } else {
                                 line.arr.splice(line.arr.indexOf(startItem),1)
@@ -48,7 +45,7 @@ function onDeleteCrossLine(event:KeyboardEvent) {
                             objStartInfo.startItem=startItem
                             objStartInfo.startIndex=line.selectStartIndexPath[1]
                         } else if(obj===endItem) {
-                            if(endItem.type===ECommon_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                            if(endItem.type===EEditor_Content_Line_Config_Type.TEXT || endItem.type===EEditor_Content_Line_Config_Type.LINK) {
                                 endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
                             } else {
                                 line.arr.splice(line.arr.indexOf(endItem),1)
@@ -60,7 +57,7 @@ function onDeleteCrossLine(event:KeyboardEvent) {
                 }
                 RichEditorHandle.fixLine(line,objStartInfo)
             } else {
-                let startLine:ICommon_Content_Line
+                let startLine:IEditor_Content_Line
                 for(let i=0;i<list.length;i++) {
                     let obj=list[i]
                     let line=obj.line
@@ -70,7 +67,7 @@ function onDeleteCrossLine(event:KeyboardEvent) {
                             for(let i=0;i<obj.data.length;i++) {
                                 let startItem=obj.data[i]
                                 if(i==0) {
-                                    if(startItem.type===ECommon_Content_Line_Config_Type.TEXT || startItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                                    if(startItem.type===EEditor_Content_Line_Config_Type.TEXT || startItem.type===EEditor_Content_Line_Config_Type.LINK) {
                                         startItem.value=startItem.value.substring(0,line.selectStartIndexPath[1])
                                     } else {
                                         line.arr.splice(line.arr.indexOf(startItem),1)
@@ -83,7 +80,7 @@ function onDeleteCrossLine(event:KeyboardEvent) {
                             for(let i=0;i<obj.data.length;i++) {
                                 let endItem=obj.data[i]
                                 if(i==obj.data.length-1) {
-                                    if(endItem.type===ECommon_Content_Line_Config_Type.TEXT || endItem.type===ECommon_Content_Line_Config_Type.LINK) {
+                                    if(endItem.type===EEditor_Content_Line_Config_Type.TEXT || endItem.type===EEditor_Content_Line_Config_Type.LINK) {
                                         endItem.value=endItem.value.substring(line.selectEndIndexPath[1])
                                     } else {
                                         line.arr.splice(line.arr.indexOf(endItem),1)
@@ -138,8 +135,7 @@ export class RichEditorEvent {
     private selectElementList:HTMLElement[]=[]
     private isMouseDown=false
     private root:Ref<HTMLElement>
-    private elementList:Ref<HTMLElement[]>
-    private lineList=reactive<ICommon_Content_Line[]>([])
+    private lineList=reactive<IEditor_Content_Line[]>([])
     private imageHelperElement:HTMLElement
     private resizeImage:HTMLElement
     private resizeObserver:ResizeObserver
@@ -148,23 +144,26 @@ export class RichEditorEvent {
     private selectionLinkElement:HTMLElement
     private selectionColorElement:HTMLElement
     private linkEditElement:HTMLElement
-    private popMenuElement:HTMLElement
-    private quoteElement:HTMLElement
-    private appContext:AppContext
+    private popMenuPosition:Ref<{
+        left:number,
+        top:number
+    }>
+    private quotePosition:Ref<{
+        left:number,
+        top:number
+    }>
     private destroyFunc:()=>void
     private destroyQuoteFunc:()=>void
-    private popMenuList:{
-        type: any,
-        title: string
-    }[]=[]
     onUploadFileFunc:(file:File,handleFunc:(fileId:string,path:string)=>void)=>void
-    onPopMenuClickFunc:(type:any,handleFunc:(item:ICommon_Content_Line_Config)=>void)=>void
-    onCustomMenuClickFunc:(type:ECommon_Content_Line_Config_Type,value:string,link:string,label:string)=>void
+    onPopMenuClickFunc:(type:any,handleFunc:(item:IEditor_Content_Line_Config)=>void)=>void
+    onCustomMenuClickFunc:(type:EEditor_Content_Line_Config_Type,value:string,link:string,label:string)=>void
     onQuoteListFunc:(keyword:string,handleFunc:(list:{
         value:string,
         label:string,
         photo:string
     }[])=>void)=>void
+    onSetLineConfigType:(linkElement:HTMLElement,obj:IEditor_Content_Line_Config)=>void
+    onGetLineConfigType:(config:IEditor_Content_Line_Config,linkElement:HTMLElement)=>void
     setSelectElementList(list:HTMLElement[]) {
         this.selectElementList=list
     }
@@ -175,26 +174,16 @@ export class RichEditorEvent {
         this.resizeObserver?.disconnect()
         this.selectionMenuElement?.remove()
         this.linkEditElement?.remove()
-        this.popMenuElement?.remove()
-        this.quoteElement?.remove()
+        this.popMenuPosition.value=null
+        this.quotePosition.value=null
     }
     clearQuote() {
-        if(this.quoteElement) {
-            this.quoteElement.remove()
-            this.destroyQuoteFunc()
-            this.quoteElement=null;
-        }
-    }
-    setPopMenuList(popMenuList:{
-        type: any,
-        title: string
-    }[]) {
-        this.popMenuList=popMenuList
+        this.quotePosition.value=null;
     }
     getLineList(){
         return this.lineList
     }
-    setLineList(data:ICommon_Content_Line[]) {
+    setLineList(data:IEditor_Content_Line[]) {
         this.lineList.splice(0,this.lineList.length,...data)
     }
     getSelectElementList() {
@@ -203,13 +192,13 @@ export class RichEditorEvent {
     getRoot() {
         return this.root
     }
-    addLine(value:string,style?:ICommon_Content_Line_Style){
-        let line:ICommon_Content_Line={
+    addLine(value:string,style?:IEditor_Content_Line_Style){
+        let line:IEditor_Content_Line={
             arr:[
                 {
                     value:value,
                     ...style,
-                    type:ECommon_Content_Line_Config_Type.TEXT
+                    type:EEditor_Content_Line_Config_Type.TEXT
                 }
             ],
             selectEndIndexPath:[],
@@ -217,7 +206,7 @@ export class RichEditorEvent {
         }
         this.lineList.push(line)
     }
-    onFocus(item:ICommon_Content_Line, event:MouseEvent){
+    onFocus(item:IEditor_Content_Line, event:MouseEvent){
         g_activeEditor=this
         if(this.selectElementList.length==0) {
             this.selectElementList=[event.currentTarget as HTMLElement]
@@ -227,8 +216,8 @@ export class RichEditorEvent {
         this.selectElementList=[event.currentTarget as HTMLElement]
     }
 
-    onBlur(item:ICommon_Content_Line, event:FocusEvent){
-        RichEditorHandle.handleInnerHtml(item,event.currentTarget as HTMLElement,true)
+    onBlur(item:IEditor_Content_Line, event:FocusEvent){
+        RichEditorHandle.handleInnerHtml(item,event.currentTarget as HTMLElement,true,this.onGetLineConfigType)
         if(this.selectionMenuElement) {
             if(!this.selectionMenuElement.contains(event.relatedTarget as HTMLElement) && !this.selectionLinkElement.contains(event.relatedTarget as HTMLElement)) {
                 this.selectionMenuElement.style.display="none"
@@ -239,23 +228,20 @@ export class RichEditorEvent {
             this.resizeObserver.unobserve(this.imageHelperElement)
             this.resizeImage=null;
         }
-        if(this.popMenuElement) {
-            this.popMenuElement.remove()
-            this.popMenuElement=null
-        }
+        this.popMenuPosition.value=null;
     }
 
-    onEnter(line:ICommon_Content_Line, index:number, event:KeyboardEvent){
+    onEnter(line:IEditor_Content_Line, index:number, event:KeyboardEvent){
         event.preventDefault()
         event.stopPropagation()
-        RichEditorHandle.handleInnerHtml(line,event.currentTarget as HTMLElement)
+        RichEditorHandle.handleInnerHtml(line,event.currentTarget as HTMLElement,false,this.onGetLineConfigType)
         let obj=line.arr[line.selectStartIndexPath[0]]
-        let newLine:ICommon_Content_Line={
+        let newLine:IEditor_Content_Line={
             arr:line.arr.slice(line.selectStartIndexPath[0]+1),
             selectStartIndexPath:[],
             selectEndIndexPath:[]
         }
-        if(!obj || obj.type===ECommon_Content_Line_Config_Type.TEXT || obj.type===ECommon_Content_Line_Config_Type.LINK) {
+        if(!obj || obj.type===EEditor_Content_Line_Config_Type.TEXT || obj.type===EEditor_Content_Line_Config_Type.LINK) {
             let value=obj?.value.substring(line.selectStartIndexPath[1])
             if(value) {
                 newLine.arr.unshift({
@@ -263,14 +249,14 @@ export class RichEditorEvent {
                     style:{
                         ...obj.style
                     },
-                    type:ECommon_Content_Line_Config_Type.TEXT
+                    type:EEditor_Content_Line_Config_Type.TEXT
                 })
                 obj.value=obj.value.substring(0,line.selectStartIndexPath[1])
             } else {
                 newLine.arr.unshift({
                     value:"",
                     style:{},
-                    type:ECommon_Content_Line_Config_Type.TEXT
+                    type:EEditor_Content_Line_Config_Type.TEXT
                 })
             }
         }
@@ -287,7 +273,7 @@ export class RichEditorEvent {
             selection.addRange(range)
         })
     }
-    onDelete(index, item:ICommon_Content_Line, event:MouseEvent){
+    onDelete(index, item:IEditor_Content_Line, event:MouseEvent){
         let ele=event.currentTarget as HTMLElement
         let selection=window.getSelection()
         let range=selection.getRangeAt(0)
@@ -332,10 +318,10 @@ export class RichEditorEvent {
             if(index>0) {
                 event.preventDefault()
                 event.stopPropagation()
-                RichEditorHandle.handleInnerHtml(item,ele)
+                RichEditorHandle.handleInnerHtml(item,ele,false,this.onGetLineConfigType)
                 let preLine=this.lineList[index-1]
                 item.arr=item.arr.filter(obj=>{
-                    return obj.value.length>0 || obj.type===ECommon_Content_Line_Config_Type.IMAGE
+                    return obj.value.length>0 || obj.type===EEditor_Content_Line_Config_Type.IMAGE
                 })
                 let path=[preLine.arr.length-1>=0?preLine.arr.length-1:0,preLine.arr.length>0?preLine.arr[preLine.arr.length-1].value.length:0]
                 preLine.arr=preLine.arr.concat(item.arr)
@@ -369,9 +355,7 @@ export class RichEditorEvent {
     }
 
     onMouseDown(event:MouseEvent){
-        if(this.popMenuElement) {
-            this.popMenuElement.style.display="none"
-        }
+        this.popMenuPosition.value=null;
         this.clearQuote()
         if(event.detail==1) {
             this.selectElementList=[event.currentTarget as HTMLElement]
@@ -869,7 +853,7 @@ export class RichEditorEvent {
                 let remove=this.linkEditElement.querySelector("[name='remove']") as HTMLElement
                 remove.onclick=()=>{
                     let item=this.lineList[lineIndex].arr[index]
-                    item.type=ECommon_Content_Line_Config_Type.TEXT
+                    item.type=EEditor_Content_Line_Config_Type.TEXT
                     delete item.link
                     RichEditorHandle.fixLine(this.lineList[lineIndex])
                     this.linkEditElement.style.display="none"
@@ -907,20 +891,20 @@ export class RichEditorEvent {
                 }
                 let startIndex=Array.from(this.root.value.children).indexOf(container)
                 let selectLine=this.lineList[startIndex]
-                RichEditorHandle.handleInnerHtml(selectLine,container,true)
+                RichEditorHandle.handleInnerHtml(selectLine,container,true,this.onGetLineConfigType)
                 this.onUploadFileFunc?.(file,(fileId, path) => {
                     let originItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
-                    let objItem:ICommon_Content_Line_Config={
+                    let objItem:IEditor_Content_Line_Config={
                         value:fileId,
                         link:path,
-                        type:ECommon_Content_Line_Config_Type.IMAGE
+                        type:EEditor_Content_Line_Config_Type.IMAGE
                     }
                     let index:number
                     if(originItem) {
-                        let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+                        let objTemp:IEditor_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
                         objTemp.value=objTemp.value.substring(selectLine.selectStartIndexPath[1])
                         let appendItemList=[...selectLine.arr.slice(selectLine.selectStartIndexPath[0]+1)]
-                        if(objTemp.type!=ECommon_Content_Line_Config_Type.IMAGE) {
+                        if(objTemp.type!=EEditor_Content_Line_Config_Type.IMAGE) {
                             appendItemList.unshift(objTemp)
                         }
                         originItem.value=originItem.value.substring(0,selectLine.selectStartIndexPath[1])
@@ -959,22 +943,22 @@ export class RichEditorEvent {
             }
             let startIndex=Array.from(this.root.value.children).indexOf(container)
             let selectLine=this.lineList[Array.from(this.root.value.children).indexOf(container)]
-            RichEditorHandle.handleInnerHtml(selectLine,container,true)
+            RichEditorHandle.handleInnerHtml(selectLine,container,true,this.onGetLineConfigType)
             if(isFromTeamLinker) {
-                let appendItemList:ICommon_Content_Line_Config[],indexPath:number[]=[];
+                let appendItemList:IEditor_Content_Line_Config[],indexPath:number[]=[];
                 for(let i=0;i<divList.length;i++) {
-                    let line:ICommon_Content_Line={
+                    let line:IEditor_Content_Line={
                         arr:[],
                         selectEndIndexPath:[],
                         selectStartIndexPath:[]
                     }
-                    RichEditorHandle.handleInnerHtml(line,divList[i])
+                    RichEditorHandle.handleInnerHtml(line,divList[i],false,this.onGetLineConfigType)
                     if(i==0 || i==divList.length-1) {
                         if(i==0) {
                             let text="",isImg=false
                             selectLine.arr.forEach(item=>{
                                 text+=item.value
-                                if(item.type==ECommon_Content_Line_Config_Type.IMAGE) {
+                                if(item.type==EEditor_Content_Line_Config_Type.IMAGE) {
                                     isImg=true
                                 }
                             })
@@ -982,10 +966,10 @@ export class RichEditorEvent {
                                 this.lineList.splice(this.lineList.indexOf(selectLine),1,line)
                             } else {
                                 let originItem=selectLine.arr[selectLine.selectStartIndexPath[0]]
-                                let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+                                let objTemp:IEditor_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
                                 objTemp.value=objTemp.value.substring(selectLine.selectStartIndexPath[1])
                                 appendItemList=[...selectLine.arr.slice(selectLine.selectStartIndexPath[0]+1)]
-                                if(objTemp.type!=ECommon_Content_Line_Config_Type.IMAGE) {
+                                if(objTemp.type!=EEditor_Content_Line_Config_Type.IMAGE) {
                                     appendItemList.unshift(objTemp)
                                 }
                                 originItem.value=originItem.value.substring(0,selectLine.selectStartIndexPath[1])
@@ -1053,7 +1037,7 @@ export class RichEditorEvent {
                 } else {
                     selectLine.arr.push({
                         value:ele.innerText,
-                        type:ECommon_Content_Line_Config_Type.TEXT,
+                        type:EEditor_Content_Line_Config_Type.TEXT,
                         style:{}
                     })
                     nextTick(()=>{
@@ -1126,7 +1110,7 @@ export class RichEditorEvent {
                 }
                 let index=Array.from(this.root.value.children).indexOf(element)
                 let line=this.lineList[index]
-                RichEditorHandle.handleInnerHtml(line,element)
+                RichEditorHandle.handleInnerHtml(line,element,false,this.onGetLineConfigType)
                 this.selectElementList=Array.from(this.root.value.children) as HTMLElement[]
                 nextTick(()=>{
                     let range=document.createRange()
@@ -1167,32 +1151,39 @@ export class RichEditorEvent {
             }
         }
         if(event.key==="/") {
-            if(!this.popMenuList || this.popMenuList.length==0) {
-                return;
+            let selection=window.getSelection()
+            let range=selection.getRangeAt(0)
+            let rect=range.getBoundingClientRect()
+            if(rect.left==0 && rect.top==0 && rect.width==0 && rect.height==0) {
+                let ele=range.startContainer as HTMLElement
+                if(ele.tagName=="DIV" && range.startOffset!==0) {
+                    return
+                }
+                rect=(range.startContainer as HTMLElement).getBoundingClientRect()
             }
-            if(!this.popMenuElement) {
-                this.popMenuElement=document.createElement("div")
-                this.popMenuElement.style.position="absolute"
-                this.popMenuElement.style.display="none"
-                this.popMenuElement.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
-                this.popMenuElement.style.backgroundColor="white"
-                this.popMenuElement.style.border="1px solid rgba(169, 169, 169, 0.2)"
-                this.popMenuElement.style.width="150px"
-                this.popMenuElement.style.height="200px"
-                this.popMenuElement.style.overflow="auto"
-                this.popMenuElement.style.backgroundColor="white";
-                this.popMenuElement.style.outlineWidth="0"
-                this.popMenuElement.tabIndex=-1;
-                this.popMenuElement.style.zIndex="10000";
-                document.body.appendChild(this.popMenuElement)
-                this.popMenuElement.addEventListener("mousedown",ev => {
-                    this.popMenuElement.style.display="none"
-                })
-                this.destroyFunc=renderComponent(this.popMenuElement,PopMenu,this.appContext,{
-                    objEditor:this,
-                    popMenuList:this.popMenuList
-                });
-
+            let right=rect.right+rect.width
+            let bottom=rect.bottom
+            let left:number,top:number
+            if(right>160) {
+                left=rect.left
+            } else {
+                left=rect.left-150
+            }
+            if(document.body.clientHeight-bottom>210) {
+                top=rect.top+rect.height
+            } else {
+                top=rect.top-200
+            }
+            this.popMenuPosition.value={
+                left,
+                top
+            }
+        } else {
+            this.popMenuPosition.value=null;
+        }
+        if(event.key==="@") {
+            if(!this.onQuoteListFunc) {
+                return;
             }
             let selection=window.getSelection()
             let range=selection.getRangeAt(0)
@@ -1217,64 +1208,10 @@ export class RichEditorEvent {
             } else {
                 top=rect.top-200
             }
-            this.popMenuElement.style.left=left+"px"
-            this.popMenuElement.style.top=top+"px"
-            this.popMenuElement.style.display="block"
-        } else {
-            if(this.popMenuElement) {
-                this.popMenuElement.style.display="none"
+            this.quotePosition.value={
+                left,
+                top
             }
-        }
-        if(event.key==="@") {
-            if(!this.onQuoteListFunc) {
-                return;
-            }
-            if(!this.quoteElement) {
-                this.quoteElement=document.createElement("div")
-                this.quoteElement.style.position="absolute"
-                this.quoteElement.style.display="none"
-                this.quoteElement.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
-                this.quoteElement.style.backgroundColor="white"
-                this.quoteElement.style.border="1px solid rgba(169, 169, 169, 0.2)"
-                this.quoteElement.style.width="150px"
-                this.quoteElement.style.height="200px"
-                this.quoteElement.style.overflow="auto"
-                this.quoteElement.style.backgroundColor="white";
-                this.quoteElement.style.outlineWidth="0"
-                this.quoteElement.tabIndex=-1;
-                (event.target as HTMLElement).offsetParent.appendChild(this.quoteElement)
-                this.destroyQuoteFunc=renderComponent(this.quoteElement,markRaw(Quote),this.appContext,{
-                    objEditor:this
-                });
-            }
-            let selection=window.getSelection()
-            let range=selection.getRangeAt(0)
-            let rect=range.getBoundingClientRect()
-            if(rect.left==0 && rect.top==0 && rect.width==0 && rect.height==0) {
-                let ele=range.startContainer as HTMLElement
-                if(ele.tagName=="DIV" && range.startOffset!==0) {
-                    return
-                }
-                rect=(range.startContainer as HTMLElement).getBoundingClientRect()
-            }
-            let parent=(event.target as HTMLElement).offsetParent
-            let rectParent=parent.getBoundingClientRect()
-            let right=rectParent.right-rect.right+rect.width
-            let bottom=rectParent.bottom-rect.bottom
-            let left:number,top:number
-            if(right>160) {
-                left=rect.left-rectParent.left
-            } else {
-                left=rect.left-rectParent.left-150
-            }
-            if(bottom>210) {
-                top=rect.top-rectParent.top+rect.height
-            } else {
-                top=rect.top-rectParent.top-200
-            }
-            this.quoteElement.style.left=left+"px"
-            this.quoteElement.style.top=top+"px"
-            this.quoteElement.style.display="block"
         } else {
             this.clearQuote()
         }
@@ -1347,17 +1284,23 @@ export class RichEditorEvent {
         }
     }
 
-    constructor(root:Ref<HTMLElement>,elementList:Ref<HTMLElement[]>,appContext:AppContext){
-        this.appContext=appContext
+    constructor(root:Ref<HTMLElement>,popMenuPosition:Ref<{
+        left:number,
+        top:number
+    }>,quotePosition:Ref<{
+        left:number,
+        top:number
+    }>){
         this.root=root;
-        this.elementList=elementList
+        this.popMenuPosition=popMenuPosition
+        this.quotePosition=quotePosition
         document.addEventListener("keydown",onDeleteCrossLine)
     }
     getSelectionItemList():{
-        line:ICommon_Content_Line,
-        data:ICommon_Content_Line_Config[]
+        line:IEditor_Content_Line,
+        data:IEditor_Content_Line_Config[]
     }[] {
-        let selectLineList:ICommon_Content_Line[]=[]
+        let selectLineList:IEditor_Content_Line[]=[]
         this.selectElementList.forEach((ele)=>{
             selectLineList.push(this.lineList[Array.from(this.root.value.children).indexOf(ele)])
         })
@@ -1403,11 +1346,11 @@ export class RichEditorEvent {
         let endLine=selectLineList[selectLineList.length-1]
         endLine.selectEndIndexPath=selectEndIndexPath
         let itemList:{
-            line:ICommon_Content_Line,
-            data:ICommon_Content_Line_Config[]
+            line:IEditor_Content_Line,
+            data:IEditor_Content_Line_Config[]
         }[]=[]
         if(selectLineList.length==1) {
-            RichEditorHandle.handleInnerHtml(selectLineList[0],startContainer)
+            RichEditorHandle.handleInnerHtml(selectLineList[0],startContainer,false,this.onGetLineConfigType)
             itemList=[{
                 line:selectLineList[0],
                 data:[...selectLineList[0].arr.slice(selectStartIndexPath[0],selectEndIndexPath[0]+1)]
@@ -1425,13 +1368,13 @@ export class RichEditorEvent {
                     itemList.push(obj)
                 }
                 if(line==startLine) {
-                    RichEditorHandle.handleInnerHtml(line,startContainer)
+                    RichEditorHandle.handleInnerHtml(line,startContainer,false,this.onGetLineConfigType)
                     for (let i = selectStartIndexPath[0]; i < startLine.arr.length; i++) {
                         let item=startLine.arr[i]
                         obj.data.push(item)
                     }
                 } else if(line==endLine) {
-                    RichEditorHandle.handleInnerHtml(line,endContainer)
+                    RichEditorHandle.handleInnerHtml(line,endContainer,false,this.onGetLineConfigType)
                     for (let i = 0; i <= selectEndIndexPath[0]; i++) {
                         let item=endLine.arr[i]
                         if(item) {
@@ -1439,7 +1382,7 @@ export class RichEditorEvent {
                         }
                     }
                 } else {
-                    RichEditorHandle.handleInnerHtml(line,this.root.value.children[this.lineList.indexOf(line)] as HTMLElement)
+                    RichEditorHandle.handleInnerHtml(line,this.root.value.children[this.lineList.indexOf(line)] as HTMLElement,false,this.onGetLineConfigType)
                     line.arr.forEach(item=>{
                         obj.data.push(item)
                     })
@@ -1450,9 +1393,9 @@ export class RichEditorEvent {
     }
     getCurrentInfo():{
         element:HTMLElement,
-        line:ICommon_Content_Line,
+        line:IEditor_Content_Line,
         lineIndex:number,
-        item:ICommon_Content_Line_Config,
+        item:IEditor_Content_Line_Config,
         itemIndex
     }{
         let selection=window.getSelection()
@@ -1464,7 +1407,7 @@ export class RichEditorEvent {
         }
         let lineIndex=Array.from(this.root.value.children).indexOf(element)
         let line=this.lineList[lineIndex]
-        let item:ICommon_Content_Line_Config,itemIndex:number
+        let item:IEditor_Content_Line_Config,itemIndex:number
         if(container!=element) {
             itemIndex=Array.from(element.childNodes).indexOf(container as HTMLElement)
             item=line.arr[itemIndex]

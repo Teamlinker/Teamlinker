@@ -29,7 +29,7 @@
 
 		</a-col>
 		<a-col :span="4" style="align-items: center;justify-content: center;display: flex;height: 100%">
-			<a-space v-if="userId" size="mini">
+			<a-space v-if="userInfo" size="mini">
 				<a-avatar :size="30" :image-url="userInfo?.photo">
 					{{imgName}}
 				</a-avatar>

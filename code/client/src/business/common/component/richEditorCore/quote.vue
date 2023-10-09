@@ -1,28 +1,33 @@
 <template>
-	<div style="width: 100%;height: 100%;padding: 5px;box-sizing: border-box" ref="rootEle" @mousedown="onMouseDown">
-		<div style="height: 30px;border-bottom: 1px lightgray solid">
-			<input v-model="keyword" :placeholder="$t('placeholder.typeName')" style="width: 100%;box-sizing: border-box" @input="onChange">
-		</div>
-		<div class="hover" v-for="item in list" style="height: 40px;display: flex;align-items: center" @click="onClick(item)">
-			<img v-if="item.photo" style="width: 30px;height: 30px;border-radius: 15px" :src="item.photo">&nbsp;
-			{{item.label}}
+	<div style="width: 100%;height: 100%;position: absolute;z-index: 10000;left: 0px;top:0px" @click.self="onMaskClick">
+		<div style="width: 150px;height: 200px;padding: 5px;box-sizing: border-box;position: absolute;box-shadow: 0px 0px 2px 2px rgba(169, 169, 169, 0.2);border: 1px solid rgba(169, 169, 169, 0.2);background-color: white;overflow:auto;outline-width: 0;" :style="{
+			left:position.left+'px',
+			top:position.top+'px'
+		}" ref="rootEle" @mousedown="onMouseDown">
+			<div style="height: 30px;border-bottom: 1px lightgray solid">
+				<input v-model="keyword" style="width: 100%;box-sizing: border-box" @input="onChange">
+			</div>
+			<div class="hover" v-for="item in list" style="height: 40px;display: flex;align-items: center" @click="onClick(item)">
+				<img v-if="item.photo" style="width: 30px;height: 30px;border-radius: 15px" :src="item.photo">&nbsp;
+				{{item.label}}
+			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import {nextTick, onBeforeMount, ref} from "vue";
-import {SessionStorage} from "../../storage/session";
 import {RichEditorEvent} from "./event";
-import {
-	ECommon_Content_Line_Config_Type,
-	ICommon_Content_Line,
-	ICommon_Content_Line_Config
-} from "../../../../../../common/model/content";
 import {RichEditorHandle} from "./handle";
+import {IEditor_Content_Line, IEditor_Content_Line_Config} from "./types";
 
 const props=defineProps<{
-	objEditor:RichEditorEvent
+	objEditor:RichEditorEvent,
+	quoteType?:any,
+	position:{
+		left:number,
+		top:number
+	}
 }>()
 const keyword=ref("")
 const rootEle=ref<HTMLElement>()
@@ -31,16 +36,19 @@ const list=ref<{
 	label:string,
 	photo:string
 }[]>([])
-const organizationId=SessionStorage.get("organizationId")
 let itemList:{
-	line: ICommon_Content_Line,
-	data: ICommon_Content_Line_Config[]
+	line: IEditor_Content_Line,
+	data: IEditor_Content_Line_Config[]
 }[]
 let selectStartIndexPath
 const onChange=async ()=>{
 	props.objEditor.onQuoteListFunc?.(keyword.value,list1 => {
 		list.value=list1
 	})
+}
+
+const onMaskClick=(event:MouseEvent)=>{
+	props.objEditor.clearQuote()
 }
 
 const onMouseDown=(event:MouseEvent)=>{
@@ -59,11 +67,11 @@ const onClick=async (item:{
 	let line=itemList[0].line
 	let eleLine=props.objEditor.getRoot().value.children[props.objEditor.getLineList().indexOf(line)]
 	let originItem=line.arr[selectStartIndexPath[0]]
-	let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
+	let objTemp:IEditor_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
 	objTemp.value=originItem.value.substring(selectStartIndexPath[1])
 	originItem.value=originItem.value.substring(0,selectStartIndexPath[1]-1)
-	let item1:ICommon_Content_Line_Config={
-		type:ECommon_Content_Line_Config_Type.QUOTE_PERSON,
+	let item1:IEditor_Content_Line_Config={
+		type:props.quoteType,
 		value:item.value,
 		label:item.label
 	}

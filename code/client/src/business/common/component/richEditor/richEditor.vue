@@ -1,35 +1,30 @@
 <template>
-  <div>
-    <div ref="root" @mouseover="onMouseOver" @keydown="onKeyDown" style="padding: 10px" @keyup="onKeyUp" :style="{border:border?'border: 1px solid lightgray;':'0px'}" @copy="onCopy" @dragstart="onDragStart">
-      <div v-for="(item,index) in lineList" :key="index" contenteditable="true" @blur="onBlur(item,$event)" ref="elementList" v-html="RichEditorHandle.handle(item)" @keydown.enter="onEnter(item,index,$event)" @keydown.delete="onDelete(index,item,$event)" style="line-height: 1.5" @focus="onFocus(item,$event)" @mousedown="onMouseDown" @mouseup="onMouseUp" @mousemove="onMouseMove" @dblclick="onDbClick" @paste="onPaste" @click="onClick" :placeholder="$t('placeholder.richText')" v-if="!readonly">
-      </div>
-      <div v-for="(item,index) in lineList" @click="onClick" :key="index+1" v-html="RichEditorHandle.handle(item)" style="line-height: 1.5;min-height: 21px" v-else>
-      </div>
-    </div>
-	  <teleport to="body" v-if="userShortViewInfo">
+	<div>
+		<Editor v-bind="props" @update:modelValue="value => emit('update:modelValue',value)" @uploadFile="(file, handleFunc) => emit('uploadFile',file,handleFunc)" @popMenuClick="(type, handleFunc) => emit('popMenuClick',type,handleFunc)" @customAnchorClick="(type, value, link, label) => emit('customAnchorClick',type,value,link,label)" @[isQuote&&`quoteList`]="(keyword, handleFunc) => emit('quoteList',keyword,handleFunc)" @metaEnter="emit('metaEnter')" @linkClick="onLinkClick" :placeholder="$t('placeholder.richText')" @dragstart="onDragStart" @setLineConfigType="onSetLineConfigType" @getLineConfigType="onGetLineConfigType" :quote-type="ECommon_Content_Line_Config_Type.QUOTE_PERSON" ref="objEditor"></Editor>
+		<teleport to="body" v-if="userShortViewInfo">
 			<UserShortView ref="userShortViewEle" :organization-user-id="userShortViewInfo.id" style="position:absolute;z-index: 1000;box-shadow: rgba(169, 169, 169, 0.2) 0px 0px 2px 2px;border-radius: 5px;background-color: white" :style="{left:userShortViewInfo.x+'px',top:userShortViewInfo.y+'px'}" tabindex="0" @blur="onUserShotViewBlur"></UserShortView>
-	  </teleport>
-  </div>
+		</teleport>
+	</div>
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, nextTick, onBeforeUnmount, ref, watch, watchEffect} from "vue";
-import {RichEditorEvent} from "./event";
-import {RichEditorHandle} from "./handle";
+import Editor from "@/business/common/component/richEditorCore/index.vue"
 import {
-	ECommon_Content_Line_Config_Type,
-	ICommon_Content_Line,
-	ICommon_Content_Line_Config
-} from "../../../../../../common/model/content";
-import UserShortView from "../userShortView.vue";
-import {dragElementList, EClient_Drag_Type} from "../../../../teamOS/common/directive/drag";
+	EEditor_Content_Line_Config_Type,
+	IEditor_Content_Line,
+	IEditor_Content_Line_Config
+} from "@/business/common/component/richEditorCore/types";
+import {ECommon_Content_Line_Config_Type} from "../../../../../../common/model/content";
+import {getCurrentInstance, nextTick, ref} from "vue";
+import UserShortView from "@/business/common/component/userShortView.vue";
+import {dragElementList, EClient_Drag_Type} from "@/teamOS/common/directive/drag";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 
 const emit=defineEmits<{
-  (e:"update:modelValue",value:ICommon_Content_Line[]):void
+	(e:"update:modelValue",value:IEditor_Content_Line[]):void
 	(e:"uploadFile", file:File, handleFunc:(fileId:string, path:string)=>void):void
-	(e:"popMenuClick",type:any,handleFunc:(item:ICommon_Content_Line_Config)=>void):void
-	(e:"customAnchorClick",type:ECommon_Content_Line_Config_Type,value:string,link:string,label:string):void
+	(e:"popMenuClick",type:any,handleFunc:(item:IEditor_Content_Line_Config)=>void):void
+	(e:"customAnchorClick",type:any,value:string,link:string,label:string):void
 	(e:"quoteList",keyword:string,handleFunc:(list:{
 		value:string,
 		label:string,
@@ -38,197 +33,33 @@ const emit=defineEmits<{
 	(e:"metaEnter"):void
 }>()
 const props=defineProps<{
-  readonly?:boolean,
-  modelValue:ICommon_Content_Line[],
-  border?:boolean,
+	readonly?:boolean,
+	modelValue:IEditor_Content_Line[],
+	border?:boolean,
 	popMenuList?:{
 		type: any,
 		title: string
 	}[]
 }>()
+const objEditor=ref<InstanceType<typeof Editor>>()
 const userShortViewEle=ref()
 const userShortViewInfo=ref<{
 	x:number,
 	y:number,
 	id:string
 }>()
-const root=ref<HTMLElement>()
-const elementList=ref<HTMLElement[]>([])
-let selectStartIndexPath=[0,0,0]
-const objEditor=new RichEditorEvent(root,elementList,getCurrentInstance().appContext)
-watchEffect(()=>{
-	if(props.popMenuList) {
-		objEditor.setPopMenuList(props.popMenuList)
-	}
-})
-objEditor.onUploadFileFunc=(file, handleFunc) => {
-	emit("uploadFile",file,handleFunc)
-}
-objEditor.onPopMenuClickFunc=(type, handleFunc) => {
-	emit("popMenuClick",type,handleFunc)
-}
-objEditor.onCustomMenuClickFunc=(type, value, link, label) => {
-	emit("customAnchorClick",type,value,link,label)
-}
-if(getCurrentInstance().vnode.props.onQuoteList) {
-	objEditor.onQuoteListFunc=(keyword, handleFunc) => {
-		emit("quoteList",keyword,handleFunc)
-	}
-}
-const lineList=objEditor.getLineList()
-let historyList:ICommon_Content_Line[][]=[]
-let recall=false
-watch(lineList,()=>{
-  emit("update:modelValue",lineList)
-},{
-  deep:true
-})
-
-watch(()=>props.modelValue,(value, oldValue, onCleanup)=>{
-  objEditor.setLineList(props.modelValue)
-  if(lineList.length==0) {
-    objEditor.addLine("")
-  }
-	if(oldValue && oldValue.length>0 && !recall) {
-		let obj=JSON.parse(JSON.stringify(oldValue))
-		obj.forEach(obj=>{
-			delete obj.selectStartIndexPath
-			delete obj.selectEndIndexPath
-		})
-		let str=JSON.stringify(obj)
-		if(historyList.length==0) {
-			historyList.unshift(obj)
-		} else {
-			let objFirst=historyList[0]
-			if(JSON.stringify(objFirst)!==str) {
-				historyList.unshift(obj)
+const isQuote=!!getCurrentInstance().vnode.props.onQuoteList
+const onLinkClick=(type:ECommon_Content_Line_Config_Type,value:string,x:number,y:number)=>{
+	if(type===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
+		if(value!=="0") {
+			userShortViewInfo.value={
+				id:value,
+				x:x,
+				y:y
 			}
-		}
-		if(historyList.length>10) {
-			historyList.pop()
-		}
-	} else if(recall===true) {
-		recall=false
-	}
-},{
-  deep:true,
-  immediate:true
-})
-
-const onFocus=(item:ICommon_Content_Line, event:MouseEvent)=>{
-  objEditor.onFocus(item,event)
-}
-const onDbClick=(event:MouseEvent)=>{
-  objEditor.onDbClick(event)
-}
-
-const onBlur=(item:ICommon_Content_Line, event:FocusEvent)=>{
-  objEditor.onBlur(item,event)
-}
-
-const onEnter=(line:ICommon_Content_Line, index:number, event:KeyboardEvent)=>{
-	if(event.metaKey) {
-		RichEditorHandle.handleInnerHtml(line,event.currentTarget as HTMLElement)
-		nextTick(()=>{
-			emit("metaEnter")
-		})
-	} else {
-		objEditor.onEnter(line,index,event)
-	}
-}
-const onDelete=(index, item:ICommon_Content_Line, event:MouseEvent)=>{
-  objEditor.onDelete(index,item,event)
-}
-
-const onMouseDown=(event:MouseEvent)=>{
-  objEditor.onMouseDown(event)
-}
-const onMouseMove=(event:MouseEvent)=>{
-  objEditor.onMouseMove(event)
-}
-
-const calculateIndex=()=>{
-	let selection=window.getSelection()
-	if(selection.rangeCount==0) {
-		return
-	}
-	let range=selection.getRangeAt(0)
-	let startOffset=range.startOffset
-	selectStartIndexPath=[]
-	let startContainer=range.startContainer as HTMLElement
-	if(startContainer.tagName==="DIV") {
-		selectStartIndexPath=[0,startOffset]
-		selectStartIndexPath.unshift(Array.from(startContainer.parentElement.children).indexOf(startContainer))
-	} else {
-		selectStartIndexPath=[startOffset]
-		let parentElement=startContainer.parentElement
-		if(parentElement.tagName=="DIV") {
-			startOffset=Array.from(parentElement.childNodes).indexOf(startContainer as Element)
-			selectStartIndexPath.unshift(startOffset)
-			startContainer=parentElement
-		} else {
-			startOffset=Array.from(parentElement.parentElement.childNodes).indexOf(parentElement as Element)
-			selectStartIndexPath.unshift(startOffset)
-			startContainer=parentElement.parentElement
-		}
-		selectStartIndexPath.unshift(Array.from(startContainer.parentElement.children).indexOf(startContainer))
-	}
-}
-
-const onKeyUp=(event:KeyboardEvent)=>{
-	calculateIndex()
-}
-
-const onMouseUp=(event:MouseEvent)=>{
-  objEditor.onMouseUp(event)
-	calculateIndex()
-}
-const onPaste=(event:ClipboardEvent)=>{
-  objEditor.onPaste(event)
-}
-
-const onMouseOver=(event:MouseEvent)=>{
-  if(!props.readonly) {
-    objEditor.onMouseOver(event)
-  }
-}
-
-const onCopy=(event:ClipboardEvent)=>{
-	objEditor.onCopy(event)
-}
-
-const onKeyDown=(event:KeyboardEvent)=>{
-  if(!props.readonly) {
-    objEditor.onKeyDown(event)
-    if(event.key=="z" && (event.metaKey || event.ctrlKey)) {
-		  event.stopPropagation()
-		  event.preventDefault()
-	    if(historyList.length>0) {
-		    let list=historyList.shift()
-		    objEditor.setLineList(list)
-	    }
-			recall=true
-	  }
-  }
-}
-
-const onClick=(event:MouseEvent)=>{
-	objEditor.onClick(event)
-	if(props.readonly) {
-		let ele=event.target as HTMLElement
-		let type=ele.getAttribute("type")
-		if(ele.tagName==="A" && type && Number(type)===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
-			let value=ele.getAttribute("value")
-			if(value!=="0") {
-				userShortViewInfo.value={
-					id:value,
-					x:event.x,
-					y:event.y
-				}
-				nextTick(()=>{
-					userShortViewEle.value.$el.focus()
-				})
-			}
+			nextTick(()=>{
+				userShortViewEle.value.$el.focus()
+			})
 		}
 	}
 }
@@ -285,46 +116,327 @@ const onDragStart=(event:DragEvent)=>{
 	}
 }
 
-const insertConfig=(itemList:ICommon_Content_Line_Config[])=>{
-	if(itemList.length==0) {
-		return
+const onSetLineConfigType=(ele:HTMLElement,obj:IEditor_Content_Line_Config)=>{
+	if(obj.type==ECommon_Content_Line_Config_Type.LINK) {
+		ele.setAttribute("href",obj.link)
+		ele.setAttribute("target","_blank")
+		ele.style.cursor="pointer"
+		ele.innerText=obj.value
+		if(obj.style) {
+			for(let key in obj.style) {
+				ele.style[key]=obj.style[key]
+			}
+		}
+	} else if(obj.type==ECommon_Content_Line_Config_Type.IMAGE) {
+		ele.setAttribute("src",obj.link)
+		ele.setAttribute("width",String(obj.width??200))
+		ele.setAttribute("height","auto")
+		ele.setAttribute("fileId",obj.value)
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.FILE)
+		ele.setAttribute("dragValue",obj.value)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.FILE) {
+		ele.setAttribute("href",obj.link)
+		ele.setAttribute("download",obj.label)
+		ele.setAttribute("fileId",obj.value)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.FILE)
+		ele.setAttribute("dragValue",obj.value)
+		let icon=document.createElement("i")
+		icon.className="svg svg-file"
+		icon.style.marginRight="5px"
+		icon.style.color="gray"
+		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.PROJECT) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.PROJECT))
+		ele.setAttribute("value",obj.value)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.style.borderRadius="5px"
+		ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+		ele.style.border="1px solid rgb(210,210,210)"
+		ele.style.color="blue"
+		ele.style.fontSize="medium"
+		ele.style.textDecoration="none"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+		ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.PROJECT)
+		ele.setAttribute("shortcutRefId",obj.value)
+		ele.setAttribute("shortcutName",obj.label)
+		let icon=document.createElement("i")
+		icon.className="svg svg-project"
+		icon.style.marginRight="5px"
+		icon.style.color="green"
+		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.PROJECT_ISSUE))
+		ele.setAttribute("value",obj.value)
+		ele.setAttribute("link",obj.link)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.style.borderRadius="5px"
+		ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+		ele.style.border="1px solid rgb(210,210,210)"
+		ele.style.color="blue"
+		ele.style.fontSize="medium"
+		ele.style.textDecoration="none"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+		ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.PROJECT_ISSUE)
+		ele.setAttribute("shortcutRefId",obj.value)
+		ele.setAttribute("shortcutName",obj.label)
+		let icon=document.createElement("i")
+		icon.className="svg svg-project-issue"
+		icon.style.marginRight="5px"
+		icon.style.color="green"
+		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.BOARD_SPRINT) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.BOARD_SPRINT))
+		ele.setAttribute("value",obj.value)
+		ele.setAttribute("link",obj.link)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.style.borderRadius="5px"
+		ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+		ele.style.border="1px solid rgb(210,210,210)"
+		ele.style.color="blue"
+		ele.style.fontSize="medium"
+		ele.style.textDecoration="none"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+		ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.BOARD_SPRINT)
+		ele.setAttribute("shortcutRefId",obj.value)
+		ele.setAttribute("shortcutName",obj.label)
+		let icon=document.createElement("i")
+		icon.className="svg svg-board-sprint"
+		icon.style.marginRight="5px"
+		icon.style.color="green"
+		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.WIKI) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.WIKI))
+		ele.setAttribute("value",obj.value)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.style.borderRadius="5px"
+		ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+		ele.style.border="1px solid rgb(210,210,210)"
+		ele.style.color="blue"
+		ele.style.fontSize="medium"
+		ele.style.textDecoration="none"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+		ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.WIKI)
+		ele.setAttribute("shortcutRefId",obj.value)
+		ele.setAttribute("shortcutName",obj.label)
+		let icon=document.createElement("i")
+		icon.className="svg svg-wiki"
+		icon.style.marginRight="5px"
+		icon.style.color="rgb(0,120,212)"
+		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.WIKI_ITEM))
+		ele.setAttribute("value",obj.value)
+		ele.setAttribute("link",obj.link)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.style.borderRadius="5px"
+		ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+		ele.style.border="1px solid rgb(210,210,210)"
+		ele.style.color="blue"
+		ele.style.fontSize="medium"
+		ele.style.textDecoration="none"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+		ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.WIKI_ITEM)
+		ele.setAttribute("shortcutRefId",obj.value)
+		ele.setAttribute("shortcutName",obj.label)
+		let icon=document.createElement("i")
+		icon.className="svg svg-wiki-item"
+		icon.style.marginRight="5px"
+		icon.style.color="rgb(0,120,212)"
+		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.CALENDAR_EVENT))
+		ele.setAttribute("value",obj.value)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.style.borderRadius="5px"
+		ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+		ele.style.border="1px solid rgb(210,210,210)"
+		ele.style.color="blue"
+		ele.style.fontSize="medium"
+		ele.style.textDecoration="none"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+		ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.CALENDAR_EVENT)
+		ele.setAttribute("shortcutRefId",obj.value)
+		ele.setAttribute("shortcutName",obj.label)
+		let icon=document.createElement("i")
+		icon.className="svg svg-calendar-event"
+		icon.style.marginRight="5px"
+		icon.style.color="orange"
+		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.MEETING_ROOM))
+		ele.setAttribute("value",obj.value)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.style.borderRadius="5px"
+		ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+		ele.style.border="1px solid rgb(210,210,210)"
+		ele.style.color="blue"
+		ele.style.fontSize="medium"
+		ele.style.textDecoration="none"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+		ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.MEETING_ROOM)
+		ele.setAttribute("shortcutRefId",obj.value)
+		ele.setAttribute("shortcutName",obj.label)
+		let icon=document.createElement("i")
+		icon.className="svg svg-meeting-room"
+		icon.style.marginRight="5px"
+		icon.style.color="red"
+		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.QUOTE_PERSON))
+		ele.setAttribute("value",obj.value)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.backgroundColor="rgba(9, 30, 66, 0.08)"
+		ele.style.color="#42526E"
+		ele.style.borderRadius="10px"
+		ele.style.textDecoration="none"
+		ele.prepend(document.createTextNode("@"))
 	}
-	let items:ICommon_Content_Line_Config[]=[]
-	itemList.forEach(item=>{
-		items.push(item,{
-			type:ECommon_Content_Line_Config_Type.TEXT,
-			value:"&nbsp;"
-		})
-	})
-	let line=lineList[selectStartIndexPath[0]]
-	let eleLine=elementList.value[selectStartIndexPath[0]]
-	RichEditorHandle.handleInnerHtml(line,eleLine)
-	let originItem=line.arr[selectStartIndexPath[1]]
-	let objFix
-	if(originItem) {
-		let objTemp:ICommon_Content_Line_Config=JSON.parse(JSON.stringify(originItem))
-		objTemp.value=originItem.value.substring(selectStartIndexPath[2])
-		originItem.value=originItem.value.substring(0,selectStartIndexPath[2])
-		line.arr.splice(selectStartIndexPath[1]+1,0,...items,objTemp)
-		objFix={endIndex:selectStartIndexPath[1]+items.length}
-	} else {
-		line.arr.push(...items)
-		objFix={endIndex:selectStartIndexPath[1]+items.length-1}
-	}
-	RichEditorHandle.fixLine(line,objFix)
-	nextTick(()=>{
-		let selection=window.getSelection()
-		let range=document.createRange()
-		range.setStart(eleLine.childNodes[objFix.endIndex],1)
-		range.setEnd(eleLine.childNodes[objFix.endIndex],1)
-		selection.removeAllRanges()
-		selection.addRange(range)
-	})
 }
 
-onBeforeUnmount(()=>{
-	objEditor.clear()
-})
+const onGetLineConfigType=(obj:IEditor_Content_Line_Config,ele:HTMLElement)=>{
+	if(ele.tagName=="A") {
+		let fileId=ele.getAttribute("fileId")
+		if(fileId) {
+			obj.type=ECommon_Content_Line_Config_Type.FILE
+			obj.link=ele.getAttribute("href")
+			obj.value=fileId
+			obj.label=ele.innerText??""
+		} else {
+			let type=ele.getAttribute("type")
+			if(type) {
+				let configType=Number(type)
+				if(configType===ECommon_Content_Line_Config_Type.PROJECT) {
+					let projectId=ele.getAttribute("value")
+					obj.type=ECommon_Content_Line_Config_Type.PROJECT
+					obj.value=projectId
+					obj.label=ele.innerText??""
+				} else if(configType===ECommon_Content_Line_Config_Type.PROJECT_ISSUE) {
+					let projectId=ele.getAttribute("link")
+					let projectIssueId=ele.getAttribute("value")
+					obj.type=ECommon_Content_Line_Config_Type.PROJECT_ISSUE
+					obj.value=projectIssueId
+					obj.link=projectId
+					obj.label=ele.innerText??""
+				} else if(configType===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
+					let projectId=ele.getAttribute("link")
+					let projectReleaseId=ele.getAttribute("value")
+					obj.type=ECommon_Content_Line_Config_Type.PROJECT_RELEASE
+					obj.value=projectReleaseId
+					obj.link=projectId
+					obj.label=ele.innerText??""
+				} else if(configType===ECommon_Content_Line_Config_Type.BOARD_SPRINT) {
+					let projectAndBoardId=ele.getAttribute("link")
+					let boardSprintId=ele.getAttribute("value")
+					obj.type=ECommon_Content_Line_Config_Type.BOARD_SPRINT
+					obj.value=boardSprintId
+					obj.link=projectAndBoardId
+					obj.label=ele.innerText??""
+				} else if(configType===ECommon_Content_Line_Config_Type.WIKI) {
+					let wikiId=ele.getAttribute("value")
+					obj.type=ECommon_Content_Line_Config_Type.WIKI
+					obj.value=wikiId
+					obj.label=ele.innerText??""
+				} else if(configType===ECommon_Content_Line_Config_Type.WIKI_ITEM) {
+					let wikiItemId=ele.getAttribute("value")
+					let wikiId=ele.getAttribute("link")
+					obj.type=ECommon_Content_Line_Config_Type.WIKI_ITEM
+					obj.value=wikiItemId
+					obj.link=wikiId
+					obj.label=ele.innerText??""
+				} else if(configType===ECommon_Content_Line_Config_Type.CALENDAR_EVENT) {
+					let calendarEventId=ele.getAttribute("value")
+					obj.type=ECommon_Content_Line_Config_Type.CALENDAR_EVENT
+					obj.value=calendarEventId
+					obj.label=ele.innerText??""
+				} else if(configType===ECommon_Content_Line_Config_Type.MEETING_ROOM) {
+					let meetingRoomId=ele.getAttribute("value")
+					obj.type=ECommon_Content_Line_Config_Type.MEETING_ROOM
+					obj.value=meetingRoomId
+					obj.label=ele.innerText??""
+				} else if(configType===ECommon_Content_Line_Config_Type.QUOTE_PERSON) {
+					let organizationUserId=ele.getAttribute("value")
+					obj.type=ECommon_Content_Line_Config_Type.QUOTE_PERSON
+					obj.value=organizationUserId
+					obj.label=ele.innerText.replaceAll("@","")??""
+				}
+			} else {
+				obj.type=ECommon_Content_Line_Config_Type.LINK
+				obj.link=ele.getAttribute("href")
+				obj.value=ele.innerText??""
+			}
+		}
+	} else if(ele.tagName=="IMG") {
+		obj.type=EEditor_Content_Line_Config_Type.IMAGE
+		obj.link=ele.getAttribute("src")
+		obj.width=parseInt(ele.getAttribute("width"))
+		obj.value=ele.getAttribute("fileId")
+	}
+}
+
+const insertConfig=(itemList:IEditor_Content_Line_Config[])=>{
+	objEditor.value.insertConfig(itemList)
+}
 
 defineExpose({
 	insertConfig
@@ -332,19 +444,6 @@ defineExpose({
 </script>
 
 <style scoped>
-div {
-  word-break: break-all;
-}
-[contenteditable] {
-  outline: 0px solid transparent;
-}
-[contenteditable=true]:first-child:empty:not(:focus):before{
-  content: attr(placeholder);
-  color:grey;
-  font-style:italic;
-  pointer-events: none;
-  display: block;
-}
 :deep a[fileId]:hover {
 	background-color: lightgray;
 }
