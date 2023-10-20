@@ -148,7 +148,7 @@ class ProjectController {
 
     @DHttpApi(projectApi.routes.userProjectList)
     async userProjectList(@DHttpReqParamRequired("page") page:number,@DHttpReqParamRequired("size") size:number,@DHttpReqParamRequired("type") type:"all"|"created"|"joined",@DHttpReqParam("keyword") keyword:string,@DHttpUser user:IUserSession) :Promise<typeof projectApi.routes.userProjectList.res> {
-        let ret=await ProjectService.userProjectList(user.organizationInfo.organizationUserId,page,size,type,keyword);
+        let ret=await ProjectService.userProjectList(user.organizationInfo.organizationId,user.organizationInfo.organizationUserId,page,size,type,keyword);
         return ret;
     }
 

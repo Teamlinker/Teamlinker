@@ -1986,7 +1986,7 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
         }
     }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+String(item)).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -2158,7 +2158,7 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+String(item)).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -2368,7 +2368,7 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+String(item)).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -2616,7 +2616,7 @@ export function generateGroupLeftJoin4Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} left join ${joinTable4} on ${expression4} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} left join ${joinTable4} on ${expression4} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+String(item)).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }
@@ -2902,7 +2902,7 @@ export function generateGroupLeftJoin5Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
     return {
-        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} left join ${joinTable4} on ${expression4} left join ${joinTable5} on ${expression5} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+item).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
+        value:`select ${column} from ${table} left join ${joinTable} on ${expression} left join ${joinTable2} on ${expression2} left join ${joinTable3} on ${expression3} left join ${joinTable4} on ${expression4} left join ${joinTable5} on ${expression5} ${expr?(" where "+expr):""} group by ${groups.map(item=>table+"."+String(item)).join(",")}${having?(" having "+havingExpr):""}${orderStr}${limit!==undefined?` limit ${limit},${size}`:""}`,
         type:null,
         aggregation:aggregation
     }

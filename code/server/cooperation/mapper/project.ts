@@ -457,7 +457,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         return ret;
     }
 
-    async userProjectList(organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
+    async userProjectList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
         if(!organizationUserId) {
             throw Err.User.userIdNotExists
         }
@@ -534,7 +534,11 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                         value:organizationUserId
                     }
                 }
-            })
+            }),
+            organization_id:{
+                model:projectModel,
+                value:organizationId
+            }
         },"and",null,"and",{
             field:"name",
             model:projectModel,

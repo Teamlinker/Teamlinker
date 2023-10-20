@@ -52,6 +52,7 @@ const onQuit=async ()=>{
 		if(res?.code==0) {
 			Message.success(t("tip.operationSuccess"))
 			props.onClose()
+			location.reload()
 		} else {
 			Message.error(res.msg)
 		}

@@ -227,7 +227,10 @@ export default {
         typeEmail:"输入Email",
         typePasswordAgain:"再次输入密码",
         typeMeetingPassword:"输入会议密码",
-        typeOrganizationName:"输入组织名称"
+        typeOrganizationName:"输入组织名称",
+        typeProjectReleaseName:"输入发布名称",
+        typeCalendarEventName:"输入日历事件名称",
+        typeMeetingRoomName:"输入会议名称"
     },
     "util":{
         "ok":"确认",

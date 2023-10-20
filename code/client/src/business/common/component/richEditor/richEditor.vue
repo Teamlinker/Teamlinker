@@ -205,6 +205,33 @@ const onSetLineConfigType=(ele:HTMLElement,obj:IEditor_Content_Line_Config)=>{
 		icon.style.marginRight="5px"
 		icon.style.color="green"
 		ele.prepend(icon)
+	} else if(obj.type===ECommon_Content_Line_Config_Type.PROJECT_RELEASE) {
+		ele.setAttribute("href","javascript:void(0)")
+		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.PROJECT_RELEASE))
+		ele.setAttribute("value",obj.value)
+		ele.setAttribute("link",obj.link)
+		ele.style.margin="0 2px 0 2px"
+		ele.style.padding="0 5px 0 5px"
+		ele.style.cursor="pointer"
+		ele.contentEditable="false"
+		ele.innerText=obj.label
+		ele.style.color="black"
+		ele.style.borderRadius="5px"
+		ele.style.boxShadow="0px 0px 2px 2px rgba(169, 169, 169, 0.2)"
+		ele.style.border="1px solid rgb(210,210,210)"
+		ele.style.color="blue"
+		ele.style.fontSize="medium"
+		ele.style.textDecoration="none"
+		ele.setAttribute("allowDrag","1")
+		ele.setAttribute("dragType",EClient_Drag_Type.SHORTCUT)
+		ele.setAttribute("shortcutType",ECommon_Model_Finder_Shortcut_Type.PROJECT_RELEASE)
+		ele.setAttribute("shortcutRefId",obj.value)
+		ele.setAttribute("shortcutName",obj.label)
+		let icon=document.createElement("i")
+		icon.className="svg svg-project-release"
+		icon.style.marginRight="5px"
+		icon.style.color="green"
+		ele.prepend(icon)
 	} else if(obj.type===ECommon_Content_Line_Config_Type.BOARD_SPRINT) {
 		ele.setAttribute("href","javascript:void(0)")
 		ele.setAttribute("type",String(ECommon_Content_Line_Config_Type.BOARD_SPRINT))

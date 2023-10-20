@@ -229,7 +229,10 @@ export default {
         typeEmail:"Type Email",
         typePasswordAgain:"Type Password Again",
         typeMeetingPassword:"Type Meeting Password",
-        typeOrganizationName:"Type Organization Name"
+        typeOrganizationName:"Type Organization Name",
+        typeProjectReleaseName:"Type Project Release Name",
+        typeCalendarEventName:"type calendar event name",
+        typeMeetingRoomName:"type meeting room name"
     },
     "util":{
         "ok":"Ok",

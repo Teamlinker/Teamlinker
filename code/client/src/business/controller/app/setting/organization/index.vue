@@ -75,6 +75,7 @@ const onDelete=async ()=>{
 			})
 			if(res?.code==0) {
 				Message.success(t("tip.operationSuccess"))
+				location.reload()
 			}
 		} else {
 			Message.error(t("tip.notMatch"))
