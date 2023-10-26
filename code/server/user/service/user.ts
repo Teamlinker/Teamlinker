@@ -171,7 +171,7 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         await this.update()
     }
 
-    async startSession():Promise<string>{
+    async startSession(lang:string):Promise<string>{
         let secret=getConfigInstance().jwt;
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
@@ -188,7 +188,9 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
                     let session=REDIS_USER.token(this.item.id)
                     await session.set(token);
                     let sessionInfo=REDIS_USER.info(this.item.id)
-                    await sessionInfo.set(this.item);
+                    await sessionInfo.set(Object.assign({},this.item,{
+                        lang
+                    }));
                     let sessionOrganization=REDIS_USER.organizationInfo(this.item.id)
                     let objSessionOrganization=await sessionOrganization.get()
                     await sessionOrganization.del();

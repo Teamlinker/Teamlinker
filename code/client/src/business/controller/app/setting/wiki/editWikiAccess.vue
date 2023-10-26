@@ -152,6 +152,7 @@ const getWikiInfo=async ()=>{
 }
 onBeforeMount(()=>{
 	getWikiInfo()
+	search(pagination.current)
 })
 </script>
 

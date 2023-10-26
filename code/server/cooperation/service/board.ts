@@ -21,6 +21,8 @@ import {ProjectService} from "./project";
 import {ProjectIssueService} from "./issue";
 import {Err} from "../../../common/status/error";
 import {ICommon_Model_Workflow_Action} from "../../../common/model/workflow_action";
+import {REDIS_USER} from "../../common/cache/keys/user";
+import * as i18next from "i18next";
 
 export class BoardService extends Entity<typeof boardModel,typeof boardMapper> {
     constructor() {
@@ -42,9 +44,13 @@ export class BoardService extends Entity<typeof boardModel,typeof boardMapper> {
         return ret;
     }
 
-    override async create(...param): Promise<typeof boardModel["model"]> {
-        let ret=await super.create(...param);
-        await Promise.all(["To Do","In Progress","Done"].map((name,index)=>{
+    override async create(userId:string): Promise<typeof boardModel["model"]> {
+        let ret=await super.create();
+        let objRedis=REDIS_USER.info(userId)
+        let value=await objRedis.get()
+        let lang=value.lang??"en"
+        let t=i18next.getFixedT(lang)
+        await Promise.all([t("util.todo"),t("util.inProgress"),t("util.done")].map((name,index)=>{
             let obj=new BoardColumnService()
             obj.assignItem({
                 board_id:ret.id,

@@ -126,6 +126,7 @@ export default class GateWay extends Application {
                     if (ctx.state.formData) {
                         obj.bodyType = EServer_Common_Http_Body_Type.FORMDATA
                     }
+                    let lang=ctx.headers["accept-language"]
                     if(permission && Array.isArray(permission) && permission.length>0) {
                         if(obj.user) {
                             if(obj.user.type==ECommon_User_Type.USER) {
@@ -167,7 +168,7 @@ export default class GateWay extends Application {
                     if(ret.data===undefined || typeof(ret.data)=="string" || typeof(ret.data)=="number" || typeof(ret.data)=="boolean" || typeof(ret.data)=="object")
                     {
                         if(ret.status==500) {
-                            ctx.body = generateHttpErrorResponse(ret.data);
+                            ctx.body = generateHttpErrorResponse(ret.data,lang);
                         } else {
                             if(typeof(ret.data)=="object" && obj.user) {
                                 await handleImageFields(ret.data,obj.data["organizationId"]?obj.data["organizationId"]:obj.user.organizationInfo?.organizationId);

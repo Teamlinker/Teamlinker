@@ -1,3 +1,6 @@
 export default {
-    ok:"operation successful"
+    ok:{
+        en:"operation successful",
+        zh:"操作成功"
+    }
 }

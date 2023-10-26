@@ -17,6 +17,7 @@ import {
 import {ICommon_Model_Workflow_Approval, workflowApprovalModel} from "../../../common/model/workflow_approval";
 import {keys} from "../../../common/transform";
 import {WorkflowApprovalService} from "../service/workflow";
+import * as i18next from "i18next";
 
 class WorkflowMapper  {
     async nodeList(issueTypeId:string) {
@@ -137,7 +138,7 @@ class WorkflowMapper  {
         return ret!=null
     }
 
-    async init(issueTypeId: string) {
+    async init(issueTypeId: string,lang:string) {
         if (!issueTypeId) {
             throw Err.Project.Issue.issueTypeNotFound
         }
@@ -149,7 +150,7 @@ class WorkflowMapper  {
         await Promise.all([
             mysql.execute(generateCreateSql(workflowNodeModel, {
                 id: workflowNodeOpenId,
-                name: "open",
+                name: i18next.getFixedT(lang)("backend.open"),
                 status: ECommon_Model_Workflow_Node_Status.NOTSTART,
                 issue_type_id: issueTypeId,
                 x: 50,
@@ -157,7 +158,7 @@ class WorkflowMapper  {
             })),
             mysql.execute(generateCreateSql(workflowNodeModel, {
                 id: workflowNodeProgressId,
-                name: "in progress",
+                name: i18next.getFixedT(lang)("backend.inProgress"),
                 status: ECommon_Model_Workflow_Node_Status.INPROGRESS,
                 issue_type_id: issueTypeId,
                 x: 281,
@@ -165,7 +166,7 @@ class WorkflowMapper  {
             })),
             mysql.execute(generateCreateSql(workflowNodeModel, {
                 id: workflowNodeClosedId,
-                name: "closed",
+                name: i18next.getFixedT(lang)("backend.closed"),
                 status: ECommon_Model_Workflow_Node_Status.DONE,
                 issue_type_id: issueTypeId,
                 x: 59,
@@ -173,7 +174,7 @@ class WorkflowMapper  {
             })),
             mysql.execute(generateCreateSql(workflowNodeModel, {
                 id: workflowNodeResolvedId,
-                name: "resolved",
+                name: i18next.getFixedT(lang)("backend.resolved"),
                 status: ECommon_Model_Workflow_Node_Status.DONE,
                 issue_type_id: issueTypeId,
                 x: 507,
@@ -189,42 +190,42 @@ class WorkflowMapper  {
         await Promise.all([
             mysql.execute(generateCreateSql(workflowActionModel, {
                 id: actionOpenToProgressId,
-                name: "open to progress",
+                name: i18next.getFixedT(lang)("backend.openToProgress"),
                 issue_type_id: issueTypeId,
                 source_node_id: workflowNodeOpenId,
                 dest_node_id: workflowNodeProgressId
             })),
             mysql.execute(generateCreateSql(workflowActionModel, {
                 id: actionProgressToOpenId,
-                name: "progress to open",
+                name: i18next.getFixedT(lang)("backend.progressToOpen"),
                 issue_type_id: issueTypeId,
                 source_node_id: workflowNodeProgressId,
                 dest_node_id: workflowNodeOpenId
             })),
             mysql.execute(generateCreateSql(workflowActionModel, {
                 id: actionOpenToClosedId,
-                name: "open to close",
+                name: i18next.getFixedT(lang)("backend.openToClosed"),
                 issue_type_id: issueTypeId,
                 source_node_id: workflowNodeOpenId,
                 dest_node_id: workflowNodeClosedId
             })),
             mysql.execute(generateCreateSql(workflowActionModel, {
                 id: actionClosedToOpenId,
-                name: "closed to open",
+                name: i18next.getFixedT(lang)("backend.closedToOpen"),
                 issue_type_id: issueTypeId,
                 source_node_id: workflowNodeClosedId,
                 dest_node_id: workflowNodeOpenId
             })),
             mysql.execute(generateCreateSql(workflowActionModel, {
                 id: actionProgressToResolvedId,
-                name: "progress to resolved",
+                name: i18next.getFixedT(lang)("backend.progressToResolved"),
                 issue_type_id: issueTypeId,
                 source_node_id: workflowNodeProgressId,
                 dest_node_id: workflowNodeResolvedId
             })),
             mysql.execute(generateCreateSql(workflowActionModel, {
                 id: actionResolvedToProgressId,
-                name: "resolved to progress",
+                name: i18next.getFixedT(lang)("backend.resolvedToProgress"),
                 issue_type_id: issueTypeId,
                 source_node_id: workflowNodeResolvedId,
                 dest_node_id: workflowNodeProgressId

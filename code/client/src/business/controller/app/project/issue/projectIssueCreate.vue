@@ -1,5 +1,5 @@
 <template>
-  <div style="padding: 0 10px">
+  <div style="padding: 0 10px" ref="root">
     <a-form layout="vertical" :model="form" ref="eleForm">
       <a-form-item :label="$t('util.issueType')" field="issueTypeId" required>
         <a-select v-model="form.issueTypeId" @change="onIssueTypeChange">
@@ -10,7 +10,9 @@
         <a-input v-model="form.name"></a-input>
       </a-form-item>
       <a-form-item :label="$t('util.description')" field="description">
-        <a-textarea v-model="form.description"></a-textarea>
+	      <a-spin :loading="loading" v-drop.file.shortcut.disk="onDrop" style="width: 100%;background-color: rgb(242, 243, 245)">
+		      <RichEditor style="color: black" v-model="form.description" @upload-file="onUploadFile" :pop-menu-list="popMenuList" @pop-menu-click="onPopMenuClick" @custom-anchor-click="onCustomAnchorClick" @quote-list="onQuoteList" ref="objEditor"></RichEditor>
+	      </a-spin>
       </a-form-item>
       <a-form-item :label="$t('util.priority')" field="priority" required>
         <a-select v-model="form.priority">
@@ -49,9 +51,9 @@
 <script setup lang="ts">
 
 import {ECommon_Model_Project_Issue_Priority} from "../../../../../../../common/model/project_issue";
-import {onBeforeMount, reactive, ref, toRef} from "vue";
+import {getCurrentInstance, onBeforeMount, reactive, ref, toRef} from "vue";
 import {ICommon_Model_Issue_Type} from "../../../../../../../common/model/issue_type";
-import {apiIssue, apiOrganization, apiProject} from "../../../../common/request/request";
+import {apiFile, apiIssue, apiOrganization, apiProject} from "../../../../common/request/request";
 import {
 	ICommon_Route_Req_ProjectIssue_Field,
 	ICommon_Route_Res_Organization_User_Item,
@@ -62,6 +64,10 @@ import {onDialogOk} from "../../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../../common/util/helper";
 import {SessionStorage} from "../../../../common/storage/session";
 import {DCSType} from "../../../../../../../common/types";
+import RichEditor from "@/business/common/component/richEditor/richEditor.vue";
+import {RichEditorEventHandle} from "@/business/common/component/richEditorEventHandle";
+import {ECommon_Content_Line_Config_Type, ICommon_Content_Line_Config} from "../../../../../../../common/model/content";
+import {DropParam, vDrop} from "@/teamOS/common/directive/drop";
 
 const props=defineProps<{
   projectId:string
@@ -74,14 +80,19 @@ const reporterList=ref<DCSType<ICommon_Route_Res_Organization_User_Item>[]>([])
 const valueList=ref<DCSType<(ICommon_Route_Res_Workflow_Node_Field & {
   fieldValue:ICommon_Route_Req_ProjectIssue_Field
 })>[]>([])
+const root=ref<HTMLElement>()
+const appContext=getCurrentInstance().appContext
 const form=reactive({
   issueTypeId:"",
   name:"",
-  description:"",
+  description:[],
   priority:ECommon_Model_Project_Issue_Priority.MEDIUM,
   assigner:"",
   reporter:""
 })
+const loading=ref(false)
+const objEditor=ref<InstanceType<typeof RichEditor>>()
+const popMenuList=ref(RichEditorEventHandle.popMenuList)
 const formCustom=reactive({})
 const getIssueTypeList=async ()=>{
   let res=await apiProject.issueTypeList({
@@ -136,6 +147,36 @@ const onIssueTypeChange=async ()=>{
     })
   }
 }
+
+const onUploadFile=async (file, handleFunc) => {
+	let res=await apiFile.upload({
+		file:file
+	})
+	if(res?.code==0) {
+		handleFunc(res.data.id,res.data.path)
+	}
+}
+
+const onPopMenuClick=(type:ECommon_Content_Line_Config_Type,handleFunc:(item:ICommon_Content_Line_Config)=>void)=>{
+	RichEditorEventHandle.onPopMenuClick(type,root,appContext,loading,handleFunc)
+}
+
+const onCustomAnchorClick=(type:ECommon_Content_Line_Config_Type,value:string,link:string,label:string)=>{
+	RichEditorEventHandle.onCustomAnchorClick(type,value,link,label)
+}
+
+const onQuoteList=(keyword:string,handleFunc:(list:{
+	value:string,
+	label:string,
+	photo:string
+}[])=>void)=>{
+	RichEditorEventHandle.onQuoteList(keyword,handleFunc)
+}
+
+const onDrop=(data?:DropParam)=>{
+	RichEditorEventHandle.onDrop(objEditor,data,loading)
+}
+
 onDialogOk(dialogFuncGenerator({
   func:async ()=>{
     let res=await apiIssue.create({
@@ -148,10 +189,14 @@ onDialogOk(dialogFuncGenerator({
       values:valueList.value.map(item=>item.fieldValue)
     })
     if(res?.code==0) {
-      if(form.description) {
+      if(form.description.length>0) {
         apiIssue.editDescription({
           projectIssueId:res.data.id,
-          description:form.description
+          description:JSON.stringify(form.description.map(item=>{
+	          return {
+		          arr:item.arr
+	          }
+          }))
         })
       }
     }

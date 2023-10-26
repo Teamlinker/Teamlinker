@@ -26,7 +26,9 @@ export namespace REDIS_USER {
     }
     export function info(userId:string)
     {
-        let obj=new RedisStringKey(StringUtil.format(USER_INFO_KEY,userId),cacheRedisType<ICommon_Model_User>().Object,300)
+        let obj=new RedisStringKey(StringUtil.format(USER_INFO_KEY,userId),cacheRedisType<ICommon_Model_User & {
+            lang?:string
+        }>().Object,300)
         return obj
     }
     export function adminInfo(userId:string)
@@ -49,5 +51,4 @@ export namespace REDIS_USER {
         let obj=new RedisStringKey(StringUtil.format(USER_RESET_CODE_KEY,userId),cacheRedisType<ICommon_Register_Cache_Info>().Object,600)
         return obj
     }
-
 }

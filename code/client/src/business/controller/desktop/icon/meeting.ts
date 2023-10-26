@@ -12,7 +12,7 @@ import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
 export const iconMeeting=new Icon(t("util.meeting"),iconGroupMap["meeting"],"meeting")
-iconMeeting.addEventListener("dbClick",item => {
+const func=item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error(t("tip.switchToSpecificOrganization"))
         return;
@@ -33,6 +33,16 @@ iconMeeting.addEventListener("dbClick",item => {
         }
     ],t("util.meeting"));
     windowManager.open(win);
+}
+iconMeeting.addEventListener("dbClick",item => {
+    if(!document.getElementById("application")) {
+        func(item)
+    }
+})
+iconMeeting.addEventListener("click",item => {
+    if(document.getElementById("application")) {
+        func(item)
+    }
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_MEETING,(meetingId, password,inviteBusinessIds) => {
     const win=new Window(t("util.meeting"),ETeamOS_Window_Type.SIMPLE, "meeting",false,[

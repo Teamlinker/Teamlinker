@@ -10,7 +10,7 @@
     <a-form-item field="description" :label="$t('util.description')">
       <a-textarea v-model="form.description" allow-clear></a-textarea>
     </a-form-item>
-	  <a-form-item field="issueTypeSolutionId" :label="$t('util.issueSolution')" required v-if="type==='add'">
+	  <a-form-item field="issueTypeSolutionId" :label="$t('util.issueSolution')" required v-if="type==='add'" :extra="$t('help.issueSolutionProjectCreate')">
 		  <a-select v-model="form.issueTypeSolutionId" allow-search>
 			  <a-option v-for="item in issueSolutionList" :label="item.name" :value="item.id"></a-option>
 		  </a-select>

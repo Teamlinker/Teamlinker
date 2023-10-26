@@ -3,19 +3,84 @@
     <a-collapse-item :header="$t('util.basic')" key="basic">
       <ProjectSettingBasic :project-id="projectId"></ProjectSettingBasic>
     </a-collapse-item>
-    <a-collapse-item :header="$t('util.module')" key="module">
+    <a-collapse-item key="module">
+	    <template #header>
+		    <a-space>
+			    {{$t('util.module')}}
+			    <a-popover trigger="hover" position="right">
+				    <icon-question-circle-fill style="color: rgb(35,110,184)"></icon-question-circle-fill>
+				    <template #content>
+					    <span style="color: dodgerblue">
+								{{$t("help.module")}}
+					    </span>
+				    </template>
+			    </a-popover>
+		    </a-space>
+	    </template>
       <ModuleList :project-id="projectId"></ModuleList>
     </a-collapse-item>
-    <a-collapse-item :header="$t('util.label')" key="label">
+    <a-collapse-item key="label">
+	    <template #header>
+		    <a-space>
+			    {{$t('util.label')}}
+			    <a-popover trigger="hover" position="right">
+				    <icon-question-circle-fill style="color: rgb(35,110,184)"></icon-question-circle-fill>
+				    <template #content>
+					    <span style="color: dodgerblue">
+								{{$t("help.label")}}
+					    </span>
+				    </template>
+			    </a-popover>
+		    </a-space>
+	    </template>
       <LabelList :project-id="projectId"></LabelList>
     </a-collapse-item>
-    <a-collapse-item :header="$t('util.access')" key="access">
+    <a-collapse-item key="access">
+	    <template #header>
+		    <a-space>
+			    {{$t('util.access')}}
+			    <a-popover trigger="hover" position="right">
+				    <icon-question-circle-fill style="color: rgb(35,110,184)"></icon-question-circle-fill>
+				    <template #content>
+					    <span style="color: dodgerblue;white-space: pre-line">
+								{{$t("help.access")}}
+					    </span>
+				    </template>
+			    </a-popover>
+		    </a-space>
+	    </template>
       <EditProjectAccess :project-id="projectId"></EditProjectAccess>
     </a-collapse-item>
-    <a-collapse-item :header="$t('util.role')" key="role">
+    <a-collapse-item key="role">
+	    <template #header>
+		    <a-space>
+			    {{$t('util.role')}}
+			    <a-popover trigger="hover" position="right">
+				    <icon-question-circle-fill style="color: rgb(35,110,184)"></icon-question-circle-fill>
+				    <template #content>
+					    <span style="color: dodgerblue;white-space: pre-line">
+								{{$t("help.role")}}
+					    </span>
+				    </template>
+			    </a-popover>
+		    </a-space>
+	    </template>
       <ProjectSettingRole :project-id="projectId"></ProjectSettingRole>
     </a-collapse-item>
-    <a-collapse-item :header="$t('util.issueSolution')" key="solution">
+    <a-collapse-item key="solution">
+	    <template #header>
+		    <a-space>
+			    {{$t('util.issueSolution')}}
+			    <a-popover trigger="hover" position="right">
+				    <icon-question-circle-fill style="color: rgb(35,110,184)"></icon-question-circle-fill>
+				    <template #content>
+					    <span style="color: dodgerblue;white-space: pre-line">
+								{{$t("help.issueSolution")}}
+					    </span>
+				    </template>
+			    </a-popover>
+		    </a-space>
+	    </template>
       <ProjectSettingIssueSolution :project-id="projectId"></ProjectSettingIssueSolution>
     </a-collapse-item>
   </a-collapse>

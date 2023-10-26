@@ -10,7 +10,7 @@ import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
 export const iconSetting=new Icon(t("util.setting"),iconGroupMap["setting"],"setting")
-iconSetting.addEventListener("dbClick",item => {
+const func=item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error(t("tip.switchToSpecificOrganization"))
         return;
@@ -30,4 +30,14 @@ iconSetting.addEventListener("dbClick",item => {
         }
     ],t("util.setting"));
     windowManager.open(win);
+}
+iconSetting.addEventListener("dbClick",item => {
+    if(!document.getElementById("application")) {
+        func(item)
+    }
+})
+iconSetting.addEventListener("click",item => {
+    if(document.getElementById("application")) {
+        func(item)
+    }
 })

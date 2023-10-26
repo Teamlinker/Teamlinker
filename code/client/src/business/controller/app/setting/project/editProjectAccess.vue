@@ -153,6 +153,7 @@ const getProjectInfo=async ()=>{
 
 onBeforeMount(()=>{
 	getProjectInfo()
+	search(pagination.current)
 })
 </script>
 

@@ -158,8 +158,8 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
         return ret
     }
 
-    static async userProjectList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
-        let ret=await projectMapper.userProjectList(organizationId,organizationUserId,page,size,type,keyword)
+    static async userProjectList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string,sort?:"name"|"created_time") {
+        let ret=await projectMapper.userProjectList(organizationId,organizationUserId,page,size,type,keyword,sort)
         return ret
     }
 

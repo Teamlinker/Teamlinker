@@ -1,4 +1,49 @@
 export default {
+    backend:{
+        task:"Task",
+        bug:"Bug",
+        ticket:"Ticket",
+        default:"Default",
+        open:"Open",
+        inProgress:"In Progress",
+        closed:"Closed",
+        resolved:"Resolved",
+        openToProgress:"Open -> In Progress",
+        progressToOpen:"In Progress -> Open",
+        openToClosed:"Open -> Closed",
+        closedToOpen:"Closed -> Open",
+        progressToResolved:"In Progress -> Resolved",
+        resolvedToProgress:"Resolved -> In Progress",
+        newFolder:"New Folder",
+        newProject:"New Project",
+        newTask:"New Task",
+        newBug:"New Bug",
+        newTicket:"New Ticket",
+        newWikiSpace:"New Wiki Space",
+        newWiki:"New Wiki",
+        newWikiContent:"hi,this is a new wiki content!Welcome to Teamlinker!"
+    },
+    help:{
+        module:"module is a space that includes many issues,you can classify issues using modules",
+        label:"you can specify an issue with multiply labels so that ths issue has different characters",
+        access:`there are 4 access types:
+        default:this is default role of this project for all members in this organization
+        member:you can specify specific members with specific roles
+        team:you can specify specific teams with specific roles
+        tag:you can specify specific member tags with specific roles,and this will affect all members in the member tags
+        `,
+        role:"you can manage project roles here,you can assign or revoke permissions with a role",
+        issueSolution:"you can change issue solution here,if this project has already issues,you have to specify the relationship between old issue types and new issue types",
+        issue:"you can check issues here,issue is a piece of work you should solve",
+        board:"board is collection that includes many sprints,you can create different boards for different sprint types",
+        issueSolutionProjectCreate:"issue solution is a collection that includes different issue types,it looks like different kind of work",
+        release:"release is a version that includes many issues.",
+        boardIssueType:"You need to include the types of issue types that need to be processed",
+        column:"column is kanban status for issues,you can add,edit or delete the column",
+        sprint:"sprint is a short version that includes many issues for agile project",
+        kanban:"kanban can show issues' status clearly in the sprint",
+        swimLane:"swim lane is a issues' pool that needs to complete a specific task"
+    },
     notification:{
         teamUserAdd:{
             0:"TEAM:team",
@@ -358,6 +403,7 @@ export default {
         kanban:"Kanban",
         config:"Config",
         comments:"Comments",
+        comment:"Comment",
         history:"History",
         avatar:"Avatar",
         username:"Username",
@@ -387,7 +433,8 @@ export default {
         issueTypes:"Issue Types",
         dateRange:"Date Range",
         fixVersions:"Fix Versions",
-        keyword:"Keyword",
+        keyword:"Project Id",
+        issueKey:"Issue Id",
         logo:"Logo",
         fieldType:"Field Type",
         optional:"Optional",
@@ -443,7 +490,19 @@ export default {
         newFolder:"New Folder",
         paste:"Paste",
         download:"Download",
-        console:"Console"
+        console:"Console",
+        skip:"Skip",
+        organizationList:"Organization List",
+        help:"Help",
+        task:"Task",
+        bug:"Bug",
+        ticket:"Ticket",
+        node:"Node",
+        transition:"Transition",
+        createdBy:"Created By",
+        application:"Application",
+        todo:"To Do",
+        unNamed:"UnNamed"
     },
     "common":{
         "component":{
@@ -625,8 +684,8 @@ export default {
                 },
                 project:{
                     yourWork:"Your Work",
-                    recentProjectList:"Recent Project List",
-                    allProjectList:"All Project List",
+                    recentProjectList:"Recent Process",
+                    allProjectList:"All",
                     myDoneIssue:"My Done Issue",
                     myOpenIssue:"My Open Issue",
                     doneIssue:"Done issue",
@@ -722,8 +781,8 @@ export default {
                     deleteIncludeChildren:"Delete(Include Children)"
                 },
                 wiki:{
-                    recentWikiList:"Recent Wiki List",
-                    allWikiList:"All Wiki List"
+                    recentWikiList:"Recent Edit",
+                    allWikiList:"All"
                 }
             },
             team:{
@@ -734,6 +793,13 @@ export default {
             }
         },
         "desktop":{
+            comp:{
+                recentIssue:"Recent Issue",
+                recentCreatedProject:"Recent Project",
+                recentCreatedWikiSpace:"Recent Wiki Space",
+                recentCalendarEvent:"Recent Calendar Event",
+                recentMeeting:"Recent Meeting"
+            },
             desktop:{
                 createOrganization:"Create Organization",
                 editOrganizationUserProfile:"Edit Organization User Profile"

@@ -17,7 +17,7 @@
           <a-space>
 	          {{$t("util.type")}}
             <a-select v-model="type" style="width: 100px">
-              <a-option :label="$t('util.name')" value="all"></a-option>
+              <a-option :label="$t('util.all')" value="all"></a-option>
               <a-option :label="$t('util.created')" value="created"></a-option>
               <a-option :label="$t('util.joined')" value="joined"></a-option>
             </a-select>

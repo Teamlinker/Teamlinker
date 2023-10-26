@@ -1,5 +1,8 @@
 <template>
   <div>
+	  <a-alert closable style="margin-bottom: 10px">
+		  {{$t("help.issue")}}
+	  </a-alert>
     <a-row>
       <a-space wrap>
         {{$t("util.filter")}}:
@@ -127,7 +130,7 @@ const columns=[
     slotName:"type"
   },
   {
-    title:"Key",
+    title:t("util.issueKey"),
     slotName: "key"
   },
   {
@@ -135,11 +138,11 @@ const columns=[
     slotName: "name"
   },
   {
-    title:"Assigner",
+    title:t("util.assigner"),
     slotName: "assigner"
   },
   {
-    title:"Reporter",
+    title:t("util.reporter"),
     slotName: "reporter"
   },
   {
@@ -301,6 +304,10 @@ onNavigatorShow(action => {
   if(action===ETeamOS_Navigator_Action.POP) {
     search(pagination.current)
   }
+})
+
+onBeforeMount(()=>{
+	search(pagination.current)
 })
 </script>
 

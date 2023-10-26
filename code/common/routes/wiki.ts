@@ -37,7 +37,8 @@ const api= {
                 keyword?:string,
                 page:number,
                 size:number,
-                type:"all"|"created"|"joined"
+                type:"all"|"created"|"joined",
+                sort?:"name"|"created_time"
             }>{},
             res: <ICommon_Route_Res_userWikiList>{},
             permission: [Permission_Types.Organization.READ]

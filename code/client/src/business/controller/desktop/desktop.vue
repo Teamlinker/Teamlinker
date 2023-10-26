@@ -1,7 +1,7 @@
 <template>
   <TeamOS ref="root">
     <template #barLeft>
-      <a-dropdown trigger="hover">
+      <a-dropdown trigger="hover" id="dropdownEle">
         <a-avatar id="myProfile" :size="32" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
           T
           <template #trigger-icon>
@@ -13,6 +13,7 @@
         </a-avatar>
         <template #content>
 	        <a-doption @click="onEditOrganizationProfile" v-if="store.organizationUserInfo">{{store.organizationUserInfo?.nickname}}</a-doption>
+	        <a-doption @click="onApp">{{$t("util.application")}}</a-doption>
           <a-dsubmenu trigger="hover" v-if="store.organizationInfo && store.status!==ECommon_User_Online_Status.MEETING">
             {{$t("util.status")}}
             <template #content>
@@ -52,7 +53,7 @@
 				  <img :src="store.organizationInfo.photo" style="height: 30px;width:60px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
 			  <a-col :flex="menuValue?'100px':'170px'" id="createOrganization" style="align-items: center;display: flex">
-				  <a-select style="max-width: 170px;color: white" :placeholder="$t('placeholder.organization')" :bordered="false" @change="onMenuClick" v-model:model-value="menuValue" v-if="menu.length>0">
+				  <a-select style="max-width: 170px;color: white" :placeholder="$t('placeholder.organization')" :bordered="false" @change="onMenuClick" v-model="menuValue" v-if="menu.length>0">
 					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
 						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
 					  </a-optgroup>
@@ -98,6 +99,17 @@
 		  />
 		  <Photo v-for="item in photoList" :item="item" :key="item.id" @update="onUpdatePhoto" @delete="onDeletePhoto"></Photo>
 		  <StickyNote v-for="item in noteList" :item="item" :key="item.id" @update="onUpdateStickyNote" @delete="onDeleteStickyNote"></StickyNote>
+		  <DesktopComp style="position: absolute;width:25%;top:50px;right: 30px" v-if="store.organizationInfo" :background-image="backgroundImage" :key="store.organizationInfo.id"></DesktopComp>
+		  <a-popover trigger="click">
+			  <a-button style="position: absolute;right: 20px;bottom: 50px;" shape="round">
+				  <template #icon>
+					  <icon-message style="font-size: x-large;color: dodgerblue"></icon-message>
+				  </template>
+			  </a-button>
+			  <template #content>
+				  <img :src="qq" style="width: 250px;height: auto"/>
+			  </template>
+		  </a-popover>
 	  </template>
   </TeamOS>
 	<a-skeleton :animation="true" v-if="loading" style="position: absolute;left: 0;top: 0;height: 100%;width: 100%;background-color: white;z-index: 10000">
@@ -109,6 +121,9 @@
 	</a-skeleton>
 	<teleport to="body">
 		<Search @close="isSearch=false" v-show="isSearch"></Search>
+		<transition>
+			<Application @close="isApplication=false" v-if="isApplication"></Application>
+		</transition>
 	</teleport>
 </template>
 
@@ -116,7 +131,7 @@
 
 import TeamOS from "../../../teamOS/index.vue";
 import {getDesktopInstance} from "../../../teamOS/teamOS";
-import {getCurrentInstance, markRaw, nextTick, onBeforeMount, onBeforeUnmount, ref, watchEffect} from "vue";
+import {getCurrentInstance, markRaw, nextTick, onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
 import {useDesktopStore} from "./store/desktop";
 import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
@@ -150,6 +165,9 @@ import {Driver, driver} from "driver.js";
 import "driver.js/dist/driver.css"
 import guide from "@/assert/guide.png"
 import EditOrganizationUserProfile from "@/business/controller/desktop/editOrganizationUserProfile.vue";
+import DesktopComp from "@/business/controller/desktop/desktopComp.vue";
+import Application from "@/business/controller/desktop/application.vue";
+import qq from "@/assert/qq.jpg";
 
 interface ITeamOS_Desktop_Menu {
 	group:string,
@@ -159,10 +177,12 @@ interface ITeamOS_Desktop_Menu {
 	}[]
 }
 const {t}=useI18n()
+const isApplication=ref(false)
 const isSearch=ref(false)
 const imgUri=ref("")
 const imgVisible=ref(false)
 let desktop=getDesktopInstance().desktop;
+const backgroundImage=desktop.getBackgroundImage()
 const root=ref()
 const menu=ref<ITeamOS_Desktop_Menu[]>([])
 const menuValue=ref("")
@@ -187,7 +207,7 @@ objFinderHandle.onEnterFolderFunc=folderId => {
 const finderItemIconList=objFinderHandle.getItemList()
 desktop.onDropFunc=objFinderHandle.onDrop.bind(objFinderHandle,"")
 desktop.contextMenu=objFinderHandle.contextMenuFunc.bind(objFinderHandle)
-const watchStop=watchEffect(()=>{
+watch(()=>store.organizationList,()=>{
   if(store.organizationList) {
     let arr=[]
     if(store.organizationList.create.length>0) {
@@ -225,7 +245,13 @@ const watchStop=watchEffect(()=>{
   nextTick(()=>{
     iconManager.sort()
   })
+})
 
+watch(()=>store.appList,()=>{
+	iconManager.setList(store.appList)
+	nextTick(()=>{
+		iconManager.sort()
+	})
 })
 
 const setMenu=(menu1:ITeamOS_Desktop_Menu[],defaultValue?:string) => {
@@ -262,7 +288,6 @@ const onLogout=async (isDirect?:boolean)=>{
     let res=await store.logout(isDirect);
     if(res) {
       Message.success(t("tip.logoutSuccess"))
-      watchStop();
       desktop.clear()
       iconManager.clear()
       windowManager.clear();
@@ -413,45 +438,10 @@ const onGuide=()=>{
 				}
 			},
 			{
-				element:"#projectIcon",
-				popover:{
-					title:t("util.project"),
-					description:t("controller.desktop.guide.projectDescription")
-				}
-			},
-			{
-				element:"#wikiIcon",
-				popover:{
-					title:t("util.wiki"),
-					description:t("controller.desktop.guide.wikiDescription")
-				}
-			},
-			{
-				element:"#calendarIcon",
-				popover:{
-					title:t("util.calendar"),
-					description:t("controller.desktop.guide.calendarDescription")
-				}
-			},
-			{
 				element:"#finderIcon",
 				popover:{
 					title:t("util.finder"),
 					description:t("controller.desktop.guide.finderDescription")
-				}
-			},
-			{
-				element:"#imIcon",
-				popover:{
-					title:t("util.im"),
-					description:t("controller.desktop.guide.imDescription")
-				}
-			},
-			{
-				element:"#meetingIcon",
-				popover:{
-					title:t("util.meeting"),
-					description:t("controller.desktop.guide.meetingDescription")
 				}
 			},
 			{
@@ -497,6 +487,10 @@ const onRemoveOrganization=async (organizationId:string)=>{
 	store.getOrganizationList()
 }
 
+const onApp=()=>{
+	isApplication.value=true
+}
+
 onBeforeMount(async ()=>{
 	objFinderHandle.registerEvents()
 	eventBus.on(EClient_EVENTBUS_TYPE.UPDATE_ORGANIZATION_USER_STATUS,onHandleStatus)
@@ -536,5 +530,17 @@ onBeforeUnmount(()=>{
 </script>
 
 <style scoped>
+:global(#dropdownEle .arco-dropdown-list-wrapper) {
+	max-height: 300px!important;
+}
 
+.v-enter-active,
+.v-leave-active {
+	transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+	opacity: 0;
+}
 </style>

@@ -12,7 +12,7 @@ import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
 export const iconWiki=new Icon(t("util.wiki"),iconGroupMap["wiki"],"wiki")
-iconWiki.addEventListener("dbClick",item => {
+const func=item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error(t("tip.switchToSpecificOrganization"))
         return;
@@ -50,6 +50,16 @@ iconWiki.addEventListener("dbClick",item => {
         }
     })
     windowManager.open(win);
+}
+iconWiki.addEventListener("dbClick",item => {
+    if(!document.getElementById("application")) {
+        func(item)
+    }
+})
+iconWiki.addEventListener("click",item => {
+    if(document.getElementById("application")) {
+        func(item)
+    }
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_WIKI_PROFILE,wikiId => {
     const win=new Window(t("util.wiki"),ETeamOS_Window_Type.TAB, "wiki",true,[

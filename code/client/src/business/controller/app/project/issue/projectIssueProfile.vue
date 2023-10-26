@@ -314,11 +314,15 @@ const onAction=async (item:ICommon_Model_Workflow_Action | {
 				return
 			}
 		} else if(item.type===ECommon_Model_Project_Issue_Approval_Action.REJECT) {
-			let ret=await Dialog.inputRich(root.value,appContext,t("tip.rejectReason"))
+			let ret:any=await Dialog.inputRich(root.value,appContext,t("tip.rejectReason"))
 			if(ret) {
 				let res=await apiIssue.rejectApproval({
 					projectIssueId:props.projectIssueId,
-					reason:JSON.stringify(ret)
+					reason:JSON.stringify(ret.map(item=>{
+						return {
+							arr:item.arr
+						}
+					}))
 				})
 				if(res?.code!=0) {
 					Message.error(res.msg)

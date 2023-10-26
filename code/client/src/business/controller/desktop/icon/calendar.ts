@@ -11,7 +11,7 @@ import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
 export const iconCalendar=new Icon(t("util.calendar"),iconGroupMap["calendar"],"calendar")
-iconCalendar.addEventListener("dbClick",item => {
+const func=item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error(t("tip.switchToSpecificOrganization"))
         return;
@@ -31,6 +31,16 @@ iconCalendar.addEventListener("dbClick",item => {
         }
     ],t("util.calendar"));
     windowManager.open(win);
+}
+iconCalendar.addEventListener("dbClick",item => {
+    if(!document.getElementById("application")) {
+        func(item)
+    }
+})
+iconCalendar.addEventListener("click",item => {
+    if(document.getElementById("application")) {
+        func(item)
+    }
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_CALENDAR_EVENT,(calendarEventId) => {
     const win=new Window(t("util.calendar"),ETeamOS_Window_Type.SIMPLE, "calendar",false,[

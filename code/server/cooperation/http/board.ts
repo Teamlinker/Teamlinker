@@ -41,14 +41,14 @@ class BoardController {
     }
 
     @DHttpApi(boardApi.routes.createBoard)
-    async createBoard(@DHttpReqParamRequired("projectId") projectId: string,@DHttpReqParamRequired("name") name: string,@DHttpReqParam("description") description: string,@DHttpReqParam("issueTypeIds") issueTypeIds: string[]): Promise<typeof boardApi.routes.createBoard.res> {
+    async createBoard(@DHttpReqParamRequired("projectId") projectId: string,@DHttpReqParamRequired("name") name: string,@DHttpReqParam("description") description: string,@DHttpReqParam("issueTypeIds") issueTypeIds: string[],@DHttpUser user:IUserSession): Promise<typeof boardApi.routes.createBoard.res> {
         let obj=new BoardService()
         obj.assignItem({
             name,
             project_id:projectId,
             description
         })
-        let objBoard=await obj.create()
+        let objBoard=await obj.create(user.userId)
         if(issueTypeIds?.length>0) {
             await obj.bindIssueTypes(issueTypeIds)
         }
@@ -528,7 +528,7 @@ class BoardController {
     async startSprint(@DHttpReqParamRequired("boardSprintId") boardSprintId: string): Promise<typeof boardApi.routes.startSprint.res> {
         let obj=await BoardSprintService.getItemById(boardSprintId)
         if(!obj) {
-            throw Err.Project.Board.issueSprintNotExists
+            throw Err.Project.Board.boardSprintNotFound
         }
         obj.assignItem({
             status:ECommon_Model_Board_Sprint_Status.STARTING
@@ -541,7 +541,7 @@ class BoardController {
     async completeSprint(@DHttpReqParamRequired("boardSprintId") boardSprintId: string): Promise<typeof boardApi.routes.completeSprint.res> {
         let obj=await BoardSprintService.getItemById(boardSprintId)
         if(!obj) {
-            throw Err.Project.Board.issueSprintNotExists
+            throw Err.Project.Board.boardSprintNotFound
         }
         obj.assignItem({
             status:ECommon_Model_Board_Sprint_Status.COMPLETED

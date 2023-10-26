@@ -1,9 +1,19 @@
 <template>
 	<div style="width: 100%;height: 100%">
 		<a-row style="width: 100%;height: 30px;padding-left: 10px">
-			<a-button type="primary" size="small" @click="onAddColumn">
-				{{$t("controller.app.project.board.boardConfig.addColumn")}}
-			</a-button>
+			<a-space>
+				<a-button type="primary" size="small" @click="onAddColumn">
+					{{$t("controller.app.project.board.boardConfig.addColumn")}}
+				</a-button>
+				<a-popover trigger="hover" position="right">
+					<icon-question-circle-fill style="color: rgb(35,110,184)"></icon-question-circle-fill>
+					<template #content>
+						<span style="color: dodgerblue;white-space: pre-line">
+							{{$t("help.column")}}
+						</span>
+					</template>
+				</a-popover>
+			</a-space>
 		</a-row>
 		<div style="width: 100%;margin-top: 20px;overflow: auto;height: calc(100% - 90px)">
 			<Card v-if="workflowUnSetNodeMap" :data="cardData" type="fixed" :gap="10" :rect="{
@@ -40,14 +50,22 @@
 				</template>
 				<template #pinHeader>
 					<a-row style="height: 100%;display: flex;align-items: center;justify-content: space-between;padding: 0 5px;box-sizing: border-box;">
-						<span style="color: grey">{{$t("util.issueType")}}</span>
 						<a-space size="mini">
-							<a-button type="text" size="mini" @click="onAddIssueType">
-								<template #icon>
-									<icon-plus></icon-plus>
+							<span style="color: grey">{{$t("util.issueType")}}</span>
+							<a-popover trigger="hover" position="right">
+								<icon-question-circle-fill style="color: rgb(35,110,184)"></icon-question-circle-fill>
+								<template #content>
+					        <span style="color: dodgerblue;white-space: pre-line">
+										{{$t("help.boardIssueType")}}
+					        </span>
 								</template>
-							</a-button>
+							</a-popover>
 						</a-space>
+						<a-button type="text" size="mini" @click="onAddIssueType">
+							<template #icon>
+								<icon-plus></icon-plus>
+							</template>
+						</a-button>
 					</a-row>
 				</template>
 				<template #pinBody>

@@ -88,7 +88,7 @@
 				<template #second>
 					<div style="height: 100%;box-sizing: border-box;display: flex;">
 						<div style="height: 100%;flex: 0 0 calc(100% - 60px);overflow-y: auto" v-drop.file.shortcut.disk="onDrop">
-							<RichEditor v-model="content" v-if="type===ECommon_IM_Message_EntityType.USER" key="user" style="width: 100%" @upload-file="onUploadFile" :pop-menu-list="popMenuList" @pop-menu-click="onPopMenuClick" @custom-anchor-click="onCustomAnchorClick" ref="objEditorUser" @meta-enter="onSend"></RichEditor>
+							<RichEditor v-model="content" v-if="type===ECommon_IM_Message_EntityType.USER" key="user" style="width: 100%;min-height: 50px" @upload-file="onUploadFile" :pop-menu-list="popMenuList" @pop-menu-click="onPopMenuClick" @custom-anchor-click="onCustomAnchorClick" ref="objEditorUser" @meta-enter="onSend"></RichEditor>
 							<RichEditor v-model="content" v-else key="team" style="width: 100%" :pop-menu-list="popMenuList" @pop-menu-click="onPopMenuClick" @custom-anchor-click="onCustomAnchorClick" @quote-list="onQuoteList" ref="objEditorTeam" @meta-enter="onSend"></RichEditor>
 						</div>
 						<a-button type="primary" style="margin-top: 2px;height: auto;flex: 0 0 60px;border-radius: 5px"

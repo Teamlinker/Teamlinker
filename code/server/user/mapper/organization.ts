@@ -260,7 +260,7 @@ class OrganizationMapper extends Mapper<typeof organizationModel> {
             })()
         ])
         return {
-            projectCount,issueCount,wikiSpaceCount,wikiItemCount,userCount,teamCount,projectWithIssueList,projectWithUnDoneIssueList,wikiSpaceWithWikiItemList,teamWithUserList
+            projectCount,issueCount,wikiSpaceCount,wikiItemCount,userCount:userCount-1,teamCount,projectWithIssueList,projectWithUnDoneIssueList,wikiSpaceWithWikiItemList,teamWithUserList
         }
     }
 

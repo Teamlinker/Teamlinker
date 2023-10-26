@@ -27,6 +27,7 @@
 import {ref, watch} from "vue";
 import qq from "@/assert/qq.jpg"
 import discord from "@/assert/discord.png"
+import {apiUser} from "@/business/common/request/request";
 
 const getLang=()=>{
 	let lang=localStorage.getItem("lang")
@@ -46,8 +47,11 @@ const getLang=()=>{
 	}
 }
 const language=ref(getLang())
-watch(language,()=>{
+watch(language,async ()=>{
 	localStorage.setItem("lang",language.value)
+	await apiUser.changeLang({
+		lang:language.value
+	})
 	location.reload()
 })
 </script>

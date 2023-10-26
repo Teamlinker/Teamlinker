@@ -556,3 +556,7 @@ export type ICommon_Route_Res_Sticky_Note_Item = ICommon_Model_Sticky_Note & {
 export type ICommon_Route_Res_Photo_item =ICommon_Model_Photo & {
     path:string
 }
+
+export type ICommon_Route_Res_RecentIssue_Item= ICommon_Model_Project_Issue & {
+    project:ICommon_Model_Project
+}

@@ -13,7 +13,7 @@
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.REPORTER" :value="info.reporter_id"></FieldEditBasic>
 					</a-form-item>
 					<a-form-item :label="$t('util.priority')">
-						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.PRIORITY" :value="info.priority"></FieldEditBasic>
+						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.PRIORITY" :value="info.priority as ECommon_Model_Project_Issue_Priority"></FieldEditBasic>
 					</a-form-item>
 					<a-form-item :label="$t('util.module')">
 						<FieldEditBasic :project-issue-id="info.id" :type="EClient_Field_Basic_Type.MODULE" :value="moduleList"></FieldEditBasic>
@@ -29,7 +29,7 @@
 					</a-form-item>
 				</a-form>
 			</a-collapse-item>
-			<a-collapse-item key="more" :header="$t('util.more')">
+			<a-collapse-item key="more" :header="$t('util.more')" v-if="fieldList?.length>0">
 				<a-form layout="vertical" :model="{}" v-if="fieldList.length>0">
 					<a-form-item v-for="item in fieldList" :label="item.nodeField.field.name" :key="item.issueFieldValue.id">
 						<FieldEdit :item="item"></FieldEdit>
@@ -59,6 +59,7 @@ import {ICommon_Model_Project_Label} from "../../../../../../../common/model/pro
 import {ICommon_Model_Project_Module} from "../../../../../../../common/model/project_module";
 import {ICommon_Model_Project_Release} from "../../../../../../../common/model/project_release";
 import {DCSType} from "../../../../../../../common/types";
+import {ECommon_Model_Project_Issue_Priority} from "../../../../../../../common/model/project_issue";
 
 const props=defineProps<{
 	info:DCSType<ICommon_Route_Res_ProjectIssue_BasicInfo>,

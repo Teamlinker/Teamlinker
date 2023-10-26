@@ -1,6 +1,6 @@
 <template>
   <div  :data-id="item.id" :id="item.id" :style="{zIndex:item.isFocus?101:100,left:item.rect.left,top:item.rect.top,width:item.rect.width,height:item.rect.height}"  style="box-shadow:0px 0px 2px 2px rgba(169, 169, 169, 0.2);position:absolute;border-radius: 5px;" :tabindex="index" @focus="onFocus(item.id)" v-resize="item.rect" v-show="item.status!=ETeamOS_Window_Status.MIN" name="window">
-    <a-row style="height: 35px;background-color: rgba(249,249,249,0.9)" v-drag:[item.id].free="item.rect" @dragend="item.onMove">
+    <a-row style="height: 35px;background: rgba(249,249,249,0.9);backdrop-filter: blur(5px)" v-drag:[item.id].free="item.rect" @dragend="item.onMove">
 	    <a-col flex="100px" style="height: 100%;text-align: center;line-height: 35px;color: rgb(93,93,93);font-size: medium;cursor: move;align-items: center;display: flex">
 		    <SvgIcon style="margin-left: 10px;margin-right: 10px;width: 18px;height: 18px" :name="iconGroupMap[item.group]"></SvgIcon>
 		    <span style="font-size: small;color: #333">{{item.title}}</span>
@@ -53,7 +53,7 @@
         </a-row>
       </a-col>
     </a-row>
-    <a-row style="height: calc(100% - 35px);background-color: white;position: relative;z-index: -1">
+    <a-row style="height: calc(100% - 35px);background-color:white;position: relative;z-index: -1">
       <NavigatorContainer :routes="item.nodes[0].components" :id="item.nodes[0].id" :path="item.nodes[0].path" :default="item.nodes[0].default" ref="navigator" v-if="item.type==ETeamOS_Window_Type.SIMPLE" name="root" style="position: relative"/>
       <a-tabs type="card-gutter" :editable="true" show-add-button auto-switch :justify="true" v-else-if="item.type==ETeamOS_Window_Type.TAB" @change="change" style="width: 100%" @add="addTab" @delete="removeTab" @tabClick="change" :active-key="item.activeKey">
         <a-tab-pane v-for="(node,index) in item.nodes" :key="node.id" tabindex="-1" :closable="item.nodes.length>1">

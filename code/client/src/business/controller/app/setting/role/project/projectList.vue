@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import {reactive, ref} from "vue";
+import {onBeforeMount, reactive, ref} from "vue";
 import {ICommon_Model_Project} from "../../../../../../../../common/model/project";
 import {apiProject} from "../../../../../common/request/request";
 import {getCurrentNavigator} from "../../../../../../teamOS/common/component/navigator/navigator";
@@ -46,6 +46,7 @@ const pagination=reactive({
 const keyword=ref("");
 const search=async (key:string)=>{
   keyword.value=key;
+	pagination.current=1
   let ret=await apiProject.list({
     ...(key && {
       keyword:key
@@ -56,7 +57,6 @@ const search=async (key:string)=>{
   if(ret?.code==0) {
     data.value=ret.data.data
     pagination.total=ret.data.count;
-    pagination.current=ret.data.page+1
   }
 }
 let navigator=getCurrentNavigator();
@@ -76,9 +76,13 @@ const onPageChange=async (page:number)=>{
   if(ret?.code==0) {
     data.value=ret.data.data
     pagination.total=ret.data.count;
-    pagination.current=ret.data.page+1
+    pagination.current=ret.data.page
   }
 }
+
+onBeforeMount(()=>{
+	search("")
+})
 </script>
 
 <style scoped>

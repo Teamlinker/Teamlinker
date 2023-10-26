@@ -1,5 +1,8 @@
 <template>
   <div>
+	  <a-alert closable style="margin-bottom: 10px;">
+		  {{$t("help.release")}}
+	  </a-alert>
     <a-row>
       <a-space wrap>
         <a-input-search v-model="keyword" :placeholder="$t('placeholder.typeReleaseName')" style="width: 250px" @search="onSearch" v-if="checkPermission(permission,Permission_Types.Project.READ)"></a-input-search>
@@ -70,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, inject, markRaw, reactive, ref} from "vue";
+import {getCurrentInstance, inject, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {injectProjectInfo} from "../../../../common/util/symbol";
 import {ECommon_Model_Project_Release_Status} from "../../../../../../../common/model/project_release";
 import {apiRelease} from "../../../../common/request/request";
@@ -261,6 +264,10 @@ onNavigatorShow(action => {
   if(action===ETeamOS_Navigator_Action.POP || action===ETeamOS_Navigator_Action.BACK) {
     search(pagination.current)
   }
+})
+
+onBeforeMount(()=>{
+	search(pagination.current)
 })
 </script>
 

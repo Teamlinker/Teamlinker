@@ -40,4 +40,5 @@ export namespace REDIS_ORGANIZATION {
         let obj=new RedisStringKey(StringUtil.format(STATICS,organizationId),cacheRedisType<ICommon_Route_Res_Organization_Statics>().Object,60)
         return obj
     }
+
 }

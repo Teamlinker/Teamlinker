@@ -69,7 +69,7 @@ class WikiMapper extends Mapper<typeof wikiModel> {
         return ret;
     }
 
-    async userWikiList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
+    async userWikiList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string,sort?:"name"|"created_time") {
         if(!organizationUserId) {
             throw Err.User.userIdNotExists
         }
@@ -152,9 +152,9 @@ class WikiMapper extends Mapper<typeof wikiModel> {
                 value:organizationId
             }
         },"and",null,"and",{
-            field:"name",
+            field:sort??"name",
             model:wikiModel,
-            type:"asc",
+            type:(!sort || sort==="name")?"asc":"desc",
             isVirtualField:false
         },page*size,size)
         let ret=await generateCommonListData(sql,page,size)

@@ -52,7 +52,7 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
         }
         if(this.getItem().start_time && this.getItem().release_time) {
             if(!moment(this.getItem().start_time).isBefore(moment(this.getItem().release_time))) {
-                throw Err.Project.Release.releaseStartDateNotLessReleaseDate
+                throw Err.Project.Release.releaseStartDateNotMoreThanReleaseDate
             }
         }
         let ret=await super.create()
@@ -72,7 +72,7 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
         }
         if(this.getItem().start_time && this.getItem().release_time) {
             if(!moment(this.getItem().start_time).isBefore(moment(this.getItem().release_time))) {
-                throw Err.Project.Release.releaseStartDateNotLessReleaseDate
+                throw Err.Project.Release.releaseStartDateNotMoreThanReleaseDate
             }
         }
         let ret=await super.update()

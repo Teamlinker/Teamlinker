@@ -61,6 +61,38 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
         super(projectIssueModel)
     }
+    async recentIssueList(organizationUserId:string,size:number) {
+        let mysql=getMysqlInstance()
+        let sql=generateLeftJoinSql({
+            model:projectIssueModel,
+            columns:keys<ICommon_Model_Project_Issue>().map(item=>item.name)
+        },{
+            model:projectModel,
+            columns:keys<ICommon_Model_Project>().map(item=>item.name),
+            aggregation:"project",
+            expression:{
+                id:{
+                    model:projectIssueModel,
+                    field:"project_id"
+                }
+            }
+        },{
+            assigner_id:{
+                model:projectIssueModel,
+                value:organizationUserId
+            },
+            reporter_id:{
+                model:projectIssueModel,
+                value:organizationUserId
+            }
+        },"or",{
+            field:"modified_time",
+            type:"desc",
+            model:projectIssueModel
+        },0,size)
+        let arr=await mysql.execute(sql)
+        return arr;
+    }
 
     async getAvailableUniqueId(projectId:string) {
         if(!projectId) {

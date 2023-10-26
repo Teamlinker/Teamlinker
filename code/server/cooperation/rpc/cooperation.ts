@@ -9,6 +9,7 @@ import {BoardService, BoardSprintService} from "../service/board";
 import {ICommon_Model_Board_Sprint} from "../../../common/model/board_sprint";
 import {ICommon_Model_Board} from "../../../common/model/board";
 import {ICommon_Model_Project} from "../../../common/model/project";
+import {ECommon_Model_Project_Issue_Priority} from "../../../common/model/project_issue";
 
 class RpcCooperationApi  {
     
@@ -27,8 +28,9 @@ class RpcCooperationApi  {
         await IssueTypeSolutionService.clearByOrganizationId(organizationId)
     }
     
-    async initIssueTypeSolution(organizationId: string) {
-        let objIssueTypeSolution=await IssueTypeSolutionService.init(organizationId)
+    async initIssueTypeSolution(organizationId: string,lang:string) {
+        let ret=await IssueTypeSolutionService.init(organizationId,lang)
+        return ret;
     }
 
     
@@ -127,6 +129,31 @@ class RpcCooperationApi  {
 
     async clearMember(organizationUserId:string) {
         await ProjectService.clearMember(organizationUserId)
+    }
+
+    async createProject(name:string,keyword:string,organizationUserId:string,organizationId:string,issueTypeSolutionId:string) {
+        let obj=new ProjectService()
+        obj.assignItem({
+            keyword:keyword,
+            name:name,
+            created_by:organizationUserId,
+            organization_id:organizationId
+        })
+        let ret=await obj.create(issueTypeSolutionId)
+        return ret
+    }
+
+    async createIssue(projectId:string,issueTypeId:string,name:string,priority:ECommon_Model_Project_Issue_Priority,organizationUserId:string) {
+        let projectIssue=new ProjectIssueService
+        projectIssue.assignItem({
+            project_id:projectId,
+            issue_type_id:issueTypeId,
+            name,
+            priority,
+            created_by:organizationUserId
+        })
+        let obj=await projectIssue.create()
+        return obj;
     }
 }
 export default new RpcCooperationApi;

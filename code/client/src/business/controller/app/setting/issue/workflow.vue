@@ -9,7 +9,7 @@
       </a-layout-content>
       <a-layout-sider :resize-directions="['left']">
         <a-form :model="form" layout="vertical" style="margin:10px 5px 0px 5px;width: 90%" v-if="form.type" @submitSuccess="onSubmit">
-          <h3>{{form.type}}</h3>
+          <h3>{{$t("util."+form.type)}}</h3>
           <a-form-item field="status" :label="$t('util.status')" v-if="form.type=='node' || form.type=='approval'" required>
             <a-select v-model="form.status">
               <a-option :value="ECommon_Model_Workflow_Node_Status.NOTSTART">{{$t("util.notStart")}}</a-option>

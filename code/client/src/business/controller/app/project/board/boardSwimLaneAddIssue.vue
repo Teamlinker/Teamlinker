@@ -52,7 +52,7 @@ const getIssueList=async ()=>{
 		for(let obj of res.data) {
 			let name=""
 			if(!obj.swimLane) {
-				name="UnNamed"
+				name=t("util.unNamed")
 			} else {
 				name=obj.swimLane.name
 			}

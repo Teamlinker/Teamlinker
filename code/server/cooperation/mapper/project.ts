@@ -431,11 +431,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             assigner_id:{
                 model:projectIssueModel,
                 value:organizationUserId
-            },
-            reporter_id:{
-                model:projectIssueModel,
-                value:organizationUserId
-            },
+            }
         },"or",null,"and",{
             isVirtualField:true,
             field:"notstart",
@@ -457,7 +453,7 @@ class ProjectMapper extends Mapper<typeof projectModel>{
         return ret;
     }
 
-    async userProjectList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string) {
+    async userProjectList(organizationId:string,organizationUserId:string,page:number,size:number,type:"all"|"created"|"joined",keyword?:string,sort?:"name"|"created_time") {
         if(!organizationUserId) {
             throw Err.User.userIdNotExists
         }
@@ -540,9 +536,9 @@ class ProjectMapper extends Mapper<typeof projectModel>{
                 value:organizationId
             }
         },"and",null,"and",{
-            field:"name",
+            field:sort??"name",
             model:projectModel,
-            type:"asc",
+            type:(!sort || sort==="name")?"asc":"desc",
             isVirtualField:false
         },page*size,size)
         let objPage=await generateCommonListData(sql,page,size)

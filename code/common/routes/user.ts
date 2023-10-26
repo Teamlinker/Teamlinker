@@ -14,7 +14,8 @@ const api={
             path:"/login",
             req:<{
                 username:string,
-                password:string                 
+                password:string,
+                lang:string
             }>{},
             res:<Omit<ICommon_Model_User,"password">>{},
             ignoreValidate:true
@@ -210,6 +211,14 @@ const api={
             res:<{
                 path:string
             }>{},
+        },
+        changeLang:{
+            method:ECommon_HttpApi_Method.PUT,
+            path:"/lang",
+            req:<{
+                lang:string
+            }>{},
+            res:{},
         }
     }
 }

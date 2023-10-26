@@ -1,5 +1,8 @@
 <template>
 	<div>
+		<a-alert closable style="margin-bottom: 10px">
+			{{$t("help.sprint")}}
+		</a-alert>
 		<a-row style="width: 100%;">
 			<a-space>
 				{{$t("util.status")}}:
@@ -80,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, inject, markRaw, reactive, ref} from "vue";
+import {getCurrentInstance, inject, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
 import {apiBoard} from "@/business/common/request/request";
 import {
@@ -250,6 +253,10 @@ const onRemoveIssue=async (issue:DCSType<ICommon_Route_Res_Board_Sprint_Issue_It
 const onClickIssue=(item:DCSType<ICommon_Route_Res_Board_Sprint_Issue_Item>)=>{
 	eventBus.emit(EClient_EVENTBUS_TYPE.OPEN_PROJECT_ISSUE_PROFILE,projectId,item.id)
 }
+
+onBeforeMount(()=>{
+	search(pagination.current)
+})
 
 </script>
 

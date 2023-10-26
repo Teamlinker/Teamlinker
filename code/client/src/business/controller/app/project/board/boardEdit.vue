@@ -6,7 +6,7 @@
 		<a-form-item :label="$t('util.description')" field="description">
 			<a-textarea v-model="form.description" allow-clear></a-textarea>
 		</a-form-item>
-		<a-form-item :label="$t('util.issueType')" field="issueTypeIds" v-if="type=='add'">
+		<a-form-item :label="$t('util.issueType')" field="issueTypeIds" v-if="type=='add'" :extra="$t('help.boardIssueType')">
 			<a-select v-model="form.issueTypeIds" multiple>
 				<a-option v-for="item in issueTypeList" :value="item.id" :label="item.name"></a-option>
 			</a-select>

@@ -9,6 +9,9 @@
     <a-form-item :label="$t('util.logo')">
       <Upload types=".png,.jpg,.jpeg,.gif,.bmp,.svg" :default-uri="photo" @upload="onUpload"></Upload>
     </a-form-item>
+	  <a-form-item :label="$t('util.createdBy')">
+		  <UserAvatar :organization-user-id="createdBy" v-if="createdBy"></UserAvatar>
+	  </a-form-item>
     <a-form-item>
 	    <a-space>
 		    <a-button html-type="submit" type="primary">{{$t("util.save")}}</a-button>
@@ -27,6 +30,7 @@ import {Message} from "@arco-design/web-vue";
 import {useI18n} from "vue-i18n";
 import {Dialog} from "@/business/common/component/dialog/dialog";
 import {getCurrentNavigator, getRootNavigatorRef} from "@/teamOS/common/component/navigator/navigator";
+import UserAvatar from "@/business/common/component/userAvatar.vue";
 
 const props=defineProps<{
   wikiId:string
@@ -38,6 +42,7 @@ const form = reactive({
   description: "",
 })
 const {t}=useI18n()
+const createdBy=ref()
 const uploadUriId=ref("")
 const onUpload=(id:string)=> {
   uploadUriId.value=id
@@ -54,6 +59,7 @@ const getWikiInfo=async ()=>{
     form.name=res.data.name
     form.description=res.data.description
     photo.value=res.data.photo
+	  createdBy.value=res.data.created_by.organizationUserId
   }
 }
 

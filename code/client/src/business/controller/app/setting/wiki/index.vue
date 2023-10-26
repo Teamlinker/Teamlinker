@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, markRaw, reactive, ref} from "vue";
+import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {apiWiki} from "../../../../common/request/request";
 import {Message} from "@arco-design/web-vue";
 import {Dialog} from "../../../../common/component/dialog/dialog";
@@ -122,6 +122,10 @@ const onDelete=async (item:DCSType<ICommon_Model_Wiki>)=>{
     }
   }
 }
+
+onBeforeMount(()=>{
+	search(pagination.current)
+})
 </script>
 
 <style scoped>

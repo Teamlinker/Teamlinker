@@ -4,6 +4,7 @@ import {Base} from "../common/util/base";
 export interface ITeamOS_Icon_Event {
     "move":(item:Icon)=>void
     "dbClick":(item:Icon)=>void
+    "click":(item:Icon)=>void
     "contextmenu":((item:Icon)=>ITeamOS_Menu[])|((item:Icon)=>Promise<ITeamOS_Menu[]>)
 }
 
@@ -17,7 +18,8 @@ export const iconGroupMap={
     team:"team",
     wiki:"file-text",
     finder:"folder-view",
-    account:"setting"
+    account:"setting",
+    help:"help"
 }
 
 export class Icon extends Base{
@@ -31,6 +33,7 @@ export class Icon extends Base{
     rename=false
     loadingFunc:()=>boolean
     onDBClick:(item:Icon)=>void
+    onClick:(item:Icon)=>void
     onMove:(item:Icon)=>void
     onRename:(item:Icon,name:string)=>Promise<void>
     onContextMenu:((item:Icon)=>ITeamOS_Menu[])|((item:Icon)=>Promise<ITeamOS_Menu[]>)
@@ -56,6 +59,8 @@ export class Icon extends Base{
             this.onDBClick=func.bind(null,this);
         } else if(eventType=="contextmenu") {
             this.onContextMenu=func.bind(null,this) as ITeamOS_Icon_Event["contextmenu"];
+        } else if(eventType=="click") {
+            this.onClick=func.bind(null,this);
         }
     }
 }

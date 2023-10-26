@@ -43,7 +43,7 @@ const props=defineProps<{
 const {t}=useI18n()
 const columns=[
   {
-    title:"Key",
+    title:t("util.issueKey"),
     slotName: "key"
   },
   {
@@ -55,11 +55,11 @@ const columns=[
     slotName: "priority"
   },
   {
-    title:"Assigner",
+    title:t("util.assigner"),
     slotName: "assigner"
   },
   {
-    title:"Reporter",
+    title:t("util.reporter"),
     slotName: "reporter"
   }
 ]

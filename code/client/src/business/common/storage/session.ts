@@ -11,7 +11,7 @@ export interface IClient_SessionStorage_Type {
         }[]
     }
     organizationUserId:string,
-    firstShow:string
+    firstShow:string,
 }
 
 let keys:(keyof IClient_SessionStorage_Type)[]=["organizationId","userId","userToken","imRecentList","organizationUserId","firstShow"]

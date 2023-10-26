@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import {getCurrentInstance, markRaw, reactive, ref} from "vue";
+import {getCurrentInstance, markRaw, onBeforeMount, reactive, ref} from "vue";
 import {apiOrganization} from "../../../../common/request/request";
 import {ICommon_Route_Res_Organization_User_Item} from "../../../../../../../common/routes/response";
 import {Message} from "@arco-design/web-vue";
@@ -184,6 +184,10 @@ const onResetPassword=async (item:DCSType<ICommon_Route_Res_Organization_User_It
 		}
 	}
 }
+
+onBeforeMount(()=>{
+	search(pagination.current)
+})
 </script>
 
 <style scoped>

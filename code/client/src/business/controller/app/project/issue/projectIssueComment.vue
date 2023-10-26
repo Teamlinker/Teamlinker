@@ -7,7 +7,7 @@
 				</a-spin>
 			</template>
 			<template #actions>
-				<a-button type="primary" size="small" @click="onCommentAdd" style="margin-top: 10px">{{$t("util.save")}}</a-button>
+				<a-button type="primary" size="small" @click="onCommentAdd" style="margin-top: 10px">{{$t("util.comment")}}</a-button>
 			</template>
 		</a-comment>
 		<a-comment v-for="(item,index) in commentList" :author="item.value.created_by.nickname" :datetime="moment(item.value.created_time).format('YYYY-MM-DD HH:mm:ss')">

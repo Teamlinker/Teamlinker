@@ -249,6 +249,7 @@ const api={
                 page:number,
                 size:number,
                 type:"all"|"created"|"joined"
+                sort?:"name"|"created_time"
             }>{},
             res:<ICommon_Route_Res_userProjectList>{},
             permission:[Permission_Types.Organization.READ]

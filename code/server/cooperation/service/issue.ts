@@ -46,6 +46,11 @@ export  class ProjectIssueService extends Entity<typeof projectIssueModel,typeof
         return ret;
     }
 
+    static async recentIssueList(organizationUserId:string,size:number) {
+        let ret=await projectIssueMapper.recentIssueList(organizationUserId,size)
+        return ret;
+    }
+
     async convert(issueTypeId:string,values:ICommon_Route_Req_ProjectIssue_Field[],organizationUserId:string) {
         if(this.getItem().issue_type_id===issueTypeId) {
             return

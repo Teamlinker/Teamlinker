@@ -1,5 +1,8 @@
 <template>
 	<div style="width: 100%;height: 100%">
+		<a-alert closable style="margin-bottom: 10px">
+			{{$t("help.kanban")}}
+		</a-alert>
 		<a-row style="width: 100%;height: 30px;padding-left: 10px">
 			<a-space>
 				<a-select v-model="sprintId" allow-search allow-clear @search="onSearch" size="small">
@@ -65,6 +68,14 @@
 							<span :style="{color: sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED?'dodgerblue':'rgb(0,180,42)'}">
 								({{sprintInfo.status===ECommon_Model_Board_Sprint_Status.NOTSTART?$t("util.notStart"):sprintInfo.status===ECommon_Model_Board_Sprint_Status.STARTING?$t("util.starting"):$t("util.completed")}})
 							</span>
+							<a-popover trigger="hover" position="right">
+								<icon-question-circle-fill style="color: rgb(35,110,184)"></icon-question-circle-fill>
+								<template #content>
+					    <span style="color: dodgerblue;white-space: pre-line">
+								{{$t("help.swimLane")}}
+					    </span>
+								</template>
+							</a-popover>
 						</a-space>
 						<a-button size="mini" type="text" @click="onAddSwimLane" v-if="sprintInfo.status!==ECommon_Model_Board_Sprint_Status.COMPLETED">
 							<template #icon>
@@ -316,7 +327,7 @@ const handleSwimLaneList=(list:DCSType<ICommon_Model_Board_Sprint_SwimLane>[])=>
 	})
 	swimLaneList.value.push({
 		id:"_",
-		name:"UnNamed",
+		name:t("util.unNamed"),
 		priority:null,
 		board_sprint_id:sprintId.value,
 		board_id:props.boardId,
@@ -534,11 +545,15 @@ const onAction=async (projectIssueId:string,item:ICommon_Model_Workflow_Action |
 				return
 			}
 		} else if(item.type==ECommon_Model_Project_Issue_Approval_Action.REJECT) {
-			let ret=await Dialog.inputRich(root.value,appContext,t("tip.rejectReason"))
+			let ret:any=await Dialog.inputRich(root.value,appContext,t("tip.rejectReason"))
 			if(ret) {
 				let res=await apiIssue.rejectApproval({
 					projectIssueId:projectIssueId,
-					reason:JSON.stringify(ret)
+					reason:JSON.stringify(ret.map(item=>{
+						return {
+							arr:item.arr
+						}
+					}))
 				})
 				if(res?.code!=0) {
 					Message.error(res.msg)
@@ -627,6 +642,8 @@ onBeforeMount(async ()=>{
 		if(sprintInfo.value) {
 			sprintList.value=[sprintInfo.value]
 		}
+	} else {
+		onSearch("")
 	}
 })
 </script>

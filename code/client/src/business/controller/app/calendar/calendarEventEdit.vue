@@ -279,7 +279,11 @@ onDialogOk(dialogFuncGenerator({
 				all_day:form.date.isAllDay,
 				recurring:form.date.recurring,
 				recurring_day:form.date.recurring_day,
-				agenda:JSON.stringify(form.agenda),
+				agenda:JSON.stringify(form.agenda.map(item=>{
+					return {
+						arr:item.arr
+					}
+				})),
 				location:form.location,
 				reminder_minutes:form.reminder===0?null:form.reminder,
 				guestList:form.guestList.map(item=>item.organizationUserId),
@@ -292,7 +296,11 @@ onDialogOk(dialogFuncGenerator({
 				all_day:form.date.isAllDay,
 				recurring:form.date.recurring,
 				recurring_day:form.date.recurring_day,
-				agenda:JSON.stringify(form.agenda),
+				agenda:JSON.stringify(form.agenda.map(item=>{
+					return {
+						arr:item.arr
+					}
+				})),
 				location:form.location,
 				reminder_minutes:form.reminder===0?null:form.reminder,
 				guestList:form.guestList.map(item=>item.organizationUserId),

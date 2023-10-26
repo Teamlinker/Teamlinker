@@ -4,6 +4,7 @@ import {DComponent} from "../../common/decorate/component";
 import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired, DHttpUser} from "../../common/http/http";
 import {IssueTypeService, IssueTypeSolutionService} from "../service/issueType";
 import {IUserSession} from "../../user/types/config";
+import {REDIS_USER} from "../../common/cache/keys/user";
 
 @DComponent
 @DHttpController(issueTypeApi)
@@ -23,7 +24,7 @@ class IssueTypeController {
      }
 
      @DHttpApi(issueTypeApi.routes.create)
-     async create(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("icon") icon:string,@DHttpReqParam("description") description:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string):Promise<typeof issueTypeApi.routes.create.res> {
+     async create(@DHttpReqParamRequired("name") name:string,@DHttpReqParam("icon") icon:string,@DHttpReqParam("description") description:string,@DHttpReqParamRequired("issueTypeSolutionId") issueTypeSolutionId:string,@DHttpUser user:IUserSession):Promise<typeof issueTypeApi.routes.create.res> {
          let obj=new IssueTypeService()
          obj.assignItem({
              name,
@@ -31,7 +32,9 @@ class IssueTypeController {
              description,
              issue_type_solution_id:issueTypeSolutionId
          })
-         let ret=await obj.create()
+         let objRedis=REDIS_USER.info(user.userId)
+         let value=await objRedis.get()
+         let ret=await obj.create(value.lang??"en")
          return ret;
      }
 

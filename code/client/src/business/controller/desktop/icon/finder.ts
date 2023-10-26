@@ -9,7 +9,7 @@ import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
 export const iconFinder=new Icon(t("util.finder"),iconGroupMap["finder"],"finder")
-iconFinder.addEventListener("dbClick",item => {
+const func=item => {
     const win=new Window(t("util.finder"),ETeamOS_Window_Type.SIMPLE, "finder",false,[
         {
             id:v4(),
@@ -25,6 +25,16 @@ iconFinder.addEventListener("dbClick",item => {
         }
     ],t("util.finder"));
     windowManager.open(win,true);
+}
+iconFinder.addEventListener("dbClick",item => {
+    if(!document.getElementById("application")) {
+        func(item)
+    }
+})
+iconFinder.addEventListener("click",item => {
+    if(document.getElementById("application")) {
+        func(item)
+    }
 })
 eventBus.on(EClient_EVENTBUS_TYPE.FINDER_OPEN_WINDOW,(folderId) => {
     const win=new Window(t("util.finder"),ETeamOS_Window_Type.SIMPLE, "finder",false,[

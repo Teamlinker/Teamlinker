@@ -5,6 +5,7 @@ import {IServer_Common_Config_Base} from "../types/config";
 import {Log} from './../log/log';
 import {BaseMq} from "../mq/mq";
 import {Mail} from "../mail/mail";
+import "../i18n/i18n"
 
 export async function init<T extends IServer_Common_Config_Base>() {
     new Log()

@@ -15,6 +15,7 @@ import {ECommon_User_Online_Status} from "../../../common/types";
 import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 import {ECommon_Content_Line_Config_Type, ICommon_Content_Line} from "../../../common/model/content";
 import {ECommon_IM_Message_At, ECommon_IM_Message_EntityType} from "../../../common/model/im_unread_message";
+import {REDIS_USER} from "../../common/cache/keys/user";
 
 export async function handleImConnection() {
     let io=getSocketIOInstance().of("/"+ECommon_Socket_Type.IM)
@@ -55,9 +56,11 @@ export async function handleImConnection() {
                 let objTeamUsers=new REDIS_AUTH.Permission.Team.OrganizationUsers(teamId);
                 let roleId=await objTeamUsers.getValue(socket.data.organizationUserId);
                 if(!roleId) {
+                    let objRedis=REDIS_USER.info(socket.data.userId)
+                    let obj=await objRedis.get()
                     callback({
                         success:false,
-                        ...Err.Team.teamMemberNotExists
+                        msg:Err.Team.teamMemberNotExists[obj.lang]
                     })
                     return
                 }

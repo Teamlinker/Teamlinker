@@ -35,6 +35,11 @@ import {getSocketEmitterInstance} from "../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../common/socket/types";
 import rpcContentApi from "../../content/rpc/content"
 import Application from "../../common/app/app";
+import * as i18next from "i18next";
+import {ECommon_Model_Project_Issue_Priority} from "../../../common/model/project_issue";
+import {ECommon_Model_Content_Type} from "../../../common/model/content";
+import {ICommon_Model_Issue_Type_Solution} from "../../../common/model/issue_type_solution";
+import {ICommon_Model_Issue_Type} from "../../../common/model/issue_type";
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -56,14 +61,43 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         return ret;
     }
 
+    async createExampleData(lang:string,organizationUserId:string,organizationId:string,issueTypeInfo:{
+        solution:ICommon_Model_Issue_Type_Solution,
+        issueTypeMap:{
+            [type in "task"|"bug"|"ticket"]:ICommon_Model_Issue_Type
+        }
+    }) {
+        let t=i18next.getFixedT(lang)
+        let objProject=await rpcCooperationApi.createProject(t("backend.newProject"),t("backend.newProject"),organizationUserId,organizationId,issueTypeInfo.solution.id)
+        let projectAdminRole=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.PROJECT)
+        await Promise.all([
+            rpcAuthApi.addRoleMember(objProject.id,projectAdminRole,ECommon_Model_Organization_Member_Type.DEFAULT),
+            rpcCooperationApi.createIssue(objProject.id,issueTypeInfo.issueTypeMap.task.id,t("backend.newTask"),ECommon_Model_Project_Issue_Priority.MEDIUM,organizationUserId),
+            rpcCooperationApi.createIssue(objProject.id,issueTypeInfo.issueTypeMap.bug.id,t("backend.newBug"),ECommon_Model_Project_Issue_Priority.MEDIUM, organizationUserId),
+            rpcCooperationApi.createIssue(objProject.id,issueTypeInfo.issueTypeMap.ticket.id,t("backend.newTicket"),ECommon_Model_Project_Issue_Priority.MEDIUM, organizationUserId)
+        ])
+        let objWikiSpace=await rpcWikiApi.createWikiSpace(t("backend.newWikiSpace"),organizationUserId,organizationId)
+        let wikiSpaceAdminRole=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.WIKI)
+        await Promise.all([
+            rpcAuthApi.addRoleMember(objWikiSpace.id,wikiSpaceAdminRole,ECommon_Model_Organization_Member_Type.DEFAULT),
+            (async ()=>{
+                let obj=await rpcWikiApi.createWiki(objWikiSpace.id,null,t("backend.newWiki"),organizationUserId)
+                await rpcContentApi.save(obj.id,ECommon_Model_Content_Type.WIKI_ITEM, organizationUserId,JSON.stringify([{"arr":[{"value":t("backend.newWikiContent"),"type":0}]}]))
+            })()
+        ])
+    }
+
     override async create(): Promise<ICommon_Model_Organization> {
         let ret=await super.create()
         await Promise.all([
             (async ()=>{
                 let adminRole=await rpcAuthApi.getAdminRoleByType(ECommon_Model_Role_Type.ORGANIZATION);
-                await this.addUser(adminRole,ret.created_by_pure,"Admin",1)
+                let objUser=await this.addUser(adminRole,ret.created_by_pure,"Admin",1)
+                let objRedis=REDIS_USER.info(this.item.created_by_pure)
+                let obj=await objRedis.get()
+                let info=await rpcCooperationApi.initIssueTypeSolution(ret.id,obj.lang??"en")
+                await this.createExampleData(obj.lang??"en",objUser.id,ret.id,info)
             })(),
-            rpcCooperationApi.initIssueTypeSolution(ret.id),
             (async ()=>{
                 let defaultOrganizationRole=await rpcAuthApi.getSystemDefaultRole(ECommon_Model_Role_Type.ORGANIZATION);
                 defaultOrganizationRole.organization_id=ret.id

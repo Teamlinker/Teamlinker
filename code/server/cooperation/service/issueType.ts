@@ -1,8 +1,8 @@
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
 import {ProjectService} from "../service/project";
-import {issueTypeModel} from './../../../common/model/issue_type';
-import {issueTypeSolutionModel} from './../../../common/model/issue_type_solution';
+import {ICommon_Model_Issue_Type, issueTypeModel} from './../../../common/model/issue_type';
+import {ICommon_Model_Issue_Type_Solution, issueTypeSolutionModel} from './../../../common/model/issue_type_solution';
 import {ICommon_Route_Res_IssueTypeSolution_List_Item} from './../../../common/routes/response';
 import {issueTypeMapper, issueTypeSolutionMapper} from './../mapper/issueType';
 import {WorkflowService} from "./workflow";
@@ -10,15 +10,16 @@ import {projectIssueMapper} from "../mapper/issue";
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import {ProjectIssueService} from "./issue";
 import {boardMapper} from "../mapper/board";
+import * as i18next from "i18next";
 
 export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issueTypeMapper> {
     constructor(){
         super(issueTypeMapper)
     }
 
-    override async create(): Promise<typeof issueTypeModel["model"]> {
+    override async create(lang:string): Promise<typeof issueTypeModel["model"]> {
         let obj=await super.create();
-        await WorkflowService.init(obj.id);
+        await WorkflowService.init(obj.id,lang);
         return obj
     }
 
@@ -215,43 +216,49 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         return ret;
     }
 
-    static async init(organizationId:string):Promise<{
-        solutionId:string,
-        solutionName:string
+    static async init(organizationId:string,lang:string):Promise<{
+        solution:ICommon_Model_Issue_Type_Solution,
+        issueTypeMap:{
+            [type in "task"|"bug"|"ticket"]:ICommon_Model_Issue_Type
+        }
     }> {
         if(!organizationId) {
             throw Err.Organization.organizationNotFound
         }
         let objSolution=new IssueTypeSolutionService;
         objSolution.assignItem({
-            name:"Default",
-            description:"Default",
+            name:i18next.getFixedT(lang)("backend.default"),
+            description:i18next.getFixedT(lang)("backend.default"),
             reserved:1,
             organization_id:organizationId
         })
         await objSolution.create()
         let objTask=new IssueTypeService();
         objTask.assignItem({
-            name:"Task",
+            name:i18next.getFixedT(lang)("backend.task"),
             reserved:1,
             issue_type_solution_id:objSolution.getId()
         })
         let objBug=new IssueTypeService;
         objBug.assignItem({
-            name:"Bug",
+            name:i18next.getFixedT(lang)("backend.bug"),
             reserved:1,
             issue_type_solution_id:objSolution.getId()
         })
         let objTicket=new IssueTypeService;
         objTicket.assignItem({
-            name:"Ticket",
+            name:i18next.getFixedT(lang)("backend.ticket"),
             reserved:1,
             issue_type_solution_id:objSolution.getId()
         })
-        await Promise.all([objTask.create(),objBug.create(),objTicket.create()])
+        await Promise.all([objTask.create(lang),objBug.create(lang),objTicket.create(lang)])
         return {
-            solutionId:objSolution.getId(),
-            solutionName:objSolution.getItem().name
+            solution:objSolution.getItem(),
+            issueTypeMap:{
+                task:objTask.getItem(),
+                bug:objBug.getItem(),
+                ticket:objTicket.getItem()
+            }
         }
     }
 

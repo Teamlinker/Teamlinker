@@ -9,7 +9,7 @@
 			</span>
 		</a-space>
 		<div style="width:40%;box-shadow: rgba(22, 14, 45, 0.02) 0px 0px 40px, rgba(22, 14, 45, 0.06) 0px 0px 104px;padding: 20px;box-sizing: border-box;border: 1px solid rgb(234, 236, 240);border-radius: 10px;background-color: white">
-			<a-form :model="form"  auto-label-width @submit="onSubmit">
+			<a-form :model="form"  auto-label-width @submit="onSubmit" v-if="!organizationList">
 				<h1 style="text-align: center;margin-bottom: 50px">{{$t("util.login")}}</h1>
 				<a-form-item field="username" :label="$t('util.username')" required>
 					<a-input v-model="form.username" :placeholder="$t('placeholder.enterUsername')"></a-input>
@@ -29,39 +29,100 @@
 					</a-row>
 				</a-form-item>
 			</a-form>
+			<div v-else style="display: flex;flex-direction: column;justify-content: center;align-items: center">
+				<h2 style="text-align: center;">{{$t("util.organizationList")}}</h2>
+				<template v-if="organizationList.create?.length>0 || organizationList.join?.length>0">
+					<a-list v-if="organizationList.create?.length>0" style="width: 80%" :bordered="false" hoverable size="small">
+						<template #header>
+							{{$t("util.created")}}:
+						</template>
+						<a-list-item v-for="item in organizationList.create as ICommon_Model_Organization[]" style="cursor: pointer;justify-content: center;" @click="onDesktop(item.id)">
+							<div style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center">
+								<a-space>
+									<a-image :src="item.photo" width="50px" v-if="item.photo"></a-image>
+									<span style="font-size: larger">{{item.name}}</span>
+								</a-space>
+							</div>
+						</a-list-item>
+					</a-list>
+					<a-list v-if="organizationList.join?.length>0" style="width: 80%" :bordered="false" hoverable size="small">
+						<template #header>
+							{{$t("util.joined")}}:
+						</template>
+						<a-list-item v-for="item in organizationList.join as ICommon_Model_Organization[]" style="cursor: pointer" @click="onDesktop(item.id)">
+							<div style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center">
+								<a-space>
+									<a-image :src="item.photo" width="50px"  v-if="item.photo"></a-image>
+									<span style="font-size: larger">{{item.name}}</span>
+								</a-space>
+							</div>
+						</a-list-item>
+					</a-list>
+				</template>
+				<a-button type="primary" status="success" @click="onCreate" size="large" style="width: 200px;" v-else>
+					{{$t("controller.desktop.desktop.createOrganization")}}
+				</a-button>
+				<a-button type="text" style="color: grey;margin-top: 20px" @click="onDesktop()">{{$t("util.skip")}}</a-button>
+			</div>
 		</div>
 
 	</a-row>
 </template>
 
 <script setup lang="ts">
-import {reactive} from "vue";
-import {apiUser} from "../../common/request/request";
+import {getCurrentInstance, markRaw, reactive, ref} from "vue";
+import {apiOrganization, apiUser} from "../../common/request/request";
 import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
 import {NotificationWrapper} from "../../common/component/notification/notification";
 import {SessionStorage} from "../../common/storage/session";
 import md5 from "blueimp-md5"
-import {ECommon_Application_Mode} from "../../../../../common/types";
+import {DCSType, ECommon_Application_Mode} from "../../../../../common/types";
 import logo from "@/assert/logo.png"
+import {ICommon_Route_Res_Organization_List} from "../../../../../common/routes/response";
+import {ICommon_Model_Organization} from "../../../../../common/model/organization";
+import {Dialog} from "@/business/common/component/dialog/dialog";
+import CreateOrganization from "@/business/controller/desktop/createOrganization.vue";
+import {useI18n} from "vue-i18n";
+import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
 
+const organizationList=ref<DCSType<ICommon_Route_Res_Organization_List>>()
 let form = reactive({
 	username: "",
 	password: ""
 })
+const appContext=getCurrentInstance().appContext
+const store=useDesktopStore()
+const {t}=useI18n()
 let router = useRouter();
 const onSubmit = async () => {
-	NotificationWrapper.init()
 	let ret = await apiUser.login({
 		username: form.username,
-		password: md5(form.password)
+		password: md5(form.password),
+		lang:localStorage.getItem("lang")??(navigator.language || "en").toLowerCase().split("-")[0]
 	})
 	if (ret.code == 0) {
 		SessionStorage.remove("organizationId")
-		await router.push("desktop")
+		SessionStorage.set("userId",ret.data.id);
+		getOrganizationList()
+		store.initNotificationSocket()
 	} else {
 		Message.error(ret.msg);
 	}
+}
+
+const onDesktop=async (organizationId?:string)=>{
+	if(organizationId) {
+		SessionStorage.set("organizationId",organizationId)
+		let retEnter=await apiOrganization.enter({
+			organizationId
+		});
+		if(retEnter?.code==0) {
+			SessionStorage.set("organizationUserId",retEnter.data.organizationUserId)
+		}
+	}
+	NotificationWrapper.init()
+	await router.push("desktop")
 }
 
 const onRegister = async () => {
@@ -70,6 +131,20 @@ const onRegister = async () => {
 
 const onReset = async () => {
 	await router.push("reset")
+}
+
+const onCreate=async ()=>{
+	let ret=await Dialog.open(document.body,appContext,t("controller.desktop.desktop.createOrganization"),markRaw(CreateOrganization))
+	if(ret) {
+		getOrganizationList()
+	}
+}
+
+const getOrganizationList=async ()=>{
+	let ret=await apiOrganization.list()
+	if(ret && ret.code==0) {
+		organizationList.value=ret.data;
+	}
 }
 </script>
 

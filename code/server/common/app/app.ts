@@ -134,7 +134,7 @@ export default abstract class Application{
                 if(Application.mode===ECommon_Application_Mode.ONLINE) {
                     const maxLength = 1024 * 1024 * 5;
                     if (ctx.headers && ctx.headers['content-length'] && Number(ctx.headers['content-length']) > maxLength) {
-                        ctx.body = generateHttpErrorResponse(Err.Http.overFileSize)
+                        ctx.body = generateHttpErrorResponse(Err.Http.overFileSize,ctx.headers["accept-language"])
                         return;
                     }
                 }
@@ -168,7 +168,10 @@ export default abstract class Application{
             try {
                 await next()
             } catch (err) {
-                ctx.body = generateHttpErrorResponse(err.data??err)
+                if(err.message) {
+                    console.error(err.message)
+                }
+                ctx.body = generateHttpErrorResponse(err.data??err,ctx.headers["accept-language"])
             }
         })
     }

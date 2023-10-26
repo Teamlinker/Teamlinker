@@ -1,10 +1,12 @@
 export function generateHttpErrorResponse(obj:{
     code:number,
-    msg:string
-}) {
+    msg:{
+        [lang:string]:string
+    }
+},lang:string) {
     return {
-        code:obj.code,
-        msg:obj.msg
+        code:obj?.code,
+        msg:obj?.msg?.[lang]
     }
 }
 

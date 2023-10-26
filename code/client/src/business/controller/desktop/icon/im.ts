@@ -11,7 +11,7 @@ import i18n from "@/business/common/i18n/i18n";
 
 const {t}=i18n.global
 export const iconIM=new Icon(t("util.im"),iconGroupMap["im"],"im")
-iconIM.addEventListener("dbClick",item => {
+const func=item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error(t("tip.switchToSpecificOrganization"))
         return;
@@ -31,6 +31,16 @@ iconIM.addEventListener("dbClick",item => {
         }
     ],t("util.im"));
     windowManager.open(win);
+}
+iconIM.addEventListener("dbClick",item => {
+    if(!document.getElementById("application")) {
+        func(item)
+    }
+})
+iconIM.addEventListener("click",item => {
+    if(document.getElementById("application")) {
+        func(item)
+    }
 })
 eventBus.on(EClient_EVENTBUS_TYPE.OPEN_IM_CHAT,(id, chatType) => {
     const win=new Window(t("util.im"),ETeamOS_Window_Type.SIMPLE, "im",false,[

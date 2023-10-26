@@ -1,4 +1,49 @@
 export default {
+    backend:{
+        task:"任务",
+        bug:"缺陷",
+        ticket:"工单",
+        default:"默认",
+        open:"打开中",
+        inProgress:"进行中",
+        closed:"已关闭",
+        resolved:"已解决",
+        openToProgress:"打开中 -> 进行中",
+        progressToOpen:"进行中 -> 打开中",
+        openToClosed:"打开中 -> 已关闭",
+        closedToOpen:"已关闭 -> 打开中",
+        progressToResolved:"进行中 -> 已解决",
+        resolvedToProgress:"已解决 -> 进行中",
+        newFolder:"新文件夹",
+        newProject:"新项目",
+        newTask:"新任务",
+        newBug:"新缺陷",
+        newTicket:"新工单",
+        newWikiSpace:"新文档集合",
+        newWiki:"新文档",
+        newWikiContent:"你好，这是新文档的内容，欢迎来到Teamlinker！"
+    },
+    help:{
+        module:"模块是工作项的集合，你可以使用模块来对工作项进行分类",
+        label:"你可以对一个工作项打上不同的标签使这个标签具有多个特性",
+        access:`有4个访问权限类型:
+        默认:这是访问该项目的默认角色，对组织里的所有成员有效
+        成员:你可以指定特定成员具有特定的角色
+        团队:你可以指定特定的团队具有特定的角色
+        用户标签:你可以指定特定的用户标签具有特定的角色，这会影响用户标签下的所有成员
+        `,
+        role:"你可以在这里管理项目的角色，可以对一个角色赋予或者解除相关的权限",
+        issueSolution:"你可以在这里切换工作项解决方案，如果该项目有工作项，那么需要在新老工作项类型之间做一个转换",
+        issue:"你可以在这里查看你的工作项，工作项可以把它看做你需要解决的一项任务",
+        board:"面板是一个包含了冲刺的集合，你可以创建不同的面板应对不同的冲刺类型",
+        issueSolutionProjectCreate:"工作项解决方案包含了不同的工作项类型，你可以看做是不同种类的工作",
+        release:"你可以把发布看做是一个将要发行的版本，里面包含了各种工作项",
+        boardIssueType:"你要把需要处理的工作项类型包含进来",
+        column:"列是代表了工作项的看板状态,你可以编辑，新增，删除列",
+        sprint:"对于敏捷项目来说，冲刺就是一个包含工作项的小版本",
+        kanban:"看板可以直观地反映出冲刺中工作项的状态",
+        swimLane:"泳道可以看做是一个为了完成特定任务的需求池"
+    },
     notification:{
         teamUserAdd:{
             0:"团队:",
@@ -22,8 +67,8 @@ export default {
             1:"正在邀请你"
         },
         issueCommentAt:{
-            0:"事务:你被",
-            1:"在事务评论中提及了:"
+            0:"工作项:你被",
+            1:"在工作项评论中提及了:"
         },
         teamDismiss:{
             0:"团队:",
@@ -37,7 +82,7 @@ export default {
             0:"团队:你在团队中的权限被更改："
         },
         issueRemove:{
-            0:"事务:",
+            0:"工作项:",
             1:"已经被删除，删除人："
         },
         teamUserQuit:{
@@ -45,45 +90,45 @@ export default {
             1:"退出了团队："
         },
         issueReporterAssign:{
-            0:"事务:",
+            0:"工作项:",
             1:"将",
             2:"的reporter移交给你了"
         },
         issueWorkflowChange:{
-            0:"事务:",
+            0:"工作项:",
             1:"的工作流已经被改变了,修改人："
         },
         issueCommentAdd:{
-            0:"事务:",
-            1:"添加了一条评论，事务"
+            0:"工作项:",
+            1:"添加了一条评论，工作项"
         },
         calendarEventInvitation:{
             0:"日历:你被邀请了："
         },
         issueFieldChange:{
-            0:"事务:",
+            0:"工作项:",
             1:"的字段被修改了，修改人："
         },
         issueAssignerAssign:{
-            0:"事务:",
+            0:"工作项:",
             1:"将",
             2:"的assigner移交给你了"
         },
         issueAssignRelease:{
-            0:"事务:",
+            0:"工作项:",
             1:"的发布已经被更改，修改人："
         },
         issueAssignSprint:{
-            0:"事务:",
+            0:"工作项:",
             1:"的冲刺已经被更改，修改人："
         },
         issueApprovalResolve:{
-            0:"事务:",
-            1:"批准了事务"
+            0:"工作项:",
+            1:"批准了工作项"
         },
         issueApprovalReject:{
-            0:"事务:",
-            1:"驳回了事务"
+            0:"工作项:",
+            1:"驳回了工作项"
         }
     },
     tip:{
@@ -106,28 +151,28 @@ export default {
         demote:"降级",
         toNormalMember:"为普通成员",
         deleteColumn:"你打算删除这个列吗?",
-        removeIssueType:"你要删除这个事务类型吗?",
+        removeIssueType:"你要删除这个工作项类型吗?",
         deleteSwimLane:"你要删除这个泳道吗?",
         deleteBoard:"你要删除这个面板吗?",
         deleteSprint:"你要删除这个冲刺吗?",
         startSprint:"你要开始这个冲刺吗?",
         completeSprint:"你要完成这个冲刺吗?",
-        removeIssueFromSprint:"你要把该事务从冲刺中移除吗?",
+        removeIssueFromSprint:"你要把该工作项从冲刺中移除吗?",
         deleteComment:"你要删除这个评论吗?",
-        deleteIssue:"你要删除这个事务吗?",
-        deleteParentIssue:"你要删除这个父事务吗?",
-        deleteChildIssue:"你要删除这个子事务吗?",
-        deleteRelatedIssue:"你要删除这个关联事务吗?",
+        deleteIssue:"你要删除这个工作项吗?",
+        deleteParentIssue:"你要删除这个父工作项吗?",
+        deleteChildIssue:"你要删除这个子工作项吗?",
+        deleteRelatedIssue:"你要删除这个关联工作项吗?",
         deleteRelease:"你要删除这个发布吗?",
-        removeIssue:"你要移除这个事务吗?",
-        switchIssueSolution:"你要切换事务类型方案吗?",
+        removeIssue:"你要移除这个工作项吗?",
+        switchIssueSolution:"你要切换工作项类型方案吗?",
         deleteRole:"你要删除这个角色吗?",
-        unbindProjectFromIssueSolution:"你要把该项目和该事务类型方案解除绑定吗?",
+        unbindProjectFromIssueSolution:"你要把该项目和该工作项类型方案解除绑定吗?",
         deleteField:"你要删除这个字段吗?",
-        copyIssueSolution:"你要复制这个事务类型方案吗?",
-        deleteIssueSolution:"你要删除这个事务类型方案吗?",
-        copyIssueType:"你要复制这个事务类型吗?",
-        deleteIssueType:"你要删除这个事务类型吗?",
+        copyIssueSolution:"你要复制这个工作项类型方案吗?",
+        deleteIssueSolution:"你要删除这个工作项类型方案吗?",
+        copyIssueType:"你要复制这个工作项类型吗?",
+        deleteIssueType:"你要删除这个工作项类型吗?",
         doYouWantToDelete:"你要删除",
         removeUser:"你要移除这个用户吗?",
         deleteProject:"你要删除这个项目吗?",
@@ -148,8 +193,8 @@ export default {
         editColumnName:"编辑列名称",
         newColumnTitle:"新列的名称",
         rejectReason:"拒绝原因",
-        typeIssueName:"输入事务名称",
-        typeNewIssueSolutionName:"输入新事务类型方案名称",
+        typeIssueName:"输入工作项名称",
+        typeNewIssueSolutionName:"输入新工作项类型方案名称",
         typeModuleName:"输入模块名称",
         editModuleName:"编辑模块名称",
         typeNewPassword:"输入新密码",
@@ -176,13 +221,13 @@ export default {
         endDateLess:"结束时间不能小于开始时间",
         operationFailed:"操作失败",
         cannotShare:"现在不能分享",
-        issueTypeCannotBeEmpty:"事务类型不能为空!",
+        issueTypeCannotBeEmpty:"工作项类型不能为空!",
         selectSprint:"需要选择冲刺!",
-        notMoveToColumn:"这个事务不能移动到该列!",
-        issueShouldNotBeEmpty:"事务不能为空",
+        notMoveToColumn:"这个工作项不能移动到该列!",
+        issueShouldNotBeEmpty:"工作项不能为空",
         contentNotEmpty:"内容不能为空",
         selectBothDate:"日期都需要选择!",
-        notStartNodeNotRemove:"未开始节点不能被删除!!!",
+        notStartNodeNotRemove:"待办节点不能被删除!!!",
         typeCode:"输入验证码",
         accept:"接受",
         reject:"拒绝",
@@ -208,17 +253,17 @@ export default {
         typeProjectName:"输入项目名称",
         typeBoardName:"输入面板名称",
         typeSprintName:"输入冲刺名称",
-        typeNameOrUniqueId:"输入名称或者唯一ID",
+        typeNameOrUniqueId:"输入名称或者工作项Id",
         typeLabel:"输入标签",
-        typeAssigner:"输入Assigner",
-        typeReporter:"输入Reporter",
+        typeAssigner:"输入执行人",
+        typeReporter:"输入汇报人",
         typeReleaseName:"输入发布名称",
         typeTeamName:"输入团队名称",
         typeWikiName:"输入文档名称",
         typeUsernameOrNickname:"输入用户名或者昵称",
         typeTitle:"输入标题",
         typeWikiSpaceName:"输入文档集合名称",
-        typeProjectIssueName:"输入事务名称",
+        typeProjectIssueName:"输入工作项名称",
         typeWikiItemName:"输入文档名称",
         organization:"组织",
         search:"输入任何你想要的",
@@ -246,7 +291,7 @@ export default {
         folder:"文件夹",
         shortcut:"快捷项目",
         project:"项目",
-        projectIssue:"项目事务",
+        projectIssue:"项目工作项",
         projectRelease:"项目发布",
         wikiProject:"文档集合",
         wikiItem:"文档",
@@ -258,7 +303,7 @@ export default {
         leave:"离开",
         end:"结束",
         message:"消息",
-        issueType:"事务类型",
+        issueType:"工作项类型",
         fields:"字段",
         go:"确定",
         create:"创建",
@@ -267,7 +312,7 @@ export default {
         status:"状态",
         start:"开始",
         complete:"完成",
-        issues:"事务",
+        issues:"工作项",
         low:"低",
         medium:"中等",
         high:"高",
@@ -276,9 +321,9 @@ export default {
         filter:"过滤",
         priority:"优先级",
         label:"标签",
-        assigner:"Assigner",
-        reporter:"Reporter",
-        notStart:"未开始",
+        assigner:"执行人",
+        reporter:"汇报人",
+        notStart:"待办",
         inProgress:"进行中",
         done:"已完成",
         copy:"复制",
@@ -298,7 +343,7 @@ export default {
         manage:"管理",
         type:"类型",
         home:"主页",
-        issue:"事务",
+        issue:"工作项",
         board:"面板",
         setting:"设置",
         yes:"是",
@@ -323,7 +368,7 @@ export default {
         global:"全局",
         specific:"指定",
         wiki:"文档",
-        issueSolution:"事务类型方案",
+        issueSolution:"工作项类型方案",
         quit:"退出",
         preview:"预览",
         calendar:"日历",
@@ -356,6 +401,7 @@ export default {
         kanban:"看板",
         config:"配置",
         comments:"评论",
+        comment:"评论",
         history:"历史",
         avatar:"头像",
         username:"用户名",
@@ -382,10 +428,11 @@ export default {
         audioOn:"声音开启",
         created:"已创建",
         joined:"已加入",
-        issueTypes:"事务类型",
+        issueTypes:"工作项类型",
         dateRange:"日期范围",
         fixVersions:"修复版本",
-        keyword:"关键词",
+        keyword:"项目Id",
+        issueKey:"工作项Id",
         logo:"Logo",
         fieldType:"字段类型",
         optional:"可选",
@@ -434,14 +481,26 @@ export default {
         editProfile:"编辑详情",
         accepted:"已接受",
         rejected:"已拒绝",
-        issueTypeList:"事务类型列表",
+        issueTypeList:"工作项类型列表",
         waitForApproval:"等待审批",
         addItem:"添加项",
         me:"我",
         newFolder:"新建文件夹",
         paste:"粘贴",
         download:"下载",
-        console:"控制台"
+        console:"控制台",
+        skip:"跳过",
+        organizationList:"组织列表",
+        help:"帮助",
+        task:"任务",
+        bug:"缺陷",
+        ticket:"工单",
+        node:"节点",
+        transition:"流转",
+        createdBy:"创建人",
+        application:"应用",
+        todo:"待办中",
+        unNamed:"未命名"
     },
     "common":{
         "component":{
@@ -548,24 +607,24 @@ export default {
             project:{
                 home:{
                     projectHome:{
-                        issueTotal:"事务总数",
-                        unResolvedIssueTotal:"未完成事务总数",
+                        issueTotal:"工作项总数",
+                        unResolvedIssueTotal:"未完成工作项总数",
                         releaseTotal:"发布总数",
                         sprintTotal:"冲刺总数",
                         statics:"统计",
-                        myRecentIssueList:"我最近处理的事务列表",
-                        userIssueList:"用户事务统计",
-                        userUnDoneIssueList:"用户未完成事务统计",
+                        myRecentIssueList:"我最近处理的工作项列表",
+                        userIssueList:"用户工作项统计",
+                        userUnDoneIssueList:"用户未完成工作项统计",
                         recentReleaseList:"最近发布列表"
                     }
                 },
                 board:{
                     boardConfig:{
                         addColumn:"添加列",
-                        addIssueType:"添加事务类型"
+                        addIssueType:"添加工作项类型"
                     },
                     boardSprintList:{
-                        notStart:"未开始",
+                        notStart:"待办",
                         starting:"进行中",
                         completed:"已完成",
                         swimLanes:"泳道"
@@ -573,7 +632,7 @@ export default {
                     boardKanban:{
                         addSwimLane:"添加泳道",
                         editSwimLane:"编辑泳道",
-                        addIssue:"添加事务",
+                        addIssue:"添加工作项",
                         selectAction:"操作"
                     }
                 },
@@ -582,57 +641,57 @@ export default {
                         convertFields:"转换字段"
                     },
                     projectIssueHistory:{
-                        createdTheIssue:"创建了事务",
+                        createdTheIssue:"创建了工作项",
                         resolvedYourApproval:"通过了审批",
                         rejectedYourApproval:"拒绝了审批",
                         updatedTheField:"更新了字段",
                         newValue:"新值",
                         updatedTheWorkflow:"更新了工作流",
                         newWorkflow:"新工作流",
-                        convertTheIssue:"转换了事务"
+                        convertTheIssue:"转换了工作项"
                     },
                     projectIssueList:{
-                        remark:"如果你想再新标签页中打开事务，点击链接的同时，按下command（mac）或者control（win）键"
+                        remark:"如果你想再新标签页中打开工作项，点击链接的同时，按下command（mac）或者control（win）键"
                     },
                     projectIssueProfile:{
-                        related:"关联事务",
-                        child:"子事务",
-                        parent:"父事务",
+                        related:"关联工作项",
+                        child:"子工作项",
+                        parent:"父工作项",
                         quickMeeting:"快速会议",
-                        createChildIssue:"创建子事务",
-                        linkIssue:"关联事务"
+                        createChildIssue:"创建子工作项",
+                        linkIssue:"关联工作项"
                     },
                     projectIssueRelated:{
-                        parentIssue:"父事务",
-                        childIssues:"子事务",
-                        relatedIssues:"关联事务"
+                        parentIssue:"父工作项",
+                        childIssues:"子工作项",
+                        relatedIssues:"关联工作项"
                     }
                 },
                 release:{
                     projectReleaseIfCan:{
                         thereAreStill:"仍然有",
-                        unresolvedIssues:"未完成事务",
+                        unresolvedIssues:"未完成工作项",
                         continueToRelease:"你仍然想继续发布"
                     },
                     projectReleaseList:{
-                        noIssues:"无事务"
+                        noIssues:"无工作项"
                     },
                     projectReleaseProfile:{
-                        addIssue:"添加事务"
+                        addIssue:"添加工作项"
                     }
                 },
                 project:{
                     yourWork:"你的工作",
-                    recentProjectList:"最近项目列表",
-                    allProjectList:"所有项目列表",
-                    myDoneIssue:"我完成的事务",
-                    myOpenIssue:"我未开始的事务",
-                    doneIssue:"完成的事务",
-                    openIssue:"未开始的事务"
+                    recentProjectList:"最近参与",
+                    allProjectList:"所有",
+                    myDoneIssue:"我完成的工作项",
+                    myOpenIssue:"我待办的工作项",
+                    doneIssue:"完成的工作项",
+                    openIssue:"待办的工作项"
                 },
                 setting:{
                     projectSettingIssueSolution:{
-                        issueTypeConvert:"事务类型转换"
+                        issueTypeConvert:"工作项类型转换"
                     },
                     projectSettingRole:{
                         addRole:"添加角色",
@@ -644,14 +703,14 @@ export default {
                 home:{
                     settingHome:{
                         projectTotal:"项目总数",
-                        issueTotal:"事务总数",
+                        issueTotal:"工作项总数",
                         wikiSpaceTotal:"文档集合总数",
                         wikiItemTotal:"文档总数",
                         userTotal:"用户总数",
                         teamTotal:"团队总数",
                         statics:"统计",
-                        projectWithIssueList:"项目事务统计",
-                        projectWithUnDoneIssueList:"项目未完成事务统计",
+                        projectWithIssueList:"项目工作项统计",
+                        projectWithUnDoneIssueList:"项目未完成工作项统计",
                         wikiSpaceWithWikiItemList:"文档集合文档统计",
                         teamWithUserList:"团队用户统计"
                     }
@@ -720,8 +779,8 @@ export default {
                     deleteIncludeChildren:"删除（包含子页面）"
                 },
                 wiki:{
-                    recentWikiList:"最近文档集合列表",
-                    allWikiList:"所有文档集合列表"
+                    recentWikiList:"最近参与",
+                    allWikiList:"所有"
                 }
             },
             team:{
@@ -732,6 +791,13 @@ export default {
             }
         },
         "desktop":{
+            comp:{
+                recentIssue:"最近工作项",
+                recentCreatedProject:"最近项目",
+                recentCreatedWikiSpace:"最近文档集合",
+                recentCalendarEvent:"最近日历事件",
+                recentMeeting:"最近会议"
+            },
             desktop:{
                 createOrganization:"创建组织",
                 editOrganizationUserProfile:"编辑组织成员信息"
@@ -742,7 +808,7 @@ export default {
             guide:{
                 createOrganization:"创建组织",
                 organizationDescription:"首先，你应该创建一个组织，它代表着你的公司或者集团",
-                projectDescription:"处理事务，面板和发布数据",
+                projectDescription:"处理工作项，面板和发布数据",
                 wikiDescription:"读写文档",
                 calendarDescription:"创建日历事件并且安排你的工作",
                 finderDescription:"管理你的文件和快捷方式，以及上传和下载",
@@ -750,7 +816,7 @@ export default {
                 meetingDescription:"加入，创建和安排视频会议",
                 profileDescription:"编辑你的个人信息，更换壁纸以及使用便签和相册",
                 searchDescription:"搜索任何你想要的",
-                notificationDescription:"检索关于事务，项目，日历等任何发给你的通知信息",
+                notificationDescription:"检索关于工作项，项目，日历等任何发给你的通知信息",
                 doneDescription:"一切都已经准备就绪，享受你的工作之旅吧！"
             }
         },
@@ -775,14 +841,14 @@ export default {
                 },
                 section2:{
                     1:"数据无缝流转",
-                    2:"任务分配，视频会议",
+                    2:"工作项分配，视频会议",
                     3:"让您轻松掌握项目进度",
                     4:"Teamlinker让你的工作完成的更好更快，并且所有的工作只需要一个切入口"
                 },
                 project:{
                     1:"自由的工作流",
                     2:"支持看板和发布",
-                    3:"事务审批",
+                    3:"工作项审批",
                     4:"自定义字段"
                 },
                 wiki:{
@@ -817,13 +883,13 @@ export default {
                 },
                 finder:{
                     1:"文件和文件夹的自由拖拽",
-                    2:"对于事务，日历，会议等可以创建快捷方式",
+                    2:"对于工作项，日历，会议等可以创建快捷方式",
                     3:"文件快速预览",
                     4:"上传与下载"
                 },
                 system:{
                     1:"基于网页操作系统",
-                    2:"多窗口与任务并行",
+                    2:"多窗口与工作项并行",
                     3:"强大的搜索功能",
                     4:"提供便签和相册的小组件"
                 },

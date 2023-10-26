@@ -128,8 +128,8 @@ export class WorkflowService  {
         return ret;
     }
 
-    static async init(issueTypeId:string) {
-        let workflowId=await workflowMapper.init(issueTypeId);
+    static async init(issueTypeId:string,lang:string) {
+        let workflowId=await workflowMapper.init(issueTypeId,lang);
         return workflowId;
     }
 

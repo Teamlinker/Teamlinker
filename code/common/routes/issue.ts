@@ -12,6 +12,7 @@ import {
     ICommon_Route_Res_Project_Issue_filter,
     ICommon_Route_Res_ProjectIssue_BasicInfo,
     ICommon_Route_Res_ProjectIssue_fieldsInfo,
+    ICommon_Route_Res_RecentIssue_Item,
     ICommon_Route_Res_Workflow_Node_Field
 } from "./response";
 import {ECommon_HttpApi_Method} from "./types";
@@ -456,6 +457,15 @@ const api={
                 size:number
             }>{},
             res:<ICommon_Route_Res_Global_Search_Project_Issue_Item[]>{},
+            permission:[Permission_Types.Organization.READ]
+        },
+        recentIssueList:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/recent/list",
+            req:<{
+                size:number
+            }>{},
+            res:<ICommon_Route_Res_RecentIssue_Item[]>{},
             permission:[Permission_Types.Organization.READ]
         }
     }

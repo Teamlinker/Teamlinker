@@ -521,4 +521,10 @@ class IssueController {
           return ret;
      }
 
+     @DHttpApi(projectIssueApi.routes.recentIssueList)
+     async recentIssueList(@DHttpReqParamRequired("size") size: number,@DHttpUser user:IUserSession):Promise<typeof projectIssueApi.routes.recentIssueList.res> {
+          let ret=await ProjectIssueService.recentIssueList(user.organizationInfo.organizationUserId,size)
+          return ret;
+     }
+
 }

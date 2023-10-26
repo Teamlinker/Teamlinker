@@ -18,6 +18,9 @@ import {OrganizationUserService} from "../service/organization";
 import Application from "../../common/app/app";
 import {ECommon_Application_Mode} from "../../../common/types";
 import rpcFileApi from "../../file/rpc/file"
+import {REDIS_USER} from "../../common/cache/keys/user";
+import rpcFinderApi from "../../finder/rpc/finder";
+import * as i18next from "i18next";
 
 @DComponent
 @DHttpController(userApi)
@@ -33,7 +36,7 @@ class UserController {
     }
 
     @DHttpApi(userApi.routes.login)
-    async login(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.login.res> {
+    async login(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpReqParamRequired("lang") lang:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.login.res> {
         let user=await UserService.getItemByName(username)
         if(!user) {
             throw  Err.User.userNotFound
@@ -42,7 +45,10 @@ class UserController {
             throw Err.User.accessDenied
         }
         if(user.getItem().password===password) {
-            let token=await user.startSession()
+            let token=await user.startSession(lang)
+            if(user.getItem().count===0) {
+                rpcFinderApi.createFolder(user.getId(),i18next.getFixedT(lang)("backend.newFolder"),null)
+            }
             user.assignItem({
                 count:user.getItem().count+1
             })
@@ -273,5 +279,15 @@ class UserController {
         }
     }
 
+    @DHttpApi(userApi.routes.changeLang)
+    async changeLang(@DHttpReqParamRequired("lang") lang:string,@DHttpUser user:IUserSession):Promise<typeof userApi.routes.changeLang.res> {
+        let objRedis=REDIS_USER.info(user.userId)
+        let obj=await objRedis.get()
+        if(obj) {
+            obj.lang=lang
+            await objRedis.set(obj)
+        }
+        return 
+    }
 
 }

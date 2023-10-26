@@ -119,6 +119,7 @@ export function generatorApi<T extends ICommon_Http_Route_List>(api:{
                         ...(!route.ignoreValidate && {
                             "Authorization":"Bearer "+SessionStorage.get("userToken")
                         }),
+                        "Accept-Language":localStorage.getItem("lang")??(navigator.language || "en").toLowerCase().split("-")[0]
                     },
                     ...(objBody && {
                         body:objBody

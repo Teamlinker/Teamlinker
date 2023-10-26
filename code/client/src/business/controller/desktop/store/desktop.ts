@@ -23,6 +23,8 @@ import {checkPermission, Permission_Types} from "../../../../../../common/permis
 import {iconFinder} from "../icon/finder";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {ICommon_Model_Organization_User} from "../../../../../../common/model/organization_user";
+import {iconHelp} from "@/business/controller/desktop/icon/help";
+import {toRaw} from "vue";
 
 export const useDesktopStore=defineStore("desktop",{
     state:()=>({
@@ -31,14 +33,8 @@ export const useDesktopStore=defineStore("desktop",{
         organizationList:null as DCSType<ICommon_Route_Res_Organization_List>,
         organizationPermission:0,
         appList:[
-            iconCalendar,
-            iconMeeting,
-            iconProject,
-            iconPeople,
-            iconWiki,
-            iconIM,
-            iconTeam,
-            iconFinder
+            iconFinder,
+            iconHelp
         ] as Icon[],
         userInfo:{} as DCSType<Omit<ICommon_Model_User,"password">>,
         status:ECommon_User_Online_Status.OFFLINE,
@@ -122,6 +118,16 @@ export const useDesktopStore=defineStore("desktop",{
                                 this.appList.splice(index,1)
                             }
                         }
+                        let set=new Set(toRaw(this.appList).concat([
+                            iconCalendar,
+                            iconMeeting,
+                            iconProject,
+                            iconPeople,
+                            iconWiki,
+                            iconIM,
+                            iconTeam
+                        ]))
+                        this.appList=Array.from(set)
                     }
                 })()
             ])
@@ -174,10 +180,13 @@ export const useDesktopStore=defineStore("desktop",{
             let imRecentList=SessionStorage.get("imRecentList")
             delete imRecentList[this.organizationInfo.id]
             SessionStorage.set("imRecentList",imRecentList)
-            let index=this.appList.indexOf(iconSetting)
-            if(index>-1) {
-                this.appList.splice(index,1)
-            }
+            this.appList=this.appList.filter(item=>{
+                if(![iconFinder,iconHelp].includes(item)) {
+                    return false
+                } else {
+                    return true
+                }
+            })
             SocketIOClient.clear([ECommon_Socket_Type.NOTIFICATION])
         },
         async $update() {

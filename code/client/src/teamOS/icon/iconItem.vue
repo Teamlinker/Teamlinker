@@ -1,8 +1,11 @@
 <template>
-	<a-spin :loading="loading" :tabindex="index"  v-menu="item.onContextMenu" @dblclick="item.onDBClick" @dragend="item.onMove" :title="item.name">
+	<a-spin :loading="loading" :tabindex="index"  v-menu="item.onContextMenu" @dblclick="item.onDBClick" @dragend="item.onMove" :title="item.name" @click="item.onClick">
 		<div :style="{
 		width:Icon.width+'px',
 		height:Icon.height+'px',
+		...(scale && {
+			transform:`scale(${scale},${scale})`
+		})
 	}">
 			<a-row :style="{width: Icon.width+'px',height:Icon.width+'px',textAlign: 'center'}" style="justify-content: center;align-items: center">
 <!--				<sicon name="Ant" :type="item.icon" size="40" :color="item.iconColor"></sicon>-->
@@ -27,6 +30,7 @@ import SvgIcon from "../../icon/svgIcon.vue";
 const props=defineProps<{
   item:Icon,
   index:number,
+	scale?:number
 }>();
 const editName=ref("")
 const input=ref()
