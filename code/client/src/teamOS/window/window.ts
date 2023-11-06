@@ -39,8 +39,9 @@ export interface ITeamOS_Window_Node {
 export interface ITeamOS_Window_Event {
     "open":(item:Window)=>void,
     "move":(item:Window)=>void,
-    "newTab":(item:Window)=>Promise<ITeamOS_Window_Node>
-    "removeTab":(item:Window)=>void
+    "newTab":(item:Window)=>Promise<ITeamOS_Window_Node>,
+    "removeTab":(item:Window)=>void,
+    "close":(item:Window)=>Promise<boolean>
 }
 
 export function getCurrentWindow():Window {
@@ -59,6 +60,8 @@ export class Window extends Base{
         width:"80%",
         height:"80%"
     }
+    originalRect:ITeamOS_Rect
+    originalStatus:ETeamOS_Window_Status
     group:string
     nodes:ITeamOS_Window_Node[]
     status=ETeamOS_Window_Status.NORMAL
@@ -68,6 +71,7 @@ export class Window extends Base{
     onOpen:(item:Window)=>void
     onNewTab:(item:Window)=>Promise<ITeamOS_Window_Node>
     onRemoveTab:(item:Window)=>void
+    onClose:(item:Window)=>Promise<boolean>
     constructor(name:string,type:ETeamOS_Window_Type,group:string,isControl:boolean,nodes:ITeamOS_Window_Node[],title?:string) {
         super()
         this.name=name;
@@ -87,13 +91,15 @@ export class Window extends Base{
     }
     addEventListener<T extends keyof ITeamOS_Window_Event>(eventType:T,func:ITeamOS_Window_Event[T]) {
         if(eventType=="move") {
-            this.onMove=func.bind(null,this);
+            this.onMove=func
         } else if(eventType=="open") {
             this.onOpen=func
         } else if(eventType=="newTab") {
             this.onNewTab=func as ITeamOS_Window_Event["newTab"]
         } else if(eventType=="removeTab") {
-            this.onRemoveTab=func.bind(null,this);
+            this.onRemoveTab=func
+        } else if(eventType=="close") {
+            this.onClose=func as ITeamOS_Window_Event["close"]
         }
     }
 }

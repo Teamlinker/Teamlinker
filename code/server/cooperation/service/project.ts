@@ -19,6 +19,7 @@ import {emitServiceEvent} from "../../common/event/event";
 import {BoardService} from "./board";
 import {REDIS_PROJECT} from "../../common/cache/keys/project";
 import rpcUserApi from "../../user/rpc/user"
+import {planMapper} from "../mapper/plan";
 
 export class ProjectService extends Entity<typeof projectModel,typeof projectMapper> {
     constructor(){
@@ -44,7 +45,8 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
             ProjectIssueService.clearByProjectIds([this.item.id]),
             releaseMapper.clear(this.item.id),
             issueTypeSolutionMapper.clearProjects([this.item.id]),
-            BoardService.clearByProjectId(this.getId())
+            BoardService.clearByProjectId(this.getId()),
+            planMapper.clearByProjects([this.item.id])
         ])
     }
 
@@ -177,7 +179,8 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
             ProjectIssueService.clearByProjectIds(projectIds),
             releaseMapper.clearByProjectIds(projectIds),
             issueTypeSolutionMapper.clearProjects(projectIds),
-            BoardService.clearByProjectIds(projectIds)
+            BoardService.clearByProjectIds(projectIds),
+            planMapper.clearByProjects(projectIds)
         ])
     }
 

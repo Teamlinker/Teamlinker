@@ -34,6 +34,7 @@ import {Message} from "@arco-design/web-vue";
 import {useRouter} from "vue-router";
 import {useI18n} from "vue-i18n";
 import logo from "@/assert/logo.png";
+import {SessionStorage} from "@/business/common/storage/session";
 
 const props=defineProps<{
 	username:string
@@ -59,12 +60,15 @@ const onSubmit=async()=>{
 	if(!form.code) {
 		return
 	}
+	let openId=SessionStorage.get("wechatOpenId")
 	let res=await apiUser.confirmRegister({
 		username:props.username,
-		code:form.code
+		code:form.code,
+		openId
 	})
 	if(res?.code==0) {
 		Message.info(t("tip.registerSuccess"))
+		SessionStorage.remove("wechatOpenId")
 		await router.replace("login")
 	} else {
 		Message.error(res.msg)

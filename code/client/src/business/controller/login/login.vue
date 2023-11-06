@@ -10,7 +10,7 @@
 		</a-space>
 		<div style="width:40%;box-shadow: rgba(22, 14, 45, 0.02) 0px 0px 40px, rgba(22, 14, 45, 0.06) 0px 0px 104px;padding: 20px;box-sizing: border-box;border: 1px solid rgb(234, 236, 240);border-radius: 10px;background-color: white">
 			<a-form :model="form"  auto-label-width @submit="onSubmit" v-if="!organizationList">
-				<h1 style="text-align: center;margin-bottom: 50px">{{$t("util.login")}}</h1>
+				<h1 style="text-align: center;margin-bottom: 50px;color: rgba(16, 24, 40, 0.8)">{{$t("util.login")}}</h1>
 				<a-form-item field="username" :label="$t('util.username')" required>
 					<a-input v-model="form.username" :placeholder="$t('placeholder.enterUsername')"></a-input>
 				</a-form-item>
@@ -19,7 +19,14 @@
 				</a-form-item>
 				<a-form-item>
 					<a-row style="justify-content: space-between;width: 100%">
-						<a-button html-type="submit" type="primary">{{ $t("util.submit") }}</a-button>
+						<a-space size="large">
+							<a-button html-type="submit" type="primary" style="background-color: rgb(147, 115, 238)">{{ $t("util.submit") }}</a-button>
+							<a-button v-if="$deployMode.value===ECommon_Application_Mode.ONLINE" type="text" @click="onWechat">
+								<template #icon>
+									<icon-wechat style="color: green;font-size: x-large"></icon-wechat>
+								</template>
+							</a-button>
+						</a-space>
 						<a-space v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
 							<a-button html-type="button" type="primary" status="success" @click="onRegister">{{ $t("util.register") }}
 							</a-button>
@@ -59,7 +66,7 @@
 						</a-list-item>
 					</a-list>
 				</template>
-				<a-button type="primary" status="success" @click="onCreate" size="large" style="width: 200px;" v-else>
+				<a-button type="primary" status="success" @click="onCreate" size="large" style="width: 200px;" v-else-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
 					{{$t("controller.desktop.desktop.createOrganization")}}
 				</a-button>
 				<a-button type="text" style="color: grey;margin-top: 20px" @click="onDesktop()">{{$t("util.skip")}}</a-button>
@@ -71,7 +78,7 @@
 
 <script setup lang="ts">
 import {getCurrentInstance, markRaw, reactive, ref} from "vue";
-import {apiOrganization, apiUser} from "../../common/request/request";
+import {apiGateway, apiOrganization, apiUser} from "../../common/request/request";
 import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
 import {NotificationWrapper} from "../../common/component/notification/notification";
@@ -95,6 +102,14 @@ const appContext=getCurrentInstance().appContext
 const store=useDesktopStore()
 const {t}=useI18n()
 let router = useRouter();
+const login=(userId:string)=>{
+	SessionStorage.remove("organizationId")
+	SessionStorage.set("userId",userId);
+	getOrganizationList()
+	store.initNotificationSocket()
+}
+
+
 const onSubmit = async () => {
 	let ret = await apiUser.login({
 		username: form.username,
@@ -102,10 +117,7 @@ const onSubmit = async () => {
 		lang:localStorage.getItem("lang")??(navigator.language || "en").toLowerCase().split("-")[0]
 	})
 	if (ret.code == 0) {
-		SessionStorage.remove("organizationId")
-		SessionStorage.set("userId",ret.data.id);
-		getOrganizationList()
-		store.initNotificationSocket()
+		login(ret.data.id)
 	} else {
 		Message.error(ret.msg);
 	}
@@ -137,6 +149,34 @@ const onCreate=async ()=>{
 	let ret=await Dialog.open(document.body,appContext,t("controller.desktop.desktop.createOrganization"),markRaw(CreateOrganization))
 	if(ret) {
 		getOrganizationList()
+	}
+}
+
+const onWechat=async ()=>{
+	SessionStorage.remove("wechatOpenId")
+	let res=await apiGateway.wechatAppId()
+	if(res?.code==0) {
+		window.open(`https://open.weixin.qq.com/connect/qrconnect?appid=${res.data.appId}&redirect_uri=${encodeURIComponent(location.protocol+"//"+location.host+"/#/wechat")}&response_type=code&scope=snsapi_login#wechat_redirect`,"_blank","popup=yes,width=600,height=600,top=100,left=300")
+		window.onmessage= async ev => {
+			let openId=ev.data
+			let res=await apiUser.wechatLogin({
+				openId,
+				lang:localStorage.getItem("lang")??(navigator.language || "en").toLowerCase().split("-")[0]
+			})
+			if(res?.code==0) {
+				if(res.data) {
+					login(res.data.id)
+				} else {
+					SessionStorage.set("wechatOpenId",openId)
+					let ret=await Dialog.confirm(document.body,appContext,t("tip.bindExistedAccount"))
+					if(ret) {
+						await router.replace("bindAccount")
+					} else {
+						await router.replace("register")
+					}
+				}
+			}
+		}
 	}
 }
 

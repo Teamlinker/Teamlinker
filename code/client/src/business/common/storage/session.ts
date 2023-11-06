@@ -12,9 +12,10 @@ export interface IClient_SessionStorage_Type {
     }
     organizationUserId:string,
     firstShow:string,
+    wechatOpenId:string
 }
 
-let keys:(keyof IClient_SessionStorage_Type)[]=["organizationId","userId","userToken","imRecentList","organizationUserId","firstShow"]
+let keys:(keyof IClient_SessionStorage_Type)[]=["organizationId","userId","userToken","imRecentList","organizationUserId","firstShow","wechatOpenId"]
 
 export class SessionStorage {
     static get<T extends keyof IClient_SessionStorage_Type>(name:T):IClient_SessionStorage_Type[T] {

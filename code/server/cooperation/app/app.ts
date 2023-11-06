@@ -7,4 +7,5 @@ import "../http/release";
 import "../http/label";
 import "../http/workflow";
 import "../http/board"
+import "../http/plan"
 import "../rpc/cooperation";

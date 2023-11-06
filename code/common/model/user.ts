@@ -5,6 +5,12 @@ export enum ECommon_User_Type {
   ADMIN,
   DELETED
 }
+
+export enum ECommon_User_From_Type {
+  LOCAL,
+  WECHAT
+}
+
 export interface ICommon_Model_User {
     id :string,
   username :string,
@@ -15,7 +21,9 @@ export interface ICommon_Model_User {
   sign :string,
   active:number,
   role:ECommon_User_Type,
-  count:number
+  count:number,
+  from_type:ECommon_User_From_Type,
+  from_id:string
 }
 export const Table_User="user"
 

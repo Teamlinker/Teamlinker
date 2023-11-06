@@ -173,7 +173,7 @@ const pagination=reactive({
 const action=(item:ICommon_Route_Res_Organization_User_Item)=>{
   return [
     {
-      name:"role",
+      name:t("util.role"),
       func:async ()=>{
         let ret=await Dialog.open(root.value,appContext,t("util.add"),markRaw(EditTeamMemberRole),{
           type:"edit",
@@ -186,7 +186,7 @@ const action=(item:ICommon_Route_Res_Organization_User_Item)=>{
       }
     },
     {
-      name:"remove",
+      name:t("util.remove"),
       func:async ()=>{
         let ret=await Dialog.confirm(root.value,appContext,t("tip.removeMember"))
         if(ret) {

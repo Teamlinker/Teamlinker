@@ -31,7 +31,8 @@ export class Dialog {
                 events,
                 onOk,
                 onClose,
-                loading
+                loading,
+                parentNode:el
             });
             el.appendChild(ele);
             async function onOk(){
@@ -64,7 +65,8 @@ export class Dialog {
             let destroyFunc=renderComponent(ele,DialogView,appContext,{
                 onOk,
                 onClose,
-                title:content
+                title:content,
+                parentNode:el
             });
             el.appendChild(ele);
             async function onOk(){
@@ -90,7 +92,8 @@ export class Dialog {
                 onOk,
                 onClose,
                 title:title,
-                input
+                input,
+                parentNode:el
             });
             el.appendChild(ele);
             async function onOk(){
@@ -123,7 +126,8 @@ export class Dialog {
                 events,
                 onOk,
                 onClose,
-                loading
+                loading,
+                parentNode:el
             });
             el.appendChild(ele);
             async function onOk(){

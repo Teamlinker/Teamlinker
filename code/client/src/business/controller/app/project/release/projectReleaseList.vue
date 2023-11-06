@@ -31,7 +31,7 @@
         <span v-if="record.notstart+record.inprogress+record.done==0">
           {{$t("controller.app.project.release.projectReleaseList.noIssues")}}
         </span>
-        <a-progress v-else :percent="record.done/(record.notstart+record.inprogress+record.done)" style="width: 180px" color="green"></a-progress>
+        <a-progress v-else :percent="Number((record.done/(record.notstart+record.inprogress+record.done)).toFixed(2))" style="width: 180px" color="green"></a-progress>
       </template>
       <template #startDate="{record}">
         {{record.start_time}}

@@ -19,14 +19,11 @@
           <UserAvatar :organization-user-id="info.modified_by.organizationUserId" :name="info.modified_by.nickname" :photo="info.modified_by.photo" v-if="info"></UserAvatar>
         </a-row>
       </a-row>
-      <a-switch v-model="isWrite" v-if="checkPermission(permission,Permission_Types.Wiki.EDIT)">
-        <template #checked>
-          {{$t("util.edit")}}
-        </template>
-        <template #unchecked>
-	        {{$t("util.preview")}}
-        </template>
-      </a-switch>
+	    <a-space>
+		    <span style="color: green">{{$t("util.preview")}}</span>
+		    <a-switch type="line" v-model="isWrite" v-if="checkPermission(permission,Permission_Types.Wiki.EDIT)" unchecked-color="green" checked-color="dodgerblue"></a-switch>
+		    <span style="color: dodgerblue">{{$t("util.edit")}}</span>
+	    </a-space>
     </a-row>
     <a-row style="width: 100%;height: calc(100% - 45px)">
 	    <a-spin :loading="loading" style="width: 100%;height: 100%">
@@ -57,10 +54,11 @@ import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model
 import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import {DropParam, vDrop} from "../../../../teamOS/common/directive/drop";
-import moment from "moment";
 import {RichEditorEventHandle} from "../../../common/component/richEditorEventHandle";
 import {DCSType} from "../../../../../../common/types";
+import moment from "moment";
 
+moment;
 const props=defineProps<{
   wikiItemId:string,
   path:string[],

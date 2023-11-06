@@ -1,5 +1,10 @@
 import Application from "../app/app";
-import {IServer_Common_Config_Mail, IServer_Common_Config_Mysql, IServer_Common_Config_Redis} from "../types/config";
+import {
+    IServer_Common_Config_Mail,
+    IServer_Common_Config_Mysql,
+    IServer_Common_Config_Redis,
+    IServer_Common_Config_Wechat
+} from "../types/config";
 
 class Config {
     constructor() {
@@ -26,6 +31,9 @@ class Config {
     }
     get mailInfo():IServer_Common_Config_Mail {
         return Application.privateConfig.mail
+    }
+    get wechatInfo():IServer_Common_Config_Wechat {
+        return Application.privateConfig.wechat
     }
 }
 var g_config:InstanceType<typeof Config>

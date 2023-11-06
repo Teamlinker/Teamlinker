@@ -52,7 +52,17 @@ const routes=[
         path:"/resetCode",
         component: ()=>import("./business/controller/login/resetCode.vue"),
         props:route=>({username:route.query.username})
-    }
+    },
+    {
+        name:"wechat",
+        path:"/wechat",
+        component: ()=>import("./business/controller/login/wechat.vue"),
+    },
+    {
+        name:"bindAccount",
+        path:"/bindAccount",
+        component: ()=>import("./business/controller/login/bindAccount.vue"),
+    },
 ]
 const router=createRouter({
     history:createWebHashHistory(),
@@ -78,6 +88,18 @@ apiGateway.deployInfo().then(async value => {
             if(!(hash.startsWith("#/login") || hash.startsWith("#/desktop"))) {
                 await router.replace("login")
             }
+        } else {
+            loadStaticScript()
         }
     }
 })
+
+function loadStaticScript() {
+    let script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.onload = function() {
+        eval('LA.init({id:"KEwmiZNvHr5leFev",ck:"KEwmiZNvHr5leFev"})')
+    }
+    script.src = 'https://sdk.51.la/js-sdk-pro.min.js';
+    document.body.appendChild(script);
+}

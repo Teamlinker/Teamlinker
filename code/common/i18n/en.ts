@@ -42,7 +42,12 @@ export default {
         column:"column is kanban status for issues,you can add,edit or delete the column",
         sprint:"sprint is a short version that includes many issues for agile project",
         kanban:"kanban can show issues' status clearly in the sprint",
-        swimLane:"swim lane is a issues' pool that needs to complete a specific task"
+        swimLane:"swim lane is a issues' pool that needs to complete a specific task",
+        manDay:"the number of days it takes to complete the issue",
+        plan:"we can plan the issues,arrange the dependence relationship,and make a gantt chart",
+        planItemType:`stage:it's a collection that includes sub stages,issues,and milestones.
+        milestone:it shows the completion of issues and stages above in a level.
+        `
     },
     notification:{
         teamUserAdd:{
@@ -141,6 +146,7 @@ export default {
         deleteEvent:"Do you want to delete this event?",
         deleteFolder:"do you want to delete this folder?",
         deleteItems:"Do you want to delete these items?",
+        deleteItem:"Do you want to delete this item?",
         deleteFavorite:"Do you want delete this favorite?",
         deleteMeeting:"Do you want to delete this meeting?",
         leaveMeeting:"Do you leave this meeting?",
@@ -237,7 +243,10 @@ export default {
         deleteOrganization:"Do you want to delete this organization?",
         notMatch:"input not match",
         quitOrganization:"do you want to quit this organization?",
-        switchToOrganization:"you should switch to organization "
+        switchToOrganization:"you should switch to organization ",
+        deletePlan:"Do you want to delete this plan?",
+        bindExistedAccount:"Do you want to bind an existed account?",
+        leavePage:"Are you sure you want to leave?"
     },
     placeholder:{
         pleaseSelect:"Please Select",
@@ -277,7 +286,8 @@ export default {
         typeOrganizationName:"Type Organization Name",
         typeProjectReleaseName:"Type Project Release Name",
         typeCalendarEventName:"type calendar event name",
-        typeMeetingRoomName:"type meeting room name"
+        typeMeetingRoomName:"type meeting room name",
+        typePlanName:"Type Plan Name",
     },
     "util":{
         "ok":"Ok",
@@ -426,6 +436,7 @@ export default {
         meetingPassword:"Meeting Password",
         users:"Users",
         selectCamera:"Select Camera",
+        selectAudio:"Select Audio Input",
         videoOn:"Video On",
         audioOn:"Audio On",
         created:"Created",
@@ -502,7 +513,23 @@ export default {
         createdBy:"Created By",
         application:"Application",
         todo:"To Do",
-        unNamed:"UnNamed"
+        unNamed:"UnNamed",
+        manDay:"Man Day",
+        plan:"Plan",
+        gantt:"Gantt",
+        stage:"Stage",
+        milestone:"Milestone",
+        depend:"Depend",
+        delay:"Delay(Day)",
+        day:"Day",
+        month:"Month",
+        sunday:"Sunday",
+        monday:"Monday",
+        tuesday:"Tuesday",
+        wednesday:"Wednesday",
+        thursday:"Thursday",
+        friday:"Friday",
+        saturday:"Saturday"
     },
     "common":{
         "component":{
@@ -925,6 +952,9 @@ export default {
         "login":{
             registerCode:{
                 receiveCode:"if you don't receive verification code email,you can"
+            },
+            bindAccount:{
+                bindExistedAccount: "Bind Account"
             }
         }
     }

@@ -23,7 +23,7 @@
           </a-col>
         </a-row>
       </a-col>
-      <a-col flex="auto" style="height: 100%;text-align: center;line-height: 35px;color: rgb(93,93,93);font-size: medium;cursor: move">
+      <a-col flex="auto" style="height: 100%;text-align: center;line-height: 35px;color: rgb(93,93,93);font-size: medium;cursor: move" @dblclick="onDbClick">
 
       </a-col>
       <a-col flex="80px" style="height: 100%">
@@ -102,6 +102,15 @@ const onMin=(id:string)=>{
 const onClose=(id:string)=>{
   windowManager.close(id)
 }
+
+const onDbClick=()=>{
+	if(props.item.status===ETeamOS_Window_Status.NORMAL) {
+		windowManager.max(props.item.id)
+	} else {
+		windowManager.normal(props.item.id)
+	}
+}
+
 const navigator=ref<InstanceType<typeof NavigatorContainer>>(null)
 const navigatorList=ref<InstanceType<typeof NavigatorContainer>[]>([])
 const back=()=>{

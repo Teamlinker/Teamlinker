@@ -26,6 +26,7 @@ export class MeetingClient {
     private defaultVideo=true
     private defaultAudio=true
     private defaultCameraId:string
+    private defaultAudioId:string
     onProducerStateChange:(state:"new"|"close"|"pause"|"resume", kind: mediaSoup.types.MediaKind, businessId:string,type:"data"|"camera"|"screen",stream?: MediaStream,producerId?:string)=>void
     onLocalProducerInit:(stream:MediaStream)=>void
     onLocalProducerStart:(kind:MediaKind)=>void
@@ -96,6 +97,13 @@ export class MeetingClient {
             name:item.label
         }))
     }
+    static async enumAudioDevice() {
+        let ret=await navigator.mediaDevices.enumerateDevices()
+        return ret.filter(item=>item.kind==="audioinput").map(item=>({
+            id:item.deviceId,
+            name:item.label
+        }))
+    }
     static async checkVideoStream(id:string) {
         let stream=await navigator.mediaDevices.getUserMedia({
             video:{
@@ -110,7 +118,7 @@ export class MeetingClient {
     getRoomInfo() {
         return this.roomInfo
     }
-    async join(roomId:string,extraData:any,isVideo=true,isAudio=true,cameraId?:string):Promise<{
+    async join(roomId:string,extraData:any,isVideo=true,isAudio=true,cameraId?:string,audioId?:string):Promise<{
         success:boolean,
         msg?:string
     }> {
@@ -123,6 +131,7 @@ export class MeetingClient {
         this.defaultVideo=isVideo
         this.defaultAudio=isAudio
         this.defaultCameraId=cameraId
+        this.defaultAudioId=audioId
         let ret=await this.socket.emitWithAck("joinRoom",roomId,extraData)
         if(ret) {
             this.roomInfo=ret;
@@ -502,7 +511,10 @@ export class MeetingClient {
             const mediaConstraints:MediaStreamConstraints = {
                 audio: {
                     echoCancellation:true,
-                    noiseSuppression:true
+                    noiseSuppression:true,
+                    ...(this.defaultAudioId && {
+                        deviceId:this.defaultAudioId
+                    })
                 },
                 video: (isVideo && this.defaultCameraId)?{
                     deviceId:this.defaultCameraId

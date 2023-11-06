@@ -30,6 +30,9 @@ import {boardModel} from "../../../../common/model/board";
 import {boardSprintModel} from "../../../../common/model/board_sprint";
 import {boardSprintSwimLaneModel} from "../../../../common/model/board_sprint_swimlane";
 import {boardColumnModel} from "../../../../common/model/board_column";
+import {planModel} from "../../../../common/model/plan";
+import {projectModel} from "../../../../common/model/project";
+import {planTableModel} from "../../../../common/model/plan_table";
 
 export namespace REDIS_AUTH {
     export namespace Resource {
@@ -484,6 +487,88 @@ export namespace REDIS_AUTH {
                             await this.objRedis.set(projectId)
                         } else {
                             throw Err.Project.Board.boardColumnNotFound
+                        }
+                    }
+                    return projectId;
+                }
+            }
+            export class ProjectIdFromPlan extends BaseRedisStringCache<string> {
+                key="permission:projectPlan:{0}"
+                constructor(private planId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,planId),cacheRedisType<string>().String,1000*10);
+                }
+                async getValue():Promise<string> {
+                    let mysql=getMysqlInstance()
+                    let projectId:string
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        projectId=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoinSql({
+                            model:planModel
+                        },{
+                            model:projectModel,
+                            columns:["id"],
+                            expression:{
+                                id:{
+                                    model:planModel,
+                                    field:"project_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:planModel,
+                                value:this.planId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            projectId=ret.id
+                            await this.objRedis.set(projectId)
+                        } else {
+                            throw Err.Project.Plan.planNotFound
+                        }
+                    }
+                    return projectId;
+                }
+            }
+            export class ProjectIdFromPlanItem extends BaseRedisStringCache<string> {
+                key="permission:projectPlanItem:{0}"
+                constructor(private planItemId:string) {
+                    super()
+                    this.objRedis=new RedisStringKey(StringUtil.format(this.key,planItemId),cacheRedisType<string>().String,1000*10);
+                }
+                async getValue():Promise<string> {
+                    let mysql=getMysqlInstance()
+                    let projectId:string
+                    let exists=await this.objRedis.exists()
+                    if(exists) {
+                        projectId=await this.objRedis.get()
+                    } else {
+                        let sql=generateLeftJoinSql({
+                            model:planTableModel
+                        },{
+                            model:projectModel,
+                            columns:["id"],
+                            expression:{
+                                id:{
+                                    model:planTableModel,
+                                    field:"project_id"
+                                }
+                            }
+                        },{
+                            id:{
+                                model:planTableModel,
+                                value:this.planItemId
+                            }
+                        })
+                        let ret=await mysql.executeOne(sql)
+                        if(ret) {
+                            projectId=ret.id
+                            await this.objRedis.set(projectId)
+                        } else {
+                            throw Err.Project.Plan.planItemNotFound
                         }
                     }
                     return projectId;

@@ -1,8 +1,9 @@
 import gateApi from "../../../common/routes/gateway";
 import Application from "../../common/app/app";
-import { DComponent } from "../../common/decorate/component";
-import { DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired } from "../../common/http/http";
-import { GateWayService } from './../service/http';
+import {DComponent} from "../../common/decorate/component";
+import {DHttpApi, DHttpController, DHttpReqParam, DHttpReqParamRequired} from "../../common/http/http";
+import {GateWayService} from './../service/http';
+
 @DComponent
 @DHttpController(gateApi)
 class GatewayController {
@@ -21,6 +22,13 @@ class GatewayController {
     async deployInfo():Promise<typeof gateApi.routes.deployInfo.res> {
         return {
             type:Application.mode
+        }
+    }
+
+    @DHttpApi(gateApi.routes.wechatAppId)
+    async wechatAppId():Promise<typeof gateApi.routes.wechatAppId.res> {
+        return {
+            appId:Application.privateConfig.wechat.appId
         }
     }
 }

@@ -9,9 +9,24 @@ import Meeting from "../../app/meeting/meeting.vue";
 import MeetingProfile from "../../app/meeting/meetingProfile.vue";
 import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import i18n from "@/business/common/i18n/i18n";
+import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
+import {ECommon_User_Online_Status} from "../../../../../../common/types";
+import {Dialog} from "@/business/common/component/dialog/dialog";
 
 const {t}=i18n.global
 export const iconMeeting=new Icon(t("util.meeting"),iconGroupMap["meeting"],"meeting")
+const closeFunc=async item1 => {
+    const store=useDesktopStore()
+    if(store.status===ECommon_User_Online_Status.MEETING) {
+        let ret=await Dialog.confirm(document.body,store.appContext,t("tip.leaveMeeting"))
+        if(ret) {
+            return true
+        } else {
+            return false
+        }
+    }
+    return true
+}
 const func=item => {
     if(!SessionStorage.get("organizationId")) {
         Message.error(t("tip.switchToSpecificOrganization"))
@@ -33,6 +48,7 @@ const func=item => {
         }
     ],t("util.meeting"));
     windowManager.open(win);
+    win.addEventListener("close",closeFunc)
 }
 iconMeeting.addEventListener("dbClick",item => {
     if(!document.getElementById("application")) {
@@ -68,4 +84,5 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_MEETING,(meetingId, password,inviteBusine
         }
     ],t("util.meeting"));
     windowManager.open(win);
+    win.addEventListener("close",closeFunc)
 })

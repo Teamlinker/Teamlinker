@@ -35,6 +35,15 @@ const api={
                 type:ECommon_Application_Mode
             }>{},
             ignoreValidate:true
+        },
+        wechatAppId:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/wechat/appid",
+            req:{},
+            res:<{
+                appId:string
+            }>{},
+            ignoreValidate:true
         }
     }
 }

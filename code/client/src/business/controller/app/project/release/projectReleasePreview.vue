@@ -27,7 +27,7 @@
             <span v-if="info?.notstart+info?.inprogress+info?.done==0">
               {{$t("controller.app.project.release.projectReleaseList.noIssues")}}
             </span>
-            <a-progress v-else :percent="info?.done/(info?.notstart+info?.inprogress+info?.done)" style="width: 100%" color="green"></a-progress>
+            <a-progress v-else :percent="Number((info?.done/(info?.notstart+info?.inprogress+info?.done)).toFixed(2))" style="width: 100%" color="green"></a-progress>
           </a-col>
           <a-col :span="8" style="text-align: center">
             <a-button type="outline" size="mini" @click="onProfile">{{$t("util.profile")}}</a-button>

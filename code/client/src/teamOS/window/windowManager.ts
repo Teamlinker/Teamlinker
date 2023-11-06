@@ -47,9 +47,16 @@ export class WindowManager extends Base{
             }
         }
     }
-    removeById(id:string) {
+    async removeById(id:string) {
         for(let i=0;i<this.windowList.length;i++) {
             if(this.windowList[i].id==id) {
+                let obj=this.windowList[i]
+                if(obj.onClose) {
+                    let ret=await obj.onClose(obj)
+                    if(ret===false) {
+                        return
+                    }
+                }
                 this.windowList.splice(i,1)
                 break
             }
@@ -91,6 +98,7 @@ export class WindowManager extends Base{
     max(id:string){
         let obj=this.setFocus(id);
         if(obj) {
+            obj.originalRect={...obj.rect}
             obj.rect.left="0%"
             obj.rect.top="0%"
             obj.rect.width="100%"
@@ -111,6 +119,8 @@ export class WindowManager extends Base{
     hide(id:string) {
         let obj=this.getById(id);
         if(obj) {
+            obj.originalRect={...obj.rect}
+            obj.originalStatus=obj.status
             obj.status=ETeamOS_Window_Status.MIN
             if(obj.isFocus) {
                 obj.isFocus=false
@@ -123,10 +133,15 @@ export class WindowManager extends Base{
             if(isNew) {
                 obj.rect.top=`${10+Math.random()*8-4}%`
                 obj.rect.left=`${10+Math.random()*8-4}%`
+                obj.status=ETeamOS_Window_Status.NORMAL
+                obj.rect.width="80%"
+                obj.rect.height="80%"
+            } else {
+                if(obj.status===ETeamOS_Window_Status.MIN) {
+                    Object.assign(obj.rect,obj.originalRect)
+                    obj.status=obj.originalStatus
+                }
             }
-            obj.status=ETeamOS_Window_Status.NORMAL
-            obj.rect.width="80%"
-            obj.rect.height="80%"
         }
         this.setFocus(id);
     }

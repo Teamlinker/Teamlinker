@@ -13,11 +13,11 @@
 				</a-button>
 			</a-space>
 		</a-row>
-		<div style="width: 100%;margin-top: 20px;overflow: auto;height: calc(100% - 90px)">
+		<div style="width: 100%;margin-top: 20px;overflow: auto;height: calc(100% - 140px)">
 			<Card v-if="sprintInfo" :data="cardData" type="fixed" :gap="10" :rect="{
 				width:230,
 				height:swimLaneList.length*250+30
-			}" readonly>
+			}" readonly style="overflow: visible">
 				<template #header="props">
 					<a-row style="height: 100%;display: flex;align-items: center;justify-content: center;padding: 0 5px;box-sizing: border-box">
 						<span style="color: grey">{{props.item.name}}</span>

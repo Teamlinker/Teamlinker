@@ -19,7 +19,8 @@ export interface ICommon_Model_Project_Issue {
     priority: ECommon_Model_Project_Issue_Priority,
     assigner_id: string,
     reporter_id: string,
-    workflow_node_id: string
+    workflow_node_id: string,
+    man_day:number
 }
 
 export const Table_Project_Issue = "project_issue"

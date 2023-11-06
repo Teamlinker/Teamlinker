@@ -45,7 +45,7 @@ const func=item => {
             },
             default:{
                 name:"project",
-                title: "project"
+                title: t("util.project")
             }
         }
     })
@@ -231,6 +231,48 @@ eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_BOARD_PROFILE,(projectId, boardId
                 title:"project",
                 data:{
                     boardId:boardId
+                }
+            },
+            components:{
+                project:markRaw(Project),
+                profile:markRaw(ProjectProfile)
+            },
+            default:{
+                name:"profile",
+                title: t("util.profile"),
+                props:{
+                    projectId:projectId
+                }
+            }
+        }
+    ],t("util.project"));
+    win.addEventListener("newTab", async item => {
+        return {
+            id:v4(),
+            meta:{
+                title:"project"
+            },
+            components:{
+                project:markRaw(Project),
+                profile:markRaw(ProjectProfile)
+            },
+            default:{
+                name:"project",
+                title: t("util.project")
+            }
+        }
+    })
+    windowManager.open(win);
+})
+
+eventBus.on(EClient_EVENTBUS_TYPE.OPEN_PROJECT_PLAN_PROFILE,(projectId, planId) => {
+    const win=new Window(t("util.project"),ETeamOS_Window_Type.TAB, "project",true,[
+        {
+            id:v4(),
+            meta:{
+                title:"project",
+                data:{
+                    planId:planId
                 }
             },
             components:{

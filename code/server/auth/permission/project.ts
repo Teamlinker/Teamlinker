@@ -9,7 +9,7 @@ import rpcCooperationApi from "../../cooperation/rpc/cooperation"
 @DComponent
 class PermissionProject extends PermissionBase {
     fieldName="projectId"
-    async translateToField({commentId,projectIssueId,labelId,moduleId,projectReleaseId,roleId,boardId,boardSprintId,boardSprintSwimLaneId,boardColumnId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,labelId:string,moduleId:string,projectReleaseId:string ,roleId:string}): Promise<string> {
+    async translateToField({commentId,projectIssueId,labelId,moduleId,projectReleaseId,roleId,boardId,boardSprintId,boardSprintSwimLaneId,boardColumnId,planId,planItemId}: { [param: string]: any; isAdmin?: boolean;commentId:string,projectIssueId:string,labelId:string,moduleId:string,projectReleaseId:string ,roleId:string}): Promise<string> {
         let projectId:string
         if(commentId) {
             let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromProjectIssueComment(commentId);
@@ -51,6 +51,14 @@ class PermissionProject extends PermissionBase {
             return projectId;
         } else if(boardColumnId) {
             let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromBoardColumn(boardColumnId);
+            projectId=await obj.getValue();
+            return projectId;
+        } else if(planId) {
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromPlan(planId);
+            projectId=await obj.getValue();
+            return projectId;
+        } else if(planItemId) {
+            let obj=new REDIS_AUTH.Permission.Project.ProjectIdFromPlanItem(planItemId);
             projectId=await obj.getValue();
             return projectId;
         }

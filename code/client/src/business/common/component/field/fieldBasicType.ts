@@ -7,5 +7,7 @@ export enum EClient_Field_Basic_Type {
     MODULE,
     PRIORITY,
     FIXVERSIONS,
-    SPRINT
+    SPRINT,
+    MANDAY,
+    PLANS
 }

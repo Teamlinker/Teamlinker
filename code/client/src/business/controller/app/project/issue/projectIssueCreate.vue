@@ -38,6 +38,9 @@
           </a-option>
         </a-select>
       </a-form-item>
+	    <a-form-item :label="$t('util.manDay')" :extra="$t('help.manDay')">
+		    <a-input-number v-model="form.manDay" :min="1" :max="100" :precision="0"></a-input-number>
+	    </a-form-item>
     </a-form>
 	  <a-divider orientation="left" v-if="valueList.length>0">Custom Fields</a-divider>
 	  <a-form v-if="valueList.length>0" :model="formCustom" ref="eleFormCustom" layout="vertical">
@@ -88,7 +91,8 @@ const form=reactive({
   description:[],
   priority:ECommon_Model_Project_Issue_Priority.MEDIUM,
   assigner:"",
-  reporter:""
+  reporter:"",
+	manDay:1
 })
 const loading=ref(false)
 const objEditor=ref<InstanceType<typeof RichEditor>>()
@@ -186,7 +190,8 @@ onDialogOk(dialogFuncGenerator({
       priority :form.priority,
       assignerId:form.assigner ,
       reporterId:form.reporter ,
-      values:valueList.value.map(item=>item.fieldValue)
+      values:valueList.value.map(item=>item.fieldValue),
+	    manDay:form.manDay
     })
     if(res?.code==0) {
       if(form.description.length>0) {

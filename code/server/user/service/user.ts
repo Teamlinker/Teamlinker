@@ -6,7 +6,7 @@ import {getConfigInstance} from '../../common/config/config';
 import {Entity} from "../../common/entity/entity";
 import {userMapper, userSettingMapper} from '../mapper/user';
 import rpcFileApi from "../../file/rpc/file";
-import {ECommon_User_Type, ICommon_Model_User, userModel} from './../../../common/model/user';
+import {ECommon_User_From_Type, ECommon_User_Type, ICommon_Model_User, userModel} from './../../../common/model/user';
 import rpcAuthApi from "../../auth/rpc/auth";
 import {ICommon_Model_Team} from "../../../common/model/team";
 import {ECommon_Model_Role_Reserved} from "../../../common/model/role";
@@ -19,6 +19,10 @@ import rpcFinderApi from "../../finder/rpc/finder"
 import rpcNotificationApi from "../../notification/rpc/notification"
 import {PhotoService, StickyNoteService} from "./tool";
 import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
+import {request} from "../../common/request/request"
+import Application from "../../common/app/app";
+import File from "../../file/service/file";
+
 
 export class UserService extends Entity<typeof userModel,typeof userMapper> {
     constructor(){
@@ -83,7 +87,7 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         mail.send(username,"Teamlinker Verification Code","code: "+code)
     }
 
-    static async conformRegister(username:string,code:string) {
+    static async conformRegister(username:string,code:string,openId?:string) {
         let obj=await userMapper.getUserByName(username)
         if(obj) {
             throw Err.User.userExists
@@ -100,11 +104,37 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
             throw Err.User.codeNotMatch
         }
         let objUser=new UserService()
+        let img:string
+        if(openId) {
+            let objRedis=REDIS_USER.wechatOpenId(openId)
+            let value=await objRedis.get()
+            if(!value) {
+                throw Err.User.userCacheExpired
+            }
+            let user=await UserService.getItemByExp({
+                from_id:openId
+            })
+            if(user) {
+                throw Err.User.userExists
+            }
+            img=value.img
+        }
         objUser.assignItem({
             username,
-            password:content.password
+            password:content.password,
+            ...(openId && {
+                from_type:ECommon_User_From_Type.WECHAT,
+                from_id:openId
+            })
         })
-        await objUser.create()
+        let ret=await objUser.create()
+        if(img) {
+            let file=await File.download(img,ret.id)
+            objUser.assignItem({
+                photo:file.getId()
+            })
+            await objUser.update()
+        }
         objRedis.del()
     }
 
@@ -368,6 +398,27 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         let ret=await userMapper.getDeletedUser()
         return ret;
     }
+
+    static async handleWechatCode(code:string) {
+        let res=await request(`https://api.weixin.qq.com/sns/oauth2/access_token?appid=${Application.privateConfig.wechat.appId}&secret=${Application.privateConfig.wechat.appSecret}&code=${code}&grant_type=authorization_code`)
+        if(res.statusCode==200) {
+            let obj=JSON.parse(res.body)
+            if(obj.openid && obj.access_token) {
+                let res=await request(`https://api.weixin.qq.com/sns/userinfo?access_token=${obj.access_token}&openid=${obj.openid}`)
+                if(res.statusCode==200) {
+                    let obj1=JSON.parse(res.body)
+                    let objKey=REDIS_USER.wechatOpenId(obj.openid)
+                    await objKey.set({
+                        img:obj1.headimgurl
+                    })
+                    return {
+                        openId:obj.openid
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 

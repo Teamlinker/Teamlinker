@@ -42,7 +42,12 @@ export default {
         column:"列是代表了工作项的看板状态,你可以编辑，新增，删除列",
         sprint:"对于敏捷项目来说，冲刺就是一个包含工作项的小版本",
         kanban:"看板可以直观地反映出冲刺中工作项的状态",
-        swimLane:"泳道可以看做是一个为了完成特定任务的需求池"
+        swimLane:"泳道可以看做是一个为了完成特定任务的需求池",
+        manDay: "完成工作项需要花费的天数",
+        plan:"我们可以对工作项进行排期，规划前后依赖关系，形成甘特图",
+        planItemType:`阶段:阶段包含了子阶段，里程碑和工作项，可以看做是一段工作的集合.
+        里程碑:它反应了同层级下在其上面的工作项和阶段的完成情况.
+        `
     },
     notification:{
         teamUserAdd:{
@@ -92,7 +97,7 @@ export default {
         issueReporterAssign:{
             0:"工作项:",
             1:"将",
-            2:"的reporter移交给你了"
+            2:"的汇报人移交给你了"
         },
         issueWorkflowChange:{
             0:"工作项:",
@@ -112,7 +117,7 @@ export default {
         issueAssignerAssign:{
             0:"工作项:",
             1:"将",
-            2:"的assigner移交给你了"
+            2:"的执行人移交给你了"
         },
         issueAssignRelease:{
             0:"工作项:",
@@ -141,6 +146,7 @@ export default {
         deleteEvent:"你要删除这个日历事件吗?",
         deleteFolder:"你要删除这个文件夹吗?",
         deleteItems:"你要删除这些项目吗?",
+        deleteItem:"你要删除这个项目吗?",
         deleteFavorite:"你要删除这个会议吗?",
         leaveMeeting:"你要离开这个会议吗?",
         endMeeting:"你要结束这个会议吗?",
@@ -236,7 +242,10 @@ export default {
         deleteOrganization:"你是否想删除该组织？",
         notMatch:"输入不匹配",
         quitOrganization:"你确定要退出当前组织吗?",
-        switchToOrganization:"你应该切换到组织"
+        switchToOrganization:"你应该切换到组织",
+        deletePlan:"你要删除这个规划吗?",
+        bindExistedAccount:"你是否要绑定到一个已有账号?",
+        leavePage:"你确定要离开当前页面吗?"
     },
     placeholder:{
         pleaseSelect:"请选择",
@@ -275,7 +284,8 @@ export default {
         typeOrganizationName:"输入组织名称",
         typeProjectReleaseName:"输入发布名称",
         typeCalendarEventName:"输入日历事件名称",
-        typeMeetingRoomName:"输入会议名称"
+        typeMeetingRoomName:"输入会议名称",
+        typePlanName:"输入规划名称"
     },
     "util":{
         "ok":"确认",
@@ -388,7 +398,7 @@ export default {
         resend:"重发",
         wallpaper:"壁纸",
         members:"成员",
-        detail:"描述",
+        detail:"详情",
         more:"更多",
         basic:"基本信息",
         projectBoard:"项目面板",
@@ -424,6 +434,7 @@ export default {
         meetingPassword:"会议密码",
         users:"用户",
         selectCamera:"选择相机",
+        selectAudio:"选择音频输入",
         videoOn:"视频开启",
         audioOn:"声音开启",
         created:"已创建",
@@ -431,7 +442,7 @@ export default {
         issueTypes:"工作项类型",
         dateRange:"日期范围",
         fixVersions:"修复版本",
-        keyword:"项目Id",
+        keyword:"项目标识",
         issueKey:"工作项Id",
         logo:"Logo",
         fieldType:"字段类型",
@@ -500,7 +511,23 @@ export default {
         createdBy:"创建人",
         application:"应用",
         todo:"待办中",
-        unNamed:"未命名"
+        unNamed:"未命名",
+        manDay:"工天",
+        plan:"规划",
+        gantt:"甘特图",
+        stage:"阶段",
+        milestone:"里程碑",
+        depend:"前置依赖",
+        delay:"延迟(天）",
+        day:"天",
+        month:"月",
+        sunday:"周日",
+        monday:"周一",
+        tuesday:"周二",
+        wednesday:"周三",
+        thursday:"周四",
+        friday:"周五",
+        saturday:"周六"
     },
     "common":{
         "component":{
@@ -923,6 +950,9 @@ export default {
         "login":{
             registerCode:{
                 receiveCode:"如果你没有收到验证码邮件，你可以"
+            },
+            bindAccount:{
+                bindExistedAccount: "绑定已有账号"
             }
         }
     }

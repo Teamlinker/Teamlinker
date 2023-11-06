@@ -17,6 +17,7 @@ export enum EClient_EVENTBUS_TYPE {
     OPEN_PROJECT_BOARD_PROFILE="open_project_sprint_board",
     OPEN_PROJECT_SPRINT_KANBAN_PROFILE="open_project_sprint_kanban_profile",
     OPEN_PROJECT_RELEASE_PROFILE="open_project_release_profile",
+    OPEN_PROJECT_PLAN_PROFILE="open_project_plan_profile",
     OPEN_WIKI_PROFILE="open_wiki_profile",
     OPEN_WIKI_ITEM="open_wiki_item",
     UPDATE_USER_INFO="update_user_info",
@@ -84,6 +85,7 @@ interface IClient_EventBus_Func {
     [EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED]:()=>void
     [EClient_EVENTBUS_TYPE.GUIDE]:()=>void
     [EClient_EVENTBUS_TYPE.ORGANIZATION_REMOVE]:(organizationId:string)=>void
+    [EClient_EVENTBUS_TYPE.OPEN_PROJECT_PLAN_PROFILE]:(projectId:string,planId:string)=>void
 }
 
 interface IClient_EventBus_Emit_Func {

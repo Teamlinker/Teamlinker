@@ -45,6 +45,7 @@ const api={
                 priority :number,
                 assignerId? :string ,
                 reporterId? :string ,
+                manDay:number,
                 values?:ICommon_Route_Req_ProjectIssue_Field[]
             }>{},
             res:<ICommon_Model_Project_Issue>{},
@@ -89,7 +90,8 @@ const api={
                 name? :string,
                 priority? :number,
                 assignerId? :string ,
-                reporterId? :string 
+                reporterId? :string ,
+                manDay?:number
             }>{},
             res:<ICommon_Model_Project_Issue>{},
             permission:[Permission_Types.Project.EDIT]

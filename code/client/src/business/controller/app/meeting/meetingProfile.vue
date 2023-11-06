@@ -250,7 +250,7 @@ const initMeeting=async ()=>{
 	}
 	let preview:any=await Dialog.open(root.value,appContext,t("controller.app.meeting.meetingProfile.meetingPreview"),markRaw(MeetingPreview))
 	if(preview) {
-		let ret=await meetingClient.join(props.meetingId,password,preview.enableVideo,preview.enableAudio,preview.cameraId)
+		let ret=await meetingClient.join(props.meetingId,password,preview.enableVideo,preview.enableAudio,preview.cameraId,preview.audioId)
 		if(!ret?.success) {
 			Message.error(ret.msg)
 			navigator.pop()

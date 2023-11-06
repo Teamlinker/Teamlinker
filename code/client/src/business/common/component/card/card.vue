@@ -4,7 +4,7 @@
 		overflowY:'visible',
 		height:rect.height+(gap??0)*2+15+'px'
 	})}">
-		<div v-if="props.type==='fixed' && !multiRow && $slots.pinHeader" style="position: sticky;z-index: 1;left: 0px;background-color: white;" :style="{height:rect.height+'px',width:(rect.width+(gap??0))+'px'}">
+		<div v-if="props.type==='fixed' && !multiRow && $slots.pinHeader" style="position: sticky;z-index: 10;left: 0px;background-color: white;" :style="{height:rect.height+'px',width:(rect.width+(gap??0))+'px'}">
       <div style="height: 100%;background-color: rgb(244, 245, 247);border-radius: 5px;;position: relative;z-index: 1" :style="{marginLeft:(gap??0)+'px',width:rect.width+'px',top:(gap??0)+'px'}">
         <div style="width: 100%;height: 30px;position: sticky;top: 0px;background-color: rgb(244, 245, 247);z-index: 1">
           <slot name="pinHeader"></slot>

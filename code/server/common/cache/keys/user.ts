@@ -19,6 +19,7 @@ export namespace REDIS_USER {
     let USER_ORGANIZATION_KEY=`${ECommon_Services.User}:user:{0}:organization`
     let USER_REGISTER_KEY=`${ECommon_Services.User}:username:{0}:register`
     let USER_RESET_CODE_KEY=`${ECommon_Services.User}:user:{0}:reset`
+    let WECHAT_OPEN_ID_KEY=`${ECommon_Services.User}:wechat:openid`
     export function token(userId:string)
     {
         let obj=new RedisStringKey(StringUtil.format(USER_TOKEN_KEY,userId),cacheRedisType<string>().String,300)
@@ -49,6 +50,13 @@ export namespace REDIS_USER {
     export function resetCode(userId:string)
     {
         let obj=new RedisStringKey(StringUtil.format(USER_RESET_CODE_KEY,userId),cacheRedisType<ICommon_Register_Cache_Info>().Object,600)
+        return obj
+    }
+    export function wechatOpenId(openId:string)
+    {
+        let obj=new RedisStringKey(StringUtil.format(WECHAT_OPEN_ID_KEY,openId),cacheRedisType<{
+            img:string
+        }>().Object,600)
         return obj
     }
 }

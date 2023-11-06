@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 8.0.31, for macos12 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.34, for macos13 (x86_64)
 --
 -- Host: localhost    Database: teamlinker_dev
 -- ------------------------------------------------------
@@ -654,6 +654,58 @@ CREATE TABLE `photo` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `plan`
+--
+
+DROP TABLE IF EXISTS `plan`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `plan` (
+  `id` bigint(20) NOT NULL,
+  `name` varchar(65) COLLATE utf8mb4_general_ci NOT NULL,
+  `start_time` timestamp NOT NULL,
+  `organization_user_id` bigint(20) NOT NULL,
+  `project_id` bigint(20) NOT NULL,
+  `organization_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `organization_user_id` (`organization_user_id`),
+  KEY `project_id` (`project_id`),
+  KEY `organization_id` (`organization_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `plan_table`
+--
+
+DROP TABLE IF EXISTS `plan_table`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `plan_table` (
+  `id` bigint(20) NOT NULL,
+  `sort` tinyint(3) unsigned NOT NULL,
+  `type` tinyint(4) NOT NULL,
+  `name` varchar(65) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ref_id` bigint(20) DEFAULT NULL,
+  `progress` tinyint(4) DEFAULT NULL,
+  `depend_id` bigint(20) DEFAULT NULL,
+  `delay` int(11) DEFAULT NULL,
+  `parent_id` bigint(20) DEFAULT NULL,
+  `plan_id` bigint(20) NOT NULL,
+  `project_id` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `sort` (`sort`),
+  KEY `ref_id` (`ref_id`),
+  KEY `depend_id` (`depend_id`),
+  KEY `parent_id` (`parent_id`),
+  KEY `plan_id` (`plan_id`),
+  KEY `project_id` (`project_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `project`
 --
 
@@ -697,6 +749,7 @@ CREATE TABLE `project_issue` (
   `reporter_id` bigint(20) DEFAULT NULL,
   `workflow_node_id` bigint(20) NOT NULL,
   `unique_id` int(10) unsigned DEFAULT NULL,
+  `man_day` int(11) DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `project` (`project_id`),
@@ -1092,8 +1145,12 @@ CREATE TABLE `user` (
   `photo` bigint(20) DEFAULT NULL,
   `role` tinyint(4) NOT NULL DEFAULT '0',
   `count` int(11) DEFAULT '0',
+  `from_type` tinyint(4) DEFAULT '0',
+  `from_id` varchar(65) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `username_UNIQUE` (`username`)
+  UNIQUE KEY `username_UNIQUE` (`username`),
+  UNIQUE KEY `from_id_UNIQUE` (`from_id`),
+  KEY `from_id` (`from_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1296,4 +1353,4 @@ CREATE TABLE `workflow_node_field_type_config` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-09-24 21:24:18
+-- Dump completed on 2023-11-06 16:35:44

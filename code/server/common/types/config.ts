@@ -24,6 +24,11 @@ export interface IServer_Common_Config_Mail {
     "pass":string
 }
 
+export interface IServer_Common_Config_Wechat {
+    appId:string,
+    appSecret:string
+}
+
 export interface IServer_Common_Config {
     services:{
         [name:string]:any

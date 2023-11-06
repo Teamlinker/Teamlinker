@@ -77,6 +77,10 @@ export default abstract class Application{
             "port": number,
             "user":string,
             "pass":string
+        },
+        wechat:{
+            appId:string,
+            appSecret:string
         }
     }
     Application(){

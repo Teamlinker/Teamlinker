@@ -1,4 +1,4 @@
-import {ECommon_User_Type} from "../../../common/model/user";
+import {ECommon_User_From_Type, ECommon_User_Type} from "../../../common/model/user";
 import userApi from "../../../common/routes/user";
 import {Err} from "../../../common/status/error";
 import {DComponent} from '../../common/decorate/component';
@@ -21,6 +21,7 @@ import rpcFileApi from "../../file/rpc/file"
 import {REDIS_USER} from "../../common/cache/keys/user";
 import rpcFinderApi from "../../finder/rpc/finder";
 import * as i18next from "i18next";
+import File from "../../file/service/file";
 
 @DComponent
 @DHttpController(userApi)
@@ -205,9 +206,9 @@ class UserController {
     }
 
     @DHttpApi(userApi.routes.confirmRegister)
-    async confirmRegister(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("code") code:string):Promise<typeof userApi.routes.confirmRegister.res> {
+    async confirmRegister(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("code") code:string,@DHttpReqParamRequired("openId") openId:string):Promise<typeof userApi.routes.confirmRegister.res> {
         if(Application.mode===ECommon_Application_Mode.ONLINE) {
-            await UserService.conformRegister(username,code)
+            await UserService.conformRegister(username,code,openId)
             return
         } else {
             throw Err.Common.interfaceForbidden
@@ -288,6 +289,77 @@ class UserController {
             await objRedis.set(obj)
         }
         return 
+    }
+
+    @DHttpApi(userApi.routes.wechatCode)
+    async wechatCode(@DHttpReqParamRequired("code") code:string,@DHttpUser user:IUserSession):Promise<typeof userApi.routes.wechatCode.res> {
+        let ret=await UserService.handleWechatCode(code)
+        return ret;
+    }
+
+
+    @DHttpApi(userApi.routes.wechatLogin)
+    async wechatLogin(@DHttpReqParamRequired("openId") openId:string,@DHttpReqParamRequired("lang") lang:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.wechatLogin.res> {
+        let user=await UserService.getItemByExp({
+            from_id:openId
+        })
+        if(user) {
+            if(!user.getItem().active) {
+                throw Err.User.accessDenied
+            }
+            let token=await user.startSession(lang)
+            if(user.getItem().count===0) {
+                rpcFinderApi.createFolder(user.getId(),i18next.getFixedT(lang)("backend.newFolder"),null)
+            }
+            user.assignItem({
+                count:user.getItem().count+1
+            })
+            let ret=await user.update()
+            delete ret.password
+            ctx.setHeader("token",token)
+            return ret
+        } else {
+            return;
+        }
+    }
+
+    @DHttpApi(userApi.routes.bindWechat)
+    async bindWechat(@DHttpReqParamRequired("openId") openId:string,@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.bindWechat.res> {
+        let objUser=await UserService.getItemByExp({
+            username,
+            password
+        })
+        if(!objUser) {
+            throw Err.User.userPasswordWrong
+        }
+        let img:string
+        if(openId) {
+            let objRedis=REDIS_USER.wechatOpenId(openId)
+            let value=await objRedis.get()
+            if(!value) {
+                throw Err.User.userCacheExpired
+            }
+            let user=await UserService.getItemByExp({
+                from_id:openId
+            })
+            if(user) {
+                throw Err.User.userExists
+            }
+            img=value.img
+        }
+        objUser.assignItem({
+            from_type:objUser.getItem().from_type | ECommon_User_From_Type.WECHAT,
+            from_id:openId
+        })
+        await objUser.update()
+        if(img && !objUser.getItem().photo) {
+            let file=await File.download(img,objUser.getId())
+            objUser.assignItem({
+                photo:file.getId()
+            })
+            await objUser.update()
+        }
+        return;
     }
 
 }

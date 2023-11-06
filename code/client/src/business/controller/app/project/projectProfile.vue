@@ -6,6 +6,7 @@
         <a-menu-item key="issue">{{$t("util.issue")}}</a-menu-item>
 	      <a-menu-item key="board">{{$t("util.board")}}</a-menu-item>
         <a-menu-item key="release">{{$t("util.release")}}</a-menu-item>
+	      <a-menu-item key="plan">{{$t("util.plan")}}</a-menu-item>
         <a-menu-item key="setting" v-if="checkPermission(permission,Permission_Types.Project.ADMIN)">{{$t("util.setting")}}</a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -33,6 +34,8 @@ import {Message} from "@arco-design/web-vue";
 import BoardList from "@/business/controller/app/project/board/boardList.vue";
 import BoardProfile from "@/business/controller/app/project/board/boardProfile.vue";
 import ProjectHome from "@/business/controller/app/project/home/projectHome.vue";
+import PlanList from "@/business/controller/app/project/plan/planList.vue";
+import PlanProfile from "@/business/controller/app/project/plan/planProfile.vue";
 
 const props=defineProps<{
   projectId:string
@@ -50,7 +53,9 @@ let objComponent={
   releaseProfile:markRaw(ProjectReleaseProfile),
 	board:markRaw(BoardList),
 	boardProfile:markRaw(BoardProfile),
-	home:markRaw(ProjectHome)
+	home:markRaw(ProjectHome),
+	plan:markRaw(PlanList),
+	planProfile:markRaw(PlanProfile)
 }
 const objProvide={
   id:props.projectId,
@@ -62,7 +67,8 @@ let objMeta=getCurrentNavigatorMeta()?.data as {
   projectIssueId?:string
   projectReleaseId?:string,
 	boardSprintId?:string,
-	boardId?:string
+	boardId?:string,
+	planId?:string
 }
 if(objMeta?.projectReleaseId) {
   menuKey.value=["release"]
@@ -70,6 +76,8 @@ if(objMeta?.projectReleaseId) {
 	menuKey.value=["board"]
 } else if(objMeta?.projectIssueId) {
 	menuKey.value=["issue"]
+} else if(objMeta?.planId) {
+	menuKey.value=["plan"]
 }
 onMounted(()=>{
   if(objMeta?.projectIssueId) {
@@ -94,6 +102,11 @@ onMounted(()=>{
 		  boardId:objMeta?.boardId,
 	  });
 	  delete objMeta.boardId
+  } else if(objMeta?.planId) {
+	  eleNavigator.value.navigator.replaceRoot("planProfile",{
+		  planId:objMeta?.planId,
+	  });
+	  delete objMeta.planId
   } else {
     eleNavigator.value.navigator.replaceRoot(type.value,null);
   }

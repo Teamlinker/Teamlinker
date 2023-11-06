@@ -269,7 +269,7 @@ async function checkIfNeedPatch() {
         }
         console.log("patch end");
     }
-    mysql.execute(generateUpdateSql(versionModel,{
+    await mysql.execute(generateUpdateSql(versionModel,{
         version:curVersion
     }))
 }

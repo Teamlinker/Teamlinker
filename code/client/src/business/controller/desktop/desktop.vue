@@ -3,7 +3,7 @@
     <template #barLeft>
       <a-dropdown trigger="hover" id="dropdownEle">
         <a-avatar id="myProfile" :size="32" :image-url="avatar" :trigger-icon-style="{height:'12px',width:'12px',lineHeight:'12px',right:'-2px',bottom:'-2px',...(store.status===ECommon_User_Online_Status.MEETING && {backgroundColor:'transparent'})}">
-          T
+          {{imgName}}
           <template #trigger-icon>
             <div style="height: 100%;width: 100%;background-color: #03ad03;border-radius: 6px" v-if="store.status===ECommon_User_Online_Status.ONLINE"></div>
             <icon-stop :stroke-width="5" style="color: darkred" v-else-if="store.status===ECommon_User_Online_Status.BUSY"></icon-stop>
@@ -131,7 +131,7 @@
 
 import TeamOS from "../../../teamOS/index.vue";
 import {getDesktopInstance} from "../../../teamOS/teamOS";
-import {getCurrentInstance, markRaw, nextTick, onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
+import {computed, getCurrentInstance, markRaw, nextTick, onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
 import {useDesktopStore} from "./store/desktop";
 import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
@@ -191,9 +191,20 @@ const router=useRouter();
 let iconManager=getDesktopInstance().iconManager
 let windowManager=getDesktopInstance().windowManager
 const appContext=getCurrentInstance().appContext
+store.appContext=appContext
 const loading=ref(true)
 let objDriver:Driver
-let avatar=ref("")
+let avatar=computed(()=>{
+	return store.userInfo?.photo
+})
+const imgName=computed(()=>{
+	if(store.userInfo?.username?.includes(" ")) {
+		let arr=store.userInfo.username.split(" ")
+		return arr[0][0].toUpperCase()+arr[1][0].toUpperCase()
+	} else {
+		return store.userInfo?.username?store.userInfo?.username[0].toUpperCase():""
+	}
+})
 const objFinderHandle=new FinderHandle(root,appContext,"")
 const noteList=ref<DCSType<ICommon_Route_Res_Sticky_Note_Item & {
 	isReadOnly:boolean
@@ -231,9 +242,6 @@ watch(()=>store.organizationList,()=>{
           }
         })
       })
-    }
-    if(store.userInfo?.photo) {
-      avatar.value=store.userInfo?.photo
     }
     if(SessionStorage.get("organizationId")) {
       setMenu(arr,SessionStorage.get("organizationId"))
@@ -514,7 +522,11 @@ onBeforeMount(async ()=>{
   if(SessionStorage.get("organizationId")) {
     await store.initOrganization(SessionStorage.get("organizationId"))
   }
-	loading.value=false
+	loading.value=false;
+	window.onbeforeunload = function(event){
+		event.preventDefault()
+		event.returnValue=t("tip.leavePage");
+	};
 })
 
 onBeforeUnmount(()=>{
@@ -524,6 +536,7 @@ onBeforeUnmount(()=>{
 	eventBus.off(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED,onLogout.bind(null,true))
 	eventBus.off(EClient_EVENTBUS_TYPE.GUIDE,onGuide)
 	eventBus.off(EClient_EVENTBUS_TYPE.ORGANIZATION_REMOVE, onRemoveOrganization)
+	window.onbeforeunload=null;
 })
 
 

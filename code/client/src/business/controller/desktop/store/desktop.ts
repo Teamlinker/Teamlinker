@@ -39,7 +39,8 @@ export const useDesktopStore=defineStore("desktop",{
         userInfo:{} as DCSType<Omit<ICommon_Model_User,"password">>,
         status:ECommon_User_Online_Status.OFFLINE,
         heartbeatInterval:null,
-        copyItemList:[] as string[]
+        copyItemList:[] as string[],
+        appContext:null
     }),
     actions:{
         async initNotificationSocket() {

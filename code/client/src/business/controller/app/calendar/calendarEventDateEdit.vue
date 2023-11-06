@@ -27,7 +27,7 @@
         <template v-if="data.recurring===ECommon_Calendar_Recurring_Type.WEEK">
 	        {{$t("controller.app.calendar.calendarEventDateEdit.selectWeekday")}}:
           <a-select size="small" style="width: 130px" v-model="recurryingWeekDay" @change="onChangeRecurry">
-            <a-option v-for="item in ECommon_Calendar_WeekDay" :value="item">{{calendarWeekDayName[item]}}</a-option>
+            <a-option v-for="item in ECommon_Calendar_WeekDay" :value="item">{{calendarWeekDayName[item]?$t("util."+calendarWeekDayName[item].toLowerCase()):undefined}}</a-option>
           </a-select>
         </template>
         <template v-else-if="data.recurring===ECommon_Calendar_Recurring_Type.MONTH">

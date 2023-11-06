@@ -28,7 +28,7 @@ const columns=[
     dataIndex:"description"
   },
   {
-    title:"keyword",
+    title:t("util.keyword"),
     dataIndex:"keyword"
   },
   {

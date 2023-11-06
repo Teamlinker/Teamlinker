@@ -582,6 +582,43 @@ export namespace Err {
                     zh: "面板为包含该工作项类型"
                 }
             }
+        },
+        Plan:{
+            planNotFound:{
+                code:3920,
+                msg:{
+                    en:"plan not found",
+                    zh:"计划不存在"
+                }
+            },
+            planItemNotFound:{
+                code:3921,
+                msg:{
+                    en:"plan item not found",
+                    zh:"计划项目不存在"
+                }
+            },
+            planTypeNotMatched:{
+                code:3922,
+                msg:{
+                    en:"plan type not matched",
+                    zh:"计划的类型不匹配"
+                }
+            },
+            dependItemNotMatchedParentItem:{
+                code:3923,
+                msg:{
+                    en:"depend item not matched parent item",
+                    zh:"依赖项需要和是父项目的子项目"
+                }
+            },
+            operationForbidden:{
+                code:3924,
+                msg:{
+                    en:"operation is forbidden",
+                    zh:"禁止该操作"
+                }
+            }
         }
     }
     export const Team = {

@@ -35,6 +35,8 @@ import {ICommon_Model_Board_Column} from "../model/board_column";
 import {ICommon_Model_Sticky_Note} from "../model/sticky_note";
 import {ICommon_Model_Content} from "../model/content";
 import {ICommon_Model_Photo} from "../model/photo";
+import {ICommon_Model_Plan_Table} from "../model/plan_table";
+import {ICommon_Model_Plan} from "../model/plan";
 
 export interface ICommon_Route_Res_Project_CreateModule_Data {
     id:string,
@@ -559,4 +561,21 @@ export type ICommon_Route_Res_Photo_item =ICommon_Model_Photo & {
 
 export type ICommon_Route_Res_RecentIssue_Item= ICommon_Model_Project_Issue & {
     project:ICommon_Model_Project
+}
+
+export type ICommon_Route_Res_Plan_Info_Item=ICommon_Model_Plan_Table & {
+    issue?:ICommon_Model_Project_Issue,
+    workflow?:ICommon_Model_Workflow_Node,
+    children?:ICommon_Route_Res_Plan_Info_Item[]
+}
+
+export type ICommon_Route_Res_Plan_Info = ICommon_Model_Plan & {
+    data:ICommon_Route_Res_Plan_Info_Item[]
+}
+
+export type ICommon_Route_Res_Plan_List={
+    count:number,
+    totalPage:number,
+    page:number,
+    data:ICommon_Model_Plan[]
 }

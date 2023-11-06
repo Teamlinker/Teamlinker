@@ -10,6 +10,13 @@
 				</div>
 			</div>
 		</a-form-item>
+		<a-form-item field="audioId" :label="$t('util.selectAudio')">
+			<div style="width: 80%">
+				<a-select v-model="form.audioId" :placeholder="$t('placeholder.meetingPreview')">
+					<a-option v-for="item in audioList" :value="item.id">{{item.name}}</a-option>
+				</a-select>
+			</div>
+		</a-form-item>
 		<a-form-item field="enableVideo" :label="$t('util.videoOn')">
 			<a-switch v-model="form.enableVideo"></a-switch>
 		</a-form-item>
@@ -32,9 +39,14 @@ const formEle=ref()
 const form=reactive({
 	cameraId:"",
 	enableVideo:true,
-	enableAudio:true
+	enableAudio:true,
+	audioId:""
 })
 const cameraList=ref<{
+	id:string,
+	name:string
+}[]>([])
+const audioList=ref<{
 	id:string,
 	name:string
 }[]>([])
@@ -47,8 +59,15 @@ watch(()=>form.cameraId,async ()=>{
 const getCameraList=async ()=>{
 	cameraList.value=(await MeetingClient.enumVideoDevice()).filter(item=>item.id!=="")
 }
+
+const getAudioList =async () => {
+	audioList.value=(await MeetingClient.enumAudioDevice()).filter(item=>item.id!=="")
+}
+
 onBeforeMount(()=>{
 	getCameraList()
+	getAudioList()
+
 })
 onBeforeUnmount(()=>{
 	stream.value?.getVideoTracks()[0]?.stop()

@@ -14,12 +14,16 @@
     },
     "port":14000,
     "jwt": "teamlinker",
-    "version":"0.1.0",
+    "version":"0.1.1",
     "mq": "amqp://127.0.0.1",
     "mail":{
         "host": "smtp.exmail.qq.com",
         "port": 465,
         "user":"notify@team-linker.com",
         "pass":"gjH9WwP9JEF42QBu"
+    },
+    "wechat":{
+        "appId":"wxe8213f696c7ac4ea",
+        "appSecret":"7a6f6dab82a82a764016cb2dc5bb4e12"
     }
 }

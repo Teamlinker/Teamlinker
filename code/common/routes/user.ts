@@ -162,7 +162,8 @@ const api={
             path:"/register/confirm",
             req:<{
                 username:string,
-                code:string
+                code:string,
+                openId?:string
             }>{},
             res:{},
             ignoreValidate:true
@@ -219,6 +220,38 @@ const api={
                 lang:string
             }>{},
             res:{},
+        },
+        wechatCode:{
+            method:ECommon_HttpApi_Method.GET,
+            path:"/wechat/code",
+            req:<{
+                code:string
+            }>{},
+            res:<{
+                openId:string
+            }>{},
+            ignoreValidate:true
+        },
+        wechatLogin:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/wechat/login",
+            req:<{
+                openId:string,
+                lang:string
+            }>{},
+            res:<Omit<ICommon_Model_User,"password">>{},
+            ignoreValidate:true
+        },
+        bindWechat:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/wechat/bind",
+            req:<{
+                openId:string,
+                username:string,
+                password:string
+            }>{},
+            res:{},
+            ignoreValidate:true
         }
     }
 }

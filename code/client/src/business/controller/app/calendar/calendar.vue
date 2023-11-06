@@ -63,7 +63,7 @@
 								<a-form :model="{}" layout="vertical">
 									<a-form-item :label="$t('util.calendar')">
 										<a-select size="small" v-model="searchForm.calendarId">
-											<a-option value="all">{{$t("util.all")}}</a-option>
+											<a-option :value="''">{{$t("util.all")}}</a-option>
 											<a-option v-for="item in calendarList" :value="item.id">{{item.name}}</a-option>
 										</a-select>
 									</a-form-item>
@@ -115,7 +115,7 @@
         </a-form-item>
         <a-form-item :label="$t('controller.app.calendar.calendar.startWeekDay')">
           <a-select v-model="settingEdit.start_week_day">
-            <a-option v-for="item in ECommon_Calendar_WeekDay" :value="item">{{calendarWeekDayName[item]}}</a-option>
+            <a-option v-for="item in ECommon_Calendar_WeekDay" :value="item">{{calendarWeekDayName[item]?$t("util."+calendarWeekDayName[item].toLowerCase()):undefined}}</a-option>
           </a-select>
         </a-form-item>
       </a-form>
@@ -170,6 +170,7 @@ import {DCSType} from "../../../../../../common/types";
 const props=defineProps<{
 	calendarEventId?:string
 }>()
+const {t}=useI18n()
 const appContext=getCurrentInstance().appContext
 const root=getRootNavigatorRef()
 const isCalendarEventAddSimple=ref(false)
@@ -193,14 +194,14 @@ const calendarEventList=ref<IClient_Calendar_Info[]>([])
 const organizationUserId=SessionStorage.get("organizationUserId")
 const searchForm=reactive({
 	keyword:"",
-	calendarId:"All",
+	calendarId:"",
 	startDate:null,
 	endDate:null,
 	location:""
 })
 const searchResultList=ref<DCSType<ICommon_Route_Res_Calendar_ListEvent_Item>[]>([])
 let searchDebounce=null
-const {t}=useI18n()
+
 provide(injectCalendarSetting,setting)
 const startDay=computed(()=>{
   let start_week_day=setting.value?.start_week_day
@@ -548,7 +549,7 @@ const onSearch=async ()=>{
 			let res=await apiCalendar.searchCalendarEvent({
 				location:searchForm.location,
 				keyword:searchForm.keyword,
-				...(searchForm.calendarId!=="All" && {
+				...(searchForm.calendarId!=="" && {
 					calendarId:searchForm.calendarId
 				}),
 				...(searchForm.startDate && {

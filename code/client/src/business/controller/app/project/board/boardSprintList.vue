@@ -32,7 +32,7 @@
 					<a-space>
 						<a-dropdown trigger="hover">
 							<a-button size="mini" type="primary" :status="item.status===ECommon_Model_Board_Sprint_Status.COMPLETED?'success':'normal'" @click="$event.stopPropagation(),$event.preventDefault()">
-								{{item.status===ECommon_Model_Board_Sprint_Status.NOTSTART?"Not Start":item.status===ECommon_Model_Board_Sprint_Status.STARTING?"Starting":"Completed"}}
+								{{item.status===ECommon_Model_Board_Sprint_Status.NOTSTART?$t("util.notStart"):item.status===ECommon_Model_Board_Sprint_Status.STARTING?$t("util.starting"):$t("util.complete")}}
 							</a-button>
 							<template #content>
 								<a-doption size="mini" type="primary" status="success" @click="onStartSprint(item,$event)" v-if="item.status!==ECommon_Model_Board_Sprint_Status.STARTING">

@@ -709,12 +709,26 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             throw Err.Project.ProjectIssue.issueEqualForbidden
         }
         let mysql=getMysqlInstance()
-        let obj=await mysql.executeOne(generateQuerySql(projectIssueParentModel,["id"],{
-            child_id:projectChildIssueId
-        }))
-        if(obj) {
-            throw Err.Project.ProjectIssue.parentChildExists
-        }
+        await Promise.all([
+            (async ()=>{
+                let obj=await mysql.executeOne(generateQuerySql(projectIssueParentModel,["id"],{
+                    child_id:projectChildIssueId,
+                    parent_id:projectChildIssueId
+                },"or"))
+                if(obj) {
+                    throw Err.Project.ProjectIssue.parentChildExists
+                }
+            })(),
+            (async ()=>{
+                let obj=await mysql.executeOne(generateQuerySql(projectIssueParentModel,["id"],{
+                    child_id:projectParentIssueId,
+                    parent_id:projectChildIssueId
+                }))
+                if(obj) {
+                    throw Err.Project.ProjectIssue.parentChildExists
+                }
+            })()
+        ])
         await mysql.execute(generateCreateSql(projectIssueParentModel,{
             id:await generateSnowId(),
             parent_id:projectParentIssueId,
@@ -798,6 +812,10 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
                 model:projectIssueParentModel,
                 value:projectIssueId
             }
+        },"and",{
+            type:"asc",
+            model:projectIssueParentModel,
+            field:"child_id"
         })
         let ret=await mysql.execute(sql)
         return ret;
