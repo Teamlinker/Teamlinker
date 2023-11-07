@@ -1628,7 +1628,7 @@ export function convertCountSql(sql:{
     }
 } {
     return {
-        value:sql.value.replace(/select[\s\S]+?from/,"select count(1) from").replace(/limit\s+\d+\s*\,\s*\d+/,""),
+        value:sql.value.replace(/select[\s\S]+?\sfrom\s/,"select count(1) from ").replace(/limit\s+\d+\s*\,\s*\d+/,""),
         type:{
             "count(1)":""
         }
