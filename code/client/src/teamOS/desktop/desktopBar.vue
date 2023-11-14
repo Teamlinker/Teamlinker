@@ -13,7 +13,7 @@
         </a-col>
       </a-row>
     </a-col>
-    <a-col flex="250px" style="height: 100%;" id="teamOS-Desktop-Menu">
+    <a-col flex="280px" style="height: 100%;" id="teamOS-Desktop-Menu">
 	    <slot name="barRight"></slot>
     </a-col>
   </a-row>

@@ -315,7 +315,7 @@ const calcItem=(data:GanttDataItem[],startDate:number):{
 					}
 				}
 				if(objDepend) {
-					obj.startDate=moment(objDepend.endDate).add(obj.delay??1,"day").toDate().getTime()
+					obj.startDate=moment(objDepend.endDate).add(1,"day").startOf("day").add(obj.delay??0,"day").toDate().getTime()
 				}
 			} else {
 				obj.startDate=moment(startDate).add(obj.delay??0,"day").toDate().getTime()

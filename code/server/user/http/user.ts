@@ -206,7 +206,7 @@ class UserController {
     }
 
     @DHttpApi(userApi.routes.confirmRegister)
-    async confirmRegister(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("code") code:string,@DHttpReqParamRequired("openId") openId:string):Promise<typeof userApi.routes.confirmRegister.res> {
+    async confirmRegister(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("code") code:string,@DHttpReqParam("openId") openId:string):Promise<typeof userApi.routes.confirmRegister.res> {
         if(Application.mode===ECommon_Application_Mode.ONLINE) {
             await UserService.conformRegister(username,code,openId)
             return

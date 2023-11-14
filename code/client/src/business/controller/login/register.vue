@@ -1,7 +1,6 @@
 <template>
 	<a-row align="center" justify="center" style="height: 100%;position: relative;background: radial-gradient(circle at center, rgb(228,232,249), #ffffff);" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
 		<a-space style="position: absolute;left: 20px;top: 20px">
-			<img :src="logo" style="width: 20px;aspect-ratio: 1/1" />
 			<span style="font-size: 24px;font-weight: bolder">
 				<router-link :to="{name:'index'}" style="text-decoration: none;color:rgb(35,110,184)">
 					Teamlinker
@@ -40,7 +39,6 @@ import {useRouter} from "vue-router";
 import {Message} from "@arco-design/web-vue";
 import md5 from "blueimp-md5";
 import {useI18n} from "vue-i18n";
-import logo from "@/assert/logo.png";
 
 let form=reactive({
 	username:"",

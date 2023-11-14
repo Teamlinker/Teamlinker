@@ -28,12 +28,13 @@
     "vue-router": "^4.2.2"
   },
   "devDependencies": {
-    "@arco-design/web-vue": "^2.49.1",
+    "@arco-design/web-vue": "^2.53.2",
     "@rollup/plugin-typescript": "^10.0.1",
     "@types/blueimp-md5": "^2.18.0",
     "@types/node": "^18.15.11",
     "@types/uuid": "^9.0.0",
     "@vitejs/plugin-vue": "^4.2.3",
+    "@vue/language-server": "^1.8.22",
     "fast-glob": "^3.3.1",
     "typescript": "^4.6.4",
     "vite": "^4.3.9",

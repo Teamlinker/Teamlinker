@@ -677,7 +677,13 @@ const onMouseMove=(event:MouseEvent)=>{
         selectedItem.startDate=startDate.toDate().getTime()
       }
       selectedItem.endDate=moment(selectedItem.startDate).add(days,"days").toDate().getTime()
-	    selectedItem.delay=moment(selectedItem.startDate).endOf("day").diff(selectedDependEndDate,"day")
+	    if(selectedItem.depend) {
+				selectedItem.delay=moment(selectedItem.startDate).endOf("day").diff
+				(moment(selectedDependEndDate).endOf("day"),"day")-1
+	    } else {
+		    selectedItem.delay=moment(selectedItem.startDate).endOf("day").diff
+		    (selectedDependEndDate,"day")
+	    }
       let rectScroll=scrollEle.value.$el.getBoundingClientRect()
       left=event.x-rectScroll.left
       if(left<20) {

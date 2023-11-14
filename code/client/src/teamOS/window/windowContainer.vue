@@ -10,7 +10,6 @@ import WindowItem from "./windowItem.vue";
 
 let windowList=windowManager.getList();
 
-
 </script>
 
 <style scoped>

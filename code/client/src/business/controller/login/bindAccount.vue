@@ -1,7 +1,6 @@
 <template>
 	<a-row align="center" justify="center" style="height: 100%;position: relative;background: radial-gradient(circle at center, rgb(228,232,249), #ffffff);">
 		<a-space style="position: absolute;left: 20px;top: 20px">
-			<img :src="logo" style="width: 20px;aspect-ratio: 1/1" />
 			<span style="font-size: 24px;font-weight: bolder">
 				<router-link :to="{name:'index'}" style="text-decoration: none;color:rgb(35,110,184)">
 					Teamlinker
@@ -28,7 +27,6 @@
 <script setup lang="ts">
 import {getCurrentInstance, reactive} from "vue";
 import {useRouter} from "vue-router";
-import logo from "@/assert/logo.png"
 import {useI18n} from "vue-i18n";
 import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
 import {apiUser} from "@/business/common/request/request";

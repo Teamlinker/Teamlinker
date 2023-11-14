@@ -1,7 +1,6 @@
 <template>
 	<a-row align="center" justify="center" style="height: 100%;position: relative;background: radial-gradient(circle at center, rgb(228,232,249), #ffffff);">
 		<a-space style="position: absolute;left: 20px;top: 20px">
-			<img :src="logo" style="width: 20px;aspect-ratio: 1/1" />
 			<span style="font-size: 24px;font-weight: bolder">
 				<router-link :to="{name:'index'}" style="text-decoration: none;color:rgb(35,110,184)">
 					Teamlinker
@@ -85,7 +84,6 @@ import {NotificationWrapper} from "../../common/component/notification/notificat
 import {SessionStorage} from "../../common/storage/session";
 import md5 from "blueimp-md5"
 import {DCSType, ECommon_Application_Mode} from "../../../../../common/types";
-import logo from "@/assert/logo.png"
 import {ICommon_Route_Res_Organization_List} from "../../../../../common/routes/response";
 import {ICommon_Model_Organization} from "../../../../../common/model/organization";
 import {Dialog} from "@/business/common/component/dialog/dialog";

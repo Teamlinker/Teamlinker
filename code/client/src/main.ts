@@ -89,7 +89,7 @@ apiGateway.deployInfo().then(async value => {
                 await router.replace("login")
             }
         } else {
-            loadStaticScript()
+            //loadStaticScript()
         }
     }
 })

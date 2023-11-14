@@ -52,8 +52,8 @@
 			  <a-col :flex="menuValue?'60px':'0px'" style="align-items: center;display: flex">
 				  <img :src="store.organizationInfo.photo" style="height: 30px;width:60px;object-fit: cover;object-position: 50% 50%;" v-if="store.organizationInfo?.photo"/>
 			  </a-col>
-			  <a-col :flex="menuValue?'100px':'170px'" id="createOrganization" style="align-items: center;display: flex">
-				  <a-select style="max-width: 170px;color: white" :placeholder="$t('placeholder.organization')" :bordered="false" @change="onMenuClick" v-model="menuValue" v-if="menu.length>0">
+			  <a-col :flex="menuValue?'130px':'200px'" id="createOrganization" style="align-items: center;display: flex">
+				  <a-select style="max-width: 130px;color: white" :placeholder="$t('placeholder.organization')" :bordered="false" @change="onMenuClick" v-model="menuValue" v-if="menu.length>0">
 					  <a-optgroup v-for="(item,index) in menu" :label="item.group">
 						  <a-option v-for="(item1,index1) in item.data" :label="item1.name" :value="item1.value"></a-option>
 					  </a-optgroup>
