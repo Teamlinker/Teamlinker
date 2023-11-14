@@ -2,12 +2,13 @@ import {REDIS_AUTH} from '../../common/cache/keys/auth';
 import {DComponent} from "../../common/decorate/component";
 import {PermissionBase} from "./base";
 import userRpcApi from "../../user/rpc/user"
+import {ECommon_Platform_Type} from "../../../common/types";
 
 @DComponent
 export class PermissionOrganization extends PermissionBase {
-    async translateToField({userId}: { [param: string]: any; userId?: string; isAdmin?: boolean; }): Promise<string>
+    async translateToField({userId,platform}: { [param: string]: any; userId?: string; isAdmin?: boolean;platform:ECommon_Platform_Type }): Promise<string>
     {
-        let ret=await userRpcApi.checkOrganizationInfo(userId);
+        let ret=await userRpcApi.checkOrganizationInfo(platform,userId);
         return ret?.organizationId;
     }
     fieldName: string="organizationId"

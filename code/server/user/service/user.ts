@@ -22,6 +22,7 @@ import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 import {request} from "../../common/request/request"
 import Application from "../../common/app/app";
 import File from "../../file/service/file";
+import {ECommon_Platform_Type} from "../../../common/types";
 
 
 export class UserService extends Entity<typeof userModel,typeof userMapper> {
@@ -201,7 +202,7 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         await this.update()
     }
 
-    async startSession(lang:string):Promise<string>{
+    async startSession(platform:ECommon_Platform_Type,lang:string):Promise<string>{
         let secret=getConfigInstance().jwt;
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
@@ -209,37 +210,48 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         return new Promise(async (resolve,reject)=>{
             jwt.sign({
                 userId:this.item.id,
-                type:ECommon_User_Type.USER
+                type:ECommon_User_Type.USER,
+                platform
             },secret,async (err,token)=>{
                 if(err) {
                     reject(err)
                     return
                 } else {
-                    let session=REDIS_USER.token(this.item.id)
+                    let session=REDIS_USER.token(platform,this.item.id)
                     await session.set(token);
                     let sessionInfo=REDIS_USER.info(this.item.id)
                     await sessionInfo.set(Object.assign({},this.item,{
                         lang
                     }));
-                    let sessionOrganization=REDIS_USER.organizationInfo(this.item.id)
-                    let objSessionOrganization=await sessionOrganization.get()
-                    await sessionOrganization.del();
-                    if(objSessionOrganization) {
-                        let objOrganizationUser=await OrganizationUserService.getItemById(objSessionOrganization.organizationUserId)
-                        if(objOrganizationUser) {
-                            await objOrganizationUser.clearStatus()
+                    let objRedisPlatformList=REDIS_USER.userPlatformList(this.item.id)
+                    let objPlatformList=await objRedisPlatformList.get()
+                    if(!objPlatformList?.includes(platform)) {
+                        let sessionOrganization=REDIS_USER.organizationInfo(platform,this.item.id)
+                        let objSessionOrganization=await sessionOrganization.get()
+                        await sessionOrganization.del();
+                        if(objSessionOrganization) {
+                            let objOrganizationUser=await OrganizationUserService.getItemById(objSessionOrganization.organizationUserId)
+                            if(objOrganizationUser) {
+                                await objOrganizationUser.clearStatus(objPlatformList)
+                            }
                         }
                     }
+                    if(objPlatformList) {
+                        objPlatformList.push(platform)
+                    } else {
+                        objPlatformList=[platform]
+                    }
+                    await objRedisPlatformList.set(objPlatformList)
                     resolve(token)
                 }
             })
         })
     }
 
-    async keepAlive() {
+    async keepAlive(platform:ECommon_Platform_Type) {
         await Promise.allSettled([
             (async ()=>{
-                let obj=REDIS_USER.token(this.getId())
+                let obj=REDIS_USER.token(platform,this.getId())
                 let exist=await obj.exists()
                 if(exist) {
                     await obj.setTTL(300)
@@ -253,7 +265,7 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
                 }
             })(),
             (async ()=>{
-                let obj=REDIS_USER.organizationInfo(this.getId())
+                let obj=REDIS_USER.organizationInfo(platform,this.getId())
                 let value=await obj.get()
                 if(value) {
                     await obj.setTTL(300)
@@ -271,17 +283,24 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
                     }
                 }
             })(),
+            (async ()=>{
+                let obj=REDIS_USER.userPlatformList(this.getId())
+                let exist=await obj.exists()
+                if(exist) {
+                    await obj.setTTL(300)
+                }
+            })(),
         ])
 
     }
 
-    async stopSession() {
+    async stopSession(platform:ECommon_Platform_Type) {
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
         }
-        let session=REDIS_USER.token(this.item.id)
+        let session=REDIS_USER.token(platform,this.item.id)
         await session.del()
-        let sessionOrganization=REDIS_USER.organizationInfo(this.item.id)
+        let sessionOrganization=REDIS_USER.organizationInfo(platform,this.item.id)
         let info=await sessionOrganization.get()
         if(info) {
             await sessionOrganization.del();
@@ -289,6 +308,15 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
             if(objOrganizationUser) {
                 await objOrganizationUser.clearStatus()
             }
+        }
+        let sessionPlatform=REDIS_USER.userPlatformList(this.item.id)
+        let objPlatformList=await sessionPlatform.get()
+        let index=objPlatformList.indexOf(platform)
+        objPlatformList.splice(index,1)
+        if(objPlatformList.length>0) {
+            await sessionPlatform.set(objPlatformList)
+        } else {
+            await sessionPlatform.del()
         }
     }
 
@@ -298,11 +326,6 @@ export class UserService extends Entity<typeof userModel,typeof userMapper> {
         }
         await userMapper.active(this.item.id,active);
         await this.loadItem();
-    }
-
-    async clearCache(){
-        await REDIS_USER.token(this.item.id).del()
-        await REDIS_USER.info(this.item.id).del()
     }
 
     static async list(page:number,size:number,keyword?:string):Promise<ICommon_Route_Res_User_List>{

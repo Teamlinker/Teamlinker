@@ -247,7 +247,7 @@ class OrganizationController {
         if(!obj) {
             throw Err.Organization.organizationNotFound
         }
-        let organizationUserId=await obj.enter(user.userId,user.organizationInfo?.organizationUserId);
+        let organizationUserId=await obj.enter(user.platform,user.userId,user.organizationInfo?.organizationUserId);
         return {
             organizationUserId
         };

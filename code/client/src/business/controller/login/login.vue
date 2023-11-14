@@ -83,7 +83,7 @@ import {Message} from "@arco-design/web-vue";
 import {NotificationWrapper} from "../../common/component/notification/notification";
 import {SessionStorage} from "../../common/storage/session";
 import md5 from "blueimp-md5"
-import {DCSType, ECommon_Application_Mode} from "../../../../../common/types";
+import {DCSType, ECommon_Application_Mode, ECommon_Platform_Type} from "../../../../../common/types";
 import {ICommon_Route_Res_Organization_List} from "../../../../../common/routes/response";
 import {ICommon_Model_Organization} from "../../../../../common/model/organization";
 import {Dialog} from "@/business/common/component/dialog/dialog";
@@ -112,7 +112,8 @@ const onSubmit = async () => {
 	let ret = await apiUser.login({
 		username: form.username,
 		password: md5(form.password),
-		lang:localStorage.getItem("lang")??(navigator.language || "en").toLowerCase().split("-")[0]
+		lang:localStorage.getItem("lang")??(navigator.language || "en").toLowerCase().split("-")[0],
+		platform:ECommon_Platform_Type.WEB
 	})
 	if (ret.code == 0) {
 		login(ret.data.id)
@@ -159,7 +160,8 @@ const onWechat=async ()=>{
 			let openId=ev.data
 			let res=await apiUser.wechatLogin({
 				openId,
-				lang:localStorage.getItem("lang")??(navigator.language || "en").toLowerCase().split("-")[0]
+				lang:localStorage.getItem("lang")??(navigator.language || "en").toLowerCase().split("-")[0],
+				platform:ECommon_Platform_Type.WEB
 			})
 			if(res?.code==0) {
 				if(res.data) {

@@ -1,5 +1,5 @@
 import {ICommon_Model_User} from './../model/user';
-import {ECommon_Services} from './../types';
+import {ECommon_Platform_Type, ECommon_Services} from './../types';
 import {ICommon_Route_Res_User_List, ICommon_Route_Res_User_Profile, ICommon_Route_Res_User_TeamList} from './response';
 import {ECommon_HttpApi_Method} from "./types";
 import {Permission_Types} from "../permission/permission";
@@ -15,7 +15,8 @@ const api={
             req:<{
                 username:string,
                 password:string,
-                lang:string
+                lang:string,
+                platform:ECommon_Platform_Type
             }>{},
             res:<Omit<ICommon_Model_User,"password">>{},
             ignoreValidate:true
@@ -237,7 +238,8 @@ const api={
             path:"/wechat/login",
             req:<{
                 openId:string,
-                lang:string
+                lang:string,
+                platform:ECommon_Platform_Type
             }>{},
             res:<Omit<ICommon_Model_User,"password">>{},
             ignoreValidate:true

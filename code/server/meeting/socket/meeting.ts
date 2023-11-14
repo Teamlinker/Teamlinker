@@ -11,6 +11,8 @@ import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import {handleImageFields} from "../../gateway/util/util";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import {MeetingMissCallService} from "../service/missCall";
+import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
+
 
 export async function handleMeetingConnection() {
     if(!Application.debug) {
@@ -122,6 +124,13 @@ export async function handleMeetingConnection() {
         })
         socket.on("meeting_reject",async (fromOrganizationUserId, roomId) => {
             try {
+                let objRoom=await MeetingRoomService.getItemById(roomId)
+                if(objRoom) {
+                    let exist=await objRoom.checkMember(socket.data.organizationUserId)
+                    if(exist) {
+                        return
+                    }
+                }
                 let name=await rpcUserApi.getOrganizationUserName(socket.data.organizationUserId)
                 emit.in(fromOrganizationUserId).emit("meeting_rejected",socket.data.organizationUserId,name,roomId)
             } catch (err) {

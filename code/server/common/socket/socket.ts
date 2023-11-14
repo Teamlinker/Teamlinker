@@ -61,13 +61,14 @@ export class SocketIO {
                 return
             }
             if(io.adapter.nsp.name!=="/"+ECommon_Socket_Type.NOTIFICATION) {
-                let objOrganization=await userRpcApi.checkOrganizationInfo(objCheck.userId)
+                let objOrganization=await userRpcApi.checkOrganizationInfo(objCheck.platform,objCheck.userId)
                 if(!objOrganization) {
                     next(new Error("not in organization"))
                 } else {
                     socket.data.organizationUserId=objOrganization.organizationUserId
                     socket.data.userId=objHandshake.userId
                     socket.data.organizationId=objOrganization.organizationId
+                    socket.data.platform=objCheck.platform
                     next()
                 }
             } else {
@@ -79,14 +80,10 @@ export class SocketIO {
             if(io.adapter.nsp.name==="/"+ECommon_Socket_Type.NOTIFICATION) {
                 let set=io.adapter.rooms.get(socket.data.userId)
                 if(set) {
-                    g_emitter.of(io.adapter.nsp.name).to(socket.data.userId).except(socket.id).emit("notification_logout")
+                    g_emitter.of(io.adapter.nsp.name).to(socket.data.userId).except(socket.id).emit("notification_logout",socket.data.platform)
                 }
                 socket.join(socket.data.userId)
             } else {
-                let set=io.adapter.rooms.get(socket.data.organizationUserId)
-                if(set) {
-                    g_emitter.of(io.adapter.nsp.name).to(socket.data.organizationUserId).except(socket.id).disconnectSockets()
-                }
                 socket.join(socket.data.organizationUserId)
                 socket.join(socket.data.organizationId)
             }

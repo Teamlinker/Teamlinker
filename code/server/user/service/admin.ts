@@ -6,6 +6,7 @@ import {Entity} from "../../common/entity/entity";
 import {ECommon_User_Type, userModel} from './../../../common/model/user';
 import {adminMapper} from './../mapper/admin';
 import {UserSettingService} from "./user";
+import {ECommon_Platform_Type} from "../../../common/types";
 
 export class AdminService extends Entity<typeof userModel,typeof adminMapper> {
     constructor(){
@@ -46,7 +47,7 @@ export class AdminService extends Entity<typeof userModel,typeof adminMapper> {
                     reject(err)
                     return
                 } else {
-                    let session=REDIS_USER.token(this.item.id)
+                    let session=REDIS_USER.token(ECommon_Platform_Type.WEB, this.item.id)
                     await session.set(token);
                     let sessionInfo=REDIS_USER.adminInfo(this.item.id)
                     await sessionInfo.set(this.item);
@@ -60,7 +61,7 @@ export class AdminService extends Entity<typeof userModel,typeof adminMapper> {
         if(!this.item || !this.item.id) {
             throw Err.User.userNotFound
         }
-        let session=REDIS_USER.token(this.item.id)
+        let session=REDIS_USER.token(ECommon_Platform_Type.WEB,this.item.id)
         await session.del()
     }
 }

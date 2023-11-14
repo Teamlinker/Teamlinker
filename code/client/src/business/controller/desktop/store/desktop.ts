@@ -17,7 +17,7 @@ import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {NotificationType, NotificationWrapper} from "../../../common/component/notification/notification";
 import {SessionStorage} from "../../../common/storage/session";
 import {handleIMEvent} from "../../app/im/event";
-import {DCSType, ECommon_User_Online_Status} from "../../../../../../common/types";
+import {DCSType, ECommon_Platform_Type, ECommon_User_Online_Status} from "../../../../../../common/types";
 import {handleMeetingEvent} from "../../app/meeting/event";
 import {checkPermission, Permission_Types} from "../../../../../../common/permission/permission";
 import {iconFinder} from "../icon/finder";
@@ -52,8 +52,10 @@ export const useDesktopStore=defineStore("desktop",{
             if(this.heartbeatInterval) {
                 clearInterval(this.heartbeatInterval)
             }
-            objSocketNotification.getSocket().on("notification_logout",() => {
-                eventBus.emit(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED)
+            objSocketNotification.getSocket().on("notification_logout",(platform) => {
+                if(platform===ECommon_Platform_Type.WEB) {
+                    eventBus.emit(EClient_EVENTBUS_TYPE.USER_LOGIN_EXPIRED)
+                }
             })
             this.heartbeatInterval=setInterval(async ()=>{
                 let ret=await objSocketNotification.getSocket().emitWithAck("notification_heartbeat",SessionStorage.get("userToken"))

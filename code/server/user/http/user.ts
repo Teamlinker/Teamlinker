@@ -16,7 +16,7 @@ import {UserService, UserSettingService} from "../service/user";
 import {IUserSession} from "../types/config";
 import {OrganizationUserService} from "../service/organization";
 import Application from "../../common/app/app";
-import {ECommon_Application_Mode} from "../../../common/types";
+import {ECommon_Application_Mode, ECommon_Platform_Type} from "../../../common/types";
 import rpcFileApi from "../../file/rpc/file"
 import {REDIS_USER} from "../../common/cache/keys/user";
 import rpcFinderApi from "../../finder/rpc/finder";
@@ -37,7 +37,7 @@ class UserController {
     }
 
     @DHttpApi(userApi.routes.login)
-    async login(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpReqParamRequired("lang") lang:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.login.res> {
+    async login(@DHttpReqParamRequired("username") username:string,@DHttpReqParamRequired("password") password:string,@DHttpReqParamRequired("lang") lang:string,@DHttpReqParamRequired("platform") platform:ECommon_Platform_Type,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.login.res> {
         let user=await UserService.getItemByName(username)
         if(!user) {
             throw  Err.User.userNotFound
@@ -46,7 +46,7 @@ class UserController {
             throw Err.User.accessDenied
         }
         if(user.getItem().password===password) {
-            let token=await user.startSession(lang)
+            let token=await user.startSession(platform,lang)
             if(user.getItem().count===0) {
                 rpcFinderApi.createFolder(user.getId(),i18next.getFixedT(lang)("backend.newFolder"),null)
             }
@@ -77,13 +77,7 @@ class UserController {
         if(!user) {
             throw Err.User.userNotFound
         }
-        if(userInfo.organizationInfo?.organizationUserId) {
-            let obj=await OrganizationUserService.getItemById(userInfo.organizationInfo?.organizationUserId)
-            if(obj) {
-                await obj.clearStatus()
-            }
-        }
-        await user.stopSession()
+        await user.stopSession(userInfo.platform)
     }
 
     @DHttpApi(userApi.routes.refresh)
@@ -299,7 +293,7 @@ class UserController {
 
 
     @DHttpApi(userApi.routes.wechatLogin)
-    async wechatLogin(@DHttpReqParamRequired("openId") openId:string,@DHttpReqParamRequired("lang") lang:string,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.wechatLogin.res> {
+    async wechatLogin(@DHttpReqParamRequired("openId") openId:string,@DHttpReqParamRequired("lang") lang:string,@DHttpReqParamRequired("platform") platform:ECommon_Platform_Type,@DHttpContext ctx:HttpContext):Promise<typeof userApi.routes.wechatLogin.res> {
         let user=await UserService.getItemByExp({
             from_id:openId
         })
@@ -307,7 +301,7 @@ class UserController {
             if(!user.getItem().active) {
                 throw Err.User.accessDenied
             }
-            let token=await user.startSession(lang)
+            let token=await user.startSession(platform,lang)
             if(user.getItem().count===0) {
                 rpcFinderApi.createFolder(user.getId(),i18next.getFixedT(lang)("backend.newFolder"),null)
             }

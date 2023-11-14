@@ -23,7 +23,7 @@ import {TeamService} from "./team";
 import {UserService} from "./user";
 import {ECommon_Calendar_Color} from "../../../common/model/calendar";
 import {IServer_Common_Event_Types} from "../../common/event/types";
-import {ECommon_Application_Mode, ECommon_User_Online_Status} from "../../../common/types";
+import {ECommon_Application_Mode, ECommon_Platform_Type, ECommon_User_Online_Status} from "../../../common/types";
 import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 import {emitServiceEvent} from "../../common/event/event";
 import {ECommon_Model_Meeting_Room_Type} from "../../../common/model/meeting_room";
@@ -181,7 +181,7 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         return organization.getId();
     }
 
-    async enter(userId:string,preOrganizationUserId?:string) {
+    async enter(platform:ECommon_Platform_Type,userId:string,preOrganizationUserId?:string) {
         if(preOrganizationUserId) {
             let obj=await OrganizationUserService.getItemById(preOrganizationUserId)
             if(obj) {
@@ -195,12 +195,17 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
         if(!objOrganizationUser) {
             throw Err.Organization.userNotFound
         }
-        let obj=REDIS_USER.organizationInfo(userId);
+        let obj=REDIS_USER.organizationInfo(platform,userId);
         await obj.set({
             organizationId:this.getId(),
             organizationUserId:objOrganizationUser.getId()
-        },-1);
-        await objOrganizationUser.changeOnlineStatus(ECommon_User_Online_Status.ONLINE)
+        });
+        let objRedis=REDIS_USER.userPlatformList(userId)
+        let platformList=await objRedis.get()
+        let count=await objOrganizationUser.getPlatformUserCount(platformList)
+        if(count==0) {
+            await objOrganizationUser.changeOnlineStatus(ECommon_User_Online_Status.ONLINE)
+        }
         return objOrganizationUser.getId()
     }
 
@@ -370,7 +375,9 @@ export class OrganizationUserService extends Entity<typeof organizationUserModel
         objMeeting.del()
         let objTeamList=REDIS_ORGANIZATION.teamList(this.getId())
         objTeamList.del()
-        let objOrganization=REDIS_USER.organizationInfo(this.getItem().user_id)
+        let objOrganization=REDIS_USER.organizationInfo(ECommon_Platform_Type.WEB,this.getItem().user_id)
+        objOrganization.del()
+        objOrganization=REDIS_USER.organizationInfo(ECommon_Platform_Type.MOBILE, this.getItem().user_id)
         objOrganization.del()
     }
 
@@ -500,11 +507,35 @@ export class OrganizationUserService extends Entity<typeof organizationUserModel
         return ret;
     }
 
-    async clearStatus() {
-        let sessionStatus=REDIS_ORGANIZATION.status(this.getId())
-        await sessionStatus.del()
-        let preSessionStatus=REDIS_ORGANIZATION.preStatus(this.getId())
-        await preSessionStatus.del()
+    async clearStatus(platformList?:ECommon_Platform_Type[]) {
+        if(platformList===undefined) {
+            let objRedis=REDIS_USER.userPlatformList(this.item.user_id)
+            platformList=await objRedis.get()
+        }
+        let count=await this.getPlatformUserCount(platformList)
+        if(count<=1) {
+            let sessionStatus=REDIS_ORGANIZATION.status(this.getId())
+            await sessionStatus.del()
+            let preSessionStatus=REDIS_ORGANIZATION.preStatus(this.getId())
+            await preSessionStatus.del()
+        }
+    }
+
+    async getPlatformUserCount(platformList:ECommon_Platform_Type[]) {
+        if(!platformList) {
+            return 0;
+        }
+        let count=0
+        let organizationInfoList=await Promise.all(platformList.map(item=>{
+            let redis=REDIS_USER.organizationInfo(item,this.item.user_id)
+            return redis.get()
+        }))
+        for(let obj of organizationInfoList) {
+            if(obj?.organizationId===this.getId()) {
+                count++
+            }
+        }
+        return count
     }
 }
 

@@ -1,7 +1,7 @@
 import {ECommon_IM_Message_EntityType, ICommon_Model_IM_UnRead_Message} from "../model/im_unread_message";
 import {ECommon_IM_Message_ContentType, ICommon_Model_IM_User_Message} from "../model/im_user_message";
 import {ICommon_Model_IM_Team_Message} from "../model/im_team_message";
-import {DCSType, ECommon_User_Online_Status} from "../types";
+import {DCSType, ECommon_Platform_Type, ECommon_User_Online_Status} from "../types";
 import {ECommon_Meeting_Room_Permission} from "../model/meeting_room";
 import {ICommon_Content_Line, ICommon_Model_Content} from "../model/content";
 import {ICommon_Model_IM_Favorite_Message} from "../model/im_favorite_message";
@@ -56,7 +56,7 @@ export interface ICommon_Socket_ServerToClientEvents {
     meeting_rejected:(rejectOrganizationUserId:string,rejectOrganizationUserName:string,roomId:string)=>void,
     //notification
     notification_new:(notificationId:string)=>void,
-    notification_logout:()=>void,
+    notification_logout:(platform:ECommon_Platform_Type)=>void,
 }
 
 export interface ICommon_Socket_ClientToServerEvents {
@@ -105,5 +105,6 @@ export interface ICommon_Socket_InterServerEvents {
 export interface ICommon_Socket_Data {
     userId: string,
     organizationUserId: string,
-    organizationId:string
+    organizationId:string,
+    platform:ECommon_Platform_Type
 }

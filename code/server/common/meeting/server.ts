@@ -38,7 +38,7 @@ export class MeetingServer {
     }>
     onJoinedRoom:(roomId:string,businessId:string,socketId:string)=>void
     onLeaveRoom:(type:"self"|"kick"|"end",roomId:string,businessId:string,socketId:string)=>Promise<void>
-    onLeavedRoom:(type:"self"|"kick"|"end",roomId:string,businessId:string,socketId:string)=>void
+    onLeavedRoom:(type:"self"|"kick"|"end",roomId:string,businessId:string,socketId:string)=>Promise<void>
     onHandleOperation:(type:"pause"|"resume"|"kick"|"end",roomId:string,fromBusinessId:string,toBusinessId?:string,kind?:MediaKind)=>Promise<boolean>
     onMessageSend:(roomId:string,fromBusinessId:string,message:string|Buffer)=>Promise<void>
     onDeleteRoom:(roomId:string)=>void
@@ -61,6 +61,17 @@ export class MeetingServer {
                             roomName=ret.roomName
                             businessId=ret.businessId
                         }
+                    }
+                    let obj=this.getPeerFromBusinessIdAndRoomId(roomId,businessId)
+                    if(obj) {
+                        if(this.onLeaveRoom) {
+                            await this.onLeaveRoom("kick",obj.roomId,obj.businessId,obj.socketId)
+                        }
+                        this.leaveRoom(obj.socketId)
+                        if(this.onLeavedRoom) {
+                            await this.onLeavedRoom("kick",obj.roomId,obj.businessId,obj.socketId)
+                        }
+                        this.io.in(obj.socketId).emit("kick")
                     }
                     await this.createRoom(roomId,roomName,socket.id,businessId)
                     callback({
@@ -613,6 +624,18 @@ export class MeetingServer {
         let objRoom=this.roomMap.get(objPeer.roomId)
         for(let id of objRoom.peerList) {
             if(isAll || id!==socketId) {
+                let obj=this.peerInfoMap.get(id)
+                if(obj.businessId===businessId) {
+                    return obj;
+                }
+            }
+        }
+    }
+
+    private getPeerFromBusinessIdAndRoomId(roomId:string,businessId:string) {
+        let objRoom=this.roomMap.get(roomId)
+        if(objRoom) {
+            for(let id of objRoom.peerList) {
                 let obj=this.peerInfoMap.get(id)
                 if(obj.businessId===businessId) {
                     return obj;

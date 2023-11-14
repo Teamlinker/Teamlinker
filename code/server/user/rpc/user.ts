@@ -9,7 +9,7 @@ import {MemberTagService, OrganizationService, OrganizationUserService} from './
 import rpcFileApi from "../../file/rpc/file";
 import {IServer_Common_RPC_User_CheckSession} from "../types/config";
 import {Err} from "../../../common/status/error";
-import {ECommon_User_Online_Status} from "../../../common/types";
+import {ECommon_Platform_Type, ECommon_User_Online_Status} from "../../../common/types";
 import CommonUtil from "../../common/util/common";
 import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 import {ECommon_User_Type} from "../../../common/model/user";
@@ -27,13 +27,14 @@ class RpcUserApi {
                 if(err) {
                     resolve(null);
                 } else {
-                    let session=REDIS_USER.token((decoded as JwtPayload).userId)
+                    let session=REDIS_USER.token((decoded as JwtPayload).platform,(decoded as JwtPayload).userId)
                     let tokenFromCache = await session.get()
                     if(token==tokenFromCache) {
                         await session.setTTL(300);
                         resolve({
                             userId:(decoded as JwtPayload).userId,
-                            type:(decoded as JwtPayload).type
+                            type:(decoded as JwtPayload).type,
+                            platform:(decoded as JwtPayload).platform
                         })
                     } else {
                         resolve(null);
@@ -180,13 +181,13 @@ class RpcUserApi {
         await team.create()
     }
 
-    async checkOrganizationInfo(userId:string) {
-        let objRedis=REDIS_USER.organizationInfo(userId);
+    async checkOrganizationInfo(platform:ECommon_Platform_Type,userId:string) {
+        let objRedis=REDIS_USER.organizationInfo(platform,userId);
         let exists=await objRedis.exists();
         if(!exists) {
             return null
         }
-        let value=await  objRedis.get();
+        let value=await objRedis.get();
         return value
     }
 
@@ -261,7 +262,7 @@ class RpcUserApi {
         if(!objUser) {
             throw Err.User.userNotFound
         }
-        await objUser.keepAlive()
+        await objUser.keepAlive(check.platform)
     }
 
     async changeOnlineStatus(organizationUserId:string,status:ECommon_User_Online_Status) {

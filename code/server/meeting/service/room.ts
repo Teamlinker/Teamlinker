@@ -89,6 +89,16 @@ export class MeetingRoomService extends Entity<typeof meetingRoomModel,typeof me
         }
     }
 
+    async checkMember(organizationUserId:string) {
+        let objRedis=REDIS_MEETING.roomInfo(this.getId())
+        let objAll=await objRedis.getAll()
+        if(objAll && Object.keys(objAll).includes(organizationUserId)) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     async changePermission(organizationUserId:string,permission:ECommon_Meeting_Room_Permission) {
         let objRedis=REDIS_MEETING.roomInfo(this.getId())
         await objRedis.set({

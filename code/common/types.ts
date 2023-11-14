@@ -24,6 +24,11 @@ export enum ECommon_Application_Mode {
     OFFLINE
 }
 
+export enum ECommon_Platform_Type {
+    WEB,
+    MOBILE
+}
+
 export type DCSType<T>={
     [key in keyof T]:key extends "created_by"|"modified_by"|"assigner_id"|"reporter_id"|"created_by_pure"?{
         id:string,

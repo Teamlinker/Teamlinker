@@ -131,7 +131,7 @@ export default class GateWay extends Application {
                     if(permission && Array.isArray(permission) && permission.length>0) {
                         if(obj.user) {
                             if(obj.user.type==ECommon_User_Type.USER) {
-                                obj.user.organizationInfo=await userRpcApi.checkOrganizationInfo(obj.user.userId);
+                                obj.user.organizationInfo=await userRpcApi.checkOrganizationInfo(obj.user.platform,obj.user.userId);
                                 if(!obj.user.organizationInfo) {
                                     if(obj.data["organizationId"]) {
                                         obj.user.organizationInfo={
