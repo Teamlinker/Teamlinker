@@ -607,7 +607,7 @@ export default {
             meeting:{
                 meeting:{
                     startMeeting:"Start Meeting",
-                    personMeetingSetting:"Person Meeting Setting",
+                    meetingSetting:"Meeting Setting",
                     joinMeeting:"Join Meeting",
                     scheduleMeeting:"Schedule Meeting",
                     meetingList:"Meeting List",
@@ -625,7 +625,13 @@ export default {
                     presenter:"Presenter"
                 },
                 meetingPreview:{
-                    tip:"Tip: Meeting functionality needs camera permission,if camera permission prompt pop up,please click allow!"
+                    tip:"Tip: Meeting functionality needs camera permission,if camera permission prompt pop up,please click allow!",
+                    blur:"Background Blur"
+                },
+                meetingSetting:{
+                    personalSetting:"Personal Meeting Setting",
+                    backgroundSetting:"Background Setting",
+                    backgroundImage:"Background Image"
                 }
             },
             people:{
@@ -694,6 +700,9 @@ export default {
                         parentIssue:"Parent Issue",
                         childIssues:"Child Issues",
                         relatedIssues:"Related Issues"
+                    },
+                    projectIssueCreate:{
+                        customFields:"Custom Fields"
                     }
                 },
                 release:{

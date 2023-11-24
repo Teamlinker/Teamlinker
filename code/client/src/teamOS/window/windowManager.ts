@@ -137,6 +137,7 @@ export class WindowManager extends Base{
                 obj.rect.width="80%"
                 obj.rect.height="80%"
             } else {
+                obj.isPopup=false
                 if(obj.status===ETeamOS_Window_Status.MIN) {
                     Object.assign(obj.rect,obj.originalRect)
                     obj.status=obj.originalStatus
@@ -147,6 +148,15 @@ export class WindowManager extends Base{
     }
     close(id:string) {
         this.removeById(id);
+    }
+    popup(id:string,width:`${number}%`,height:`${number}%`) {
+        let obj=this.getById(id);
+        if(obj) {
+            obj.rect.width=width
+            obj.rect.height=height
+            obj.isFocus=false
+            obj.isPopup=true
+        }
     }
     getWindowsByGroup(group:string):Window[] {
         let arr:Window[]=[];

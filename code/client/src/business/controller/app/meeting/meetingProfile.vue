@@ -1,60 +1,66 @@
 <template>
-  <a-layout style="height: 100%">
-    <a-layout-content>
-      <a-spin :loading="loading" style="height: 100%;width: 100%;">
-        <a-row style="height: 100%;width: 100%;flex-direction: column">
-          <a-row style="flex: 0 0 130px;width: 100%;display: flex;align-items: center;overflow-x: auto;overflow-y:hidden;background-color: dimgray" id="meetingPresent">
-            <div v-for="item in organizationUserList" :key="item.organizationUserId" style="flex: 0 0 250px;height: 100%;overflow: hidden;border: 1px solid black;background-color: black;position: relative">
-              <div style="position:absolute;bottom: 0;left: 0;color: white ">
-                {{item.name}}
-              </div>
-              <template v-if="item.organizationUserId===myOrganizationUserId">
-                <video autoplay muted :srcObject="item.videoStream" style="width: 100%;height: 100%" v-if="item.video"></video>
-              </template>
-              <template v-else>
-                <audio autoplay :srcObject="item.audioStream" v-if="item.audio"></audio>
-                <video autoplay :srcObject="item.videoStream" style="width: 100%;height: 100%" v-if="item.video"></video>
-              </template>
-            </div>
-          </a-row>
-          <a-row style="flex:1 1 calc(100% - 170px);width: 100%;overflow: hidden;display: flex;justify-content: center;background-color: dimgray;position: relative">
-            <div style="position:absolute;bottom: 0;left: 0;color: white;font-size: 20px">
-              {{screenShareInfo?.organizationUserId?organizationUserList.find(item=>item.organizationUserId===screenShareInfo.organizationUserId)?.name:speaker?.name}}
-            </div>
-	          <template v-if="screenShareInfo">
-		          <audio autoplay :srcObject="screenShareInfo.audio" v-if="screenShareInfo.audio"></audio>
-		          <video autoplay :srcObject="screenShareInfo.video" style="width: 100%;height: 100%" v-if="screenShareInfo.video"></video>
-	          </template>
-            <template v-else-if="speaker?.organizationUserId===myOrganizationUserId">
-              <video autoplay muted :srcObject="speaker.videoStream" style="width: 100%;height: 100%" v-if="speaker.video"></video>
-            </template>
-            <template v-else-if="speaker">
-              <audio autoplay :srcObject="speaker.audioStream" v-if="speaker.audio"></audio>
-              <video autoplay :srcObject="speaker.videoStream" style="width: 100%;height: 100%" v-if="speaker.video"></video>
-            </template>
-          </a-row>
-          <a-row style="flex: 0 0 40px;width: 100%">
-            <MeetingOperation :current-meeting="currentMeeting" :me="me" :meeting-client="meetingClient"></MeetingOperation>
-          </a-row>
-        </a-row>
-      </a-spin>
-    </a-layout-content>
-    <a-layout-sider :resize-directions="['left']" :width="250" id="meetingRight">
-	    <a-tabs size="mini" v-model:active-key="tabValue" style="height: 100%">
-		    <a-tab-pane :title="$t('util.participant')" key="participant">
-			    <MeetingParticipant :organization-user-list="organizationUserList" :me="me" :meeting-client="meetingClient"></MeetingParticipant>
-		    </a-tab-pane>
-		    <a-tab-pane key="chat">
-			    <template #title>
-				    <a-badge dot :count="unReadCount" :offset="[6,0]">
-					    {{$t("controller.app.meeting.meetingProfile.chat")}}
-				    </a-badge>
-			    </template>
-			    <MeetingChat :meeting-client="meetingClient" @new-message="onNewMessage" ref="meetingChat"></MeetingChat>
-		    </a-tab-pane>
-	    </a-tabs>
-    </a-layout-sider>
-  </a-layout>
+	<div style="width: 100%;height: 100%">
+		<a-layout style="height: 100%" v-show="!windowItem.isPopup">
+			<a-layout-content>
+				<a-spin :loading="loading" style="height: 100%;width: 100%;">
+					<a-row style="height: 100%;width: 100%;flex-direction: column" ref="contentEle" >
+						<a-row style="flex: 0 0 130px;width: 100%;display: flex;align-items: center;overflow-x: auto;overflow-y:hidden;background-color: dimgray" id="meetingPresent">
+							<div v-for="item in organizationUserList" :key="item.organizationUserId" style="flex: 0 0 250px;height: 100%;overflow: hidden;border: 1px solid black;background-color: black;position: relative">
+								<div style="position:absolute;bottom: 0;left: 0;color: white ">
+									{{item.name}}
+								</div>
+								<template v-if="item.organizationUserId===myOrganizationUserId">
+									<video autoplay muted :srcObject="item.videoStream" style="width: 100%;height: 100%" v-if="item.video"></video>
+								</template>
+								<template v-else>
+									<audio autoplay :srcObject="item.audioStream" v-if="item.audio"></audio>
+									<video autoplay :srcObject="item.videoStream" style="width: 100%;height: 100%" v-if="item.video"></video>
+								</template>
+							</div>
+						</a-row>
+						<a-row style="flex:1 1 calc(100% - 170px);width: 100%;overflow: hidden;display: flex;justify-content: center;background-color: dimgray;position: relative">
+							<div style="position:absolute;bottom: 0;left: 0;color: white;font-size: 20px">
+								{{screenShareInfo?.organizationUserId?organizationUserList.find(item=>item.organizationUserId===screenShareInfo.organizationUserId)?.name:speaker?.name}}
+							</div>
+							<template v-if="screenShareInfo">
+								<audio autoplay :srcObject="screenShareInfo.audio" v-if="screenShareInfo.audio"></audio>
+								<video autoplay :srcObject="screenShareInfo.video" style="width: 100%;height: 100%" v-if="screenShareInfo.video"></video>
+							</template>
+							<template v-else-if="speaker">
+								<video autoplay :srcObject="speaker.videoStream" style="width: 100%;height: 100%" v-if="speaker.video"></video>
+							</template>
+						</a-row>
+						<a-row style="flex: 0 0 40px;width: 100%;background-color: white">
+							<MeetingOperation :current-meeting="currentMeeting" :me="me" :meeting-client="meetingClient"></MeetingOperation>
+						</a-row>
+					</a-row>
+				</a-spin>
+			</a-layout-content>
+			<a-layout-sider :resize-directions="['left']" :width="250" id="meetingRight">
+				<a-tabs size="mini" v-model:active-key="tabValue" style="height: 100%">
+					<a-tab-pane :title="$t('util.participant')" key="participant">
+						<MeetingParticipant :organization-user-list="organizationUserList" :me="me" :meeting-client="meetingClient"></MeetingParticipant>
+					</a-tab-pane>
+					<a-tab-pane key="chat">
+						<template #title>
+							<a-badge dot :count="unReadCount" :offset="[6,0]">
+								{{$t("controller.app.meeting.meetingProfile.chat")}}
+							</a-badge>
+						</template>
+						<MeetingChat :meeting-client="meetingClient" @new-message="onNewMessage" ref="meetingChat"></MeetingChat>
+					</a-tab-pane>
+				</a-tabs>
+			</a-layout-sider>
+		</a-layout>
+		<div style="width: 100%;height: 100%;background-color: dimgray;" v-if="windowItem.isPopup">
+			<template v-if="screenShareInfo">
+				<video autoplay :srcObject="screenShareInfo.video" style="width: 100%;height: 100%" v-if="screenShareInfo.video"></video>
+			</template>
+			<template v-else-if="speaker">
+				<video autoplay :srcObject="speaker.videoStream" style="width: 100%;height: 100%" v-if="speaker.video"></video>
+			</template>
+		</div>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -79,6 +85,8 @@ import MeetingPreview from "./meetingPreview.vue";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";
 import {DCSType} from "../../../../../../common/types";
+import {ETeamOS_Window_Status, getCurrentWindow} from "@/teamOS/window/window";
+import {windowManager} from "@/teamOS/window/windowManager";
 
 const props=defineProps<{
 	meetingId:string,
@@ -88,6 +96,7 @@ const props=defineProps<{
 		type:ECommon_Model_Organization_Member_Type
 	}[]
 }>()
+const contentEle=ref()
 const loading=ref(true)
 const unReadCount=ref(0)
 const organizationUserList=ref<OrganizationUserItem[]>([])
@@ -110,12 +119,18 @@ const navigator=getCurrentNavigator()
 const root=getRootNavigatorRef()
 const appContext=getCurrentInstance().appContext
 const currentMeeting=ref<DCSType<ICommon_Model_Meeting_Room>>()
+const windowItem=getCurrentWindow()
 const screenShareInfo=ref<{
 	video:MediaStream,
 	audio:MediaStream,
 	organizationUserId:string
 }>()
 let meetingClient=new MeetingClient(socket.getSocket())
+watch(()=>windowItem.status,()=>{
+	if(windowItem.status===ETeamOS_Window_Status.MIN) {
+		windowManager.popup(windowItem.id,"15%","20%")
+	}
+})
 watch(tabValue,()=>{
 	if(tabValue.value==="chat") {
 		unReadCount.value=0
@@ -198,7 +213,12 @@ meetingClient.onProducerStateChange=async (state, kind, businessId,type, stream,
   }
   handleState()
 }
-meetingClient.onKick=() => {
+meetingClient.onKick=async () => {
+	if(document.fullscreenElement) {
+		await document.exitFullscreen()
+	} else if(windowItem.isPopup) {
+		windowManager.show(windowItem.id)
+	}
 	navigator.pop()
 }
 meetingClient.onJoinedRoom=async roomInfo => {
@@ -217,7 +237,7 @@ meetingClient.onSpeaker=async businessId => {
 		speaker.value=obj
 	}
 }
-meetingClient.onLocalProducerInit=async stream => {
+meetingClient.onLocalProducerInit=async (stream) => {
   let obj=userTeamInfoPick.getInfos([{
     id:myOrganizationUserId,
     type:ECommon_IM_Message_EntityType.USER
@@ -250,7 +270,7 @@ const initMeeting=async ()=>{
 	}
 	let preview:any=await Dialog.open(root.value,appContext,t("controller.app.meeting.meetingProfile.meetingPreview"),markRaw(MeetingPreview))
 	if(preview) {
-		let ret=await meetingClient.join(props.meetingId,password,preview.enableVideo,preview.enableAudio,preview.cameraId,preview.audioId)
+		let ret=await meetingClient.join(props.meetingId,password,preview.enableVideo,preview.enableAudio,preview.cameraId,preview.audioId,preview.backgroundImageUri,preview.blur)
 		if(!ret?.success) {
 			Message.error(ret.msg)
 			navigator.pop()
@@ -311,6 +331,7 @@ const getCurrentMeeting=async ()=>{
 		currentMeeting.value=res.data
 	}
 }
+
 
 const handleLeaveMeeting=async ()=>{
 	await meetingClient.leave()

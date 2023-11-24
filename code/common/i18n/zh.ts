@@ -605,7 +605,7 @@ export default {
             meeting:{
                 meeting:{
                     startMeeting:"开始会议",
-                    personMeetingSetting:"个人会议设置",
+                    meetingSetting:"会议设置",
                     joinMeeting:"加入会议",
                     scheduleMeeting:"安排会议",
                     meetingList:"会议列表",
@@ -623,7 +623,13 @@ export default {
                     presenter:"主持人"
                 },
                 meetingPreview:{
-                    tip:"注意:视频会议功能需要浏览器的摄像头权限,如果有浏览器有需要权限的弹出框弹出,请点击允许!"
+                    tip:"注意:视频会议功能需要浏览器的摄像头权限,如果有浏览器有需要权限的弹出框弹出,请点击允许!",
+                    blur:"背景虚化"
+                },
+                meetingSetting:{
+                    personalSetting:"个人会议设置",
+                    backgroundSetting:"会议背景设置",
+                    backgroundImage:"背景图片"
                 }
             },
             people:{
@@ -692,6 +698,9 @@ export default {
                         parentIssue:"父工作项",
                         childIssues:"子工作项",
                         relatedIssues:"关联工作项"
+                    },
+                    projectIssueCreate:{
+                        customFields:"自定义字段"
                     }
                 },
                 release:{

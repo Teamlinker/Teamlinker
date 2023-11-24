@@ -14,7 +14,7 @@
     },
     "port":14000,
     "jwt": "teamlinker",
-    "version":"0.1.1",
+    "version":"0.1.2",
     "mq": "amqp://127.0.0.1",
     "mail":{
         "host": "smtp.exmail.qq.com",

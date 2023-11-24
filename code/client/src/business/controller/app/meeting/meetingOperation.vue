@@ -1,5 +1,5 @@
 <template>
-	<a-row style="width: 100%;height: 100%;display: flex;align-items: center;justify-content: space-between;padding:0 5px;box-sizing: border-box">
+	<a-row style="width: 100%;height: 100%;display: flex;align-items: center;justify-content: space-between;padding:0 5px;box-sizing: border-box" ref="operationEle">
 		<a-space>
 			<a-button size="large" type="text" v-if="me" @click="onToggleAudio">
 				<template #icon>
@@ -15,7 +15,7 @@
 			</a-button>
 		</a-space>
 		<a-space>
-			<a-popover>
+			<a-popover :popup-container="root">
 				<a-button size="large" type="text">
 					<template #icon>
 						<sicon size="20" color="" name="Ant" type="add user"></sicon>
@@ -35,7 +35,7 @@
 					<a-divider :margin="10"></a-divider>
 					<a-form :model="form" auto-label-width>
 						<a-form-item field="memberIds" :label="$t('util.invite')" required>
-							<a-select style="width: 100%" :placeholder="$t('placeholder.typeUserOrTeam')" multiple allow-search allow-clear v-model="form.memberIds" @search="onSearch">
+							<a-select style="width: 100%" :placeholder="$t('placeholder.typeUserOrTeam')" multiple allow-search allow-clear v-model="form.memberIds" @search="onSearch" :popup-container="root">
 								<a-optgroup :label="$t('util.team')" v-if="selectList && selectList.teams && selectList.teams.length>0">
 									<a-option v-for="item in selectList.teams" :value="item.id">
 										<a-row style="align-items: center">
@@ -66,6 +66,12 @@
 					<sicon size="20" color="red" name="Ant" type="desktop" v-else></sicon>
 				</template>
 			</a-button>
+			<a-button type="text" @click="isFullScreen=!isFullScreen">
+				<template #icon>
+					<sicon size="20" color="" name="Ant" type="fullscreen" v-if="!isFullScreen"></sicon>
+					<sicon size="20" color="" name="Ant" type="fullscreen-exit" v-else></sicon>
+				</template>
+			</a-button>
 		</a-space>
 		<a-space>
 			<a-button size="mini" type="primary" @click="onLeave">
@@ -87,7 +93,7 @@ import {Dialog} from "../../../common/component/dialog/dialog";
 import {Message} from "@arco-design/web-vue";
 import {getCurrentNavigator, getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import {MeetingClient} from "../../../common/component/meeting/client";
-import {getCurrentInstance, onBeforeMount, onBeforeUnmount, reactive, ref} from "vue";
+import {getCurrentInstance, onBeforeMount, onBeforeUnmount, reactive, ref, watch} from "vue";
 import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {ICommon_Route_Res_Organization_FilterUserAndTeam} from "../../../../../../common/routes/response";
@@ -95,6 +101,7 @@ import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/m
 import {useI18n} from "vue-i18n";
 import {DCSType} from "../../../../../../common/types";
 import {EClient_EVENTBUS_TYPE, eventBus} from "@/business/common/event/event";
+import Sicon from "@/icon/sicon.vue";
 
 const props=defineProps<{
 	me:OrganizationUserItem,
@@ -104,6 +111,8 @@ const props=defineProps<{
 const form=reactive({
 	memberIds:[]
 })
+const isFullScreen=ref(false)
+const operationEle=ref()
 const selectList=ref<ICommon_Route_Res_Organization_FilterUserAndTeam>()
 const navigator=getCurrentNavigator()
 const root=getRootNavigatorRef()
@@ -114,6 +123,15 @@ const {t}=useI18n()
 props.meetingClient.onScreenStopped=() => {
 	isScreen.value=false
 }
+
+watch(isFullScreen,()=>{
+	if(isFullScreen.value) {
+		root.value.requestFullscreen()
+	} else {
+		document.exitFullscreen()
+	}
+})
+
 const onToggleAudio=()=>{
 	if(props.me.audio) {
 		props.meetingClient.pause("audio")
@@ -135,18 +153,24 @@ const onToggleVideo=()=>{
 }
 
 const onLeave=async ()=>{
-	let ret=await Dialog.confirm(root.value,appContext,t("tip.leaveMeeting"))
+	let ret=await Dialog.confirm(document.fullscreenElement?operationEle.value.$el.parentElement:root.value,appContext,t("tip.leaveMeeting"))
 	if(ret) {
 		await props.meetingClient.leave()
+		if(isFullScreen.value) {
+			await document.exitFullscreen()
+		}
 		navigator.pop()
 	}
 }
 
 const onEnd=async ()=>{
-	let ret=await Dialog.confirm(root.value,appContext,t("tip.endMeeting"))
+	let ret=await Dialog.confirm(document.fullscreenElement?operationEle.value.$el.parentElement:root.value,appContext,t("tip.endMeeting"))
 	if(ret) {
 		let res=await props.meetingClient.end()
 		if(res) {
+			if(isFullScreen.value) {
+				await document.exitFullscreen()
+			}
 			navigator.pop()
 		} else {
 			Message.error(t("tip.operationFailed"))

@@ -4,13 +4,14 @@ import {Mapper} from './mapper';
 import {emitServiceEvent} from "../event/event";
 import {IServer_Common_Event_Types} from "../event/types";
 
-let imagefields=[
+let fileFields=[
     "photo",
     "image",
     "img",
     "icon",
     "file_id",
-    "wallpaper"
+    "wallpaper",
+    "meeting_background_img"
 ]
 export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
     protected item:T["model"];
@@ -54,7 +55,7 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         }
         await this.mapper.create(this.item)
         await this.loadItem();
-        imagefields.forEach(item=>{
+        fileFields.forEach(item=>{
             if(this.item[item]) {
                 emitServiceEvent("fileRef",this.item[item])
             }
@@ -67,7 +68,7 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         }
         let ret=await this.mapper.getById(this.item.id)
         await this.mapper.update(this.item)
-        imagefields.forEach(item=>{
+        fileFields.forEach(item=>{
             if(!ret[item] && this.item[item]) {
                 emitServiceEvent("fileRef",this.item[item])
             } else if(ret[item] && ret[item]!=this.item[item]) {
@@ -85,7 +86,7 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         if(eventPublish) {
             emitServiceEvent(eventPublish,this.item.id);
         }
-        imagefields.forEach(item=>{
+        fileFields.forEach(item=>{
             if(this.item[item]) {
                 emitServiceEvent("fileUnref",this.item[item])
             }
@@ -103,7 +104,7 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
         let obj=new Cls(this.mapper)
         let data=await this.mapper.copy(this.item.id,deletedFields as string[],updatedFields)
         obj.setItem(data)
-        imagefields.forEach(item=>{
+        fileFields.forEach(item=>{
             if(this.item[item]) {
                 emitServiceEvent("fileRef",this.item[item])
             }

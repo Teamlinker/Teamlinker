@@ -42,7 +42,7 @@
 		    <a-input-number v-model="form.manDay" :min="1" :max="100" :precision="0"></a-input-number>
 	    </a-form-item>
     </a-form>
-	  <a-divider orientation="left" v-if="valueList.length>0">Custom Fields</a-divider>
+	  <a-divider orientation="left" v-if="valueList.length>0">{{$t("controller.app.project.issue.projectIssueCreate.customFields")}}</a-divider>
 	  <a-form v-if="valueList.length>0" :model="formCustom" ref="eleFormCustom" layout="vertical">
 		  <a-form-item v-for="value in valueList" :key="value.field.id" :label="value.field.name" :extra="value.field.description" :field="value.field.name" :required="!value.field.optional">
 			  <FieldInput :item="value" :project-id="projectId"></FieldInput>

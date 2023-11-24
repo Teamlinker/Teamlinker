@@ -214,6 +214,16 @@ const api={
                 path:string
             }>{},
         },
+        setMeetingBackgroundImg:{
+            method:ECommon_HttpApi_Method.POST,
+            path:"/setting/meeting_background_img",
+            req:<{
+                photo?:string
+            }>{},
+            res:<{
+                path:string
+            }>{},
+        },
         changeLang:{
             method:ECommon_HttpApi_Method.PUT,
             path:"/lang",

@@ -1,0 +1,1 @@
+ALTER TABLE `teamlinker`.`user_setting` ADD COLUMN `meeting_background_img` BIGINT(20) NULL AFTER `wallpaper`;

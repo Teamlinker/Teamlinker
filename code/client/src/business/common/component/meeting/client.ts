@@ -6,6 +6,7 @@ import {Meeting_ClientToServerEvents, Meeting_ServerToClientEvents} from "./type
 import {AutoExecuteArray} from "./AutoExecuteArray";
 import {MediaKind, RtpCapabilities} from "mediasoup-client/lib/RtpParameters";
 import {ProducerOptions} from "mediasoup-client/lib/Producer";
+import {VirtualBackgroundProcessor, VirtualBackgroundProcessorOptions} from "@shiguredo/virtual-background";
 
 export class MeetingClient {
     private device:Device
@@ -27,6 +28,9 @@ export class MeetingClient {
     private defaultAudio=true
     private defaultCameraId:string
     private defaultAudioId:string
+    private backImg:string
+    private blur:boolean
+    private processor:VirtualBackgroundProcessor
     onProducerStateChange:(state:"new"|"close"|"pause"|"resume", kind: mediaSoup.types.MediaKind, businessId:string,type:"data"|"camera"|"screen",stream?: MediaStream,producerId?:string)=>void
     onLocalProducerInit:(stream:MediaStream)=>void
     onLocalProducerStart:(kind:MediaKind)=>void
@@ -118,7 +122,7 @@ export class MeetingClient {
     getRoomInfo() {
         return this.roomInfo
     }
-    async join(roomId:string,extraData:any,isVideo=true,isAudio=true,cameraId?:string,audioId?:string):Promise<{
+    async join(roomId:string,extraData:any,isVideo=true,isAudio=true,cameraId?:string,audioId?:string,backImg?:string,blur?:boolean):Promise<{
         success:boolean,
         msg?:string
     }> {
@@ -132,6 +136,8 @@ export class MeetingClient {
         this.defaultAudio=isAudio
         this.defaultCameraId=cameraId
         this.defaultAudioId=audioId
+        this.backImg=backImg
+        this.blur=blur
         let ret=await this.socket.emitWithAck("joinRoom",roomId,extraData)
         if(ret) {
             this.roomInfo=ret;
@@ -277,6 +283,12 @@ export class MeetingClient {
         this.device=null;
         this.producerSet=new Set
         this.stopShare()
+        if(this.processor) {
+            this.processor.getOriginalTrack().stop()
+            this.processor.getProcessedTrack().stop()
+            this.processor.stopProcessing()
+            this.processor=null
+        }
         if(this.producerAudio) {
             this.producerAudio.removeAllListeners();
             this.producerAudio.close()
@@ -521,13 +533,10 @@ export class MeetingClient {
                 }:isVideo,
             }
             navigator.mediaDevices.getUserMedia(mediaConstraints).then( async (stream) => {
-                if(this.onLocalProducerInit) {
-                    this.onLocalProducerInit(stream)
-                }
-                let track = stream.getAudioTracks()[0];
-                if(track) {
+                let trackAudio= stream.getAudioTracks()[0];
+                if(trackAudio) {
                     let params:ProducerOptions = {
-                        track,
+                        track:trackAudio,
                         appData:{
                             paused:!this.defaultAudio
                         }
@@ -538,15 +547,38 @@ export class MeetingClient {
                     }
                     this.producerAudio =await this.transportSend.produce(params);
                 }
-                track=stream.getVideoTracks()[0]
-                if(track) {
+                let trackVideo=stream.getVideoTracks()[0]
+                if(trackVideo) {
+                    if(this.backImg || this.blur) {
+                        if(this.processor) {
+                            this.processor.stopProcessing()
+                        }
+                        this.processor = new VirtualBackgroundProcessor("/");
+                        const options:VirtualBackgroundProcessorOptions={
+                            segmentationModel:"selfie-general"
+                        }
+                        if(this.backImg) {
+                            const backgroundImage = new Image();
+                            backgroundImage.src = this.backImg;
+                            options.backgroundImage=backgroundImage
+                        } else if(this.blur) {
+                            options.blurRadius=5
+                        }
+                        trackVideo=await this.processor.startProcessing(trackVideo, options)
+                    }
                     let params:ProducerOptions={
-                        track,
+                        track:trackVideo,
                         appData:{
                             paused:!this.defaultVideo
                         }
                     }
                     this.producerVideo=await this.transportSend.produce(params)
+                }
+                if(this.onLocalProducerInit) {
+                    const stream=new MediaStream()
+                    stream.addTrack(trackAudio)
+                    stream.addTrack(trackVideo)
+                    this.onLocalProducerInit(stream)
                 }
                 resolve(true)
             },reason => {

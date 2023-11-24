@@ -54,6 +54,7 @@ export class Window extends Base{
     type:ETeamOS_Window_Type
     title=""
     isFocus=false
+    isPopup=false
     rect:ITeamOS_Rect={
         left:"10%",
         top:"10%",

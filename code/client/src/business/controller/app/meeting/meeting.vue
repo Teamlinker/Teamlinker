@@ -2,16 +2,12 @@
 	<a-layout style="height: 100%">
 		<a-layout-content>
 			<a-row style="height: 100%;display: flex;flex-direction: column;justify-content: center;align-items: center">
-				<a-dropdown class="startMeeting" trigger="hover" position="top">
-					<a-button size="large" type="primary" style="width: 300px" status="success" @click="onStartMeeting">
-						{{$t("controller.app.meeting.meeting.startMeeting")}}
-					</a-button>
-					<template #content>
-						<a-doption @click="onPersonalMeetingSetting">{{$t("controller.app.meeting.meeting.personMeetingSetting")}}</a-doption>
-					</template>
-				</a-dropdown>
+				<a-button size="large" type="primary" style="width: 300px" status="success" @click="onStartMeeting">
+					{{$t("controller.app.meeting.meeting.startMeeting")}}
+				</a-button>
 				<a-button size="large" type="primary" style="margin-top: 30px;width: 300px" status="warning" @click="onJoinMeeting">{{$t("controller.app.meeting.meeting.joinMeeting")}}</a-button>
 				<a-button size="large" type="primary" style="margin-top: 30px;width: 300px" @click="onScheduleMeeting">{{$t("controller.app.meeting.meeting.scheduleMeeting")}}</a-button>
+				<a-button size="large" style="margin-top: 30px;width: 300px" @click="onMeetingSetting">{{$t("controller.app.meeting.meeting.meetingSetting")}}</a-button>
 			</a-row>
 		</a-layout-content>
 		<a-layout-sider :resize-directions="['left']" :width="300">
@@ -70,7 +66,6 @@ import {
 	getRootNavigatorRef,
 	onNavigatorShow
 } from "../../../../teamOS/common/component/navigator/navigator";
-import PersonalMeetingSetting from "./personalMeetingSetting.vue";
 import EditScheduleMeeting from "./editScheduleMeeting.vue";
 import moment from "moment";
 import {Message} from "@arco-design/web-vue";
@@ -82,6 +77,7 @@ import {vDrag} from "../../../../teamOS/common/directive/drag";
 import {ECommon_Model_Organization_Member_Type} from "../../../../../../common/model/organization";
 import {useI18n} from "vue-i18n";
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
+import MeetingSetting from "@/business/controller/app/meeting/meetingSetting.vue";
 
 const props=defineProps<{
 	meetingInitInfo?:{
@@ -123,8 +119,8 @@ const onStartMeeting=async ()=>{
     }
 }
 
-const onPersonalMeetingSetting=async()=>{
-	Dialog.open(root.value,appContext,t("controller.app.meeting.meeting.editSetting"),markRaw(PersonalMeetingSetting))
+const onMeetingSetting=async()=>{
+	Dialog.open(root.value,appContext,t("controller.app.meeting.meeting.editSetting"),markRaw(MeetingSetting))
 }
 
 const onChangePage=(page:number)=>{

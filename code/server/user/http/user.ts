@@ -256,6 +256,10 @@ class UserController {
         if(wallpaper) {
             obj.getItem().wallpaper=await rpcFileApi.getPath(wallpaper)
         }
+        let backgroundImage=obj.getItem().meeting_background_img
+        if(backgroundImage) {
+            obj.getItem().meeting_background_img=await rpcFileApi.getPath(backgroundImage)
+        }
         return obj.getItem()
     }
 
@@ -266,6 +270,21 @@ class UserController {
         })
         obj.assignItem({
             wallpaper:photo??null
+        })
+        await obj.update()
+        let path=photo?(await rpcFileApi.getPath(photo)):null
+        return {
+            path:path
+        }
+    }
+
+    @DHttpApi(userApi.routes.setMeetingBackgroundImg)
+    async setMeetingBackgroundImg(@DHttpReqParam("photo") photo:string,@DHttpUser user:IUserSession):Promise<typeof userApi.routes.setMeetingBackgroundImg.res> {
+        let obj=await UserSettingService.getItemByExp({
+            user_id:user.userId
+        })
+        obj.assignItem({
+            meeting_background_img:photo??null
         })
         await obj.update()
         let path=photo?(await rpcFileApi.getPath(photo)):null

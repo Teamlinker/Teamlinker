@@ -1165,6 +1165,7 @@ CREATE TABLE `user_setting` (
   `id` bigint(20) NOT NULL,
   `user_id` bigint(20) NOT NULL,
   `wallpaper` bigint(20) DEFAULT NULL,
+  `meeting_background_img` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `user_id_UNIQUE` (`user_id`)
