@@ -1,16 +1,16 @@
 <template>
 	<div style="display: flex;flex-direction: column;">
 		<div style="height: 150px;width: 100%;" class="card">
-			<div style="height: 30px;display: flex;align-items: center;padding-left: 5px;color: rgb(33,33,33);font-weight: bold;font-size: large">
+			<div style="height: 40px;display: flex;align-items: center;padding-left: 5px;color: white;font-weight: bold;font-size: medium">
 				{{$t("controller.desktop.comp.recentIssue")}}
 			</div>
-			<div style="height: calc(100% - 30px);overflow-y: auto">
-				<a-list :bordered="false" hoverable style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
+			<div style="height: calc(100% - 40px);overflow-y: auto">
+				<a-list :bordered="false"  style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
 					<template #empty>
 						<a-empty style="margin-top: 20px"></a-empty>
 					</template>
 					<a-list-item v-for="item in issueList" style="cursor: pointer" @click="onIssue(item.project.id,item.id)">
-						<a-space style="overflow: hidden;white-space: nowrap;color: dimgray">
+						<a-space style="overflow: hidden;white-space: nowrap;color: white">
 							<FieldPriority :priority="item.priority"></FieldPriority>
 							<span style="color: dodgerblue">{{item.project.keyword+"-"+item.unique_id}}</span>
 							{{item.name}}
@@ -21,40 +21,40 @@
 		</div>
 		<div style="height: 150px;width: 100%;display: flex;justify-content: space-between;margin-top: 20px;">
 			<div style="width: 49%;height: 100%;" class="card">
-				<div style="height: 30px;display: flex;align-items: center;color: rgb(33,33,33);font-weight: bold;justify-content: space-between;padding-left: 5px;font-size: large">
+				<div style="height: 40px;display: flex;align-items: center;color: white;font-weight: bold;justify-content: space-between;padding-left: 5px;font-size: medium">
 					{{$t("controller.desktop.comp.recentCreatedProject")}}
 					<a-button type="text" @click="onCreateProject">
 						<template #icon>
-							<icon-plus></icon-plus>
+							<icon-plus style="color: white"></icon-plus>
 						</template>
 					</a-button>
 				</div>
-				<div style="height: calc(100% - 30px);overflow-y: auto">
-					<a-list :bordered="false" hoverable style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
+				<div style="height: calc(100% - 40px);overflow-y: auto">
+					<a-list :bordered="false"  style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
 						<template #empty>
 							<a-empty style="margin-top: 20px"></a-empty>
 						</template>
-						<a-list-item v-for="item in projectList" style="color: dimgray;cursor: pointer" @click="onProject(item.id)">
+						<a-list-item v-for="item in projectList" style="color: white;cursor: pointer" @click="onProject(item.id)">
 							{{item.name}}
 						</a-list-item>
 					</a-list>
 				</div>
 			</div>
 			<div style="width: 49%;height: 100%;" class="card">
-				<div style="height: 30px;display: flex;align-items: center;color: rgb(33,33,33);font-weight: bold;justify-content: space-between;padding-left: 5px;font-size: large">
+				<div style="height: 40px;display: flex;align-items: center;color: white;font-weight: bold;justify-content: space-between;padding-left: 5px;font-size: medium">
 					{{$t("controller.desktop.comp.recentCreatedWikiSpace")}}
 					<a-button type="text" @click="onCreateWikiSpace">
 						<template #icon>
-							<icon-plus></icon-plus>
+							<icon-plus style="color: white"></icon-plus>
 						</template>
 					</a-button>
 				</div>
-				<div style="height: calc(100% - 30px);overflow-y: auto">
-					<a-list :bordered="false" hoverable style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
+				<div style="height: calc(100% - 40px);overflow-y: auto">
+					<a-list :bordered="false"  style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
 						<template #empty>
 							<a-empty style="margin-top: 20px"></a-empty>
 						</template>
-						<a-list-item v-for="item in wikiSpaceList" style="color: dimgray;cursor: pointer" @click="onWikiSpace(item.id)">
+						<a-list-item v-for="item in wikiSpaceList" style="color: white;cursor: pointer" @click="onWikiSpace(item.id)">
 							{{item.name}}
 						</a-list-item>
 					</a-list>
@@ -63,40 +63,40 @@
 		</div>
 		<div style="height: 150px;width: 100%;display: flex;justify-content: space-between;margin-top: 10px">
 			<div style="width:49%;height: 100%;" class="card">
-				<div style="height: 30px;display: flex;align-items: center;color: rgb(33,33,33);font-weight: bold;justify-content: space-between;padding-left: 5px;font-size: large">
+				<div style="height: 40px;display: flex;align-items: center;color: white;font-weight: bold;justify-content: space-between;padding-left: 5px;font-size: medium">
 					{{$t("controller.desktop.comp.recentCalendarEvent")}}
 					<a-button type="text" @click="onCreateCalendarEvent" :loading="loadingCalendarEvent">
 						<template #icon>
-							<icon-plus></icon-plus>
+							<icon-plus style="color: white"></icon-plus>
 						</template>
 					</a-button>
 				</div>
-				<div style="height: calc(100% - 30px);overflow-y: auto">
-					<a-list :bordered="false" hoverable style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
+				<div style="height: calc(100% - 40px);overflow-y: auto">
+					<a-list :bordered="false"  style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
 						<template #empty>
 							<a-empty style="margin-top: 20px"></a-empty>
 						</template>
-						<a-list-item v-for="item in calendarEventList" style="color: dimgray;cursor: pointer" @click="onCalendarEvent(item.id)">
+						<a-list-item v-for="item in calendarEventList" style="color: white;cursor: pointer" @click="onCalendarEvent(item.id)">
 							{{item.name}}
 						</a-list-item>
 					</a-list>
 				</div>
 			</div>
 			<div style="width:49%;height: 100%;" class="card">
-				<div style="height: 30px;display: flex;align-items: center;color: rgb(33,33,33);font-weight: bold;justify-content: space-between;padding-left: 5px;font-size: large">
+				<div style="height: 40px;display: flex;align-items: center;color: white;font-weight: bold;justify-content: space-between;padding-left: 5px;font-size: medium">
 					{{$t("controller.desktop.comp.recentMeeting")}}
 					<a-button type="text" @click="onCreateMeeting">
 						<template #icon>
-							<icon-plus></icon-plus>
+							<icon-plus style="color: white"></icon-plus>
 						</template>
 					</a-button>
 				</div>
-				<div style="height: calc(100% - 30px);overflow-y: auto">
-					<a-list :bordered="false" hoverable style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
+				<div style="height: calc(100% - 40px);overflow-y: auto">
+					<a-list :bordered="false"  style="height: 100%" size="small" scrollbar :max-height="120" :split="false">
 						<template #empty>
 							<a-empty style="margin-top: 20px"></a-empty>
 						</template>
-						<a-list-item v-for="item in meetingRoomList" style="color: dimgray;cursor: pointer" @click="onMeeting(item.id,item.password)">
+						<a-list-item v-for="item in meetingRoomList" style="color: white;cursor: pointer" @click="onMeeting(item.id,item.password)">
 							{{item.name}}
 						</a-list-item>
 					</a-list>
@@ -142,9 +142,9 @@ const loadingCalendarEvent=ref(false)
 const appContext=getCurrentInstance().appContext
 watch(()=>props.backgroundImage,()=>{
 	if(props.backgroundImage) {
-		backgroundColor.value="rgba(255,250,244,0.7)"
+		backgroundColor.value="hsla(0,0%,100%,.3)"
 	} else {
-		backgroundColor.value="rgb(255,250,244)"
+		backgroundColor.value="hsla(0,0%,100%,.3)"
 	}
 },{
 	immediate:true
@@ -287,7 +287,7 @@ onBeforeMount(()=>{
 
 <style scoped>
 .card {
-	backdrop-filter: blur(10px);
+	backdrop-filter: blur(20px);
 	background-color: v-bind(backgroundColor);
 	border-radius: 10px;
 	overflow: hidden;
