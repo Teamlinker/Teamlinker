@@ -197,5 +197,6 @@ Ansun [[ website ](https://team-linker.com) | [ github ](https://github.com/sx19
 
 [ISC](./LICENSE)
 
-## ⚡Technology Exchange
-Discord https://discord.gg/X8t4d7JqgX
+## ⚡ Technology Exchange
+
+[Discord](https://discord.gg/X8t4d7JqgX)
