@@ -198,4 +198,4 @@ Ansun [[ website ](https://team-linker.com) | [ github ](https://github.com/sx19
 [ISC](./LICENSE)
 
 ## ⚡Technology Exchange
-https://discord.gg/X8t4d7JqgX
+Discord https://discord.gg/X8t4d7JqgX
