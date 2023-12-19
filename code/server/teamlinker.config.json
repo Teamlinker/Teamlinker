@@ -1,0 +1,29 @@
+{
+    "redis":{
+        "url":"localhost",
+        "port":6379,
+        "db":0,
+        "password":""
+    },
+    "mysql":{
+        "url":"localhost",
+        "port":3306,
+        "database":"teamlinker_dev",
+        "username":"root",
+        "password":"123456"
+    },
+    "port":14000,
+    "jwt": "teamlinker",
+    "version":"0.1.2",
+    "mq": "amqp://127.0.0.1",
+    "mail":{
+        "host": "",
+        "port": 465,
+        "user":"",
+        "pass":""
+    },
+    "wechat":{
+        "appId":"",
+        "appSecret":""
+    }
+}

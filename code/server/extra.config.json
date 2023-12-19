@@ -1,0 +1,17 @@
+{
+  "mysql": {
+    "url":"localhost",
+    "port":3306,
+    "database":"teamlinker_dev",
+    "username":"root",
+    "password":"sxsxsxSX1"
+  },
+  "listenIps": [
+    {
+      "ip": "0.0.0.0",
+      "announcedIp": "192.168.2.112"
+    }
+  ],
+  "rtcMinPort": 40000,
+  "rtcMaxPort": 49999
+}

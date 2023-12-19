@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "commonjs",
+    "target": "ES2021",
+    "sourceMap": true,
+    "resolveJsonModule":true,
+    "moduleResolution":"node",
+    "noImplicitUseStrict":true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noImplicitOverride": true,
+    "baseUrl": "./",
+    "plugins": [
+      { "transform": "../common/transform/transformer.js" }
+    ]
+  },
+  "files": [
+    "./patch/1.2.0.ts"
+  ],
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "ts-node": {
+    "esm": true
+  }
+}
