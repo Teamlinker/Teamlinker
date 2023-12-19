@@ -95,8 +95,8 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
                 let objUser=await this.addUser(adminRole,ret.created_by_pure,"Admin",1)
                 let objRedis=REDIS_USER.info(this.item.created_by_pure)
                 let obj=await objRedis.get()
-                let info=await rpcCooperationApi.initIssueTypeSolution(ret.id,obj.lang??"en")
-                await this.createExampleData(obj.lang??"en",objUser.id,ret.id,info)
+                let info=await rpcCooperationApi.initIssueTypeSolution(ret.id,obj?.lang??"en")
+                await this.createExampleData(obj?.lang??"en",objUser.id,ret.id,info)
             })(),
             (async ()=>{
                 let defaultOrganizationRole=await rpcAuthApi.getSystemDefaultRole(ECommon_Model_Role_Type.ORGANIZATION);

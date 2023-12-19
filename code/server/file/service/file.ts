@@ -42,7 +42,7 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
     async upload(file:IServer_Common_Http_Req_File,meta?:string){
         let {dbPath,filePath}=await File.ensureDir(file.md5,file.fileName)
         fs.writeFile(filePath,file.data)
-        this.item.path=dbPath
+        this.item.path=dbPath.replaceAll(path.sep,"/")
         await super.create()
         if(meta) {
             emitServiceEvent("fileUpload",meta,this.item.id)
@@ -54,7 +54,7 @@ export default class File extends Entity<typeof fileModel,typeof fileMapper> {
         let url=new URL(uri)
         let pathName=url.pathname
         let fileName=pathName.substring(pathName.lastIndexOf("/")+1)
-        let tempPath=path.join("/tmp",fileName,String(Date.now()))
+        let tempPath=path.join(Application.uploadTempPath,fileName,String(Date.now()))
         let {md5,size}=await download(uri,tempPath)
         let {filePath,dbPath}=await this.ensureDir(md5,fileName)
         await fs.move(tempPath,filePath)

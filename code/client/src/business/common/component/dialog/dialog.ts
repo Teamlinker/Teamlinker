@@ -1,6 +1,6 @@
 import {renderComponent} from "../../../../teamOS/common/util/component";
 import DialogView from "./dialogView.vue";
-import {AppContext, Component, inject, markRaw, ref} from "vue";
+import {AppContext, inject, markRaw, Raw, ref} from "vue";
 import DiaglogRich from "@/business/common/component/dialog/diaglogRich.vue";
 
 export function onDialogOk(func:()=>void){
@@ -13,7 +13,7 @@ export function onDialogClose(func:()=>void) {
     events.onClose=func;
 }
 export class Dialog {
-    static open(el:HTMLElement,appContext: AppContext,title:string,component:Component,props?:object) {
+    static open<G ,U extends G extends { new(): { $props:infer U } } ? U : object>(el:HTMLElement,appContext: AppContext,title:string,component:Raw<G>,props?:U) {
         return new Promise((resolve,reject)=>{
             let ele=document.createElement("div")
             const events:{

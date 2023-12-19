@@ -40,7 +40,7 @@
     "koa-static-server": "^1.5.2",
     "koa2-formidable": "^1.0.3",
     "log4js": "^6.7.0",
-    "mediasoup": "^3.12.8",
+    "mediasoup": "3.13.8",
     "moment": "^2.29.4",
     "mysql2": "^2.3.3",
     "node-schedule": "^2.1.0",

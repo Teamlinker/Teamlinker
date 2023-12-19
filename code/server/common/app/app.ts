@@ -38,6 +38,7 @@ export default abstract class Application{
     public static mode:ECommon_Application_Mode;
     public static teamlinkerPath:string=(os.platform()=="darwin" || os.platform()=="win32")?path.resolve(os.homedir(),"teamlinker-files"):"/opt/teamlinker-files"
     public static uploadPath=path.join(Application.teamlinkerPath,"upload")
+    public static uploadTempPath=path.join(Application.uploadPath,"temp")
     public static configPath:string=path.join(this.teamlinkerPath,"extra.config.json")
     public static certsPath=path.join(this.teamlinkerPath,"certs")
     public static extraConfig:{
@@ -105,6 +106,7 @@ export default abstract class Application{
             })
         }
         await fs.ensureDir(Application.uploadPath)
+        await fs.ensureDir(Application.uploadTempPath)
         Application.mode = mode
         initComponent()
         await init()
