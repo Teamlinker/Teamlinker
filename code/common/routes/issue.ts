@@ -183,7 +183,7 @@ const api={
                 content:string
             }>{},
             res:<ICommon_Model_Content>{},
-            permission:[Permission_Types.Project.EDIT]
+            permission:[Permission_Types.Project.EDIT,Permission_Types.Common.SELF]
         },
         commentRemove:{
             method:ECommon_HttpApi_Method.DELETE,
@@ -192,7 +192,7 @@ const api={
                 contentId :string
             }>{},
             res:{},
-            permission:[Permission_Types.Project.EDIT]
+            permission:[Permission_Types.Project.EDIT,Permission_Types.Common.SELF]
         },
         copy:{
             method:ECommon_HttpApi_Method.POST,

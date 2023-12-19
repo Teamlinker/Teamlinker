@@ -88,7 +88,7 @@ class ProjectController {
     }
 
     @DHttpApi(projectApi.routes.editMember)
-    async editMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParamRequired("memberId") memberId:string,@DHttpReqParam("type") type:ECommon_Model_Organization_Member_Type,@DHttpReqParamRequired("roleId") roleId:string):Promise<typeof projectApi.routes.editMember.res>{
+    async editMember(@DHttpReqParamRequired("projectId") projectId:string,@DHttpReqParam("memberId") memberId:string,@DHttpReqParam("type") type:ECommon_Model_Organization_Member_Type,@DHttpReqParamRequired("roleId") roleId:string):Promise<typeof projectApi.routes.editMember.res>{
         let obj=await ProjectService.getItemById(projectId);
         if(!obj) {
             throw Err.Project.projectNotFound
