@@ -16,7 +16,7 @@ The software environments below you need to install first:
 
 Official website download address: https://www.rabbitmq.com/community-plugins.html
 
-We also provide download [message delayed queue plug-in package](./dev/rabbitmq_delayed_message_exchange-3.8.0.ez)
+We also provide download [message delayed queue plug-in package](./file/rabbitmq_delayed_message_exchange-3.8.0.ez)
 
 🚧 Note: Select the corresponding version
 
