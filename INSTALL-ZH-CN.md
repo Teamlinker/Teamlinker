@@ -63,11 +63,11 @@ touch extra.config.json
 
 你可以使用以下命令获取最新版本:
 ```
-docker push teamlinkeroffical/teamlinker:[tagname]
+docker pull teamlinkeroffical/teamlinker:[tagname]
 ```
 您可以
 ```
-docker push teamlinkeroffical/teamlinker
+docker pull teamlinkeroffical/teamlinker
 ```
 
 然后您可以把它启动起来:

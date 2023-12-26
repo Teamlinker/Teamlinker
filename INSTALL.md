@@ -63,11 +63,11 @@ You can get docker from docker hub: [Docker Edition](https://hub.docker.com/repo
 
 You can get the latest version using the following command:
 ```
-docker push teamlinkeroffical/teamlinker:[tagname]
+docker pull teamlinkeroffical/teamlinker:[tagname]
 ```
 you can
 ```
-docker push teamlinkeroffical/teamlinker
+docker pull teamlinkeroffical/teamlinker
 ```
 
 Then you can start it:
