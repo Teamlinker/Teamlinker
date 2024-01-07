@@ -27,7 +27,7 @@
     "biguint-format": "^1.0.2",
     "flake-idgen": "^1.4.0",
     "fs-extra": "^10.1.0",
-    "i18next": "^23.6.0",
+    "i18next": "^23.7.11",
     "ioredis": "^5.2.4",
     "jsonwebtoken": "^8.5.1",
     "koa": "^2.13.4",

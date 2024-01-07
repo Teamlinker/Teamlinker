@@ -3,7 +3,7 @@ LABEL author="teamlinker"
 USER root
 RUN curl -fsSL https://rpm.nodesource.com/setup_16.x | bash -  \
     && yum remove gcc -y  \
-    && yum install -y epel-release yum-utils socat unzip git centos-release-scl devtoolset-8 nodejs  \
+    && yum install -y net-tools epel-release yum-utils socat unzip git centos-release-scl devtoolset-8 nodejs  \
     && mkdir -p /home/teamlinker /usr/rabbitmq  \
     &&  yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm  \
     && yum-config-manager --enable remi  \

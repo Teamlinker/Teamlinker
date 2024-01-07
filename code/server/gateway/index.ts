@@ -1,9 +1,9 @@
 import * as fs from "fs";
-import {ECommon_Application_Mode} from "../../common/types";
 import * as process from "process";
 import * as path from "path";
 import * as yargs from "yargs";
 import * as util from "util";
+
 
 (async function (){
     ///(<any>process).pkg=true;
@@ -19,7 +19,8 @@ import * as util from "util";
     }
     const GateWay =await import("./app/app");
     var application = new GateWay.default()
-    application.start((<any>process).pkg?ECommon_Application_Mode.OFFLINE:ECommon_Application_Mode.ONLINE);
+
+    application.start();
 })()
 
 

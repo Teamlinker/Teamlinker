@@ -87,7 +87,7 @@ export default abstract class Application{
     Application(){
 
     }
-    async start(mode:ECommon_Application_Mode) {
+    async start() {
         let argv=yargs.argv
         if(argv["reset"])
         {
@@ -98,16 +98,17 @@ export default abstract class Application{
             Application.configPath=path.join(__dirname,"../../teamlinker.config.json")
             Application.privateConfig = JSON.parse(fs.readFileSync(Application.configPath,"utf-8"))
             Application.certsPath=path.join(__dirname,"../../certs")
+            Application.mode=ECommon_Application_Mode.ONLINE
         } else {
             let selfConfig=JSON.parse(fs.readFileSync(path.join(__dirname,"../../teamlinker.config.json"),"utf-8"))
             Application.extraConfig=JSON.parse(fs.readFileSync(Application.configPath,"utf-8"))
             Application.privateConfig=Object.assign({},selfConfig,{
                 mysql:Application.extraConfig.mysql
             })
+            Application.mode = (<any>Application.extraConfig).runningMode==="online"?ECommon_Application_Mode.ONLINE:ECommon_Application_Mode.OFFLINE
         }
         await fs.ensureDir(Application.uploadPath)
         await fs.ensureDir(Application.uploadTempPath)
-        Application.mode = mode
         initComponent()
         await init()
         await this.initKoa();

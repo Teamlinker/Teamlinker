@@ -304,9 +304,11 @@ import IMLogo from "@/assert/custom/message.svg"
 import meetingLogo from "@/assert/custom/video.svg"
 import calendarLogo from "@/assert/custom/calendar.svg"
 import fileLogo from "@/assert/custom/file.svg"
+import {getCurrentInstance, onMounted} from "vue";
+import {ECommon_Application_Mode} from "../../../../../common/types";
 
 const router=useRouter()
-
+const app=getCurrentInstance().appContext
 const onLogin=async () =>{
 	await router.push("login")
 }
@@ -318,6 +320,19 @@ const onRegister=async()=>{
 const onDocker=()=>{
 	window.open('https://hub.docker.com/r/teamlinkeroffical/teamlinker','_blank')
 }
+
+onMounted(()=>{
+	if(app.config.globalProperties.$deployMode.value===ECommon_Application_Mode.ONLINE) {
+		var _hmt = _hmt || [];
+		(function() {
+			let hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?92bf6c648bf055f2cc5be97167fb7ef6";
+			let s = document.getElementsByTagName("script")[0];
+			s.parentNode.insertBefore(hm, s);
+		})();
+	}
+
+})
 </script>
 
 <style scoped>

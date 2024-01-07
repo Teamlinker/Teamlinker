@@ -2,10 +2,8 @@
   "name": "docker",
   "version": "1.0.0",
   "scripts": {
-    "docker_build_offline":"docker build -t teamlinker:1.0 .",
-    "docker_run_offline": "docker run -d  -p 40000-41000:40000-41000 -p 14000:14000 -v /Users/sunxin/teamlinker-files:/opt/teamlinker-files -e TZ=Asia/Shanghai teamlinker:1.0",
-    "docker_build_online":"docker build -f Dockerfile-online -t teamlinker-online:1.0 .",
-    "docker_run_online": "docker run -d  -p 40000-41000:40000-41000 -p 14000:14000 -v /Users/sunxin/teamlinker-files:/opt/teamlinker-files -e TZ=Asia/Shanghai teamlinker-online:1.0"
+    "docker_build":"docker build -t teamlinker:1.0 .",
+    "docker_run": "docker run -d  -p 40000-41000:40000-41000 -p 14000:14000 -v /Users/sunxin/teamlinker-files:/opt/teamlinker-files -e TZ=Asia/Shanghai teamlinker:1.0"
   },
   "dependencies": {
   }
