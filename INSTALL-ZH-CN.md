@@ -76,7 +76,7 @@ docker run -d -p [rtcMinPort]-[rtcMaxPort]:[rtcMinPort]-[rtcMaxPort] -p 14000:14
 ```
 您可以
 ```
-docker run -d -p 14000:14000 -v D:\code\teamlinker-files:/opt/teamlinker-files -e TZ=Asia/Shanghai teamlinkeroffical/teamlinker
+docker run -d -p 40000-41000:40000-41000 -p 14000:14000 -v D:\code\teamlinker-files:/opt/teamlinker-files -e TZ=Asia/Shanghai teamlinkeroffical/teamlinker
 ```
 
 
