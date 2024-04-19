@@ -810,3 +810,10 @@ class MemberTagMapper extends Mapper<typeof memberTagModel> {
 }
 
 export let memberTagMapper=new MemberTagMapper()
+
+class MemberTagMemberMapper extends Mapper<typeof memberTagMemberModel> {
+    constructor() {
+        super(memberTagMemberModel)
+    }
+}
+export let memberTagMemberMapper=new MemberTagMemberMapper()

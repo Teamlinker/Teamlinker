@@ -1388,3 +1388,12 @@ class CalendarSettingMapper extends Mapper<typeof calendarSettingModel> {
 }
 
 export const calendarSettingMapper=new CalendarSettingMapper
+
+
+class CalendarEventGuestMapper extends Mapper<typeof calendarEventGuestModel> {
+    constructor() {
+        super(calendarEventGuestModel)
+    }
+}
+
+export const calendarEventGuestMapper=new CalendarEventGuestMapper

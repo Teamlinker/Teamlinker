@@ -345,3 +345,10 @@ class TeamMapper extends Mapper<typeof teamModel> {
 }
 
 export let teamMapper=new TeamMapper()
+
+class TeamUserMapper extends Mapper<typeof teamUserModel> {
+    constructor() {
+        super(teamUserModel)
+    }
+}
+export let teamUserMapper=new TeamUserMapper()

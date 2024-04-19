@@ -517,3 +517,10 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
 }
 
 export let workflowNodeFieldTypeMapper=new WorkflowNodeFieldTypeMapper
+
+class WorkflowNodeFieldTypeConfigMapper extends Mapper<typeof workflowNodeFieldTypeConfigModel> {
+    constructor() {
+        super(workflowNodeFieldTypeConfigModel)
+    }
+}
+export let workflowNodeFieldTypeConfigMapper=new WorkflowNodeFieldTypeConfigMapper

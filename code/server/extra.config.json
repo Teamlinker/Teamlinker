@@ -9,7 +9,7 @@
   "listenIps": [
     {
       "ip": "0.0.0.0",
-      "announcedIp": "192.168.2.112"
+      "announcedIp": "192.168.1.245"
     }
   ],
   "rtcMinPort": 40000,

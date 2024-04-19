@@ -56,6 +56,7 @@ import {roleMemberModel} from "../../../common/model/role_member";
 import {teamUserModel} from "../../../common/model/team_user";
 import {memberTagMemberModel} from "../../../common/model/member_tag_member";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
+import {projectIssueTypeSolutionModel} from "../../../common/model/project_issue_type_solution";
 
 class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
@@ -1447,3 +1448,38 @@ class ProjectIssueApprovalMapper extends Mapper<typeof projectIssueApprovalModel
     }
 }
 export let projectIssueApprovalMapper=new ProjectIssueApprovalMapper
+
+class ProjectIssueFieldValueMapper extends Mapper<typeof projectIssueFieldValueModel> {
+    constructor() {
+        super(projectIssueFieldValueModel)
+    }
+}
+export let projectIssueFieldValueMapper=new ProjectIssueFieldValueMapper
+
+class ProjectIssueParentMapper extends Mapper<typeof projectIssueParentModel> {
+    constructor() {
+        super(projectIssueParentModel)
+    }
+}
+export let projectIssueParentMapper=new ProjectIssueParentMapper
+
+class ProjectIssueProcessMapper extends Mapper<typeof projectIssueProcessModel> {
+    constructor() {
+        super(projectIssueProcessModel)
+    }
+}
+export let projectIssueProcessMapper=new ProjectIssueProcessMapper
+
+class ProjectIssueRelatedMapper extends Mapper<typeof projectIssueRelatedModel> {
+    constructor() {
+        super(projectIssueRelatedModel)
+    }
+}
+export let projectIssueRelatedMapper=new ProjectIssueRelatedMapper
+
+class ProjectIssueTypeSolutionMapper extends Mapper<typeof projectIssueTypeSolutionModel> {
+    constructor() {
+        super(projectIssueTypeSolutionModel)
+    }
+}
+export let projectIssueTypeSolutionMapper=new ProjectIssueTypeSolutionMapper

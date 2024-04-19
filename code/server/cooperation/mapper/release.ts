@@ -618,3 +618,10 @@ class ReleaseMapper extends Mapper<typeof projectReleaseModel> {
     }
 }
 export let releaseMapper=new ReleaseMapper
+
+class ReleaseIssueMapper extends Mapper<typeof projectReleaseIssueModel> {
+    constructor() {
+        super(projectReleaseIssueModel)
+    }
+}
+export let releaseIssueMapper=new ReleaseIssueMapper

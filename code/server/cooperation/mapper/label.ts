@@ -102,3 +102,11 @@ class LabelMapper extends Mapper<typeof projectLabelModel> {
     }
 }
 export let labelMapper=new LabelMapper
+
+
+class LabelIssueMapper extends Mapper<typeof projectLabelIssueModel> {
+    constructor() {
+        super(projectLabelIssueModel)
+    }
+}
+export let labelIssueMapper=new LabelIssueMapper

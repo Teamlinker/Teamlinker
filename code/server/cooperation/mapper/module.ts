@@ -137,3 +137,11 @@ class ModuleMapper extends Mapper<typeof projectModuleModel> {
     }
 }
 export let moduleMapper=new ModuleMapper
+
+class ModuleIssueMapper extends Mapper<typeof projectModuleIssueModel> {
+    constructor() {
+        super(projectModuleIssueModel)
+    }
+
+}
+export let moduleIssueMapper=new ModuleIssueMapper
