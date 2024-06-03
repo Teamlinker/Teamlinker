@@ -42,32 +42,40 @@ systemctl restart rabbitmq-server
 
 配置文件位置 `code/server/teamlinker.config.json` 
 
-Redis配置
-```bash
-"redis":{
-   "url":"localhost",
-   "port":6379,
-   "db":0,
-   "password":""
+如果该文件不存在，就创建并用下面的模板内容填充
+
+```json
+{
+    "redis":{
+        "url":"localhost",
+        "port":6379,
+        "db":0,
+        "password":""
+    },
+    "mysql":{
+        "url":"localhost",
+        "port":3306,
+        "database":"",
+        "username":"",
+        "password":""
+    },
+    "port":14000,
+    "jwt": "teamlinker",
+    "version":"最新的版本号",
+    "mq": "amqp://127.0.0.1",
+    "mail":{
+        "host": "",
+        "port": 465,
+        "user":"",
+        "pass":""
+    },
+    "wechat":{
+        "appId":"",
+        "appSecret":""
+    }
 }
 ```
-
-Mysql配置
-```bash
-"mysql":{
-   "url":"localhost",
-   "port":3306,
-   "database":"teamlinker_dev",
-   "username":"root",
-   "password":"123456"
-}
-```
-
-Rabbitmq配置
-```bash
-"mq": "amqp://127.0.0.1"
-```
-
+你需要用你自己的值去填充这个配置文件
 
 ### 安装依赖
 1、先切换到 `teamlinker` 项目根目录

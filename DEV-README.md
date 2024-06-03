@@ -42,32 +42,40 @@ Let’s introduce the configuration file to you:
 
 Configuration file location `code/server/teamlinker.config.json`
 
-Redis configuration
-```bash
-"redis":{
-    "url":"localhost",
-    "port":6379,
-    "db":0,
-    "password":""
+If it's not existed,please create and fill it with template content below.
+
+```json
+{
+    "redis":{
+        "url":"localhost",
+        "port":6379,
+        "db":0,
+        "password":""
+    },
+    "mysql":{
+        "url":"localhost",
+        "port":3306,
+        "database":"",
+        "username":"",
+        "password":""
+    },
+    "port":14000,
+    "jwt": "teamlinker",
+    "version":"the latest version",
+    "mq": "amqp://127.0.0.1",
+    "mail":{
+        "host": "",
+        "port": 465,
+        "user":"",
+        "pass":""
+    },
+    "wechat":{
+        "appId":"",
+        "appSecret":""
+    }
 }
 ```
-
-Mysql configuration
-```bash
-"mysql":{
-    "url":"localhost",
-    "port":3306,
-    "database":"teamlinker_dev",
-    "username":"root",
-    "password":"123456"
-}
-```
-
-Rabbitmq configuration
-```bash
-"mq": "amqp://127.0.0.1"
-```
-
+you can fill specific field with your value.
 
 ### Install dependencies
 1. Switch to the `teamlinker` project root directory
