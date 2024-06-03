@@ -1,38 +1,15 @@
-import * as log from "log4js"
-import * as os from "os"
-import * as path from "path"
+import {configure, getLogger, LogLevel} from '@log4js2/core';
 
-export class Log {
-    constructor() {
-        let filePath=path.resolve(os.homedir(),`teamlinker-log/teamlinker.log`)
-        var config={
-            appenders:{
-                console:{
-                    type:"console"
-                },
-                file:{
-                    type: 'file',
-                    filename:filePath,
-                    maxLogSize:200*1024*1024,
-                    encoding : 'utf-8'
-                },
-            
-            },
-            categories:{
-                default:{
-                    appenders:["console","file"],
-                    level:"all"
-                },
-                teamlinker:{
-                    appenders:["console","file"],
-                    level:"all"
-                }
-            }
-        }
-        log.configure(config)
-        let logger=log.getLogger("teamlinker");
-        console.info=console.log=logger.info.bind(logger)
-        console.warn=logger.warn.bind(logger)
-        console.error=logger.error.bind(logger)    
-    }
-}
+configure({
+    level: LogLevel.INFO,
+    layout: '%d [%p] %c %F:%M:%line - %m %ex',
+    appenders: ['Console'],
+    loggers: [{
+        tag: 'App',
+        logLevel : LogLevel.INFO
+    } as any]
+});
+const logger = getLogger('app');
+console.info=console.log=logger.info.bind(logger)
+console.warn=logger.warn.bind(logger)
+console.error=logger.error.bind(logger)

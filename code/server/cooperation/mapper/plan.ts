@@ -4,7 +4,6 @@ import {ECommon_Model_Plan_Table, ICommon_Model_Plan_Table, planTableModel} from
 import {Err} from "../../../common/status/error";
 import {
     generateCommonListData,
-    generateDeleteSql,
     generateGroupLeftJoinSql,
     generateLeftJoin2Sql,
     generateQuerySql,
@@ -100,28 +99,6 @@ class PlanMapper extends Mapper<typeof planModel> {
         return ret;
     }
 
-    async clearByProjects(projectIds:string[]) {
-        if(projectIds.length==0) {
-            return
-        }
-        let mysql=getMysqlInstance()
-        await Promise.all([
-            mysql.execute(generateDeleteSql(planModel,{
-                project_id:{
-                    exp:"in",
-                    value:projectIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(planTableModel,{
-                project_id:{
-                    exp:"in",
-                    value:projectIds
-                }
-            }))
-        ])
-
-    }
-
     async issuePlanList(projectIssueId:string) {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
@@ -157,15 +134,6 @@ export const planMapper=new PlanMapper
 class PlanTableMapper extends Mapper<typeof planTableModel> {
     constructor() {
         super(planTableModel)
-    }
-    async clearByPlanId(planId:string) {
-        if(!planId) {
-            throw Err.Project.Plan.planNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(planTableModel,{
-            plan_id:planId
-        }))
     }
 
     async getNewSort(planItemId:string,planId:string) {
@@ -215,19 +183,6 @@ class PlanTableMapper extends Mapper<typeof planTableModel> {
             },
             parent_id:parentId,
             plan_id:planId
-        }))
-    }
-
-    async removeItems(ids:string[]) {
-        if(ids?.length==0) {
-            return
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(planTableModel,{
-            id:{
-                exp:"in",
-                value:ids
-            }
         }))
     }
 

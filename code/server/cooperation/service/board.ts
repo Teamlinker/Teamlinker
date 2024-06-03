@@ -13,7 +13,7 @@ import {boardColumnModel} from "../../../common/model/board_column";
 import {boardColumnWorkflowNodeModel} from "../../../common/model/board_column_workflow_node";
 import {boardIssueTypeModel} from "../../../common/model/board_issue_type";
 import {boardSprintModel, ECommon_Model_Board_Sprint_Status} from "../../../common/model/board_sprint";
-import {boardSprintIssueModel} from "../../../common/model/board_sprint_issue";
+import {boardSprintIssueModel, ICommon_Model_Board_Sprint_Issue} from "../../../common/model/board_sprint_issue";
 import {boardSprintSwimLaneModel} from "../../../common/model/board_sprint_swimlane";
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import {workflowMapper} from "../mapper/workflow";
@@ -23,6 +23,8 @@ import {Err} from "../../../common/status/error";
 import {ICommon_Model_Workflow_Action} from "../../../common/model/workflow_action";
 import {REDIS_USER} from "../../common/cache/keys/user";
 import * as i18next from "i18next";
+import {ICommon_Model_Project_Issue, projectIssueModel} from "../../../common/model/project_issue";
+import {keys} from "../../../common/transform";
 
 export class BoardService extends Entity<typeof boardModel,typeof boardMapper> {
     constructor() {
@@ -142,16 +144,18 @@ export class BoardService extends Entity<typeof boardModel,typeof boardMapper> {
     }
 
     static async clearByProjectId(projectId:string) {
-        let arr=await BoardService.getItemsByExp({
+        await BoardService.batchDelete({
             project_id:projectId
-        })
-        await Promise.all(arr.map(item=>{
-            return item.delete()
-        }))
+        },false)
     }
 
     static async clearByProjectIds(projectIds:string[]) {
-        await boardMapper.clearByProjects(projectIds)
+        await BoardService.batchDelete({
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        },false)
     }
 }
 
@@ -167,7 +171,9 @@ export class BoardColumnService extends Entity<typeof boardColumnModel,typeof bo
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
         await super.delete(eventPublish, ...param);
-        await BoardColumnWorkflowNodeService.clear(this.getId())
+        await BoardColumnWorkflowNodeService.batchDelete({
+            board_column_id:this.getId()
+        },false)
         await boardColumnMapper.shrink(this.getItem().board_id,this.getItem().weight)
     }
 
@@ -185,12 +191,6 @@ export class BoardColumnWorkflowNodeService extends Entity<typeof boardColumnWor
         let ret=await boardColumnWorkflowNodeMapper.list(boardColumnId)
         return ret;
     }
-    static async clear(boardColumnId:string) {
-        await boardColumnWorkflowNodeMapper.clear(boardColumnId)
-    }
-    static async clearByIssueTypeId(issueTypeId:string) {
-        await boardColumnWorkflowNodeMapper.clear(issueTypeId)
-    }
     static async listAllWorkflowNode(boardId:string,issuerTypeId:string) {
         let ret=await boardColumnWorkflowNodeMapper.listAllWorkflowNode(boardId,issuerTypeId)
         return ret;
@@ -206,12 +206,16 @@ export class BoardIssueTypeService extends Entity<typeof boardIssueTypeModel,typ
         return ret;
     }
     static async clear(boardId:string) {
-        await boardIssueTypeMapper.clear(boardId)
+        await BoardIssueTypeService.batchDelete({
+            board_id:boardId
+        },false)
     }
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
         await super.delete(eventPublish, ...param);
-        await BoardColumnWorkflowNodeService.clearByIssueTypeId(this.getItem().issue_type_id)
+        await BoardColumnWorkflowNodeService.batchDelete({
+            issue_type_id:this.getItem().issue_type_id
+        },false)
         await BoardSprintIssueService.clearByIssueTypeIds([this.getItem().issue_type_id])
     }
 }
@@ -332,10 +336,29 @@ export class BoardSprintIssueService extends Entity<typeof boardSprintIssueModel
         super(boardSprintIssueMapper)
     }
     static async clear(boardSprintId:string) {
-        await boardSprintIssueMapper.clear(boardSprintId)
+        await BoardSprintIssueService.batchDelete({
+            board_sprint_id:boardSprintId,
+        },false)
     }
     static async clearByIssueTypeIds(issueTypeIds:string[]) {
-        await boardSprintIssueMapper.clearByIssueTypeIds(issueTypeIds)
+        await BoardSprintIssueService.batchLeftJoinDelete(keys<ICommon_Model_Board_Sprint_Issue>().map(item=>item.name),{
+            entity:new ProjectIssueService(),
+            expression:{
+                id:{
+                    field:"project_issue_id"
+                }
+            },
+            columns:keys<ICommon_Model_Project_Issue>().map(item=>item.name),
+            isDelete:false
+        },{
+            issue_type_id:{
+                model:projectIssueModel,
+                value:{
+                    exp:"in",
+                    value:issueTypeIds
+                }
+            }
+        },false)
     }
 }
 
@@ -344,7 +367,9 @@ export class BoardSprintSwimLaneService extends Entity<typeof boardSprintSwimLan
         super(boardSprintSwimLaneMapper)
     }
     static async clear(boardSprintId:string) {
-        await boardSprintSwimLaneMapper.clear(boardSprintId)
+        await BoardSprintSwimLaneService.batchDelete({
+            board_sprint_id:boardSprintId
+        },false)
     }
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {

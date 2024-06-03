@@ -302,31 +302,6 @@ class OrganizationMapper extends Mapper<typeof organizationModel> {
         };
     }
 
-
-    async clearUser(organizationId:string){
-        if(!organizationId) {
-            throw Err.Organization.organizationNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(organizationUserModel,{
-            organization_id:organizationId
-        }))
-    }
-
-    async clearTeam(organizationId:string){
-        if(!organizationId) {
-            throw Err.Organization.organizationNotFound
-        }
-        let mysql=getMysqlInstance()
-        let ret=await mysql.execute(generateQuerySql(teamModel,["id"],{
-            organization_id:organizationId
-        }))
-        await mysql.execute(generateDeleteSql(teamModel,{
-            organization_id:organizationId
-        }))
-        return ret.map(item=>item.id)
-    }
-
     async init(adminIds: string[], userIds: string[]) {
         let mysql=getMysqlInstance()
         let id=await generateSnowId()
@@ -585,13 +560,6 @@ class MemberTagMapper extends Mapper<typeof memberTagModel> {
         return ret;
     }
 
-    async clearMemberByTagId(memberTagId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(memberTagMemberModel,{
-            member_tag_id:memberTagId
-        }))
-    }
-
     async listMemberTag(memberId:string) {
         let mysql=getMysqlInstance()
         let sql=generateLeftJoinSql({
@@ -800,12 +768,6 @@ class MemberTagMapper extends Mapper<typeof memberTagModel> {
         return ret;
     }
 
-    async clearMemberByMemberId(memberId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(memberTagMemberModel,{
-            organization_user_id:memberId
-        }))
-    }
 
 }
 

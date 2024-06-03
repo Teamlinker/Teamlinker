@@ -1,10 +1,11 @@
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
 import {workflowNodeFieldTypeModel} from '../../../common/model/workflow_node_field_type';
-import {workflowNodeFieldTypeMapper} from './../mapper/field';
+import {workflowNodeFieldTypeConfigMapper, workflowNodeFieldTypeMapper} from './../mapper/field';
 import {ECommon_Field_Type, Field_Types} from "../../../common/field/type";
-import {ProjectIssueService} from "./issue";
+import {ProjectIssueFieldValueService, ProjectIssueService} from "./issue";
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import {workflowNodeFieldTypeConfigModel} from "../../../common/model/workflow_node_field_type_config";
 
 export  class FieldTypeService {
 
@@ -27,8 +28,14 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
     }
 
     override async delete(eventPulish?: keyof IServer_Common_Event_Types): Promise<void> {
-        await workflowNodeFieldTypeMapper.deleteWorkflowNodeField(this.getId());
-        await ProjectIssueService.clearIssueValueByFieldTypeId(this.getId());
+        await super.delete(eventPulish)
+        await WorkflowNodeFieldTypeConfigService.batchDelete({
+            workflow_node_field_type_id:this.getId(),
+        },true)
+        await workflowNodeFieldTypeMapper.offsetWorkflowNodeField(this.getItem().workflow_node_id,this.getItem().weight);
+        await ProjectIssueFieldValueService.batchDelete({
+            workflow_node_field_type_id:this.getId()
+        },false)
     }
 
 
@@ -76,7 +83,9 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
         if(!workflowNodeId) {
             throw Err.Project.Workflow.workflowNodeNotFound
         }
-        await workflowNodeFieldTypeMapper.clearFieldByWorkflowNodeId(workflowNodeId)
+        await WorkflowNodeFieldTypeService.batchDelete({
+            workflow_node_id:workflowNodeId
+        },false)
     }
 
     async moveWorkflowNodeField(weight:number) {
@@ -124,7 +133,9 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
             }
         }
         for(let i=0;i<arrConfig.length;i++) {
-            arrPromise.push(workflowNodeFieldTypeMapper.deleteWorkflowNodeFieldConfigs([arrConfig[i].id]))
+            arrPromise.push(WorkflowNodeFieldTypeConfigService.batchDelete({
+                workflow_node_field_type_id:arrConfig[i].id
+            },true))
             arrPromise.push(ProjectIssueService.clearWorkflowNodeFieldTypeConfig(arrConfig[i].id))
         }
         await Promise.all(arrPromise)
@@ -134,7 +145,9 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
 
     static async workflowFieldsCopy(workflowNodeId:string,newWorkflowNodeId:string,overwrite:number) {
         if(overwrite) {
-            await workflowNodeFieldTypeMapper.clearFieldByWorkflowNodeId(newWorkflowNodeId)
+            await WorkflowNodeFieldTypeService.batchDelete({
+                workflow_node_id:newWorkflowNodeId
+            },false)
         }
         await workflowNodeFieldTypeMapper.workflowFieldsCopy(workflowNodeId,newWorkflowNodeId)
     }
@@ -148,10 +161,18 @@ export class WorkflowNodeFieldTypeService extends Entity<typeof workflowNodeFiel
     }
 
     static async clearFieldByWorkflowNodeId(workflowNodeId:string) {
-        await workflowNodeFieldTypeMapper.clearFieldByWorkflowNodeId(workflowNodeId);
+        await WorkflowNodeFieldTypeService.batchDelete({
+            workflow_node_id:workflowNodeId
+        },false)
     }
 
     static async setWorkflowNodeFieldsWeight(workflowNodeFieldTypeIds:string) {
         await workflowNodeFieldTypeMapper.setWorkflowNodeFieldsWeight(workflowNodeFieldTypeIds)
+    }
+}
+
+export class WorkflowNodeFieldTypeConfigService extends Entity<typeof workflowNodeFieldTypeConfigModel,typeof workflowNodeFieldTypeConfigMapper> {
+    constructor() {
+        super(workflowNodeFieldTypeConfigMapper)
     }
 }

@@ -7,9 +7,8 @@ import {
 import {Err} from '../../../common/status/error';
 import {getMysqlInstance} from '../../common/db/mysql';
 import {Mapper} from "../../common/entity/mapper";
-import {generateDeleteLeftJoinSql, generateDeleteSql, generateQuerySql} from '../../common/util/sql';
+import {generateQuerySql} from '../../common/util/sql';
 import {projectModel} from './../../../common/model/project';
-import {roleMemberModel} from './../../../common/model/role_member';
 import {teamModel} from './../../../common/model/team';
 import {organizationModel} from "../../../common/model/organization";
 import {wikiModel} from "../../../common/model/wiki";
@@ -20,43 +19,6 @@ let g_roleAdmin:{
 class RoleMapper extends Mapper<typeof roleModel> {
     constructor(){
         super(roleModel)
-    }
-
-    async clearRoleByItemId(itemId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(roleMemberModel,{
-            item_id:itemId
-        }))
-        await mysql.execute(generateDeleteSql(roleModel,{
-            item_id:itemId
-        }))
-    }
-
-    async clearRoleByItemIds(itemIds:string[]) {
-        if(itemIds.length==0) {
-            return;
-        }
-        let mysql=getMysqlInstance()
-        let ret=await mysql.execute(generateQuerySql(roleModel,["id"],{
-            item_id:{
-                exp:"in",
-                value:itemIds
-            }
-        }))
-        if(ret.length>0) {
-            await mysql.execute(generateDeleteSql(roleMemberModel,{
-                item_id:{
-                    exp:"in",
-                    value:itemIds
-                }
-            }))
-            await mysql.execute(generateDeleteSql(roleModel,{
-                item_id:{
-                    exp:"in",
-                    value:itemIds
-                }
-            }))
-        }
     }
 
     async getAdminRole(type:ECommon_Model_Role_Type) {
@@ -180,29 +142,6 @@ class RoleMapper extends Mapper<typeof roleModel> {
             value:value
         }))
         return obj;
-    }
-
-    async clearByOrganizationId(organizationId:string) {
-        if(!organizationId) {
-            throw Err.Organization.organizationNotFound
-        }
-        let mysql=getMysqlInstance()
-        let sql=generateDeleteLeftJoinSql(roleModel,{
-            model:roleMemberModel,
-            expression:{
-                role_id:{
-                    model:roleModel,
-                    field:"id"
-                }
-            },
-            isDelete:true
-        },{
-            organization_id:{
-                model:roleModel,
-                value:organizationId
-            }
-        })
-        await mysql.execute(sql)
     }
 }
 

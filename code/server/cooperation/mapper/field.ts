@@ -13,7 +13,6 @@ import {Mapper} from "../../common/entity/mapper";
 import {
     generateBatchCreateSql,
     generateCreateSql,
-    generateDeleteSql,
     generateMaxSql,
     generateQuerySql,
     generateSnowId,
@@ -173,36 +172,23 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
         }))
     }
 
-    async deleteWorkflowNodeField(workflowNodeFieldTypeId:string) {
-        if(!workflowNodeFieldTypeId) {
-            throw Err.Project.Field.fieldSolutionWorkflowNodeFieldTypeNotFound
+    async offsetWorkflowNodeField(workflowNodeId:string,weight:number) {
+        if(!workflowNodeId) {
+            throw Err.Project.Workflow.workflowNodeNotFound
         }
         let mysql=getMysqlInstance()
-        let obj=await mysql.executeOne(generateQuerySql(workflowNodeFieldTypeModel,[],{
-            id:workflowNodeFieldTypeId
+        await mysql.execute(generateUpdateSql(workflowNodeFieldTypeModel,{
+            weight:{
+                exp:"-",
+                value:1
+            }
+        },{
+            workflow_node_id:workflowNodeId,
+            weight:{
+                exp:">",
+                value:weight
+            }
         }))
-        if(obj) {
-            await Promise.all([
-                mysql.execute(generateDeleteSql(workflowNodeFieldTypeModel,{
-                    id:workflowNodeFieldTypeId
-                })),
-                mysql.execute(generateDeleteSql(workflowNodeFieldTypeConfigModel,{
-                    workflow_node_field_type_id:workflowNodeFieldTypeId
-                })),
-                mysql.execute(generateUpdateSql(workflowNodeFieldTypeModel,{
-                    weight:{
-                        exp:"-",
-                        value:1
-                    }
-                },{
-                    workflow_node_id:obj.workflow_node_id,
-                    weight:{
-                        exp:">",
-                        value:obj.weight
-                    }
-                }))
-            ])
-        }
     }
 
     async moveWorkflowNodeField(workflowNodeFieldTypeId:string, weight:number) {
@@ -351,31 +337,6 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
         return ret;
     }
 
-    async deleteConfigByFieldId(fieldTypeId :string) {
-        if(fieldTypeId===undefined ||fieldTypeId===null) {
-            throw Err.Project.Field.fieldTypeNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(workflowNodeFieldTypeConfigModel,{
-            workflow_node_field_type_id:fieldTypeId
-        }))
-    }
-
-    async deleteWorkflowNodeFieldConfigs(fieldTypeConfigValueIds :string[]) {
-        if(!fieldTypeConfigValueIds) {
-            throw Err.Project.Field.fieldTypeConfigValueIdNotFound
-        }
-        if(fieldTypeConfigValueIds.length>0) {
-            let mysql=getMysqlInstance()
-            await mysql.execute(generateDeleteSql(workflowNodeFieldTypeConfigModel,{
-                id:{
-                    exp:"in",
-                    value:fieldTypeConfigValueIds
-                }
-            }))
-        }
-    }
-
     async workflowFieldsCopy(workflowNodeId:string,newWorkflowNodeId:string) {
         if(!workflowNodeId) {
             throw Err.Project.Workflow.workflowNodeNotFound
@@ -476,26 +437,6 @@ class WorkflowNodeFieldTypeMapper extends Mapper<typeof workflowNodeFieldTypeMod
                 fieldType:Field_Types[obj.field_type_id]
             }
         });
-    }
-
-    async clearFieldByWorkflowNodeId(workflowNodeId:string){
-        let mysql=getMysqlInstance()
-        let arr=await mysql.execute(generateQuerySql(workflowNodeFieldTypeModel,["id"],{
-            workflow_node_id:workflowNodeId
-        }))
-        let arrPromise=[]
-        if(arr.length>0) {
-            arrPromise.push(mysql.execute(generateDeleteSql(workflowNodeFieldTypeModel, {
-                workflow_node_id: workflowNodeId
-            })))
-            arrPromise.push(mysql.execute(generateDeleteSql(workflowNodeFieldTypeConfigModel,{
-                workflow_node_field_type_id:{
-                    exp:"in",
-                    value:arr.map(item=>item.id)
-                }
-            })))
-        }
-        await Promise.all(arrPromise);
     }
 
     async setWorkflowNodeFieldsWeight(workflowNodeFieldTypeIds:string) {

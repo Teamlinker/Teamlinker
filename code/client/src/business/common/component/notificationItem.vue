@@ -1,28 +1,49 @@
 <template>
 	<div style="display: flex;align-items: center;">
 		<template v-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_ADD">
-			{{$t("notification.teamUserAdd.0")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
-			&nbsp;&nbsp;
-			{{$t("notification.teamUserAdd.1")}}
+			<i18n-t keypath="notification.teamUserAdd" tag="span">
+				<template #team>
+					<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.WIKI_ITEM_AT">
-			{{$t("notification.wikiItemAt.0")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onWiki">{{(obj.data as ICommon_Model_Wiki_Item)?.name}}</a>
+			<i18n-t keypath="notification.wikiItemAt" tag="span">
+				<template #wiki>
+					<a href="javascript:void(0)" @click="onWiki">{{(obj.data as ICommon_Model_Wiki_Item)?.name}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ORGANIZATION_USER_ROLE_CHANGE">
-			{{$t("notification.organizationUserRoleChange.0")}}{{(obj.data as ICommon_Model_Organization)?.name}}
+			<i18n-t keypath="notification.organizationUserRoleChange" tag="span">
+				<template #organization>
+					{{(obj.data as ICommon_Model_Organization)?.name}}
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ORGANIZATION_USER_REMOVE">
-			{{$t("notification.organizationUserRemove.0")}}{{(obj.data as ICommon_Model_Organization)?.name}}
+			<i18n-t keypath="notification.organizationUserRemove" tag="span">
+				<template #organization>
+					{{(obj.data as ICommon_Model_Organization)?.name}}
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ORGANIZATION_USER_QUIT">
-			{{$t("notification.organizationUserQuit.0")}}{{obj.extra}}{{$t("notification.organizationUserQuit.1")}}{{(obj.data as ICommon_Model_Organization)?.name}}
+			<i18n-t keypath="notification.organizationUserQuit" tag="span">
+				<template #user>
+					{{obj.extra}}
+				</template>
+				<template #organization>
+					{{(obj.data as ICommon_Model_Organization)?.name}}
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ORGANIZATION_INVITATION">
-			{{$t("notification.organizationInvitation.0")}}{{(obj.data as ICommon_Model_Organization)?.name}}{{$t("notification.organizationInvitation.1")}}
+			<i18n-t keypath="notification.organizationInvitation" tag="span">
+				<template #organization>
+					{{(obj.data as ICommon_Model_Organization)?.name}}
+				</template>
+			</i18n-t>
 			<template v-if="obj.status===ECommon_Model_Notification_Status.PENDING">
 				&nbsp;
 				<a href="javascript:void(0)" @click="onAcceptOrganizationInvitation">{{$t("util.accept")}}</a>&nbsp;&nbsp;
@@ -38,135 +59,155 @@
 			</template>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_COMMENT_AT">
-			{{$t("notification.issueCommentAt.0")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
-			&nbsp;&nbsp;
-			{{$t("notification.issueCommentAt.1")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
-			&nbsp;&nbsp;
+			<i18n-t keypath="notification.issueCommentAt" tag="span">
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_DISMISS">
-			{{$t("notification.teamDismiss.0")}}{{obj.extra}}{{$t("notification.teamDismiss.1")}}
+			<i18n-t keypath="notification.teamDismiss" tag="span">
+				<template #team>
+					{{obj.extra}}
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_REMOVE">
-			{{$t("notification.teamUserRemove.0")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
-			&nbsp;&nbsp;
-			{{$t("notification.teamUserRemove.1")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
+			<i18n-t keypath="notification.teamUserRemove" tag="span">
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+				<template #team>
+					<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_ROLE_CHANGE">
-			{{$t("notification.teamUserRoleChange.0")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
+			<i18n-t keypath="notification.teamUserRoleChange" tag="span">
+				<template #team>
+					<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_REMOVE">
-			{{$t("notification.issueRemove.0")}}{{obj.extra}}{{$t("notification.issueRemove.1")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<i18n-t keypath="notification.issueRemove" tag="span">
+				<template #issue>
+					{{obj.extra}}
+				</template>
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.TEAM_USER_QUIT">
-			{{$t("notification.teamUserQuit.0")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
-			&nbsp;&nbsp;
-			{{$t("notification.teamUserQuit.1")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
+			<i18n-t keypath="notification.teamUserQuit" tag="span">
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+				<template #team>
+					<a href="javascript:void(0)" @click="onTeam">{{(obj.data as ICommon_Model_Team)?.name}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_REPORTER_ASSIGN">
-			{{$t("notification.issueReporterAssign.0")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
-			&nbsp;&nbsp;
-			{{$t("notification.issueReporterAssign.1")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
-			&nbsp;&nbsp;
-			{{$t("notification.issueReporterAssign.2")}}
+			<i18n-t keypath="notification.issueReporterAssign" tag="span">
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_WORKFLOW_CHANGE">
-			{{$t("notification.issueWorkflowChange.0")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
-			&nbsp;&nbsp;
-			{{$t("notification.issueWorkflowChange.1")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<i18n-t keypath="notification.issueWorkflowChange" tag="span">
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_COMMENT_ADD">
-			{{$t("notification.issueCommentAdd.0")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
-			&nbsp;&nbsp;
-			{{$t("notification.issueCommentAdd.1")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+			<i18n-t keypath="notification.issueCommentAdd" tag="span">
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.CALENDAR_EVENT_INVITATION">
-			{{$t("notification.calendarEventInvitation.0")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onCalendarEvent">{{(obj.data as ICommon_Model_Calendar_Event)?.name}}</a>
+			<i18n-t keypath="notification.calendarEventInvitation" tag="span">
+				<template #event>
+					<a href="javascript:void(0)" @click="onCalendarEvent">{{(obj.data as ICommon_Model_Calendar_Event)?.name}}</a>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_FIELD_CHANGE">
-			{{$t("notification.issueFieldChange.0")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
-			&nbsp;&nbsp;
-			{{$t("notification.issueFieldChange.1")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<i18n-t keypath="notification.issueFieldChange" tag="span">
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGNER_ASSIGN">
-			{{$t("notification.issueAssignerAssign.0")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
-			&nbsp;&nbsp;
-			{{$t("notification.issueAssignerAssign.1")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
-			&nbsp;&nbsp;
-			{{$t("notification.issueAssignerAssign.2")}}
+			<i18n-t keypath="notification.issueAssignerAssign" tag="span">
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGN_RELEASE">
-			{{$t("notification.issueAssignRelease.0")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
-			&nbsp;&nbsp;
-			{{$t("notification.issueAssignRelease.1")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<i18n-t keypath="notification.issueAssignRelease" tag="span">
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_ASSIGN_SPRINT">
-			{{$t("notification.issueAssignSprint.0")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
-			&nbsp;&nbsp;
-			{{$t("notification.issueAssignSprint.1")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+			<i18n-t keypath="notification.issueAssignSprint" tag="span">
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_RESOLVE">
-			{{$t("notification.issueApprovalResolve.0")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
-			&nbsp;&nbsp;
-			{{$t("notification.issueApprovalResolve.1")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+			<i18n-t keypath="notification.issueApprovalResolve" tag="span">
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+			</i18n-t>
 		</template>
 		<template v-else-if="obj.type===ECommon_Model_Notification_Type.ISSUE_APPROVAL_REJECT">
-			{{$t("notification.issueApprovalReject.0")}}
-			&nbsp;&nbsp;
-			<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
-			&nbsp;&nbsp;
-			{{$t("notification.issueApprovalReject.1")}}
-			&nbsp;&nbsp;
-			<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+			<i18n-t keypath="notification.issueApprovalReject" tag="span">
+				<template #issue>
+					<a href="javascript:void(0)" @click="onIssue">{{(obj.data as ISSUE)?.project.keyword}}-{{(obj.data as ISSUE)?.issue.unique_id}}</a>
+				</template>
+				<template #user>
+					<UserAvatar :organization-user-id="obj.operationOrganizationUser?.id" :name="obj.operationOrganizationUser?.name" :photo="obj.operationOrganizationUser?.photo" :organization-id="obj.organization_id"></UserAvatar>
+				</template>
+			</i18n-t>
 		</template>
 	</div>
 </template>

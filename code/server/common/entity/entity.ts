@@ -3,6 +3,9 @@ import {Err} from '../../../common/status/error';
 import {Mapper} from './mapper';
 import {emitServiceEvent} from "../event/event";
 import {IServer_Common_Event_Types} from "../event/types";
+import {EXPREXTRAVALUE, EXPRVALUE} from "../util/sql";
+import {Options} from "amqplib";
+
 
 let fileFields=[
     "photo",
@@ -151,8 +154,9 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
     }
 
     static async getItemsByExp<Type>(this:{new():Type},exp:{
-        [param in keyof GET<Type>["model"]]?:GET<Type>["model"][param]
-    }):Promise<Type[]>{
+        [param in ((keyof GET<Type>["model"])|`${"$and"|"$or"}${number}`)]?:EXPRVALUE|{
+        [param in keyof GET<Type>["model"]]?:EXPRVALUE
+    }}):Promise<Type[]>{
         if(!exp) {
             return null
         }
@@ -168,6 +172,99 @@ export abstract class Entity<T extends BaseModel,M extends Mapper<T>> {
             return ret;
         } else {
             return [];
+        }
+    }
+
+    static async batchDelete<Type>(this:{new():Type},exp:{
+        [param in keyof GET<Type>["model"]]?:Extract<EXPRVALUE,GET<Type>["model"][param]|EXPREXTRAVALUE>
+    } | {
+        [param in `${"$and"|"$or"}${number}`]:{
+            [param in keyof GET<Type>["model"]]?:Extract<EXPRVALUE,GET<Type>["model"][param]|EXPREXTRAVALUE>
+        }
+    },isDirect:boolean=true,eventPublish?:keyof IServer_Common_Event_Types,...param:any):Promise<void>{
+        if(!exp) {
+            return null
+        }
+        if(isDirect) {
+            let user = new this() as any;
+            await user.mapper.batchDelete(exp)
+        } else {
+            let user = new this() as any;
+            let arr = await user.mapper.getItemsByExp(exp);
+            if(arr.length>0) {
+                let ret:Entity<GET<Type>,typeof user.mapper>[]=[]
+                for(let obj of arr) {
+                    let objService=new this() as any
+                    objService.setItem(obj)
+                    ret.push(objService)
+                }
+                if(ret.length>0) {
+                    let arrPromise=ret.map(value => {
+                        return value.delete(eventPublish,param)
+                    })
+                    await Promise.all(arrPromise)
+                }
+            }
+        }
+    }
+
+    static async batchLeftJoinDelete<Type extends Entity<T,M>,T2 extends Entity<T1,T3>,T1 extends BaseModel,T3 extends Mapper<T1>,T extends BaseModel,M extends Mapper<T>>(this:{new():Type},columns:(keyof GET<Type>["model"])[],joinEntity: {
+        entity: T2,
+        expression: {
+            [key in keyof T1["model"]]?: {
+                field: keyof T1["model"]
+            }
+        },
+        columns:(keyof T1["model"])[],
+        isDelete:boolean
+    }, objExpr: {
+        [param in keyof (GET<Type> & T1)["model"]]?: {
+            value: Extract<EXPRVALUE,(GET<Type> & T1)["model"][param]|EXPREXTRAVALUE>,
+            model: GET<Type> | T1
+        }
+    } | {
+        [param in `${"$and" | "$or"}${number}`] :{
+            [param in keyof (GET<Type> & T1)["model"]]?: {
+                value: Extract<EXPRVALUE,(GET<Type> & T1)["model"][param]|EXPREXTRAVALUE>,
+                model: GET<Type> | T1
+            }
+        }
+    },isDirect:boolean,eventPublish?:keyof IServer_Common_Event_Types,...param:any):Promise<void>{
+        if(isDirect) {
+            let user:Entity<T, M> = new this();
+            await user.mapper.batchLeftJoinDelete<T1>({
+                ...joinEntity,
+                model:joinEntity.entity.mapper.getModel()
+            },objExpr)
+        } else {
+            let user:Entity<T, M> = new this();
+            let arr = await user.mapper.batchLeftJoinQuery<T1>(columns,{
+                ...joinEntity,
+                model:joinEntity.entity.mapper.getModel(),
+                columns:joinEntity.columns
+            },objExpr);
+            if(arr.length>0) {
+                let ret:Entity<T, M>[]=[]
+                let ret1:Entity<T1, T3>[]=[]
+                for(let obj of arr) {
+                    if(obj.$0?.id) {
+                        let objService:Entity<T, M>=new this()
+                        objService.setItem(obj.$0)
+                        ret.push(objService)
+                    }
+                    if(obj.$1?.id && joinEntity.isDelete) {
+                        let objService:Entity<T1, T3>=Object.create(joinEntity.entity)
+                        objService.setItem(obj.$1)
+                        ret1.push(objService)
+                    }
+                }
+                if(ret.length>0) {
+                    let arrPromise=[...ret,...ret1].map(value => {
+                        return value.delete(eventPublish,param)
+                    })
+                    await Promise.all(arrPromise)
+                }
+            }
         }
     }
 }

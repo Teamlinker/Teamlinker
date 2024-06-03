@@ -150,10 +150,10 @@ import {Dialog} from "../../../common/component/dialog/dialog";
 import {getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import CalendarEdit from "./calendarEdit.vue";
 import {Message} from "@arco-design/web-vue";
-import Calendar from "../../../common/component/calendar/calendar.vue"
+import Calendar from "../../../common/component/calendar/src/calendar.vue"
 import CalendarEventAddSimple from "./calendarEventAddSimple.vue";
 import {CalendarEventModelType} from "./calendarEventDateEdit.vue";
-import {IClient_Calendar_Date, IClient_Calendar_Info} from "../../../common/component/calendar/type";
+import {IClient_Calendar_Date, IClient_Calendar_Info} from "../../../common/component/calendar/src/type";
 import {ECommon_Calendar_Recurring_Type} from "../../../../../../common/model/calendar_event";
 import CalendarEventEdit from "./calendarEventEdit.vue";
 import {injectCalendarSetting} from "../../../common/util/symbol";

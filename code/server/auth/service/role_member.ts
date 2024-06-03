@@ -19,7 +19,9 @@ export class RoleMemberService extends Entity<typeof roleMemberModel,typeof role
     }
 
     static async clearByRoleId(roleId:string) {
-        await roleMemberMapper.clearByRoleId(roleId)
+        RoleMemberService.batchDelete({
+            role_id:roleId
+        },false)
     }
 
     static async checkRoleMember(roleId:string):Promise<boolean> {
@@ -28,7 +30,9 @@ export class RoleMemberService extends Entity<typeof roleMemberModel,typeof role
     }
 
     static async clearMember(memberId:string) {
-        await roleMemberMapper.clearMember(memberId)
+        RoleMemberService.batchDelete({
+            member_id:memberId
+        },false)
     }
 
 }

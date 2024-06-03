@@ -78,7 +78,7 @@
             <div style="position: absolute;line-height:20px;border-radius: 5px;padding-left: 5px;color: white;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;cursor: move" :style="{left:item.left,top:item.top,right:item.right,height:item.height,backgroundColor:objManage.checkCrossEvent(item)?item.color:'',color:objManage.checkCrossEvent(item)?'white':item.color}" :data-id="item.id" :data-index="JSON.stringify(item.index)" data-type="move" v-if="parseInt(item.top)+parseInt(item.height)<monthDayHeight-30">
               {{moment.tz({hour:item.startDate.hour,minute:item.startDate.minute},props.timeZone).format("HH:mm")+" "+item.name}}
             </div>
-            <div class="eventMore" style="position: absolute;line-height:20px;border-radius: 5px;padding-left: 5px;font-weight: bold;color: rgb(3,155,229)" :style="{left:item.left,top:item.top,right:item.right,height:item.height}" v-else-if="check(index,index1)" @click="onMore(index-1,$event)" name="more">{{$t("util.more")}}</div>
+            <div class="eventMore" style="position: absolute;line-height:20px;border-radius: 5px;padding-left: 5px;font-weight: bold;color: rgb(3,155,229)" :style="{left:item.left,top:item.top,right:item.right,height:item.height}" v-else-if="check(index,index1)" @click="onMore(index-1,$event)" name="more">{{t["more"]}}</div>
           </template>
         </div>
       </div>
@@ -92,10 +92,13 @@
 <script setup lang="ts">
 import {IClient_Calendar_Date, IClient_Calendar_Info} from "./type";
 import {CalendarManage} from "./calendarManage";
-import {nextTick, onBeforeUnmount, onMounted, ref, watchEffect} from "vue";
+import {getCurrentInstance, nextTick, onBeforeUnmount, onMounted, ref, watchEffect} from "vue";
 import moment from "moment";
 import "moment-timezone"
+import {locale} from "./i18n";
 
+const i18n=getCurrentInstance().appContext.app.config.globalProperties.$TLCalendarLang || localStorage.getItem("lang") || navigator.language.split("-")[0] || "en"
+const t=locale[i18n]
 const emit=defineEmits<{
   (e:"changeEventDate", event:IClient_Calendar_Info, originalDateRange:{
     start:IClient_Calendar_Date,

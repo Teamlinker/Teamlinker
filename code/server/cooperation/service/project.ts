@@ -2,15 +2,11 @@ import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from "../../../com
 import {ICommon_Route_Res_Project_List, ICommon_Route_Res_Project_Statics} from "../../../common/routes/response";
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
-import {moduleMapper} from "../mapper/module";
 import {projectMapper} from '../mapper/project';
 import rpcAuthApi from "../../auth/rpc/auth";
-import {ProjectIssueService} from "../service/issue";
+import {ProjectIssueService, ProjectIssueTypeSolutionService} from "../service/issue";
 import {ICommon_Model_Project, projectModel} from './../../../common/model/project';
 import {ECommon_Model_Organization_Member_Type} from './../../../common/model/organization';
-import {issueTypeSolutionMapper} from './../mapper/issueType';
-import {releaseMapper} from './../mapper/release';
-import {labelMapper} from '../mapper/label';
 import {WorkflowNodeFieldTypeService} from './field';
 import {IssueTypeSolutionService} from './issueType';
 import {WorkflowService} from './workflow';
@@ -19,7 +15,10 @@ import {emitServiceEvent} from "../../common/event/event";
 import {BoardService} from "./board";
 import {REDIS_PROJECT} from "../../common/cache/keys/project";
 import rpcUserApi from "../../user/rpc/user"
-import {planMapper} from "../mapper/plan";
+import {ProjectModuleService} from "./module";
+import {ProjectLabelService} from "./label";
+import {PlanService} from "./plan";
+import {ProjectReleaseService} from "./release";
 
 export class ProjectService extends Entity<typeof projectModel,typeof projectMapper> {
     constructor(){
@@ -39,14 +38,14 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
     override async delete(type?:keyof IServer_Common_Event_Types) {
         await Promise.all([
             super.delete("projectDelete"),
-            moduleMapper.deleteByProjectId(this.item.id),
-            labelMapper.deleteByProjectId(this.item.id),
+            ProjectModuleService.clearByProjectId(this.item.id),
+            ProjectLabelService.clearByProjectId(this.item.id),
             rpcAuthApi.clearRoleByItemId(this.item.id),
             ProjectIssueService.clearByProjectIds([this.item.id]),
-            releaseMapper.clear(this.item.id),
-            issueTypeSolutionMapper.clearProjects([this.item.id]),
+            ProjectReleaseService.clearByProjectId(this.item.id),
+            ProjectIssueTypeSolutionService.clearProjects([this.item.id]),
             BoardService.clearByProjectId(this.getId()),
-            planMapper.clearByProjects([this.item.id])
+            PlanService.clearByProjects([this.item.id])
         ])
     }
 
@@ -171,17 +170,12 @@ export class ProjectService extends Entity<typeof projectModel,typeof projectMap
     }
 
     static async clearProjects(projectIds:string[]) {
-        await Promise.all([
-            projectMapper.clearProjects(projectIds),
-            moduleMapper.deleteByProjectIds(projectIds),
-            labelMapper.deleteByProjectIds(projectIds),
-            rpcAuthApi.clearRoleByItemIds(projectIds),
-            ProjectIssueService.clearByProjectIds(projectIds),
-            releaseMapper.clearByProjectIds(projectIds),
-            issueTypeSolutionMapper.clearProjects(projectIds),
-            BoardService.clearByProjectIds(projectIds),
-            planMapper.clearByProjects(projectIds)
-        ])
+        ProjectService.batchDelete({
+            id:{
+                exp:"in",
+                value:projectIds
+            }
+        },false)
     }
 
     async listRole(){

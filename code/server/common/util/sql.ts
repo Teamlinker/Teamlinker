@@ -17,9 +17,17 @@ type EXPRVALUEEXP ={
         model:BaseModel,
         field:string
     },
-    exp?:"="|">="|"<="|">"|"<"|"<>"|"is null"|"in"|"is not null"|"between"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"|"not in"|"regexp"|"json_array_contain"
+    exp:"="|">="|"<="|">"|"<"|"<>"|"is null"|"is not null"|"%like"|"like%"|"%like%"|"> <"|">= <="|">= <"|"> <="|"ref"|"regexp"|"json_array_contain"
+} | {
+    value:string[]|number[],
+    exp:"in"|"not in"
+} | {
+    value:[number,number],
+    exp:"between"
 }
-type EXPRVALUE=string|number|boolean|string|Date|EXPRVALUEEXP|{
+export type EXPRVALUE=string|number|boolean|string|Date|EXPREXTRAVALUE
+
+export type EXPREXTRAVALUE=EXPRVALUEEXP|{
     type:"and"|"or",
     values:EXPRVALUEEXP[]
 }
@@ -294,8 +302,10 @@ export function generateBatchCreateSql<T extends BaseModel>(model:T,arr:{
 }
 
 export function generateQuerySql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columns:K1[],objExpr?:{
-    [param in ((keyof T["model"])|`${"$and"|"$or"}${number}`)]?:EXPRVALUE|{
-        [param in keyof T["model"]]?:EXPRVALUE
+    [param in keyof T["model"]]?:Extract<EXPRVALUE,T["model"][param]|EXPREXTRAVALUE>
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
+        [param in keyof T["model"]]?:Extract<EXPRVALUE,T["model"][param]|EXPREXTRAVALUE>
     }
 },exprMode?:"and"|"or",order?:{
     field:keyof T["model"],
@@ -481,8 +491,10 @@ export function generateUpdateSql<T extends BaseModel>(model:T,obj:{
 }
 
 export function generateDeleteSql<T extends BaseModel>(model:T,objExpr?:{
-    [param in ((keyof T["model"])|`${"$and"|"$or"}${number}`)]?:EXPRVALUE|{
-        [param in keyof T["model"]]?:EXPRVALUE
+    [param in keyof T["model"]]?:Extract<EXPRVALUE,T["model"][param]|EXPREXTRAVALUE>
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
+        [param in keyof T["model"]]?:Extract<EXPRVALUE,T["model"][param]|EXPREXTRAVALUE>
     }
 },exprMode?:"and"|"or"):{
     value:string,
@@ -505,15 +517,17 @@ export function generateDeleteLeftJoinSql<T1 extends BaseModel, T2 extends BaseM
     },
     isDelete:boolean
 }, objExpr?: {
-    [param in ((keyof (T1 & T2)["model"]) | `${"$and" | "$or"}${number}`)]?: {
-    value: EXPRVALUE,
-    model: T1 | T2
-} | {
     [param in keyof (T1 & T2)["model"]]?: {
-        value: EXPRVALUE,
-        model: T1 | T2
-    }
+    value: Extract<EXPRVALUE,(T1 & T2)["model"][param]|EXPREXTRAVALUE>,
+    model: T1 | T2
 }
+} | {
+    [param in `${"$and" | "$or"}${number}`] :{
+        [param in keyof (T1 & T2)["model"]]?: {
+            value: Extract<EXPRVALUE,(T1 & T2)["model"][param]|EXPREXTRAVALUE>,
+            model: T1 | T2
+        }
+    }
 }, exprMode?: "and" | "or") {
     let expr = generateLeftJoinExp(objExpr, exprMode);
     let table = mainModel.table
@@ -549,15 +563,16 @@ export function generateDeleteLeftJoin2Sql<T1 extends BaseModel, T2 extends Base
     },
     isDelete:boolean
 }, objExpr?: {
-    [param in ((keyof (T1 & T2 & T3)["model"])|`${"$and"|"$or"}${number}`)]?:{
-    value:EXPRVALUE,
+    [param in (keyof (T1 & T2 & T3)["model"])]?:{
+    value:Extract<EXPRVALUE,(T1 & T2 & T3)["model"][param]|EXPREXTRAVALUE>,
     model:T1|T2|T3
-}|{
-    [param in keyof (T1 & T2 & T3)["model"]]?:{
-        value:EXPRVALUE,
-        model:T1|T2|T3
+}} | {
+    [param in `${"$and"|"$or"}${number}`]?:{
+        [param in keyof (T1 & T2 & T3)["model"]]?:{
+            value:Extract<EXPRVALUE,(T1 & T2 & T3)["model"][param]|EXPREXTRAVALUE>,
+            model:T1|T2|T3
+        }
     }
-}
 }, exprMode?: "and" | "or") {
     let expr = generateLeftJoinExp(objExpr, exprMode);
     let table = mainModel.table
@@ -606,15 +621,17 @@ export function generateDeleteLeftJoin3Sql<T1 extends BaseModel, T2 extends Base
         }
     }
 }, objExpr?: {
-    [param in ((keyof (T1 & T2 & T3 & T4)["model"])|`${"$and"|"$or"}${number}`)]?:{
-    value:EXPRVALUE,
-    model:T1|T2|T3|T4
-}|{
     [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
-        value:EXPRVALUE,
-        model:T1|T2|T3|T4
-    }
+    value:Extract<EXPRVALUE,(T1 & T2 & T3 & T4)["model"][param]|EXPREXTRAVALUE>,
+    model:T1|T2|T3|T4
 }
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
+        [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
+            value:Extract<EXPRVALUE,(T1 & T2 & T3 & T4)["model"][param]|EXPREXTRAVALUE>,
+            model:T1|T2|T3|T4
+        }
+    }
 }, exprMode?: "and" | "or") {
     let expr = generateLeftJoinExp(objExpr, exprMode);
     let table = mainModel.table
@@ -670,12 +687,14 @@ export function generateLeftJoinSql<T1 extends BaseModel,T2 extends BaseModel,K1
         }
     }
 },objExpr?:{
-    [param in ((keyof (T1 & T2)["model"])|`${"$and"|"$or"}${number}`)]?:{
-        value:EXPRVALUE,
+    [param in keyof (T1 & T2)["model"]]?:{
+        value:Extract<EXPRVALUE,(T1 & T2)["model"][param]|EXPREXTRAVALUE>,
         model:T1|T2
-    }|{
-        [param in keyof (T1 & T2)["model"]]?:{ 
-            value:EXPRVALUE,
+    }
+} | {
+    [parma in `${"$and"|"$or"}${number}`]:{
+        [param in keyof (T1 & T2)["model"]]?:{
+            value:Extract<EXPRVALUE,(T1 & T2)["model"][param]|EXPREXTRAVALUE>,
             model:T1|T2
         }
     }
@@ -804,12 +823,14 @@ export function generateLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseModel,T
         }
     }
 },objExpr?:{
-    [param in ((keyof (T1 & T2 & T3)["model"])|`${"$and"|"$or"}${number}`)]?:{
-        value:EXPRVALUE,
+    [param in keyof (T1 & T2 & T3)["model"]]?:{
+        value:Extract<EXPRVALUE,(T1 & T2 & T3)["model"][param]|EXPREXTRAVALUE>,
         model:T1|T2|T3
-    }|{
-        [param in keyof (T1 & T2 & T3)["model"]]?:{ 
-            value:EXPRVALUE,
+    }
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
+        [param in keyof (T1 & T2 & T3)["model"]]?:{
+            value:Extract<EXPRVALUE,(T1 & T2 & T3)["model"][param]|EXPREXTRAVALUE>,
             model:T1|T2|T3
         }
     }
@@ -971,12 +992,14 @@ export function generateLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseModel,T
         }
     }
 },objExpr?:{
-    [param in ((keyof (T1 & T2 & T3 & T4)["model"])|`${"$and"|"$or"}${number}`)]?:{
-        value:EXPRVALUE,
+    [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
+        value:Extract<EXPRVALUE,(T1 & T2 & T3 & T4)["model"][param]|EXPREXTRAVALUE>,
         model:T1|T2|T3|T4
-    }|{
+    }
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
         [param in keyof (T1 & T2 & T3 & T4)["model"]]?:{
-            value:EXPRVALUE,
+            value:Extract<EXPRVALUE,(T1 & T2 & T3 & T4)["model"][param]|EXPREXTRAVALUE>,
             model:T1|T2|T3|T4
         }
     }
@@ -1173,15 +1196,17 @@ export function generateLeftJoin4Sql<T1 extends BaseModel,T2 extends BaseModel,T
         }
     }
 },objExpr?:{
-    [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"])|`${"$and"|"$or"}${number}`)]?:{
-    value:EXPRVALUE,
-    model:T1|T2|T3|T4|T5
-}|{
     [param in keyof (T1 & T2 & T3 & T4 & T5)["model"]]?:{
-        value:EXPRVALUE,
-        model:T1|T2|T3|T4|T5
-    }
+    value:Extract<EXPRVALUE,(T1 & T2 & T3 & T4 & T5)["model"][param]|EXPREXTRAVALUE>,
+    model:T1|T2|T3|T4|T5
 }
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
+        [param in keyof (T1 & T2 & T3 & T4 & T5)["model"]]?:{
+            value:Extract<EXPRVALUE,(T1 & T2 & T3 & T4 & T5)["model"][param]|EXPREXTRAVALUE>,
+            model:T1|T2|T3|T4|T5
+        }
+    }
 },exprMode?:"and"|"or",order?:{
     field:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"] & T5["model"]),
     model:T1 | T2 | T3 | T4 | T5,
@@ -1410,15 +1435,17 @@ export function generateLeftJoin5Sql<T1 extends BaseModel,T2 extends BaseModel,T
         }
     }
 },objExpr?:{
-    [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"])|`${"$and"|"$or"}${number}`)]?:{
-    value:EXPRVALUE,
-    model:T1|T2|T3|T4|T5|T6
-}|{
     [param in keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]]?:{
-        value:EXPRVALUE,
-        model:T1|T2|T3|T4|T5|T6
-    }
+    value:Extract<EXPRVALUE,(T1 & T2 & T3 & T4 & T5 & T6)["model"][param]|EXPREXTRAVALUE>,
+    model:T1|T2|T3|T4|T5|T6
 }
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
+        [param in keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]]?:{
+            value:Extract<EXPRVALUE,(T1 & T2 & T3 & T4 & T5 & T6)["model"][param]|EXPREXTRAVALUE>,
+            model:T1|T2|T3|T4|T5|T6
+        }
+    }
 },exprMode?:"and"|"or",order?:{
     field:keyof(T1["model"] & T2["model"] & T3["model"] & T4["model"] & T5["model"] & T6["model"]),
     model:T1 | T2 | T3 | T4 | T5 | T6,
@@ -1660,7 +1687,7 @@ export async function generatePageAndCount(sql:{
 }
 
 export function generateMaxSql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columnMax:K1,objExpr?:{
-    [param in keyof T["model"]]?:EXPRVALUE
+    [param in keyof T["model"]]?:Extract<EXPRVALUE,T["model"][param]|EXPREXTRAVALUE>
 },exprMode?:"and"|"or"):{
     value:string,
     type:{
@@ -1676,7 +1703,7 @@ export function generateMaxSql<T extends BaseModel,K1 extends keyof T["model"]>(
 }
 
 export function generateMinSql<T extends BaseModel,K1 extends keyof T["model"]>(model:T,columnMin:K1,objExpr?:{
-    [param in keyof T["model"]]?:EXPRVALUE
+    [param in keyof T["model"]]?:Extract<EXPRVALUE,T["model"][param]|EXPREXTRAVALUE>
 },exprMode?:"and"|"or"):{
     value:string,
     type:{
@@ -1812,7 +1839,7 @@ export function generateGroupSql<T extends BaseModel,K1 extends keyof T["model"]
     columns:K1[],
     calcColumns:COLUMNSVALUETYPE<R,RR>[]
 },objExpr?:{
-    [param in keyof T["model"]]?:EXPRVALUE
+    [param in keyof T["model"]]?:Extract<EXPRVALUE,T["model"][param]|EXPREXTRAVALUE>
 },exprMode?:"and"|"or",having?:{
     [param in keyof T["model"]]?:HAVINGEXP
 },havingMode?:"and"|"or",order?:{
@@ -1879,12 +1906,14 @@ export function generateGroupLeftJoinSql<T1 extends BaseModel,T2 extends BaseMod
         }
     }
 },groups:(keyof T1["model"])[],objExpr?:{
-    [param in ((keyof (T1 & T2)["model"])|`${"$and"|"$or"}${number}`)]?:{
-        value:EXPRVALUE,
+    [param in keyof (T1 & T2)["model"]]?:{
+        value:Extract<EXPRVALUE,(T1 & T2)["model"][param]|EXPREXTRAVALUE>,
         model:T1|T2
-    }|{
+    }
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
         [param in keyof (T1 & T2)["model"]]?:{
-            value:EXPRVALUE,
+            value:Extract<EXPRVALUE,(T1 & T2)["model"][param]|EXPREXTRAVALUE>,
             model:T1|T2
         }
     }
@@ -2026,12 +2055,14 @@ export function generateGroupLeftJoin2Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
 },groups:(keyof T1["model"])[],objExpr?:{
-    [param in ((keyof (T1 & T2 & T3)["model"])|`${"$and"|"$or"}${number}`)]?:{
-        value:EXPRVALUE,
+    [param in keyof (T1 & T2 & T3)["model"]]?:{
+        value:Extract<EXPRVALUE,(T1 & T2 & T3)["model"][param]|EXPREXTRAVALUE>,
         model:T1|T2|T3
-    }|{
+    }
+} | {
+    [param in `${"$and"|"$or"}${number}`]:{
         [param in keyof (T1 & T2 & T3)["model"]]?:{
-            value:EXPRVALUE,
+            value:Extract<EXPRVALUE,(T1 & T2 & T3)["model"][param]|EXPREXTRAVALUE>,
             model:T1|T2|T3
         }
     }
@@ -2211,12 +2242,14 @@ export function generateGroupLeftJoin3Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
 },groups:(keyof T1["model"])[],objExpr?: {
-    [param in ((keyof (T1 & T2 & T3 & T4)["model"]) | `${"$and" | "$or"}${number}` | `${Exclude<keyof (T1 & T2 & T3 & T4)["model"], symbol>}${" "|"  "|"   "}`)]?: {
-        value: EXPRVALUE,
+    [param in ((keyof (T1 & T2 & T3 & T4)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4)["model"], symbol>}${" "|"  "|"   "}`)]?: {
+        value: Extract<EXPRVALUE,(T1 & T2 & T3 & T4)["model"][param]|EXPREXTRAVALUE>,
         model: T1 | T2 | T3 | T4
-    } | {
+    }
+} | {
+    [param in `${"$and" | "$or"}${number}`]:{
         [param in ((keyof (T1 & T2 & T3 & T4)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4)["model"], symbol>}${" "|"  "|"   "}`)]?: {
-            value: EXPRVALUE,
+            value: Extract<EXPRVALUE,(T1 & T2 & T3 & T4)["model"][param]|EXPREXTRAVALUE>,
             model: T1 | T2 | T3 | T4
         }
     }
@@ -2434,15 +2467,17 @@ export function generateGroupLeftJoin4Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
 },groups:(keyof T1["model"])[],objExpr?: {
-    [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"]) | `${"$and" | "$or"}${number}` | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5)["model"], symbol>}${" "|"  "|"   "}`)]?: {
-    value: EXPRVALUE,
-    model: T1 | T2 | T3 | T4 | T5
-} | {
     [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5)["model"], symbol>}${" "|"  "|"   "}`)]?: {
-        value: EXPRVALUE,
-        model: T1 | T2 | T3 | T4 | T5
-    }
+    value: Extract<EXPRVALUE,(T1 & T2 & T3 & T4 & T5)["model"][param]|EXPREXTRAVALUE>,
+    model: T1 | T2 | T3 | T4 | T5
 }
+} | {
+    [param in `${"$and" | "$or"}${number}`]:{
+        [param in ((keyof (T1 & T2 & T3 & T4 & T5)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5)["model"], symbol>}${" "|"  "|"   "}`)]?: {
+            value: Extract<EXPRVALUE,(T1 & T2 & T3 & T4 & T5)["model"][param]|EXPREXTRAVALUE>,
+            model: T1 | T2 | T3 | T4 | T5
+        }
+    }
 },exprMode?:"and"|"or",having?:{
     [param in keyof T1["model"]]?:{
         model:T1,
@@ -2695,15 +2730,17 @@ export function generateGroupLeftJoin5Sql<T1 extends BaseModel,T2 extends BaseMo
         }
     }
 },groups:(keyof T1["model"])[],objExpr?: {
-    [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]) | `${"$and" | "$or"}${number}` | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"], symbol>}${" "|"  "|"   "}`)]?: {
-    value: EXPRVALUE,
-    model: T1 | T2 | T3 | T4 | T5 | T6
-} | {
     [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"], symbol>}${" "|"  "|"   "}`)]?: {
-        value: EXPRVALUE,
-        model: T1 | T2 | T3 | T4 | T5 | T6
-    }
+    value: Extract<EXPRVALUE,(T1 & T2 & T3 & T4 & T5 & T6)["model"][param]|EXPREXTRAVALUE>,
+    model: T1 | T2 | T3 | T4 | T5 | T6
 }
+} | {
+    [param in `${"$and" | "$or"}${number}`]:{
+        [param in ((keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"]) | `${Exclude<keyof (T1 & T2 & T3 & T4 & T5 & T6)["model"], symbol>}${" "|"  "|"   "}`)]?: {
+            value: Extract<EXPRVALUE,(T1 & T2 & T3 & T4 & T5 & T6)["model"][param]|EXPREXTRAVALUE>,
+            model: T1 | T2 | T3 | T4 | T5 | T6
+        }
+    }
 },exprMode?:"and"|"or",having?:{
     [param in keyof T1["model"]]?:{
         model:T1,

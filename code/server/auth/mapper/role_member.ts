@@ -1,13 +1,7 @@
 import {ECommon_Model_Role_Type, ICommon_Model_Role, roleModel} from "../../../common/model/role";
 import {getMysqlInstance} from "../../common/db/mysql";
 import {Mapper} from "../../common/entity/mapper";
-import {
-    generateDeleteSql,
-    generateLeftJoin2Sql,
-    generateLeftJoin3Sql,
-    generateLeftJoinSql,
-    generateQuerySql
-} from "../../common/util/sql";
+import {generateLeftJoin2Sql, generateLeftJoin3Sql, generateLeftJoinSql, generateQuerySql} from "../../common/util/sql";
 import {roleMemberModel, Table_Role_Member} from './../../../common/model/role_member';
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import {
@@ -364,13 +358,6 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
         return ret;
     }
 
-    async clearByRoleId(roleId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(roleMemberModel,{
-            role_id:roleId
-        }))
-    }
-
     async checkRoleMember(roleId:string) {
         let mysql=getMysqlInstance()
         let ret=await mysql.executeOne(generateQuerySql(roleMemberModel,null,{
@@ -383,12 +370,6 @@ class RoleMemberMapper extends Mapper<typeof roleMemberModel> {
         }
     }
 
-    async clearMember(memberId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(roleMemberModel,{
-            member_id:memberId
-        }))
-    }
 }
 
 export let roleMemberMapper=new RoleMemberMapper()

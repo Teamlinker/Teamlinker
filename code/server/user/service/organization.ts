@@ -6,7 +6,12 @@ import {
     ICommon_Model_Organization,
     organizationModel
 } from './../../../common/model/organization';
-import {memberTagMapper, organizationMapper, organizationUserMapper} from './../mapper/organization';
+import {
+    memberTagMapper,
+    memberTagMemberMapper,
+    organizationMapper,
+    organizationUserMapper
+} from './../mapper/organization';
 import {REDIS_USER} from "../../common/cache/keys/user";
 import rpcAuthApi from "../../auth/rpc/auth"
 import rpcIMApi from "../../im/rpc/im"
@@ -40,6 +45,7 @@ import {ECommon_Model_Project_Issue_Priority} from "../../../common/model/projec
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import {ICommon_Model_Issue_Type_Solution} from "../../../common/model/issue_type_solution";
 import {ICommon_Model_Issue_Type} from "../../../common/model/issue_type";
+import {memberTagMemberModel} from "../../../common/model/member_tag_member";
 
 export class OrganizationService extends Entity<typeof organizationModel,typeof organizationMapper> {
     constructor(){
@@ -151,13 +157,18 @@ export class OrganizationService extends Entity<typeof organizationModel,typeof 
     }
 
     async clearUser() {
-        await organizationMapper.clearUser(this.getId())
+        await OrganizationUserService.batchDelete({
+            organization_id:this.getId()
+        },false)
         await rpcAuthApi.clearRoleByItemId(this.getId())
     }
 
     async clearTeam() {
-        let ids=await organizationMapper.clearTeam(this.getId())
-        await rpcAuthApi.clearRoleByItemIds(ids)
+        let arrTeam=await TeamService.getItemsByExp({
+            organization_id:this.getId()
+        })
+        await Promise.all(arrTeam.map(obj=>obj.delete()))
+        await rpcAuthApi.clearRoleByItemIds(arrTeam.map(obj=>obj.getId()))
     }
 
     static async init(adminIds:string[],userIds:string[],deletedUserId:string) {
@@ -547,7 +558,9 @@ export class MemberTagService extends Entity<typeof memberTagModel,typeof member
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
-        await memberTagMapper.clearMemberByTagId(this.getId());
+        await MemberTagMemberService.batchDelete({
+            member_tag_id:this.getId()
+        },true)
         await rpcAuthApi.clearRoleByItemId(this.getId());
     }
 
@@ -588,8 +601,15 @@ export class MemberTagService extends Entity<typeof memberTagModel,typeof member
     }
 
     static async clearMember(organizationUserId:string) {
-        await memberTagMapper.clearMemberByMemberId(organizationUserId)
+        await MemberTagMemberService.batchDelete({
+            organization_user_id:organizationUserId
+        },true)
     }
 
 }
 
+export class MemberTagMemberService extends Entity<typeof memberTagMemberModel,typeof memberTagMemberMapper> {
+    constructor() {
+        super(memberTagMemberMapper)
+    }
+}

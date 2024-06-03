@@ -6,8 +6,6 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {
     convertCountSql,
     generateBatchCreateSql,
-    generateDeleteLeftJoin2Sql,
-    generateDeleteLeftJoin3Sql,
     generateDeleteSql,
     generateLeftJoin2Sql,
     generateLeftJoinSql,
@@ -20,7 +18,6 @@ import {ICommon_Route_Res_Calendar_ListEvent_Item} from "../../../common/routes/
 import * as moment from "moment";
 import {keys} from "../../../common/transform";
 import CommonUtil from "../../common/util/common";
-import {meetingRoomModel} from "../../../common/model/meeting_room";
 
 
 class CalendarMapper extends Mapper<typeof calendarModel> {
@@ -36,121 +33,6 @@ class CalendarMapper extends Mapper<typeof calendarModel> {
             organization_user_id:organizationUserId
         }))
         return arr;
-    }
-
-    async clearEvent(calendarId:string) {
-        if(!calendarId) {
-            throw Err.Calendar.calendarNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteLeftJoin2Sql(calendarEventModel,{
-            model:calendarEventGuestModel,
-            expression:{
-                calendar_event_id:{
-                    model:calendarEventModel,
-                    field:"id"
-                }
-            },
-            isDelete:true
-        },{
-            model:meetingRoomModel,
-            expression:{
-                related_id:{
-                    model:calendarEventModel,
-                    field:"id"
-                }
-            },
-            isDelete:true
-        },{
-            calendar_id:{
-                model:calendarEventModel,
-                value:calendarId
-            }
-        }))
-    }
-
-    async clearCalendar(organizationUserId:string) {
-        if(!organizationUserId) {
-            throw Err.Organization.userNotFound
-        }
-        let mysql=getMysqlInstance()
-        await Promise.all([
-            mysql.execute(generateDeleteLeftJoin3Sql(calendarModel,{
-                model:calendarEventModel,
-                expression:{
-                    calendar_id:{
-                        model:calendarModel,
-                        field: "id"
-                    }
-                }
-            },{
-                model:calendarEventGuestModel,
-                expression:{
-                    calendar_event_id:{
-                        model:calendarEventModel,
-                        field:"id"
-                    }
-                }
-            },{
-                model:meetingRoomModel,
-                expression:{
-                    related_id:{
-                        model:calendarEventModel,
-                        field:"id"
-                    }
-                }
-            },{
-                organization_user_id:{
-                    model:calendarModel,
-                    value:organizationUserId
-                }
-            })),
-            mysql.execute(generateDeleteSql(calendarEventGuestModel,{
-                organization_user_id:organizationUserId
-            }))
-        ])
-    }
-
-    async clearCalendarByOrganizationId(organizationId:string) {
-        if(!organizationId) {
-            throw Err.Organization.organizationNotFound
-        }
-        let mysql=getMysqlInstance()
-        await Promise.all([
-            mysql.execute(generateDeleteLeftJoin3Sql(calendarModel,{
-                model:calendarEventModel,
-                expression:{
-                    calendar_id:{
-                        model:calendarModel,
-                        field: "id"
-                    }
-                }
-            },{
-                model:calendarEventGuestModel,
-                expression:{
-                    calendar_event_id:{
-                        model:calendarEventModel,
-                        field:"id"
-                    }
-                }
-            },{
-                model:meetingRoomModel,
-                expression:{
-                    related_id:{
-                        model:calendarEventModel,
-                        field:"id"
-                    }
-                }
-            },{
-                organization_id:{
-                    model:calendarModel,
-                    value:organizationId
-                }
-            })),
-            mysql.execute(generateDeleteSql(calendarSettingModel,{
-                organization_id:organizationId
-            }))
-        ])
     }
 
     async listCalendarEvent(organizationUserId:string,calendarId:string,start:number,end:number,isDefault:number):Promise<ICommon_Route_Res_Calendar_ListEvent_Item[]> {
@@ -586,16 +468,6 @@ class CalendarEventMapper extends Mapper<typeof calendarEventModel> {
             }
             await mysql.execute(generateBatchCreateSql(calendarEventGuestModel,ret))
         }
-    }
-
-    async clearGuestList(calendarEventId:string) {
-        if(!calendarEventId) {
-            throw Err.Calendar.calendarEventNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(calendarEventGuestModel,{
-            calendar_event_id:calendarEventId
-        }))
     }
 
     async listReminderEvent(start:number,end:number):Promise<{

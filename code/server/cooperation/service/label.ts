@@ -1,8 +1,9 @@
 import {Err} from "../../../common/status/error";
 import {Entity} from "../../common/entity/entity";
 import {projectLabelModel} from './../../../common/model/project_label';
-import {labelMapper} from '../mapper/label';
+import {labelIssueMapper, labelMapper} from '../mapper/label';
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import {projectLabelIssueModel} from "../../../common/model/project_label_issue";
 
 export class ProjectLabelService extends Entity<typeof projectLabelModel,typeof labelMapper> {
     constructor(){
@@ -18,6 +19,20 @@ export class ProjectLabelService extends Entity<typeof projectLabelModel,typeof 
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
-        await labelMapper.clearByLabelId(this.getId());
+        await ProjectLabelIssueService.batchDelete({
+            project_label_id:this.getId()
+        },true)
+    }
+
+    static async clearByProjectId(projectId:string) {
+        await ProjectLabelService.batchDelete({
+            project_id:projectId
+        },false)
+    }
+}
+
+export class ProjectLabelIssueService extends Entity<typeof projectLabelIssueModel,typeof labelIssueMapper> {
+    constructor() {
+        super(labelIssueMapper)
     }
 }

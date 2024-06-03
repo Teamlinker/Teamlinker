@@ -51,7 +51,6 @@ import {WorkflowService} from "../service/workflow";
 import {WorkflowNodeFieldTypeService} from "../service/field";
 import {ECommon_Field_Type, ICommon_Field_Type} from "../../../common/field/type";
 import {ICommon_Model_Workflow_Node_Field_Type_Config} from "../../../common/model/workflow_node_field_type_config";
-import {boardSprintIssueModel} from "../../../common/model/board_sprint_issue";
 import {roleMemberModel} from "../../../common/model/role_member";
 import {teamUserModel} from "../../../common/model/team_user";
 import {memberTagMemberModel} from "../../../common/model/member_tag_member";
@@ -62,6 +61,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
     constructor() {
         super(projectIssueModel)
     }
+
     async recentIssueList(organizationUserId:string,size:number) {
         let mysql=getMysqlInstance()
         let sql=generateLeftJoinSql({
@@ -94,6 +94,8 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         let arr=await mysql.execute(sql)
         return arr;
     }
+
+
 
     async getAvailableUniqueId(projectId:string) {
         if(!projectId) {
@@ -476,60 +478,6 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         ])
     }
 
-    async clearBeforeConvertByIssueTypeId(issueTypeId:string) {
-        if(!issueTypeId) {
-            throw Err.Project.Issue.issueTypeNotFound
-        }
-        let mysql=getMysqlInstance()
-        await Promise.all([
-            mysql.execute(generateDeleteLeftJoinSql(projectIssueFieldValueModel,{
-                model:projectIssueModel,
-                expression:{
-                    id:{
-                        model:projectIssueFieldValueModel,
-                        field:"project_issue_id"
-                    }
-                },
-                isDelete:false
-            },{
-                issue_type_id:{
-                    model:projectIssueModel,
-                    value:issueTypeId
-                }
-            })),
-            mysql.execute(generateDeleteLeftJoinSql(projectIssueProcessModel,{
-                model:projectIssueModel,
-                expression:{
-                    id:{
-                        model:projectIssueProcessModel,
-                        field:"project_issue_id"
-                    }
-                },
-                isDelete:false
-            },{
-                issue_type_id:{
-                    model:projectIssueModel,
-                    value:issueTypeId
-                }
-            })),
-            mysql.execute(generateDeleteLeftJoinSql(projectIssueApprovalModel,{
-                model:projectIssueModel,
-                expression:{
-                    id:{
-                        model:projectIssueApprovalModel,
-                        field:"project_issue_id"
-                    }
-                },
-                isDelete:false
-            },{
-                issue_type_id:{
-                    model:projectIssueModel,
-                    value:issueTypeId
-                }
-            }))
-        ])
-    }
-
     async getProcess(projectIssueId:string) {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
@@ -555,7 +503,7 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         return ret;
     }
 
-    async clear(projectIssueId:string) {
+    async clear(projectIssueId:string): Promise<void> {
         if(!projectIssueId) {
             throw Err.Project.ProjectIssue.projectIssueNotFound
         }
@@ -583,18 +531,11 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
             })),
             mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
                 project_issue_id:projectIssueId
-            })),
-            mysql.execute(generateDeleteSql(projectIssueApprovalModel,{
-                project_issue_id:projectIssueId
-            })),
-            mysql.execute(generateDeleteSql(projectIssueHistoryModel,{
-                project_issue_id:projectIssueId
-            })),
-            mysql.execute(generateDeleteSql(boardSprintIssueModel,{
-                project_issue_id:projectIssueId
             }))
         ])
     }
+
+
 
     async getBasicInfo(projectIssueId:string) {
         if(!projectIssueId) {
@@ -1193,91 +1134,6 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         };
     }
 
-    async clearMany(projectIssueIds:string[]) {
-        if(!projectIssueIds) {
-            throw Err.Project.ProjectIssue.projectIssueNotFound
-        } else if(projectIssueIds.length==0) {
-            return
-        }
-        let mysql=getMysqlInstance()
-        await Promise.all([
-            mysql.execute(generateDeleteSql(projectIssueModel,{
-                id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
-                project_issue_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(projectIssueParentModel,{
-                parent_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                },
-                child_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            },"or")),
-            mysql.execute(generateDeleteSql(projectIssueProcessModel,{
-                project_issue_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(projectIssueRelatedModel,{
-                project_issue_1_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                },
-                project_issue_2_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            },"or")),
-            mysql.execute(generateDeleteSql(projectIssueApprovalModel,{
-                project_issue_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(projectIssueHistoryModel,{
-                project_issue_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(boardSprintIssueModel,{
-                project_issue_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(projectModuleIssueModel,{
-                project_issue_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(projectReleaseIssueModel,{
-                project_issue_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-            mysql.execute(generateDeleteSql(projectLabelIssueModel,{
-                project_issue_id:{
-                    exp:"in",
-                    value:projectIssueIds
-                }
-            })),
-        ])
-    }
-
     async getIdsByProjectIds(projectIds:string[]){
         if(!projectIds || projectIds.length==0) {
             return []
@@ -1296,26 +1152,6 @@ class ProjectIssueMapper extends Mapper<typeof projectIssueModel> {
         return ret.map(item=>item.id);
     }
 
-    async clearIssueValueByFieldTypeId(workflowFieldTypeId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectIssueFieldValueModel,{
-            workflow_node_field_type_id:workflowFieldTypeId
-        }))
-    }
-
-    async clearByIssueTypeId(issueTypeId:string) {
-        if(!issueTypeId) {
-            throw Err.Project.Issue.issueTypeNotFound
-        }
-        let mysql=getMysqlInstance()
-        let arr=await mysql.execute(generateQuerySql(projectIssueModel,["id"],{
-            issue_type_id:issueTypeId
-        }))
-        if(arr.length>0) {
-            let projectIssueIds=arr.map(item=>item.id)
-            await this.clearMany(projectIssueIds)
-        }
-    }
 
     async getOrganizationUserIdsByIssueExtraField(projectIssueId:string) {
         if(!projectIssueId) {
@@ -1415,28 +1251,6 @@ class ProjectIssueHistoryMapper extends Mapper<typeof projectIssueHistoryModel> 
             field:"id"
         }))
         return ret;
-    }
-
-    async clear(projectIssueId:string) {
-        if(!projectIssueId) {
-            throw Err.Project.ProjectIssue.projectIssueNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectIssueHistoryModel,{
-            project_issue_id:projectIssueId
-        }))
-    }
-
-    async clearByProjectIds(projectIds:string[]) {
-        if(projectIds.length>0) {
-            let mysql=getMysqlInstance()
-            await mysql.execute(generateDeleteSql(projectIssueHistoryModel,{
-                project_id:{
-                    exp:"in",
-                    value:projectIds
-                }
-            }))
-        }
     }
 }
 

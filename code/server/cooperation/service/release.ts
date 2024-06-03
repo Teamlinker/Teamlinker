@@ -6,10 +6,11 @@ import {
     ICommon_Model_Project_Release,
     projectReleaseModel
 } from './../../../common/model/project_release';
-import {releaseMapper} from './../mapper/release';
+import {releaseIssueMapper, releaseMapper} from './../mapper/release';
 import {ProjectIssueHistoryService, ProjectIssueService} from "./issue";
 import {ECommon_Model_Project_Issue_History_Type} from "../../../common/model/project_issue_history";
 import {IServer_Common_Event_Types} from "../../common/event/types";
+import {projectReleaseIssueModel} from "../../../common/model/project_release_issue";
 
 export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typeof releaseMapper> {
     constructor(){
@@ -18,7 +19,9 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
         await super.delete(eventPublish, ...param);
-        await releaseMapper.clearIssue(this.getId())
+        await ProjectReleaseIssueService.batchDelete({
+            project_release_id:this.getId()
+        },true)
     }
 
     static async globalSearch(keyword:string,size:number,organizationUserId:string) {
@@ -86,7 +89,19 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
         } else if (objIssue.getItem().project_id!=this.getItem().project_id) {
             throw Err.Project.ProjectIssue.issueProjectNotMatch
         }
-        await releaseMapper.addIssue(this.getId(),projectIssueId)
+        let objNew=await ProjectReleaseIssueService.getItemByExp({
+            project_release_id:this.getId(),
+            project_issue_id:projectIssueId
+        })
+        if(objNew) {
+            throw Err.Project.Release.releaseIssueDuplicate
+        }
+        objNew=new ProjectReleaseIssueService()
+        objNew.assignItem({
+            project_release_id:this.getId(),
+            project_issue_id:projectIssueId
+        })
+        await objNew.create();
         let objHistory=new ProjectIssueHistoryService()
         objHistory.assignItem({
             project_issue_id:projectIssueId,
@@ -106,7 +121,11 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
         } else if (objIssue.getItem().project_id!=this.getItem().project_id) {
             throw Err.Project.ProjectIssue.issueProjectNotMatch
         }
-        await releaseMapper.removeIssue(this.getId(),projectIssueId)
+        let obj=await ProjectReleaseIssueService.getItemByExp({
+            project_release_id:this.getId(),
+            project_issue_id:projectIssueId
+        })
+        await obj?.delete()
         let objHistory=new ProjectIssueHistoryService()
         objHistory.assignItem({
             project_issue_id:projectIssueId,
@@ -142,4 +161,16 @@ export class ProjectReleaseService extends Entity<typeof projectReleaseModel,typ
         return ret;
     }
 
+    static async clearByProjectId(projectId:string) {
+        ProjectReleaseService.batchDelete({
+           project_id:projectId
+        },false)
+    }
+
+}
+
+export class ProjectReleaseIssueService extends Entity<typeof projectReleaseIssueModel,typeof releaseIssueMapper> {
+    constructor() {
+        super(releaseIssueMapper)
+    }
 }

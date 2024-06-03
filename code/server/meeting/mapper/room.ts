@@ -1,7 +1,7 @@
 import {Mapper} from "../../common/entity/mapper";
 import {ECommon_Model_Meeting_Room_Type, meetingRoomModel} from "../../../common/model/meeting_room";
 import {Err} from "../../../common/status/error";
-import {generateDeleteSql, generatePageAndCount, generateQuerySql} from "../../common/util/sql";
+import {generatePageAndCount, generateQuerySql} from "../../common/util/sql";
 import {getMysqlInstance} from "../../common/db/mysql";
 import * as moment from "moment/moment";
 
@@ -61,27 +61,6 @@ class MeetingRoomMapper extends Mapper<typeof meetingRoomModel> {
             }
         }))
         return ret;
-    }
-
-    async clear(organizationUserId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(meetingRoomModel,{
-            created_by:organizationUserId
-        }))
-    }
-
-    async clearByOrganizationId(organizationId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(meetingRoomModel,{
-            organization_id:organizationId
-        }))
-    }
-
-    async clearByRelatedId(relatedId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(meetingRoomModel,{
-            related_id:relatedId
-        }))
     }
 }
 

@@ -50,91 +50,28 @@ export default {
         `
     },
     notification:{
-        teamUserAdd:{
-            0:"TEAM:team",
-            1:"has added you"
-        },
-        wikiItemAt:{
-            0:"WIKI:you are mentioned in wiki item"
-        },
-        organizationUserRoleChange:{
-            0:"ORGANIZATION:your organization role has been changed in organization "
-        },
-        organizationUserRemove:{
-            0:"ORGANIZATION:you has been removed in organization "
-        },
-        organizationUserQuit:{
-            0:"ORGANIZATION: ",
-            1:" quit the organization "
-        },
-        organizationInvitation:{
-            0:"ORGANIZATION:organization ",
-            1:" is inviting you"
-        },
-        issueCommentAt:{
-            0:"ISSUE:you are mentioned by",
-            1:"in issue"
-        },
-        teamDismiss:{
-            0:"TEAM:team ",
-            1:" has been dismissed"
-        },
-        teamUserRemove:{
-            0:"TEAM:you have been removed by",
-            1:"in team"
-        },
-        teamUserRoleChange:{
-            0:"TEAM:your team role has been changed in team"
-        },
-        issueRemove:{
-            0:"ISSUE:",
-            1:" has been removed by"
-        },
-        teamUserQuit:{
-            0:"TEAM:",
-            1:"quit the team"
-        },
-        issueReporterAssign:{
-            0:"ISSUE:",
-            1:"assign the reporter of issue",
-            2:"to you"
-        },
-        issueWorkflowChange:{
-            0:"ISSUE:the workflow of issue",
-            1:"has been changed by"
-        },
-        issueCommentAdd:{
-            0:"ISSUE:",
-            1:"add a comment in issue"
-        },
-        calendarEventInvitation:{
-            0:"CALENDAR:you are invited in calendar event"
-        },
-        issueFieldChange:{
-            0:"ISSUE:the field of issue",
-            1:"has been changed by"
-        },
-        issueAssignerAssign:{
-            0:"ISSUE:",
-            1:"assign the assigner of issue",
-            2:"to you"
-        },
-        issueAssignRelease:{
-            0:"ISSUE:the release of issue",
-            1:"has been changed by"
-        },
-        issueAssignSprint:{
-            0:"ISSUE:the sprint of issue",
-            1:"has been changed by"
-        },
-        issueApprovalResolve:{
-            0:"ISSUE:",
-            1:"resolved the approval of issue"
-        },
-        issueApprovalReject:{
-            0:"ISSUE:",
-            1:"rejected the approval of issue"
-        }
+        teamUserAdd:"TEAM:{team} has added you",
+        wikiItemAt:"WIKI:you are mentioned in wiki item {wiki}",
+        organizationUserRoleChange:"ORGANIZATION:your organization role has been changed in organization {organization}",
+        organizationUserRemove:"ORGANIZATION:you has been removed in organization {organization}",
+        organizationUserQuit:"ORGANIZATION: {user} quit the organization {organization}",
+        organizationInvitation:"ORGANIZATION:organization {organization} is inviting you",
+        issueCommentAt:"ISSUE:you are mentioned by {user} in issue {issue}",
+        teamDismiss:"TEAM:team {team} has been dismissed",
+        teamUserRemove:"TEAM:you have been removed by {user} in team {team}",
+        teamUserRoleChange:"TEAM:your team role has been changed in team {team}",
+        issueRemove:"ISSUE:{issue} has been removed by {user}",
+        teamUserQuit:"Team:{team} quit the team {team}",
+        issueReporterAssign:"ISSUE:{user} assign the reporter of issue {issue} to you",
+        issueWorkflowChange:"ISSUE:the workflow of issue {issue} has been changed by {user}",
+        issueCommentAdd:"ISSUE:{user} add a comment in issue {issue}",
+        calendarEventInvitation:"CALENDAR:you are invited in calendar event {event}",
+        issueFieldChange:"ISSUE:the field of issue {issue} has been changed by {user}",
+        issueAssignerAssign:"ISSUE:{user} assign the assigner of issue {issue} to you",
+        issueAssignRelease:"ISSUE:the release of issue {issue} has been changed by {user}",
+        issueAssignSprint:"ISSUE:the sprint of issue {issue} has been changed by {user}",
+        issueApprovalResolve:"ISSUE:{user} resolved the approval of issue {issue}",
+        issueApprovalReject:"ISSUE:{user} rejected the approval of issue {issue}"
     },
     tip:{
         typePassword:"Type Password",

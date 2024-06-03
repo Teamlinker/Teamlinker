@@ -8,7 +8,6 @@ import {
     convertCountAndExecute,
     convertCountSql,
     generateCommonListData,
-    generateDeleteSql,
     generateGroupLeftJoin2Sql,
     generateGroupLeftJoin3Sql,
     generateLeftJoinSql,
@@ -649,18 +648,6 @@ class ProjectMapper extends Mapper<typeof projectModel>{
             type:"asc"
         }))
         return ret;
-    }
-    async clearProjects(projectIds:string[]){
-        if(!projectIds || projectIds.length==0) {
-            return;
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(projectModel,{
-            id:{
-                exp:"in",
-                value:projectIds
-            }
-        }))
     }
 
     async issueCount(projectId:string) {

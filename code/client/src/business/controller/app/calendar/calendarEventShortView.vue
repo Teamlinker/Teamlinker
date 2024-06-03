@@ -84,7 +84,7 @@
 <script setup lang="ts">
 import {ECommon_Model_Finder_Shortcut_Type} from "../../../../../../common/model/finder_item";
 import {computed, onBeforeMount, ref} from "vue";
-import {IClient_Calendar_Info} from "../../../common/component/calendar/type";
+import {IClient_Calendar_Info} from "../../../common/component/calendar/src/type";
 import moment from "moment";
 import "moment-timezone"
 import {vDrag} from "../../../../teamOS/common/directive/drag";

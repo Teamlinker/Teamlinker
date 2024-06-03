@@ -16,7 +16,7 @@
 import {ICommon_Route_Res_Calendar_ListEvent_Item} from "../../../../../../common/routes/response";
 import CalendarEventShortView from "./calendarEventShortView.vue";
 import {ref} from "vue";
-import {IClient_Calendar_Info} from "../../../common/component/calendar/type";
+import {IClient_Calendar_Info} from "../../../common/component/calendar/src/type";
 import moment from "moment";
 import "moment-timezone"
 import {DCSType} from "../../../../../../common/types";

@@ -20,7 +20,9 @@ export class PlanService extends Entity<typeof planModel,typeof planMapper> {
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
         await super.delete(eventPublish, ...param);
-        await planTableMapper.clearByPlanId(this.getId())
+        await PlanTableService.batchDelete({
+            plan_id:this.getId()
+        },false)
     }
 
     async info() {
@@ -95,6 +97,15 @@ export class PlanService extends Entity<typeof planModel,typeof planMapper> {
             })()
         })))
     }
+
+    static async clearByProjects(projectIds:string[]) {
+        PlanService.batchDelete({
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        },false)
+    }
 }
 
 export class PlanTableService extends Entity<typeof planTableModel,typeof planTableMapper> {
@@ -115,7 +126,12 @@ export class PlanTableService extends Entity<typeof planTableModel,typeof planTa
         let item=this.findItem(this.getId(),info)
         if(item?.children?.length>0) {
             let arr=this.getChildrenIds(item.children)
-            await planTableMapper.removeItems(arr)
+            await PlanTableService.batchDelete({
+                id:{
+                    exp:"in",
+                    value:arr
+                }
+            },true)
         }
         await planTableMapper.clearDepend(this.getId())
     }

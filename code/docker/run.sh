@@ -1,10 +1,10 @@
 #!/bin/sh
 rabbitmq-server -detached
-redis-server /etc/redis.conf
+redis-server /etc/redis/redis.conf
 while true
 do
         process=`netstat -nap|grep :::5672`;
-        if [ "$process" == "" ]; then
+        if [ "$process" = "" ]; then
                 echo "waiting rabbitmq";
                  sleep 5;
         else

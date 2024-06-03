@@ -10,8 +10,18 @@ import {Entity} from "../../common/entity/entity";
 import {generateSnowId} from '../../common/util/sql';
 import {ProjectService} from "../service/project";
 import {ICommon_Model_Project_Issue, projectIssueModel} from './../../../common/model/project_issue';
-import {ICommon_Model_Project_Issue_Field_Value} from './../../../common/model/project_issue_field_value';
-import {projectIssueApprovalMapper, projectIssueHistoryMapper, projectIssueMapper} from './../mapper/issue';
+import {
+    ICommon_Model_Project_Issue_Field_Value,
+    projectIssueFieldValueModel
+} from './../../../common/model/project_issue_field_value';
+import {
+    projectIssueApprovalMapper,
+    projectIssueFieldValueMapper,
+    projectIssueHistoryMapper,
+    projectIssueMapper,
+    projectIssueProcessMapper,
+    projectIssueTypeSolutionMapper
+} from './../mapper/issue';
 import {WorkflowNodeFieldTypeService} from './field';
 import {ProjectModuleService} from './module';
 import {WorkflowActionService, WorkflowApprovalService, WorkflowNodeService, WorkflowService} from './workflow';
@@ -36,6 +46,12 @@ import {ICommon_Model_Workflow_Action} from "../../../common/model/workflow_acti
 import {ICommon_Model_Workflow_Node} from "../../../common/model/workflow_node";
 import {BoardSprintIssueService} from "./board";
 import {PlanTableService} from "./plan";
+import {
+    ICommon_Model_Project_Issue_Process,
+    projectIssueProcessModel
+} from "../../../common/model/project_issue_process";
+import {projectIssueTypeSolutionModel} from "../../../common/model/project_issue_type_solution";
+import {keys} from "../../../common/transform";
 
 export class ProjectIssueService extends Entity<typeof projectIssueModel, typeof projectIssueMapper> {
     constructor() {
@@ -546,9 +562,11 @@ export class ProjectIssueService extends Entity<typeof projectIssueModel, typeof
 
     override async delete(eventPulish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete()
-        await projectIssueMapper.clear(this.getId())
+        await this.mapper.clear(this.getId())
         await rpcContentApi.clearByRefId(this.getId())
-        await projectIssueHistoryMapper.clear(this.getId())
+        await ProjectIssueHistoryService.batchDelete({
+            project_issue_id: this.getId()
+        })
         let objApproval = await ProjectIssueApprovalService.getItemByExp({
             project_issue_id: this.getId()
         })
@@ -820,18 +838,26 @@ export class ProjectIssueService extends Entity<typeof projectIssueModel, typeof
     static async clearByProjectIds(projectIds: string[]) {
         let ret = await projectIssueMapper.getIdsByProjectIds(projectIds);
         if (ret.length > 0) {
-            await projectIssueMapper.clearMany(ret);
-            await rpcContentApi.clearByRefIds(ret)
+            ProjectIssueService.batchDelete({
+                project_id:{
+                    exp:"in",
+                    value:projectIds
+                }
+            },false)
         }
-        await projectIssueHistoryMapper.clearByProjectIds(projectIds)
+        ProjectIssueHistoryService.batchDelete({
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        },false)
     }
 
-    static async clearIssueValueByFieldTypeId(workflowFieldTypeId: string) {
-        await projectIssueMapper.clearIssueValueByFieldTypeId(workflowFieldTypeId)
-    }
 
     static async clearByIssueTypeId(issueTypeId: string) {
-        await projectIssueMapper.clearByIssueTypeId(issueTypeId)
+        ProjectIssueService.batchDelete({
+            issue_type_id:issueTypeId
+        },false)
     }
 
     async releaseList() {
@@ -876,6 +902,56 @@ export class ProjectIssueService extends Entity<typeof projectIssueModel, typeof
     static async clearWorkflowNodeFieldTypeConfig(fieldTypeConfigValueId: string) {
         await projectIssueMapper.clearWorkflowNodeFieldTypeConfig(fieldTypeConfigValueId)
     }
+
+    static async clearBeforeConvertByIssueTypeId(issueTypeId:string) {
+        await Promise.all([
+            ProjectIssueFieldValueService.batchLeftJoinDelete(keys<ICommon_Model_Project_Issue_Field_Value>().map(item=>item.name),{
+                entity:new ProjectIssueService(),
+                expression:{
+                    id:{
+                        field:"project_issue_id"
+                    }
+                },
+                columns:keys<ICommon_Model_Project_Issue>().map(item=>item.name),
+                isDelete:false
+            },{
+                issue_type_id:{
+                    model:projectIssueModel,
+                    value:issueTypeId
+                }
+            },true),
+            ProjectIssueProcessService.batchLeftJoinDelete(keys<ICommon_Model_Project_Issue_Process>().map(item=>item.name),{
+                entity:new ProjectIssueService(),
+                expression:{
+                    id:{
+                        field:"project_issue_id"
+                    }
+                },
+                columns:keys<ICommon_Model_Project_Issue>().map(item=>item.name),
+                isDelete:false
+            },{
+                issue_type_id:{
+                    model:projectIssueModel,
+                    value:issueTypeId
+                }
+            },true),
+            ProjectIssueApprovalService.batchLeftJoinDelete(keys<ICommon_Model_Project_Issue_Approval>().map(item=>item.name),{
+                entity:new ProjectIssueService(),
+                expression:{
+                    id:{
+                        field:"project_issue_id"
+                    }
+                },
+                columns:keys<ICommon_Model_Project_Issue>().map(item=>item.name),
+                isDelete:false
+            },{
+                issue_type_id:{
+                    model:projectIssueModel,
+                    value:issueTypeId
+                }
+            },true)
+        ])
+    }
 }
 
 export class ProjectIssueHistoryService extends Entity<typeof projectIssueHistoryModel, typeof projectIssueHistoryMapper> {
@@ -886,6 +962,18 @@ export class ProjectIssueHistoryService extends Entity<typeof projectIssueHistor
     static async list(projectIssueId: string) {
         let ret = await projectIssueHistoryMapper.list(projectIssueId)
         return ret;
+    }
+}
+
+export class ProjectIssueFieldValueService extends Entity<typeof projectIssueFieldValueModel, typeof projectIssueFieldValueMapper> {
+    constructor() {
+        super(projectIssueFieldValueMapper)
+    }
+}
+
+export class ProjectIssueProcessService extends Entity<typeof projectIssueProcessModel, typeof projectIssueProcessMapper> {
+    constructor() {
+        super(projectIssueProcessMapper)
     }
 }
 
@@ -922,5 +1010,20 @@ export class ProjectIssueApprovalService extends Entity<typeof projectIssueAppro
             await rpcContentApi.save(this.getItem().project_issue_id, ECommon_Model_Content_Type.PROJECT_ISSUE_REJECT, ret.approval_organization_user_id, reason)
         }
         return ret
+    }
+}
+
+export class ProjectIssueTypeSolutionService extends Entity<typeof projectIssueTypeSolutionModel, typeof projectIssueTypeSolutionMapper> {
+    constructor() {
+        super(projectIssueTypeSolutionMapper)
+    }
+
+    static clearProjects(projectIds:string[]) {
+        ProjectIssueTypeSolutionService.batchDelete({
+            project_id:{
+                exp:"in",
+                value:projectIds
+            }
+        },false)
     }
 }

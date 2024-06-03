@@ -5,7 +5,6 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {Mapper} from "../../common/entity/mapper";
 import {
     generateCreateSql,
-    generateDeleteLeftJoinSql,
     generateDeleteSql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -19,11 +18,6 @@ import {
     Table_Project_Issue_Type_Solution
 } from './../../../common/model/project_issue_type_solution';
 import CommonUtil from "../../common/util/common";
-import {workflowActionModel} from "../../../common/model/workflow_action";
-import {workflowNodeModel} from "../../../common/model/workflow_node";
-import {workflowApprovalModel} from "../../../common/model/workflow_approval";
-import {workflowNodeFieldTypeConfigModel} from "../../../common/model/workflow_node_field_type_config";
-import {workflowNodeFieldTypeModel} from "../../../common/model/workflow_node_field_type";
 
 class IssueTypeMapper extends Mapper<typeof issueTypeModel> {
     constructor() {
@@ -223,101 +217,6 @@ class IssueTypeSolutionMapper extends Mapper<typeof issueTypeSolutionModel> {
         })
         let ret=await mysql.executeOne(sql)
         return ret;
-    }
-
-    async clearByOrganizationId(organizationId:string):Promise<string[]> {
-        if(!organizationId){
-            throw Err.Organization.organizationNotFound
-        }
-        let mysql=getMysqlInstance()
-        let issueTypeSolutionList=await mysql.execute(generateQuerySql(issueTypeSolutionModel,["id"],{
-            organization_id:organizationId
-        }))
-        if(issueTypeSolutionList.length>0) {
-            let ids=issueTypeSolutionList.map(item=>item.id);
-            let [_,__,issueTypeList]=await Promise.all([
-                mysql.execute(generateDeleteSql(issueTypeSolutionModel,{
-                    organization_id:organizationId
-                })),
-                mysql.execute(generateDeleteSql(projectIssueTypeSolutionModel,{
-                    issue_type_solution_id:{
-                        exp:"in",
-                        value:ids
-                    }
-                })),
-                mysql.execute(generateQuerySql(issueTypeModel,["id"],{
-                    issue_type_solution_id:{
-                        exp:"in",
-                        value:issueTypeSolutionList.map(item=>item.id)
-                    }
-                },"and",{
-                    field:"issue_type_solution_id",
-                    type:"field",
-                    value:issueTypeSolutionList.map(item=>item.id)
-                }))
-            ])
-            if(issueTypeList.length>0) {
-                let ids=issueTypeList.map(item=>item.id);
-                let [_,__,workflowNodeList]=await Promise.all([
-                    mysql.execute(generateDeleteSql(issueTypeModel,{
-                        id:{
-                            exp:"in",
-                            value:ids
-                        }
-                    })),
-                    mysql.execute(generateDeleteSql(workflowActionModel,{
-                        issue_type_id:{
-                            exp:"in",
-                            value:ids
-                        }
-                    })),
-                    mysql.execute(generateQuerySql(workflowNodeModel,["id"],{
-                        issue_type_id:{
-                            exp:"in",
-                            value:ids
-                        }
-                    }))
-                ])
-                if(workflowNodeList.length>0) {
-                    let workflowNodeIds=workflowNodeList.map(item=>item.id)
-                    await Promise.all([
-                        mysql.execute(generateDeleteSql(workflowNodeModel,{
-                            id:{
-                                exp:"in",
-                                value:workflowNodeIds
-                            }
-                        })),
-                        mysql.execute(generateDeleteSql(workflowApprovalModel,{
-                            workflow_node_id:{
-                                exp:"in",
-                                value:workflowNodeIds
-                            }
-                        })),
-                        mysql.execute(generateDeleteLeftJoinSql(workflowNodeFieldTypeModel,{
-                            model:workflowNodeFieldTypeConfigModel,
-                            expression:{
-                                workflow_node_field_type_id:{
-                                    model:workflowNodeFieldTypeModel,
-                                    field:"id"
-                                }
-                            },
-                            isDelete:true
-                        },{
-                            workflow_node_id:{
-                                model:workflowNodeFieldTypeModel,
-                                value:{
-                                    exp:"in",
-                                    value:workflowNodeIds
-                                }
-                            }
-                        }))
-                    ])
-                }
-            }
-            return issueTypeList.map(item=>item.id);
-        } else {
-            return []
-        }
     }
 
     async getIssueTypesByOrganizationId(organizationId:string):Promise<string[]> {

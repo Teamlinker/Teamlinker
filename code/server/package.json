@@ -1,5 +1,5 @@
 {
-  "name": "teamlinker",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,7 +11,7 @@
     "scripts": [],
     "assets": [
       "../client/**/*",
-      "./node_modules/mediasoup/worker/out/Release/mediasoup-worker"
+      "./mediasoup-worker"
     ],
     "outputPath": "./package"
   },
@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@log4js2/core": "^2.0.9",
     "@pivvenit/mysql-import": "^6.0.0",
     "@socket.io/admin-ui": "^0.5.1",
     "@socket.io/redis-adapter": "^8.2.1",
@@ -39,8 +40,7 @@
     "koa-static": "^5.0.0",
     "koa-static-server": "^1.5.2",
     "koa2-formidable": "^1.0.3",
-    "log4js": "^6.7.0",
-    "mediasoup": "3.13.8",
+    "mediasoup": "3.14.1",
     "moment": "^2.29.4",
     "mysql2": "^2.3.3",
     "node-schedule": "^2.1.0",
@@ -69,8 +69,6 @@
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.9.1",
     "ttypescript": "^1.5.15",
-    "typescript": "^4.6.4",
-    "vite": "^3.2.4",
-    "vite-node": "^0.25.3"
+    "typescript": "4.6.4"
   }
 }

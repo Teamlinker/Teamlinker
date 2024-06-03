@@ -1,6 +1,6 @@
 import {Entity} from "../../common/entity/entity";
 import {calendarModel} from "../../../common/model/calendar";
-import {calendarEventMapper, calendarMapper, calendarSettingMapper} from "../mapper/calendar";
+import {calendarEventGuestMapper, calendarEventMapper, calendarMapper, calendarSettingMapper} from "../mapper/calendar";
 import {calendarSettingModel} from "../../../common/model/calendar_setting";
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import {calendarEventModel, ECommon_Calendar_Recurring_Type} from "../../../common/model/calendar_event";
@@ -11,6 +11,7 @@ import {calendarMq} from "../mq/calendar";
 import rpcContentApi from "../../content/rpc/content"
 import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import rpcMeetingApi from "../../meeting/rpc/meeting"
+import {calendarEventGuestModel} from "../../../common/model/calendar_event_guest";
 
 export class CalendarService extends Entity<typeof calendarModel,typeof calendarMapper> {
     constructor() {
@@ -23,15 +24,21 @@ export class CalendarService extends Entity<typeof calendarModel,typeof calendar
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
-        await calendarMapper.clearEvent(this.getId())
+        CalendarEventService.batchDelete({
+            calendar_id:this.getId()
+        },false)
     }
 
     static async clearCalendar(organizationUserId:string) {
-        await calendarMapper.clearCalendar(organizationUserId)
+        CalendarService.batchDelete({
+            organization_user_id:organizationUserId
+        },false)
     }
 
     static async clearCalendarByOrganizationId(organizationId:string) {
-        await calendarMapper.clearCalendarByOrganizationId(organizationId)
+        CalendarService.batchDelete({
+            organization_id:organizationId
+        },false)
     }
 
     async listEvent(start:number,end:number) {
@@ -142,7 +149,9 @@ export class CalendarEventService extends Entity<typeof calendarEventModel,typeo
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
-        await calendarEventMapper.clearGuestList(this.getId())
+        CalendarEventGuestService.batchDelete({
+            calendar_event_id:this.getId()
+        },true)
         await rpcContentApi.clearByRefId(this.getId())
         await rpcMeetingApi.clearMeetingRoomByRelatedId(this.getId())
     }
@@ -171,5 +180,11 @@ export class CalendarEventService extends Entity<typeof calendarEventModel,typeo
 export class CalendarSettingService extends Entity<typeof calendarSettingModel,typeof calendarSettingMapper> {
     constructor() {
         super(calendarSettingMapper)
+    }
+}
+
+export class CalendarEventGuestService extends Entity<typeof calendarEventGuestModel,typeof calendarEventGuestMapper> {
+    constructor() {
+        super(calendarEventGuestMapper)
     }
 }

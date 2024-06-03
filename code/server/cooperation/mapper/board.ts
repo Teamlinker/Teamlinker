@@ -18,7 +18,6 @@ import {getMysqlInstance} from "../../common/db/mysql";
 import {
     convertCountAndExecute,
     generateCommonListData,
-    generateDeleteLeftJoinSql,
     generateDeleteSql,
     generateGroupLeftJoin4Sql,
     generateGroupLeftJoin5Sql,
@@ -75,67 +74,6 @@ class BoardMapper extends Mapper<typeof boardModel> {
         },page*size,size)
         let ret=generateCommonListData(sql,page,size)
         return ret;
-    }
-
-    async clearByProjects(projectIds:string[]) {
-        if(projectIds.length==0) {
-            return
-        }
-        let mysql=getMysqlInstance()
-        let arrBoard=await mysql.execute(generateQuerySql(boardModel,["id"],{
-            project_id:{
-                exp:"in",
-                value:projectIds
-            }
-        }))
-        if(arrBoard.length>0) {
-            let boardIds=arrBoard.map(item=>item.id)
-            await Promise.all([
-                mysql.execute(generateDeleteSql(boardModel,{
-                    project_id:{
-                        exp:"in",
-                        value:projectIds
-                    }
-                })),
-                mysql.execute(generateDeleteSql(boardColumnModel,{
-                    board_id:{
-                        exp:"in",
-                        value:boardIds
-                    }
-                })),
-                mysql.execute(generateDeleteSql(boardColumnWorkflowNodeModel,{
-                    board_id:{
-                        exp:"in",
-                        value:boardIds
-                    }
-                })),
-                mysql.execute(generateDeleteSql(boardIssueTypeModel,{
-                    board_id:{
-                        exp:"in",
-                        value:boardIds
-                    }
-                })),
-                mysql.execute(generateDeleteSql(boardSprintModel,{
-                    board_id:{
-                        exp:"in",
-                        value:boardIds
-                    }
-                })),
-                mysql.execute(generateDeleteSql(boardSprintIssueModel,{
-                    board_id:{
-                        exp:"in",
-                        value:boardIds
-                    }
-                })),
-                mysql.execute(generateDeleteSql(boardSprintSwimLaneModel,{
-                    board_id:{
-                        exp:"in",
-                        value:boardIds
-                    }
-                }))
-            ])
-        }
-
     }
 
     async globalSearch(keyword:string,size:number,organizationUserId:string):Promise<ICommon_Route_Res_Global_Search_Board_Item[]> {
@@ -821,30 +759,6 @@ class BoardSprintIssueMapper extends Mapper<typeof boardSprintIssueModel> {
         let mysql=getMysqlInstance()
         await mysql.execute(generateDeleteSql(boardSprintIssueModel,{
             board_sprint_id:boardSprintId
-        }))
-    }
-    async clearByIssueTypeIds(issueTypeIds:string[]) {
-        if(issueTypeIds.length==0) {
-            return
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteLeftJoinSql(boardSprintIssueModel,{
-            model:projectIssueModel,
-            expression:{
-                id:{
-                    model:boardSprintIssueModel,
-                    field:"project_issue_id"
-                }
-            },
-            isDelete:false
-        },{
-            issue_type_id:{
-                model:projectIssueModel,
-                value:{
-                    exp:"in",
-                    value:issueTypeIds
-                }
-            }
         }))
     }
 }

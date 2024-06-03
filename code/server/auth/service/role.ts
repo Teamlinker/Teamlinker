@@ -5,6 +5,7 @@ import {getAllPermissions, Permission_Base, Permission_Types} from "../../../com
 import {ICommon_Route_Res_Role_Item} from "../../../common/routes/response";
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import {emitServiceEvent} from "../../common/event/event";
+import {RoleMemberService} from "./role_member";
 
 export class RoleService extends Entity<typeof roleModel,typeof roleMapper> {
     constructor(){
@@ -20,14 +21,33 @@ export class RoleService extends Entity<typeof roleModel,typeof roleMapper> {
     override async delete(eventPublish?: keyof IServer_Common_Event_Types, ...param): Promise<void> {
         await super.delete(eventPublish, ...param);
         emitServiceEvent("roleChange",this.getId())
+        RoleMemberService.batchDelete({
+            role_id:this.getId()
+        },false)
     }
 
     static async clearRoleByItemId(itemId:string) {
-        await roleMapper.clearRoleByItemId(itemId)
+        await RoleService.batchDelete({
+            item_id:itemId
+        },false)
+        await RoleMemberService.batchDelete({
+            item_id:itemId
+        },false)
     }
 
     static async clearRoleByItemIds(itemIds:string[]) {
-        await roleMapper.clearRoleByItemIds(itemIds)
+        await RoleService.batchDelete({
+            item_id:{
+                exp:"in",
+                value:itemIds
+            }
+        },false)
+        await RoleMemberService.batchDelete({
+            item_id:{
+                exp:"in",
+                value:itemIds
+            }
+        },false)
     }
 
     static async getAdminRole(type:ECommon_Model_Role_Type) {
@@ -112,7 +132,9 @@ export class RoleService extends Entity<typeof roleModel,typeof roleMapper> {
     }
 
     static async clearByOrganizationId(organizationId:string) {
-        await roleMapper.clearByOrganizationId(organizationId)
+        await RoleService.batchDelete({
+            organization_id:organizationId
+        },false)
     }
 
 }

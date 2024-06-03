@@ -2,7 +2,7 @@ import {ECommon_Model_Organization_Member_Type} from '../../../common/model/orga
 import {ICommon_Route_Res_Organization_User_List, ICommon_Route_Res_Team_List} from '../../../common/routes/response';
 import {Err} from '../../../common/status/error';
 import {Entity} from "../../common/entity/entity";
-import {teamMapper} from '../mapper/team';
+import {teamMapper, teamUserMapper} from '../mapper/team';
 import rpcAuthApi from "../../auth/rpc/auth";
 import rpcFileApi from "../../file/rpc/file";
 import {ECommon_Model_Role_Reserved, ECommon_Model_Role_Type} from './../../../common/model/role';
@@ -12,6 +12,7 @@ import {emitServiceEvent} from "../../common/event/event";
 import {IServer_Common_Event_Types} from "../../common/event/types";
 import rpcNotificationApi from "../../notification/rpc/notification";
 import {ECommon_Model_Notification_Type} from "../../../common/model/notification";
+import {teamUserModel} from "../../../common/model/team_user";
 
 export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     constructor(){
@@ -98,7 +99,10 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
         if(!this.item || !this.item.id) {
             throw  Err.Team.teamNotFound;
         }
-        await teamMapper.removeMember(this.item.id,organizationUserId)
+        await TeamUserService.batchDelete({
+            organization_user_id:organizationUserId,
+            team_id:this.getId()
+        },true)
         await rpcAuthApi.removeRoleMember(this.item.id,ECommon_Model_Organization_Member_Type.USER,organizationUserId);
         emitServiceEvent("teamUserDelete",this.item.id,organizationUserId)
     }
@@ -204,7 +208,9 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
         await super.delete(eventPublish);
-        await teamMapper.clearMemberByItemId(this.getId());
+        await TeamUserService.batchDelete({
+            team_id:this.getId()
+        },true)
         await rpcAuthApi.clearRoleByItemId(this.getId())
     }
 
@@ -251,12 +257,21 @@ export class TeamService extends Entity<typeof teamModel,typeof teamMapper> {
     }
 
     static async clearMember(organizationUserId:string) {
-        await teamMapper.clearMemberByMemberId(organizationUserId);
+        await TeamUserService.batchDelete({
+            organization_user_id:organizationUserId
+        },true);
         await rpcAuthApi.clearMember(organizationUserId)
     }
 
     static async infos(teamIds:string[]) {
         let ret=await teamMapper.infos(teamIds)
         return ret;
+    }
+}
+
+
+export class TeamUserService extends Entity<typeof teamUserModel,typeof teamUserMapper> {
+    constructor() {
+        super(teamUserMapper)
     }
 }

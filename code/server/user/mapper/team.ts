@@ -8,7 +8,6 @@ import CommonUtil from '../../common/util/common';
 import {
     convertCountSql,
     generateCreateSql,
-    generateDeleteSql,
     generateLeftJoin3Sql,
     generateLeftJoinSql,
     generateQuerySql,
@@ -142,19 +141,6 @@ class TeamMapper extends Mapper<typeof teamModel> {
         }))
     }
 
-    async removeMember(teamId:string,organizationUserId:string) {
-        if(!teamId) {
-            throw  Err.Team.teamNotFound
-        } else if(!organizationUserId) {
-            throw Err.Organization.userNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(teamUserModel,{
-            team_id:teamId,
-            organization_user_id:organizationUserId
-        }))
-    }
-
     async list(organizationId:string,page:number,size:number,keyword?:string):Promise<{
         count:number,
         totalPage:number,
@@ -206,23 +192,6 @@ class TeamMapper extends Mapper<typeof teamModel> {
             type:"asc"
         },0,size))
         return ret;
-    }
-
-    async clearMemberByItemId(teamId:string) {
-        if(!teamId) {
-            throw  Err.Team.teamNotFound
-        }
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(teamUserModel,{
-            team_id:teamId
-        }))
-    }
-
-    async clearMemberByMemberId(memberId:string) {
-        let mysql=getMysqlInstance()
-        await mysql.execute(generateDeleteSql(teamUserModel,{
-            organization_user_id:memberId
-        }))
     }
 
     async checkMember(teamId:string,memberId:string) {

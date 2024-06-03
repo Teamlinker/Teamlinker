@@ -31,7 +31,7 @@ export  class IssueTypeService extends Entity<typeof issueTypeModel,typeof issue
     override async delete(eventPublish?:keyof IServer_Common_Event_Types,convertIssueTypeId?:string) {
         if(convertIssueTypeId) {
             await Promise.all([
-                projectIssueMapper.clearBeforeConvertByIssueTypeId(this.getId()),
+                ProjectIssueService.clearBeforeConvertByIssueTypeId(this.getId()),
                 projectIssueMapper.updateConvertIssueType({
                     [this.getId()]:convertIssueTypeId
                 })
@@ -206,14 +206,10 @@ export class IssueTypeSolutionService extends Entity<typeof issueTypeSolutionMod
         
     }
 
-    static async clearByOrganizationId(organizationId:string):Promise<string[]> {
-        let ret=await issueTypeSolutionMapper.clearByOrganizationId(organizationId)
-        return ret;
-    }
-
-    static async getIssueTypesByOrganizationId(organizationId:string):Promise<string[]> {
-        let ret=await issueTypeSolutionMapper.clearByOrganizationId(organizationId)
-        return ret;
+    static async clearByOrganizationId(organizationId:string) {
+        IssueTypeSolutionService.batchDelete({
+            organization_id:organizationId
+        },false)
     }
 
     static async init(organizationId:string,lang:string):Promise<{

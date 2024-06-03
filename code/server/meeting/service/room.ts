@@ -46,16 +46,22 @@ export class MeetingRoomService extends Entity<typeof meetingRoomModel,typeof me
     }
 
     static async clear(organizationUserId:string) {
-        await meetingRoomMapper.clear(organizationUserId)
+        await MeetingRoomService.batchDelete({
+            created_by:organizationUserId
+        },true)
     }
 
     static async clearByRelatedId(relatedId:string) {
-        await meetingRoomMapper.clearByRelatedId(relatedId)
+        await MeetingRoomService.batchDelete({
+            related_id:relatedId
+        },true)
     }
 
 
     static async clearByOrganizationId(organizationId:string) {
-        await meetingRoomMapper.clearByOrganizationId(organizationId)
+        await MeetingRoomService.batchDelete({
+            organization_id:organizationId
+        },true)
     }
 
     override async delete(eventPublish?: keyof IServer_Common_Event_Types): Promise<void> {
