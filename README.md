@@ -1,56 +1,56 @@
 <p align="center">
-  <a href="https://team-linker.com">
-    <img width="200" src="img/logo.png">
-  </a>
+   <a href="https://team-linker.com">
+     <img width="200" src="img/logo.png">
+   </a>
 </p>
 <h3 align="center">
-企业用户团队协作解决方案
+Team Collaboration Solution For Enterprise Users
 </h3>
 <h4 align="center">
-团队协作从未如此轻松
+Team collaboration has never been easier
 </h4>
 
-## 📝 介绍
-Teamlinker是一个集成了多功能模块的团队协作平台，涵盖团队成员联系、任务分配、会议开启、事务安排以及文件管理等方面。
+English | [简体中文](./README-ZH-CN.md)
 
-该平台解决了团队内高效协作的难题，避免了公司使用多个工具分别处理项目进程、同事交流和客户会议的问题。相较于传统工具，Teamlinker不仅提供基本而全面的协同办公需求，而且成本极低，更符合当前经济环境。
+## 📝 Introduction
+Teamlinker is a team collaboration platform that integrates multi-functional modules,such as contact, task management, meeting, IM,Wiki and file management.
 
-Teamlinker基于TeamOS系统开发，是一种web操作系统，用户可以并行处理不同任务，类似于Win和Mac等操作系统。主要包含六个功能模块：项目、Wiki、日历、会议、聊天和网盘，这些功能之间无缝整合，使团队协作更加顺畅。
-### 用心做开源，我们也很需要你的鼓励！右上角Star🌟，等你点亮！
+The platform solves the problem of efficient collaboration within the team and avoids the problem of companies using multiple tools to handle project progress, communication with colleagues and client meetings separately. Compared with traditional tools, Teamlinker not only provides basic and comprehensive collaborative office needs, but also has extremely low cost.
 
-## 📋 官网
+Teamlinker is developed based on the TeamOS system. It is a web operating system that allows users to process different tasks in parallel, similar to operating systems such as Win and Mac. It mainly contains six functional modules: project, wiki, calendar, meeting, chat and network disk. These functions are seamlessly integrated to make team collaboration smoother.
+
+## 📋 Official website
 
 https://team-linker.com
 
 
-## 📋 文档
-简体中文 https://team-linker.com/doc/zh/
+## 📋 Documentation
+https://team-linker.com/doc/en/
 
-## 🕐︎ 功能特点
-* 完全采用TypeScript开发，后端使用Node.js，前端使用Vue3。
-* 从零开始打造了一个Web OS系统，实现了桌面管理、多窗口、多任务、文件拖放、上传和下载等功能。
-* 利用WebRtc实现了多人视频和语音传输，包括成员邀请、屏幕共享、虚拟背景、视频虚化等功能。同时，实现了会议管理员控制和会议内聊天功能。
-* 基于HTMLElement的contentEditable开发了块编辑器，支持自由排版、颜色和字体调整、链接和图片插入，以及附件添加和快捷方式。
-* 项目管理模块支持自定义工作项类型、工作流、字段、看板和甘特图管理等常用项目管理功能，完全使用纯JavaScript开发，可单独提取为模块使用。
-* 日历部分实现了多日历管理、多时区切换、自由切换日、周和月视图状态，支持全天和重复日历事件，并利用RabbitMQ实现了日历事件提醒功能。
-* IM功能利用Socket.IO实现了在消息组内@所有人或指定成员、消息收藏和搜索，还包括快速视频会议等功能。
-* 即将推出的AI功能，利用NLP技术和Transformers框架打造私人工作小助理，为你提供个性化服务。
+## 🕐︎ Features
+* Completely developed using TypeScript, using Node.js on the backend and Vue3 on the frontend.
+* Created a Web OS system from scratch, realizing functions such as desktop management, multi-window, multi-tasking, file drag-and-drop, upload and download.
+* Use WebRtc to realize multi-person video and voice transmission, including member invitation, screen sharing, virtual background, video blur and other functions. At the same time, conference administrator control and in-meeting chat functions are implemented.
+* A block editor is developed based on HTMLElement's contentEditable, which supports free typesetting, color and font adjustment, link and picture insertion, as well as attachment addition and shortcuts.
+* The project management module supports common project management functions such as custom work item types, workflows, fields, Kanban and Gantt chart management. It is completely developed using pure JavaScript and can be extracted as a separate module for use.
+* The calendar part implements multi-calendar management, multi-time zone switching, free switching of day, week and month view status, supports all-day and repeated calendar events, and uses RabbitMQ to implement calendar event reminder functions.
+* The IM function uses Socket.IO to realize @ everyone or specific members in the message group, message collection and search, and also includes functions such as fast video conferencing.
+* The upcoming AI function uses NLP technology and the Transformers framework to create a personal work assistant to provide you with personalized services.
 
 
-## 📲 核心架构
+## 📲 Core Architecture
 <p>
-  <img src="img/core.png">
+   <img src="img/core.png">
 </p>
 
-## 🔐 安装
-[安装教程](./INSTALL.md)
+## 🔐 Installation
+[Installation tutorial](./INSTALL.md)
 
-## 💻 本地部署
-[本地部署](./DEV-README.md)
+## 💻 Local Deployment
+[Local Deployment](./DEV-README.md)
 
-
-## 📱 在线演示
-项目
+## 📱 Online demo
+project
 
 ![example](img/example.png)
 ![example1](img/example1.png)
@@ -58,60 +58,53 @@ https://team-linker.com
 ![example3](img/example3.png)
 ![example4](img/example4.png)
 
-文档
+document
 
 ![example2-1](img/example2-1.png)
 
 
-日历
+calendar
 
 ![example3-1](img/example3-1.png)
 ![example3-2](img/example3-2.png)
 
-会议
+Meeting
 
 ![example4-1](img/example4-1.png)
 
-聊天
+chat
 
 ![example5-1](img/example5-1.png)
 
-文件管理
+File management
 
 ![example6-1](img/example6-1.png)
 
-系统
+system
 
 ![example7-1](img/example7-1.png)
 
 
-## 🎬 作者
+## 🎬 Author
 
-Ansun [[ 网站 ](https://team-linker.com) | [ github ](https://github.com/sx1989827)]
+Ansun [[ website ](https://team-linker.com) | [ github ](https://github.com/sx1989827)]
 
-## 📺 使用须知
-1、仅允许用于个人学习、毕业设计、教学案例、公益事业、商业使用;
+## 📺 Tips
+1. Only allowed to be used for personal study, graduation projects, teaching cases, public welfare undertakings, and commercial use;
 
-2、如果商用必须保留版权信息，请自觉遵守;
+2. If copyright information must be retained for commercial use, please abide by it consciously;
 
-3、禁止将本开源的代码和资源进行任何形式任何名义的出售，否则产生的一切任何后果责任由侵权者自负;
+3. It is prohibited to sell the code and resources of this open source in any form or under any name, otherwise the infringer will be responsible for any consequences;
 
-4、本版本源码全部开源; 包括前端，后端，无任何加密;
+4. The source code of this version is all open source; including front-end and back-end, without any encryption;
 
-5、商用请仔细审查代码和漏洞，不得用于任一国家许可范围之外的商业应用，产生的一切任何后果责任自负;
+5. For commercial use, please carefully review the code and vulnerabilities. It must not be used for commercial applications outside the scope of permission in any country. You will be responsible for any consequences;
 
-<h4>本系统已申请专利著作权，请不要私自用于商业用途，如有发现，我们将保留对你的法律责任追究！</h4>
 
 ## 🔓 License
 
 [ISC](./LICENSE)
 
-## ⚡ 技术交流
-QQ交流群
-<p>
-  <img width="200" src="img/qq.jpg">
-</p>
+## ⚡ Technology Exchange
 
-
-### 📺 赞助
-[爱发电](https://afdian.net/a/teamlinker)
+[Discord](https://discord.gg/X8t4d7JqgX)

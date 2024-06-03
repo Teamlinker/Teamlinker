@@ -1,14 +1,14 @@
-## 🔐 安装
-### 准备工作
+## 🔐 Installation
+### Preparation
 
 ```bash
-1、一台服务器(最好是Linux系统)
-2、Mysql服务器(最好是8.0+版本)
-3、docker环境
+1. A server (preferably a Linux system)
+2. Mysql server (preferably version 8.0+)
+3. docker environment
 ```
 
-### 步骤
-##### 1、Config基本设置
+### Steps
+##### 1. Config basic settings
 
 ```bash
 mkdir teamlinker-files
@@ -16,79 +16,79 @@ cd teamlinker-files
 mkdir certs
 touch extra.config.json
 ```
-将下面的json内容粘贴到extra.config.json中，并用正确的值填充字段
+Paste the json content below into extra.config.json and fill the fields with the correct values
 ```
 {
-  "mysql": {
-    "url":"your mysql ip address",
-    "port":3306,
-    "database":"teamlinker",
-    "username":"your mysql username",
-    "password":"your mysql password"
-  },
-  "listenIps": [
-    {
-      "ip": "0.0.0.0",
-      "announcedIp": "192.168.110.6"
-    }
-  ],
-  "rtcMinPort": 40000,
-  "rtcMaxPort": 41000
+   "mysql": {
+     "url":"your mysql ip address",
+     "port":3306,
+     "database":"teamlinker",
+     "username":"your mysql username",
+     "password":"your mysql password"
+   },
+   "listenIps": [
+     {
+       "ip": "0.0.0.0",
+       "announcedIp": "192.168.110.6"
+     }
+   ],
+   "rtcMinPort": 40000,
+   "rtcMaxPort": 41000
 }
 ```
-字段含义解析
+Field meaning analysis
 ```
 {
-  "mysql": "你应该准备一个mysql服务器，最好是8.0+版本，并为Teamlinker创建一个模式",
-  "listenIps": [
-    {
-      "ip": "通常不用更改",
-      "announcedIp": "部署的服务器的公共IP地址"
-    }
-  ],
-  "rtcMinPort": "会议传输端口，不应被其他应用程序占用，优先选择高端口",
-  "rtcMaxPort": "会议传输端口，不应被其他应用程序占用，优先选择高端口"
+   "mysql": "You should prepare a mysql server, preferably version 8.0+, and create a schema for Teamlinker",
+   "listenIps": [
+     {
+       "ip": "Normally no need to change",
+       "announcedIp": "Public IP address of the deployed server"
+     }
+   ],
+   "rtcMinPort": "The conference transmission port should not be occupied by other applications. High ports are preferred",
+   "rtcMaxPort": "The conference transmission port should not be occupied by other applications. High ports are preferred"
 }
 ```
 
-##### 2、TLS证书文件
+##### 2. TLS certificate file
 
-由于Teamlinker使用webrtc技术，所以tls证书文件是必需的。如果您没有任何证书文件，可以下载[cert.pem](https://team-linker.com/doc/cert/cert.pem) 和[key.pem](https://team-linker.com/doc/cert/key.pem)作为临时备用，并将它们放入certs目录，但web浏览器会显示没有被信任的信息，用户应该手动信任它。
+Since Teamlinker uses webrtc technology, the tls certificate file is required. If you don't have any certificate files, you can download [cert.pem](https://team-linker.com/doc/cert/cert.pem) and [key.pem](https://team-linker.com/doc/cert/key.pem) as a temporary backup and put them into the certs directory, but the web browser will show that it is not trusted and the user should trust it manually.
 
-你最好准备一个域名和tls证书文件，以便所有用户都能安全访问你的网站。
+You'd better prepare a domain name and TLS certificate file so that all users can safely access your website.
 
-##### 3、启动 Docker
+##### 3. Start Docker
 
-您可以从docker hub获取docker: [Docker Edition](https://hub.docker.com/repository/docker/teamlinkeroffical/teamlinker/general)
+You can get docker from docker hub: [Docker Edition](https://hub.docker.com/repository/docker/teamlinkeroffical/teamlinker/general)
 
-你可以使用以下命令获取最新版本:
+You can get the latest version using the following command:
 ```
 docker pull teamlinkeroffical/teamlinker:[tagname]
 ```
-您可以
+you can
 ```
 docker pull teamlinkeroffical/teamlinker
 ```
 
-然后您可以把它启动起来:
+Then you can start it:
 ```
-docker run -d -p [rtcMinPort]-[rtcMaxPort]:[rtcMinPort]-[rtcMaxPort] -p 14000:14000 -v [your teamlinker-files folder path on your server]:/opt/teamlinker-files -e TZ=[your mysql server timezone,such as Asia/Shanghai] teamlinkeroffical/teamlinker:[tagname]
+docker run -d -p [rtcMinPort]-[rtcMaxPort]:[rtcMinPort]-[rtcMaxPort] -p 14000:14000 -v [your teamlinker-files folder path on your server]:/opt/teamlinker-files -e TZ= [your mysql server timezone,such as Asia/Shanghai] teamlinkeroffical/teamlinker:[tagname]
 ```
-您可以
+you can
 ```
 docker run -d -p 40000-41000:40000-41000 -p 14000:14000 -v D:\code\teamlinker-files:/opt/teamlinker-files -e TZ=Asia/Shanghai teamlinkeroffical/teamlinker
 ```
 
 
-##### 4、访问您的网站
+##### 4. Visit your website
 
-在web浏览器中打开 **https://[server ip address]:14000** 检查是否一切正常，如果没问题，您将看到登录页面。
+Open **https://[server ip address]:14000** in a web browser to check if everything is fine, if so you will see the login page.
 
-您可以使用默认用户名/密码: **teamlinker/teamlinker** 登录
+You can log in using the default username/password: **teamlinker/teamlinker**
 
-如果你想方便地访问，你可以使用一个负载均衡解决方案，例如nginx、haproxy，并将域名定向到ip地址和端口。
+If you want easy access, you can use a load balancing solution such as nginx, haproxy, and direct the domain name to the ip address and port.
 
-##### 5、升级
+##### 5. Upgrade
 
-1. 备份数据库数据
-2. 拉取最新版本的docker并像第一次一样执行docker run命令
+1. Back up database data
+2. Pull the latest version of docker and execute the docker run command like the first time

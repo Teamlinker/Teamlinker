@@ -1,104 +1,102 @@
-## 📝本地部署
+## 📝Local deployment
 
-如果您想本地部署
+If you want to deploy locally
 
-首先您需要安装的软件环境有：
-* Redis 推荐版本5.0+
-* Rabbitmq 推荐版本3.12+,
-* Mysql 推荐版本5.7+
-* Nodejs 推荐版本18+ 
-* Vue 推荐版本3.0+ 
+The software environments below you need to install first:
+* Redis recommended version 5.0+
+* Rabbitmq recommended version 3.8+,
+* Mysql recommended version 5.7+
+* Nodejs recommended version 18+
+* Vue recommended version 3.0+
 
-🚧 注意：Rabbitmq需要安装消息延迟队列插件
+🚧 Note: Rabbitmq needs to install the message delay queue plugin
 
-### 消息延迟队列插件安装
-1、下载
+### Message delay queue plug-in installation
+1. Download
 
-官网下载地址： https://www.rabbitmq.com/community-plugins.html
+Official website download address: https://www.rabbitmq.com/community-plugins.html
 
-我们也提供了下载  [消息延迟队列插件包](./file/rabbitmq_delayed_message_exchange-3.12.0.ez)
+We also provide download [message delayed queue plug-in package](./file/rabbitmq_delayed_message_exchange-3.8.0.ez)
 
-🚧 注意：要选择对应的版本
+🚧 Note: Select the corresponding version
 
-2、添加至 `plgins` 目录中
+2. Add to the `plgins` directory
 
-比如我们放在这个目录
+For example, if we put it in this directory
 ```bash
-/usr/lib/rabbitmq/lib/rabbitmq_server-3.12.0/plugins
+/usr/lib/rabbitmq/lib/rabbitmq_server-3.8.0/plugins
 ```
 
-3、安装
+3. Installation
 ```bash
-cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.12.0/plugins
+cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.8.0/plugins
 rabbitmq-plugins enable rabbitmq_delayed_message_exchange
 systemctl restart rabbitmq-server
 ```
-再次登录rabbitmq，如果exchange的类型中出现：`x-delayed-message`，说明该插件安装成功！
+Log in to rabbitmq again. If `x-delayed-message` appears in the exchange type, it means that the plug-in is installed successfully!
 
 ![rabbitmq_delayed_message_exchange](img/rabbitmq_delayed_message_exchange.png)
 
-### 服务端配置文件
-下面来给大家介绍下配置文件：
+### Server configuration file
+Let’s introduce the configuration file to you:
 
-配置文件位置 `code/server/teamlinker.config.json` 
+Configuration file location `code/server/teamlinker.config.json`
 
-Redis配置
+Redis configuration
 ```bash
 "redis":{
-   "url":"localhost",
-   "port":6379,
-   "db":0,
-   "password":""
+    "url":"localhost",
+    "port":6379,
+    "db":0,
+    "password":""
 }
 ```
 
-Mysql配置
+Mysql configuration
 ```bash
 "mysql":{
-   "url":"localhost",
-   "port":3306,
-   "database":"teamlinker_dev",
-   "username":"root",
-   "password":"123456"
+    "url":"localhost",
+    "port":3306,
+    "database":"teamlinker_dev",
+    "username":"root",
+    "password":"123456"
 }
 ```
 
-Rabbitmq配置
+Rabbitmq configuration
 ```bash
 "mq": "amqp://127.0.0.1"
 ```
 
 
-### 安装依赖
-1、先切换到 `teamlinker` 项目根目录
+### Install dependencies
+1. Switch to the `teamlinker` project root directory
 
-
-然后安装依赖
+Then install the dependencies
 ```
 npm install
 ```
 
-### 服务端部署
+### Server deployment
 
-2、先切换到 `code/server` 目录
+2. Switch to the `code/server` directory
 
-然后安装依赖
+Then install the dependencies
 ```
 npm install
 ```
-启动后端
+Start backend
 ![run](img/run.png)
 
-### 客户端部署
-3、先切换到 `code/client` 目录
+### Client deployment
+3. Switch to the `code/client` directory
 
-然后安装依赖
+Then install the dependencies
 ```
 npm install
 ```
-启动服务
+Start service
 ```
-npm run dev 
+npm run dev
 ```
-🚧 注意: 端口修改  `code/client/vite.config.ts` `port` 配置项 默认`3000`
-
+🚧 Note: Port modification `code/client/vite.config.ts` `port` configuration item default is `3000`
