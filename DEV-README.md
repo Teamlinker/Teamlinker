@@ -76,6 +76,7 @@ If it's not existed,please create and fill it with template content below.
 }
 ```
 you can fill specific field with your value.
+you should ignore mail and wechat fields.
 
 ### Install dependencies
 1. Switch to the `teamlinker` project root directory

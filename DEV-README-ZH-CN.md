@@ -75,7 +75,8 @@ systemctl restart rabbitmq-server
     }
 }
 ```
-你需要用你自己的值去填充这个配置文件
+你需要用你自己的值去填充这个配置文件.
+你需要忽略mail和wechat字段。
 
 ### 安装依赖
 1、先切换到 `teamlinker` 项目根目录
