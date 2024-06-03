@@ -4,7 +4,7 @@ If you want to deploy locally
 
 The software environments below you need to install first:
 * Redis recommended version 5.0+
-* Rabbitmq recommended version 3.8+,
+* Rabbitmq recommended version 3.12+,
 * Mysql recommended version 5.7+
 * Nodejs recommended version 18+
 * Vue recommended version 3.0+
@@ -16,7 +16,7 @@ The software environments below you need to install first:
 
 Official website download address: https://www.rabbitmq.com/community-plugins.html
 
-We also provide download [message delayed queue plug-in package](./file/rabbitmq_delayed_message_exchange-3.8.0.ez)
+We also provide download [message delayed queue plug-in package](./file/rabbitmq_delayed_message_exchange-3.12.0.ez)
 
 🚧 Note: Select the corresponding version
 
@@ -24,12 +24,12 @@ We also provide download [message delayed queue plug-in package](./file/rabbitmq
 
 For example, if we put it in this directory
 ```bash
-/usr/lib/rabbitmq/lib/rabbitmq_server-3.8.0/plugins
+/usr/lib/rabbitmq/lib/rabbitmq_server-3.12.0/plugins
 ```
 
 3. Installation
 ```bash
-cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.8.0/plugins
+cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.12.0/plugins
 rabbitmq-plugins enable rabbitmq_delayed_message_exchange
 systemctl restart rabbitmq-server
 ```

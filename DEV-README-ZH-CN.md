@@ -4,7 +4,7 @@
 
 首先您需要安装的软件环境有：
 * Redis 推荐版本5.0+
-* Rabbitmq 推荐版本3.8+,
+* Rabbitmq 推荐版本3.12+,
 * Mysql 推荐版本5.7+
 * Nodejs 推荐版本18+ 
 * Vue 推荐版本3.0+ 
@@ -16,7 +16,7 @@
 
 官网下载地址： https://www.rabbitmq.com/community-plugins.html
 
-我们也提供了下载  [消息延迟队列插件包](./file/rabbitmq_delayed_message_exchange-3.8.0.ez)
+我们也提供了下载  [消息延迟队列插件包](./file/rabbitmq_delayed_message_exchange-3.12.0.ez)
 
 🚧 注意：要选择对应的版本
 
@@ -24,12 +24,12 @@
 
 比如我们放在这个目录
 ```bash
-/usr/lib/rabbitmq/lib/rabbitmq_server-3.8.0/plugins
+/usr/lib/rabbitmq/lib/rabbitmq_server-3.12.0/plugins
 ```
 
 3、安装
 ```bash
-cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.8.0/plugins
+cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.12.0/plugins
 rabbitmq-plugins enable rabbitmq_delayed_message_exchange
 systemctl restart rabbitmq-server
 ```
