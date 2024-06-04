@@ -51,7 +51,7 @@ import {SessionStorage} from "../../../common/storage/session";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {getCurrentNavigator, getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
 import {getCurrentInstance} from "vue";
-import {MeetingClient} from "../../../common/component/meeting/client";
+import {MeetingClient} from "../../../common/component/meeting/src/client";
 import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {useI18n} from "vue-i18n";

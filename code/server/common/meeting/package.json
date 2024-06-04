@@ -1,0 +1,9 @@
+{
+  "name": "meeting-server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "vue-tsc && vite build && rm -f ./dist/*js && tsc --noEmit false && cp -rf ./dist/* ./npm"
+  }
+}

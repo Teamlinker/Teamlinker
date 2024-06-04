@@ -2,7 +2,7 @@
   "name": "code",
   "private": true,
   "workspaces": {
-    "packages": ["code/*","code/client/src/business/component/calendar"]
+    "packages": ["code/*"]
   },
   "version": "1.0.0",
   "description": "",

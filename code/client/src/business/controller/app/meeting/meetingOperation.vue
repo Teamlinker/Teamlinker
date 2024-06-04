@@ -92,7 +92,7 @@ import {apiOrganization} from "../../../common/request/request";
 import {Dialog} from "../../../common/component/dialog/dialog";
 import {Message} from "@arco-design/web-vue";
 import {getCurrentNavigator, getRootNavigatorRef} from "../../../../teamOS/common/component/navigator/navigator";
-import {MeetingClient} from "../../../common/component/meeting/client";
+import {MeetingClient} from "../../../common/component/meeting/src/client";
 import {getCurrentInstance, onBeforeMount, onBeforeUnmount, reactive, ref, watch} from "vue";
 import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";

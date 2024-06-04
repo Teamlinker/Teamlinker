@@ -67,7 +67,7 @@
 import {SocketIOClient} from "../../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../../../../common/socket/types";
 import {getCurrentInstance, markRaw, onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
-import {MeetingClient} from "../../../common/component/meeting/client";
+import {MeetingClient} from "../../../common/component/meeting/src/client";
 import {ECommon_Meeting_Room_Permission, ICommon_Model_Meeting_Room} from "../../../../../../common/model/meeting_room";
 import {SessionStorage} from "../../../common/storage/session";
 import {userTeamInfoPick} from "../../../common/component/userInfoPick";

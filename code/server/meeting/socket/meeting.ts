@@ -1,6 +1,6 @@
 import {getSocketEmitterInstance, getSocketIOInstance, SocketIO} from "../../common/socket/socket";
 import {ECommon_Socket_Type} from "../../../common/socket/types";
-import {MeetingServer} from "../../common/meeting/server";
+import {MeetingServer} from "../../common/meeting/src/server";
 import {MeetingRoomService} from "../service/room";
 import {ECommon_Meeting_Room_Permission} from "../../../common/model/meeting_room";
 import rpcUserApi from "../../user/rpc/user";
@@ -11,7 +11,6 @@ import {ECommon_Model_Content_Type} from "../../../common/model/content";
 import {handleImageFields} from "../../gateway/util/util";
 import {ECommon_Model_Organization_Member_Type} from "../../../common/model/organization";
 import {MeetingMissCallService} from "../service/missCall";
-import {REDIS_ORGANIZATION} from "../../common/cache/keys/organization";
 
 
 export async function handleMeetingConnection() {

@@ -1,0 +1,11 @@
+{
+  "name": "meeting-client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build && rm -f ./dist/*js && tsc --noEmit false && cp -rf ./dist/* ./npm",
+    "preview": "vite preview"
+  }
+}

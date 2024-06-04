@@ -1,0 +1,14 @@
+{
+  "name": "editor",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build && cp -f ./dist/* ./npm",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^20.13.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noImplicitUseStrict":true,
+    "sourceMap": false,
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "noImplicitOverride": true,
+    "noImplicitThis": true,
+    //"ignoreDeprecations": "5.0",
+    "outDir": "./dist"
+  },
+  "include": ["src/*.ts","index.ts"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

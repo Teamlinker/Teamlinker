@@ -1,0 +1,21 @@
+{
+  "name": "tlcalendar",
+  "version": "0.0.3",
+  "description": "A simple calendar component based on vue3 and typescript",
+  "main": "TLCalendar.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Teamlinker/TLCalendar.git"
+  },
+  "keywords": ["vue","calendar","date","date-picker","time-picker","teamlinker"],
+  "author": "teamlinker",
+  "license": "ISC",
+  "types": "./TLCalendar.d.ts",
+  "dependencies": {
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43"
+  }
+}

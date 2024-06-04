@@ -1,0 +1,21 @@
+{
+  "name": "tlmeetingclient",
+  "version": "0.0.4",
+  "description": "A simple video meeting library based on node.js and typescript",
+  "main": "client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Teamlinker/TLMeetingClient.git"
+  },
+  "keywords": ["teamlinker","meeting","video","nodejs","typescript","meeting client"],
+  "author": "teamlinker",
+  "license": "ISC",
+  "types": "./TLMeetingClient.d.ts",
+  "dependencies": {
+    "mediasoup-client": "^3.7.7",
+    "socket.io-client": "^4.7.2"
+  }
+}

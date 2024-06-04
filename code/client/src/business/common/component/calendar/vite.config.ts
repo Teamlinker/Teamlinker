@@ -1,6 +1,9 @@
+// @ts-ignore
 import {defineConfig} from "vite"
+// @ts-ignore
 import vue from "@vitejs/plugin-vue"
 import path from "path";
+// @ts-ignore
 import dts from "vite-plugin-dts"
 
 export default defineConfig({

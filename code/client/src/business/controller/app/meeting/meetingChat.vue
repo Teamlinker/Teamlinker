@@ -48,7 +48,7 @@
 
 
 <script setup lang="ts">
-import {MeetingClient} from "../../../common/component/meeting/client";
+import {MeetingClient} from "../../../common/component/meeting/src/client";
 import RichEditor from "../../../common/component/richEditor/richEditor.vue";
 import {getCurrentInstance, onBeforeMount, ref} from "vue";
 import {apiFile} from "../../../common/request/request";

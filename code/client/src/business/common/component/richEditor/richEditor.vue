@@ -8,12 +8,12 @@
 </template>
 
 <script setup lang="ts">
-import Editor from "@/business/common/component/richEditorCore/index.vue"
+import Editor from "@/business/common/component/richEditorCore/src/index.vue"
 import {
 	EEditor_Content_Line_Config_Type,
 	IEditor_Content_Line,
 	IEditor_Content_Line_Config
-} from "@/business/common/component/richEditorCore/types";
+} from "@/business/common/component/richEditorCore/src/types";
 import {ECommon_Content_Line_Config_Type} from "../../../../../../common/model/content";
 import {getCurrentInstance, nextTick, ref} from "vue";
 import UserShortView from "@/business/common/component/userShortView.vue";

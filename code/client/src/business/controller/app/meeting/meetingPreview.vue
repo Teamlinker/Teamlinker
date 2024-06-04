@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import {onBeforeMount, onBeforeUnmount, reactive, ref, watch} from "vue";
-import {MeetingClient} from "../../../common/component/meeting/client";
+import {MeetingClient} from "../../../common/component/meeting/src/client";
 import {onDialogOk} from "../../../common/component/dialog/dialog";
 import {dialogFuncGenerator} from "../../../common/util/helper";
 import {apiUser} from "@/business/common/request/request";
