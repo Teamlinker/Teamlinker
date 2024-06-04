@@ -21,10 +21,10 @@ Teamlinker is developed based on the TeamOS system. It is a web operating system
 
 **We also support the relevant open-source components**
 
-[TLCalendar](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/calendar)  
-[TLEditor](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/richEditorCore)  
-[TLMeetingClient](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/meeting)  
-[TLMeetingServer](https://github.com/Teamlinker/Teamlinker/tree/dev/code/server/common/meeting)
+[TLCalendar](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/calendar/npm)  
+[TLEditor](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/richEditorCore/npm)  
+[TLMeetingClient](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/meeting/npm)  
+[TLMeetingServer](https://github.com/Teamlinker/Teamlinker/tree/dev/code/server/common/meeting/npm)
 
 ## 📋 Official website
 

@@ -19,10 +19,10 @@ Teamlinker基于TeamOS系统开发，是一种web操作系统，用户可以并�
 
 **我们同时也提供了相关的开源组件** 
 
-[TLCalendar](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/calendar)  
-[TLEditor](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/richEditorCore)   
-[TLMeetingClient](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/meeting)  
-[TLMeetingServer](https://github.com/Teamlinker/Teamlinker/tree/dev/code/server/common/meeting)
+[TLCalendar](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/calendar/npm)  
+[TLEditor](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/richEditorCore/npm)   
+[TLMeetingClient](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/meeting/npm)  
+[TLMeetingServer](https://github.com/Teamlinker/Teamlinker/tree/dev/code/server/common/meeting/npm)
 
 ## 📋 官网
 
