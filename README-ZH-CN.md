@@ -16,7 +16,13 @@ Teamlinker是一个集成了多功能模块的团队协作平台，涵盖团队�
 该平台解决了团队内高效协作的难题，避免了公司使用多个工具分别处理项目进程、同事交流和客户会议的问题。相较于传统工具，Teamlinker不仅提供基本而全面的协同办公需求，而且成本极低，更符合当前经济环境。
 
 Teamlinker基于TeamOS系统开发，是一种web操作系统，用户可以并行处理不同任务，类似于Win和Mac等操作系统。主要包含六个功能模块：项目、Wiki、日历、会议、聊天和网盘，这些功能之间无缝整合，使团队协作更加顺畅。
-### 用心做开源，我们也很需要你的鼓励！右上角Star🌟，等你点亮！
+
+**我们同时也提供了相关的开源组件** 
+
+[TLCalendar](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/calendar)  
+[TLEditor](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/richEditorCore)   
+[TLMeetingClient](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/meeting)  
+[TLMeetingServer](https://github.com/Teamlinker/Teamlinker/tree/dev/code/server/common/meeting)
 
 ## 📋 官网
 

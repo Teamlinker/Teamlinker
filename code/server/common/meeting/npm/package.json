@@ -1,15 +1,13 @@
 {
   "name": "tlmeetingserver",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple video meeting library based on node.js and typescript",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Teamlinker/TLMeetingServer.git"
-  },
+  "repository": "https://github.com/Teamlinker/Teamlinker",
+  "homepage": "https://github.com/Teamlinker/Teamlinker/blob/dev/code/server/common/meeting/npm/README.md",
   "keywords": ["teamlinker","meeting","video","nodejs","typescript","meeting server"],
   "author": "teamlinker",
   "license": "ISC",

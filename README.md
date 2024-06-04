@@ -19,6 +19,13 @@ The platform solves the problem of efficient collaboration within the team and a
 
 Teamlinker is developed based on the TeamOS system. It is a web operating system that allows users to process different tasks in parallel, similar to operating systems such as Win and Mac. It mainly contains six functional modules: project, wiki, calendar, meeting, chat and network disk. These functions are seamlessly integrated to make team collaboration smoother.
 
+**We also support the relevant open-source components**
+
+[TLCalendar](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/calendar)  
+[TLEditor](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/richEditorCore)  
+[TLMeetingClient](https://github.com/Teamlinker/Teamlinker/tree/dev/code/client/src/business/common/component/meeting)  
+[TLMeetingServer](https://github.com/Teamlinker/Teamlinker/tree/dev/code/server/common/meeting)
+
 ## 📋 Official website
 
 https://team-linker.com
