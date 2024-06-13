@@ -98,10 +98,13 @@ importers:
         version: 9.0.8
       '@vitejs/plugin-vue':
         specifier: ^5.0.4
-        version: 5.0.4(vite@5.2.9(@types/node@18.19.31))(vue@3.4.23(typescript@4.9.5))
+        version: 5.0.5(vite@5.2.9(@types/node@18.19.31))(vue@3.4.23(typescript@4.9.5))
       '@vue/language-server':
         specifier: ^1.8.22
         version: 1.8.27(typescript@4.9.5)
+      '@vue/runtime-core':
+        specifier: ^3.4.23
+        version: 3.4.23
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
@@ -855,8 +858,8 @@ packages:
   '@types/yargs@17.0.32':
     resolution: {integrity: sha512-xQ67Yc/laOG5uMfX/093MRlGGCIBzZMarVa+gfNKJxWAIgykYpVGkBdbqEzGDDfCrVUj6Hiff4mTZ5BA6TmAog==}
 
-  '@vitejs/plugin-vue@5.0.4':
-    resolution: {integrity: sha512-WS3hevEszI6CEVEx28F8RjTX97k3KsrcY6kvTg7+Whm5y3oYvcqzVeGCU3hxSAn4uY2CLCkeokkGKpoctccilQ==}
+  '@vitejs/plugin-vue@5.0.5':
+    resolution: {integrity: sha512-LOjm7XeIimLBZyzinBQ6OSm3UBCNVCpLkxGC0oWmm2YPzVZoxMsdvNVimLTBzpAnR9hl/yn1SHGuRfe6/Td9rQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       vite: ^5.0.0
@@ -3670,7 +3673,7 @@ snapshots:
     dependencies:
       '@types/yargs-parser': 21.0.3
 
-  '@vitejs/plugin-vue@5.0.4(vite@5.2.9(@types/node@18.19.31))(vue@3.4.23(typescript@4.9.5))':
+  '@vitejs/plugin-vue@5.0.5(vite@5.2.9(@types/node@18.19.31))(vue@3.4.23(typescript@4.9.5))':
     dependencies:
       vite: 5.2.9(@types/node@18.19.31)
       vue: 3.4.23(typescript@4.9.5)

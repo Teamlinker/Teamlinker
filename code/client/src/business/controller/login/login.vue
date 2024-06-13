@@ -1,78 +1,83 @@
 <template>
-	<a-row align="center" justify="center" style="height: 100%;position: relative;background: radial-gradient(circle at center, rgb(228,232,249), #ffffff);">
-		<a-space style="position: absolute;left: 20px;top: 20px">
-			<span style="font-size: 24px;font-weight: bolder">
-				<router-link :to="{name:'index'}" style="text-decoration: none;color:rgb(35,110,184)">
-					Teamlinker
-				</router-link>
-			</span>
-		</a-space>
-		<div style="width:40%;box-shadow: rgba(22, 14, 45, 0.02) 0px 0px 40px, rgba(22, 14, 45, 0.06) 0px 0px 104px;padding: 20px;box-sizing: border-box;border: 1px solid rgb(234, 236, 240);border-radius: 10px;background-color: white">
-			<a-form :model="form"  auto-label-width @submit="onSubmit" v-if="!organizationList">
-				<h1 style="text-align: center;margin-bottom: 50px;color: rgba(16, 24, 40, 0.8)">{{$t("util.login")}}</h1>
-				<a-form-item field="username" :label="$t('util.username')" required>
-					<a-input v-model="form.username" :placeholder="$t('placeholder.enterUsername')"></a-input>
-				</a-form-item>
-				<a-form-item field="password" :label="$t('util.password')" required>
-					<a-input v-model="form.password" type="password" :placeholder="$t('placeholder.typePassword')"></a-input>
-				</a-form-item>
-				<a-form-item>
-					<a-row style="justify-content: space-between;width: 100%">
-						<a-space size="large">
-							<a-button html-type="submit" type="primary" style="background-color: rgb(147, 115, 238)">{{ $t("util.submit") }}</a-button>
-							<a-button v-if="$deployMode.value===ECommon_Application_Mode.ONLINE" type="text" @click="onWechat">
-								<template #icon>
-									<icon-wechat style="color: green;font-size: x-large"></icon-wechat>
-								</template>
-							</a-button>
-						</a-space>
-						<a-space v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
-							<a-button html-type="button" type="primary" status="success" @click="onRegister">{{ $t("util.register") }}
-							</a-button>
-							<a-button html-type="button" type="primary" status="warning" @click="onReset">{{ $t("util.reset") }}
-							</a-button>
-						</a-space>
-					</a-row>
-				</a-form-item>
-			</a-form>
-			<div v-else style="display: flex;flex-direction: column;justify-content: center;align-items: center">
-				<h2 style="text-align: center;">{{$t("util.organizationList")}}</h2>
-				<template v-if="organizationList.create?.length>0 || organizationList.join?.length>0">
-					<a-list v-if="organizationList.create?.length>0" style="width: 80%" :bordered="false" hoverable size="small">
-						<template #header>
-							{{$t("util.created")}}:
-						</template>
-						<a-list-item v-for="item in organizationList.create as ICommon_Model_Organization[]" style="cursor: pointer;justify-content: center;" @click="onDesktop(item.id)">
-							<div style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center">
-								<a-space>
-									<a-image :src="item.photo" width="50px" v-if="item.photo"></a-image>
-									<span style="font-size: larger">{{item.name}}</span>
-								</a-space>
-							</div>
-						</a-list-item>
-					</a-list>
-					<a-list v-if="organizationList.join?.length>0" style="width: 80%" :bordered="false" hoverable size="small">
-						<template #header>
-							{{$t("util.joined")}}:
-						</template>
-						<a-list-item v-for="item in organizationList.join as ICommon_Model_Organization[]" style="cursor: pointer" @click="onDesktop(item.id)">
-							<div style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center">
-								<a-space>
-									<a-image :src="item.photo" width="50px"  v-if="item.photo"></a-image>
-									<span style="font-size: larger">{{item.name}}</span>
-								</a-space>
-							</div>
-						</a-list-item>
-					</a-list>
-				</template>
-				<a-button type="primary" status="success" @click="onCreate" size="large" style="width: 200px;" v-else-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
-					{{$t("controller.desktop.desktop.createOrganization")}}
-				</a-button>
-				<a-button type="text" style="color: grey;margin-top: 20px" @click="onDesktop()">{{$t("util.skip")}}</a-button>
-			</div>
-		</div>
+  <div class="commonBox">
+    <a-row style="width: 100%;margin: 0px auto;height: 100%">
+      <a-col :span="10" style="background:#F2F6FA;height: 100%">
+        <!--<div class="commonL" style="width: 100%"></div>-->
+        <div style="background:#F2F6FA;min-width:40rem"><img :src="loginBg" style="width: 95%; aspect-ratio: auto;"/></div>
+      </a-col>
+      <a-col :span="14">
+      <div class="commonR">
+        <div style="width: 100%;height: 34px">
+          <div style="display: flex; flex-direction: row;float: left">
+            <img :src="logo2">
+            <!--<div class="logo-box"><span class="logo-l">T</span></div>
+            <span class="logo-r">eamlinker</span>-->
+          </div>
+          <div class="commonTopR" style="float: right"><a-link @click="onIndex">{{$t("controller.login.goToHomePage")}}</a-link></div>
+        </div>
+        <div class="commonHi" style="margin-top: 46px">{{$t("controller.login.welcomeBack")}}！</div>
+        <div class="commonSubTitle" style="margin-top: 13px;margin-bottom: 55px;">{{$t("controller.login.noAccount")}}？<a-link @click="onRegister">{{$t("controller.login.signUp")}}</a-link></div>
+        <div>
+          <a-form :model="form"  auto-label-width @submit="onSubmit" v-if="!organizationList">
+            <span class="commonTitle">{{$t('util.username')}}</span>
+            <a-form-item field="username" required>
+              <a-input v-model="form.username" :placeholder="$t('placeholder.enterUsername')" class="formInput"></a-input>
+            </a-form-item>
+            <span class="commonTitle" style="margin-top: 20px">{{$t('util.password')}}</span>
+            <a-form-item field="password" required>
+              <a-input v-model="form.password" type="password" :placeholder="$t('placeholder.typePassword')" class="formInput"></a-input>
+            </a-form-item>
 
-	</a-row>
+            <a-form-item>
+              <a-row style="justify-content: center;width: 100%">
+                <span style="width:100%;text-align:right;"><a-link @click="onReset" style="font-size: 18px;font-family: PingFangSC, PingFang SC;font-weight: 500;color: #2864FF;line-height: 25px;">{{$t("controller.login.forgetPassword")}}？</a-link></span>
+	              <a-button html-type="submit" type="primary" style="width: 100%; height: 60px;background: #2864FF;font-size: 22px;
+  font-family: PingFangSC, PingFang SC;font-weight: 500;color: #FFFFFF;line-height: 30px;margin-top: 45px">{{ $t("util.login") }}</a-button>
+                <div style="text-align: center">
+                  <div style="width: 40rem;margin-top: 40px; margin-bottom: 15px;font-size: 18px">{{$t("controller.login.thirdLogin")}}</div>
+                  <a-button type="text" @click="onWechat">
+                    <template #icon>
+                      <icon-wechat style="color: green;font-size: x-large;border: 1px solid #C9C9C9;border-radius: 8px;padding: 5px"></icon-wechat>
+                    </template>
+                  </a-button>
+                </div>
+              </a-row>
+            </a-form-item>
+          </a-form>
+	        <div v-else style="display: flex;flex-direction: column;justify-content: center;align-items: center">
+		        <h2 style="text-align: center;">{{$t("util.organizationList")}}</h2>
+		        <template v-if="organizationList.create?.length>0 || organizationList.join?.length>0">
+			        <div v-if="organizationList.create?.length>0" style="width: 80%">
+				        <span style="font-weight: bold">{{$t("util.created")}}:</span><br>
+				        <a-space style="margin-top: 20px" wrap>
+					        <a-tag v-for="item in organizationList.create as ICommon_Model_Organization[]" style="cursor: pointer;" @click="onDesktop(item.id)">
+						        <span style="font-size: larger">{{item.name}}</span>
+					        </a-tag>
+				        </a-space>
+			        </div>
+			        <div v-if="organizationList.join?.length>0" style="width: 80%;margin-top: 20px" >
+				        <span style="font-weight: bold">
+					        {{$t("util.joined")}}:
+				        </span><br>
+				        <a-space style="margin-top: 20px" wrap>
+					        <a-tag v-for="item in organizationList.join as ICommon_Model_Organization[]" style="cursor: pointer;" @click="onDesktop(item.id)">
+						        <div style="width: 100%;height: 100%;display: flex;justify-content: center;align-items: center">
+							        <span style="font-size: larger">{{item.name}}</span>
+						        </div>
+					        </a-tag>
+				        </a-space>
+			        </div>
+		        </template>
+		        <a-button type="primary" status="success" @click="onCreate" size="large" style="width: 200px;" v-else-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
+			        {{$t("controller.desktop.desktop.createOrganization")}}
+		        </a-button>
+		        <a-button type="text" style="color: grey;margin-top: 20px" @click="onDesktop()">{{$t("util.skip")}}</a-button>
+	        </div>
+        </div>
+      </div>
+      </a-col>
+    </a-row>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -85,11 +90,13 @@ import {SessionStorage} from "../../common/storage/session";
 import md5 from "blueimp-md5"
 import {DCSType, ECommon_Application_Mode, ECommon_Platform_Type} from "../../../../../common/types";
 import {ICommon_Route_Res_Organization_List} from "../../../../../common/routes/response";
-import {ICommon_Model_Organization} from "../../../../../common/model/organization";
 import {Dialog} from "@/business/common/component/dialog/dialog";
 import CreateOrganization from "@/business/controller/desktop/createOrganization.vue";
 import {useI18n} from "vue-i18n";
 import {useDesktopStore} from "@/business/controller/desktop/store/desktop";
+import loginBg from "@/assert/loginBg.png"
+import logo2 from "@/assert/logo2.png";
+import {ICommon_Model_Organization} from "../../../../../common/model/organization";
 
 const organizationList=ref<DCSType<ICommon_Route_Res_Organization_List>>()
 let form = reactive({
@@ -186,8 +193,95 @@ const getOrganizationList=async ()=>{
 		organizationList.value=ret.data;
 	}
 }
+const onIndex=async()=>{
+  await router.push("/")
+}
 </script>
 
 <style scoped>
-
+.commonBox{
+  background-color: #FFFFFF;
+  height: 100vh;
+}
+.commonL{
+  float: left;
+  height: 860px;
+  background: url('@/assert/loginBg.png') 100% no-repeat,#F2F6FA;
+  background-size: 100% 100%;
+  width: auto;
+}
+.commonR{
+  width: 80%;
+  padding-top: 40px;
+  margin-left: 10%;
+}
+.logo-box{
+  background-color: #2864FF;
+  border-radius: 50%;
+  height: 32px;
+  width: 32px;
+}
+.logo-l{
+  width: 18px;
+  height: 34px;
+  overflow-wrap: break-word;
+  color: #FFFFFF;
+  font-size: 28px;
+  font-family: DingTalk-JinBuTi;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 34px;
+  margin-left: 7px;
+}
+.logo-r{
+  width: auto;
+  height: 33px;
+  overflow-wrap: break-word;
+  color: #2864FF;
+  font-size: 27px;
+  font-family: DingTalk-JinBuTi;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 33px;
+}
+.commonTopR,.commonTopR a{
+  font-size: 18px;
+  font-family: PingFangSC, PingFang SC;
+  font-weight: 500;
+  color: #565656;
+  line-height: 25px;
+}
+.commonHi{
+  font-size: 48px;
+  font-family: PingFangSC, PingFang SC;
+  font-weight: 600;
+  color: #000000;
+  line-height: 67px;
+  text-align: left;
+}
+.commonTitle{
+  color: #000000;
+  font-size: 18px;
+  font-family: PingFangSC-Medium;
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+  line-height: 25px;
+  margin-bottom: 20px;
+}
+.commonSubTitle{
+  font-size: 18px;
+  font-family: PingFangSC, PingFang SC;
+  font-weight: 500;
+  color: #565656;
+  line-height: 25px;
+}
+.formInput{
+  border: none;
+  border-bottom: 2px #000000 solid;
+}
+.formInput.arco-input-focus{
+  border-bottom-color: #2864FF;
+}
+.arco-input-wrapper{background-color:#FFFFFF}
 </style>

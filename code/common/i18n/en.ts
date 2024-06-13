@@ -466,7 +466,10 @@ export default {
         wednesday:"Wednesday",
         thursday:"Thursday",
         friday:"Friday",
-        saturday:"Saturday"
+        saturday:"Saturday",
+        price:"Price",
+        contact:"Contact",
+        about:"About"
     },
     "common":{
         "component":{
@@ -879,6 +882,107 @@ export default {
                     2:"Just go ahead! Sign up and create your team.",
                     3:"Sign Up Online",
                     4:"Deploy Offline Edition"
+                },
+                started: "Getting Started",
+                aiIntro: "With AI and the Metaverse,your partners are by your side.",
+                banner1: "",
+                banner2: "",
+                projectList: {
+                    1: "Make meaningful connections with project, meetings, team chat, calendar ,files and more in one offering.",
+                    2: "Project",
+                    3: "Meeting",
+                    4: "IM",
+                    5: "Calendar",
+                    6: "File",
+                    7: "Table",
+                    8: "Wiki",
+                    9: "White board",
+                    10: "Unified Collaboration and",
+                    11: "Communication",
+                    12: "Platform",
+                    13: "Management"
+                },
+                aiList: {
+                    1: "Team collaboration has never",
+                    2: "been smarter",
+                    3: "With the help of AI assistant, you can tell it what you want to",
+                    4: "do, such as booking a meeting, analyzing a project,etc.",
+                    5: "Book Meetings",
+                    6: "Retrieve Issues",
+                    7: "Project Delay Warning",
+                    8: "Automatic Tasks Assignment",
+                    9: "Data Retrieval",
+                    10: "Wiki Summary"
+                },
+                virtualWorkstation: {
+                    1: "with Virtual Workstations",
+                    2: "Team members can face each other at anytime",
+                    3: "Each team member can choose his or her own virtual workstation and avatar,",
+                    4: "CREATE",
+                    5: "an office",
+                    6: "CHOOSE",
+                    7: "a workstation",
+                    8: "PICK",
+                    9: "an avatar",
+                    10: "START",
+                    11: "your work",
+                    12: "and decorate his or her own personalized workstation and avatar to show to other team members."
+
+                },
+                statistics:{
+                    1: "Organizations",
+                    2: "Users",
+                    3: "online time of users",
+                },
+                idea: {
+                    1: "Values & Culture",
+                    2: "Following the concept of free",
+                    3: "sharing, we uphold the principle",
+                    4: "Enjoy life, you don’t need to be",
+                    5: "busy switching between",
+                    6: "Focus on business as much as",
+                    7: "possible, we will take care of",
+                    8: "of open source",
+                    9: "different tools",
+                    10: "communication matters"
+                },
+                voice: {
+                    title: "client LOVE us & we LOVE them",
+                    voice1:{
+                        1: "TeamLinker has greatly helped me reduce team costs, it’s really great! It has greatly helped me reduce team costs, which is really great! It has greatly helped me reduce team costs, which is really great! It has greatly helped me reduce team costs, which is really great!",
+                        2: "Leo Zheng",
+                    },
+                    voice2:{
+                        1: "TeamLinker is a very powerful team collaboration tool that allows me to communicate with team members anytime and anywhere.",
+                        2: "Sandra Ryan",
+                    },
+                    voice3:{
+                        1: "I love TeamLinker and once I use it I won't buy any other tools!",
+                        2: "Simon Wilson",
+                    }
+                },
+                news: {
+                    1: "Events & News",
+                    2: "Read more",
+                    3: "Article title content Article title content Article title content",
+                    4: "Article Summary article summary article summary article summary article summary article summary",
+                    5: "Article title content Article title content Article title content",
+                    6: "Article Summary article summary article summary article summary article summary article summary",
+                    7: "Article title content Article title content Article title content",
+                    8: "Article Summary article summary article summary article summary article summary article summary"
+                },
+                faq: {
+                    1: "FAQ",
+                    2: "What is Teamlinker",
+                    3: "Teamlinker is a team collaboration platform that integrates multi-functional modules. Users can process tasks in parallel, including six functional modules: project, wiki, calendar, meeting, chat and network disk, achieving seamless integration and improving team collaboration efficiency.",
+                    4:"How can i use Teamlinker?",
+                    5:"You can user online version directly and you can also deploy it on your own computers,we use docker as packaging solution so that the deploy process is very simple.we provide all codes in the github and you can re-develop beyond the open-source codes",
+                    6:"Teamlinker is free?",
+                    7:"Yes,Teamlinker is free and open-source,but you can't sell it as commercial approach,if you have some business ideas,you need to contact us,we can offer authentication for you!"
+                },
+                deployment: {
+                    1: "Sign Up Online",
+                    2: "Deploy Offline Edition"
                 }
             },
             price:{
@@ -888,7 +992,8 @@ export default {
                 2:"No Functionality Limit",
                 3:"No Member Limit",
                 4:"Single File Size Limit",
-                5:"No File Size Limit"
+                5:"No File Size Limit",
+                choosePlan: "Check out your Plans. "
             },
             footer:{
                 contactUs:"Contact Us",
@@ -901,7 +1006,14 @@ export default {
             },
             bindAccount:{
                 bindExistedAccount: "Bind Account"
-            }
+            },
+            signUp: "Sign up",
+            thirdLogin: "or login with",
+            forgetPassword: "forget password",
+            goToHomePage: "Go to home",
+            welcomeBack: "Welcome back",
+            welcome: "Hi,Welcome",
+            noAccount: "Still dont have an account"
         }
     }
 }

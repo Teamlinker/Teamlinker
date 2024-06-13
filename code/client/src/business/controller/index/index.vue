@@ -6,7 +6,7 @@
 				<component :is="comp"></component>
 			</transition>
 		</div>
-		<Footer></Footer>
+		<Footer @change="onChange"></Footer>
 	</div>
 </template>
 

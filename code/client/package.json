@@ -43,6 +43,7 @@
     "vite-plugin-svg-icons": "^2.0.1",
     "vite-plugin-typescript": "^1.0.4",
     "vue-tsc": "^2.0.13",
-    "vite-plugin-dts": "^3.9.1"
+    "vite-plugin-dts": "^3.9.1",
+    "@vue/runtime-core": "^3.4.23"
   }
 }
