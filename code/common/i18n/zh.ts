@@ -84,7 +84,7 @@ export default {
         deleteFolder:"你要删除这个文件夹吗?",
         deleteItems:"你要删除这些项目吗?",
         deleteItem:"你要删除这个项目吗?",
-        deleteFavorite:"你要删除这个会议吗?",
+        deleteFavorite:"你要删除这个收藏吗?",
         leaveMeeting:"你要离开这个会议吗?",
         endMeeting:"你要结束这个会议吗?",
         kick:"你要踢出",

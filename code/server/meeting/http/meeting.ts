@@ -62,7 +62,7 @@ class MeetingController {
             let end=endTime || obj.getItem().end_time
             if(start>end) {
                 throw Err.Meeting.endTimeLarger
-            } else if(start<moment().subtract(1,"hour").toDate().getTime()) {
+            } else if(<number>start<moment().subtract(1,"hour").toDate().getTime()) {
                 throw Err.Meeting.startTimeLess
             }
         }

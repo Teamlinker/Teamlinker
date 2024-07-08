@@ -1,5 +1,5 @@
 <template>
-  <div class="commonBox">
+  <div class="commonBox" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
     <a-row style="width: 100%;margin: 0px auto;">
       <a-col :span="12">
         <!--<div class="commonL" style="width: 100%"></div>-->
@@ -58,6 +58,7 @@ import md5 from "blueimp-md5";
 import {useI18n} from "vue-i18n";
 import loginBg from "@/assert/loginBg.png";
 import logo2 from "@/assert/logo2.png";
+import {ECommon_Application_Mode} from "../../../../../common/types";
 
 let form=reactive({
 	username:"",

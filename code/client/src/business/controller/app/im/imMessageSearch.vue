@@ -1,7 +1,7 @@
 <template>
 	<div style="height: 100%">
 		<a-row style="width: 100%">
-			<a-input-search :placeholder="$t('placeholder.imMessageSearch')" v-model="keyword" @search="onSearch" search-button></a-input-search>
+			<a-input-search :placeholder="$t('placeholder.imMessageSearch')" v-model="keyword" @search="onSearch" @press-enter="onSearch" search-button></a-input-search>
 		</a-row>
 		<a-divider></a-divider>
 		<a-row style="width: 100%;">

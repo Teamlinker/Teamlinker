@@ -16,7 +16,7 @@
           <div class="commonTopR" style="float: right"><a-link @click="onIndex">{{$t("controller.login.goToHomePage")}}</a-link></div>
         </div>
         <div class="commonHi" style="margin-top: 46px">{{$t("controller.login.welcomeBack")}}！</div>
-        <div class="commonSubTitle" style="margin-top: 13px;margin-bottom: 55px;">{{$t("controller.login.noAccount")}}？<a-link @click="onRegister">{{$t("controller.login.signUp")}}</a-link></div>
+        <div class="commonSubTitle" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE" style="margin-top: 13px;margin-bottom: 55px;">{{$t("controller.login.noAccount")}}？<a-link @click="onRegister">{{$t("controller.login.signUp")}}</a-link></div>
         <div>
           <a-form :model="form"  auto-label-width @submit="onSubmit" v-if="!organizationList">
             <span class="commonTitle">{{$t('util.username')}}</span>
@@ -30,10 +30,10 @@
 
             <a-form-item>
               <a-row style="justify-content: center;width: 100%">
-                <span style="width:100%;text-align:right;"><a-link @click="onReset" style="font-size: 18px;font-family: PingFangSC, PingFang SC;font-weight: 500;color: #2864FF;line-height: 25px;">{{$t("controller.login.forgetPassword")}}？</a-link></span>
+                <span style="width:100%;text-align:right;" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE"><a-link @click="onReset" style="font-size: 18px;font-family: PingFangSC, PingFang SC;font-weight: 500;color: #2864FF;line-height: 25px;">{{$t("controller.login.forgetPassword")}}？</a-link></span>
 	              <a-button html-type="submit" type="primary" style="width: 100%; height: 60px;background: #2864FF;font-size: 22px;
   font-family: PingFangSC, PingFang SC;font-weight: 500;color: #FFFFFF;line-height: 30px;margin-top: 45px">{{ $t("util.login") }}</a-button>
-                <div style="text-align: center">
+                <div style="text-align: center" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE">
                   <div style="width: 40rem;margin-top: 40px; margin-bottom: 15px;font-size: 18px">{{$t("controller.login.thirdLogin")}}</div>
                   <a-button type="text" @click="onWechat">
                     <template #icon>

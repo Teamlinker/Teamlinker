@@ -1,14 +1,16 @@
 "use strict";
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ts = __importStar(require("typescript"));
-var path = __importStar(require("path"));
+var ts = require("typescript");
+var path = require("path");
 exports.default = (function (program) {
     return function (ctx) {
         return function (sourceFile) {
@@ -33,15 +35,15 @@ var visitNode = function (node, program) {
         return node;
     }
     if (!node.typeArguments) {
-        return ts.createArrayLiteral([]);
+        return ts.factory.createArrayLiteralExpression([]);
     }
     var type = typeChecker.getTypeFromTypeNode(node.typeArguments[0]);
     var properties = [];
     var symbols = typeChecker.getPropertiesOfType(type);
     symbols.forEach(function (symbol) {
-        properties = properties.concat(getPropertiesOfSymbol(symbol, [], symbolMap));
+        properties = __spreadArray(__spreadArray([], properties, true), getPropertiesOfSymbol(symbol, [], symbolMap), true);
     });
-    return ts.createArrayLiteral(properties.map(function (property) { return ts.createRegularExpressionLiteral(JSON.stringify(property)); }));
+    return ts.factory.createArrayLiteralExpression(properties.map(function (property) { return ts.factory.createRegularExpressionLiteral(JSON.stringify(property)); }));
 };
 var getPropertiesOfSymbol = function (symbol, outerLayerProperties, symbolMap) {
     var properties = [];
@@ -71,7 +73,7 @@ var getPropertiesOfSymbol = function (symbol, outerLayerProperties, symbolMap) {
     };
     properties.push(key);
     var propertiesOfSymbol = _getPropertiesOfSymbol(symbol, propertyPathElements, symbolMap);
-    properties = properties.concat(propertiesOfSymbol);
+    properties = __spreadArray(__spreadArray([], properties, true), propertiesOfSymbol, true);
     return properties;
 };
 var getPropertyType = function (propertySignature) {
@@ -97,20 +99,7 @@ var getPropertyType = function (propertySignature) {
         case ts.SyntaxKind.KeyOfKeyword:
             return 'keyOf';
         case ts.SyntaxKind.ArrayType:
-            if(propertySignature.elementType && propertySignature.elementType.members && propertySignature.elementType.members.length>0)
-            {
-                let arr=[]
-                for(let o of propertySignature.elementType.members)
-                {
-                    arr.push(o.symbol.escapedName)
-                }
-                return "("+arr.join("|")+")[]"
-            }
-            else
-            {
-                return getPropertyType(propertySignature.elementType) + "[]";
-            }
-
+            return "".concat(getPropertyType(propertySignature.elementType), "[]");
         case ts.SyntaxKind.UnionType:
             return uniq(propertySignature.types.map(function (type) { return getPropertyType(type); })).join(' | ');
         case ts.SyntaxKind.LiteralType:
@@ -152,8 +141,7 @@ var _getPropertiesOfSymbol = function (symbol, propertyPathElements, symbolMap) 
                 members = propertyTypeSymbol.members;
             }
             else {
-                if(propertyTypeSymbol.exportSymbol)
-                {
+                if (propertyTypeSymbol.exportSymbol) {
                     members = propertyTypeSymbol.exportSymbol.members;
                 }
             }
@@ -161,7 +149,7 @@ var _getPropertiesOfSymbol = function (symbol, propertyPathElements, symbolMap) 
     }
     if (members) {
         members.forEach(function (member) {
-            properties = properties.concat(getPropertiesOfSymbol(member, propertyPathElements, symbolMap));
+            properties = __spreadArray(__spreadArray([], properties, true), getPropertiesOfSymbol(member, propertyPathElements, symbolMap), true);
         });
     }
     return properties;

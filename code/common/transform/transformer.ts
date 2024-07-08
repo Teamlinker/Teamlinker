@@ -33,7 +33,7 @@ const visitNode = (node: ts.Node, program: ts.Program): ts.Node => {
     return node;
   }
   if (!node.typeArguments) {
-    return ts.createArrayLiteral([]);
+    return ts.factory.createArrayLiteralExpression([]);
   }
   const type = typeChecker.getTypeFromTypeNode(node.typeArguments[0]);
   let properties: InterfaceProperty[] = [];
@@ -42,7 +42,7 @@ const visitNode = (node: ts.Node, program: ts.Program): ts.Node => {
     properties = [ ...properties, ...getPropertiesOfSymbol(symbol, [], symbolMap) ];
   });
 
-  return ts.createArrayLiteral(properties.map(property => ts.createRegularExpressionLiteral(JSON.stringify(property))));
+  return ts.factory.createArrayLiteralExpression(properties.map(property => ts.factory.createRegularExpressionLiteral(JSON.stringify(property))));
 };
 
 const getPropertiesOfSymbol = (symbol: any, outerLayerProperties: InterfaceProperty[], symbolMap: Map<string, ts.Symbol>): InterfaceProperty[] => {
@@ -175,8 +175,8 @@ const isKeysCallExpression = (node: ts.Node, typeChecker: ts.TypeChecker): node 
   }
   const { declaration } = signature;
   return !!declaration
-    && !ts.isJSDocSignature(declaration)
-    && (path.join(declaration.getSourceFile().fileName) === indexTs)
-    && !!declaration.name
-    && declaration.name.getText() === 'keys';
+      && !ts.isJSDocSignature(declaration)
+      && (path.join(declaration.getSourceFile().fileName) === indexTs)
+      && !!declaration.name
+      && declaration.name.getText() === 'keys';
 };

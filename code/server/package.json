@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "rm -rf ./dist && ttsc ./gateway/index.ts && mkdir -p ./dist/client && cp -r ../client/dist/* ./dist/client && cp ./teamlinker.config.json ./dist/server && cp ./init.sql ./dist/server && cp ./package.json ./dist/server && cp ./patch/*.sql ./dist/server/patch>/dev/null || : && zip -q -r ./dist/teamlinker.zip ./dist && cp ./dist/teamlinker.zip ../docker"
+    "compile": "rm -rf ./dist && tspc ./gateway/index.ts && mkdir -p ./dist/client && cp -r ../client/dist/* ./dist/client && cp ./teamlinker.config.json ./dist/server && cp ./init.sql ./dist/server && cp ./package.json ./dist/server && cp ./patch/*.sql ./dist/server/patch>/dev/null || : && zip -q -r ./dist/teamlinker.zip ./dist && cp ./dist/teamlinker.zip ../docker"
   },
   "pkg": {
     "scripts": [],
@@ -40,7 +40,7 @@
     "koa-static": "^5.0.0",
     "koa-static-server": "^1.5.2",
     "koa2-formidable": "^1.0.3",
-    "mediasoup": "3.14.1",
+    "mediasoup": "3.14.7",
     "moment": "^2.29.4",
     "mysql2": "^2.3.3",
     "node-schedule": "^2.1.0",
@@ -69,9 +69,10 @@
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.9.1",
     "ttypescript": "^1.5.15",
-    "typescript": "4.6.4",
+    "typescript": "^5.4.5",
     "vue-tsc": "^2.0.13",
     "vite-plugin-dts": "^3.9.1",
-    "vite": "^5.2.9"
+    "vite": "^5.2.9",
+    "ts-patch": "^3.2.0"
   }
 }

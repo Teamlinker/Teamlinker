@@ -15,7 +15,7 @@
 				<a-row style="height: 30px;width: 100%;">
 					<a-space>
 						{{$t("controller.app.meeting.meeting.meetingList")}}:
-						<a-input-search search-button :placeholder="$t('placeholder.typeMeetingName')" size="mini" @search="onSearch" v-model="keyword"></a-input-search>
+						<a-input-search search-button :placeholder="$t('placeholder.typeMeetingName')" size="mini" @search="onSearch" v-model="keyword" @press-enter="onSearch"></a-input-search>
 					</a-space>
 				</a-row>
 				<a-row style="height: calc(100% - 30px);width: 100%;border-top: 1px solid lightgray;overflow-y: auto;flex-direction: column">

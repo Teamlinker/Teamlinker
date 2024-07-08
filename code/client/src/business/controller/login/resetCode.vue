@@ -1,5 +1,5 @@
 <template>
-  <div class="commonBox">
+  <div class="commonBox" v-if="$deployMode.value===ECommon_Application_Mode.ONLINE && username">
     <a-row style="width: 100%;margin: 0px auto;">
       <a-col :span="12">
         <!--<div class="commonL" style="width: 100%"></div>-->

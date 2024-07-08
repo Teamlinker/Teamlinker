@@ -10,9 +10,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noImplicitOverride": true,
+    "ignoreDeprecations": "5.0",
     "baseUrl": "./",
     "plugins": [
-      { "transform": "../common/transform/transformer.js" }
+      { "transform": "../common/transform/transformer" }
     ]
   },
   "files": [

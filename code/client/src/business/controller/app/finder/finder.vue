@@ -28,7 +28,7 @@
 					{{$t("controller.app.finder.finder.searchResult")}}:
 				</template>
 				<a-row>
-					<a-input-search size="mini" style="background-color: white;border: 1px lightgray solid" @search="onSearch"></a-input-search>
+					<a-input-search size="mini" style="background-color: white;border: 1px lightgray solid" @search="onSearch" @press-enter="onSearch"></a-input-search>
 				</a-row>
 			</a-row>
 			<a-row style="width: 100%;height: calc(100% - 50px)">
@@ -47,15 +47,15 @@
 </template>
 
 <script setup lang="ts">
-import FinderFolderTree from "./finderFolderTree.vue";
 import {onBeforeMount, onBeforeUnmount, ref, watch} from "vue";
+import {ECommon_Model_Finder_Item_Type, ICommon_Model_Finder_Item} from "../../../../../../common/model/finder_item";
+import {DCSType} from "../../../../../../common/types";
+import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
 import {apiFinder} from "../../../common/request/request";
 import FinderContent from "./finderContent.vue";
-import {EClient_EVENTBUS_TYPE, eventBus} from "../../../common/event/event";
+import FinderFolderTree from "./finderFolderTree.vue";
 import FinderItemInfo from "./finderItemInfo.vue";
-import {ECommon_Model_Finder_Item_Type, ICommon_Model_Finder_Item} from "../../../../../../common/model/finder_item";
 import FinderSearchContent from "./finderSearchContent.vue";
-import {DCSType} from "../../../../../../common/types";
 
 enum EClient_Finder_Mode {
 	NORMAL,
